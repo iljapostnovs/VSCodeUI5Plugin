@@ -3,7 +3,7 @@
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
 	"version": "0.5.0",
-	"publisher": "ui5plugin",
+	"publisher": "iljapostnovs",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/iljapostnovs/VSCodeUI5Plugin.git"
@@ -11,6 +11,8 @@
 	"bugs": {
 		"url": "https://github.com/iljapostnovs/VSCodeUI5Plugin/issues"
 	},
+	"icon": "images/ui5.png",
+	"homepage": "https://github.com/iljapostnovs/VSCodeUI5Plugin/blob/master/README.md",
 	"engines": {
 		"vscode": "^1.32.0"
 	},
