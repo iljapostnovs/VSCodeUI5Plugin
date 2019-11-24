@@ -76,3 +76,4 @@ There are several types of variable definitions:
 * You have manifest.json in source folder
 * App ID (Component name) and i18n paths are defined in manifest.json
 * File is without syntax errors
+* No ES6 features are used (Will be added in the future)
