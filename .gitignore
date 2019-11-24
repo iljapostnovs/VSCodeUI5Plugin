@@ -1,0 +1,4 @@
+/out
+*.vsix
+/node_modules
+.vscode

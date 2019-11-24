@@ -1,0 +1,78 @@
+{
+	"name": "ui5plugin",
+	"displayName": "SAPUI5 Extension",
+	"description": "Extension for working with UI5 projects",
+	"version": "0.5.0",
+	"publisher": "ui5plugin",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/iljapostnovs/VSCodeUI5Plugin.git"
+	},
+	"bugs": {
+		"url": "https://github.com/iljapostnovs/VSCodeUI5Plugin/issues"
+	},
+	"engines": {
+		"vscode": "^1.32.0"
+	},
+	"categories": [
+		"Extension Packs"
+	],
+	"activationEvents": [
+		"*"
+	],
+	"contributes": {
+		"configuration": {
+			"title": "SAPUI5 Plugin",
+			"properties": {
+				"ui5.plugin.ui5version": {
+					"type": "string",
+					"default": "1.60.11",
+					"description": "SAPUI5 Library version for lib metadata preload"
+				},
+				"ui5.plugin.src": {
+					"type": "string",
+					"default": "src",
+					"description": "Source folder in your workspace"
+				}
+			}
+		},
+		"commands": [
+			{
+				"command": "ui5plugin.moveDefineToFunctionParameters",
+				"title": "UI5: Move sap.ui.define to parameters"
+			},
+			{
+				"command": "ui5plugin.switchBetweenVC",
+				"title": "UI5: Switch View/Controller"
+			},
+			{
+				"command": "ui5plugin.clearCache",
+				"title": "UI5: Clear Cache"
+			},
+			{
+				"command": "ui5plugin.exportToi18n",
+				"title": "UI5: Export to i18n"
+			}
+		]
+	},
+	"main": "./out/extension.js",
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "tslint -p ./",
+		"watch": "tsc -watch -p ./"
+	},
+	"devDependencies": {
+		"@types/node": "^10.12.18",
+		"@types/vscode": "^1.32.0",
+		"tslint": "^5.16.0",
+		"typescript": "^3.6.4"
+	},
+	"dependencies": {
+		"@types/glob": "^7.1.1",
+		"@types/request-promise": "^4.1.44",
+		"glob": "^7.1.5",
+		"request": "^2.88.0",
+		"request-promise": "^4.2.4"
+	}
+}
