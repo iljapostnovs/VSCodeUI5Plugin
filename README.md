@@ -4,7 +4,7 @@ This plugin contains perks for UI5 developers.
 ----------
 ## Completion Items
 ### XML
-XML Completion Items for classes, with generating of properties and aggregations.
+XML Completion Items for UI5 Controls.
 ![XMLCompletionItems](/images/XMLCompletionItems.gif)
 
 ### JS
@@ -43,12 +43,13 @@ Clears cache with SAPUI5 lib metadata
 ----------
 ## Settings
 ![Settings](/images/Settings.png)
+
 There are two settings available:
 * Your source folder name where manifest.json should be located at
 * Library version (For now - tested only for 1.60.11)
 
 ----------
-# How this works
+# How it works
 ## SAPUI5 Metadata
 * Standard SAPUI5 Library Metadata is fetched from ui5.sap.com and saved locally
 * Tested using 1.60.11 only
@@ -68,7 +69,7 @@ There are several types of variable definitions:
 	var oList = new List();
 }`
 
-#### Custom file parsing limitations
+### Custom file parsing limitations
 * All variables defined in if/else, try/catch, for/while loops are ignored, because that is not reliable source of data definitions
 
 ### Assumptions
