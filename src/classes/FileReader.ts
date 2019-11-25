@@ -20,22 +20,36 @@ export class FileReader {
 	}
 	public static getDocumentTextFromCustomClassName(className: string, isFragment?: boolean) {
 		let documentText;
-		const extension = isFragment ? ".fragment.xml" : ".js";
-		const manifest = this.getManifestForClass(className);
-		if (manifest) {
-			const classPath = manifest.fsPath + className.replace(manifest.componentName, "").replace(/\./g, "\\").trim() + extension;
-			try {
-				documentText = fs.readFileSync(classPath, "ascii");
-			} catch(error) {
-				//thx to controllers for this
-				if (extension === ".js") {
-					documentText = fs.readFileSync(classPath.replace(".js", ".controller.js"), "ascii");
-				}
-
-			}
+		const classPath = this.getClassPath(className, isFragment);
+		if (classPath) {
+			documentText = fs.readFileSync(classPath, "ascii");
 		}
 
 		return documentText;
+	}
+
+	public static getClassPath(className: string, isFragment?: boolean) {
+		let classPath: string | undefined;
+		const extension = isFragment ? ".fragment.xml" : ".js";
+		const manifest = this.getManifestForClass(className);
+		if (manifest) {
+			classPath = manifest.fsPath + className.replace(manifest.componentName, "").replace(/\./g, "\\").trim() + extension;
+			try {
+				fs.readFileSync(classPath);
+			} catch (error) {
+				if (extension === ".js") {
+					//thx to controllers for this
+					classPath = classPath.replace(".js", ".controller.js");
+					try {
+						fs.readFileSync(classPath);
+					} catch (error) {
+						classPath = undefined;
+					}
+				}
+			}
+		}
+
+		return classPath;
 	}
 
 	public static getManifestForClass(className: string) {

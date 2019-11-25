@@ -14,7 +14,8 @@ interface UIDefine {
 	classNameDotNotation: string
 }
 export class CustomUIClass extends AbstractUIClass {
-	private classBody: JSObject | undefined;
+	public classBody: JSObject | undefined;
+	public classText: string = "";
 	private UIDefine: UIDefine[] = [];
 	private jsPasredBody: AbstractType | undefined;
 
@@ -32,6 +33,7 @@ export class CustomUIClass extends AbstractUIClass {
 		if (!documentText) {
 			documentText = FileReader.getDocumentTextFromCustomClassName(this.className);
 		}
+		this.classText = documentText || "";
 		if (documentText) {
 			const parsedBodies = MainLooper.startAnalysing(documentText);
 			parsedBodies.forEach(part => {
@@ -67,7 +69,7 @@ export class CustomUIClass extends AbstractUIClass {
 	private getThisClassBody() {
 		let classBody: JSObject | undefined;
 		if (this.jsPasredBody) {
-			const classFNCall = this.jsPasredBody.parts[1].parts.find(part => part instanceof JSFunctionCall);
+			const classFNCall = this.jsPasredBody.parts[1].parts.find(part => part instanceof JSFunctionCall && part.parsedName.indexOf(".extend") > -1);
 			if (classFNCall) {
 				classBody = <JSObject>classFNCall.parts[1];
 			} else {

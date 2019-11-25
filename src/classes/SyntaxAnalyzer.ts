@@ -36,7 +36,7 @@ export class SyntaxAnalyzer {
 		return fieldsAndMethods;
 	}
 
-	private static getClassNameFromVariableParts(variableParts: string[], className: string, usedPartQuantity: number = 2) : string | undefined {
+	public static getClassNameFromVariableParts(variableParts: string[], className: string, usedPartQuantity: number = 2) : string | undefined {
 		//first part should be "this"
 		let classNameOfTheVariable: string | undefined;
 
@@ -169,7 +169,7 @@ export class SyntaxAnalyzer {
 		return completionItems;
 	}
 
-	private static gerCurrentClass() {
+	public static gerCurrentClass() {
 		let returnClassName;
 		if (vscode.window.activeTextEditor) {
 			const documentText = vscode.window.activeTextEditor.document.getText();

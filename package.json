@@ -67,11 +67,13 @@
 	"devDependencies": {
 		"@types/node": "^10.12.18",
 		"@types/vscode": "^1.32.0",
+		"line-column": "^1.0.2",
 		"tslint": "^5.16.0",
 		"typescript": "^3.6.4"
 	},
 	"dependencies": {
 		"@types/glob": "^7.1.1",
+		"@types/line-column": "^1.0.0",
 		"@types/request-promise": "^4.1.44",
 		"glob": "^7.1.5",
 		"request": "^2.88.0",

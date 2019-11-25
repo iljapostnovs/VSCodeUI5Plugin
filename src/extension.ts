@@ -7,12 +7,9 @@ import { ClearCacheCommand } from "./classes/commands/ClearCacheCommand";
 import { ViewControllerSwitcher } from "./classes/commands/switchers/ViewControllerSwitcher";
 import { DefineGenerator } from "./classes/generators/define/UIDefineCompletionItemGenerator";
 import { WorkspaceCompletionItemDAO } from "./classes/DAO/WorkspaceCompletionItemDAO";
-import { SyntaxAnalyzer } from "./classes/SyntaxAnalyzer";
-import { MainLooper } from "./classes/SyntaxParsers/JSParser/MainLooper";
-import { JSVariable } from "./classes/SyntaxParsers/JSParser/types/Variable";
-import { DifferentJobs } from "./classes/SyntaxParsers/JSParser/DifferentJobs";
 import { UIClassDAO } from "./classes/DAO/UIClassDAO";
 import { FileReader } from "./classes/FileReader";
+import { UIClassDefinitionFinder } from "./classes/SyntaxParsers/UI5Parser/UIClass/UIClassDefinitionFinder";
 
 export async function activate(context: vscode.ExtensionContext) {
 	vscode.window.withProgress({
@@ -89,6 +86,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
 				UIClassDAO.synchroniseCacheOnDocumentSave();
 				FileReader.synchroniseCacheOnDocumentSave();
+
+				/* Definition provider */
+				const definitionProviderDisposable = vscode.languages.registerDefinitionProvider({language: "javascript", scheme: "file"}, {
+					provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {
+						return UIClassDefinitionFinder.getPositionAndUriOfCurrentVariableDefinition();
+					}
+				});
+				context.subscriptions.push(definitionProviderDisposable);
 
 				resolve();
 			} catch (error) {
