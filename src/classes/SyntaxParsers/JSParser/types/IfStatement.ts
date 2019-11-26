@@ -34,4 +34,8 @@ export class IfStatement extends AbstractType {
 
 
 	public parseBody() {}
+
+	static isAnIfStatement(text: string) {
+		return /\sif(\s|\()/.test(text);
+	}
 }

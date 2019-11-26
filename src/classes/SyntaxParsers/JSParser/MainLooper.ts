@@ -14,6 +14,7 @@ import { JSSwitch } from "./types/JSSwitch";
 import { JSComment } from "./types/JSComment";
 import { JSUnknown } from "./types/JSUnknown";
 import { JSTernaryOperation } from "./types/TernaryOperation";
+import { JSIncrement } from "./types/JSIncrement";
 
 export class MainLooper {
 	static startAnalysing(javascript: string, runBeforeChar?: string) {
@@ -22,192 +23,99 @@ export class MainLooper {
 		let currentIndex = 0;
 		let parts:AbstractType[] = [];
 		let emergencyStop = false;
-		const rIsVariable = /(var\s)?(.*=)|this\..*\s=|var\s.*?(?=;)/;
 
 		while (shouldContinueLoop) {
 			const currentChar = javascript[currentIndex];
-			let body;
-			if (currentText.indexOf("new ") > -1 && currentChar === "(") {
+			let syntaxType: AbstractType | undefined;
+
+			if (JSClass.isAClass(currentText, currentChar)) {
 				//needed before function call
-				body =  this.getEndOfChar("(", ")", javascript.substring(currentIndex, javascript.length));
-
-				const jsClass = new JSClass(currentText, body);
-				parts.push(jsClass);
-
-				javascript = javascript.substring(jsClass.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsClass.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
-			} else if (currentText.indexOf("function") > -1) {
+				syntaxType = new JSClass(currentText, javascript);
+			} else if (JSFunction.isAFunction(currentText)) {
 				//need to be before Function Call
-				let params =  this.getEndOfChar("(", ")", javascript.substring(currentIndex, javascript.length));
-				body =  this.getEndOfChar("{", "}", javascript.substring(currentIndex, javascript.length));
+				syntaxType = new JSFunction(currentText, javascript);
 
-				const functionText = javascript.substring(0, javascript.indexOf(body) + body.length);
-				const jsFunction = new JSFunction(currentText, body, params, functionText);
-				parts.push(jsFunction);
-
-				javascript = javascript.substring(jsFunction.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsFunction.functionText.endsWith(runBeforeChar)) {
+				if (runBeforeChar && (<JSFunction>syntaxType).functionText.endsWith(runBeforeChar)) {
 					emergencyStop = true;
 				}
-			} else if (/\sif(\s|\()/.test(currentText)) {
-				const jsIfStatement = new IfStatement("", javascript);
-				parts.push(jsIfStatement);
+			} else if (IfStatement.isAnIfStatement(currentText)) {
+				syntaxType = new IfStatement("", javascript);
 
-				javascript = javascript.substring(jsIfStatement.getContentLength(), javascript.length);
+			} else if (JSTernaryOperation.isATernaryOperation(currentText, javascript[currentIndex + 1])) {
+				syntaxType = new JSTernaryOperation("", javascript);
+
+			} else if (WhileLoop.isAWhileLoop(currentText)) {
+				syntaxType = new WhileLoop("", javascript);
+
+			} else if (ForLoop.isAForLoop(currentText)) {
+				syntaxType = new ForLoop("", javascript);
+
+			} else if (TryCatchFinally.isATryCatchFinally(currentText)) {
+				syntaxType = new TryCatchFinally("", javascript);
+
+			} else if (JSIncrement.isAnIncrement(currentText)) {
+				syntaxType = new JSIncrement("", javascript);
+
+			} else if (JSSwitch.isASwitchStatement(currentText)) {
+				syntaxType = new JSSwitch("", javascript);
+
+			} else if (JSComment.isAComment(currentText)) {
+				syntaxType = new JSComment("", javascript);
+
+			} else if (JSFunctionCall.isAFunctionCall(currentChar)) {
+				syntaxType = new JSFunctionCall(currentText, javascript);
+
+			} else if (JSArray.isAnArray(currentChar)) {
+				syntaxType = new JSArray(currentText, javascript);
+
+			} else if (JSObject.isAnObject(currentChar)) {
+				syntaxType = new JSObject(currentText, javascript);
+
+			} else if (JSString.isAString(currentChar)) {
+				syntaxType = new JSString("", javascript);
+
+			}
+			if (syntaxType) {
+				parts.push(syntaxType);
+
+				javascript = javascript.substring(syntaxType.getContentLength(), javascript.length);
 				currentIndex = 0;
 				currentText = "";
 
-				if (runBeforeChar && jsIfStatement.body.endsWith(runBeforeChar)) {
+				if (runBeforeChar && syntaxType.body.endsWith(runBeforeChar)) {
 					emergencyStop = true;
 				}
-			} else if (currentText.endsWith("=") && javascript[currentIndex + 1] === "=") {
-				const jsTernaryOperation = new JSTernaryOperation("", javascript);
-				parts.push(jsTernaryOperation);
-
-				javascript = javascript.substring(jsTernaryOperation.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsTernaryOperation.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
-			} else if (/\swhile(\s|\()/.test(currentText)) {
-				const jsWhileLoop = new WhileLoop("", javascript);
-				parts.push(jsWhileLoop);
-
-				javascript = javascript.substring(jsWhileLoop.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsWhileLoop.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
-			} else if (/\sfor(\s|\()/.test(currentText)) {
-				const jsForLoop = new ForLoop("", javascript);
-				parts.push(jsForLoop);
-
-				javascript = javascript.substring(jsForLoop.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsForLoop.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
-			} else if (/\stry(\s|{)/.test(currentText)) {
-				const jsTryCatchFinally = new TryCatchFinally("", javascript);
-				parts.push(jsTryCatchFinally);
-
-				javascript = javascript.substring(jsTryCatchFinally.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsTryCatchFinally.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
-			} else if (/\sswitch(\s|{)/.test(currentText)) {
-				const jsSwitch = new JSSwitch("", javascript);
-				parts.push(jsSwitch);
-
-				javascript = javascript.substring(jsSwitch.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsSwitch.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
-			} else if (currentText.endsWith("/*") || currentText.endsWith("//")) {
-				const jsComment = new JSComment("", javascript);
-				parts.push(jsComment);
-
-				javascript = javascript.substring(jsComment.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-			} else if (currentChar === "(") {
-				body = this.getEndOfChar("(", ")", javascript.substring(currentIndex, javascript.length));
-				const jsFunctionCall = new JSFunctionCall(currentText, body);
-				parts.push(jsFunctionCall);
-
-				javascript = javascript.substring(jsFunctionCall.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsFunctionCall.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
-			} else if (currentChar === "[") {
-				body = this.getEndOfChar("[", "]", javascript.substring(currentIndex, javascript.length));
-				const jsArray = new JSArray(currentText, body);
-				parts.push(jsArray);
-
-				javascript = javascript.substring(jsArray.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsArray.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
-			} else if (currentChar === "{") {
-				body = this.getEndOfChar("{", "}", javascript.substring(currentIndex, javascript.length));
-				const jsObject = new JSObject(currentText, body);
-				parts.push(jsObject);
-
-				javascript = javascript.substring(jsObject.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsObject.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
-			} else if (currentChar === '"' || currentChar === "'" || currentChar === "`") {
-				body = this.getCharPair(currentChar, javascript.substring(currentIndex, javascript.length));
-				const jsString = new JSString("", currentText + body);
-				parts.push(jsString);
-
-				javascript = javascript.substring(jsString.getContentLength(), javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsString.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
-			} else if (rIsVariable.test(currentText)) {
-				let definitions;
-				let definitionBody;
-				if (!currentText.endsWith(";")) {
-					definitions = this.startAnalysing(javascript.substring(currentIndex, javascript.length), ";");//think about formatter: Formatter,
-					definitionBody = definitions.reduce((accumulator, definition) => accumulator += definition.getFullBody(), "");
-				} else {
-					currentText = currentText.substring(0, currentText.length - 1);
-				}
-				const jsVariable = new JSVariable(currentText, definitionBody || "");
-				parts.push(jsVariable);
-
-				javascript = javascript.substring(currentText.length + (definitionBody ? definitionBody.length : 0) + 1, javascript.length);
-				currentIndex = 0;
-				currentText = "";
-
-				if (runBeforeChar && jsVariable.body.endsWith(runBeforeChar)) {
-					emergencyStop = true;
-				}
+				syntaxType = undefined;
 			} else {
-				currentText += currentChar;
-				currentIndex++;
+				if (JSVariable.isVariable(currentText)) {
+					let definitions;
+					let definitionBody;
+					if (!currentText.endsWith(";")) {
+						definitions = this.startAnalysing(javascript.substring(currentIndex, javascript.length), ";");//think about formatter: Formatter,
+						definitionBody = definitions.reduce((accumulator, definition) => accumulator += definition.getFullBody(), "");
+					} else {
+						currentText = currentText.substring(0, currentText.length - 1);
+					}
+					const jsVariable = new JSVariable(currentText, definitionBody || "");
+					parts.push(jsVariable);
+
+					javascript = javascript.substring(currentText.length + (definitionBody ? definitionBody.length : 0) + 1, javascript.length);
+					currentIndex = 0;
+					currentText = "";
+
+					if (runBeforeChar && jsVariable.body.endsWith(runBeforeChar)) {
+						emergencyStop = true;
+					}
+				} else {
+					currentText += currentChar;
+					currentIndex++;
+				}
 			}
 
 			shouldContinueLoop = emergencyStop ? false : (runBeforeChar ? (currentIndex < javascript.length && (currentText ? currentText[currentText.length - 1] !== runBeforeChar : true) ) : (currentIndex < javascript.length));
 		}
 
 		if (javascript && currentText && parts.length === 0) {
-			// parts.push(new JSUnknown(currentText, ""));
 			if (currentText.split(",").length > 1 && !!currentText.split(",")[1]) {
 				parts.push(new JSUnknown(currentText, ""));
 			} else {
@@ -279,18 +187,3 @@ export class MainLooper {
 		return body;
 	}
 }
-
-// arguments	break
-// 	case	catch
-// const	continue	debugger
-// delete	do		else
-// 	false		finally
-// float	for	function
-// if		in	instanceof
-// int		let
-// 	new	null
-// 			return
-// 		switch
-// this	throw
-// true	try	typeof	var
-// void	while

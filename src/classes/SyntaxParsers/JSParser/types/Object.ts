@@ -6,7 +6,10 @@ import { JSVariable } from "./Variable";
 
 export class JSObject extends AbstractType {
 	public partNames: string[] = [];
+
 	public parseBodyText() {
+		this.body = MainLooper.getEndOfChar("{", "}", this.body);
+
 		let lastChar = this.body[this.body.length - 1];
 		this.parsedBody = (lastChar === ";" || lastChar === ",") ? this.body.substring(0, this.body.length - 1) : this.body;
 		this.parsedBody = this.body.substring(1, this.body.length - 1);
@@ -96,5 +99,9 @@ export class JSObject extends AbstractType {
 		}
 
 		return jsVariables;
+	}
+
+	static isAnObject(char: string) {
+		return char === "{";
 	}
 }

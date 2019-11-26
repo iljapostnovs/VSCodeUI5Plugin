@@ -39,4 +39,8 @@ export class JSComment extends AbstractType {
 	public isJSDoc() {
 		return this.parsedBody && this.parsedBody.startsWith("/**");
 	}
+
+	static isAComment(text: string) {
+		return text.endsWith("/*") || text.endsWith("//");
+	}
 }

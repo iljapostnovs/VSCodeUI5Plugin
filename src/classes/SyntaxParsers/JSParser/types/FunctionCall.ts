@@ -3,8 +3,14 @@ import { MainLooper } from "../MainLooper";
 
 export class JSFunctionCall extends AbstractType {
 	public parseBodyText() {
+		this.body = MainLooper.getEndOfChar("(", ")", this.body);
+
 		let lastChar = this.body[this.body.length - 1];
 		this.parsedBody = (lastChar === ";" || lastChar === ",") ? this.body.substring(0, this.body.length - 1) : this.body;
 		this.parsedBody = this.parsedBody.substring(1, this.parsedBody.length - 1);
+	}
+
+	static isAFunctionCall(char: string) {
+		return char === "(";
 	}
 }

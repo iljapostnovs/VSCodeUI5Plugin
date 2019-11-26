@@ -14,4 +14,8 @@ export class ForLoop extends AbstractType {
 		this.parsedBody = this.body.trim();
 	}
 	public parseBody() {}
+
+	static isAForLoop(text: string) {
+		return /\sfor(\s|\()/.test(text);
+	}
 }
