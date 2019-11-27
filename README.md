@@ -52,8 +52,7 @@ Clears cache with SAPUI5 lib metadata
 ## Settings
 There are two settings available:
 * Your source folder name where manifest.json should be located at
-* Library version (For now - tested only for 1.60.11)
-<br/>
+* Library version (For now - tested only for 1.60.11)<br/>
 ![Settings](/images/Settings.png)
 
 ----------
