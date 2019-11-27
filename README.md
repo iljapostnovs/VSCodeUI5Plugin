@@ -63,16 +63,16 @@ There are two settings available:
 > If you are using different versions, you might meet an unexpected behavior if the structure of the standard lib metadata is different
 
 ## Custom class metadata
-Custom class metadata is dynamically generated using .js and view.xml files of the project.&nbsp;
+Custom class metadata is dynamically generated using .js and view.xml files of the project.
 There are several types of variable definitions:
-* Local object variables&nbsp;
-`this.variable`&nbsp;
-Algorithm looks for all definitions in the functions of the object which is returned in&nbsp;
+* Class Fields
+`this.variable`
+Algorithm looks for all definitions in the functions of the object which is returned in
 `return Control.extend("name", {})` part
-* Function parameters&nbsp;
-`function(oEvent) {}`&nbsp;
+* Function parameters
+`function(oEvent) {}`
 Only way to find out the data type of the function parameter is JSDoc. Use `@param {sap.ui.base.Event}` if you want completion items to work for function params.
-* Local variables&nbsp;
+* Local variables
 `function() {
 	var oList = new List();
 }`
