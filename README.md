@@ -78,7 +78,7 @@ Only way to find out the data type of the function parameter is JSDoc. Use `@par
 }`
 
 ### Custom file parsing limitations
-* All variables defined in if/else, try/catch, for/while loops are ignored, because that is not reliable source of data definitions
+* All variables defined in try/catch, for/while loops are ignored for now
 
 ### Assumptions
 * File starts with sap.ui.define
