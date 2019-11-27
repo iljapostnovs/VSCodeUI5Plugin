@@ -104,6 +104,7 @@ export class SyntaxAnalyzer {
 			let iDeltaStart = this.getDeltaOfVariableBegining(-1);
 			let rangeOfVariable = new vscode.Range(vscode.window.activeTextEditor.selection.start.translate(0, iDeltaStart), vscode.window.activeTextEditor.selection.start);
 			currentVariable = vscode.window.activeTextEditor.document.getText(rangeOfVariable);
+			currentVariable = currentVariable.replace(".prototype", "");
 		}
 
 		return currentVariable;
@@ -131,7 +132,7 @@ export class SyntaxAnalyzer {
 	}
 
 	private static isSeparator(char: string) {
-		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t";
+		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "(";
 	}
 	/* =========================================================== */
 	/* end: variable methods                                       */
