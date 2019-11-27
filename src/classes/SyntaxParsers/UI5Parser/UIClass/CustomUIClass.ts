@@ -69,7 +69,7 @@ export class CustomUIClass extends AbstractUIClass {
 	private getThisClassBody() {
 		let classBody: JSObject | undefined;
 		if (this.jsPasredBody) {
-			const classFNCall = this.jsPasredBody.parts[1].parts.find(part => part instanceof JSFunctionCall && part.parsedName.indexOf(".extend") > -1);
+			const classFNCall = this.jsPasredBody.parts[1].parts.find(part => part instanceof JSFunctionCall && (part.parsedName.indexOf(".extend") > -1 || part.parsedName.indexOf(".declareStaticClass")));
 			if (classFNCall) {
 				classBody = <JSObject>classFNCall.parts[1];
 			} else {
@@ -98,6 +98,11 @@ export class CustomUIClass extends AbstractUIClass {
 			allVariables.forEach(variable => {
 				if (variable.jsType) {
 					const classNameDotNotation = this.getClassNameFromUIDefine(variable.jsType);
+					if (classNameDotNotation) {
+						variable.jsType = classNameDotNotation;
+					}
+				} else {
+					const classNameDotNotation = this.getClassNameFromUIDefine(variable.parsedName);
 					if (classNameDotNotation) {
 						variable.jsType = classNameDotNotation;
 					}
