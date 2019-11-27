@@ -1,24 +1,32 @@
 import { AbstractType } from "./AbstractType";
 import { JSVariable } from "./Variable";
 import { JSComment } from "./JSComment";
+import { MainLooper } from "../MainLooper";
 
 export class JSFunction extends AbstractType {
 	public jsDoc: JSComment | undefined;
 	public type = "function"; //todo refactor
 	public params: AbstractType[] = [];
-	public functionText: string;
-	constructor(name: string, body: string, params: string, functionText: string) {
+	public functionText: string = "";
+
+	constructor(name: string, body: string) {
 		super(name, body);
 
-		params = params.substring(1, params.length - 1);
+		this.body = body;
+		this.functionText = this.body;
+		let params =  MainLooper.getEndOfChar("(", ")", this.body);
+		this.body =  MainLooper.getEndOfChar("{", "}", this.body);
+
+		this.functionText = this.functionText.substring(0, this.functionText.indexOf(this.body) + this.body.length);
+
+		params = params.substring(1, params.length - 1); //removes ()
 		if (params) {
 			this.params = params.split(",").map(param => new JSVariable(param.trim(), ""));
 			this.params.forEach(param => {
 				param.setParent(this);
 			});
 		}
-
-		this.functionText = functionText;
+		this.parseBodyText();
 	}
 
 	public parseBodyText() {
@@ -90,5 +98,9 @@ export class JSFunction extends AbstractType {
 		}
 
 		return jsType;
+	}
+
+	static isAFunction(text: string) {
+		return text.indexOf("function") > -1;
 	}
 }

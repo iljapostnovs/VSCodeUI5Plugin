@@ -14,4 +14,8 @@ export class JSSwitch extends AbstractType {
 		this.parsedBody = this.body.trim();
 	}
 	public parseBody() {}
+
+	static isASwitchStatement(text: string) {
+		return /\sswitch(\s|{)/.test(text)
+	}
 }

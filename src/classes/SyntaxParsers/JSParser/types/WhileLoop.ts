@@ -14,4 +14,8 @@ export class WhileLoop extends AbstractType {
 		this.parsedBody = this.body.trim();
 	}
 	public parseBody() {}
+
+	static isAWhileLoop(text: string) {
+		return /\swhile(\s|\()/.test(text);
+	}
 }

@@ -1,6 +1,6 @@
 import { AbstractType } from "./AbstractType";
 
-export class JSTernaryOperation extends AbstractType {
+export class JSIncrement extends AbstractType {
 	public parseBodyText() {
 		this.body = this.cropTextTill(this.body, ";");
 
@@ -18,7 +18,7 @@ export class JSTernaryOperation extends AbstractType {
 
 	public parseBody() {}
 
-	static isATernaryOperation(text: string, nextChar: string) {
-		return text.endsWith("=") && nextChar === "=";
+	static isAnIncrement(text: string) {
+		return text.endsWith("++") || text.endsWith("--");
 	}
 }

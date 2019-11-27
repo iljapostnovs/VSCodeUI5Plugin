@@ -33,4 +33,8 @@ export class TryCatchFinally extends AbstractType {
 
 
 	public parseBody() {}
+
+	static isATryCatchFinally(text: string) {
+		return /\stry(\s|{)/.test(text);
+	}
 }
