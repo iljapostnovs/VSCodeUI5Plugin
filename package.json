@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"publisher": "iljapostnovs",
 	"repository": {
 		"type": "git",
@@ -68,11 +68,13 @@
 		"@types/node": "^10.12.18",
 		"@types/vscode": "^1.32.0",
 		"tslint": "^5.16.0",
+		"@types/glob": "^7.1.1",
+		"@types/line-column": "^1.0.0",
+		"@types/request-promise": "^4.1.44",
 		"typescript": "^3.6.4"
 	},
 	"dependencies": {
-		"@types/glob": "^7.1.1",
-		"@types/request-promise": "^4.1.44",
+		"line-column": "^1.0.2",
 		"glob": "^7.1.5",
 		"request": "^2.88.0",
 		"request-promise": "^4.2.4"
