@@ -4,7 +4,7 @@ This plugin contains perks for UI5 developers.
 ----------
 ## Completion Items
 ### XML
-XML Completion Items for UI5 Controls.
+XML Completion Items for UI5 Controls.<br/>
 ![XMLCompletionItems](/images/XMLCompletionItems.gif)
 
 ### JS
@@ -42,7 +42,7 @@ Set your position to the string you want to export to i18n.properties file and e
 ![ExportToI18n](/images/ExportToI18n.gif)
 
 ### Switch View/Controller
-Goes to view from controller and to controller from view
+Goes to view from controller and to controller from view<br/>
 ![SwitchViewController](/images/SwitchViewController.gif)
 
 ### Clear Cache
@@ -53,6 +53,7 @@ Clears cache with SAPUI5 lib metadata
 There are two settings available:
 * Your source folder name where manifest.json should be located at
 * Library version (For now - tested only for 1.60.11)
+<br/>
 ![Settings](/images/Settings.png)
 
 ----------
@@ -71,7 +72,7 @@ Algorithm looks for all definitions in the functions of the object which is retu
 `return Control.extend("name", {})` part
 * Function parameters<br/>
 `function(oEvent) {}`<br/>
-Only way to find out the data type of the function parameter is JSDoc. Use `@param {sap.ui.base.Event}` if you want completion items to work for function params.<br/>
+Only way to find out the data type of the function parameter is JSDoc. Use `@param {sap.ui.base.Event} oEvent - standard event object` if you want completion items to work for function params.<br/>
 * Local variables<br/>
 `function() {
 	var oList = new List();
@@ -82,7 +83,8 @@ Only way to find out the data type of the function parameter is JSDoc. Use `@par
 
 ### Assumptions
 * File starts with sap.ui.define
+* Your class body is in Control.extend("name", {here});<br/>(It means that dynamic completion items will not work for e.g. formatters, when you usually return an object right away)
 * You have manifest.json in source folder
 * App ID (Component name) and i18n paths are defined in manifest.json
 * File is without syntax errors
-* No ES6 features are used (Will be added in the future)
+* No ES6 features are used (Partial support for const/let and arrow functions will be added later)
