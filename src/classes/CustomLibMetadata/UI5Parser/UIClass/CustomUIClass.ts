@@ -1,4 +1,4 @@
-import { FileReader } from "../../../FileReader";
+import { FileReader } from "../../../Util/FileReader";
 import { MainLooper } from "../../JSParser/MainLooper";
 import { AbstractType } from "../../JSParser/types/AbstractType";
 import { DifferentJobs } from "../../JSParser/DifferentJobs";

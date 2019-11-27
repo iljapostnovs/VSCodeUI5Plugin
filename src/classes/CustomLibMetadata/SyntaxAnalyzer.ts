@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { UIClassFactory, FieldsAndMethods } from "../DAOAndFactories/UIClassFactory";
-import { FileReader } from "../FileReader";
+import { UIClassFactory, FieldsAndMethods } from "./UI5Parser/UIClass/UIClassFactory";
+import { FileReader } from "../Util/FileReader";
 import { CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
 
 export class SyntaxAnalyzer {

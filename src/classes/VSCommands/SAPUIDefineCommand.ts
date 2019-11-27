@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-export class DefineEditor {
+export class SAPUIDefineCommand {
 	static insertUIDefine() {
 		let editor = vscode.window.activeTextEditor;
 

@@ -26,6 +26,10 @@ export class IfStatement extends AbstractType {
 		this.parsedBody = bodiesForParsing.join("");
 	}
 
+	public parseBody() {
+		super.parseBody();
+	}
+
 	private findElseBody(body: string, bodiesForParsing: string[]) {
 		let elseBody = "";
 		//else/else if body
@@ -50,6 +54,6 @@ export class IfStatement extends AbstractType {
 	}
 
 	static isAnIfStatement(text: string) {
-		return /\sif(\s|\()/.test(text);
+		return /(\s|^)if(\s|\()/.test(text);
 	}
 }

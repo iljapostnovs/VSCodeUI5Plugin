@@ -1,15 +1,15 @@
-import { SAPNodeDAO } from "./SAPNodeDAO";
+import { SAPNodeDAO } from "../StandardLibMetadata/SAPNodeDAO";
 import { SAPNode } from "../StandardLibMetadata/SAPNode";
 import * as vscode from "vscode";
 import { IPropertyGenerator } from "../CodeGenerators/property/IPropertyGenerator";
 import { GeneratorFactory } from "../CodeGenerators/GeneratorFactory";
 import { IAggregationGenerator } from "../CodeGenerators/aggregation/IAggregationGenerator";
-import { UI5MetadataPreloader } from "./UI5MetadataDAO";
-import { WorkspaceCompletionItemDAO } from "./WorkspaceCompletionItemFactory";
-import { SyntaxAnalyzer, UICompletionItem } from "../SyntaxParsers/SyntaxAnalyzer";
-import { FieldsAndMethods } from "./UIClassFactory";
+import { UI5MetadataPreloader } from "../StandardLibMetadata/UI5MetadataDAO";
+import { SyntaxAnalyzer, UICompletionItem } from "../CustomLibMetadata/SyntaxAnalyzer";
+import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
+import { FieldsAndMethods } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 
-export class CompletionItemDAO {
+export class CompletionItemFactory {
 	private nodeDAO = new SAPNodeDAO();
 	private language: GeneratorFactory.language;
 
@@ -111,7 +111,7 @@ export class CompletionItemDAO {
 	}
 
 	public async generateUIDefineCompletionItems() {
-		let workspaceCompletionItemDAO = new WorkspaceCompletionItemDAO();
+		let workspaceCompletionItemDAO = new WorkspaceCompletionItemFactory();
 		let completionItems:vscode.CompletionItem[] = [];
 
 		let SAPNodes: SAPNode[] = await this.nodeDAO.getAllNodes();

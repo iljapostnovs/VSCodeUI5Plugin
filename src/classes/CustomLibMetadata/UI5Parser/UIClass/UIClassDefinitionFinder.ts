@@ -1,8 +1,8 @@
 import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 import * as vscode from "vscode";
-import { UIClassFactory } from "../../../DAOAndFactories/UIClassFactory";
+import { UIClassFactory } from "./UIClassFactory";
 import { CustomUIClass } from "./CustomUIClass";
-import { FileReader } from "../../../FileReader";
+import { FileReader } from "../../../Util/FileReader";
 import LineColumn = require('line-column');
 
 export class UIClassDefinitionFinder {
