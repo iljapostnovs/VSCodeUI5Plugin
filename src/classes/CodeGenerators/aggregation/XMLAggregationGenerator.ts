@@ -1,6 +1,6 @@
-import { SAPNodeDAO } from "../../DAO/SAPNodeDAO";
+import { SAPNodeDAO } from "../../DAOAndFactories/SAPNodeDAO";
 import { IAggregationGenerator } from "./IAggregationGenerator";
-import { SAPNode } from "../../SAPNode";
+import { SAPNode } from "../../StandardLibMetadata/SAPNode";
 
 export class XMLAggregationGenerator implements IAggregationGenerator {
 	private nodeDAO = new SAPNodeDAO();

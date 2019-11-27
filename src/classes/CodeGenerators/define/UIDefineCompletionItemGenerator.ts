@@ -1,6 +1,6 @@
-import { SAPNode } from "../../SAPNode";
+import { SAPNode } from "../../StandardLibMetadata/SAPNode";
 import * as vscode from "vscode";
-import { UI5Metadata } from "../../UI5Metadata";
+import { UI5Metadata } from "../../StandardLibMetadata/UI5Metadata";
 
 export class DefineGenerator {
 

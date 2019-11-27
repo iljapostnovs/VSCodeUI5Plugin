@@ -1,4 +1,4 @@
-import { SAPNode } from "../SAPNode";
+import { SAPNode } from "../StandardLibMetadata/SAPNode";
 import * as rp from "request-promise";
 import * as vscode from "vscode";
 

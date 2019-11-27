@@ -1,13 +1,13 @@
 import { SAPNodeDAO } from "./SAPNodeDAO";
-import { SAPNode } from "../SAPNode";
+import { SAPNode } from "../StandardLibMetadata/SAPNode";
 import * as vscode from "vscode";
-import { IPropertyGenerator } from "../generators/property/IPropertyGenerator";
-import { GeneratorFactory } from "../generators/GeneratorFactory";
-import { IAggregationGenerator } from "../generators/aggregation/IAggregationGenerator";
+import { IPropertyGenerator } from "../CodeGenerators/property/IPropertyGenerator";
+import { GeneratorFactory } from "../CodeGenerators/GeneratorFactory";
+import { IAggregationGenerator } from "../CodeGenerators/aggregation/IAggregationGenerator";
 import { UI5MetadataPreloader } from "./UI5MetadataDAO";
-import { WorkspaceCompletionItemDAO } from "./WorkspaceCompletionItemDAO";
-import { SyntaxAnalyzer, UICompletionItem } from "../SyntaxAnalyzer";
-import { FieldsAndMethods } from "./UIClassDAO";
+import { WorkspaceCompletionItemDAO } from "./WorkspaceCompletionItemFactory";
+import { SyntaxAnalyzer, UICompletionItem } from "../SyntaxParsers/SyntaxAnalyzer";
+import { FieldsAndMethods } from "./UIClassFactory";
 
 export class CompletionItemDAO {
 	private nodeDAO = new SAPNodeDAO();

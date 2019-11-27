@@ -1,6 +1,6 @@
-import { SyntaxAnalyzer } from "../../../SyntaxAnalyzer";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 import * as vscode from "vscode";
-import { UIClassDAO } from "../../../DAO/UIClassDAO";
+import { UIClassFactory } from "../../../DAOAndFactories/UIClassFactory";
 import { CustomUIClass } from "./CustomUIClass";
 import { FileReader } from "../../../FileReader";
 import LineColumn = require('line-column');
@@ -19,7 +19,7 @@ export class UIClassDefinitionFinder {
             if (classNameDotNotation && methodName) {
                 location = this.getVSCodeMethodLocation(classNameDotNotation, methodName);
                 if (!location) {
-                    const UIClass = UIClassDAO.getUIClass(classNameDotNotation);
+                    const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
                     if (UIClass.parentClassNameDotNotation) {
                         location = this.getPositionAndUriOfCurrentVariableDefinition(UIClass.parentClassNameDotNotation, methodName);
                     }
@@ -32,7 +32,7 @@ export class UIClassDefinitionFinder {
 
     private static getVSCodeMethodLocation(classNameDotNotation: string, methodName: string) {
         let location: vscode.Location | undefined;
-        const UIClass = UIClassDAO.getUIClass(classNameDotNotation);
+        const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
 
         if (UIClass instanceof CustomUIClass && UIClass.classBody) {
             const currentMethodIndex = UIClass.classBody.partNames.indexOf(methodName);
@@ -81,7 +81,7 @@ export class UIClassDefinitionFinder {
                 } else if (variableParts[0] === "this" && variableParts.length === 1) {
                     UIClassName = currentClassName;
                 } else {
-                    const currentClass = UIClassDAO.getUIClass(currentClassName);
+                    const currentClass = UIClassFactory.getUIClass(currentClassName);
                     UIClassName = (<CustomUIClass>currentClass).getClassOfTheVariable(variable, currentPositionOffset);
                 }
             }

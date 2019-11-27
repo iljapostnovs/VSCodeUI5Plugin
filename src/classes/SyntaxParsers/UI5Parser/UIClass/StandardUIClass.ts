@@ -1,5 +1,5 @@
 import { AbstractUIClass, UIMethod } from "./AbstractUIClass"
-import { SAPNodeDAO } from "../../../DAO/SAPNodeDAO";
+import { SAPNodeDAO } from "../../../DAOAndFactories/SAPNodeDAO";
 
 export class StandardUIClass extends AbstractUIClass {
 	private nodeDAO = new SAPNodeDAO();

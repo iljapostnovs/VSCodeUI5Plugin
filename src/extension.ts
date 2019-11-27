@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
-import { CompletionItemDAO } from "./classes/DAO/CompletionItemDAO"
-import { GeneratorFactory } from "./classes/generators/GeneratorFactory";
-import { DefineEditor as SAPUIDefineCommand } from "./classes/commands/fileEditors/SAPUIDefineCommand";
-import { ExportToI18NCommand } from "./classes/commands/fileEditors/ExportToI18NCommand";
-import { ClearCacheCommand } from "./classes/commands/ClearCacheCommand";
-import { ViewControllerSwitcher } from "./classes/commands/switchers/ViewControllerSwitcher";
-import { DefineGenerator } from "./classes/generators/define/UIDefineCompletionItemGenerator";
-import { WorkspaceCompletionItemDAO } from "./classes/DAO/WorkspaceCompletionItemDAO";
-import { UIClassDAO } from "./classes/DAO/UIClassDAO";
+import { CompletionItemDAO } from "./classes/DAOAndFactories/CompletionItemFactory"
+import { GeneratorFactory } from "./classes/CodeGenerators/GeneratorFactory";
+import { DefineEditor as SAPUIDefineCommand } from "./classes/Commands/fileEditors/SAPUIDefineCommand";
+import { ExportToI18NCommand } from "./classes/Commands/fileEditors/ExportToI18NCommand";
+import { ClearCacheCommand } from "./classes/Commands/ClearCacheCommand";
+import { ViewControllerSwitcher } from "./classes/Commands/switchers/ViewControllerSwitcher";
+import { DefineGenerator } from "./classes/CodeGenerators/define/UIDefineCompletionItemGenerator";
+import { WorkspaceCompletionItemDAO } from "./classes/DAOAndFactories/WorkspaceCompletionItemFactory";
+import { UIClassFactory } from "./classes/DAOAndFactories/UIClassFactory";
 import { FileReader } from "./classes/FileReader";
 import { UIClassDefinitionFinder } from "./classes/SyntaxParsers/UI5Parser/UIClass/UIClassDefinitionFinder";
 
@@ -84,7 +84,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					WorkspaceCompletionItemDAO.synchronise(JSDefineCompletionItems, event);
 				});
 
-				UIClassDAO.synchroniseCacheOnDocumentSave();
+				UIClassFactory.synchroniseCacheOnDocumentSave();
 				FileReader.synchroniseCacheOnDocumentSave();
 
 				/* Definition provider */
