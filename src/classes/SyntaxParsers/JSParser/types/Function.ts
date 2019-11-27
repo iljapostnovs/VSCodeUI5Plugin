@@ -2,6 +2,7 @@ import { AbstractType } from "./AbstractType";
 import { JSVariable } from "./Variable";
 import { JSComment } from "./JSComment";
 import { MainLooper } from "../MainLooper";
+import { IfStatement } from "./IfStatement";
 
 export class JSFunction extends AbstractType {
 	public jsDoc: JSComment | undefined;
@@ -53,6 +54,8 @@ export class JSFunction extends AbstractType {
 			while (!definition && i < this.parts.length) {
 				if (this.parts[i] instanceof JSVariable && this.parts[i].parsedName === anything.parsedName && !this.theeseTwoAreRelated(anything, this.parts[i])) {
 					//TODO: endless recursion starts here.
+					definition = this.parts[i].findDefinition(anything);
+				} else if (this.parts[i] instanceof IfStatement) {
 					definition = this.parts[i].findDefinition(anything);
 				}
 				i++;

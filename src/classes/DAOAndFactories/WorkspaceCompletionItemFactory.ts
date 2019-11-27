@@ -1,6 +1,6 @@
 import * as vscode from "vscode"
 import * as fs from "fs";
-import { ExportToI18NCommand } from "../Commands/fileEditors/ExportToI18NCommand";
+import { ExportToI18NCommand } from "../VSCommands/fileEditors/ExportToI18NCommand";
 let workspace = vscode.workspace;
 interface WorkspaceJSFileConstructor {
 	fsPath: string,

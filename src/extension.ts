@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import { CompletionItemDAO } from "./classes/DAOAndFactories/CompletionItemFactory"
 import { GeneratorFactory } from "./classes/CodeGenerators/GeneratorFactory";
-import { DefineEditor as SAPUIDefineCommand } from "./classes/Commands/fileEditors/SAPUIDefineCommand";
-import { ExportToI18NCommand } from "./classes/Commands/fileEditors/ExportToI18NCommand";
-import { ClearCacheCommand } from "./classes/Commands/ClearCacheCommand";
-import { ViewControllerSwitcher } from "./classes/Commands/switchers/ViewControllerSwitcher";
+import { DefineEditor as SAPUIDefineCommand } from "./classes/VSCommands/fileEditors/SAPUIDefineCommand";
+import { ExportToI18NCommand } from "./classes/VSCommands/fileEditors/ExportToI18NCommand";
+import { ClearCacheCommand } from "./classes/VSCommands/ClearCacheCommand";
+import { ViewControllerSwitcher } from "./classes/VSCommands/switchers/ViewControllerSwitcher";
 import { DefineGenerator } from "./classes/CodeGenerators/define/UIDefineCompletionItemGenerator";
 import { WorkspaceCompletionItemDAO } from "./classes/DAOAndFactories/WorkspaceCompletionItemFactory";
 import { UIClassFactory } from "./classes/DAOAndFactories/UIClassFactory";
