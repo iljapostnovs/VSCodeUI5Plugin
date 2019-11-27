@@ -10,14 +10,22 @@ XML Completion Items for UI5 Controls.
 ### JS
 
 #### sap.ui.define
+Strings for import in sap.ui.define are provided.
 ![UIDefine](/images/UIDefine.gif)
 
 #### Control ID Completion Items
+IDs from the corresponding view of the controller are provided for getView().byId method
 ![GetView](/images/GetView.gif)
 
 #### Dynamic completion items
 Completion items which are generated when coding. Trigger character - dot.
 ![DynamicCompletionItems](/images/DynamicCompletionItems.gif)
+
+----------
+## Method Definitions
+Definitions for custom methods are provided.
+![Definition](/images/Definition.gif)
+
 
 ----------
 ## Commands
@@ -55,15 +63,16 @@ There are two settings available:
 > If you are using different versions, you might meet an unexpected behavior if the structure of the standard lib metadata is different
 
 ## Custom class metadata
-Custom class metadata is dynamically generated using .js and view.xml files of the project.
+Custom class metadata is dynamically generated using .js and view.xml files of the project.&nbsp;
 There are several types of variable definitions:
-* Local object variables
-`this.variable`
-	Algorithm looks for all definitions in the functions of the object which is returned in `return Control.extend("name", {})` part
-* Function parameters
-`function(oEvent) {}`
-	Only way to find out the data type of the function parameter is JSDoc. Use `@param {sap.ui.base.Event}` if you want completion items to work for function params.
-* Local variables
+* Local object variables&nbsp;
+`this.variable`&nbsp;
+Algorithm looks for all definitions in the functions of the object which is returned in&nbsp;
+`return Control.extend("name", {})` part
+* Function parameters&nbsp;
+`function(oEvent) {}`&nbsp;
+Only way to find out the data type of the function parameter is JSDoc. Use `@param {sap.ui.base.Event}` if you want completion items to work for function params.
+* Local variables&nbsp;
 `function() {
 	var oList = new List();
 }`
