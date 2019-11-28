@@ -104,6 +104,6 @@ export class JSFunction extends AbstractType {
 	}
 
 	static isAFunction(text: string) {
-		return text.indexOf("function") > -1;
+		return text.indexOf("function") > -1; //TODO: Work on this and add ES6 support, dont forget about test.map(test => test.test());
 	}
 }

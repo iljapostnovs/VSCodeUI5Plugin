@@ -52,7 +52,7 @@ export class FileReader {
 		return classPath;
 	}
 
-	public static getManifestForClass(className: string) {
+	private static getManifestForClass(className: string) {
 		let returnManifest:UIManifest | undefined;
 		if (vscode.window.activeTextEditor) {
 			if (this.manifests.length === 0) {
@@ -65,7 +65,7 @@ export class FileReader {
 		return returnManifest;
 	}
 
-	public static readAllWorkspaceManifests() {
+	private static readAllWorkspaceManifests() {
 		let wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			let manifests = this.getManifestsInWorkspaceFolder(wsFolder);

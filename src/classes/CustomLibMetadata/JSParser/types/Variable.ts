@@ -32,18 +32,6 @@ export class JSVariable extends AbstractType {
 			definition = this;
 		}
 
-		// Find definition if this variable is defined by another variable
-		// const part = this.parts[0]
-		// if (part instanceof JSVariable) {
-		// 	if (!part.jsType) {
-		// 		const definition = part.findDefinition(part);
-		// 		if (definition && definition instanceof JSClass) {
-		// 			part.jsType = definition.parsedName;
-		// 		}
-		// 	}
-		// 	this.jsType = part.jsType;
-		// }
-
 		/* if no definition in this variable, search in parent */
 		if (!definition && this.parts.length === 1 && this.parts[0] instanceof JSVariable && this.parent) {
 			definition = this.parent.findDefinition(this.parts[0]);
@@ -56,26 +44,8 @@ export class JSVariable extends AbstractType {
 		return definition;
 	}
 
-	// public parseBody() {
-	// 	super.parseBody();
-	// 	if (this.parts.length === 1) {
-	// 		const part = this.parts[0]
-	// 		if (part instanceof JSClass) {
-	// 			this.jsType = part.parsedName;
-	// 		} else if (part instanceof JSVariable) {
-	// 			if (!part.jsType) {
-	// 				const definition = part.findDefinition(part);
-	// 				if (definition && definition instanceof JSVariable) {
-	// 					this.jsType = definition.jsType;
-	// 				}
-	// 			}
-	// 			this.jsType = part.jsType;
-	// 		}
-	// 	}
-	// }
-
 	static isVariable(text: string) {
-		return /(var\s)?(.*=)|this\..*\s=|var\s.*?(?=;)/.test(text);
+		return /((var|const|let)\s)?(.*=)|this\..*\s=|(var|const|let)\s.*?(?=;)/.test(text);
 	}
 
 }

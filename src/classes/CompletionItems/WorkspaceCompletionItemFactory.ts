@@ -1,6 +1,7 @@
 import * as vscode from "vscode"
 import * as fs from "fs";
 import { ExportToI18NCommand } from "../VSCommands/ExportToI18NCommand";
+import { FileReader } from "../Util/FileReader";
 let workspace = vscode.workspace;
 interface WorkspaceJSFileConstructor {
 	fsPath: string,
@@ -82,7 +83,7 @@ export class WorkspaceCompletionItemFactory {
 		let workspaceJSFiles:UIDefineJSFile[] = [];
 		let wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
-			let manifests:any = await this.findManifestsInWorkspaceFolder(wsFolder);
+			let manifests:any = FileReader.getManifestsInWorkspaceFolder(wsFolder);
 
 			for (const manifest of manifests) {
 				let UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
@@ -105,13 +106,6 @@ export class WorkspaceCompletionItemFactory {
 		}
 
 		return workspaceJSFiles;
-	}
-
-	private findManifestsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
-		return new Promise((resolve) => {
-			workspace.findFiles(new vscode.RelativePattern(wsFolder || "", "**/manifest.json"))
-			.then(resolve);
-		});
 	}
 
 	private findJSFilesForComponentName(componentName: string) {
