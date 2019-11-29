@@ -1,7 +1,7 @@
 import { SAPNode } from "../../StandardLibMetadata/SAPNode";
 import { IPropertyGenerator } from "./IPropertyGenerator";
 import { UI5Metadata } from "../../StandardLibMetadata/UI5Metadata";
-import { SAPNodeDAO } from "../../DAOAndFactories/SAPNodeDAO";
+import { SAPNodeDAO } from "../../StandardLibMetadata/SAPNodeDAO";
 
 export class XMLPropertyGenerator implements IPropertyGenerator {
 	private nodeDAO = new SAPNodeDAO();

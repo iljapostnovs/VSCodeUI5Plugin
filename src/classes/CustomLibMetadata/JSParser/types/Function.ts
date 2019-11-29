@@ -2,6 +2,7 @@ import { AbstractType } from "./AbstractType";
 import { JSVariable } from "./Variable";
 import { JSComment } from "./JSComment";
 import { MainLooper } from "../MainLooper";
+import { IfStatement } from "./IfStatement";
 
 export class JSFunction extends AbstractType {
 	public jsDoc: JSComment | undefined;
@@ -54,6 +55,8 @@ export class JSFunction extends AbstractType {
 				if (this.parts[i] instanceof JSVariable && this.parts[i].parsedName === anything.parsedName && !this.theeseTwoAreRelated(anything, this.parts[i])) {
 					//TODO: endless recursion starts here.
 					definition = this.parts[i].findDefinition(anything);
+				} else if (this.parts[i] instanceof IfStatement) {
+					definition = this.parts[i].findDefinition(anything);
 				}
 				i++;
 			}
@@ -101,6 +104,6 @@ export class JSFunction extends AbstractType {
 	}
 
 	static isAFunction(text: string) {
-		return text.indexOf("function") > -1;
+		return text.indexOf("function") > -1; //TODO: Work on this and add ES6 support, dont forget about test.map(test => test.test());
 	}
 }

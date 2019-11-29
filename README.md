@@ -4,20 +4,28 @@ This plugin contains perks for UI5 developers.
 ----------
 ## Completion Items
 ### XML
-XML Completion Items for UI5 Controls.
+XML Completion Items for UI5 Controls.<br/>
 ![XMLCompletionItems](/images/XMLCompletionItems.gif)
 
 ### JS
 
 #### sap.ui.define
+Strings for import in sap.ui.define are provided.
 ![UIDefine](/images/UIDefine.gif)
 
 #### Control ID Completion Items
+IDs from the corresponding view of the controller are provided for getView().byId method
 ![GetView](/images/GetView.gif)
 
 #### Dynamic completion items
 Completion items which are generated when coding. Trigger character - dot.
 ![DynamicCompletionItems](/images/DynamicCompletionItems.gif)
+
+----------
+## Method Definitions
+Definitions for custom methods are provided.
+![Definition](/images/Definition.gif)
+
 
 ----------
 ## Commands
@@ -34,7 +42,7 @@ Set your position to the string you want to export to i18n.properties file and e
 ![ExportToI18n](/images/ExportToI18n.gif)
 
 ### Switch View/Controller
-Goes to view from controller and to controller from view
+Goes to view from controller and to controller from view<br/>
 ![SwitchViewController](/images/SwitchViewController.gif)
 
 ### Clear Cache
@@ -44,7 +52,7 @@ Clears cache with SAPUI5 lib metadata
 ## Settings
 There are two settings available:
 * Your source folder name where manifest.json should be located at
-* Library version (For now - tested only for 1.60.11)
+* Library version (For now - tested only for 1.60.11)<br/>
 ![Settings](/images/Settings.png)
 
 ----------
@@ -55,25 +63,27 @@ There are two settings available:
 > If you are using different versions, you might meet an unexpected behavior if the structure of the standard lib metadata is different
 
 ## Custom class metadata
-Custom class metadata is dynamically generated using .js and view.xml files of the project.
-There are several types of variable definitions:
-* Local object variables
-`this.variable`
-	Algorithm looks for all definitions in the functions of the object which is returned in `return Control.extend("name", {})` part
-* Function parameters
-`function(oEvent) {}`
-	Only way to find out the data type of the function parameter is JSDoc. Use `@param {sap.ui.base.Event}` if you want completion items to work for function params.
-* Local variables
+Custom class metadata is dynamically generated using .js and view.xml files of the project.<br/>
+There are several types of variable definitions:<br/>
+* Class Fields<br/>
+`this.variable`<br/>
+Algorithm looks for all definitions in the functions of the object which is returned in
+`return Control.extend("name", {})` part
+* Function parameters<br/>
+`function(oEvent) {}`<br/>
+Only way to find out the data type of the function parameter is JSDoc. Use `@param {sap.ui.base.Event} oEvent - standard event object` if you want completion items to work for function params.<br/>
+* Local variables<br/>
 `function() {
 	var oList = new List();
 }`
 
 ### Custom file parsing limitations
-* All variables defined in if/else, try/catch, for/while loops are ignored, because that is not reliable source of data definitions
+* All variables defined in try/catch, for/while loops are ignored for now
 
 ### Assumptions
 * File starts with sap.ui.define
+* Your class body is in Control.extend("name", {here});<br/>(It means that dynamic completion items will not work for e.g. formatters, when you usually return an object right away)
 * You have manifest.json in source folder
 * App ID (Component name) and i18n paths are defined in manifest.json
 * File is without syntax errors
-* No ES6 features are used (Will be added in the future)
+* No ES6 features are used (Partial support for const/let and arrow functions will be added later)

@@ -1,7 +1,7 @@
-import { AbstractUIClass, UIField, UIMethod } from "../SyntaxParsers/UI5Parser/UIClass/AbstractUIClass";
-import { CustomUIClass } from "../SyntaxParsers/UI5Parser/UIClass/CustomUIClass";
+import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
+import { CustomUIClass } from "./CustomUIClass";
 import * as vscode from "vscode";
-import { StandardUIClass } from "../SyntaxParsers/UI5Parser/UIClass/StandardUIClass";
+import { StandardUIClass } from "./StandardUIClass";
 
 var workspace = vscode.workspace;
 

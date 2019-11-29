@@ -1,4 +1,4 @@
-import { SAPNodeDAO } from "../../DAOAndFactories/SAPNodeDAO";
+import { SAPNodeDAO } from "../../StandardLibMetadata/SAPNodeDAO";
 import { IAggregationGenerator } from "./IAggregationGenerator";
 import { SAPNode } from "../../StandardLibMetadata/SAPNode";
 

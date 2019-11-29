@@ -1,6 +1,7 @@
 import * as vscode from "vscode"
 import * as fs from "fs";
-import { ExportToI18NCommand } from "../Commands/fileEditors/ExportToI18NCommand";
+import { ExportToI18NCommand } from "../VSCommands/ExportToI18NCommand";
+import { FileReader } from "../Util/FileReader";
 let workspace = vscode.workspace;
 interface WorkspaceJSFileConstructor {
 	fsPath: string,
@@ -15,9 +16,7 @@ class UIDefineJSFile {
 		this.UIDefineString = UIDefineString;
 	}
 }
-export class WorkspaceCompletionItemDAO {
-	static visitors: Function[] = [];
-
+export class WorkspaceCompletionItemFactory {
 	static subscribeToFileOpening(handler: Function) {
 		vscode.workspace.onDidOpenTextDocument(event => {
 			handler(event);
@@ -27,12 +26,12 @@ export class WorkspaceCompletionItemDAO {
 	static async synchronise(completionItems: vscode.CompletionItem[], event: vscode.TextDocument) {
 		if (event.languageId === "javascript") {
 			const fileFsPath = event.uri.fsPath;
-			const defineString = await WorkspaceCompletionItemDAO.getDefineStringFromFileFSPath(fileFsPath);
+			const defineString = await WorkspaceCompletionItemFactory.getDefineStringFromFileFSPath(fileFsPath);
 			if (defineString) {
 				let completionItemDoesntExist = !completionItems.find(completionItem => completionItem.label.substring(1, completionItem.label.length - 1) === defineString);
 
 				if (completionItemDoesntExist) {
-					let newCompletionItem = WorkspaceCompletionItemDAO.generateCompletionItem(new UIDefineJSFile({
+					let newCompletionItem = WorkspaceCompletionItemFactory.generateCompletionItem(new UIDefineJSFile({
 						fsPath: fileFsPath,
 						UIDefineString: defineString
 					}))
@@ -74,7 +73,7 @@ export class WorkspaceCompletionItemDAO {
 		let JSFilesOfAllWorkspaces = await this.getAllJSFilesOfAllWorkspaces();
 
 		JSFilesOfAllWorkspaces.forEach((JSFile: UIDefineJSFile) => {
-			completionItems.push(WorkspaceCompletionItemDAO.generateCompletionItem(JSFile));
+			completionItems.push(WorkspaceCompletionItemFactory.generateCompletionItem(JSFile));
 		});
 
 		return completionItems;
@@ -84,7 +83,7 @@ export class WorkspaceCompletionItemDAO {
 		let workspaceJSFiles:UIDefineJSFile[] = [];
 		let wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
-			let manifests:any = await this.findManifestsInWorkspaceFolder(wsFolder);
+			let manifests:any = FileReader.getManifestsInWorkspaceFolder(wsFolder);
 
 			for (const manifest of manifests) {
 				let UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
@@ -107,13 +106,6 @@ export class WorkspaceCompletionItemDAO {
 		}
 
 		return workspaceJSFiles;
-	}
-
-	private findManifestsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
-		return new Promise((resolve) => {
-			workspace.findFiles(new vscode.RelativePattern(wsFolder || "", "**/manifest.json"))
-			.then(resolve);
-		});
 	}
 
 	private findJSFilesForComponentName(componentName: string) {

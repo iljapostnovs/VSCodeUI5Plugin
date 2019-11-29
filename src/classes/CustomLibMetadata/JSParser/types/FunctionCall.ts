@@ -13,4 +13,7 @@ export class JSFunctionCall extends AbstractType {
 	static isAFunctionCall(char: string) {
 		return char === "(";
 	}
+	public parseBody() {
+		super.parseBody();
+	}
 }

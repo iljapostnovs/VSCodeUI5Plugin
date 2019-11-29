@@ -1,5 +1,5 @@
 import { UI5Metadata } from "./UI5Metadata";
-import { UI5MetadataDAO } from "../DAOAndFactories/UI5MetadataDAO";
+import { UI5MetadataDAO } from "./UI5MetadataDAO";
 export class SAPNode {
 	public node:any;
 	public metadata:UI5Metadata | undefined;
