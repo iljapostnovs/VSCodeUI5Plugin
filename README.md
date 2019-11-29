@@ -68,7 +68,7 @@ There are several types of variable definitions:<br/>
 * Class Fields<br/>
 `this.variable`<br/>
 Algorithm looks for all definitions in the functions of the object which is returned in
-`return Control.extend("name", {})` part
+`return AnyUI5Class.extend("name", {})` part
 * Function parameters<br/>
 `function(oEvent) {}`<br/>
 Only way to find out the data type of the function parameter is JSDoc. Use `@param {sap.ui.base.Event} oEvent - standard event object` if you want completion items to work for function params.<br/>
@@ -82,8 +82,10 @@ Only way to find out the data type of the function parameter is JSDoc. Use `@par
 
 ### Assumptions
 * File starts with sap.ui.define
-* Your class body is in Control.extend("name", {here});<br/>(It means that dynamic completion items will not work for e.g. formatters, when you usually return an object right away)
+* Your class body is in AnyUI5Class.extend("name", {here});<br/>(It means that dynamic completion items will not work for e.g. formatters, when you usually return an object right away)
 * You have manifest.json in source folder
 * App ID (Component name) and i18n paths are defined in manifest.json
 * File is without syntax errors
+* All your strings in sap.ui.define are not Relative (e.g. "./BaseController")
+* Name of the class of the UI5Class is the same as file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
 * No ES6 features are used (Partial support for const/let and arrow functions will be added later)

@@ -144,7 +144,7 @@ export class FileReader {
 			const rClassName = new RegExp(regExpBase);
 			const classNameResult = rClassName.exec(documentText);
 			if (classNameResult) {
-				controlClass = [classNameResult[0], className].join(".");
+				controlClass = [classNameResult[0], className.trim()].join(".");
 			}
 		}
 		return controlClass;
@@ -201,7 +201,7 @@ export class FileReader {
 	}
 
 	private static isSeparator(char: string) {
-		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t";
+		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r";
 	}
 }
 

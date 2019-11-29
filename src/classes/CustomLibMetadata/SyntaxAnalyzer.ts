@@ -132,7 +132,8 @@ export class SyntaxAnalyzer {
 	}
 
 	private static isSeparator(char: string) {
-		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "(";
+		//TODO: sync with FileReader
+		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r" || char === "(" || char === "=";
 	}
 	/* =========================================================== */
 	/* end: variable methods                                       */
