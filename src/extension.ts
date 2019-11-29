@@ -66,7 +66,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
 						return JSCompletionItemDAO.generateIdCompletionItems();
 					}
-				}, "this.getView().byId(");
+				}, ".byId(");
 
 				let XMLProvider = vscode.languages.registerCompletionItemProvider({language: "xml", scheme: "file"}, {
 					provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {

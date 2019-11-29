@@ -110,9 +110,12 @@ export class CustomUIClass extends AbstractUIClass {
 			});
 
 			//fill getView types from view
-			const allGetViewVars = allVariables.filter(variable => variable.parsedBody.startsWith("this.getView("));
+			const allGetViewVars = allVariables.filter(
+				variable => variable.parsedBody.startsWith("this.getView().byId(") ||
+							variable.parsedBody.startsWith("this.byId(")
+			);
 			allGetViewVars.forEach(jsVariable => {
-				const controlIdResult = /(?<=this\.getView\(\)\.byId\(").*(?="\))/.exec(jsVariable.parsedBody);
+				const controlIdResult = /(?<=this\.(getView)?\(\)\.byId\(").*(?="\))/.exec(jsVariable.parsedBody);
 				const controlId = controlIdResult ? controlIdResult[0] : "";
 				if (controlId) {
 					jsVariable.jsType = FileReader.getClassNameFromView(this.className, controlId);
