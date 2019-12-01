@@ -31,7 +31,7 @@ export class MainLooper {
 			if (JSClass.isAClass(currentText, currentChar)) {
 				//needed before function call
 				syntaxType = new JSClass(currentText, javascript);
-			} else if (JSFunction.isAFunction(currentText)) {
+			} else if (JSFunction.isAFunction(currentText, javascript)) {
 				//need to be before Function Call
 				syntaxType = new JSFunction(currentText, javascript);
 
@@ -138,16 +138,19 @@ export class MainLooper {
 		let charEndQuantity = 0;
 		let openingCharIndex = 0;
 		let index = 0;
+		let commentIndexRanges = this.getCommentRanges(text);
 
 		while((!charOpened || (charBeginQuantity - charEndQuantity !== 0)) && index < text.length) {
-			if (text[index] === charBegin) {
-				if (!charOpened) {
-					charOpened = true;
-					openingCharIndex = index;
+			if (!this.checkIfIndexIsInCommentRange(commentIndexRanges, index)) {
+				if (text[index] === charBegin) {
+					if (!charOpened) {
+						charOpened = true;
+						openingCharIndex = index;
+					}
+					charBeginQuantity++;
+				} else if (text[index] === charEnd) {
+					charEndQuantity++;
 				}
-				charBeginQuantity++;
-			} else if (text[index] === charEnd) {
-				charEndQuantity++;
 			}
 			index++;
 		}
@@ -160,15 +163,16 @@ export class MainLooper {
 		return body;
 	}
 
-	static getCharPair(char: string, text: string, breakOnEnter?: boolean) {
+	static getCharPair(char: string, text: string) {
 		let body: string = "";
 		let charOpened = false;
 		let charQuantity = 0;
 		let openingCharIndex = 0;
 		let index = 0;
+		let commentIndexRanges = this.getCommentRanges(text);
 
 		while((!charOpened || (charQuantity !== 2)) && index < text.length) {
-			if (text[index] === char && text[index - 1] !== "\\") {
+			if (!this.checkIfIndexIsInCommentRange(commentIndexRanges, index) && text[index] === char && text[index - 1] !== "\\") {
 				if (!charOpened) {
 					charOpened = true;
 					openingCharIndex = index;
@@ -186,4 +190,32 @@ export class MainLooper {
 
 		return body;
 	}
+
+	private static getCommentRanges(text: string) {
+		let ranges: CommentRanges[] = [];
+		const matches = text.match(/(\/\*(.|\s)*?\*\/)|(\/\/.*)/g);
+		if (matches) {
+			matches.forEach(match => {
+				const from = text.indexOf(match);
+				const to = from + match.length;
+				ranges.push({
+					from: from,
+					to: to
+				})
+			});
+		}
+
+		return ranges;
+	}
+
+	private static checkIfIndexIsInCommentRange(commentRanges: CommentRanges[], index: number) {
+		return !!commentRanges.find(commentRange => {
+			return index >= commentRange.from && index <= commentRange.to;
+		});
+	}
+}
+
+export interface CommentRanges {
+	from: number,
+	to: number
 }

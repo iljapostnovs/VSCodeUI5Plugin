@@ -5,28 +5,32 @@ import { CompletionItemRegistrator } from "./classes/Util/CompletionItemRegistra
 import { DefinitionProviderRegistrator } from "./classes/Util/DefinitionProviderRegistrator";
 
 export async function activate(context: vscode.ExtensionContext) {
-	vscode.window.withProgress({
-		location: vscode.ProgressLocation.Notification,
-		title: "Loading Libs",
-		cancellable: false
-	}, (progress) => {
+	const manifests = FileReader.getAllManifests();
 
-		progress.report({ increment: 0 });
+	if (manifests.length > 0) {
+		vscode.window.withProgress({
+			location: vscode.ProgressLocation.Notification,
+			title: "Loading Libs",
+			cancellable: false
+		}, (progress) => {
 
-		return new Promise(async resolve => {
-			try {
-				CommandRegistrator.register(context);
+			progress.report({ increment: 0 });
 
-				DefinitionProviderRegistrator.register(context);
+			return new Promise(async resolve => {
+				try {
+					CommandRegistrator.register(context);
 
-				await CompletionItemRegistrator.register(context, progress);
+					DefinitionProviderRegistrator.register(context);
 
-				FileReader.synchroniseCacheOnDocumentSave();
+					await CompletionItemRegistrator.register(context, progress);
 
-				resolve();
-			} catch (error) {
-				console.log(error);
-			}
+					FileReader.synchroniseCacheOnDocumentSave();
+
+					resolve();
+				} catch (error) {
+					console.log(error);
+				}
+			});
 		});
-	});
+	}
 }

@@ -52,7 +52,15 @@ export class FileReader {
 		return classPath;
 	}
 
-	public static getManifestForClass(className: string) {
+	public static getAllManifests() {
+		if (this.manifests.length === 0) {
+			this.readAllWorkspaceManifests();
+		}
+
+		return this.manifests;
+	}
+
+	private static getManifestForClass(className: string) {
 		let returnManifest:UIManifest | undefined;
 		if (vscode.window.activeTextEditor) {
 			if (this.manifests.length === 0) {
@@ -65,7 +73,7 @@ export class FileReader {
 		return returnManifest;
 	}
 
-	public static readAllWorkspaceManifests() {
+	private static readAllWorkspaceManifests() {
 		let wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			let manifests = this.getManifestsInWorkspaceFolder(wsFolder);
@@ -144,7 +152,7 @@ export class FileReader {
 			const rClassName = new RegExp(regExpBase);
 			const classNameResult = rClassName.exec(documentText);
 			if (classNameResult) {
-				controlClass = [classNameResult[0], className].join(".");
+				controlClass = [classNameResult[0], className.trim()].join(".");
 			}
 		}
 		return controlClass;
@@ -201,7 +209,7 @@ export class FileReader {
 	}
 
 	private static isSeparator(char: string) {
-		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t";
+		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r";
 	}
 }
 
