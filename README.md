@@ -10,20 +10,20 @@ XML Completion Items for UI5 Controls.<br/>
 ### JS
 
 #### sap.ui.define
-Strings for import in sap.ui.define are provided.
+Strings for import in sap.ui.define are provided.<br/>
 ![UIDefine](/images/UIDefine.gif)
 
 #### Control ID Completion Items
-IDs from the corresponding view of the controller are provided for getView().byId method
+IDs from the corresponding view of the controller are provided for getView().byId method<br/>
 ![GetView](/images/GetView.gif)
 
 #### Dynamic completion items
-Completion items which are generated when coding. Trigger character - dot.
+Completion items which are generated when coding. Trigger character - dot.<br/>
 ![DynamicCompletionItems](/images/DynamicCompletionItems.gif)
 
 ----------
 ## Method Definitions
-Definitions for custom methods are provided.
+Definitions for custom methods are provided.<br/>
 ![Definition](/images/Definition.gif)
 
 
