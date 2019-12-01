@@ -52,6 +52,14 @@ export class FileReader {
 		return classPath;
 	}
 
+	public static getAllManifests() {
+		if (this.manifests.length === 0) {
+			this.readAllWorkspaceManifests();
+		}
+
+		return this.manifests;
+	}
+
 	private static getManifestForClass(className: string) {
 		let returnManifest:UIManifest | undefined;
 		if (vscode.window.activeTextEditor) {
