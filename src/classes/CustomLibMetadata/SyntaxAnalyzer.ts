@@ -171,10 +171,12 @@ export class SyntaxAnalyzer {
 		return completionItems;
 	}
 
-	public static gerCurrentClass() {
+	public static gerCurrentClass(documentText?: string) {
 		let returnClassName;
-		if (vscode.window.activeTextEditor) {
-			const documentText = vscode.window.activeTextEditor.document.getText();
+		if (!documentText && vscode.window.activeTextEditor) {
+			documentText = vscode.window.activeTextEditor.document.getText();
+		}
+		if (documentText) {
 			const rCurrentClass = /(?<=.*\..*\(\").*(?=\")/;
 			const rCurrentClassResults = rCurrentClass.exec(documentText);
 			if (rCurrentClassResults) {

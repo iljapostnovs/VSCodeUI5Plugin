@@ -55,8 +55,13 @@ Clears cache with SAPUI5 lib metadata
 ----------
 ## Automatic template insertion
 Inserts initial text for .js files<br/>
-Extends "sap/ui/core/mvc/Controller" if file ends with .controller.js and "sap/ui/base/ManagedObject" if file ends with .js<br/>
+Extends "sap/ui/core/mvc/Controller" if file name ends with .controller.js and "sap/ui/base/ManagedObject" if file name ends with .js<br/>
 ![AutomaticTemplates](/images/AutomaticTemplates.gif)
+
+----------
+## Automatic class name and class path renaming
+Extension listens for .js file creation event (rename technically is file deletion and creation) and replaces all occurances of class name to the new one<br/>
+![AutomaticClassNameReplacingOnRename](/images/AutomaticClassNameReplacingOnRename.gif)
 
 ----------
 ## Settings
