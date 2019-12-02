@@ -11,13 +11,18 @@ export class FileReader {
 			if (document.fileName.endsWith(".view.xml")) {
 				let viewContent = document.getText();
 				viewContent = this.replaceFragments(viewContent);
-				const controllerName = this.getControllerNameFromView(viewContent);
-				if (controllerName) {
-					this.viewCache[controllerName] = viewContent;
-				}
+				this.setNewViewContentToCache(viewContent);
 			}
 		});
 	}
+
+	public static setNewViewContentToCache(viewContent: string) {
+		const controllerName = this.getControllerNameFromView(viewContent);
+		if (controllerName) {
+			this.viewCache[controllerName] = viewContent;
+		}
+	}
+
 	public static getDocumentTextFromCustomClassName(className: string, isFragment?: boolean) {
 		let documentText;
 		const classPath = this.getClassPath(className, isFragment);

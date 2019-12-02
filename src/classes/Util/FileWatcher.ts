@@ -3,6 +3,7 @@ import { FileReader } from "./FileReader";
 import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
 import * as glob from "glob";
 import * as fs from "fs";
+import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 
 export class FileWatcher {
 	static register() {
@@ -13,6 +14,13 @@ export class FileWatcher {
 				watcher.onDidCreate(uri => {
 					this.handleFileCreate(uri);
 				});
+
+				watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, "**/*"));
+				watcher.onDidCreate(uri => {
+					if (uri.fsPath.indexOf(".") === -1) {
+						this.handleFolderCreate(uri);
+					}
+				})
 			});
 		}
 	}
@@ -57,19 +65,19 @@ export class FileWatcher {
 		const currentClassNameDotNotation = SyntaxAnalyzer.gerCurrentClass(changedFileText);
 
 		if (currentClassNameDotNotation) {
-			const currentClassNameSlashNotation = currentClassNameDotNotation.replace(/\./g, "/");
 			const newClassNameDotNotation = FileReader.getClassNameFromPath(uri.fsPath);
 			if (newClassNameDotNotation) {
-				const newClassNameSlashNotation = newClassNameDotNotation.replace(/\./g, "/");
 				if (currentClassNameDotNotation !== newClassNameDotNotation) {
-					this.replaceAllOccurances(currentClassNameDotNotation, newClassNameDotNotation);
-					this.replaceAllOccurances(currentClassNameSlashNotation, newClassNameSlashNotation);
+					this.replaceAllOccurancesInFiles(currentClassNameDotNotation, newClassNameDotNotation);
 				}
 			}
 		}
 	}
 
-	private static replaceAllOccurances(textToReplaceFrom: string, textToReplaceTo: string) {
+	private static replaceAllOccurancesInFiles(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string) {
+		const textToReplaceFromSlashNotation = textToReplaceFromDotNotation.replace(/\./g, "/");
+		const textToReplaceToSlashNotation = textToReplaceToDotNotation.replace(/\./g, "/");
+
 		const workspace = vscode.workspace;
 		const wsFolders = workspace.workspaceFolders || [];
 		const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
@@ -78,12 +86,30 @@ export class FileWatcher {
 			const jsFilePaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*{.js,.xml}");
 			jsFilePaths.forEach(jsFilePath => {
 				let file = fs.readFileSync(jsFilePath, "ascii");
-				if (file.indexOf(textToReplaceFrom) > -1) {
-					file = file.replace(new RegExp(textToReplaceFrom, "g"), textToReplaceTo);
-					fs.writeFile(jsFilePath, file, () => {});
+				if (file.indexOf(textToReplaceFromDotNotation) > -1 || file.indexOf(textToReplaceFromSlashNotation) > -1) {
+					file = file.replace(new RegExp(textToReplaceFromDotNotation.replace(/\./g, "\\."), "g"), textToReplaceToDotNotation);
+					file = file.replace(new RegExp(textToReplaceFromSlashNotation.replace(/\./g, "\\."), "g"), textToReplaceToSlashNotation);
+					//TODO: Think how to do it async. Needed on folder rename.
+					fs.writeFileSync(jsFilePath, file);
+
+					//TODO: Use observer pattern here
+					if (jsFilePath.endsWith(".js")) {
+						const classNameOfTheReplacedFile = FileReader.getClassNameFromPath(jsFilePath.replace(/\//g, "\\"))
+						if (classNameOfTheReplacedFile) {
+							UIClassFactory.setNewCodeForClass(classNameOfTheReplacedFile, file);
+						}
+					} else if (jsFilePath.endsWith(".view.xml")) {
+						FileReader.setNewViewContentToCache(file);
+					}
 				}
 			});
 		}
+	}
 
+	private static handleFolderCreate(uri: vscode.Uri) {
+		const newFilePaths = glob.sync(uri.fsPath.replace(/\//g, "\\") + "/**/*{.js,.xml}");
+		newFilePaths.forEach(filePath => {
+			this.handleFileCreate(vscode.Uri.file(filePath));
+		});
 	}
 }
