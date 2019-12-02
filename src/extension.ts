@@ -19,13 +19,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			return new Promise(async resolve => {
 				try {
+					await CompletionItemRegistrator.register(context, progress);
+
 					FileWatcher.register();
 
 					CommandRegistrator.register(context);
 
 					DefinitionProviderRegistrator.register(context);
-
-					await CompletionItemRegistrator.register(context, progress);
 
 					FileReader.synchroniseCacheOnDocumentSave();
 

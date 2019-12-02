@@ -87,8 +87,8 @@ export class FileWatcher {
 			jsFilePaths.forEach(jsFilePath => {
 				let file = fs.readFileSync(jsFilePath, "ascii");
 				if (file.indexOf(textToReplaceFromDotNotation) > -1 || file.indexOf(textToReplaceFromSlashNotation) > -1) {
-					file = file.replace(new RegExp(textToReplaceFromDotNotation.replace(/\./g, "\\."), "g"), textToReplaceToDotNotation);
-					file = file.replace(new RegExp(textToReplaceFromSlashNotation.replace(/\./g, "\\."), "g"), textToReplaceToSlashNotation);
+					file = file.replace(new RegExp('\\"' + textToReplaceFromDotNotation.replace(/\./g, "\\.") + '\\"', "g"), '"' + textToReplaceToDotNotation + '"');
+					file = file.replace(new RegExp('\\"' + textToReplaceFromSlashNotation.replace(/\./g, "\\.") + '\\"', "g"), '"' + textToReplaceToSlashNotation + '"');
 					//TODO: Think how to do it async. Needed on folder rename.
 					fs.writeFileSync(jsFilePath, file);
 
