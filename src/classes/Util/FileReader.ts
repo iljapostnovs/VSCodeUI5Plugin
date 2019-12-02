@@ -211,6 +211,17 @@ export class FileReader {
 	private static isSeparator(char: string) {
 		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r";
 	}
+
+	public static getClassNameFromPath(fsPath: string) {
+		let className: string | undefined;
+		const manifests = this.getAllManifests();
+		const currentManifest = manifests.find(manifest => fsPath.indexOf(manifest.fsPath) > -1);
+		if (currentManifest) {
+			className = fsPath.replace(currentManifest.fsPath, currentManifest.componentName).replace(".controller", "").replace(".js","").replace(/\\/g, ".");
+		}
+
+		return className;
+	}
 }
 
 interface UIManifest {

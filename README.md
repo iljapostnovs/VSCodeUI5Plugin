@@ -45,8 +45,18 @@ Set your position to the string you want to export to i18n.properties file and e
 Goes to view from controller and to controller from view<br/>
 ![SwitchViewController](/images/SwitchViewController.gif)
 
+### Insert Custom Class name
+Inserts the class name into current position<br/>
+![InsertCustomClassNameCommand](/images/InsertCustomClassNameCommand.gif)
+
 ### Clear Cache
 Clears cache with SAPUI5 lib metadata
+
+----------
+## Automatic template insertion
+Inserts initial text for .js files<br/>
+Extends "sap/ui/core/mvc/Controller" if file ends with .controller.js and "sap/ui/base/ManagedObject" if file ends with .js<br/>
+![AutomaticTemplates](/images/AutomaticTemplates.gif)
 
 ----------
 ## Settings

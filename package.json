@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.6.1",
+	"version": "0.6.2",
 	"publisher": "iljapostnovs",
 	"repository": {
 		"type": "git",
@@ -54,6 +54,10 @@
 			{
 				"command": "ui5plugin.exportToi18n",
 				"title": "UI5: Export to i18n"
+			},
+			{
+				"command": "ui5plugin.insertCustomClassName",
+				"title": "UI5: Insert Custom Class name"
 			}
 		]
 	},

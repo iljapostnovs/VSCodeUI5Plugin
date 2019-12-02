@@ -58,7 +58,7 @@ export class CustomUIClass extends AbstractUIClass {
 				return {
 					path: UIDefinePaths[index],
 					className: className,
-					classNameDotNotation: UIDefinePaths[index].replace(/\//g, ".")
+					classNameDotNotation: UIDefinePaths[index] ? UIDefinePaths[index].replace(/\//g, ".") : ""
 				}
 			});
 		}

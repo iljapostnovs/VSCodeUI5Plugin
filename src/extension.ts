@@ -3,6 +3,7 @@ import { FileReader } from "./classes/Util/FileReader";
 import { CommandRegistrator } from "./classes/Util/CommandRegistrator";
 import { CompletionItemRegistrator } from "./classes/Util/CompletionItemRegistrator";
 import { DefinitionProviderRegistrator } from "./classes/Util/DefinitionProviderRegistrator";
+import { FileWatcher } from "./classes/Util/FileWatcher";
 
 export async function activate(context: vscode.ExtensionContext) {
 	const manifests = FileReader.getAllManifests();
@@ -18,6 +19,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			return new Promise(async resolve => {
 				try {
+					FileWatcher.register();
+
 					CommandRegistrator.register(context);
 
 					DefinitionProviderRegistrator.register(context);

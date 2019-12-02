@@ -9,3 +9,7 @@
 * Patch with bugfixes
 * Add support of Completion item generation depending on this.byId (previously worked with this.getView().byId only)
 * Now the extension is initialized only if there is manifest.json found in the workspace
+
+## 0.6.2 (02-12-2019)
+* "Insert Custom Class name" command added
+* Now code templates are automatically added to new .js files
