@@ -9,7 +9,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	if (manifests.length > 0) {
 		vscode.window.withProgress({
-			location: vscode.ProgressLocation.Notification,
+			location: vscode.ProgressLocation.Window,
 			title: "Loading Libs",
 			cancellable: false
 		}, (progress) => {
