@@ -31,7 +31,7 @@ export class MainLooper {
 			if (JSClass.isAClass(currentText, currentChar)) {
 				//needed before function call
 				syntaxType = new JSClass(currentText, javascript);
-			} else if (JSFunction.isAFunction(currentText, javascript)) {
+			} else if (JSFunction.isAFunction(currentText, currentChar, javascript)) {
 				//need to be before Function Call
 				syntaxType = new JSFunction(currentText, javascript);
 
