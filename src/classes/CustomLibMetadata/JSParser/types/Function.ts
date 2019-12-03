@@ -107,7 +107,7 @@ export class JSFunction extends AbstractType {
 		let isFunction = text.indexOf("function") > -1;
 
 		//es6
-		if (currentChar === "(") {
+		if (!isFunction && currentChar === "(") {
 			const params =  MainLooper.getEndOfChar("(", ")", fullJSText);
 			const restOfTheText = fullJSText.replace(params, "");
 			isFunction = restOfTheText.trim().startsWith("=>");
