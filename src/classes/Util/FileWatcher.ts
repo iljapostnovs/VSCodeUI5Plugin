@@ -83,13 +83,14 @@ export class FileWatcher {
 		const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
 
 		for (const wsFolder of wsFolders) {
-			const jsFilePaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*{.js,.xml}");
-			jsFilePaths.forEach(jsFilePath => {
+			const workspaceFilePaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*{.js,.xml,.json}");
+			workspaceFilePaths.forEach(jsFilePath => {
 				let file = fs.readFileSync(jsFilePath, "ascii");
 				if (file.indexOf(textToReplaceFromDotNotation) > -1 || file.indexOf(textToReplaceFromSlashNotation) > -1) {
 					file = file.replace(new RegExp('\\"' + textToReplaceFromDotNotation.replace(/\./g, "\\.") + '\\"', "g"), '"' + textToReplaceToDotNotation + '"');
 					file = file.replace(new RegExp('\\"' + textToReplaceFromSlashNotation.replace(/\./g, "\\.") + '\\"', "g"), '"' + textToReplaceToSlashNotation + '"');
-					//TODO: Think how to do it async. Needed on folder rename.
+					//TODO: Think how to do it async. Sync currently needed for folder rename, where mass file change is fired and
+					//there might be multiple changes for the same file
 					fs.writeFileSync(jsFilePath, file);
 
 					//TODO: Use observer pattern here
