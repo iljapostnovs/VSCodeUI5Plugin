@@ -103,14 +103,17 @@ export class JSFunction extends AbstractType {
 		return jsType;
 	}
 
-	static isAFunction(text: string, currentChar: string, fullJSText: string) {
+	static isAFunction(text: string, fullJSText: string) {
 		let isFunction = text.indexOf("function") > -1;
 
 		//es6
-		if (!isFunction && currentChar === "(") {
-			const params =  MainLooper.getEndOfChar("(", ")", fullJSText);
-			const restOfTheText = fullJSText.replace(params, "");
-			isFunction = restOfTheText.trim().startsWith("=>");
+		//TODO: arg parsing for single argument is not working
+		if (!isFunction && fullJSText.indexOf("=>") > -1) {
+			const textBeforeArrow = fullJSText.substring(0, fullJSText.indexOf("=>") + 2);
+			const results = /([a-zA-Z]\w*|\([a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\))\s?=>/.exec(textBeforeArrow);
+			if (results && results[0] === textBeforeArrow) {
+				isFunction = true;
+			}
 		}
 
 		return isFunction;

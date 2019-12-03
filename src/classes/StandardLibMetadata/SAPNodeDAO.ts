@@ -25,6 +25,7 @@ export class SAPNodeDAO {
 		const libs: any = {
 			"sap.m": true,
 			"sap.ui.comp": true,
+			"sap.f": true,
 			"sap.ui.core": true,
 			"sap.ui.commons": true,
 			"sap.ui.export": true,
