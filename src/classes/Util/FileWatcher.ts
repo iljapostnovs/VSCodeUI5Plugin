@@ -38,16 +38,8 @@ export class FileWatcher {
 	}
 
 	private static insertCodeTemplate(uri: vscode.Uri) {
-		const editor = vscode.window.activeTextEditor;
-
-		if (editor) {
-			const document = editor.document;
-			editor.edit(editBuilder => {
-				if (editor) {
-					editBuilder.insert(document.positionAt(0), this.generateTextToInsertIntoFile(uri));
-				}
-			});
-		}
+		const textToInsert = this.generateTextToInsertIntoFile(uri);
+		fs.writeFileSync(uri.fsPath, textToInsert);
 	}
 
 	private static generateTextToInsertIntoFile(uri: vscode.Uri) {
