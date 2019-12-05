@@ -177,7 +177,7 @@ export class SyntaxAnalyzer {
 			documentText = vscode.window.activeTextEditor.document.getText();
 		}
 		if (documentText) {
-			const rCurrentClass = /(?<=.*\..*\(\").*(?=\")/;
+			const rCurrentClass = /(?<=.*\..*(extend|declareStaticClass)\(\").*(?=\")/;
 			const rCurrentClassResults = rCurrentClass.exec(documentText);
 			if (rCurrentClassResults) {
 				returnClassName = rCurrentClassResults[0];
