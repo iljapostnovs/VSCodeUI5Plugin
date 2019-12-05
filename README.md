@@ -102,4 +102,4 @@ Only way to find out the data type of the function parameter is JSDoc. Use `@par
 * File is without syntax errors
 * All your strings in sap.ui.define are not Relative (e.g. "./BaseController")
 * Name of the class of the UI5Class is the same as file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
-* No ES6 features are used (Partial support for const/let and arrow functions will be added later)
+* No ES6+ features are used (except const/let and arrow functions)
