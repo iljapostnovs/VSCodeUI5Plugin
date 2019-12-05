@@ -71,7 +71,7 @@ export class UIClassDefinitionFinder {
             temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
             variable = temporaryVariableParts.join(".");
             //remove last part of the var end
-            const currentClassName = SyntaxAnalyzer.gerCurrentClass();
+            const currentClassName = SyntaxAnalyzer.getCurrentClass();
             let variableParts = variable.split(".");
 
             if (currentClassName) {

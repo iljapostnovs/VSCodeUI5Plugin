@@ -2,6 +2,7 @@ import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
 import { CustomUIClass } from "./CustomUIClass";
 import * as vscode from "vscode";
 import { StandardUIClass } from "./StandardUIClass";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 
 var workspace = vscode.workspace;
 
@@ -27,11 +28,9 @@ export class UIClassFactory {
 		//TODO: Add file watcher here
 		workspace.onDidSaveTextDocument((document) => {
 			if (document.fileName.endsWith(".js")) {
-				const rCurrentClass = /(?<=.*\..*\(\").*(?=\")/;
-				const rCurrentClassResults = rCurrentClass.exec(document.getText());
-				if (rCurrentClassResults) {
-					let className = rCurrentClassResults[0];
-					this.setNewCodeForClass(className, document.getText());
+				const currentClassNameDotNotation = SyntaxAnalyzer.getCurrentClass(document.getText());
+				if (currentClassNameDotNotation) {
+					this.setNewCodeForClass(currentClassNameDotNotation, document.getText());
 				}
 			}
 		});
