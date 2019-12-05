@@ -3,13 +3,14 @@ import { FileReader } from "./classes/Util/FileReader";
 import { CommandRegistrator } from "./classes/Util/CommandRegistrator";
 import { CompletionItemRegistrator } from "./classes/Util/CompletionItemRegistrator";
 import { DefinitionProviderRegistrator } from "./classes/Util/DefinitionProviderRegistrator";
+import { FileWatcher } from "./classes/Util/FileWatcher";
 
 export async function activate(context: vscode.ExtensionContext) {
 	const manifests = FileReader.getAllManifests();
 
 	if (manifests.length > 0) {
 		vscode.window.withProgress({
-			location: vscode.ProgressLocation.Notification,
+			location: vscode.ProgressLocation.Window,
 			title: "Loading Libs",
 			cancellable: false
 		}, (progress) => {
@@ -18,11 +19,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			return new Promise(async resolve => {
 				try {
+					await CompletionItemRegistrator.register(context, progress);
+
+					FileWatcher.register();
+
 					CommandRegistrator.register(context);
 
 					DefinitionProviderRegistrator.register(context);
-
-					await CompletionItemRegistrator.register(context, progress);
 
 					FileReader.synchroniseCacheOnDocumentSave();
 

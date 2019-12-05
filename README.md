@@ -10,22 +10,21 @@ XML Completion Items for UI5 Controls.<br/>
 ### JS
 
 #### sap.ui.define
-Strings for import in sap.ui.define are provided.
+Strings for import in sap.ui.define are provided.<br/>
 ![UIDefine](/images/UIDefine.gif)
 
 #### Control ID Completion Items
-IDs from the corresponding view of the controller are provided for getView().byId method
+IDs from the corresponding view of the controller are provided for view.byId or controller.byId method<br/>
 ![GetView](/images/GetView.gif)
 
 #### Dynamic completion items
-Completion items which are generated when coding. Trigger character - dot.
+Completion items which are generated dynamically depending on current variable class. Trigger character - dot.<br/>
 ![DynamicCompletionItems](/images/DynamicCompletionItems.gif)
 
 ----------
 ## Method Definitions
-Definitions for custom methods are provided.
+Definitions for custom methods are provided.<br/>
 ![Definition](/images/Definition.gif)
-
 
 ----------
 ## Commands
@@ -45,8 +44,23 @@ Set your position to the string you want to export to i18n.properties file and e
 Goes to view from controller and to controller from view<br/>
 ![SwitchViewController](/images/SwitchViewController.gif)
 
+### Insert Custom Class name
+Inserts the class name into current position<br/>
+![InsertCustomClassNameCommand](/images/InsertCustomClassNameCommand.gif)
+
 ### Clear Cache
 Clears cache with SAPUI5 lib metadata
+
+----------
+## Automatic template insertion
+Inserts initial text for .js files<br/>
+Extends "sap/ui/core/mvc/Controller" if file name ends with .controller.js and "sap/ui/base/ManagedObject" if file name ends with .js<br/>
+![AutomaticTemplates](/images/AutomaticTemplates.gif)
+
+----------
+## Automatic class name and class path renaming
+Extension listens for .js file creation event (rename technically is file deletion and creation) and replaces all occurances of class name to the new one<br/>
+![AutomaticClassNameReplacingOnRename](/images/AutomaticClassNameReplacingOnRename.gif)
 
 ----------
 ## Settings
@@ -88,4 +102,4 @@ Only way to find out the data type of the function parameter is JSDoc. Use `@par
 * File is without syntax errors
 * All your strings in sap.ui.define are not Relative (e.g. "./BaseController")
 * Name of the class of the UI5Class is the same as file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
-* No ES6 features are used (Partial support for const/let and arrow functions will be added later)
+* No ES6+ features are used (except const/let and arrow functions)

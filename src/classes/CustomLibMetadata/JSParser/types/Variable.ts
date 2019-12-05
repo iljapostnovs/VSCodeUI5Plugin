@@ -6,7 +6,12 @@ export class JSVariable extends AbstractType {
 	public parseName() {
 		super.parseName();
 
-		this.parsedName = this.parsedName.replace("=", "").replace("var", "").replace(",", "").trim();
+		this.parsedName = this.parsedName
+			.replace("=", "")
+			.replace("var", "")
+			.replace("const", "")
+			.replace("let", "")
+			.replace(",", "").trim();
 	}
 
 	public parseBodyText() {

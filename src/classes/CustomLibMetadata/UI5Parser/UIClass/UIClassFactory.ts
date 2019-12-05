@@ -24,6 +24,7 @@ export class UIClassFactory {
 	}
 
 	static synchroniseCacheOnDocumentSave() {
+		//TODO: Add file watcher here
 		workspace.onDidSaveTextDocument((document) => {
 			if (document.fileName.endsWith(".js")) {
 				const rCurrentClass = /(?<=.*\..*\(\").*(?=\")/;

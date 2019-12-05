@@ -11,13 +11,18 @@ export class FileReader {
 			if (document.fileName.endsWith(".view.xml")) {
 				let viewContent = document.getText();
 				viewContent = this.replaceFragments(viewContent);
-				const controllerName = this.getControllerNameFromView(viewContent);
-				if (controllerName) {
-					this.viewCache[controllerName] = viewContent;
-				}
+				this.setNewViewContentToCache(viewContent);
 			}
 		});
 	}
+
+	public static setNewViewContentToCache(viewContent: string) {
+		const controllerName = this.getControllerNameFromView(viewContent);
+		if (controllerName) {
+			this.viewCache[controllerName] = viewContent;
+		}
+	}
+
 	public static getDocumentTextFromCustomClassName(className: string, isFragment?: boolean) {
 		let documentText;
 		const classPath = this.getClassPath(className, isFragment);
@@ -210,6 +215,17 @@ export class FileReader {
 
 	private static isSeparator(char: string) {
 		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r";
+	}
+
+	public static getClassNameFromPath(fsPath: string) {
+		let className: string | undefined;
+		const manifests = this.getAllManifests();
+		const currentManifest = manifests.find(manifest => fsPath.indexOf(manifest.fsPath) > -1);
+		if (currentManifest) {
+			className = fsPath.replace(currentManifest.fsPath, currentManifest.componentName).replace(".controller", "").replace(".js","").replace(/\\/g, ".");
+		}
+
+		return className;
 	}
 }
 

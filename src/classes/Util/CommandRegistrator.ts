@@ -3,6 +3,7 @@ import { SAPUIDefineCommand } from "../VSCommands/SAPUIDefineCommand";
 import { ViewControllerSwitcher } from "../VSCommands/switchers/ViewControllerSwitcher";
 import { ClearCacheCommand } from "../VSCommands/ClearCacheCommand";
 import { ExportToI18NCommand } from "../VSCommands/ExportToI18NCommand";
+import { InsertCustomClassNameCommand } from "../VSCommands/InsertCustomClassNameCommand";
 
 export class CommandRegistrator {
 	static register(context: vscode.ExtensionContext) {
@@ -18,6 +19,9 @@ export class CommandRegistrator {
 
 		let exportToI18NCommand = vscode.commands.registerCommand("ui5plugin.exportToi18n", ExportToI18NCommand.export);
 		context.subscriptions.push(exportToI18NCommand);
+
+		let insertCustomClassNameCommand = vscode.commands.registerCommand("ui5plugin.insertCustomClassName", InsertCustomClassNameCommand.insertCustomClassName);
+		context.subscriptions.push(insertCustomClassNameCommand);
 
 		/* Events */
 		ClearCacheCommand.subscribeToPropertyChange(context);
