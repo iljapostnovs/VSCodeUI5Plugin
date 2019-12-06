@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { UIClassFactory } from "./UIClassFactory";
 import { CustomUIClass } from "./CustomUIClass";
 import { FileReader } from "../../../Util/FileReader";
-import LineColumn = require('line-column');
+import LineColumn from 'line-column';
 
 export class UIClassDefinitionFinder {
     public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string) : vscode.Location | undefined {

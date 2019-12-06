@@ -1,4 +1,5 @@
 /out
 *.vsix
 /node_modules
+/dist
 .vscode

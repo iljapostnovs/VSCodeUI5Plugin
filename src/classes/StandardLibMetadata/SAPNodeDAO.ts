@@ -1,5 +1,5 @@
 import { SAPNode } from "./SAPNode";
-import * as rp from "request-promise";
+import rp from "request-promise";
 import * as vscode from "vscode";
 
 export class SAPNodeDAO {
