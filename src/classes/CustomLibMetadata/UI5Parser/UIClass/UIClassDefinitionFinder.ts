@@ -4,6 +4,7 @@ import { UIClassFactory } from "./UIClassFactory";
 import { CustomUIClass } from "./CustomUIClass";
 import { FileReader } from "../../../Util/FileReader";
 import LineColumn from 'line-column';
+import { StandardUIClass } from "./StandardUIClass";
 
 export class UIClassDefinitionFinder {
     public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string) : vscode.Location | undefined {
@@ -17,11 +18,15 @@ export class UIClassDefinitionFinder {
                 classNameDotNotation = this.getVariableClass();
             }
             if (classNameDotNotation && methodName) {
-                location = this.getVSCodeMethodLocation(classNameDotNotation, methodName);
-                if (!location) {
-                    const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
-                    if (UIClass.parentClassNameDotNotation) {
-                        location = this.getPositionAndUriOfCurrentVariableDefinition(UIClass.parentClassNameDotNotation, methodName);
+                if (classNameDotNotation.startsWith("sap.")) {
+                    this.openClassMethodInTheBrowser(classNameDotNotation, methodName);
+                } else {
+                    location = this.getVSCodeMethodLocation(classNameDotNotation, methodName);
+                    if (!location) {
+                        const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
+                        if (UIClass.parentClassNameDotNotation) {
+                            location = this.getPositionAndUriOfCurrentVariableDefinition(UIClass.parentClassNameDotNotation, methodName);
+                        }
                     }
                 }
             }
@@ -88,5 +93,21 @@ export class UIClassDefinitionFinder {
         }
 
         return UIClassName;
+    }
+
+    private static openClassMethodInTheBrowser(classNameDotNotation: string, methodName: string) {
+        const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
+        if (UIClass instanceof StandardUIClass) {
+            const methodFromClass = UIClass.methods.find(method => method.name === methodName);
+            if (methodFromClass) {
+                if (methodFromClass.isFromParent) {
+                    this.openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
+                } else {
+                    const UI5Version = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
+                    const linkToDocumentation = `https://ui5.sap.com/${UI5Version}#/api/${classNameDotNotation}/methods/${methodName}`;
+                    vscode.env.openExternal(vscode.Uri.parse(linkToDocumentation));
+                }
+            }
+        }
     }
 }

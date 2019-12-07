@@ -16,3 +16,6 @@
 * Now on file renaming all occurances of previous class name are replaced with new class name (for now works for .js files only)
 * Bugfixes for method definition finder
 * Partial support for ES6 added
+
+## 0.7.1 (08-12-2019)
+* Method definition finder now opens new tab in the browser with documentation for the method

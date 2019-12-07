@@ -11,7 +11,9 @@ export interface FieldsAndMethods {
 	methods: UIMethod[]
 }
 export class UIClassFactory {
-	public static getInstance(className: string, documentText?: string) {
+	private static UIClasses: UIClassMap = {}
+
+	private static getInstance(className: string, documentText?: string) {
 		let returnClass: AbstractUIClass;
 		if (className.startsWith("sap.")) {
 			returnClass = new StandardUIClass(className);
@@ -35,7 +37,6 @@ export class UIClassFactory {
 			}
 		});
 	}
-	private static UIClasses: UIClassMap = {}
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
 		this.UIClasses[classNameDotNotation] = UIClassFactory.getInstance(classNameDotNotation, classFileText);
