@@ -149,7 +149,7 @@ export class CustomUIClass extends AbstractUIClass {
 						this.methods.push({
 							name: partName,
 							params: (<JSFunction>part).params.map(part => part.parsedName),
-							returnType: "void",
+							returnType: (<JSFunction>part).returnType || "void",
 							description: ""
 						});
 					} else if (part instanceof JSVariable) {
