@@ -5,6 +5,8 @@ import { CustomUIClass } from "./CustomUIClass";
 import { FileReader } from "../../../Util/FileReader";
 import LineColumn from 'line-column';
 import { StandardUIClass } from "./StandardUIClass";
+import { DifferentJobs } from "../../JSParser/DifferentJobs";
+import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
 
 export class UIClassDefinitionFinder {
     public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string) : vscode.Location | undefined {
@@ -108,6 +110,22 @@ export class UIClassDefinitionFinder {
                     vscode.env.openExternal(vscode.Uri.parse(linkToDocumentation));
                 }
             }
+        }
+    }
+
+    public static getAdditionalJSTypesHierarchically(customClass: CustomUIClass) {
+		if (customClass.classBody) {
+			const variables = DifferentJobs.getAllVariables(customClass.classBody);
+            variables.forEach(variable => {
+                if (!variable.jsType && variable.parts.length > 0) {
+                    const allPartsAreFunctionCalls = !variable.parts.find(part => !(part instanceof JSFunctionCall));
+                    if (allPartsAreFunctionCalls) {
+                        //TODO: calls parsing twice.
+                        variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variable.parsedBody.split("."), customClass.className);
+                    }
+                }
+            });
+            debugger;
         }
     }
 }

@@ -7,6 +7,7 @@ import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
 import { JSObject } from "../../JSParser/types/Object";
 import { JSVariable } from "../../JSParser/types/Variable";
 import { AbstractUIClass, UIField } from "./AbstractUIClass";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 
 interface UIDefine {
 	path: string,
@@ -25,8 +26,8 @@ export class CustomUIClass extends AbstractUIClass {
 		this.readFileContainingThisClassCode(documentText); //todo: rename. not always reading anyore.
 		this.UIDefine = this.getUIDefine();
 		this.classBody = this.getThisClassBody();
-		this.fillMethodsAndFields();
 		this.findParentClassNameDotNotation();
+		this.fillMethodsAndFields();
 	}
 
 	private readFileContainingThisClassCode(documentText?: string) {
@@ -188,19 +189,29 @@ export class CustomUIClass extends AbstractUIClass {
 
 	public getClassOfTheVariable(variableName: string, position: number) {
 		let className: string | undefined;
+		const isMethod = variableName.endsWith(")");
 		if (variableName.startsWith("this.")) {
 			variableName = variableName.replace("this.", "");
-			const field = this.fields.find(field => field.name === variableName);
-			if (field && field.type) {
-				className = field.type;
-			} else if (field && !field.type && this.classBody) {
-				//TODO: THIS ABOUT THIS! reason for this is that not always all types for this. variables are found right away.
-				const allVariables = DifferentJobs.getAllVariables(this.classBody);
-				const thisVariable = allVariables.find(variable => variable.parsedName === "this." + variableName);
-				if (thisVariable) {
-					const definition = thisVariable.findDefinition(thisVariable);
-					if (definition) {
-						className = (<JSVariable>definition).jsType;
+			if (isMethod) {
+				const methodParams = MainLooper.getEndOfChar("(", ")", variableName);
+				const methodName = variableName.replace(methodParams, "");
+				const method = this.methods.find(method => method.name === methodName);
+				if (method) {
+					className = method.returnType;
+				}
+			} else {
+				const field = this.fields.find(field => field.name === variableName);
+				if (field && field.type) {
+					className = field.type;
+				} else if (field && !field.type && this.classBody) {
+					//TODO: THIS ABOUT THIS! reason for this is that not always all types for this. variables are found right away.
+					const allVariables = DifferentJobs.getAllVariables(this.classBody);
+					const thisVariable = allVariables.find(variable => variable.parsedName === "this." + variableName);
+					if (thisVariable) {
+						const definition = thisVariable.findDefinition(thisVariable);
+						if (definition) {
+							className = (<JSVariable>definition).jsType;
+						}
 					}
 				}
 			}

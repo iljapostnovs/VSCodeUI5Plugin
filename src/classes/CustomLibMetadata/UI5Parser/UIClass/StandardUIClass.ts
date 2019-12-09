@@ -1,5 +1,6 @@
 import { AbstractUIClass, UIMethod } from "./AbstractUIClass"
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
+import { MainLooper } from "../../JSParser/MainLooper";
 
 export class StandardUIClass extends AbstractUIClass {
 	private nodeDAO = new SAPNodeDAO();
@@ -61,6 +62,17 @@ export class StandardUIClass extends AbstractUIClass {
 				this.parentClassNameDotNotation = metadata.rawMetadata.extends;
 			}
 		}
+	}
+
+	public getClassOfTheVariable(variableName: string, position: number) {
+		let className: string | undefined;
+		const methodParams = MainLooper.getEndOfChar("(", ")", variableName);
+		const methodName = variableName.replace(methodParams, "").replace("this.", "");
+		const method = this.methods.find(method => method.name === methodName);
+		if (method) {
+			className = method.returnType;
+		}
+		return className;
 	}
 }
 

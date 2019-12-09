@@ -1,12 +1,13 @@
 import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "./UI5Parser/UIClass/UIClassFactory";
 import { FileReader } from "../Util/FileReader";
-import { CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
 
 export class SyntaxAnalyzer {
-	static getFieldsAndMethodsOfTheCurrentVariable() {
+	static getFieldsAndMethodsOfTheCurrentVariable(variable?: string) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
-		let variable = this.getCurrentVariable();
+		if (!variable) {
+			variable = this.getCurrentVariable();
+		}
 		//remove last part of the var begin
 		let temporaryVariableParts = variable.split(".");
 		temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
@@ -41,7 +42,7 @@ export class SyntaxAnalyzer {
 		let classNameOfTheVariable: string | undefined;
 
 		let variableString = this.getStringFromParts(variableParts, usedPartQuantity);
-		let UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+		const UIClass = UIClassFactory.getUIClass(className);
 		let UIClassName = UIClassFactory.getClassOfTheVariableHierarchically(variableString, UIClass);
 
 		if (UIClassName) {
@@ -133,7 +134,7 @@ export class SyntaxAnalyzer {
 
 	private static isSeparator(char: string) {
 		//TODO: sync with FileReader
-		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r" || char === "(" || char === "=";
+		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r" || char === "=";
 	}
 	/* =========================================================== */
 	/* end: variable methods                                       */

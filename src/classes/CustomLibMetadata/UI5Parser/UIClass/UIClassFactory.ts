@@ -3,6 +3,7 @@ import { CustomUIClass } from "./CustomUIClass";
 import * as vscode from "vscode";
 import { StandardUIClass } from "./StandardUIClass";
 import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
+import { UIClassDefinitionFinder } from "./UIClassDefinitionFinder";
 
 var workspace = vscode.workspace;
 
@@ -52,6 +53,7 @@ export class UIClassFactory {
 		if (variable === "this") {
 			currentVariableClass = currentClassName;
 		} else {
+			// UIClassDefinitionFinder.getAdditionalJSTypesHierarchically(<CustomUIClass>currentClass); NOPE
 			currentVariableClass = (<CustomUIClass>currentClass).getClassOfTheVariable(variable, position);
 		}
 
@@ -111,13 +113,11 @@ export class UIClassFactory {
 
 	public static getClassOfTheVariableHierarchically(variable: string, UIClass: AbstractUIClass) : string | undefined {
 		let className: string | undefined;
-		if (UIClass instanceof CustomUIClass) {
-			className = UIClass.getClassOfTheVariable(variable, 0);
+		className = UIClass.getClassOfTheVariable(variable, 0);
 
-			if (!className && UIClass.parentClassNameDotNotation) {
-				UIClass = this.getUIClass(UIClass.parentClassNameDotNotation);
-				className = this.getClassOfTheVariableHierarchically(variable, UIClass);
-			}
+		if (!className && UIClass.parentClassNameDotNotation) {
+			UIClass = this.getUIClass(UIClass.parentClassNameDotNotation);
+			className = this.getClassOfTheVariableHierarchically(variable, UIClass);
 		}
 		return className;
 	}

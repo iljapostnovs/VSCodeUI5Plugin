@@ -18,4 +18,6 @@ export abstract class AbstractUIClass {
 	constructor(className: string, documentText?: string) {
 		this.className = className;
 	}
+
+	public abstract getClassOfTheVariable(variableName: string, position: number) : string | undefined;
 }
