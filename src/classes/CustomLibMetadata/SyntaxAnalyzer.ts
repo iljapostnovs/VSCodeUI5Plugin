@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "./UI5Parser/UIClass/UIClassFactory";
 import { FileReader } from "../Util/FileReader";
+import { UIClassDefinitionFinder } from "./UI5Parser/UIClass/UIClassDefinitionFinder";
+import { AbstractUIClass } from "./UI5Parser/UIClass/AbstractUIClass";
 
 export class SyntaxAnalyzer {
 	static getFieldsAndMethodsOfTheCurrentVariable(variable?: string) {
@@ -8,53 +10,48 @@ export class SyntaxAnalyzer {
 		if (!variable) {
 			variable = this.getCurrentVariable();
 		}
-		//remove last part of the var begin
-		let temporaryVariableParts = variable.split(".");
-		temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
-		variable = temporaryVariableParts.join(".");
-		//remove last part of the var end
 		const currentClassName = this.getCurrentClass();
 		let variableParts = variable.split(".");
 
-		if (currentClassName) {
+		const activeTextEditor = vscode.window.activeTextEditor;
+		if (currentClassName && activeTextEditor) {
 			this.setNewContentForCurrentUIClass();
 
-			if (variableParts[0] === "this" && variableParts.length > 1) {
-				let UIClassName = this.getClassNameFromVariableParts(variableParts, currentClassName);
-				if (UIClassName) {
-					fieldsAndMethods = this.getFieldsAndMethodsFor("this", UIClassName);
-				}
-			} else {
-				if (vscode.window.activeTextEditor) {
-					const position = vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start);
-					if (currentClassName) {
-						fieldsAndMethods = this.getFieldsAndMethodsFor(variable, currentClassName, position);
-					}
-				}
+			const position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
+
+			const UIClass = UIClassFactory.getUIClass(currentClassName);
+			UIClassDefinitionFinder.getAdditionalJSTypesHierarchically(UIClass);
+
+			let UIClassName = this.getClassNameFromVariableParts(variableParts, UIClass, 1, position);
+			if (UIClassName) {
+				fieldsAndMethods = this.getFieldsAndMethodsFor("this", UIClassName);
 			}
 		}
 
 		return fieldsAndMethods;
 	}
 
-	public static getClassNameFromVariableParts(variableParts: string[], className: string, usedPartQuantity: number = 2) : string | undefined {
-		//first part should be "this"
+	public static getClassNameFromVariableParts(variableParts: string[], theClass: AbstractUIClass, usedPartQuantity: number = 1, position?: number) : string | undefined {
 		let classNameOfTheVariable: string | undefined;
+		const thresholdForThis = variableParts.length > 1 && variableParts[0] === "this" ? 1 : 0;
+		usedPartQuantity += thresholdForThis;
 
-		let variableString = this.getStringFromParts(variableParts, usedPartQuantity);
-		const UIClass = UIClassFactory.getUIClass(className);
-		let UIClassName = UIClassFactory.getClassOfTheVariableHierarchically(variableString, UIClass);
+		const variableString = this.getStringFromParts(variableParts, usedPartQuantity);
+		let UIClass = theClass;
+
+		const UIClassName = UIClassFactory.getClassOfTheVariableHierarchically(variableString, UIClass, position);
 
 		if (UIClassName) {
-			variableParts.splice(1, usedPartQuantity - 1);
+			variableParts.splice(thresholdForThis, usedPartQuantity - thresholdForThis);
 
-			if (variableParts.length === 1) {
+			if (variableParts.length === thresholdForThis) {
 				classNameOfTheVariable = UIClassName;
 			} else {
-				classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, UIClassName);
+				UIClass = UIClassFactory.getUIClass(UIClassName);
+				classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, UIClass, undefined, position);
 			}
 		} else if (usedPartQuantity < variableParts.length) {
-			classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, className, ++usedPartQuantity);
+			classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, theClass, ++usedPartQuantity);
 		}
 
 		return classNameOfTheVariable;
@@ -106,6 +103,11 @@ export class SyntaxAnalyzer {
 			let rangeOfVariable = new vscode.Range(vscode.window.activeTextEditor.selection.start.translate(0, iDeltaStart), vscode.window.activeTextEditor.selection.start);
 			currentVariable = vscode.window.activeTextEditor.document.getText(rangeOfVariable);
 			currentVariable = currentVariable.replace(".prototype", "");
+
+			//remove last part of the var (it ends with .)
+			let temporaryVariableParts = currentVariable.split(".");
+			temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
+			currentVariable = temporaryVariableParts.join(".");
 		}
 
 		return currentVariable;
@@ -116,25 +118,38 @@ export class SyntaxAnalyzer {
 		if (vscode.window.activeTextEditor) {
 			let startingPosition = vscode.window.activeTextEditor.selection.start;
 			let selectedText = "";
+			let parenthesesCount = 0;
+			let ignoreParentheses = false;
 
-			while (!this.isSeparator(selectedText[iDelta > 0 ? selectedText.length - 1 : 0])) {
+			let sCurrentChar = selectedText[iDelta > 0 ? selectedText.length - 1 : 0];
+			do {
+				sCurrentChar = selectedText[iDelta > 0 ? selectedText.length - 1 : 0];
+
+				ignoreParentheses = parenthesesCount > 0;
+				if (sCurrentChar === ")") {
+					parenthesesCount++;
+				} else if (sCurrentChar === "(") {
+					parenthesesCount--;
+				}
 				let range = new vscode.Range(startingPosition.translate(0, deltaToReturn < 0 ? deltaToReturn : 0), startingPosition.translate(0, deltaToReturn > 0 ? deltaToReturn : 0));
 				selectedText = vscode.window.activeTextEditor.document.getText(range);
-				if (!this.isSeparator(selectedText[iDelta > 0 ? selectedText.length - 1 : 0])) {
+				if (!this.isSeparator(sCurrentChar, ignoreParentheses)) {
 					deltaToReturn += iDelta;
 				} else {
 					deltaToReturn += -iDelta;
 				}
-			}
+
+			} while (!this.isSeparator(sCurrentChar, ignoreParentheses))
 
 		}
+		deltaToReturn += -iDelta;
 
 		return deltaToReturn;
 	}
 
-	private static isSeparator(char: string) {
+	private static isSeparator(char: string, ignoreParentheses: boolean) {
 		//TODO: sync with FileReader
-		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r" || char === "=";
+		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r" || char === "=" || (char === "(" && !ignoreParentheses);
 	}
 	/* =========================================================== */
 	/* end: variable methods                                       */

@@ -124,6 +124,17 @@ export class CustomUIClass extends AbstractUIClass {
 			});
 
 			const allThisVariables = allVariables.filter(jsVariable => jsVariable.parsedName.startsWith("this."));
+			//share all this variable data types
+			allThisVariables.forEach(thisVariable => {
+				if (!thisVariable.jsType) {
+					const theSameThisVariable = allThisVariables.find(correspondingThisVariable => correspondingThisVariable.parsedName === thisVariable.parsedName && thisVariable !== correspondingThisVariable && !!correspondingThisVariable.jsType);
+					if (theSameThisVariable) {
+						thisVariable.jsType = theSameThisVariable.jsType;
+					}
+
+				}
+			});
+
 			allThisVariables.forEach(thisVariable => {
 				this.fields.push({
 					name: thisVariable.parsedName.replace("this.", ""),
@@ -189,42 +200,47 @@ export class CustomUIClass extends AbstractUIClass {
 
 	public getClassOfTheVariable(variableName: string, position: number) {
 		let className: string | undefined;
-		const isMethod = variableName.endsWith(")");
-		if (variableName.startsWith("this.")) {
-			variableName = variableName.replace("this.", "");
-			if (isMethod) {
-				const methodParams = MainLooper.getEndOfChar("(", ")", variableName);
-				const methodName = variableName.replace(methodParams, "");
-				const method = this.methods.find(method => method.name === methodName);
-				if (method) {
-					className = method.returnType;
-				}
-			} else {
-				const field = this.fields.find(field => field.name === variableName);
-				if (field && field.type) {
-					className = field.type;
-				} else if (field && !field.type && this.classBody) {
-					//TODO: THIS ABOUT THIS! reason for this is that not always all types for this. variables are found right away.
-					const allVariables = DifferentJobs.getAllVariables(this.classBody);
-					const thisVariable = allVariables.find(variable => variable.parsedName === "this." + variableName);
-					if (thisVariable) {
-						const definition = thisVariable.findDefinition(thisVariable);
-						if (definition) {
-							className = (<JSVariable>definition).jsType;
+
+		if (variableName === "this") {
+			className = this.className;
+		} else {
+			const isMethod = variableName.endsWith(")");
+			if (variableName.startsWith("this.")) {
+				variableName = variableName.replace("this.", "");
+				if (isMethod) {
+					const methodParams = MainLooper.getEndOfChar("(", ")", variableName);
+					const methodName = variableName.replace(methodParams, "");
+					const method = this.methods.find(method => method.name === methodName);
+					if (method) {
+						className = method.returnType;
+					}
+				} else {
+					const field = this.fields.find(field => field.name === variableName);
+					if (field && field.type) {
+						className = field.type;
+					} else if (field && !field.type && this.classBody) {
+						//TODO: THIS ABOUT THIS! reason for this is that not always all types for this. variables are found right away.
+						const allVariables = DifferentJobs.getAllVariables(this.classBody);
+						const thisVariable = allVariables.find(variable => variable.parsedName === "this." + variableName);
+						if (thisVariable) {
+							const definition = thisVariable.findDefinition(thisVariable);
+							if (definition) {
+								className = (<JSVariable>definition).jsType;
+							}
 						}
 					}
 				}
-			}
-		} else if (this.classBody) {
-			const definitionFromUIDefine = this.UIDefine.find(UIDefineVar => UIDefineVar.className === variableName);
-			if (definitionFromUIDefine) {
-				className = definitionFromUIDefine.classNameDotNotation;
-			} else {
-				const currentFunction = this.classBody.findFunctionByPosition(position);
-				if (currentFunction) {
-					const definition = currentFunction.findDefinition(new JSVariable(variableName, ""));
-					if (definition) {
-						className = (<JSVariable>definition).jsType;
+			} else if (this.classBody) {
+				const definitionFromUIDefine = this.UIDefine.find(UIDefineVar => UIDefineVar.className === variableName);
+				if (definitionFromUIDefine) {
+					className = definitionFromUIDefine.classNameDotNotation;
+				} else {
+					const currentFunction = this.classBody.findFunctionByPosition(position);
+					if (currentFunction) {
+						const definition = currentFunction.findDefinition(new JSVariable(variableName, ""));
+						if (definition) {
+							className = (<JSVariable>definition).jsType;
+						}
 					}
 				}
 			}

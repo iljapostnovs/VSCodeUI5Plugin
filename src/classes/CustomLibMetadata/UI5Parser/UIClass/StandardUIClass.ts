@@ -66,11 +66,15 @@ export class StandardUIClass extends AbstractUIClass {
 
 	public getClassOfTheVariable(variableName: string, position: number) {
 		let className: string | undefined;
-		const methodParams = MainLooper.getEndOfChar("(", ")", variableName);
-		const methodName = variableName.replace(methodParams, "").replace("this.", "");
-		const method = this.methods.find(method => method.name === methodName);
-		if (method) {
-			className = method.returnType;
+		if (variableName === "this") {
+			className = this.className;
+		} else {
+			const methodParams = MainLooper.getEndOfChar("(", ")", variableName);
+			const methodName = variableName.replace(methodParams, "").replace("this.", "");
+			const method = this.methods.find(method => method.name === methodName);
+			if (method) {
+				className = method.returnType;
+			}
 		}
 		return className;
 	}

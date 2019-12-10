@@ -7,6 +7,7 @@ import LineColumn from 'line-column';
 import { StandardUIClass } from "./StandardUIClass";
 import { DifferentJobs } from "../../JSParser/DifferentJobs";
 import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
+import { AbstractUIClass } from "./AbstractUIClass";
 
 export class UIClassDefinitionFinder {
     public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string) : vscode.Location | undefined {
@@ -73,24 +74,11 @@ export class UIClassDefinitionFinder {
         if (textEditor) {
             const document = textEditor.document;
             const currentPositionOffset = document.offsetAt(textEditor.selection.start);
-            //remove last part of the var begin
-            let temporaryVariableParts = variable.split(".");
-            temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
-            variable = temporaryVariableParts.join(".");
-            //remove last part of the var end
             const currentClassName = SyntaxAnalyzer.getCurrentClass();
-            let variableParts = variable.split(".");
 
             if (currentClassName) {
-
-                if (variableParts[0] === "this" && variableParts.length > 1) {
-                    UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, currentClassName);
-                } else if (variableParts[0] === "this" && variableParts.length === 1) {
-                    UIClassName = currentClassName;
-                } else {
-                    const currentClass = UIClassFactory.getUIClass(currentClassName);
-                    UIClassName = (<CustomUIClass>currentClass).getClassOfTheVariable(variable, currentPositionOffset);
-                }
+                const currentClass = UIClassFactory.getUIClass(currentClassName);
+                UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variable.split("."), currentClass, undefined, currentPositionOffset);
             }
         }
 
@@ -113,19 +101,18 @@ export class UIClassDefinitionFinder {
         }
     }
 
-    public static getAdditionalJSTypesHierarchically(customClass: CustomUIClass) {
-		if (customClass.classBody) {
-			const variables = DifferentJobs.getAllVariables(customClass.classBody);
+    public static getAdditionalJSTypesHierarchically(UIClass: AbstractUIClass) {
+		if (UIClass instanceof CustomUIClass &&  UIClass.classBody) {
+			const variables = DifferentJobs.getAllVariables(UIClass.classBody);
             variables.forEach(variable => {
                 if (!variable.jsType && variable.parts.length > 0) {
                     const allPartsAreFunctionCalls = !variable.parts.find(part => !(part instanceof JSFunctionCall));
                     if (allPartsAreFunctionCalls) {
                         //TODO: calls parsing twice.
-                        variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variable.parsedBody.split("."), customClass.className);
+                        variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variable.parsedBody.split("."), UIClass, undefined, variable.positionEnd);
                     }
                 }
             });
-            debugger;
         }
     }
 }

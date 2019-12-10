@@ -43,17 +43,16 @@ export class UIClassFactory {
 		this.UIClasses[classNameDotNotation] = UIClassFactory.getInstance(classNameDotNotation, classFileText);
 	}
 
-	public static getFieldsAndMethodsForVariable(variable: string, currentClassName: string, position: number) {
+	public static getFieldsAndMethodsForVariable(variable: string, className: string, position: number) {
 		let fieldsAndMethods: FieldsAndMethods = {
 			fields: [],
 			methods: []
 		};
-		const currentClass = this.getUIClass(currentClassName);
+		const currentClass = this.getUIClass(className);
 		let currentVariableClass: string | undefined;
 		if (variable === "this") {
-			currentVariableClass = currentClassName;
+			currentVariableClass = className;
 		} else {
-			// UIClassDefinitionFinder.getAdditionalJSTypesHierarchically(<CustomUIClass>currentClass); NOPE
 			currentVariableClass = (<CustomUIClass>currentClass).getClassOfTheVariable(variable, position);
 		}
 
@@ -111,9 +110,9 @@ export class UIClassFactory {
 		return this.UIClasses[className];
 	}
 
-	public static getClassOfTheVariableHierarchically(variable: string, UIClass: AbstractUIClass) : string | undefined {
+	public static getClassOfTheVariableHierarchically(variable: string, UIClass: AbstractUIClass, position: number = 0) : string | undefined {
 		let className: string | undefined;
-		className = UIClass.getClassOfTheVariable(variable, 0);
+		className = UIClass.getClassOfTheVariable(variable, position);
 
 		if (!className && UIClass.parentClassNameDotNotation) {
 			UIClass = this.getUIClass(UIClass.parentClassNameDotNotation);
