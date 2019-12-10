@@ -85,7 +85,8 @@ Algorithm looks for all definitions in the functions of the object which is retu
 `return AnyUI5Class.extend("name", {})` part
 * Function parameters<br/>
 `function(oEvent) {}`<br/>
-Only way to find out the data type of the function parameter is JSDoc. Use `@param {sap.ui.base.Event} oEvent - standard event object` if you want completion items to work for function params.<br/>
+> Only way to find out the data type of the function parameter is JSDoc. Use `@param {UI5Class} UI5ClassParameter - description` if you want completion items to work for function params.<br/>
+The same goes for function return data type. Use `@returns {UI5Class} UI5ClassVariable - description` if you want completion items to work for function return.<br/>
 * Local variables<br/>
 `function() {
 	var oList = new List();
