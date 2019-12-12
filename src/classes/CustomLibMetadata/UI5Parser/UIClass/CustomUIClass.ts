@@ -7,7 +7,6 @@ import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
 import { JSObject } from "../../JSParser/types/Object";
 import { JSVariable } from "../../JSParser/types/Variable";
 import { AbstractUIClass, UIField } from "./AbstractUIClass";
-import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 
 interface UIDefine {
 	path: string,

@@ -3,7 +3,6 @@ import { CustomUIClass } from "./CustomUIClass";
 import * as vscode from "vscode";
 import { StandardUIClass } from "./StandardUIClass";
 import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
-import { UIClassDefinitionFinder } from "./UIClassDefinitionFinder";
 
 var workspace = vscode.workspace;
 
