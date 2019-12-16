@@ -17,6 +17,6 @@
 * Bugfixes for method definition finder
 * Partial support for ES6 added
 
-## 0.8.0 (11-12-2019)
-* Method definition finder now opens new tab in the browser with documentation for the method
+## 0.8.0 (16-12-2019)
+* Method definition finder now opens new tab in the browser with documentation for the standard sapui5 methods
 * Dynamic completion items now works with method return data type
