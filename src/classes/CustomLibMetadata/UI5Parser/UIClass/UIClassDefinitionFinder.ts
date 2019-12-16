@@ -3,7 +3,11 @@ import * as vscode from "vscode";
 import { UIClassFactory } from "./UIClassFactory";
 import { CustomUIClass } from "./CustomUIClass";
 import { FileReader } from "../../../Util/FileReader";
-import LineColumn = require('line-column');
+import LineColumn from 'line-column';
+import { StandardUIClass } from "./StandardUIClass";
+import { DifferentJobs } from "../../JSParser/DifferentJobs";
+import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
+import { AbstractUIClass } from "./AbstractUIClass";
 
 export class UIClassDefinitionFinder {
     public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string) : vscode.Location | undefined {
@@ -17,11 +21,15 @@ export class UIClassDefinitionFinder {
                 classNameDotNotation = this.getVariableClass();
             }
             if (classNameDotNotation && methodName) {
-                location = this.getVSCodeMethodLocation(classNameDotNotation, methodName);
-                if (!location) {
-                    const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
-                    if (UIClass.parentClassNameDotNotation) {
-                        location = this.getPositionAndUriOfCurrentVariableDefinition(UIClass.parentClassNameDotNotation, methodName);
+                if (classNameDotNotation.startsWith("sap.")) {
+                    this.openClassMethodInTheBrowser(classNameDotNotation, methodName);
+                } else {
+                    location = this.getVSCodeMethodLocation(classNameDotNotation, methodName);
+                    if (!location) {
+                        const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
+                        if (UIClass.parentClassNameDotNotation) {
+                            location = this.getPositionAndUriOfCurrentVariableDefinition(UIClass.parentClassNameDotNotation, methodName);
+                        }
                     }
                 }
             }
@@ -66,27 +74,45 @@ export class UIClassDefinitionFinder {
         if (textEditor) {
             const document = textEditor.document;
             const currentPositionOffset = document.offsetAt(textEditor.selection.start);
-            //remove last part of the var begin
-            let temporaryVariableParts = variable.split(".");
-            temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
-            variable = temporaryVariableParts.join(".");
-            //remove last part of the var end
-            const currentClassName = SyntaxAnalyzer.gerCurrentClass();
-            let variableParts = variable.split(".");
+            const currentClassName = SyntaxAnalyzer.getCurrentClass();
 
             if (currentClassName) {
-
-                if (variableParts[0] === "this" && variableParts.length > 1) {
-                    UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, currentClassName);
-                } else if (variableParts[0] === "this" && variableParts.length === 1) {
-                    UIClassName = currentClassName;
-                } else {
-                    const currentClass = UIClassFactory.getUIClass(currentClassName);
-                    UIClassName = (<CustomUIClass>currentClass).getClassOfTheVariable(variable, currentPositionOffset);
-                }
+                const currentClass = UIClassFactory.getUIClass(currentClassName);
+                UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variable.split("."), currentClass, undefined, currentPositionOffset);
             }
         }
 
         return UIClassName;
+    }
+
+    private static openClassMethodInTheBrowser(classNameDotNotation: string, methodName: string) {
+        const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
+        if (UIClass instanceof StandardUIClass) {
+            const methodFromClass = UIClass.methods.find(method => method.name === methodName);
+            if (methodFromClass) {
+                if (methodFromClass.isFromParent) {
+                    this.openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
+                } else {
+                    const UI5Version = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
+                    const linkToDocumentation = `https://ui5.sap.com/${UI5Version}#/api/${classNameDotNotation}/methods/${methodName}`;
+                    vscode.env.openExternal(vscode.Uri.parse(linkToDocumentation));
+                }
+            }
+        }
+    }
+
+    public static getAdditionalJSTypesHierarchically(UIClass: AbstractUIClass) {
+		if (UIClass instanceof CustomUIClass &&  UIClass.classBody) {
+			const variables = DifferentJobs.getAllVariables(UIClass.classBody);
+            variables.forEach(variable => {
+                if (!variable.jsType && variable.parts.length > 0) {
+                    const allPartsAreFunctionCalls = !variable.parts.find(part => !(part instanceof JSFunctionCall));
+                    if (allPartsAreFunctionCalls) {
+                        //TODO: calls parsing twice.
+                        variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variable.parsedBody.split("."), UIClass, undefined, variable.positionEnd);
+                    }
+                }
+            });
+        }
     }
 }

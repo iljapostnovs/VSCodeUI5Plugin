@@ -22,9 +22,10 @@ export class CompletionItemRegistrator {
 				try {
 					if (DefineGenerator.getIfCurrentPositionIsInDefine(position)) {
 						itemsToReturn = JSDefineCompletionItems;
+					} else {
+						itemsToReturn = JSCompletionItemDAO.generateUIClassCompletionItems();
 					}
 
-					itemsToReturn = itemsToReturn.concat(JSCompletionItemDAO.generateUIClassCompletionItems());
 				} catch (error) {
 					console.log(error);
 				}

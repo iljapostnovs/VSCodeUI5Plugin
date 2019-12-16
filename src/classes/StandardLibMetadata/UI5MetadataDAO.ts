@@ -1,6 +1,6 @@
 import { UI5Metadata } from "./UI5Metadata";
 import { SAPNode } from "./SAPNode";
-import * as rp from "request-promise";
+import rp from "request-promise";
 import * as vscode from "vscode";
 import * as fs from "fs";
 
@@ -8,7 +8,6 @@ interface LooseObject {
 	[key: string]: any
 }
 var namespaceDesignTimes: LooseObject = {};
-var cache: any = null;
 
 export class UI5MetadataPreloader {
 	private libNames: LooseObject = {};

@@ -2,6 +2,7 @@ import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
 import { CustomUIClass } from "./CustomUIClass";
 import * as vscode from "vscode";
 import { StandardUIClass } from "./StandardUIClass";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 
 var workspace = vscode.workspace;
 
@@ -10,7 +11,9 @@ export interface FieldsAndMethods {
 	methods: UIMethod[]
 }
 export class UIClassFactory {
-	public static getInstance(className: string, documentText?: string) {
+	private static UIClasses: UIClassMap = {}
+
+	private static getInstance(className: string, documentText?: string) {
 		let returnClass: AbstractUIClass;
 		if (className.startsWith("sap.")) {
 			returnClass = new StandardUIClass(className);
@@ -27,30 +30,27 @@ export class UIClassFactory {
 		//TODO: Add file watcher here
 		workspace.onDidSaveTextDocument((document) => {
 			if (document.fileName.endsWith(".js")) {
-				const rCurrentClass = /(?<=.*\..*\(\").*(?=\")/;
-				const rCurrentClassResults = rCurrentClass.exec(document.getText());
-				if (rCurrentClassResults) {
-					let className = rCurrentClassResults[0];
-					this.setNewCodeForClass(className, document.getText());
+				const currentClassNameDotNotation = SyntaxAnalyzer.getCurrentClass(document.getText());
+				if (currentClassNameDotNotation) {
+					this.setNewCodeForClass(currentClassNameDotNotation, document.getText());
 				}
 			}
 		});
 	}
-	private static UIClasses: UIClassMap = {}
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
 		this.UIClasses[classNameDotNotation] = UIClassFactory.getInstance(classNameDotNotation, classFileText);
 	}
 
-	public static getFieldsAndMethodsForVariable(variable: string, currentClassName: string, position: number) {
+	public static getFieldsAndMethodsForVariable(variable: string, className: string, position: number) {
 		let fieldsAndMethods: FieldsAndMethods = {
 			fields: [],
 			methods: []
 		};
-		const currentClass = this.getUIClass(currentClassName);
+		const currentClass = this.getUIClass(className);
 		let currentVariableClass: string | undefined;
 		if (variable === "this") {
-			currentVariableClass = currentClassName;
+			currentVariableClass = className;
 		} else {
 			currentVariableClass = (<CustomUIClass>currentClass).getClassOfTheVariable(variable, position);
 		}
@@ -109,15 +109,13 @@ export class UIClassFactory {
 		return this.UIClasses[className];
 	}
 
-	public static getClassOfTheVariableHierarchically(variable: string, UIClass: AbstractUIClass) : string | undefined {
+	public static getClassOfTheVariableHierarchically(variable: string, UIClass: AbstractUIClass, position: number = 0) : string | undefined {
 		let className: string | undefined;
-		if (UIClass instanceof CustomUIClass) {
-			className = UIClass.getClassOfTheVariable(variable, 0);
+		className = UIClass.getClassOfTheVariable(variable, position);
 
-			if (!className && UIClass.parentClassNameDotNotation) {
-				UIClass = this.getUIClass(UIClass.parentClassNameDotNotation);
-				className = this.getClassOfTheVariableHierarchically(variable, UIClass);
-			}
+		if (!className && UIClass.parentClassNameDotNotation) {
+			UIClass = this.getUIClass(UIClass.parentClassNameDotNotation);
+			className = this.getClassOfTheVariableHierarchically(variable, UIClass);
 		}
 		return className;
 	}

@@ -9,6 +9,7 @@ export class JSFunction extends AbstractType {
 	public type = "function"; //todo refactor
 	public params: AbstractType[] = [];
 	public functionText: string = "";
+	public returnType: string | undefined;
 
 	constructor(name: string, body: string) {
 		super(name, body);
@@ -89,6 +90,8 @@ export class JSFunction extends AbstractType {
 				param.jsType = this.findJSType(jsDoc.parsedBody || "", param.parsedName || "");
 			}
 		});
+
+		this.returnType = this.findReturnType(jsDoc.parsedBody);
 	}
 
 	private findJSType(jsDoc: string, variableName: string) {
@@ -101,6 +104,17 @@ export class JSFunction extends AbstractType {
 		}
 
 		return jsType;
+	}
+
+	private findReturnType(jsDoc: string) {
+		let returnType: string | undefined;
+
+		const jsTypeResult = /(?<=return(s?)\s\{).*(?=\})/.exec(jsDoc);
+		if (jsTypeResult) {
+			returnType = jsTypeResult[0];
+		}
+
+		return returnType;
 	}
 
 	static isAFunction(text: string, fullJSText: string) {

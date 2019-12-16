@@ -54,7 +54,7 @@ export class FileWatcher {
 	}
 
 	private static replaceCurrentClassNameWithNewOne(uri: vscode.Uri, changedFileText: string) {
-		const currentClassNameDotNotation = SyntaxAnalyzer.gerCurrentClass(changedFileText);
+		const currentClassNameDotNotation = SyntaxAnalyzer.getCurrentClass(changedFileText);
 
 		if (currentClassNameDotNotation) {
 			const newClassNameDotNotation = FileReader.getClassNameFromPath(uri.fsPath);
