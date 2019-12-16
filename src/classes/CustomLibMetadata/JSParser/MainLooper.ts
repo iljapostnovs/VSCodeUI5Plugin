@@ -210,7 +210,7 @@ export class MainLooper {
 
 	private static checkIfIndexIsInCommentRange(commentRanges: CommentRanges[], index: number) {
 		return !!commentRanges.find(commentRange => {
-			return index >= commentRange.from && index <= commentRange.to;
+			return index >= commentRange.from && index < commentRange.to;
 		});
 	}
 }
