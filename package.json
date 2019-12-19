@@ -73,19 +73,19 @@
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
 		"@types/line-column": "^1.0.0",
-		"@types/node": "^10.12.18",
-		"@types/request-promise": "^4.1.44",
-		"@types/vscode": "^1.40.0",
+		"@types/node": "^10.17.9",
+		"@types/request-promise": "^4.1.45",
+		"@types/vscode": "^1.41.0",
 		"ts-loader": "^6.2.1",
-		"tslint": "^5.16.0",
-		"typescript": "^3.6.4",
-		"webpack": "^4.41.2",
+		"tslint": "^5.20.1",
+		"typescript": "^3.7.3",
+		"webpack": "^4.41.3",
 		"webpack-cli": "^3.3.10"
 	},
 	"dependencies": {
+		"glob": "^7.1.6",
 		"line-column": "^1.0.2",
-		"glob": "^7.1.5",
 		"request": "^2.88.0",
-		"request-promise": "^4.2.4"
+		"request-promise": "^4.2.5"
 	}
 }
