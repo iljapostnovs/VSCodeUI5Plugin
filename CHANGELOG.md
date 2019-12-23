@@ -20,3 +20,6 @@
 ## 0.8.0 (16-12-2019)
 * Method definition finder now opens new tab in the browser with documentation for the standard sapui5 methods
 * Dynamic completion items now works with method return data type
+
+## 0.8.1 (23-12-2019)
+* Bugfixes

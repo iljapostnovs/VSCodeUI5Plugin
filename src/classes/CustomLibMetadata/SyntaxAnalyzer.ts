@@ -33,25 +33,39 @@ export class SyntaxAnalyzer {
 
 	public static getClassNameFromVariableParts(variableParts: string[], theClass: AbstractUIClass, usedPartQuantity: number = 1, position?: number) : string | undefined {
 		let classNameOfTheVariable: string | undefined;
-		const thresholdForThis = variableParts.length > 1 && variableParts[0] === "this" ? 1 : 0;
-		usedPartQuantity += thresholdForThis;
+		const joinedVariable = variableParts.join(".");
+		const thisIsByIdVar = 	variableParts.length === 3 &&
+								(joinedVariable.startsWith("this.getView().byId(") ||
+								joinedVariable.startsWith("this.byId("));
 
-		const variableString = this.getStringFromParts(variableParts, usedPartQuantity);
-		let UIClass = theClass;
+		if (!thisIsByIdVar) {
+			const thresholdForThis = variableParts.length > 1 && variableParts[0] === "this" ? 1 : 0;
+			usedPartQuantity += thresholdForThis;
 
-		const UIClassName = UIClassFactory.getClassOfTheVariableHierarchically(variableString, UIClass, position);
+			const variableString = this.getStringFromParts(variableParts, usedPartQuantity);
+			let UIClass = theClass;
 
-		if (UIClassName) {
-			variableParts.splice(thresholdForThis, usedPartQuantity - thresholdForThis);
+			const UIClassName = UIClassFactory.getClassOfTheVariableHierarchically(variableString, UIClass, position);
 
-			if (variableParts.length === thresholdForThis) {
-				classNameOfTheVariable = UIClassName;
-			} else {
-				UIClass = UIClassFactory.getUIClass(UIClassName);
-				classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, UIClass, undefined, position);
+			if (UIClassName) {
+				variableParts.splice(thresholdForThis, usedPartQuantity - thresholdForThis);
+
+				if (variableParts.length === thresholdForThis) {
+					classNameOfTheVariable = UIClassName;
+				} else {
+					UIClass = UIClassFactory.getUIClass(UIClassName);
+					classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, UIClass, undefined, position);
+				}
+			} else if (usedPartQuantity < variableParts.length) {
+				classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, theClass, ++usedPartQuantity);
 			}
-		} else if (usedPartQuantity < variableParts.length) {
-			classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, theClass, ++usedPartQuantity);
+		} else {
+			//TODO: move this logic in same place from CustomUIClass as well
+			const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*(?="\))/.exec(joinedVariable);
+			const controlId = controlIdResult ? controlIdResult[0] : "";
+			if (controlId) {
+				classNameOfTheVariable = FileReader.getClassNameFromView(theClass.className, controlId);
+			}
 		}
 
 		return classNameOfTheVariable;
