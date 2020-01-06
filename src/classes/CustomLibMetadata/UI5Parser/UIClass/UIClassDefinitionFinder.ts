@@ -10,7 +10,7 @@ import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
 import { AbstractUIClass } from "./AbstractUIClass";
 
 export class UIClassDefinitionFinder {
-    public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string) : vscode.Location | undefined {
+    public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {
         let location: vscode.Location | undefined;
         const textEditor = vscode.window.activeTextEditor;
         if (textEditor) {
@@ -21,14 +21,14 @@ export class UIClassDefinitionFinder {
                 classNameDotNotation = this.getVariableClass();
             }
             if (classNameDotNotation && methodName) {
-                if (classNameDotNotation.startsWith("sap.")) {
+                if (classNameDotNotation.startsWith("sap.") && openInBrowserIfStandardMethod) {
                     this.openClassMethodInTheBrowser(classNameDotNotation, methodName);
                 } else {
                     location = this.getVSCodeMethodLocation(classNameDotNotation, methodName);
                     if (!location) {
                         const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
                         if (UIClass.parentClassNameDotNotation) {
-                            location = this.getPositionAndUriOfCurrentVariableDefinition(UIClass.parentClassNameDotNotation, methodName);
+                            location = this.getPositionAndUriOfCurrentVariableDefinition(UIClass.parentClassNameDotNotation, methodName, openInBrowserIfStandardMethod);
                         }
                     }
                 }
