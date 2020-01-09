@@ -23,3 +23,7 @@
 
 ## 0.8.1 (23-12-2019)
 * Bugfixes
+
+## 0.8.2 (09-01-2020)
+* Bugfixes
+* Opening of the standard library documentation now happens on "Go to type definition" command instead of "Go to definition"
