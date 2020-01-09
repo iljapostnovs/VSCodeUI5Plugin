@@ -12,7 +12,7 @@ export class CompletionItemRegistrator {
 		console.log("XML Completion Items generated");
 
 		const JSCompletionItemDAO = new CompletionItemFactory(GeneratorFactory.language.js);
-		const JSDefineCompletionItems = await JSCompletionItemDAO.getLanguageSpecificCompletionItems(progress, context)
+		const JSDefineCompletionItems = await JSCompletionItemDAO.getLanguageSpecificCompletionItems(progress, context);
 		console.log("JS Completion Items generated");
 
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {

@@ -20,7 +20,7 @@ export class XMLAggregationGenerator implements IAggregationGenerator {
 		}
 
 		if (node.node.extends) {
-			let extendNode: SAPNode = this.nodeDAO.findNode(node.node.extends);
+			const extendNode: SAPNode = this.nodeDAO.findNode(node.node.extends);
 			if (extendNode) {
 				aggregations += await this.generateAggregations(extendNode);
 			}

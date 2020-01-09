@@ -11,7 +11,7 @@ export class SyntaxAnalyzer {
 			variable = this.getCurrentVariable();
 		}
 		const currentClassName = this.getCurrentClass();
-		let variableParts = variable.split(".");
+		const variableParts = variable.split(".");
 
 		const activeTextEditor = vscode.window.activeTextEditor;
 		if (currentClassName && activeTextEditor) {
@@ -22,7 +22,7 @@ export class SyntaxAnalyzer {
 			const UIClass = UIClassFactory.getUIClass(currentClassName);
 			UIClassDefinitionFinder.getAdditionalJSTypesHierarchically(UIClass);
 
-			let UIClassName = this.getClassNameFromVariableParts(variableParts, UIClass, 1, position);
+			const UIClassName = this.getClassNameFromVariableParts(variableParts, UIClass, 1, position);
 			if (UIClassName) {
 				fieldsAndMethods = this.getFieldsAndMethodsFor("this", UIClassName);
 			}
@@ -113,13 +113,13 @@ export class SyntaxAnalyzer {
 	static getCurrentVariable() {
 		let currentVariable = "";
 		if (vscode.window.activeTextEditor) {
-			let iDeltaStart = this.getDeltaOfVariableBegining(-1);
-			let rangeOfVariable = new vscode.Range(vscode.window.activeTextEditor.selection.start.translate(0, iDeltaStart), vscode.window.activeTextEditor.selection.start);
+			const iDeltaStart = this.getDeltaOfVariableBegining(-1);
+			const rangeOfVariable = new vscode.Range(vscode.window.activeTextEditor.selection.start.translate(0, iDeltaStart), vscode.window.activeTextEditor.selection.start);
 			currentVariable = vscode.window.activeTextEditor.document.getText(rangeOfVariable);
 			currentVariable = currentVariable.replace(".prototype", "");
 
 			//remove last part of the var (it ends with .)
-			let temporaryVariableParts = currentVariable.split(".");
+			const temporaryVariableParts = currentVariable.split(".");
 			temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
 			currentVariable = temporaryVariableParts.join(".");
 		}
@@ -130,7 +130,7 @@ export class SyntaxAnalyzer {
 	private static getDeltaOfVariableBegining(iDelta: number) {
 		let deltaToReturn = iDelta;
 		if (vscode.window.activeTextEditor) {
-			let startingPosition = vscode.window.activeTextEditor.selection.start;
+			const startingPosition = vscode.window.activeTextEditor.selection.start;
 			let selectedText = "";
 			let parenthesesCount = 0;
 			let ignoreParentheses = false;
@@ -145,7 +145,7 @@ export class SyntaxAnalyzer {
 				} else if (sCurrentChar === "(") {
 					parenthesesCount--;
 				}
-				let range = new vscode.Range(startingPosition.translate(0, deltaToReturn < 0 ? deltaToReturn : 0), startingPosition.translate(0, deltaToReturn > 0 ? deltaToReturn : 0));
+				const range = new vscode.Range(startingPosition.translate(0, deltaToReturn < 0 ? deltaToReturn : 0), startingPosition.translate(0, deltaToReturn > 0 ? deltaToReturn : 0));
 				selectedText = vscode.window.activeTextEditor.document.getText(range);
 				if (!this.isSeparator(sCurrentChar, ignoreParentheses)) {
 					deltaToReturn += iDelta;
@@ -153,7 +153,7 @@ export class SyntaxAnalyzer {
 					deltaToReturn += -iDelta;
 				}
 
-			} while (!this.isSeparator(sCurrentChar, ignoreParentheses))
+			} while (!this.isSeparator(sCurrentChar, ignoreParentheses));
 
 		}
 		deltaToReturn += -iDelta;
@@ -180,10 +180,10 @@ export class SyntaxAnalyzer {
 		if (currentClass) {
 			const view = FileReader.getViewText(currentClass);
 			if (view) {
-				let IdsResult = view.match(/(?<=id=").*(?="\s)/g);
+				const IdsResult = view.match(/(?<=id=").*(?="\s)/g);
 				if (IdsResult) {
 					completionItems = IdsResult.map(Id => {
-						let uniqueViewId: UICompletionItem = {
+						const uniqueViewId: UICompletionItem = {
 							name: Id,
 							type: vscode.CompletionItemKind.Keyword,
 							description: Id,
@@ -221,10 +221,10 @@ export class SyntaxAnalyzer {
 	/* =========================================================== */
 }
 export interface UICompletionItem {
-	name: string,
-	description: string,
-	type: vscode.CompletionItemKind,
-	visibility: string,
-	parameters: any[],
-	returnValue: string
+	name: string;
+	description: string;
+	type: vscode.CompletionItemKind;
+	visibility: string;
+	parameters: any[];
+	returnValue: string;
 }

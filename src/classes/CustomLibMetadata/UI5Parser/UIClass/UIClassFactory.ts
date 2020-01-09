@@ -1,17 +1,13 @@
 import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
 import { CustomUIClass } from "./CustomUIClass";
-import * as vscode from "vscode";
 import { StandardUIClass } from "./StandardUIClass";
-import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
-
-var workspace = vscode.workspace;
 
 export interface FieldsAndMethods {
-	fields: UIField[],
-	methods: UIMethod[]
+	fields: UIField[];
+	methods: UIMethod[];
 }
 export class UIClassFactory {
-	private static UIClasses: UIClassMap = {}
+	private static UIClasses: UIClassMap = {};
 
 	private static getInstance(className: string, documentText?: string) {
 		let returnClass: AbstractUIClass;
@@ -111,5 +107,5 @@ export class UIClassFactory {
 }
 
 interface UIClassMap {
-	[key: string]: AbstractUIClass
+	[key: string]: AbstractUIClass;
 }

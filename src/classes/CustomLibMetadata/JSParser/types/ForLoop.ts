@@ -3,7 +3,7 @@ import { MainLooper } from "../MainLooper";
 
 export class ForLoop extends AbstractType {
 	public parseBodyText() {
-		let parsedBodyText = this.body;
+		const parsedBodyText = this.body;
 
 		//if body
 		const bracketBodyOfWhile = MainLooper.getEndOfChar("{", "}", parsedBodyText);

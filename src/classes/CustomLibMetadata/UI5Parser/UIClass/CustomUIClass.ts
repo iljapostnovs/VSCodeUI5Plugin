@@ -9,9 +9,9 @@ import { JSVariable } from "../../JSParser/types/Variable";
 import { AbstractUIClass, UIField } from "./AbstractUIClass";
 
 interface UIDefine {
-	path: string,
-	className: string,
-	classNameDotNotation: string
+	path: string;
+	className: string;
+	classNameDotNotation: string;
 }
 export class CustomUIClass extends AbstractUIClass {
 	public classBody: JSObject | undefined;
@@ -59,7 +59,7 @@ export class CustomUIClass extends AbstractUIClass {
 					path: UIDefinePaths[index],
 					className: className,
 					classNameDotNotation: UIDefinePaths[index] ? UIDefinePaths[index].replace(/\//g, ".") : ""
-				}
+				};
 			});
 		}
 
@@ -151,11 +151,11 @@ export class CustomUIClass extends AbstractUIClass {
 					accumulator.push(field);
 				}
 				return accumulator;
-			}, [])
+			}, []);
 
 			this.classBody.partNames.forEach((partName, index) => {
 				if (this.classBody) {
-					let part = this.classBody.parts[index];
+					const part = this.classBody.parts[index];
 					if (part instanceof JSFunction) {
 						this.methods.push({
 							name: partName,

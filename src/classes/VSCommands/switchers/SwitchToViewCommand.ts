@@ -1,25 +1,25 @@
-import * as vscode from "vscode"
+import * as vscode from "vscode";
 import * as fs from "fs";
-let workspace = vscode.workspace;
+const workspace = vscode.workspace;
 
 export class SwitchToViewCommand {
 	static async switchToView() {
 		try {
-			let currentControllerName: string | null = SwitchToViewCommand.getControllerName();
+			const currentControllerName: string | null = SwitchToViewCommand.getControllerName();
 			let viewToSwitch: string = "";
-			let allViewFSPaths: string[] = await SwitchToViewCommand.getAllViewFSPaths();
+			const allViewFSPaths: string[] = await SwitchToViewCommand.getAllViewFSPaths();
 
 			for (const viewFSPath of allViewFSPaths) {
-				let view: string = SwitchToViewCommand.getViewFileContent(viewFSPath);
-				let controllerNameOfTheView = SwitchToViewCommand.getControllerNameOfTheView(view);
-				let thisViewShouldBeSwitched = controllerNameOfTheView === currentControllerName;
+				const view: string = SwitchToViewCommand.getViewFileContent(viewFSPath);
+				const controllerNameOfTheView = SwitchToViewCommand.getControllerNameOfTheView(view);
+				const thisViewShouldBeSwitched = controllerNameOfTheView === currentControllerName;
 				if (thisViewShouldBeSwitched) {
 					viewToSwitch = viewFSPath;
 					break;
 				}
 			}
 
-			let editor = vscode.window.activeTextEditor;
+			const editor = vscode.window.activeTextEditor;
 			if (editor && !!viewToSwitch) {
 				await vscode.window.showTextDocument(vscode.Uri.file(viewToSwitch));
 			}
@@ -30,7 +30,7 @@ export class SwitchToViewCommand {
 	}
 
 	private static async getAllViewFSPaths() {
-		let allViews = await this.findAllViews();
+		const allViews = await this.findAllViews();
 		return allViews.map(view => view.fsPath);
 	}
 
@@ -39,8 +39,8 @@ export class SwitchToViewCommand {
 	}
 
 	private static getControllerName() {
-		let currentController = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.getText() : "";
-		let result = /(?<=.extend\(").*(?=")/.exec(currentController);
+		const currentController = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.getText() : "";
+		const result = /(?<=.extend\(").*(?=")/.exec(currentController);
 		return result && result[0] ? result[0] : null;
 	}
 
@@ -49,7 +49,7 @@ export class SwitchToViewCommand {
 	}
 
 	private static getControllerNameOfTheView(view: string) {
-		let result = /(?<=controllerName=").*(?=")/.exec(view) || [];
+		const result = /(?<=controllerName=").*(?=")/.exec(view) || [];
 		return result[0] ? result[0] : null;
 	}
 }

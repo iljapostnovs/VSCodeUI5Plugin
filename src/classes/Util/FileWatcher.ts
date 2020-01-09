@@ -6,7 +6,7 @@ import * as fs from "fs";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { WorkspaceCompletionItemFactory } from "../CompletionItems/WorkspaceCompletionItemFactory";
 
-var workspace = vscode.workspace;
+const workspace = vscode.workspace;
 
 export class FileWatcher {
 	static register() {
@@ -30,8 +30,8 @@ export class FileWatcher {
 				if (file.fsPath.endsWith(".js")) {
 					this.handleJSFileCreate(file);
 				}
-			})
-		})
+			});
+		});
 
 		workspace.onDidRenameFiles(event => {
 			event.files.forEach(file => {
@@ -42,8 +42,8 @@ export class FileWatcher {
 				if (file.newUri.fsPath.indexOf(".") === -1) {
 					this.handleFolderRename(file.oldUri, file.newUri);
 				}
-			})
-		})
+			});
+		});
 	}
 
 	public static syncrhoniseJSDefineCompletionItems(completionItems: vscode.CompletionItem[]) {
@@ -52,16 +52,16 @@ export class FileWatcher {
 				if (file.fsPath.endsWith(".js")) {
 					WorkspaceCompletionItemFactory.synchroniseCreate(completionItems, file);
 				}
-			})
-		})
+			});
+		});
 
 		workspace.onDidDeleteFiles(event => {
 			event.files.forEach(file => {
 				if (file.fsPath.endsWith(".js")) {
 					WorkspaceCompletionItemFactory.synchroniseDelete(completionItems, file);
 				}
-			})
-		})
+			});
+		});
 
 		workspace.onDidRenameFiles(event => {
 			event.files.forEach(file => {
@@ -69,8 +69,8 @@ export class FileWatcher {
 					WorkspaceCompletionItemFactory.synchroniseCreate(completionItems, file.newUri);
 					WorkspaceCompletionItemFactory.synchroniseDelete(completionItems, file.oldUri);
 				}
-			})
-		})
+			});
+		});
 	}
 
 	private static handleJSFileCreate(uri: vscode.Uri) {
@@ -96,7 +96,7 @@ export class FileWatcher {
 		const UIDefineClassNameParts = standardUIDefineClassForExtension.split("/");
 		const controlName = UIDefineClassNameParts[UIDefineClassNameParts.length - 1];
 
-		return `sap.ui.define([\r\n\t\"${standardUIDefineClassForExtension}\"\r\n], function (\r\n\t${controlName}\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ${controlName}.extend(\"${classNameDotNotation}\", {\r\n\t});\r\n});`
+		return `sap.ui.define([\r\n\t\"${standardUIDefineClassForExtension}\"\r\n], function (\r\n\t${controlName}\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ${controlName}.extend(\"${classNameDotNotation}\", {\r\n\t});\r\n});`;
 	}
 
 	private static replaceCurrentClassNameWithNewOne(oldUri: vscode.Uri, newUri: vscode.Uri) {
@@ -133,7 +133,7 @@ export class FileWatcher {
 
 					//TODO: Use observer pattern here
 					if (jsFilePath.endsWith(".js")) {
-						const classNameOfTheReplacedFile = FileReader.getClassNameFromPath(jsFilePath.replace(/\//g, "\\"))
+						const classNameOfTheReplacedFile = FileReader.getClassNameFromPath(jsFilePath.replace(/\//g, "\\"));
 						if (classNameOfTheReplacedFile) {
 							UIClassFactory.setNewCodeForClass(classNameOfTheReplacedFile, file);
 						}

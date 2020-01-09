@@ -2,7 +2,7 @@ import { AbstractType } from "./AbstractType";
 
 export class JSComment extends AbstractType {
 	public parseBodyText() {
-		let parsedBodyText = this.body;
+		const parsedBodyText = this.body;
 		var comment : string = "";
 
 		if (parsedBodyText.trim().startsWith("/*")) {

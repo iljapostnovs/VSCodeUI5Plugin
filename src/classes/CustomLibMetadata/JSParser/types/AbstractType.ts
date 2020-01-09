@@ -20,7 +20,7 @@ export abstract class AbstractType {
 		this.parseName();
 	}
 
-	public abstract parseBodyText(): void
+	public abstract parseBodyText(): void;
 
 	public parseName() {
 		this.parsedName = this.name.trim();
@@ -43,7 +43,7 @@ export abstract class AbstractType {
 
 	//TODO put it in different jobs
 	public setPositions() {
-		let text = this.parent ? this.parent.getFullBody() : this.getFullBody();
+		const text = this.parent ? this.parent.getFullBody() : this.getFullBody();
 		const startingIndex = this.parent ? this.parent.positionBegin : 0;
 
 		this.positionBegin = startingIndex + text.indexOf(this.getFullBody());
@@ -61,7 +61,7 @@ export abstract class AbstractType {
 	public findFunctionByPosition(position: number) {
 		let jsFunction: JSFunction | undefined;
 
-		let data = this.findJSTypeWithSmallestDelta({
+		const data = this.findJSTypeWithSmallestDelta({
 			type: this,
 			position: position,
 			delta: Math.abs(this.positionEnd - position)
@@ -83,7 +83,7 @@ export abstract class AbstractType {
 	}
 
 	private findJSTypeWithSmallestDelta(data: findingData) {
-		let myCurrentDelta = Math.abs(this.positionEnd - data.position);
+		const myCurrentDelta = Math.abs(this.positionEnd - data.position);
 		if (myCurrentDelta < data.delta) {
 			data.type = this;
 			data.delta = myCurrentDelta;
@@ -91,7 +91,7 @@ export abstract class AbstractType {
 
 		let i = 0;
 		while (i < this.parts.length) {
-			let partData = this.parts[i].findJSTypeWithSmallestDelta(data);
+			const partData = this.parts[i].findJSTypeWithSmallestDelta(data);
 			if (partData.delta < data.delta) {
 				data = partData;
 			}
@@ -141,7 +141,7 @@ export abstract class AbstractType {
 
 
 interface findingData {
-	delta: number
-	position: number
-	type: AbstractType
+	delta: number;
+	position: number;
+	type: AbstractType;
 }

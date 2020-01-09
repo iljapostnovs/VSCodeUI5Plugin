@@ -5,9 +5,10 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 
 interface LooseObject {
-	[key: string]: any
+	[key: string]: any;
 }
-var namespaceDesignTimes: LooseObject = {};
+
+const namespaceDesignTimes: LooseObject = {};
 
 export class UI5MetadataPreloader {
 	private libNames: LooseObject = {};
@@ -19,15 +20,15 @@ export class UI5MetadataPreloader {
 	public async preloadLibs(progress: vscode.Progress<{ message?: string | undefined; increment?: number | undefined; }>, context: vscode.ExtensionContext) {
 		var cache = this.loadCache(context);
 		if (!cache) {
-			let promises = [];
-			let metadataDAO = new UI5MetadataDAO();
+			const promises = [];
+			const metadataDAO = new UI5MetadataDAO();
 			this.nodes.forEach((node: SAPNode) => {
 				this.getUniqueLibNames(node);
 			});
-			let libQuantity = Object.keys(this.libNames).length;
-			let incrementStep = 50 / libQuantity;
+			const libQuantity = Object.keys(this.libNames).length;
+			const incrementStep = 50 / libQuantity;
 
-			for (let i in this.libNames) {
+			for (const i in this.libNames) {
 				promises.push(metadataDAO.getMetadataForLib(i).then(() => {
 					progress.report({ increment: incrementStep});
 				}));
@@ -44,7 +45,7 @@ export class UI5MetadataPreloader {
 	}
 
 	private loadCache(context: vscode.ExtensionContext) {
-		let cachePath = context.globalStoragePath + "\\cache.json";
+		const cachePath = context.globalStoragePath + "\\cache.json";
 		let cacheFromFile;
 
 		if (fs.existsSync(cachePath)) {
@@ -55,7 +56,7 @@ export class UI5MetadataPreloader {
 	}
 
 	private writeCache(context: vscode.ExtensionContext) {
-		let cachePath = context.globalStoragePath + "\\cache.json";;
+		const cachePath = context.globalStoragePath + "\\cache.json";
 		if (!fs.existsSync(cachePath)) {
 			if (!fs.existsSync(context.globalStoragePath)) {
 				fs.mkdirSync(context.globalStoragePath);
@@ -63,7 +64,7 @@ export class UI5MetadataPreloader {
 			fs.writeFileSync(cachePath, "", "utf8");
 		}
 
-		let cache = JSON.stringify(namespaceDesignTimes);
+		const cache = JSON.stringify(namespaceDesignTimes);
 		fs.writeFileSync(cachePath, cache, "utf8");
 	}
 
@@ -78,8 +79,8 @@ export class UI5MetadataDAO {
 	constructor() {}
 
 	public async getMetadataForNode(node: SAPNode) {
-		let libMetadata = await this.getMetadataForLib(node.getLib());
-		let metadata = this.findNodeMetadata(node, libMetadata);
+		const libMetadata = await this.getMetadataForLib(node.getLib());
+		const metadata = this.findNodeMetadata(node, libMetadata);
 
 		return new UI5Metadata(metadata);
 	}
@@ -91,7 +92,7 @@ export class UI5MetadataDAO {
 	}
 
 	public async getMetadataForLib(lib: string) {
-		let metadatas = await this.fetchMetadataForLib(lib);
+		const metadatas = await this.fetchMetadataForLib(lib);
 
 		return metadatas;
 	}
@@ -107,14 +108,14 @@ export class UI5MetadataDAO {
 					resolve(namespaceDesignTimes[lib]);
 				}
 			} else {
-				let readPath: string = `https://ui5.sap.com/${vscode.workspace.getConfiguration("ui5.plugin").get("ui5version")}/test-resources/${lib.replace(/\./g, "/")}/designtime/apiref/api.json`;
+				const readPath: string = `https://ui5.sap.com/${vscode.workspace.getConfiguration("ui5.plugin").get("ui5version")}/test-resources/${lib.replace(/\./g, "/")}/designtime/apiref/api.json`;
 				namespaceDesignTimes[lib] = rp(readPath)
 				.then((data: any) => {
 					try {
 						namespaceDesignTimes[lib] = JSON.parse(data);
 						resolve(namespaceDesignTimes[lib]);
 					} catch (error) {
-						console.log(lib)
+						console.log(lib);
 					}
 				})
 				.catch(reject);

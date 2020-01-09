@@ -10,7 +10,7 @@ export class JSObject extends AbstractType {
 	public parseBodyText() {
 		this.body = MainLooper.getEndOfChar("{", "}", this.body);
 
-		let lastChar = this.body[this.body.length - 1];
+		const lastChar = this.body[this.body.length - 1];
 		this.parsedBody = (lastChar === ";" || lastChar === ",") ? this.body.substring(0, this.body.length - 1) : this.body;
 		this.parsedBody = this.body.substring(1, this.body.length - 1);
 	}
@@ -24,7 +24,7 @@ export class JSObject extends AbstractType {
 					currentIndex = currentIndex + this.parseBodyPart(this.parsedBody.substring(currentIndex - 2, this.parsedBody.length), "\n") + 1;
 					beginIndex = currentIndex;
 				} else if (this.parsedBody[currentIndex] === ":") {
-					this.partNames.push(this.parsedBody.substring(beginIndex, currentIndex).trim())
+					this.partNames.push(this.parsedBody.substring(beginIndex, currentIndex).trim());
 					//todo: think how to ignore comments
 					currentIndex = currentIndex + this.parseBodyPart(this.parsedBody.substring(currentIndex + 1, this.parsedBody.length)) + 1;
 					beginIndex = currentIndex;

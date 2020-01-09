@@ -37,7 +37,7 @@ export class SAPNodeDAO {
 		};
 		for (const node of this.nodes.symbols) {
 			if (libs[node.lib]) {
-				let newNode = new SAPNode(node);
+				const newNode = new SAPNode(node);
 				SAPNodeDAO.SAPNodes.push(newNode);
 			}
 		}
@@ -58,7 +58,7 @@ export class SAPNodeDAO {
 		let correctNode: SAPNode = SAPNodeDAO.SAPNodes[0];
 
 		for (const node of SAPNodeDAO.SAPNodes) {
-			let theNode: SAPNode = node.findNode(name);
+			const theNode: SAPNode = node.findNode(name);
 			if (theNode.getName() === name) {
 				correctNode = theNode;
 				break;
