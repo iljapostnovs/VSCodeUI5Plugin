@@ -4,8 +4,11 @@ export class ClearCacheCommand {
 	static subscribeToPropertyChange(context: vscode.ExtensionContext) {
 		vscode.workspace.onDidChangeConfiguration(event => {
 			let isLibraryVersionAffected = event.affectsConfiguration("ui5.plugin.ui5version");
+			let isSrcAffected = event.affectsConfiguration("ui5.plugin.src");
 			if (isLibraryVersionAffected) {
 				ClearCacheCommand.clearCache(context);
+			} else if (isSrcAffected) {
+				ClearCacheCommand.reloadWindow();
 			}
 		})
 	}

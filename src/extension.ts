@@ -27,8 +27,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 					DefinitionProviderRegistrator.register(context);
 
-					FileReader.synchroniseCacheOnDocumentSave();
-
 					resolve();
 				} catch (error) {
 					console.log(error);

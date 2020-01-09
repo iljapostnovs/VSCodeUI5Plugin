@@ -6,15 +6,6 @@ var workspace = vscode.workspace;
 export class FileReader {
 	private static manifests:UIManifest[] = [];
 	private static viewCache:LooseObject = {};
-	static synchroniseCacheOnDocumentSave() {
-		workspace.onDidSaveTextDocument((document) => {
-			if (document.fileName.endsWith(".view.xml")) {
-				let viewContent = document.getText();
-				viewContent = this.replaceFragments(viewContent);
-				this.setNewViewContentToCache(viewContent);
-			}
-		});
-	}
 
 	public static setNewViewContentToCache(viewContent: string) {
 		const controllerName = this.getControllerNameFromView(viewContent);
@@ -185,7 +176,7 @@ export class FileReader {
 		return controllerNameResult ? controllerNameResult[0] : undefined;
 	}
 
-	private static replaceFragments(documentText: string) {
+	public static replaceFragments(documentText: string) {
 		let fragments = this.getFragments(documentText);
 		fragments.forEach(fragment => {
 			const fragmentName = this.getFragmentName(fragment);
