@@ -31,6 +31,14 @@ export class JSFunction extends AbstractType {
 		this.parseBodyText();
 	}
 
+	public setPositions() {
+		super.setPositions();
+
+		this.params.forEach(param => {
+			param.setPositions();
+		});
+	}
+
 	public parseBodyText() {
 		let lastChar = this.body[this.body.length - 1];
 		this.parsedBody = (lastChar === ";" || lastChar === ",") ? this.body.substring(0, this.body.length - 1) : this.body;

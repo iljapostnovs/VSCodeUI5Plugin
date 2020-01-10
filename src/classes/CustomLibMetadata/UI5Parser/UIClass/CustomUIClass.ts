@@ -17,7 +17,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public classBody: JSObject | undefined;
 	public classText: string = "";
 	private UIDefine: UIDefine[] = [];
-	private jsPasredBody: AbstractType | undefined;
+	public jsPasredBody: AbstractType | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);

@@ -1,49 +1,34 @@
 import * as vscode from "vscode";
+import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
+import { CustomUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
+import { JSFunctionCall } from "../CustomLibMetadata/JSParser/types/FunctionCall";
+import { JSFunction } from "../CustomLibMetadata/JSParser/types/Function";
 export class SAPUIDefineCommand {
 	static insertUIDefine() {
-		let editor = vscode.window.activeTextEditor;
+		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
-			let document = editor.document;
-			let documentText: string = document.getText();
+			const document = editor.document;
+			const currentClassName = SyntaxAnalyzer.getCurrentClass();
 
-			let regexDeleteStart = /sap\.ui\.define\(\[(.|\n|\r)*\],.?function.?\(/.exec(documentText);
-			let regexDeleteEnd = /sap\.ui\.define\(\[(.|\n|\r)*\],.?function.?\((.|\n|\r)*?\)/.exec(documentText);
-			if (regexDeleteStart && regexDeleteStart.length > 0 && regexDeleteEnd && regexDeleteEnd.length > 0) {
-				let deleteIndexStart: number = regexDeleteStart.length > 0 ? regexDeleteStart[0].length : 0;
-				let deleteIndexEnd: number = regexDeleteEnd.length > 0 ? regexDeleteEnd[0].length -1 : 0;
-
-				const defineBegin: string = "sap.ui.define([";
-				let indexDefineBegin = documentText.indexOf(defineBegin) + defineBegin.length;
-				let indexDefineEnd = documentText.indexOf("], function");
-				let classModulesInDefine: string[] = documentText.substring(indexDefineBegin, indexDefineEnd).split(",");
-				let classNamesInDefine: string[] = classModulesInDefine.map((moduleName: string) => {
-					if (moduleName.indexOf("// eslint") > -1) {
-						moduleName = moduleName.substring(0, moduleName.indexOf("// eslint"));
+			if (currentClassName) {
+				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+				if (UIClass.jsPasredBody) {
+					const SAPUIDefine = <JSFunctionCall>(UIClass.jsPasredBody);
+					const SAPUIDefineCallbackFn = <JSFunction>(SAPUIDefine.parts[1]);
+					if (SAPUIDefineCallbackFn) {
+						// SAPUIDefineCallbackFn.params
 					}
-					let parts: string[] = moduleName.split("/");
-					parts = parts.map(part => part.trim());
-					return parts[parts.length - 1];
-				});
-				let insertText: string = "\n" + classNamesInDefine.reduce((accumulator: string, className: string) => {
-					accumulator += "	" + className.substring(0, className.length - 1) + ",\n"
-					return accumulator;
-				}, "");
-
-				let regexResult = /sap\.ui\.define\(\[(.|\n|\r)*\],.?function.?\(/.exec(documentText);
-				if (regexResult && insertText) {
-					insertText = insertText.substring(0, insertText.length - 2);
-					insertText += "\n";
-					let insertIndexStart: number = regexResult.length > 0 ? regexResult[0].length : 0;
-
-					editor.edit(editBuilder => {
-						if (editor) {
-							editBuilder.delete(new vscode.Range(document.positionAt(deleteIndexStart), document.positionAt(deleteIndexEnd)));
-							editBuilder.insert(document.positionAt(insertIndexStart), insertText);
-						}
-					});
+					debugger;
 				}
 			}
+			// editor.edit(editBuilder => {
+			// 	if (editor) {
+			// 		editBuilder.delete(new vscode.Range(document.positionAt(deleteIndexStart), document.positionAt(deleteIndexEnd)));
+			// 		editBuilder.insert(document.positionAt(insertIndexStart), insertText);
+			// 	}
+			// });
 		}
 	}
 }
