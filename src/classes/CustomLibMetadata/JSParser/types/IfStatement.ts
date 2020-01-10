@@ -11,14 +11,14 @@ export class IfStatement extends AbstractType {
 	public parseBodyText() {
 		let parsedBodyText = this.body;
 
-		let bodiesForParsing: string[] = [];
+		const bodiesForParsing: string[] = [];
 		//if body
 		let bodyOfIfStatement = MainLooper.getEndOfChar("{", "}", parsedBodyText);
 		bodiesForParsing.push(bodyOfIfStatement.substring(1, bodyOfIfStatement.length - 1).trim());
 		bodyOfIfStatement = parsedBodyText.substring(0, parsedBodyText.indexOf(bodyOfIfStatement) + bodyOfIfStatement.length);
-		let restOfTheBody = parsedBodyText.substring(parsedBodyText.indexOf(bodyOfIfStatement) + bodyOfIfStatement.length, parsedBodyText.length);
+		const restOfTheBody = parsedBodyText.substring(parsedBodyText.indexOf(bodyOfIfStatement) + bodyOfIfStatement.length, parsedBodyText.length);
 
-		let elseBody = this.findElseBody(restOfTheBody, bodiesForParsing);
+		const elseBody = this.findElseBody(restOfTheBody, bodiesForParsing);
 
 		parsedBodyText = bodyOfIfStatement + elseBody;
 		this.body = parsedBodyText;

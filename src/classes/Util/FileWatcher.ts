@@ -4,36 +4,82 @@ import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
 import * as glob from "glob";
 import * as fs from "fs";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { WorkspaceCompletionItemFactory } from "../CompletionItems/WorkspaceCompletionItemFactory";
+
+const workspace = vscode.workspace;
 
 export class FileWatcher {
 	static register() {
-		let folders = vscode.workspace.workspaceFolders;
-		if (folders) {
-			folders.forEach(folder => {
-				let watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, "**/*.js"));
-				watcher.onDidCreate(uri => {
-					this.handleFileCreate(uri);
-				});
+		workspace.onDidSaveTextDocument(document => {
+			if (document.fileName.endsWith(".js")) {
 
-				watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, "**/*"));
-				watcher.onDidCreate(uri => {
-					if (uri.fsPath.indexOf(".") === -1) {
-						this.handleFolderCreate(uri);
-					}
-				})
+				const currentClassNameDotNotation = SyntaxAnalyzer.getCurrentClass(document.getText());
+				if (currentClassNameDotNotation) {
+					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
+				}
+			} else if (document.fileName.endsWith(".view.xml")) {
+
+				let viewContent = document.getText();
+				viewContent = FileReader.replaceFragments(viewContent);
+				FileReader.setNewViewContentToCache(viewContent);
+			}
+		});
+
+		workspace.onDidCreateFiles(event => {
+			event.files.forEach(file => {
+				if (file.fsPath.endsWith(".js")) {
+					this.handleJSFileCreate(file);
+				}
 			});
-		}
+		});
+
+		workspace.onDidRenameFiles(event => {
+			event.files.forEach(file => {
+				if (file.newUri.fsPath.endsWith(".js")) {
+					this.replaceCurrentClassNameWithNewOne(file.oldUri, file.newUri);
+				}
+
+				if (file.newUri.fsPath.indexOf(".") === -1) {
+					this.handleFolderRename(file.oldUri, file.newUri);
+				}
+			});
+		});
 	}
 
-	private static handleFileCreate(uri: vscode.Uri) {
+	public static syncrhoniseJSDefineCompletionItems(completionItems: vscode.CompletionItem[]) {
+		workspace.onDidCreateFiles(event => {
+			event.files.forEach(file => {
+				if (file.fsPath.endsWith(".js")) {
+					WorkspaceCompletionItemFactory.synchroniseCreate(completionItems, file);
+				}
+			});
+		});
+
+		workspace.onDidDeleteFiles(event => {
+			event.files.forEach(file => {
+				if (file.fsPath.endsWith(".js")) {
+					WorkspaceCompletionItemFactory.synchroniseDelete(completionItems, file);
+				}
+			});
+		});
+
+		workspace.onDidRenameFiles(event => {
+			event.files.forEach(file => {
+				if (file.newUri.fsPath.endsWith(".js")) {
+					WorkspaceCompletionItemFactory.synchroniseCreate(completionItems, file.newUri);
+					WorkspaceCompletionItemFactory.synchroniseDelete(completionItems, file.oldUri);
+				}
+			});
+		});
+	}
+
+	private static handleJSFileCreate(uri: vscode.Uri) {
 		const changedFileText = fs.readFileSync(uri.fsPath, "ascii");
 
 		const thisFileIsEmpty = changedFileText.length === 0;
 
 		if (thisFileIsEmpty) {
 			this.insertCodeTemplate(uri);
-		} else {
-			this.replaceCurrentClassNameWithNewOne(uri, changedFileText);
 		}
 	}
 
@@ -50,17 +96,17 @@ export class FileWatcher {
 		const UIDefineClassNameParts = standardUIDefineClassForExtension.split("/");
 		const controlName = UIDefineClassNameParts[UIDefineClassNameParts.length - 1];
 
-		return `sap.ui.define([\r\n\t\"${standardUIDefineClassForExtension}\"\r\n], function (\r\n\t${controlName}\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ${controlName}.extend(\"${classNameDotNotation}\", {\r\n\t});\r\n});`
+		return `sap.ui.define([\r\n\t\"${standardUIDefineClassForExtension}\"\r\n], function (\r\n\t${controlName}\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ${controlName}.extend(\"${classNameDotNotation}\", {\r\n\t});\r\n});`;
 	}
 
-	private static replaceCurrentClassNameWithNewOne(uri: vscode.Uri, changedFileText: string) {
-		const currentClassNameDotNotation = SyntaxAnalyzer.getCurrentClass(changedFileText);
+	private static replaceCurrentClassNameWithNewOne(oldUri: vscode.Uri, newUri: vscode.Uri) {
+		const oldClassNameDotNotation = FileReader.getClassNameFromPath(oldUri.fsPath);
 
-		if (currentClassNameDotNotation) {
-			const newClassNameDotNotation = FileReader.getClassNameFromPath(uri.fsPath);
+		if (oldClassNameDotNotation) {
+			const newClassNameDotNotation = FileReader.getClassNameFromPath(newUri.fsPath);
 			if (newClassNameDotNotation) {
-				if (currentClassNameDotNotation !== newClassNameDotNotation) {
-					this.replaceAllOccurancesInFiles(currentClassNameDotNotation, newClassNameDotNotation);
+				if (oldClassNameDotNotation !== newClassNameDotNotation) {
+					this.replaceAllOccurancesInFiles(oldClassNameDotNotation, newClassNameDotNotation);
 				}
 			}
 		}
@@ -87,7 +133,7 @@ export class FileWatcher {
 
 					//TODO: Use observer pattern here
 					if (jsFilePath.endsWith(".js")) {
-						const classNameOfTheReplacedFile = FileReader.getClassNameFromPath(jsFilePath.replace(/\//g, "\\"))
+						const classNameOfTheReplacedFile = FileReader.getClassNameFromPath(jsFilePath.replace(/\//g, "\\"));
 						if (classNameOfTheReplacedFile) {
 							UIClassFactory.setNewCodeForClass(classNameOfTheReplacedFile, file);
 						}
@@ -99,10 +145,12 @@ export class FileWatcher {
 		}
 	}
 
-	private static handleFolderCreate(uri: vscode.Uri) {
-		const newFilePaths = glob.sync(uri.fsPath.replace(/\//g, "\\") + "/**/*{.js,.xml}");
+	private static handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
+		const newFilePaths = glob.sync(newUri.fsPath.replace(/\//g, "\\") + "/**/*{.js,.xml}");
 		newFilePaths.forEach(filePath => {
-			this.handleFileCreate(vscode.Uri.file(filePath));
+			const newFileUri = vscode.Uri.file(filePath);
+			const oldFileUri = vscode.Uri.file(filePath.replace(newUri.fsPath.replace(/\\/g, "/"), oldUri.fsPath.replace(/\\/g, "/")));
+			this.replaceCurrentClassNameWithNewOne(oldFileUri, newFileUri);
 		});
 	}
 }

@@ -32,7 +32,7 @@ export class DifferentJobs {
 						part.jsType = (<JSVariable>definition).jsType;
 					}
 				}
-			})
+			});
 		}
 
 		anything.parts.forEach(part => {

@@ -1,13 +1,13 @@
 export interface UIMethod {
-	name: string,
-	params: string[],
-	returnType: string,
-	description: string
+	name: string;
+	params: string[];
+	returnType: string;
+	description: string;
 }
 export interface UIField {
-	name: string,
-	type: string | undefined,
-	description: ""
+	name: string;
+	type: string | undefined;
+	description: "";
 }
 export abstract class AbstractUIClass {
 	public className: string;

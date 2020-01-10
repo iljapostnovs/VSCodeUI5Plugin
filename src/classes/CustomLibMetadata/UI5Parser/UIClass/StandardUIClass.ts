@@ -1,4 +1,4 @@
-import { AbstractUIClass, UIMethod } from "./AbstractUIClass"
+import { AbstractUIClass, UIMethod } from "./AbstractUIClass";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
 
@@ -19,9 +19,9 @@ export class StandardUIClass extends AbstractUIClass {
 
 	private getStandardClassMethods(className: string, isParent: boolean) {
 		let classMethods:StandardClassUIMethod[] = [];
-		let SAPNode = this.findSAPNode(className);
+		const SAPNode = this.findSAPNode(className);
 		if (SAPNode) {
-			let metadata = SAPNode.getMetadataSync();
+			const metadata = SAPNode.getMetadataSync();
 			if (metadata) {
 				classMethods = metadata.rawMetadata.methods.reduce((accumulator: StandardClassUIMethod[], method:any) => {
 					if (method.visibility === "public") {
@@ -45,7 +45,7 @@ export class StandardUIClass extends AbstractUIClass {
 	}
 
 	private findSAPNode(className: string) {
-		let SAPNodes = this.nodeDAO.getAllNodesSync();
+		const SAPNodes = this.nodeDAO.getAllNodesSync();
 		return SAPNodes.find(SAPNode => SAPNode.getName() === className);
 	}
 
@@ -55,9 +55,9 @@ export class StandardUIClass extends AbstractUIClass {
 	}
 
 	private fillParentClassName() {
-		let SAPNode = this.findSAPNode(this.className);
+		const SAPNode = this.findSAPNode(this.className);
 		if (SAPNode) {
-			let metadata = SAPNode.getMetadataSync();
+			const metadata = SAPNode.getMetadataSync();
 			if (metadata) {
 				this.parentClassNameDotNotation = metadata.rawMetadata.extends;
 			}
@@ -81,5 +81,5 @@ export class StandardUIClass extends AbstractUIClass {
 }
 
 interface StandardClassUIMethod extends UIMethod {
-	isFromParent: boolean
+	isFromParent: boolean;
 }

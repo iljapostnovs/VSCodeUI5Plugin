@@ -1,11 +1,13 @@
-import * as vscode from "vscode"
+import * as vscode from "vscode";
 import * as fs from "fs";
 import { ExportToI18NCommand } from "../VSCommands/ExportToI18NCommand";
 import { FileReader } from "../Util/FileReader";
-let workspace = vscode.workspace;
+
+const workspace = vscode.workspace;
+
 interface WorkspaceJSFileConstructor {
-	fsPath: string,
-	UIDefineString: string
+	fsPath: string;
+	UIDefineString: string;
 }
 class UIDefineJSFile {
 	public fsPath:string;
@@ -17,60 +19,36 @@ class UIDefineJSFile {
 	}
 }
 export class WorkspaceCompletionItemFactory {
-	static subscribeToFileOpening(handler: Function) {
-		vscode.workspace.onDidOpenTextDocument(event => {
-			handler(event);
-		});
-	}
+	static async synchroniseCreate(completionItems: vscode.CompletionItem[], textDocument: vscode.Uri) {
+		const fileFsPath = textDocument.fsPath;
+		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
+		if (defineString) {
+			const newCompletionItem = WorkspaceCompletionItemFactory.generateCompletionItem(
+				new UIDefineJSFile({
+					fsPath: fileFsPath,
+					UIDefineString: defineString
+				})
+			);
 
-	static async synchronise(completionItems: vscode.CompletionItem[], event: vscode.TextDocument) {
-		if (event.languageId === "javascript") {
-			const fileFsPath = event.uri.fsPath;
-			const defineString = await WorkspaceCompletionItemFactory.getDefineStringFromFileFSPath(fileFsPath);
-			if (defineString) {
-				let completionItemDoesntExist = !completionItems.find(completionItem => completionItem.label.substring(1, completionItem.label.length - 1) === defineString);
-
-				if (completionItemDoesntExist) {
-					let newCompletionItem = WorkspaceCompletionItemFactory.generateCompletionItem(new UIDefineJSFile({
-						fsPath: fileFsPath,
-						UIDefineString: defineString
-					}))
-
-					completionItems.push(newCompletionItem);
-				}
-			}
+			completionItems.push(newCompletionItem);
 		}
 	}
 
-	private static async getDefineStringFromFileFSPath(FSPath: string) {
-		let defineString = "";
-
-		let editor = vscode.window.activeTextEditor;
-		if (editor) {
-			let wsFolders = workspace.workspaceFolders || [];
-			let currentlyOpenedFileFSPath = editor.document.fileName;
-			let currentWSFolder = wsFolders.find(wsFolder => currentlyOpenedFileFSPath.indexOf(wsFolder.uri.fsPath) > -1);
-
-			if (currentWSFolder) {
-				let manifests:any = await ExportToI18NCommand.findManifestsInWorkspaceFolder(currentWSFolder);
-				for (const manifest of manifests) {
-					let UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
-					let manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
-					let UI5ComponentName:string = UI5Manifest["sap.app"].id;
-
-					if (FSPath.indexOf(manifestFsPath) > -1) {
-						defineString = FSPath.replace(".js", "").replace(manifest.fsPath.replace("\\manifest.json", ""), UI5ComponentName).replace(/\./g, "/").replace(/\\/g, "/");
-					}
-				}
+	static async synchroniseDelete(completionItems: vscode.CompletionItem[], textDocument: vscode.Uri) {
+		const fileFsPath = textDocument.fsPath;
+		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
+		if (defineString) {
+			const deletedCompletionItem = completionItems.find(completionItem => completionItem.label.substring(1, completionItem.label.length - 1) === defineString);
+			if (deletedCompletionItem) {
+				completionItems.splice(completionItems.indexOf(deletedCompletionItem), 1);
 			}
 		}
-		return defineString;
 	}
 
 	async getCompletionItems() {
-		let completionItems: vscode.CompletionItem[] = [];
+		const completionItems: vscode.CompletionItem[] = [];
 
-		let JSFilesOfAllWorkspaces = await this.getAllJSFilesOfAllWorkspaces();
+		const JSFilesOfAllWorkspaces = await this.getAllJSFilesOfAllWorkspaces();
 
 		JSFilesOfAllWorkspaces.forEach((JSFile: UIDefineJSFile) => {
 			completionItems.push(WorkspaceCompletionItemFactory.generateCompletionItem(JSFile));
@@ -80,20 +58,20 @@ export class WorkspaceCompletionItemFactory {
 	}
 
 	private async getAllJSFilesOfAllWorkspaces() {
-		let workspaceJSFiles:UIDefineJSFile[] = [];
-		let wsFolders = workspace.workspaceFolders || [];
+		const workspaceJSFiles:UIDefineJSFile[] = [];
+		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
-			let manifests:any = FileReader.getManifestsInWorkspaceFolder(wsFolder);
+			const manifests:any = FileReader.getManifestsInWorkspaceFolder(wsFolder);
 
 			for (const manifest of manifests) {
-				let UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
-				let manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
-				let UI5ComponentName:string = UI5Manifest["sap.app"].id;
-				let projectJSFiles:any = await this.findJSFilesForComponentName(UI5ComponentName);
+				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
+				const manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
+				const UI5ComponentName:string = UI5Manifest["sap.app"].id;
+				const projectJSFiles:any = await this.findJSFilesForComponentName(UI5ComponentName);
 
 				projectJSFiles.forEach((projectJSFile:any) => {
 					if (projectJSFile.fsPath.indexOf(manifestFsPath) > -1) {
-						let JSFileUIDefineString = projectJSFile.fsPath.replace(".js", "").replace(manifest.fsPath.replace("\\manifest.json", ""), UI5ComponentName).replace(/\./g, "/").replace(/\\/g, "/");
+						const JSFileUIDefineString = projectJSFile.fsPath.replace(".js", "").replace(manifest.fsPath.replace("\\manifest.json", ""), UI5ComponentName).replace(/\./g, "/").replace(/\\/g, "/");
 						workspaceJSFiles.push(
 							new UIDefineJSFile({
 								fsPath: projectJSFile.fsPath,
@@ -116,8 +94,8 @@ export class WorkspaceCompletionItemFactory {
 	}
 
 	private static generateCompletionItem(workspaceJSFile: UIDefineJSFile) {
-		let insertionText = "\"" + workspaceJSFile.UIDefineString + "\"";
-		let completionItem:vscode.CompletionItem = new vscode.CompletionItem(insertionText);
+		const insertionText = "\"" + workspaceJSFile.UIDefineString + "\"";
+		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(insertionText);
 		completionItem.kind = vscode.CompletionItemKind.Class;
 		completionItem.insertText = insertionText;
 		completionItem.detail = insertionText;

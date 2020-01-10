@@ -3,14 +3,17 @@ import * as vscode from "vscode";
 export class ClearCacheCommand {
 	static subscribeToPropertyChange(context: vscode.ExtensionContext) {
 		vscode.workspace.onDidChangeConfiguration(event => {
-			let isLibraryVersionAffected = event.affectsConfiguration("ui5.plugin.ui5version");
+			const isLibraryVersionAffected = event.affectsConfiguration("ui5.plugin.ui5version");
+			const isSrcAffected = event.affectsConfiguration("ui5.plugin.src");
 			if (isLibraryVersionAffected) {
 				ClearCacheCommand.clearCache(context);
+			} else if (isSrcAffected) {
+				ClearCacheCommand.reloadWindow();
 			}
-		})
+		});
 	}
 	static clearCache(context: vscode.ExtensionContext) {
-		let cachePath = context.globalStoragePath + "\\cache.json";
+		const cachePath = context.globalStoragePath + "\\cache.json";
 		if (fs.existsSync(cachePath)) {
 			fs.unlinkSync(cachePath);
 			ClearCacheCommand.reloadWindow();

@@ -18,7 +18,7 @@ export class GeneratorFactory {
 			"xml": undefined,
 			"js": DefineGenerator
 		}
-	}
+	};
 
 	static getPropertyGenerator(language: GeneratorFactory.language) {
 		let propertyGenerator: IPropertyGenerator;
@@ -40,7 +40,7 @@ export class GeneratorFactory {
 }
 
 export namespace GeneratorFactory {
-    export enum language {
+	export enum language {
 		xml = "xml",
 		js = "js"
 	}

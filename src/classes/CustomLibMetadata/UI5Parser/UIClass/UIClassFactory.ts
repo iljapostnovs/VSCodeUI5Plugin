@@ -1,17 +1,13 @@
 import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
 import { CustomUIClass } from "./CustomUIClass";
-import * as vscode from "vscode";
 import { StandardUIClass } from "./StandardUIClass";
-import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
-
-var workspace = vscode.workspace;
 
 export interface FieldsAndMethods {
-	fields: UIField[],
-	methods: UIMethod[]
+	fields: UIField[];
+	methods: UIMethod[];
 }
 export class UIClassFactory {
-	private static UIClasses: UIClassMap = {}
+	private static UIClasses: UIClassMap = {};
 
 	private static getInstance(className: string, documentText?: string) {
 		let returnClass: AbstractUIClass;
@@ -26,29 +22,18 @@ export class UIClassFactory {
 		return returnClass;
 	}
 
-	static synchroniseCacheOnDocumentSave() {
-		//TODO: Add file watcher here
-		workspace.onDidSaveTextDocument((document) => {
-			if (document.fileName.endsWith(".js")) {
-				const currentClassNameDotNotation = SyntaxAnalyzer.getCurrentClass(document.getText());
-				if (currentClassNameDotNotation) {
-					this.setNewCodeForClass(currentClassNameDotNotation, document.getText());
-				}
-			}
-		});
-	}
-
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
 		this.UIClasses[classNameDotNotation] = UIClassFactory.getInstance(classNameDotNotation, classFileText);
 	}
 
 	public static getFieldsAndMethodsForVariable(variable: string, className: string, position: number) {
-		let fieldsAndMethods: FieldsAndMethods = {
+		const fieldsAndMethods: FieldsAndMethods = {
 			fields: [],
 			methods: []
 		};
 		const currentClass = this.getUIClass(className);
 		let currentVariableClass: string | undefined;
+
 		if (variable === "this") {
 			currentVariableClass = className;
 		} else {
@@ -65,7 +50,7 @@ export class UIClassFactory {
 
 	private static getClassFields(className: string) {
 		let fields: UIField[] = [];
-		let UIClass = this.getUIClass(className);
+		const UIClass = this.getUIClass(className);
 		fields = UIClass.fields;
 		if (UIClass.parentClassNameDotNotation) {
 			fields = fields.concat(this.getClassFields(UIClass.parentClassNameDotNotation));
@@ -84,7 +69,7 @@ export class UIClassFactory {
 
 	private static getClassMethods(className: string) {
 		let methods: UIMethod[] = [];
-		let UIClass = this.getUIClass(className);
+		const UIClass = this.getUIClass(className);
 		methods = UIClass.methods;
 		if (UIClass.parentClassNameDotNotation) {
 			methods = methods.concat(this.getClassMethods(UIClass.parentClassNameDotNotation));
@@ -122,5 +107,5 @@ export class UIClassFactory {
 }
 
 interface UIClassMap {
-	[key: string]: AbstractUIClass
+	[key: string]: AbstractUIClass;
 }

@@ -1,20 +1,11 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as glob from "glob";
-var workspace = vscode.workspace;
+const workspace = vscode.workspace;
 
 export class FileReader {
 	private static manifests:UIManifest[] = [];
 	private static viewCache:LooseObject = {};
-	static synchroniseCacheOnDocumentSave() {
-		workspace.onDidSaveTextDocument((document) => {
-			if (document.fileName.endsWith(".view.xml")) {
-				let viewContent = document.getText();
-				viewContent = this.replaceFragments(viewContent);
-				this.setNewViewContentToCache(viewContent);
-			}
-		});
-	}
 
 	public static setNewViewContentToCache(viewContent: string) {
 		const controllerName = this.getControllerNameFromView(viewContent);
@@ -79,12 +70,12 @@ export class FileReader {
 	}
 
 	private static readAllWorkspaceManifests() {
-		let wsFolders = workspace.workspaceFolders || [];
+		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
-			let manifests = this.getManifestsInWorkspaceFolder(wsFolder);
+			const manifests = this.getManifestsInWorkspaceFolder(wsFolder);
 			for (const manifest of manifests) {
-				let UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
-				let manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
+				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
+				const manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
 				const UIManifest = {
 					componentName: UI5Manifest["sap.app"].id,
 					fsPath: manifestFsPath
@@ -96,11 +87,11 @@ export class FileReader {
 
 	public static getManifestsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
 		const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
-		let manifestPaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/manifest.json");
-		let manifests: manifestPaths[] = manifestPaths.map(manifestPath => {
+		const manifestPaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/manifest.json");
+		const manifests: manifestPaths[] = manifestPaths.map(manifestPath => {
 			return {
 				fsPath: manifestPath.replace(/\//g, "\\")
-			}
+			};
 		});
 		return manifests;
 	}
@@ -130,7 +121,7 @@ export class FileReader {
 
 	private static getClassOfControlIdFromView(documentText: string, controlId: string) {
 		let controlClass = "";
-		let controlResults = new RegExp(`(?=id="${controlId}")`).exec(documentText);
+		const controlResults = new RegExp(`(?=id="${controlId}")`).exec(documentText);
 		if (controlResults) {
 			let beginIndex = controlResults.index;
 			while (beginIndex > 0 && documentText[beginIndex] !== "<") {
@@ -164,10 +155,10 @@ export class FileReader {
 	}
 
 	private static readAllViewsAndSaveInCache() {
-		let wsFolders = workspace.workspaceFolders || [];
+		const wsFolders = workspace.workspaceFolders || [];
 		const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
 		for (const wsFolder of wsFolders) {
-			let viewPaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*/*.view.xml");
+			const viewPaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*/*.view.xml");
 			viewPaths.forEach(viewPath => {
 				let viewContent = fs.readFileSync(viewPath, "ascii");
 				viewContent = this.replaceFragments(viewContent);
@@ -185,8 +176,8 @@ export class FileReader {
 		return controllerNameResult ? controllerNameResult[0] : undefined;
 	}
 
-	private static replaceFragments(documentText: string) {
-		let fragments = this.getFragments(documentText);
+	public static replaceFragments(documentText: string) {
+		const fragments = this.getFragments(documentText);
 		fragments.forEach(fragment => {
 			const fragmentName = this.getFragmentName(fragment);
 			if (fragmentName) {
@@ -230,14 +221,14 @@ export class FileReader {
 }
 
 interface UIManifest {
-	fsPath: string,
-	componentName: string
+	fsPath: string;
+	componentName: string;
 }
 
 interface manifestPaths {
-	fsPath: string
+	fsPath: string;
 }
 
 interface LooseObject {
-	[key: string]: any
+	[key: string]: any;
 }

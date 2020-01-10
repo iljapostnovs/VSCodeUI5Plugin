@@ -21,7 +21,7 @@ export class MainLooper {
 		let currentText = "";
 		let shouldContinueLoop = true;
 		let currentIndex = 0;
-		let parts:AbstractType[] = [];
+		const parts:AbstractType[] = [];
 		let emergencyStop = false;
 
 		while (shouldContinueLoop) {
@@ -138,7 +138,7 @@ export class MainLooper {
 		let charEndQuantity = 0;
 		let openingCharIndex = 0;
 		let index = 0;
-		let commentIndexRanges = this.getCommentRanges(text);
+		const commentIndexRanges = this.getCommentRanges(text);
 
 		while((!charOpened || (charBeginQuantity - charEndQuantity !== 0)) && index < text.length) {
 			if (!this.checkIfIndexIsInCommentRange(commentIndexRanges, index)) {
@@ -169,7 +169,7 @@ export class MainLooper {
 		let charQuantity = 0;
 		let openingCharIndex = 0;
 		let index = 0;
-		let commentIndexRanges = this.getCommentRanges(text);
+		const commentIndexRanges = this.getCommentRanges(text);
 
 		while((!charOpened || (charQuantity !== 2)) && index < text.length) {
 			if (!this.checkIfIndexIsInCommentRange(commentIndexRanges, index) && text[index] === char && text[index - 1] !== "\\") {
@@ -192,7 +192,7 @@ export class MainLooper {
 	}
 
 	private static getCommentRanges(text: string) {
-		let ranges: CommentRanges[] = [];
+		const ranges: CommentRanges[] = [];
 		const matches = text.match(/(\/\*(.|\s)*?\*\/)|(\/\/.*)/g);
 		if (matches) {
 			matches.forEach(match => {
@@ -201,7 +201,7 @@ export class MainLooper {
 				ranges.push({
 					from: from,
 					to: to
-				})
+				});
 			});
 		}
 
@@ -216,6 +216,6 @@ export class MainLooper {
 }
 
 export interface CommentRanges {
-	from: number,
-	to: number
+	from: number;
+	to: number;
 }

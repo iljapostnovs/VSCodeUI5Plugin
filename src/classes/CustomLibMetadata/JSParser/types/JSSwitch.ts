@@ -3,7 +3,7 @@ import { MainLooper } from "../MainLooper";
 
 export class JSSwitch extends AbstractType {
 	public parseBodyText() {
-		let parsedBodyText = this.body;
+		const parsedBodyText = this.body;
 
 		//if body
 		const bracketBodyOfWhile = MainLooper.getEndOfChar("{", "}", parsedBodyText);
@@ -16,6 +16,6 @@ export class JSSwitch extends AbstractType {
 	public parseBody() {}
 
 	static isASwitchStatement(text: string) {
-		return /\sswitch(\s|{)/.test(text)
+		return /\sswitch(\s|{)/.test(text);
 	}
 }

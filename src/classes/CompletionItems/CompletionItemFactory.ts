@@ -27,7 +27,7 @@ export class CompletionItemFactory {
 			let SAPNodes: SAPNode[];
 			SAPNodes = await this.nodeDAO.getAllNodes();
 
-			let metadataProvider: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
+			const metadataProvider: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
 			await metadataProvider.preloadLibs(progress, context);
 			console.log("Libs are preloaded");
 
@@ -67,11 +67,11 @@ export class CompletionItemFactory {
 		}
 
 		if (node.getKind() === "class" && !node.getIsDepricated()) {
-			let metadata = await node.getMetadata();
-			let stereotype = metadata.getUI5Metadata() ? metadata.getUI5Metadata().stereotype : undefined;
+			const metadata = await node.getMetadata();
+			const stereotype = metadata.getUI5Metadata() ? metadata.getUI5Metadata().stereotype : undefined;
 
 			if (metadata.getUI5Metadata() && (stereotype === "control" || stereotype === "element")) {
-				let completionItem = await this.generateClassAggregationCompletionItemFromSAPNode(node);
+				const completionItem = await this.generateClassAggregationCompletionItemFromSAPNode(node);
 				completionItems.push(completionItem);
 			}
 		}
@@ -80,13 +80,13 @@ export class CompletionItemFactory {
 	}
 
 	private async generateClassAggregationCompletionItemFromSAPNode(node: SAPNode) {
-		let completionItem:vscode.CompletionItem = new vscode.CompletionItem(node.getName());
+		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(node.getName());
 		completionItem.kind = vscode.CompletionItemKind.Class;
 		completionItem.insertText = await this.generateClassInsertTextFor(node);
-		let metadata = await node.getMetadata();
+		const metadata = await node.getMetadata();
 		completionItem.detail = metadata.rawMetadata.title;
 
-		let mardownString = new vscode.MarkdownString();
+		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
 		mardownString.appendMarkdown("[ui5.com](https://ui5.sap.com/#/api/" + node.getName() + ")\n");
 		mardownString.appendMarkdown(metadata.rawMetadata.description);
@@ -96,14 +96,14 @@ export class CompletionItemFactory {
 	}
 
 	private async generateClassInsertTextFor(node: SAPNode) {
-		let propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(this.language);
-		let aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(this.language);
-		let properties: string = await propertyGenerator.generateProperties(node);
-		let aggregations: string = await aggregationGenerator.generateAggregations(node);
+		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(this.language);
+		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(this.language);
+		const properties: string = await propertyGenerator.generateProperties(node);
+		const aggregations: string = await aggregationGenerator.generateAggregations(node);
 
 		let insertText: string = node.getDisplayName() + "\n";
 		insertText += properties;
-		insertText += ">\n"
+		insertText += ">\n";
 		insertText += aggregations;
 
 		insertText += "</" + node.getDisplayName() + ">";
@@ -111,10 +111,10 @@ export class CompletionItemFactory {
 	}
 
 	public async generateUIDefineCompletionItems() {
-		let workspaceCompletionItemDAO = new WorkspaceCompletionItemFactory();
+		const workspaceCompletionItemDAO = new WorkspaceCompletionItemFactory();
 		let completionItems:vscode.CompletionItem[] = [];
 
-		let SAPNodes: SAPNode[] = await this.nodeDAO.getAllNodes();
+		const SAPNodes: SAPNode[] = await this.nodeDAO.getAllNodes();
 
 		for (const node of SAPNodes) {
 			completionItems = completionItems.concat(await this.recursiveUIDefineCompletionItemGeneration(node));
@@ -127,18 +127,18 @@ export class CompletionItemFactory {
 
 	private async recursiveUIDefineCompletionItemGeneration(node: SAPNode) {
 		let completionItems:vscode.CompletionItem[] = [];
-		let defineGenerator = GeneratorFactory.getDefineGenerator();
-		let insertText = await defineGenerator.generateDefineString(node);
+		const defineGenerator = GeneratorFactory.getDefineGenerator();
+		const insertText = await defineGenerator.generateDefineString(node);
 
 		if (insertText) {
-			let metadata = await node.getMetadata();
+			const metadata = await node.getMetadata();
 
-			let completionItem = new vscode.CompletionItem(insertText);
+			const completionItem = new vscode.CompletionItem(insertText);
 			completionItem.kind = vscode.CompletionItemKind.Class;
 			completionItem.insertText = insertText;
 			completionItem.detail = metadata.rawMetadata.title;
 
-			let mardownString = new vscode.MarkdownString();
+			const mardownString = new vscode.MarkdownString();
 			mardownString.isTrusted = true;
 			mardownString.appendMarkdown("[UI5 API](https://ui5.sap.com/#/api/" + node.getName() + ")\n");
 			mardownString.appendMarkdown(metadata.rawMetadata.description);
@@ -148,7 +148,7 @@ export class CompletionItemFactory {
 		}
 
 		if (node.nodes) {
-			for (let nextNode of node.nodes) {
+			for (const nextNode of node.nodes) {
 				completionItems = completionItems.concat(await this.recursiveUIDefineCompletionItemGeneration(nextNode));
 			}
 		}
@@ -168,7 +168,7 @@ export class CompletionItemFactory {
 
 	private generateCompletionItemsFromUICompletionItems(UICompletionItems: UICompletionItem[]) {
 		return UICompletionItems.map(classMethod => {
-			let completionItem:vscode.CompletionItem = new vscode.CompletionItem(classMethod.name);
+			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(classMethod.name);
 			completionItem.kind = classMethod.type;
 			completionItem.insertText = classMethod.name;
 			completionItem.detail = classMethod.description;
@@ -180,7 +180,7 @@ export class CompletionItemFactory {
 
 	public generateUIClassCompletionItems() {
 		let completionItems:vscode.CompletionItem[] = [];
-		let fieldsAndMethods = SyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable();
+		const fieldsAndMethods = SyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable();
 		if (fieldsAndMethods) {
 			completionItems = this.generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods);
 		}
@@ -190,7 +190,7 @@ export class CompletionItemFactory {
 
 	private generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods: FieldsAndMethods) {
 		let completionItems = fieldsAndMethods.methods.map(classMethod => {
-			let completionItem:vscode.CompletionItem = new vscode.CompletionItem(classMethod.name);
+			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(classMethod.name);
 			completionItem.kind = vscode.CompletionItemKind.Method;
 			completionItem.insertText = classMethod.name;
 			completionItem.detail = classMethod.name;
@@ -200,7 +200,7 @@ export class CompletionItemFactory {
 		});
 
 		completionItems = completionItems.concat(fieldsAndMethods.fields.map(classField => {
-			let completionItem:vscode.CompletionItem = new vscode.CompletionItem(classField.name);
+			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(classField.name);
 			completionItem.kind = vscode.CompletionItemKind.Field;
 			completionItem.insertText = classField.name;
 			completionItem.detail = classField.name;

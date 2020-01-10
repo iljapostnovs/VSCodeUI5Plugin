@@ -8,9 +8,9 @@ export class TryCatchFinally extends AbstractType {
 		//if body
 		let bodyOfTry = MainLooper.getEndOfChar("{", "}", parsedBodyText);
 		bodyOfTry = parsedBodyText.substring(0, parsedBodyText.indexOf(bodyOfTry) + bodyOfTry.length);
-		let restOfTheBody = parsedBodyText.substring(parsedBodyText.indexOf(bodyOfTry) + bodyOfTry.length, parsedBodyText.length);
+		const restOfTheBody = parsedBodyText.substring(parsedBodyText.indexOf(bodyOfTry) + bodyOfTry.length, parsedBodyText.length);
 
-		let elseBody = this.findElseBody(restOfTheBody);
+		const elseBody = this.findElseBody(restOfTheBody);
 
 		parsedBodyText = bodyOfTry + elseBody;
 		this.body = parsedBodyText;
@@ -21,9 +21,9 @@ export class TryCatchFinally extends AbstractType {
 	private findElseBody(body: string) {
 		let elseBody = "";
 		if (body.startsWith(" catch") || body.startsWith(" finally")) {
-			let bracketBodyOfElseStatement = MainLooper.getEndOfChar("{", "}", body);
+			const bracketBodyOfElseStatement = MainLooper.getEndOfChar("{", "}", body);
 			elseBody = body.substring(0, body.indexOf(bracketBodyOfElseStatement) + bracketBodyOfElseStatement.length);
-			let restOfTheBody = body.substring(elseBody.length, body.length);
+			const restOfTheBody = body.substring(elseBody.length, body.length);
 
 			elseBody += this.findElseBody(restOfTheBody);
 		}

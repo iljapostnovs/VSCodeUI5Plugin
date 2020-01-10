@@ -11,7 +11,7 @@ export class JSString extends AbstractType {
 		const stringBody = MainLooper.getCharPair(myQuoteType, this.body);
 		this.body = this.body.substring(0, this.body.indexOf(stringBody) + stringBody.length);
 
-		let lastChar = this.body[this.body.length - 1];
+		const lastChar = this.body[this.body.length - 1];
 		this.parsedBody = (lastChar === ";" || lastChar === ",") ? this.body.substring(0, this.body.length - 1) : this.body;
 		this.parsedBody = this.parsedBody.trim();
 	}
