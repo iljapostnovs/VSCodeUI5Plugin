@@ -58,7 +58,7 @@ export class SAPNodeDAO {
 
 		const globalStoragePath = FileReader.globalStoragePath;
 		if (globalStoragePath) {
-			const cachePath = globalStoragePath + "\\cache_apiindex.json";
+			const cachePath = globalStoragePath + "\\cache_appindex.json";
 
 			if (fs.existsSync(cachePath)) {
 				cacheFromFile = JSON.parse(fs.readFileSync(cachePath, "utf8"));
@@ -71,7 +71,7 @@ export class SAPNodeDAO {
 	private cacheApiIndex() {
 		const globalStoragePath = FileReader.globalStoragePath;
 		if (globalStoragePath) {
-			const cachePath = globalStoragePath + "\\cache_apiindex.json";
+			const cachePath = globalStoragePath + "\\cache_appindex.json";
 			if (!fs.existsSync(cachePath)) {
 				if (!fs.existsSync(globalStoragePath)) {
 					fs.mkdirSync(globalStoragePath);
