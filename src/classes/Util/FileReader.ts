@@ -6,6 +6,7 @@ const workspace = vscode.workspace;
 export class FileReader {
 	private static manifests:UIManifest[] = [];
 	private static viewCache:LooseObject = {};
+	public static globalStoragePath:string | undefined;
 
 	public static setNewViewContentToCache(viewContent: string) {
 		const controllerName = this.getControllerNameFromView(viewContent);

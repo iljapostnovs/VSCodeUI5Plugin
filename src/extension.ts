@@ -6,6 +6,7 @@ import { DefinitionProviderRegistrator } from "./classes/Util/DefinitionProvider
 import { FileWatcher } from "./classes/Util/FileWatcher";
 
 export async function activate(context: vscode.ExtensionContext) {
+	FileReader.globalStoragePath = context.globalStoragePath;
 	const manifests = FileReader.getAllManifests();
 
 	if (manifests.length > 0) {
