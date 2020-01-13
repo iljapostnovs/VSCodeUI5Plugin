@@ -46,7 +46,6 @@ export class SAPNodeDAO {
 	}
 
 	private async readAllNodes() {
-		debugger;
 		this.nodes = this.getApiIndexFromCache();
 		if (!this.nodes) {
 			await this.fetchApiIndex();
