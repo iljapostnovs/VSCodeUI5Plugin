@@ -13,11 +13,16 @@ export class ClearCacheCommand {
 		});
 	}
 	static clearCache(context: vscode.ExtensionContext) {
-		const cachePath = context.globalStoragePath + "\\cache.json";
+		let cachePath = context.globalStoragePath + "\\cache.json";
 		if (fs.existsSync(cachePath)) {
 			fs.unlinkSync(cachePath);
-			ClearCacheCommand.reloadWindow();
 		}
+		cachePath = context.globalStoragePath + + "\\cache_appindex.json";
+		if (fs.existsSync(cachePath)) {
+			fs.unlinkSync(cachePath);
+		}
+
+		ClearCacheCommand.reloadWindow();
 	}
 
 	private static reloadWindow() {

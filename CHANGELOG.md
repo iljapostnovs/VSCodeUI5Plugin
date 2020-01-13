@@ -27,3 +27,7 @@
 ## 0.8.2 (09-01-2020)
 * Bugfixes
 * Opening of the standard library documentation now happens on "Go to type definition" command instead of "Go to definition"
+
+## 0.8.3 (13-01-2020)
+* Proxy support is added. Now ui5.sap.com will be requested using environment variables https_proxy or http_proxy, if there are any.
+* Now everything what is loaded from ui5.sap.com is cached.

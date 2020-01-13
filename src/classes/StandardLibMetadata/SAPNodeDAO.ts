@@ -1,6 +1,8 @@
 import { SAPNode } from "./SAPNode";
 import rp from "request-promise";
 import * as vscode from "vscode";
+import fs from "fs";
+import { FileReader } from "../Util/FileReader";
 
 export class SAPNodeDAO {
 	private static nodePath:string = `https://ui5.sap.com/${vscode.workspace.getConfiguration("ui5.plugin").get("ui5version")}/docs/api/api-index.json`;
@@ -43,9 +45,53 @@ export class SAPNodeDAO {
 		}
 	}
 
-	private readAllNodes() {
+	private async readAllNodes() {
+		this.nodes = this.getApiIndexFromCache();
+		if (!this.nodes) {
+			await this.fetchApiIndex();
+			this.cacheApiIndex();
+		}
+	}
+
+	private getApiIndexFromCache() {
+		let cacheFromFile;
+
+		const globalStoragePath = FileReader.globalStoragePath;
+		if (globalStoragePath) {
+			const cachePath = globalStoragePath + "\\cache_appindex.json";
+
+			if (fs.existsSync(cachePath)) {
+				cacheFromFile = JSON.parse(fs.readFileSync(cachePath, "utf8"));
+			}
+		}
+
+		return cacheFromFile;
+	}
+
+	private cacheApiIndex() {
+		const globalStoragePath = FileReader.globalStoragePath;
+		if (globalStoragePath) {
+			const cachePath = globalStoragePath + "\\cache_appindex.json";
+			if (!fs.existsSync(cachePath)) {
+				if (!fs.existsSync(globalStoragePath)) {
+					fs.mkdirSync(globalStoragePath);
+				}
+				fs.writeFileSync(cachePath, "", "utf8");
+			}
+
+			const cache = JSON.stringify(this.nodes);
+			fs.writeFileSync(cachePath, cache, "utf8");
+		}
+	}
+
+	private fetchApiIndex() {
 		return new Promise((resolve: any, reject: any) => {
-			rp(SAPNodeDAO.nodePath)
+			const proxy = process.env.PROXY_HTTP || process.env.PROXY_HTTPS;
+			const options = proxy ? {
+				proxy: proxy
+			} : undefined;
+
+			rp(SAPNodeDAO.nodePath, options)
 			.then((data: any) => {
 				this.nodes = JSON.parse(data);
 				resolve();

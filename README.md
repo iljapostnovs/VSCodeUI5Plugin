@@ -104,3 +104,7 @@ The same goes for function return data type. Use `@returns {UI5Class} UI5ClassVa
 * All your strings in sap.ui.define are not Relative (e.g. "./BaseController")
 * Name of the class of the UI5Class is the same as file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
 * No ES6+ features are used (except const/let and arrow functions)
+* You have an access to ui5.sap.com for standard lib metadata preload
+
+### Proxy
+If HTTP_PROXY or HTTPS_PROXY environment variables are set, ui5.sap.com will be requested using the proxy.
