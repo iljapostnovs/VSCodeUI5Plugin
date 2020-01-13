@@ -86,7 +86,12 @@ export class SAPNodeDAO {
 
 	private fetchApiIndex() {
 		return new Promise((resolve: any, reject: any) => {
-			rp(SAPNodeDAO.nodePath)
+			const proxy = process.env.PROXY_HTTP || process.env.PROXY_HTTPS;
+			const options = proxy ? {
+				proxy: proxy
+			} : undefined;
+
+			rp(SAPNodeDAO.nodePath, options)
 			.then((data: any) => {
 				this.nodes = JSON.parse(data);
 				resolve();

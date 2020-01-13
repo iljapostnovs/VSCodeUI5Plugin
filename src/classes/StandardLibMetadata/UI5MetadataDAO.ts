@@ -109,7 +109,12 @@ export class UI5MetadataDAO {
 				}
 			} else {
 				const readPath: string = `https://ui5.sap.com/${vscode.workspace.getConfiguration("ui5.plugin").get("ui5version")}/test-resources/${lib.replace(/\./g, "/")}/designtime/apiref/api.json`;
-				namespaceDesignTimes[lib] = rp(readPath)
+				const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+				const options: rp.RequestPromiseOptions | undefined = proxy ? {
+					proxy: proxy
+				} : undefined;
+
+				namespaceDesignTimes[lib] = rp(readPath, options)
 				.then((data: any) => {
 					try {
 						namespaceDesignTimes[lib] = JSON.parse(data);
