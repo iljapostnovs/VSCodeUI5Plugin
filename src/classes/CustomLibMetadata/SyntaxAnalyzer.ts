@@ -131,13 +131,14 @@ export class SyntaxAnalyzer {
 		let deltaToReturn = iDelta;
 		if (vscode.window.activeTextEditor) {
 			const startingPosition = vscode.window.activeTextEditor.selection.start;
+			const currentPosition = vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start);
 			let selectedText = "";
 			let parenthesesCount = 0;
 			let ignoreParentheses = false;
 
-			let sCurrentChar = selectedText[iDelta > 0 ? selectedText.length - 1 : 0];
+			let sCurrentChar = selectedText[0];
 			do {
-				sCurrentChar = selectedText[iDelta > 0 ? selectedText.length - 1 : 0];
+				sCurrentChar = selectedText[0];
 
 				ignoreParentheses = parenthesesCount > 0;
 				if (sCurrentChar === ")") {
@@ -145,7 +146,10 @@ export class SyntaxAnalyzer {
 				} else if (sCurrentChar === "(") {
 					parenthesesCount--;
 				}
-				const range = new vscode.Range(startingPosition.translate(0, deltaToReturn < 0 ? deltaToReturn : 0), startingPosition.translate(0, deltaToReturn > 0 ? deltaToReturn : 0));
+
+				const range = new vscode.Range(startingPosition.translate({
+					characterDelta: deltaToReturn
+				}), startingPosition);
 				selectedText = vscode.window.activeTextEditor.document.getText(range);
 				if (!this.isSeparator(sCurrentChar, ignoreParentheses)) {
 					deltaToReturn += iDelta;
@@ -153,7 +157,7 @@ export class SyntaxAnalyzer {
 					deltaToReturn += -iDelta;
 				}
 
-			} while (!this.isSeparator(sCurrentChar, ignoreParentheses));
+			} while (!this.isSeparator(sCurrentChar, ignoreParentheses) && currentPosition + deltaToReturn !== 0);
 
 		}
 		deltaToReturn += -iDelta;

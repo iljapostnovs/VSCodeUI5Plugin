@@ -96,7 +96,7 @@ export class FileWatcher {
 		const UIDefineClassNameParts = standardUIDefineClassForExtension.split("/");
 		const controlName = UIDefineClassNameParts[UIDefineClassNameParts.length - 1];
 
-		return `sap.ui.define([\r\n\t\"${standardUIDefineClassForExtension}\"\r\n], function (\r\n\t${controlName}\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ${controlName}.extend(\"${classNameDotNotation}\", {\r\n\t});\r\n});`;
+		return `sap.ui.define([\r\n\t\"${standardUIDefineClassForExtension}\"\r\n], function(\r\n\t${controlName}\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ${controlName}.extend(\"${classNameDotNotation}\", {\r\n\t});\r\n});`
 	}
 
 	private static replaceCurrentClassNameWithNewOne(oldUri: vscode.Uri, newUri: vscode.Uri) {
