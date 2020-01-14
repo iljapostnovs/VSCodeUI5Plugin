@@ -16,7 +16,7 @@ interface UIDefine {
 export class CustomUIClass extends AbstractUIClass {
 	public classBody: JSObject | undefined;
 	public classText: string = "";
-	private UIDefine: UIDefine[] = [];
+	public UIDefine: UIDefine[] = [];
 	public jsPasredBody: AbstractType | undefined;
 
 	constructor(className: string, documentText?: string) {
