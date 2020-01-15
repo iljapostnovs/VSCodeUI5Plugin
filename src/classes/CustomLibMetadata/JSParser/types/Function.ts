@@ -131,7 +131,7 @@ export class JSFunction extends AbstractType {
 		//es6
 		//TODO: arg parsing for single argument is not working
 		if (!isFunction && fullJSText.indexOf("=>") > -1) {
-			const textBeforeArrow = fullJSText.substring(0, fullJSText.indexOf("=>") + 2);
+			const textBeforeArrow = fullJSText.substring(0, fullJSText.indexOf("=>") + 2).trim();
 			const results = /([a-zA-Z]\w*|\([a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\))\s?=>/.exec(textBeforeArrow);
 			if (results && results[0] === textBeforeArrow) {
 				isFunction = true;

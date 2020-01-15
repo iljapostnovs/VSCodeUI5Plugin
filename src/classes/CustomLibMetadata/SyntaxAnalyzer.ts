@@ -54,6 +54,9 @@ export class SyntaxAnalyzer {
 					classNameOfTheVariable = UIClassName;
 				} else {
 					UIClass = UIClassFactory.getUIClass(UIClassName);
+					if (variableParts.length === 1) {
+						variableParts = ["this"].concat(variableParts);
+					}
 					classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, UIClass, undefined, position);
 				}
 			} else if (usedPartQuantity < variableParts.length) {
@@ -114,7 +117,12 @@ export class SyntaxAnalyzer {
 		let currentVariable = "";
 		if (vscode.window.activeTextEditor) {
 			const iDeltaStart = this.getDeltaOfVariableBegining(-1);
-			const rangeOfVariable = new vscode.Range(vscode.window.activeTextEditor.selection.start.translate(0, iDeltaStart), vscode.window.activeTextEditor.selection.start);
+			const rangeOfVariable = new vscode.Range(
+				vscode.window.activeTextEditor.selection.start.translate({
+					characterDelta: iDeltaStart
+				}),
+				vscode.window.activeTextEditor.selection.start
+			);
 			currentVariable = vscode.window.activeTextEditor.document.getText(rangeOfVariable);
 			currentVariable = currentVariable.replace(".prototype", "");
 
@@ -131,7 +139,6 @@ export class SyntaxAnalyzer {
 		let deltaToReturn = iDelta;
 		if (vscode.window.activeTextEditor) {
 			const startingPosition = vscode.window.activeTextEditor.selection.start;
-			const currentPosition = vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start);
 			let selectedText = "";
 			let parenthesesCount = 0;
 			let ignoreParentheses = false;
@@ -157,8 +164,7 @@ export class SyntaxAnalyzer {
 					deltaToReturn += -iDelta;
 				}
 
-			} while (!this.isSeparator(sCurrentChar, ignoreParentheses) && currentPosition + deltaToReturn !== 0);
-
+			} while (!this.isSeparator(sCurrentChar, ignoreParentheses) && startingPosition.character + deltaToReturn > 0);
 		}
 		deltaToReturn += -iDelta;
 
@@ -167,7 +173,7 @@ export class SyntaxAnalyzer {
 
 	private static isSeparator(char: string, ignoreParentheses: boolean) {
 		//TODO: sync with FileReader
-		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r" || char === "=" || (char === "(" && !ignoreParentheses);
+		return char === "," || char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r" || char === "=" || (char === "(" && !ignoreParentheses);
 	}
 	/* =========================================================== */
 	/* end: variable methods                                       */
