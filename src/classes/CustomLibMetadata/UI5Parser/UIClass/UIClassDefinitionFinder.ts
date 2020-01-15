@@ -74,7 +74,7 @@ export class UIClassDefinitionFinder {
 		if (textEditor) {
 			const document = textEditor.document;
 			const currentPositionOffset = document.offsetAt(textEditor.selection.start);
-			const currentClassName = SyntaxAnalyzer.getCurrentClass();
+			const currentClassName = SyntaxAnalyzer.getCurrentClassName();
 
 			if (currentClassName) {
 				const currentClass = UIClassFactory.getUIClass(currentClassName);

@@ -10,7 +10,7 @@ export class SyntaxAnalyzer {
 		if (!variable) {
 			variable = this.getCurrentVariable();
 		}
-		const currentClassName = this.getCurrentClass();
+		const currentClassName = this.getCurrentClassName();
 		const variableParts = variable.split(".");
 
 		const activeTextEditor = vscode.window.activeTextEditor;
@@ -92,7 +92,7 @@ export class SyntaxAnalyzer {
 			let documentText = vscode.window.activeTextEditor.document.getText();
 			const position = vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start);
 
-			const currentClassName = this.getCurrentClass();
+			const currentClassName = this.getCurrentClassName();
 			if (currentClassName) {
 				documentText = documentText.substring(0, position - 1) + ";" + documentText.substring(position, documentText.length);
 				UIClassFactory.setNewCodeForClass(currentClassName, documentText);
@@ -186,7 +186,7 @@ export class SyntaxAnalyzer {
 	static getUICompletionItemsWithUniqueViewIds() {
 		let completionItems: UICompletionItem[] = [];
 
-		const currentClass = this.getCurrentClass();
+		const currentClass = this.getCurrentClassName();
 		if (currentClass) {
 			const view = FileReader.getViewText(currentClass);
 			if (view) {
@@ -211,7 +211,7 @@ export class SyntaxAnalyzer {
 		return completionItems;
 	}
 
-	public static getCurrentClass(documentText?: string) {
+	public static getCurrentClassName(documentText?: string) {
 		let returnClassName;
 		if (!documentText && vscode.window.activeTextEditor) {
 			documentText = vscode.window.activeTextEditor.document.getText();

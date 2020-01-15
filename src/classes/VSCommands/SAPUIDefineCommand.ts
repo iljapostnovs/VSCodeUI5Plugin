@@ -11,9 +11,10 @@ export class SAPUIDefineCommand {
 
 		if (editor) {
 			const document = editor.document;
-			const currentClassName = SyntaxAnalyzer.getCurrentClass();
+			const currentClassName = SyntaxAnalyzer.getCurrentClassName();
 
 			if (currentClassName) {
+				UIClassFactory.setNewCodeForClass(currentClassName, document.getText());
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				if (UIClass.jsPasredBody) {
 					const SAPUIDefine = <JSFunctionCall>(UIClass.jsPasredBody);
