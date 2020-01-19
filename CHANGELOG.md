@@ -32,6 +32,6 @@
 * Proxy support is added. Now ui5.sap.com will be requested using environment variables https_proxy or http_proxy, if there are any.
 * Now everything what is loaded from ui5.sap.com is cached.
 
-## 0.8.4 (15-01-2020)
+## 0.8.4 (19-01-2020)
 * Bugfixes
-* Moving params of sap.ui.define now works more stable
+* Moving params of sap.ui.define is more trustworthy now
