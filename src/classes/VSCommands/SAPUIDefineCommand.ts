@@ -1,47 +1,62 @@
 import * as vscode from "vscode";
+import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
+import { CustomUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
+import { JSFunctionCall } from "../CustomLibMetadata/JSParser/types/FunctionCall";
+import { JSFunction } from "../CustomLibMetadata/JSParser/types/Function";
+import { JSString } from "../CustomLibMetadata/JSParser/types/String";
 export class SAPUIDefineCommand {
 	static insertUIDefine() {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
 			const document = editor.document;
-			const documentText: string = document.getText();
+			const currentClassName = SyntaxAnalyzer.getCurrentClassName();
 
-			const regexDeleteStart = /sap\.ui\.define\(\[(.|\n|\r)*\],.?function.?\(/.exec(documentText);
-			const regexDeleteEnd = /sap\.ui\.define\(\[(.|\n|\r)*\],.?function.?\((.|\n|\r)*?\)/.exec(documentText);
-			if (regexDeleteStart && regexDeleteStart.length > 0 && regexDeleteEnd && regexDeleteEnd.length > 0) {
-				const deleteIndexStart: number = regexDeleteStart.length > 0 ? regexDeleteStart[0].length : 0;
-				const deleteIndexEnd: number = regexDeleteEnd.length > 0 ? regexDeleteEnd[0].length -1 : 0;
+			if (currentClassName) {
+				UIClassFactory.setNewCodeForClass(currentClassName, document.getText());
+				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+				if (UIClass.jsPasredBody) {
+					const SAPUIDefine = <JSFunctionCall>(UIClass.jsPasredBody);
+					const SAPUIDefineCallbackFn = <JSFunction>(SAPUIDefine.parts[1]);
+					if (SAPUIDefineCallbackFn && SAPUIDefine.parts.length > 0) {
+						let insertIndexStart: number | undefined;
+						let deleteIndexStart:  number | undefined;
+						let deleteIndexEnd:  number | undefined;
+						let tabAddition = "";
+						let newLineAddition = "";
 
-				const defineBegin: string = "sap.ui.define([";
-				const indexDefineBegin = documentText.indexOf(defineBegin) + defineBegin.length;
-				const indexDefineEnd = documentText.indexOf("], function");
-				const classModulesInDefine: string[] = documentText.substring(indexDefineBegin, indexDefineEnd).split(",");
-				const classNamesInDefine: string[] = classModulesInDefine.map((moduleName: string) => {
-					if (moduleName.indexOf("// eslint") > -1) {
-						moduleName = moduleName.substring(0, moduleName.indexOf("// eslint"));
-					}
-					let parts: string[] = moduleName.split("/");
-					parts = parts.map(part => part.trim());
-					return parts[parts.length - 1];
-				});
-				let insertText: string = "\n" + classNamesInDefine.reduce((accumulator: string, className: string) => {
-					accumulator += "	" + className.substring(0, className.length - 1) + ",\n";
-					return accumulator;
-				}, "");
-
-				const regexResult = /sap\.ui\.define\(\[(.|\n|\r)*\],.?function.?\(/.exec(documentText);
-				if (regexResult && insertText) {
-					insertText = insertText.substring(0, insertText.length - 2);
-					insertText += "\n";
-					const insertIndexStart: number = regexResult.length > 0 ? regexResult[0].length : 0;
-
-					editor.edit(editBuilder => {
-						if (editor) {
-							editBuilder.delete(new vscode.Range(document.positionAt(deleteIndexStart), document.positionAt(deleteIndexEnd)));
-							editBuilder.insert(document.positionAt(insertIndexStart), insertText);
+						if (SAPUIDefineCallbackFn.params.length === 0) {
+							const EMPTY_PARAMS = "()";
+							insertIndexStart = SAPUIDefineCallbackFn.positionBegin + SAPUIDefineCallbackFn.getFullBody().indexOf(EMPTY_PARAMS) + 1;
+							tabAddition = "\n\t";
+							newLineAddition = "\n";
+						} else {
+							deleteIndexStart = SAPUIDefineCallbackFn.params[0].positionBegin;
+							deleteIndexEnd = SAPUIDefineCallbackFn.params[SAPUIDefineCallbackFn.params.length - 1].positionEnd;
+							insertIndexStart = deleteIndexStart;
 						}
-					});
+
+						const UIDefineParamsText = tabAddition + SAPUIDefine.parts[0].parts.reduce((accumulator: string[], part) => {
+							if (part instanceof JSString) {
+								const classNameParts = part.parsedBody.substring(1, part.parsedBody.length - 1).split("/");
+								const className = classNameParts[classNameParts.length - 1];
+								accumulator.push(className);
+							}
+							return accumulator;
+						}, []).join(",\n\t") + newLineAddition;
+
+						editor.edit(editBuilder => {
+							if (editor) {
+								if (deleteIndexStart && deleteIndexEnd) {
+									editBuilder.delete(new vscode.Range(document.positionAt(deleteIndexStart), document.positionAt(deleteIndexEnd)));
+								}
+								if (insertIndexStart) {
+									editBuilder.insert(document.positionAt(insertIndexStart), UIDefineParamsText);
+								}
+							}
+						});
+					}
 				}
 			}
 		}

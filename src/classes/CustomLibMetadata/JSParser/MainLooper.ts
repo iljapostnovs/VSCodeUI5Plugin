@@ -193,16 +193,17 @@ export class MainLooper {
 
 	private static getCommentRanges(text: string) {
 		const ranges: CommentRanges[] = [];
-		const matches = text.match(/(\/\*(.|\s)*?\*\/)|(\/\/.*)/g);
-		if (matches) {
-			matches.forEach(match => {
-				const from = text.indexOf(match);
-				const to = from + match.length;
-				ranges.push({
-					from: from,
-					to: to
-				});
+		const rComments = /(\/\*(.|\s)*?\*\/)|(\/\/.*)/g;
+		let results = rComments.exec(text);
+		while (results) {
+			const from = results.index;
+			const to = from + results[0].length;
+			ranges.push({
+				from: from,
+				to: to
 			});
+
+			results = rComments.exec(text);
 		}
 
 		return ranges;

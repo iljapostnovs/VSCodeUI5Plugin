@@ -10,7 +10,7 @@ export class SyntaxAnalyzer {
 		if (!variable) {
 			variable = this.getCurrentVariable();
 		}
-		const currentClassName = this.getCurrentClass();
+		const currentClassName = this.getCurrentClassName();
 		const variableParts = variable.split(".");
 
 		const activeTextEditor = vscode.window.activeTextEditor;
@@ -54,6 +54,9 @@ export class SyntaxAnalyzer {
 					classNameOfTheVariable = UIClassName;
 				} else {
 					UIClass = UIClassFactory.getUIClass(UIClassName);
+					if (variableParts.length === 1) {
+						variableParts = ["this"].concat(variableParts);
+					}
 					classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, UIClass, undefined, position);
 				}
 			} else if (usedPartQuantity < variableParts.length) {
@@ -89,7 +92,7 @@ export class SyntaxAnalyzer {
 			let documentText = vscode.window.activeTextEditor.document.getText();
 			const position = vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start);
 
-			const currentClassName = this.getCurrentClass();
+			const currentClassName = this.getCurrentClassName();
 			if (currentClassName) {
 				documentText = documentText.substring(0, position - 1) + ";" + documentText.substring(position, documentText.length);
 				UIClassFactory.setNewCodeForClass(currentClassName, documentText);
@@ -114,7 +117,12 @@ export class SyntaxAnalyzer {
 		let currentVariable = "";
 		if (vscode.window.activeTextEditor) {
 			const iDeltaStart = this.getDeltaOfVariableBegining(-1);
-			const rangeOfVariable = new vscode.Range(vscode.window.activeTextEditor.selection.start.translate(0, iDeltaStart), vscode.window.activeTextEditor.selection.start);
+			const rangeOfVariable = new vscode.Range(
+				vscode.window.activeTextEditor.selection.start.translate({
+					characterDelta: iDeltaStart
+				}),
+				vscode.window.activeTextEditor.selection.start
+			);
 			currentVariable = vscode.window.activeTextEditor.document.getText(rangeOfVariable);
 			currentVariable = currentVariable.replace(".prototype", "");
 
@@ -135,9 +143,9 @@ export class SyntaxAnalyzer {
 			let parenthesesCount = 0;
 			let ignoreParentheses = false;
 
-			let sCurrentChar = selectedText[iDelta > 0 ? selectedText.length - 1 : 0];
+			let sCurrentChar = selectedText[0];
 			do {
-				sCurrentChar = selectedText[iDelta > 0 ? selectedText.length - 1 : 0];
+				sCurrentChar = selectedText[0];
 
 				ignoreParentheses = parenthesesCount > 0;
 				if (sCurrentChar === ")") {
@@ -145,7 +153,10 @@ export class SyntaxAnalyzer {
 				} else if (sCurrentChar === "(") {
 					parenthesesCount--;
 				}
-				const range = new vscode.Range(startingPosition.translate(0, deltaToReturn < 0 ? deltaToReturn : 0), startingPosition.translate(0, deltaToReturn > 0 ? deltaToReturn : 0));
+
+				const range = new vscode.Range(startingPosition.translate({
+					characterDelta: deltaToReturn
+				}), startingPosition);
 				selectedText = vscode.window.activeTextEditor.document.getText(range);
 				if (!this.isSeparator(sCurrentChar, ignoreParentheses)) {
 					deltaToReturn += iDelta;
@@ -153,8 +164,7 @@ export class SyntaxAnalyzer {
 					deltaToReturn += -iDelta;
 				}
 
-			} while (!this.isSeparator(sCurrentChar, ignoreParentheses));
-
+			} while (!this.isSeparator(sCurrentChar, ignoreParentheses) && startingPosition.character + deltaToReturn > 0);
 		}
 		deltaToReturn += -iDelta;
 
@@ -163,7 +173,7 @@ export class SyntaxAnalyzer {
 
 	private static isSeparator(char: string, ignoreParentheses: boolean) {
 		//TODO: sync with FileReader
-		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r" || char === "=" || (char === "(" && !ignoreParentheses);
+		return char === "," || char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r" || char === "=" || (char === "(" && !ignoreParentheses);
 	}
 	/* =========================================================== */
 	/* end: variable methods                                       */
@@ -176,7 +186,7 @@ export class SyntaxAnalyzer {
 	static getUICompletionItemsWithUniqueViewIds() {
 		let completionItems: UICompletionItem[] = [];
 
-		const currentClass = this.getCurrentClass();
+		const currentClass = this.getCurrentClassName();
 		if (currentClass) {
 			const view = FileReader.getViewText(currentClass);
 			if (view) {
@@ -201,7 +211,7 @@ export class SyntaxAnalyzer {
 		return completionItems;
 	}
 
-	public static getCurrentClass(documentText?: string) {
+	public static getCurrentClassName(documentText?: string) {
 		let returnClassName;
 		if (!documentText && vscode.window.activeTextEditor) {
 			documentText = vscode.window.activeTextEditor.document.getText();

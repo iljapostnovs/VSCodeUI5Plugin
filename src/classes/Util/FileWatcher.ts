@@ -13,7 +13,7 @@ export class FileWatcher {
 		workspace.onDidSaveTextDocument(document => {
 			if (document.fileName.endsWith(".js")) {
 
-				const currentClassNameDotNotation = SyntaxAnalyzer.getCurrentClass(document.getText());
+				const currentClassNameDotNotation = SyntaxAnalyzer.getCurrentClassName(document.getText());
 				if (currentClassNameDotNotation) {
 					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
 				}
@@ -96,7 +96,7 @@ export class FileWatcher {
 		const UIDefineClassNameParts = standardUIDefineClassForExtension.split("/");
 		const controlName = UIDefineClassNameParts[UIDefineClassNameParts.length - 1];
 
-		return `sap.ui.define([\r\n\t\"${standardUIDefineClassForExtension}\"\r\n], function (\r\n\t${controlName}\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ${controlName}.extend(\"${classNameDotNotation}\", {\r\n\t});\r\n});`;
+		return `sap.ui.define([\r\n\t\"${standardUIDefineClassForExtension}\"\r\n], function(\r\n\t${controlName}\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ${controlName}.extend(\"${classNameDotNotation}\", {\r\n\t});\r\n});`;
 	}
 
 	private static replaceCurrentClassNameWithNewOne(oldUri: vscode.Uri, newUri: vscode.Uri) {
