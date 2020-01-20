@@ -17,11 +17,21 @@ export class JSFunction extends AbstractType {
 		this.body = body;
 		this.functionText = this.body;
 		let params =  MainLooper.getEndOfChar("(", ")", this.body);
-		this.body =  MainLooper.getEndOfChar("{", "}", this.body);
+		const indexOfParamEnd = body.indexOf(params) + params.length;
+		const textWithFnParams = this.body.substring(0, indexOfParamEnd);
+
+		this.body =  textWithFnParams + MainLooper.getEndOfChar("{", "}", this.body.substring(indexOfParamEnd, this.body.length));
+		console.log(this.body);
 
 		this.functionText = this.functionText.substring(0, this.functionText.indexOf(this.body) + this.body.length);
 
-		params = params.substring(1, params.length - 1); //removes ()
+		if (params.startsWith("(") && params.endsWith(")")) {
+			params = params.substring(1, params.length - 1); //removes ()
+		}
+		if (params.startsWith("{") && params.endsWith("}")) {
+			params = params.substring(1, params.length - 1); //removes {} for destructured objects
+		}
+
 		if (params) {
 			this.params = params.split(",").map(param => new JSVariable(param.trim(), ""));
 			this.params.forEach(param => {

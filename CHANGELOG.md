@@ -35,3 +35,6 @@
 ## 0.8.4 (19-01-2020)
 * Bugfixes
 * Moving params of sap.ui.define is more trustworthy now
+
+## 0.8.5 (20-01-2020)
+* Added parsing of destructured objects in function params
