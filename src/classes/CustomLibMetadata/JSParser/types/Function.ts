@@ -16,12 +16,10 @@ export class JSFunction extends AbstractType {
 
 		this.body = body;
 		this.functionText = this.body;
-		let params =  MainLooper.getEndOfChar("(", ")", this.body);
+		let params =  this.getParams(this.body);
 		const indexOfParamEnd = body.indexOf(params) + params.length;
-		const textWithFnParams = this.body.substring(0, indexOfParamEnd);
 
-		this.body =  textWithFnParams + MainLooper.getEndOfChar("{", "}", this.body.substring(indexOfParamEnd, this.body.length));
-		console.log(this.body);
+		this.body =  MainLooper.getEndOfChar("{", "}", this.body.substring(indexOfParamEnd, this.body.length));
 
 		this.functionText = this.functionText.substring(0, this.functionText.indexOf(this.body) + this.body.length);
 
@@ -39,6 +37,28 @@ export class JSFunction extends AbstractType {
 			});
 		}
 		this.parseBodyText();
+	}
+
+	private getParams(body: string) {
+		let params = "";
+		const isES5Function = body.trim().startsWith("async function") || body.trim().startsWith("function");
+
+		if (isES5Function) {
+			params = MainLooper.getEndOfChar("(", ")", this.body);
+		} else {
+			const indexOfArrow = body.indexOf("=>");
+			const textBeforeArrow = body.substring(0, indexOfArrow);
+			const parenthesesAreHere = textBeforeArrow.indexOf("(") > -1;
+
+			if (parenthesesAreHere) {
+				params = MainLooper.getEndOfChar("(", ")", this.body);
+			} else {
+				//no parentheses and it is es6 arrow function, meaning that it's only one param
+				params = textBeforeArrow.trim().replace("async", "");
+			}
+		}
+
+		return params;
 	}
 
 	public setPositions() {
