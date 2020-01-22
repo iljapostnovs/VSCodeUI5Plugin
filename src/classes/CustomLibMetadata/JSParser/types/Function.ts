@@ -3,6 +3,7 @@ import { JSVariable } from "./Variable";
 import { JSComment } from "./JSComment";
 import { MainLooper } from "../MainLooper";
 import { IfStatement } from "./IfStatement";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 
 export class JSFunction extends AbstractType {
 	public jsDoc: JSComment | undefined;
@@ -19,7 +20,7 @@ export class JSFunction extends AbstractType {
 		let params =  this.getParams(this.body);
 		const indexOfParamEnd = body.indexOf(params) + params.length;
 
-		this.body =  MainLooper.getEndOfChar("{", "}", this.body.substring(indexOfParamEnd, this.body.length));
+		this.body =  this.getBodyText(this.body.substring(indexOfParamEnd, this.body.length));
 
 		this.functionText = this.functionText.substring(0, this.functionText.indexOf(this.body) + this.body.length);
 
@@ -61,6 +62,36 @@ export class JSFunction extends AbstractType {
 		return params;
 	}
 
+	private getBodyText(body: string) {
+		let bodyToReturn = "";
+
+		const isArrowFunction = body.trim().startsWith("=>");
+		if (isArrowFunction) {
+			body = body.trim().replace("=>", "").trim();
+			const startsWithBrackets = body.startsWith("{");
+			const startsWithParentheses = body.startsWith("(");
+
+			if (startsWithBrackets) {
+				bodyToReturn = MainLooper.getEndOfChar("{", "}", body);
+			} else if (startsWithParentheses) {
+				bodyToReturn = MainLooper.getEndOfChar("(", ")", body);
+			} else {
+				let i = 0;
+				while(!SyntaxAnalyzer.isSeparator(body[i], false) && i < body.length) {
+					i++;
+				}
+				if (body[i] === ",") {
+					i++;
+				}
+				bodyToReturn = body.substring(0, i);
+			}
+		} else {
+			bodyToReturn = MainLooper.getEndOfChar("{", "}", body);
+		}
+
+		return bodyToReturn;
+	}
+
 	public setPositions() {
 		super.setPositions();
 
@@ -72,7 +103,13 @@ export class JSFunction extends AbstractType {
 	public parseBodyText() {
 		const lastChar = this.body[this.body.length - 1];
 		this.parsedBody = (lastChar === ";" || lastChar === ",") ? this.body.substring(0, this.body.length - 1) : this.body;
-		this.parsedBody = this.parsedBody.substring(1, this.parsedBody.length - 1);
+
+		if (
+			(this.parsedBody.startsWith("{") || this.parsedBody.startsWith("(")) &&
+			(this.parsedBody.endsWith("}") || this.parsedBody.endsWith(")"))
+		) {
+			this.parsedBody = this.parsedBody.substring(1, this.parsedBody.length - 1);
+		}
 	}
 
 	public getContentLength() {
@@ -158,11 +195,9 @@ export class JSFunction extends AbstractType {
 	static isAFunction(text: string, fullJSText: string) {
 		let isFunction = text.indexOf("function") > -1;
 
-		//es6
-		//TODO: arg parsing for single argument is not working
 		if (!isFunction && fullJSText.indexOf("=>") > -1) {
 			const textBeforeArrow = fullJSText.substring(0, fullJSText.indexOf("=>") + 2).trim();
-			const results = /([a-zA-Z]\w*|\([a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\))\s?=>/.exec(textBeforeArrow);
+			const results = /(async\s)?([a-zA-Z]\w*|\((\{?[a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\}?)?\))\s?=>/.exec(textBeforeArrow);
 			if (results && results[0] === textBeforeArrow) {
 				isFunction = true;
 			}
