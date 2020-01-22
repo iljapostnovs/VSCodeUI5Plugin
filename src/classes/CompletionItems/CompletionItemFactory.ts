@@ -44,16 +44,25 @@ export class CompletionItemFactory {
 		const availableProgressLeft = 50;
 		SAPNodes = await this.nodeDAO.getAllNodes();
 
+		const promises = [];
 		for (const node of SAPNodes) {
-			progress.report({
-				message: "Generating Completion Items: " + node.getDisplayName(),
-				increment: availableProgressLeft / SAPNodes.length
+			const promise = this.generateAggregationCompletionItemsRecursively(node)
+			.then((generatedItems) => {
+				progress.report({
+					message: "Generating Completion Items: " + node.getDisplayName(),
+					increment: availableProgressLeft / SAPNodes.length
+				});
+
+				return generatedItems;
 			});
-			await this.generateAggregationCompletionItemsRecursively(node)
-			.then((newCompletionItems) => {
-				completionItems = completionItems.concat(newCompletionItems);
-			});
+
+			promises.push(promise);
 		}
+
+		const aGeneratedCompletionItemArrays = await Promise.all(promises);
+		aGeneratedCompletionItemArrays.forEach(aGeneratedCompletionItems => {
+			completionItems = completionItems.concat(aGeneratedCompletionItems);
+		});
 
 		return completionItems;
 	}
