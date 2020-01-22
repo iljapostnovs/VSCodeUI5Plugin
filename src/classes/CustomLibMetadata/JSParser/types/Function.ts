@@ -77,7 +77,7 @@ export class JSFunction extends AbstractType {
 				bodyToReturn = MainLooper.getEndOfChar("(", ")", body);
 			} else {
 				let i = 0;
-				while(!SyntaxAnalyzer.isSeparator(body[i], false) && i < body.length) {
+				while(body[i] !== ")" && !SyntaxAnalyzer.isSeparator(body[i], false) && i < body.length) {
 					i++;
 				}
 				if (body[i] === ",") {
