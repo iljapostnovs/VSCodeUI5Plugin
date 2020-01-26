@@ -33,13 +33,12 @@ export class SyntaxAnalyzer {
 
 	public static getClassNameFromVariableParts(variableParts: string[], theClass: AbstractUIClass, usedPartQuantity: number = 1, position?: number) : string | undefined {
 		let classNameOfTheVariable: string | undefined;
-		const joinedVariable = variableParts.join(".");
-		const thisIsByIdVar = 	variableParts.length === 3 &&
-								(joinedVariable.startsWith("this.getView().byId(") ||
-								joinedVariable.startsWith("this.byId("));
+		const thisIsByIdVar = this.getIfThisIsThisGetViewByIdMethod(variableParts);
+		const thisShouldBeHandledInStandardWay = !thisIsByIdVar;
 
-		if (!thisIsByIdVar) {
-			const thresholdForThis = variableParts.length > 1 && variableParts[0] === "this" ? 1 : 0;
+		if (thisShouldBeHandledInStandardWay) {
+			const firstVariablePartIsThis = variableParts.length > 1 && variableParts[0];
+			const thresholdForThis = firstVariablePartIsThis ? 1 : 0;
 			usedPartQuantity += thresholdForThis;
 
 			const variableString = this.getStringFromParts(variableParts, usedPartQuantity);
@@ -63,12 +62,29 @@ export class SyntaxAnalyzer {
 				classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, theClass, ++usedPartQuantity);
 			}
 		} else {
-			//TODO: move this logic in same place from CustomUIClass as well
-			const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*(?="\))/.exec(joinedVariable);
-			const controlId = controlIdResult ? controlIdResult[0] : "";
-			if (controlId) {
-				classNameOfTheVariable = FileReader.getClassNameFromView(theClass.className, controlId);
-			}
+			classNameOfTheVariable = this.getClassNameUsingVariableById(variableParts, theClass, usedPartQuantity, position);
+		}
+
+		return classNameOfTheVariable;
+	}
+
+	private static getIfThisIsThisGetViewByIdMethod(variableParts: string[]) {
+		const joinedVariable = variableParts.join(".");
+		const thisIsByIdVar = 	joinedVariable.startsWith("this.getView().byId(") ||
+								joinedVariable.startsWith("this.byId(");
+
+		return thisIsByIdVar;
+	}
+
+	private static getClassNameUsingVariableById(variableParts: string[], theClass: AbstractUIClass, usedPartQuantity: number = 1, position?: number) {
+		let classNameOfTheVariable;
+		//TODO: move this logic in same place from CustomUIClass as well
+		//TODO: this
+		const joinedVariable = variableParts.join(".");
+		const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*(?="\))/.exec(joinedVariable);
+		const controlId = controlIdResult ? controlIdResult[0] : "";
+		if (controlId) {
+			classNameOfTheVariable = FileReader.getClassNameFromView(theClass.className, controlId);
 		}
 
 		return classNameOfTheVariable;
