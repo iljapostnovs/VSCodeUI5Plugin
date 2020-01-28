@@ -37,7 +37,7 @@ export class SyntaxAnalyzer {
 		const thisShouldBeHandledInStandardWay = !thisIsByIdVar;
 
 		if (thisShouldBeHandledInStandardWay) {
-			const firstVariablePartIsThis = variableParts.length > 1 && variableParts[0];
+			const firstVariablePartIsThis = variableParts.length > 1 && variableParts[0] === "this";
 			const thresholdForThis = firstVariablePartIsThis ? 1 : 0;
 			usedPartQuantity += thresholdForThis;
 
