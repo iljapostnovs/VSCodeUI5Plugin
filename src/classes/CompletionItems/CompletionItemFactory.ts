@@ -203,7 +203,15 @@ export class CompletionItemFactory {
 			completionItem.kind = vscode.CompletionItemKind.Method;
 			completionItem.insertText = classMethod.name;
 			completionItem.detail = classMethod.name;
-			completionItem.documentation = classMethod.description;
+
+			const mardownString = new vscode.MarkdownString();
+			mardownString.isTrusted = true;
+			if (classMethod.api) {
+				//TODO: newline please, why dont you work
+				mardownString.appendMarkdown(classMethod.api + "\n");
+			}
+			mardownString.appendMarkdown(classMethod.description);
+			completionItem.documentation = mardownString;
 
 			return completionItem;
 		});

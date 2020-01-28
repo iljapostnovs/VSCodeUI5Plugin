@@ -3,11 +3,12 @@ export interface UIMethod {
 	params: string[];
 	returnType: string;
 	description: string;
+	api?: string;
 }
 export interface UIField {
 	name: string;
 	type: string | undefined;
-	description: "";
+	description: string;
 }
 export abstract class AbstractUIClass {
 	public className: string;

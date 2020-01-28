@@ -30,7 +30,8 @@ export class StandardUIClass extends AbstractUIClass {
 							description: this.removeTags(method.code),
 							params: method.parameters ? method.parameters.map((parameter: any) => parameter.name) : [],
 							returnType: method.returnValue ? method.returnValue.type : "void",
-							isFromParent: !isParent
+							isFromParent: !isParent,
+							api: `[ui5.com](https://ui5.sap.com/#/api/${SAPNode.getName()}%23methods/${method.name})`
 						});
 					}
 					return accumulator;
