@@ -206,11 +206,11 @@ export class CompletionItemFactory {
 
 			const mardownString = new vscode.MarkdownString();
 			mardownString.isTrusted = true;
+			mardownString.appendCodeblock(classMethod.description);
 			if (classMethod.api) {
 				//TODO: newline please, why dont you work
-				mardownString.appendMarkdown(classMethod.api + "\n");
+				mardownString.appendMarkdown(classMethod.api);
 			}
-			mardownString.appendMarkdown(classMethod.description);
 			completionItem.documentation = mardownString;
 
 			return completionItem;
