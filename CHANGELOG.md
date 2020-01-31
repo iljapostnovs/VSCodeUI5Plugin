@@ -39,5 +39,5 @@
 ## 0.8.5 (22-01-2020)
 * Bugfixes
 * Added parsing of destructured objects in function params
-* Significant performance improvement for initial completion item generating
+* Performance improvement for initial completion item generating
 * Dynamic completion items for XML views added. Now autocomplition works for properties and events.

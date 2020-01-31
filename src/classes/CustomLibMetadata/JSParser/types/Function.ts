@@ -11,12 +11,15 @@ export class JSFunction extends AbstractType {
 	public params: AbstractType[] = [];
 	public functionText: string = "";
 	public returnType: string | undefined;
+	public isAsync: boolean = false;
 
 	constructor(name: string, body: string) {
 		super(name, body);
 
 		this.body = body;
 		this.functionText = this.body;
+		this.isAsync = this.body.trim().startsWith("async");
+		this.returnType = this.isAsync ? "Promise" : undefined;
 		let params =  this.getParams(this.body);
 		const indexOfParamEnd = body.indexOf(params) + params.length;
 
@@ -182,11 +185,18 @@ export class JSFunction extends AbstractType {
 	}
 
 	private findReturnType(jsDoc: string) {
-		let returnType: string | undefined;
+		let returnType = this.returnType;
 
-		const jsTypeResult = /(?<=return(s?)\s\{).*(?=\})/.exec(jsDoc);
-		if (jsTypeResult) {
-			returnType = jsTypeResult[0];
+		if (!returnType) {
+			const isAsync = /@async\s/.test(jsDoc);
+			if (isAsync) {
+				returnType = "Promise";
+			} else {
+				const jsTypeResult = /(?<=return(s?)\s\{).*(?=\})/.exec(jsDoc);
+				if (jsTypeResult) {
+					returnType = jsTypeResult[0];
+				}
+			}
 		}
 
 		return returnType;

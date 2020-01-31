@@ -15,6 +15,7 @@ import { JSComment } from "./types/JSComment";
 import { JSUnknown } from "./types/JSUnknown";
 import { JSTernaryOperation } from "./types/TernaryOperation";
 import { JSIncrement } from "./types/JSIncrement";
+import { EndlessLoopLocker } from "../../Util/EndlessLoopLocker";
 
 export class MainLooper {
 	static startAnalysing(javascript: string, runBeforeChar?: string) {
@@ -25,6 +26,7 @@ export class MainLooper {
 		let emergencyStop = false;
 
 		while (shouldContinueLoop) {
+			EndlessLoopLocker.checkForTimeout();
 			const currentChar = javascript[currentIndex];
 			let syntaxType: AbstractType | undefined;
 

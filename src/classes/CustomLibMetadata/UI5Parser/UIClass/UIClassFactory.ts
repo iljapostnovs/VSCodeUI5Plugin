@@ -14,9 +14,9 @@ export class UIClassFactory {
 		if (className.startsWith("sap.")) {
 			returnClass = new StandardUIClass(className);
 		} else {
-			console.time(`Class parsing for ${className} took: `);
+			console.time(`Class parsing for ${className} took:`);
 			returnClass = new CustomUIClass(className, documentText);
-			console.timeEnd(`Class parsing for ${className} took: `);
+			console.timeEnd(`Class parsing for ${className} took:`);
 		}
 
 		return returnClass;
