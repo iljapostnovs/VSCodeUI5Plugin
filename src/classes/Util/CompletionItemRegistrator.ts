@@ -40,7 +40,8 @@ export class CompletionItemRegistrator {
 
 		const XMLProvider = vscode.languages.registerCompletionItemProvider({language: "xml", scheme: "file"}, {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
-				return XMLCompletionItems;
+				const XMLDynamicCompletionItems = XMLCompletionItemFactory.generateXMLDynamicCompletionItems();
+				return XMLCompletionItems.concat(XMLDynamicCompletionItems);
 			}
 		});
 

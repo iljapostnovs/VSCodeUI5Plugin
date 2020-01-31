@@ -10,10 +10,21 @@ export interface UIField {
 	type: string | undefined;
 	description: string;
 }
+export interface UIProperties {
+	name: string;
+	type: string | undefined;
+	description: string;
+}
+export interface UIEvents {
+	name: string;
+	description: string;
+}
 export abstract class AbstractUIClass {
 	public className: string;
 	public methods: UIMethod[] = [];
 	public fields: UIField[] = [];
+	public properties: UIProperties[] = [];
+	public events: UIEvents[] = [];
 	public parentClassNameDotNotation: string = "";
 
 	constructor(className: string, documentText?: string) {
