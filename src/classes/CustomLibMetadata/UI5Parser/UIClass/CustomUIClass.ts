@@ -157,17 +157,19 @@ export class CustomUIClass extends AbstractUIClass {
 				if (this.classBody) {
 					const part = this.classBody.parts[index];
 					if (part instanceof JSFunction) {
+						const description = `(${part.params.map(part => part.parsedName).join(",")}) : ${(part.returnType ? part.returnType : "void")}`;
 						this.methods.push({
 							name: partName,
-							params: (<JSFunction>part).params.map(part => part.parsedName),
-							returnType: (<JSFunction>part).returnType || "void",
-							description: ""
+							params: part.params.map(part => part.parsedName),
+							returnType: part.returnType || "void",
+							description: description
 						});
+
 					} else if (part instanceof JSVariable) {
 						this.fields.push({
 							name: partName.replace("this.", ""),
-							type: (<JSVariable>part).jsType,
-							description: ""
+							type: part.jsType,
+							description: part.jsType || ""
 						});
 					}
 				}

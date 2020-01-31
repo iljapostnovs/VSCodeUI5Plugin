@@ -14,9 +14,9 @@ export class UIClassFactory {
 		if (className.startsWith("sap.")) {
 			returnClass = new StandardUIClass(className);
 		} else {
-			console.time(`Class parsing for ${className} took: `);
+			console.time(`Class parsing for ${className} took:`);
 			returnClass = new CustomUIClass(className, documentText);
-			console.timeEnd(`Class parsing for ${className} took: `);
+			console.timeEnd(`Class parsing for ${className} took:`);
 		}
 
 		return returnClass;
@@ -32,17 +32,17 @@ export class UIClassFactory {
 			methods: []
 		};
 		const currentClass = this.getUIClass(className);
-		let currentVariableClass: string | undefined;
+		let currentVariableClassName: string | undefined;
 
 		if (variable === "this") {
-			currentVariableClass = className;
+			currentVariableClassName = className;
 		} else {
-			currentVariableClass = (<CustomUIClass>currentClass).getClassOfTheVariable(variable, position);
+			currentVariableClassName = (<CustomUIClass>currentClass).getClassOfTheVariable(variable, position);
 		}
 
-		if (currentVariableClass) {
-			fieldsAndMethods.fields = this.getClassFields(currentVariableClass);
-			fieldsAndMethods.methods = this.getClassMethods(currentVariableClass);
+		if (currentVariableClassName) {
+			fieldsAndMethods.fields = this.getClassFields(currentVariableClassName);
+			fieldsAndMethods.methods = this.getClassMethods(currentVariableClassName);
 		}
 
 		return fieldsAndMethods;

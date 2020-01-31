@@ -33,13 +33,12 @@ export class SyntaxAnalyzer {
 
 	public static getClassNameFromVariableParts(variableParts: string[], theClass: AbstractUIClass, usedPartQuantity: number = 1, position?: number) : string | undefined {
 		let classNameOfTheVariable: string | undefined;
-		const joinedVariable = variableParts.join(".");
-		const thisIsByIdVar = 	variableParts.length === 3 &&
-								(joinedVariable.startsWith("this.getView().byId(") ||
-								joinedVariable.startsWith("this.byId("));
+		const thisIsByIdVar = this.getIfThisIsThisGetViewByIdMethod(variableParts);
+		const thisShouldBeHandledInStandardWay = !thisIsByIdVar;
 
-		if (!thisIsByIdVar) {
-			const thresholdForThis = variableParts.length > 1 && variableParts[0] === "this" ? 1 : 0;
+		if (thisShouldBeHandledInStandardWay) {
+			const firstVariablePartIsThis = variableParts.length > 1 && variableParts[0] === "this";
+			const thresholdForThis = firstVariablePartIsThis ? 1 : 0;
 			usedPartQuantity += thresholdForThis;
 
 			const variableString = this.getStringFromParts(variableParts, usedPartQuantity);
@@ -63,11 +62,43 @@ export class SyntaxAnalyzer {
 				classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, theClass, ++usedPartQuantity);
 			}
 		} else {
-			//TODO: move this logic in same place from CustomUIClass as well
+			classNameOfTheVariable = this.getClassNameUsingVariableById(variableParts, theClass, usedPartQuantity, position);
+		}
+
+		return classNameOfTheVariable;
+	}
+
+	private static getIfThisIsThisGetViewByIdMethod(variableParts: string[]) {
+		const joinedVariable = variableParts.join(".");
+		const thisIsByIdVar = 	joinedVariable.startsWith("this.getView().byId(") ||
+								joinedVariable.startsWith("this.byId(");
+
+		return thisIsByIdVar;
+	}
+
+	private static getClassNameUsingVariableById(variableParts: string[], theClass: AbstractUIClass, usedPartQuantity: number = 1, position?: number) {
+		let classNameOfTheVariable;
+		//TODO: move this logic in same place from CustomUIClass as well
+
+		const joinedVariable = variableParts.join(".");
+		const thisIsByIdVariable = joinedVariable.startsWith("this.byId(");
+		const thisIsGetViewByIdVariable = joinedVariable.startsWith("this.getView().byId(");
+
+		if (thisIsByIdVariable || thisIsGetViewByIdVariable) {
 			const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*(?="\))/.exec(joinedVariable);
 			const controlId = controlIdResult ? controlIdResult[0] : "";
 			if (controlId) {
 				classNameOfTheVariable = FileReader.getClassNameFromView(theClass.className, controlId);
+
+				if (classNameOfTheVariable) {
+					variableParts.splice(0, thisIsByIdVariable ? 2 : 3);
+					if (variableParts.length > 0) {
+						variableParts = ["this"].concat(variableParts);
+
+						const UIClass = UIClassFactory.getUIClass(classNameOfTheVariable);
+						classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, UIClass);
+					}
+				}
 			}
 		}
 
@@ -171,9 +202,11 @@ export class SyntaxAnalyzer {
 		return deltaToReturn;
 	}
 
-	private static isSeparator(char: string, ignoreParentheses: boolean) {
+	public static isSeparator(char: string, ignoreParentheses: boolean) {
 		//TODO: sync with FileReader
-		return char === "," || char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r" || char === "=" || (char === "(" && !ignoreParentheses);
+		const separators = ", 	;\n\t\r=:";
+
+		return separators.indexOf(char) > -1 || (char === "(" && !ignoreParentheses);
 	}
 	/* =========================================================== */
 	/* end: variable methods                                       */

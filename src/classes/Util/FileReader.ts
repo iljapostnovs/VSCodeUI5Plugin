@@ -122,6 +122,7 @@ export class FileReader {
 
 	private static getClassOfControlIdFromView(documentText: string, controlId: string) {
 		let controlClass = "";
+		//TODO: move to XMLParser
 		const controlResults = new RegExp(`(?=id="${controlId}")`).exec(documentText);
 		if (controlResults) {
 			let beginIndex = controlResults.index;

@@ -1,4 +1,4 @@
-import { AbstractUIClass, UIMethod } from "./AbstractUIClass";
+import { AbstractUIClass, UIMethod, UIProperties, UIEvents } from "./AbstractUIClass";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
 
@@ -11,6 +11,8 @@ export class StandardUIClass extends AbstractUIClass {
 
 		this.fillMethods();
 		this.fillParentClassName();
+		this.fillProperties();
+		this.fillEvents();
 	}
 
 	private fillMethods() {
@@ -30,7 +32,8 @@ export class StandardUIClass extends AbstractUIClass {
 							description: this.removeTags(method.code),
 							params: method.parameters ? method.parameters.map((parameter: any) => parameter.name) : [],
 							returnType: method.returnValue ? method.returnValue.type : "void",
-							isFromParent: !isParent
+							isFromParent: !isParent,
+							api: `[ui5.com](https://ui5.sap.com/#/api/${SAPNode.getName()}%23methods/${method.name})`
 						});
 					}
 					return accumulator;
@@ -77,6 +80,68 @@ export class StandardUIClass extends AbstractUIClass {
 			}
 		}
 		return className;
+	}
+
+	private fillProperties() {
+		this.properties = this.getStandardClassProperties(this.className);
+	}
+
+	private getStandardClassProperties(className: string) {
+		let classPropeties:UIProperties[] = [];
+		const SAPNode = this.findSAPNode(className);
+		if (SAPNode) {
+			const metadata = SAPNode.getMetadataSync();
+			if (metadata) {
+				if (metadata.getUI5Metadata().properties) {
+					classPropeties = metadata.getUI5Metadata().properties.reduce((accumulator: UIProperties[], property:any) => {
+						if (property.visibility === "public") {
+							accumulator.push({
+								name: property.name,
+								type: property.type,
+								description: this.removeTags(property.description)
+							});
+						}
+						return accumulator;
+					}, []);
+				}
+
+				if (metadata.rawMetadata.extends) {
+					classPropeties = classPropeties.concat(this.getStandardClassProperties(metadata.rawMetadata.extends));
+				}
+			}
+		}
+		return classPropeties;
+	}
+
+	private fillEvents() {
+		this.events = this.getStandardClassEvents(this.className);
+	}
+
+	private getStandardClassEvents(className: string) {
+		let classEvents:UIEvents[] = [];
+		const SAPNode = this.findSAPNode(className);
+		if (SAPNode) {
+			const metadata = SAPNode.getMetadataSync();
+			if (metadata) {
+				if (metadata.rawMetadata.events) {
+					classEvents = metadata.rawMetadata.events.reduce((accumulator: UIEvents[], event:any) => {
+						if (event.visibility === "public") {
+							accumulator.push({
+								name: event.name,
+								description: this.removeTags(event.description)
+							});
+						}
+						return accumulator;
+					}, []);
+				}
+
+				if (metadata.rawMetadata.extends) {
+					classEvents = classEvents.concat(this.getStandardClassEvents(metadata.rawMetadata.extends));
+				}
+			}
+
+		}
+		return classEvents;
 	}
 }
 

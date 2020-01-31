@@ -1,6 +1,8 @@
 import { MainLooper } from "../MainLooper";
 import { JSFunction } from "./Function";
-
+function escapeRegExp(string: string) {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 export abstract class AbstractType {
 	public body: string;
 	public name: string;
@@ -45,11 +47,17 @@ export abstract class AbstractType {
 	public setPositions() {
 		const text = this.parent ? this.parent.getFullBody() : this.getFullBody();
 		const startingIndex = this.parent ? this.parent.positionBegin : 0;
+		const fullBody = this.getFullBody();
+		const rMyFullBody = new RegExp(`([^a-zA-Z]|^)${escapeRegExp(fullBody)}`);
 
-		this.positionBegin = startingIndex + text.indexOf(this.getFullBody());
-		this.positionEnd = this.positionBegin + this.getFullBody().length;
+		const bodyResult = rMyFullBody.exec(text);
+		if (bodyResult) {
+			const shouldOneCharBeAdded = /[^a-zA-Z]/.test(bodyResult[0][0]);
+			this.positionBegin = startingIndex + bodyResult.index + (shouldOneCharBeAdded ? 1 : 0);
+			this.positionEnd = this.positionBegin + fullBody.length;
+		}
 
-		if (text.indexOf(this.getFullBody()) === -1) {
+		if (text.indexOf(fullBody) === -1) {
 			debugger;
 		}
 

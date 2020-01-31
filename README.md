@@ -6,6 +6,7 @@ This plugin contains perks for UI5 developers.
 ### XML
 XML Completion Items for UI5 Controls.<br/>
 ![XMLCompletionItems](/images/XMLCompletionItems.gif)
+![DynamicXMLCompletionItems](/images/DynamicXMLCompletionItems.gif)
 
 ### JS
 

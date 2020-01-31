@@ -3,6 +3,7 @@ import { CompletionItemFactory } from "../CompletionItems/CompletionItemFactory"
 import { GeneratorFactory } from "../CodeGenerators/GeneratorFactory";
 import { DefineGenerator } from "../CodeGenerators/define/UIDefineCompletionItemGenerator";
 import { FileWatcher } from "./FileWatcher";
+import { EndlessLoopLocker } from "./EndlessLoopLocker";
 
 export class CompletionItemRegistrator {
 	static async register(context: vscode.ExtensionContext, progress: vscode.Progress<{message?: string | undefined;increment?: number | undefined;}>) {
@@ -19,6 +20,8 @@ export class CompletionItemRegistrator {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
 				let itemsToReturn:vscode.CompletionItem[] = [];
 				try {
+					EndlessLoopLocker.beginProcess();
+
 					if (DefineGenerator.getIfCurrentPositionIsInDefine(position)) {
 						itemsToReturn = JSDefineCompletionItems;
 					} else {
@@ -40,7 +43,8 @@ export class CompletionItemRegistrator {
 
 		const XMLProvider = vscode.languages.registerCompletionItemProvider({language: "xml", scheme: "file"}, {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
-				return XMLCompletionItems;
+				const XMLDynamicCompletionItems = XMLCompletionItemFactory.generateXMLDynamicCompletionItems();
+				return XMLCompletionItems.concat(XMLDynamicCompletionItems);
 			}
 		});
 

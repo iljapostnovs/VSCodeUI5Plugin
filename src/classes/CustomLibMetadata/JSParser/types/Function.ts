@@ -3,6 +3,7 @@ import { JSVariable } from "./Variable";
 import { JSComment } from "./JSComment";
 import { MainLooper } from "../MainLooper";
 import { IfStatement } from "./IfStatement";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 
 export class JSFunction extends AbstractType {
 	public jsDoc: JSComment | undefined;
@@ -10,18 +11,29 @@ export class JSFunction extends AbstractType {
 	public params: AbstractType[] = [];
 	public functionText: string = "";
 	public returnType: string | undefined;
+	public isAsync: boolean = false;
 
 	constructor(name: string, body: string) {
 		super(name, body);
 
 		this.body = body;
 		this.functionText = this.body;
-		let params =  MainLooper.getEndOfChar("(", ")", this.body);
-		this.body =  MainLooper.getEndOfChar("{", "}", this.body);
+		this.isAsync = this.body.trim().startsWith("async");
+		this.returnType = this.isAsync ? "Promise" : undefined;
+		let params =  this.getParams(this.body);
+		const indexOfParamEnd = body.indexOf(params) + params.length;
+
+		this.body =  this.getBodyText(this.body.substring(indexOfParamEnd, this.body.length));
 
 		this.functionText = this.functionText.substring(0, this.functionText.indexOf(this.body) + this.body.length);
 
-		params = params.substring(1, params.length - 1); //removes ()
+		if (params.startsWith("(") && params.endsWith(")")) {
+			params = params.substring(1, params.length - 1); //removes ()
+		}
+		if (params.startsWith("{") && params.endsWith("}")) {
+			params = params.substring(1, params.length - 1); //removes {} for destructured objects
+		}
+
 		if (params) {
 			this.params = params.split(",").map(param => new JSVariable(param.trim(), ""));
 			this.params.forEach(param => {
@@ -29,6 +41,58 @@ export class JSFunction extends AbstractType {
 			});
 		}
 		this.parseBodyText();
+	}
+
+	private getParams(body: string) {
+		let params = "";
+		const isES5Function = body.trim().startsWith("async function") || body.trim().startsWith("function");
+
+		if (isES5Function) {
+			params = MainLooper.getEndOfChar("(", ")", this.body);
+		} else {
+			const indexOfArrow = body.indexOf("=>");
+			const textBeforeArrow = body.substring(0, indexOfArrow);
+			const parenthesesAreHere = textBeforeArrow.indexOf("(") > -1;
+
+			if (parenthesesAreHere) {
+				params = MainLooper.getEndOfChar("(", ")", this.body);
+			} else {
+				//no parentheses and it is es6 arrow function, meaning that it's only one param
+				params = textBeforeArrow.trim().replace("async", "");
+			}
+		}
+
+		return params;
+	}
+
+	private getBodyText(body: string) {
+		let bodyToReturn = "";
+
+		const isArrowFunction = body.trim().startsWith("=>");
+		if (isArrowFunction) {
+			body = body.trim().replace("=>", "").trim();
+			const startsWithBrackets = body.startsWith("{");
+			const startsWithParentheses = body.startsWith("(");
+
+			if (startsWithBrackets) {
+				bodyToReturn = MainLooper.getEndOfChar("{", "}", body);
+			} else if (startsWithParentheses) {
+				bodyToReturn = MainLooper.getEndOfChar("(", ")", body);
+			} else {
+				let i = 0;
+				while(body[i] !== ")" && !SyntaxAnalyzer.isSeparator(body[i], false) && i < body.length) {
+					i++;
+				}
+				if (body[i] === ",") {
+					i++;
+				}
+				bodyToReturn = body.substring(0, i);
+			}
+		} else {
+			bodyToReturn = MainLooper.getEndOfChar("{", "}", body);
+		}
+
+		return bodyToReturn;
 	}
 
 	public setPositions() {
@@ -42,7 +106,13 @@ export class JSFunction extends AbstractType {
 	public parseBodyText() {
 		const lastChar = this.body[this.body.length - 1];
 		this.parsedBody = (lastChar === ";" || lastChar === ",") ? this.body.substring(0, this.body.length - 1) : this.body;
-		this.parsedBody = this.parsedBody.substring(1, this.parsedBody.length - 1);
+
+		if (
+			(this.parsedBody.startsWith("{") || this.parsedBody.startsWith("(")) &&
+			(this.parsedBody.endsWith("}") || this.parsedBody.endsWith(")"))
+		) {
+			this.parsedBody = this.parsedBody.substring(1, this.parsedBody.length - 1);
+		}
 	}
 
 	public getContentLength() {
@@ -115,11 +185,18 @@ export class JSFunction extends AbstractType {
 	}
 
 	private findReturnType(jsDoc: string) {
-		let returnType: string | undefined;
+		let returnType = this.returnType;
 
-		const jsTypeResult = /(?<=return(s?)\s\{).*(?=\})/.exec(jsDoc);
-		if (jsTypeResult) {
-			returnType = jsTypeResult[0];
+		if (!returnType) {
+			const isAsync = /@async\s/.test(jsDoc);
+			if (isAsync) {
+				returnType = "Promise";
+			} else {
+				const jsTypeResult = /(?<=return(s?)\s\{).*(?=\})/.exec(jsDoc);
+				if (jsTypeResult) {
+					returnType = jsTypeResult[0];
+				}
+			}
 		}
 
 		return returnType;
@@ -128,11 +205,9 @@ export class JSFunction extends AbstractType {
 	static isAFunction(text: string, fullJSText: string) {
 		let isFunction = text.indexOf("function") > -1;
 
-		//es6
-		//TODO: arg parsing for single argument is not working
 		if (!isFunction && fullJSText.indexOf("=>") > -1) {
 			const textBeforeArrow = fullJSText.substring(0, fullJSText.indexOf("=>") + 2).trim();
-			const results = /([a-zA-Z]\w*|\([a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\))\s?=>/.exec(textBeforeArrow);
+			const results = /(async\s)?([a-zA-Z]\w*|\((\{?[a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\}?)?\))\s?=>/.exec(textBeforeArrow);
 			if (results && results[0] === textBeforeArrow) {
 				isFunction = true;
 			}

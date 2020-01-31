@@ -7,7 +7,9 @@ import { IAggregationGenerator } from "../CodeGenerators/aggregation/IAggregatio
 import { UI5MetadataPreloader } from "../StandardLibMetadata/UI5MetadataDAO";
 import { SyntaxAnalyzer, UICompletionItem } from "../CustomLibMetadata/SyntaxAnalyzer";
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
-import { FieldsAndMethods } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { FieldsAndMethods, UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { XMLParser, PositionType } from "../Util/XMLParser";
+import { AbstractUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 
 export class CompletionItemFactory {
 	private nodeDAO = new SAPNodeDAO();
@@ -44,16 +46,25 @@ export class CompletionItemFactory {
 		const availableProgressLeft = 50;
 		SAPNodes = await this.nodeDAO.getAllNodes();
 
+		const promises = [];
 		for (const node of SAPNodes) {
-			progress.report({
-				message: "Generating Completion Items: " + node.getDisplayName(),
-				increment: availableProgressLeft / SAPNodes.length
+			const promise = this.generateAggregationCompletionItemsRecursively(node)
+			.then((generatedItems) => {
+				progress.report({
+					message: "Generating Completion Items: " + node.getDisplayName(),
+					increment: availableProgressLeft / SAPNodes.length
+				});
+
+				return generatedItems;
 			});
-			await this.generateAggregationCompletionItemsRecursively(node)
-			.then((newCompletionItems) => {
-				completionItems = completionItems.concat(newCompletionItems);
-			});
+
+			promises.push(promise);
 		}
+
+		const aGeneratedCompletionItemArrays = await Promise.all(promises);
+		aGeneratedCompletionItemArrays.forEach(aGeneratedCompletionItems => {
+			completionItems = completionItems.concat(aGeneratedCompletionItems);
+		});
 
 		return completionItems;
 	}
@@ -91,6 +102,7 @@ export class CompletionItemFactory {
 		mardownString.appendMarkdown("[ui5.com](https://ui5.sap.com/#/api/" + node.getName() + ")\n");
 		mardownString.appendMarkdown(metadata.rawMetadata.description);
 		completionItem.documentation = mardownString;
+		completionItem.sortText = "}";
 
 		return completionItem;
 	}
@@ -194,7 +206,15 @@ export class CompletionItemFactory {
 			completionItem.kind = vscode.CompletionItemKind.Method;
 			completionItem.insertText = classMethod.name;
 			completionItem.detail = classMethod.name;
-			completionItem.documentation = classMethod.description;
+
+			const mardownString = new vscode.MarkdownString();
+			mardownString.isTrusted = true;
+			mardownString.appendCodeblock(classMethod.description);
+			if (classMethod.api) {
+				//TODO: newline please, why dont you work
+				mardownString.appendMarkdown(classMethod.api);
+			}
+			completionItem.documentation = mardownString;
 
 			return completionItem;
 		});
@@ -208,6 +228,71 @@ export class CompletionItemFactory {
 
 			return completionItem;
 		}));
+
+		return completionItems;
+	}
+
+	public generateXMLDynamicCompletionItems() {
+		let completionItems:vscode.CompletionItem[] = [];
+		const textEditor = vscode.window.activeTextEditor;
+
+		if (textEditor) {
+			const document = textEditor.document;
+			const currentPositionOffset = document.offsetAt(textEditor.selection.start);
+			const positionType = XMLParser.getPositionType(document.getText(), currentPositionOffset);
+
+			if (positionType === PositionType.Properties) {
+				const className = XMLParser.getClassNameInPosition(document.getText(), currentPositionOffset);
+				if (className) {
+					const UIClass = this.getFirstStandardClassInInheritanceTree(className);
+					completionItems = this.getPropertyCompletionItemsFromClass(UIClass);
+					completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(UIClass));
+				}
+			}
+
+		}
+
+		return completionItems;
+	}
+
+	private getFirstStandardClassInInheritanceTree(className: string) {
+		let UIClass = UIClassFactory.getUIClass(className);
+
+		if (!className.startsWith("sap.")) {
+			UIClass = this.getFirstStandardClassInInheritanceTree(UIClass.parentClassNameDotNotation);
+		}
+
+		return UIClass;
+	}
+
+	private getPropertyCompletionItemsFromClass(UIClass: AbstractUIClass) {
+		let completionItems:vscode.CompletionItem[] = [];
+
+		completionItems = UIClass.properties.map(property => {
+			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(property.name);
+			completionItem.kind = vscode.CompletionItemKind.Property;
+			completionItem.insertText = property.name;
+			completionItem.detail = `${property.name}: ${property.type}`;
+			completionItem.documentation = property.description;
+
+			return completionItem;
+		});
+
+		return completionItems;
+	}
+
+	private getEventCompletionItemsFromClass(UIClass: AbstractUIClass) {
+		let completionItems:vscode.CompletionItem[] = [];
+
+		completionItems = UIClass.events.map(event => {
+			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(event.name);
+			completionItem.kind = vscode.CompletionItemKind.Event;
+			completionItem.insertText = event.name;
+			completionItem.detail = event.name;
+			completionItem.documentation = event.description;
+
+			return completionItem;
+		});
 
 		return completionItems;
 	}
