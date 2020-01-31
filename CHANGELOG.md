@@ -36,7 +36,7 @@
 * Bugfixes
 * Moving params of sap.ui.define is more trustworthy now
 
-## 0.8.5 (22-01-2020)
+## 0.8.5 (31-01-2020)
 * Bugfixes
 * Added parsing of destructured objects in function params
 * Performance improvement for initial completion item generating
