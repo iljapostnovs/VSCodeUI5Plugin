@@ -202,7 +202,7 @@ export class SyntaxAnalyzer {
 		return deltaToReturn;
 	}
 
-	private static isSeparator(char: string, ignoreParentheses: boolean) {
+	public static isSeparator(char: string, ignoreParentheses: boolean) {
 		//TODO: sync with FileReader
 		const separators = ", 	;\n\t\r=:";
 

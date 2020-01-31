@@ -1,5 +1,3 @@
-import * as vscode from "vscode";
-
 export enum PositionType {
 	Properties = "1",
 	Content = "2",
