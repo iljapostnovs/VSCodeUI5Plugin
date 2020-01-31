@@ -28,7 +28,7 @@ export class XMLParser {
 		}
 		tagPositionBegin = i;
 
-		while (i < XMLViewText.length && XMLViewText[i] !== ">") {
+		while (i < XMLViewText.length && (XMLViewText[i] !== ">" || this.getIfPositionIsInString(XMLViewText, i))) {
 			i++;
 		}
 		tagPositionEnd = i + 1;
@@ -36,6 +36,21 @@ export class XMLParser {
 		tagText = XMLViewText.substring(tagPositionBegin, tagPositionEnd);
 
 		return tagText;
+	}
+
+	private static getIfPositionIsInString(XMLViewText: string, position: number) {
+		let quotionMarkCount = 0;
+
+		let i = 0;
+		while (i < position) {
+			if (XMLViewText[i] === "\"") {
+				quotionMarkCount++;
+			}
+
+			i++;
+		}
+
+		return quotionMarkCount % 2 === 1;
 	}
 
 	private static getTagPrefix(tagText: string) {
@@ -110,7 +125,7 @@ export class XMLParser {
 		}
 		tagPositionBegin = i;
 
-		while (i < XMLViewText.length && XMLViewText[i] !== ">") {
+		while (i < XMLViewText.length && (XMLViewText[i] !== ">" || this.getIfPositionIsInString(XMLViewText, i))) {
 			i++;
 		}
 		tagPositionEnd = i + 1;
