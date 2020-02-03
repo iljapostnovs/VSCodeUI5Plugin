@@ -21,11 +21,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
 			return new Promise(async resolve => {
 				try {
+					CommandRegistrator.register(context, false);
+
 					await CompletionItemRegistrator.register(context, progress);
 
 					FileWatcher.register();
 
-					CommandRegistrator.register(context);
+					CommandRegistrator.register(context, true);
 
 					DefinitionProviderRegistrator.register(context);
 

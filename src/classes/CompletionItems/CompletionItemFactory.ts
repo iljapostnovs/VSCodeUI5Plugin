@@ -77,7 +77,7 @@ export class CompletionItemFactory {
 			}
 		}
 
-		if (node.getKind() === "class" && !node.getIsDepricated()) {
+		if (node.getKind() === "class" && !node.getIsDepricated() && node.node.visibility === "public") {
 			const metadata = await node.getMetadata();
 			const stereotype = metadata.getUI5Metadata() ? metadata.getUI5Metadata().stereotype : undefined;
 
@@ -99,7 +99,7 @@ export class CompletionItemFactory {
 
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
-		mardownString.appendMarkdown("[UI5 API](https://ui5.sap.com/#/api/" + node.getName() + ")\n");
+		mardownString.appendMarkdown(`[UI5 API](https://ui5.sap.com/${vscode.workspace.getConfiguration("ui5.plugin").get("ui5version")}#/api/${node.getName()})\n`);
 		mardownString.appendMarkdown(metadata.rawMetadata.description);
 		completionItem.documentation = mardownString;
 		completionItem.sortText = "}";
@@ -152,7 +152,7 @@ export class CompletionItemFactory {
 
 			const mardownString = new vscode.MarkdownString();
 			mardownString.isTrusted = true;
-			mardownString.appendMarkdown("[UI5 API](https://ui5.sap.com/#/api/" + node.getName() + ")\n");
+			mardownString.appendMarkdown(`[UI5 API](https://ui5.sap.com/${vscode.workspace.getConfiguration("ui5.plugin").get("ui5version")}/#/api/${node.getName()})\n`);
 			mardownString.appendMarkdown(metadata.rawMetadata.description);
 			completionItem.documentation = mardownString;
 

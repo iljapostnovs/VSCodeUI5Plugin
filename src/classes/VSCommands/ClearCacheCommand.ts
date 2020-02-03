@@ -17,7 +17,7 @@ export class ClearCacheCommand {
 		if (fs.existsSync(cachePath)) {
 			fs.unlinkSync(cachePath);
 		}
-		cachePath = context.globalStoragePath + + "\\cache_appindex.json";
+		cachePath = context.globalStoragePath + "\\cache_appindex.json";
 		if (fs.existsSync(cachePath)) {
 			fs.unlinkSync(cachePath);
 		}
