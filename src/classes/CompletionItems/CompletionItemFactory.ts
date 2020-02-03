@@ -204,16 +204,20 @@ export class CompletionItemFactory {
 		let completionItems = fieldsAndMethods.methods.map(classMethod => {
 			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(classMethod.name);
 			completionItem.kind = vscode.CompletionItemKind.Method;
-			completionItem.insertText = classMethod.name;
+
+			const mandatoryParams = classMethod.params.filter(param => !param.endsWith("?"));
+			const i = mandatoryParams.length + 1;
+			const paramString = mandatoryParams.map((param, index) => `\${${i - index}:${param}}`).join(", ");
+			completionItem.insertText = new vscode.SnippetString(`${classMethod.name}(${paramString})$0`);
 			completionItem.detail = classMethod.name;
 
 			const mardownString = new vscode.MarkdownString();
 			mardownString.isTrusted = true;
-			mardownString.appendCodeblock(classMethod.description);
 			if (classMethod.api) {
 				//TODO: newline please, why dont you work
 				mardownString.appendMarkdown(classMethod.api);
 			}
+			mardownString.appendCodeblock(classMethod.description);
 			completionItem.documentation = mardownString;
 
 			return completionItem;
@@ -271,7 +275,8 @@ export class CompletionItemFactory {
 		completionItems = UIClass.properties.map(property => {
 			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(property.name);
 			completionItem.kind = vscode.CompletionItemKind.Property;
-			completionItem.insertText = property.name;
+			const insertTextValues = property.typeValues.length > 0 ? `|${property.typeValues.join(",")}|` : "";
+			completionItem.insertText =  new vscode.SnippetString(`${property.name}="\${1${insertTextValues}}"$0`);
 			completionItem.detail = `${property.name}: ${property.type}`;
 			completionItem.documentation = property.description;
 
@@ -287,7 +292,7 @@ export class CompletionItemFactory {
 		completionItems = UIClass.events.map(event => {
 			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(event.name);
 			completionItem.kind = vscode.CompletionItemKind.Event;
-			completionItem.insertText = event.name;
+			completionItem.insertText = new vscode.SnippetString(`${event.name}="\${1}"$0`);
 			completionItem.detail = event.name;
 			completionItem.documentation = event.description;
 
