@@ -157,7 +157,7 @@ export class CustomUIClass extends AbstractUIClass {
 				if (this.classBody) {
 					const part = this.classBody.parts[index];
 					if (part instanceof JSFunction) {
-						const description = `(${part.params.map(part => part.parsedName).join(",")}) : ${(part.returnType ? part.returnType : "void")}`;
+						const description = `(${part.params.map(part => part.parsedName).join(", ")}) : ${(part.returnType ? part.returnType : "void")}`;
 						this.methods.push({
 							name: partName,
 							params: part.params.map(part => part.parsedName),
