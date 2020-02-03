@@ -242,20 +242,39 @@ export class CompletionItemFactory {
 		if (textEditor) {
 			const document = textEditor.document;
 			const currentPositionOffset = document.offsetAt(textEditor.selection.start);
-			const positionType = XMLParser.getPositionType(document.getText(), currentPositionOffset);
+			const XMLText = document.getText();
+			const positionType = XMLParser.getPositionType(XMLText, currentPositionOffset);
 
-			if (positionType === PositionType.Properties) {
-				const className = XMLParser.getClassNameInPosition(document.getText(), currentPositionOffset);
+			if (positionType === PositionType.InTheTag) {
+				const className = XMLParser.getClassNameInPosition(XMLText, currentPositionOffset);
 				if (className) {
 					const UIClass = this.getFirstStandardClassInInheritanceTree(className);
 					completionItems = this.getPropertyCompletionItemsFromClass(UIClass);
 					completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(UIClass));
+				}
+			} else if (positionType === PositionType.InTheString) {
+				const positionBeforeString = XMLParser.getPositionBeforeStringBegining(XMLText, currentPositionOffset);
+
+				const className = XMLParser.getClassNameInPosition(XMLText, positionBeforeString);
+				if (className) {
+					const UIClass = this.getFirstStandardClassInInheritanceTree(className);
+					const propertyName = XMLParser.getNearestProperty(XMLText, positionBeforeString);
+					const UIProperty = UIClass.properties.find(property => property.name === propertyName);
+					if (UIProperty && UIProperty.typeValues.length > 0) {
+						completionItems = this.generateCompletionItemsFromTypeValues(UIProperty.typeValues);
+					}
 				}
 			}
 
 		}
 
 		return completionItems;
+	}
+
+	private generateCompletionItemsFromTypeValues(typeValues: string[]) {
+		return typeValues.map(typeValue => {
+			return new vscode.CompletionItem(typeValue, vscode.CompletionItemKind.Keyword);
+		});
 	}
 
 	private getFirstStandardClassInInheritanceTree(className: string) {

@@ -3,7 +3,7 @@ import { FileReader } from "./classes/Util/FileReader";
 import { CommandRegistrator } from "./classes/Util/CommandRegistrator";
 import { CompletionItemRegistrator } from "./classes/Util/CompletionItemRegistrator";
 import { DefinitionProviderRegistrator } from "./classes/Util/DefinitionProviderRegistrator";
-import { SignatureHelpRegistrator } from "./classes/Util/SignatureHelpRegistrator";
+// import { SignatureHelpRegistrator } from "./classes/Util/SignatureHelpRegistrator";
 import { FileWatcher } from "./classes/Util/FileWatcher";
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -29,7 +29,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 					DefinitionProviderRegistrator.register(context);
 
-					SignatureHelpRegistrator.register(context);
+					// SignatureHelpRegistrator.register(context);
 
 					resolve();
 				} catch (error) {
