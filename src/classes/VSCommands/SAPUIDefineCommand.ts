@@ -5,6 +5,7 @@ import { CustomUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/CustomUICl
 import { JSFunctionCall } from "../CustomLibMetadata/JSParser/types/FunctionCall";
 import { JSFunction } from "../CustomLibMetadata/JSParser/types/Function";
 import { JSString } from "../CustomLibMetadata/JSParser/types/String";
+import { EndlessLoopLocker } from "../Util/EndlessLoopLocker";
 export class SAPUIDefineCommand {
 	static insertUIDefine() {
 		const editor = vscode.window.activeTextEditor;
@@ -14,6 +15,8 @@ export class SAPUIDefineCommand {
 			const currentClassName = SyntaxAnalyzer.getCurrentClassName();
 
 			if (currentClassName) {
+				EndlessLoopLocker.beginProcess();
+
 				UIClassFactory.setNewCodeForClass(currentClassName, document.getText());
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				if (UIClass.jsPasredBody) {

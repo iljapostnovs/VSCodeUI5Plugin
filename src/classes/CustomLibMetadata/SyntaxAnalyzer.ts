@@ -208,6 +208,67 @@ export class SyntaxAnalyzer {
 
 		return separators.indexOf(char) > -1 || (char === "(" && !ignoreParentheses);
 	}
+
+	static getCurrentActiveText() {
+		let currentActiveText = "";
+		if (vscode.window.activeTextEditor) {
+			const iDeltaStart = this.getDeltaOfTheActiveTextBegining(-1);
+			const rangeOfVariable = new vscode.Range(
+				vscode.window.activeTextEditor.selection.start.translate({
+					characterDelta: iDeltaStart
+				}),
+				vscode.window.activeTextEditor.selection.start
+			);
+			currentActiveText = vscode.window.activeTextEditor.document.getText(rangeOfVariable);
+			currentActiveText = currentActiveText.replace(".prototype", "");
+			if (currentActiveText.endsWith("(")) {
+				currentActiveText = currentActiveText.substring(0, currentActiveText.length - 1);
+			}
+
+			//remove last part of the var (it ends with .)
+			// const temporaryVariableParts = currentActiveText.split(".");
+			// temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
+			// currentActiveText = temporaryVariableParts.join(".");
+		}
+
+		return currentActiveText;
+	}
+
+	private static getDeltaOfTheActiveTextBegining(iDelta: number) {
+		let deltaToReturn = iDelta - 1; //Filter( => ignore first parentheses
+		if (vscode.window.activeTextEditor) {
+			const startingPosition = vscode.window.activeTextEditor.selection.start;
+			let selectedText = "";
+			let parenthesesCount = 0;
+			let ignoreParentheses = false;
+
+			let sCurrentChar = selectedText[0];
+			do {
+				sCurrentChar = selectedText[0];
+
+				ignoreParentheses = parenthesesCount > 0;
+				if (sCurrentChar === ")") {
+					parenthesesCount++;
+				} else if (sCurrentChar === "(") {
+					parenthesesCount--;
+				}
+
+				const range = new vscode.Range(startingPosition.translate({
+					characterDelta: deltaToReturn
+				}), startingPosition);
+				selectedText = vscode.window.activeTextEditor.document.getText(range);
+				if (!this.isSeparator(sCurrentChar, ignoreParentheses)) {
+					deltaToReturn += iDelta;
+				} else {
+					deltaToReturn += -iDelta;
+				}
+
+			} while (!this.isSeparator(sCurrentChar, ignoreParentheses) && startingPosition.character + deltaToReturn > 0);
+		}
+		deltaToReturn += -iDelta;
+
+		return deltaToReturn;
+	}
 	/* =========================================================== */
 	/* end: variable methods                                       */
 	/* =========================================================== */
