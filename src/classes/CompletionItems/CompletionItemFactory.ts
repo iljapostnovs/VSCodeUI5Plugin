@@ -206,8 +206,7 @@ export class CompletionItemFactory {
 			completionItem.kind = vscode.CompletionItemKind.Method;
 
 			const mandatoryParams = classMethod.params.filter(param => !param.endsWith("?"));
-			const i = mandatoryParams.length + 1;
-			const paramString = mandatoryParams.map((param, index) => `\${${i - index}:${param}}`).join(", ");
+			const paramString = mandatoryParams.map((param, index) => `\${${index + 1}:${param}}`).join(", ");
 			completionItem.insertText = new vscode.SnippetString(`${classMethod.name}(${paramString})$0`);
 			completionItem.detail = classMethod.name;
 
