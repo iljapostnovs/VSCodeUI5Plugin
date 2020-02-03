@@ -30,10 +30,10 @@ export class StandardUIClass extends AbstractUIClass {
 						accumulator.push({
 							name: method.name,
 							description: this.removeTags(method.code),
-							params: method.parameters ? method.parameters.map((parameter: any) => parameter.name) : [],
+							params: method.parameters ? method.parameters.map((parameter: any) => parameter.name + (parameter.optional ? "?" : "")) : [],
 							returnType: method.returnValue ? method.returnValue.type : "void",
 							isFromParent: !isParent,
-							api: `[ui5.com](https://ui5.sap.com/#/api/${SAPNode.getName()}%23methods/${method.name})`
+							api: `[UI5 API](https://ui5.sap.com/#/api/${SAPNode.getName()}%23methods/${method.name})`
 						});
 					}
 					return accumulator;
@@ -93,12 +93,14 @@ export class StandardUIClass extends AbstractUIClass {
 			const metadata = SAPNode.getMetadataSync();
 			if (metadata) {
 				if (metadata.getUI5Metadata().properties) {
-					classPropeties = metadata.getUI5Metadata().properties.reduce((accumulator: UIProperties[], property:any) => {
-						if (property.visibility === "public") {
+					classPropeties = metadata.getUI5Metadata().properties.reduce((accumulator: UIProperties[], {visibility, name, type, description}:any) => {
+						const additionalDescription = this.generateAdditionalDescriptionFrom(type);
+						if (visibility === "public") {
 							accumulator.push({
-								name: property.name,
-								type: property.type,
-								description: this.removeTags(property.description)
+								name: name,
+								type: type,
+								typeValues: this.generateTypeValues(type),
+								description: `${additionalDescription}\n${this.removeTags(description)}`.trim()
 							});
 						}
 						return accumulator;
@@ -111,6 +113,40 @@ export class StandardUIClass extends AbstractUIClass {
 			}
 		}
 		return classPropeties;
+	}
+
+	private generateAdditionalDescriptionFrom(type: string) {
+		let additionalDescription = "";
+		if (type && type.startsWith("sap.")) {
+			const typeNode = this.findSAPNode(type);
+			if (typeNode) {
+				const metadata = typeNode.getMetadataSync();
+				if (metadata) {
+					additionalDescription = metadata.rawMetadata.properties.reduce((accumulator: string, property: any) => {
+						accumulator += `${property.name}\n`;
+
+						return accumulator;
+					}, "");
+				}
+			}
+		}
+
+		return additionalDescription;
+	}
+
+	private generateTypeValues(type: string) {
+		let typeValues = [];
+		if (type && type.startsWith("sap.")) {
+			const typeNode = this.findSAPNode(type);
+			if (typeNode) {
+				const metadata = typeNode.getMetadataSync();
+				if (metadata) {
+					typeValues = metadata.rawMetadata.properties.map((property: any) => `${property.name}`.replace(`${type}.`, ""));
+				}
+			}
+		}
+
+		return typeValues;
 	}
 
 	private fillEvents() {

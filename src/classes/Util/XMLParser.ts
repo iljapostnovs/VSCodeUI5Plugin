@@ -1,6 +1,7 @@
 export enum PositionType {
-	Properties = "1",
+	InTheTag = "1",
 	Content = "2",
+	InTheString = "3"
 }
 
 export class XMLParser {
@@ -101,9 +102,9 @@ export class XMLParser {
 		let libraryPath = "";
 		let regExpBase;
 		if (!tagPrefix) {
-			regExpBase = `(?<=xmlns=").*(?=")`;
+			regExpBase = `(?<=xmlns=").*?(?=")`;
 		} else {
-			regExpBase = `(?<=xmlns(:${tagPrefix})=").*(?=")`;
+			regExpBase = `(?<=xmlns(:${tagPrefix})=").*?(?=")`;
 		}
 		const rClassName = new RegExp(regExpBase);
 		const classNameResult = rClassName.exec(XMLViewText);
@@ -119,20 +120,50 @@ export class XMLParser {
 		let i = currentPosition;
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
+		let positionType: PositionType = PositionType.Content;
+		if (this.getIfPositionIsInString(XMLViewText, currentPosition)) {
+			positionType = PositionType.InTheString;
+		} else {
+			while (i > 0 && XMLViewText[i] !== "<") {
+				i--;
+			}
+			tagPositionBegin = i;
 
-		while (i > 0 && XMLViewText[i] !== "<") {
+			while (i < XMLViewText.length && (XMLViewText[i] !== ">" || this.getIfPositionIsInString(XMLViewText, i))) {
+				i++;
+			}
+			tagPositionEnd = i + 1;
+
+			const positionIsInsideTheClassTag = currentPosition > tagPositionBegin && currentPosition < tagPositionEnd;
+			// const positionIsInsideTheClassBody = currentPosition > tagPositionEnd;
+
+			if (positionIsInsideTheClassTag) {
+				positionType = PositionType.InTheTag;
+			} else {
+				positionType = PositionType.Content;
+			}
+		}
+
+		return positionType;
+	}
+
+	static getPositionBeforeStringBegining(XMLViewText: string, currentPosition: number) {
+		let i = currentPosition - 1;
+		while (XMLViewText[i] !== "\"" && i > 0) {
 			i--;
 		}
-		tagPositionBegin = i;
+		i--;
 
-		while (i < XMLViewText.length && (XMLViewText[i] !== ">" || this.getIfPositionIsInString(XMLViewText, i))) {
-			i++;
+		return i;
+	}
+
+	static getNearestProperty(XMLViewText: string, currentPosition: number) {
+		let i = currentPosition;
+
+		while (!/\s/.test(XMLViewText[i]) && i > 0) {
+			i--;
 		}
-		tagPositionEnd = i + 1;
 
-		const positionIsInsideTheClassTag = currentPosition > tagPositionBegin && currentPosition < tagPositionEnd;
-		// const positionIsInsideTheClassBody = currentPosition > tagPositionEnd;
-
-		return positionIsInsideTheClassTag ? PositionType.Properties : PositionType.Content;
+		return XMLViewText.substring(i + 1, currentPosition).replace("=", "");
 	}
 }

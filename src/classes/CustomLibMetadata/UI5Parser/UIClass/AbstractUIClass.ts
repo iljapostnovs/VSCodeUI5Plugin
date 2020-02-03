@@ -13,6 +13,7 @@ export interface UIField {
 export interface UIProperties {
 	name: string;
 	type: string | undefined;
+	typeValues: string[];
 	description: string;
 }
 export interface UIEvents {

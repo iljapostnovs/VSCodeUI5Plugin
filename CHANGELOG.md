@@ -41,3 +41,7 @@
 * Added parsing of destructured objects in function params
 * Performance improvement for initial completion item generating
 * Dynamic completion items for XML views added. Now autocomplition works for properties and events.
+
+## 0.8.5 (03-02-2020)
+* Bugfixes for xml completion items
+* Added value helps for properties which has enum values for xml files

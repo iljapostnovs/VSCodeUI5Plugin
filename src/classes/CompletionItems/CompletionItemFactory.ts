@@ -99,7 +99,7 @@ export class CompletionItemFactory {
 
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
-		mardownString.appendMarkdown("[ui5.com](https://ui5.sap.com/#/api/" + node.getName() + ")\n");
+		mardownString.appendMarkdown("[UI5 API](https://ui5.sap.com/#/api/" + node.getName() + ")\n");
 		mardownString.appendMarkdown(metadata.rawMetadata.description);
 		completionItem.documentation = mardownString;
 		completionItem.sortText = "}";
@@ -204,16 +204,19 @@ export class CompletionItemFactory {
 		let completionItems = fieldsAndMethods.methods.map(classMethod => {
 			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(classMethod.name);
 			completionItem.kind = vscode.CompletionItemKind.Method;
-			completionItem.insertText = classMethod.name;
+
+			const mandatoryParams = classMethod.params.filter(param => !param.endsWith("?"));
+			const paramString = mandatoryParams.map((param, index) => `\${${index + 1}:${param}}`).join(", ");
+			completionItem.insertText = new vscode.SnippetString(`${classMethod.name}(${paramString})$0`);
 			completionItem.detail = classMethod.name;
 
 			const mardownString = new vscode.MarkdownString();
 			mardownString.isTrusted = true;
-			mardownString.appendCodeblock(classMethod.description);
 			if (classMethod.api) {
 				//TODO: newline please, why dont you work
 				mardownString.appendMarkdown(classMethod.api);
 			}
+			mardownString.appendCodeblock(classMethod.description);
 			completionItem.documentation = mardownString;
 
 			return completionItem;
@@ -239,20 +242,39 @@ export class CompletionItemFactory {
 		if (textEditor) {
 			const document = textEditor.document;
 			const currentPositionOffset = document.offsetAt(textEditor.selection.start);
-			const positionType = XMLParser.getPositionType(document.getText(), currentPositionOffset);
+			const XMLText = document.getText();
+			const positionType = XMLParser.getPositionType(XMLText, currentPositionOffset);
 
-			if (positionType === PositionType.Properties) {
-				const className = XMLParser.getClassNameInPosition(document.getText(), currentPositionOffset);
+			if (positionType === PositionType.InTheTag) {
+				const className = XMLParser.getClassNameInPosition(XMLText, currentPositionOffset);
 				if (className) {
 					const UIClass = this.getFirstStandardClassInInheritanceTree(className);
 					completionItems = this.getPropertyCompletionItemsFromClass(UIClass);
 					completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(UIClass));
+				}
+			} else if (positionType === PositionType.InTheString) {
+				const positionBeforeString = XMLParser.getPositionBeforeStringBegining(XMLText, currentPositionOffset);
+
+				const className = XMLParser.getClassNameInPosition(XMLText, positionBeforeString);
+				if (className) {
+					const UIClass = this.getFirstStandardClassInInheritanceTree(className);
+					const propertyName = XMLParser.getNearestProperty(XMLText, positionBeforeString);
+					const UIProperty = UIClass.properties.find(property => property.name === propertyName);
+					if (UIProperty && UIProperty.typeValues.length > 0) {
+						completionItems = this.generateCompletionItemsFromTypeValues(UIProperty.typeValues);
+					}
 				}
 			}
 
 		}
 
 		return completionItems;
+	}
+
+	private generateCompletionItemsFromTypeValues(typeValues: string[]) {
+		return typeValues.map(typeValue => {
+			return new vscode.CompletionItem(typeValue, vscode.CompletionItemKind.Keyword);
+		});
 	}
 
 	private getFirstStandardClassInInheritanceTree(className: string) {
@@ -271,7 +293,8 @@ export class CompletionItemFactory {
 		completionItems = UIClass.properties.map(property => {
 			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(property.name);
 			completionItem.kind = vscode.CompletionItemKind.Property;
-			completionItem.insertText = property.name;
+			const insertTextValues = property.typeValues.length > 0 ? `|${property.typeValues.join(",")}|` : "";
+			completionItem.insertText =  new vscode.SnippetString(`${property.name}="\${1${insertTextValues}}"$0`);
 			completionItem.detail = `${property.name}: ${property.type}`;
 			completionItem.documentation = property.description;
 
@@ -287,7 +310,7 @@ export class CompletionItemFactory {
 		completionItems = UIClass.events.map(event => {
 			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(event.name);
 			completionItem.kind = vscode.CompletionItemKind.Event;
-			completionItem.insertText = event.name;
+			completionItem.insertText = new vscode.SnippetString(`${event.name}="\${1}"$0`);
 			completionItem.detail = event.name;
 			completionItem.documentation = event.description;
 
