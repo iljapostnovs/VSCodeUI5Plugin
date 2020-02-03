@@ -99,7 +99,7 @@ export class CompletionItemFactory {
 
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
-		mardownString.appendMarkdown("[ui5.com](https://ui5.sap.com/#/api/" + node.getName() + ")\n");
+		mardownString.appendMarkdown("[UI5 API](https://ui5.sap.com/#/api/" + node.getName() + ")\n");
 		mardownString.appendMarkdown(metadata.rawMetadata.description);
 		completionItem.documentation = mardownString;
 		completionItem.sortText = "}";
