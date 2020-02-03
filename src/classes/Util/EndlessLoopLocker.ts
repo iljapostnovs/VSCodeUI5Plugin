@@ -13,8 +13,8 @@ export class EndlessLoopLocker {
 		const timeStart = this.timeStart.getTime();
 		const threeSeconds = 3 * 1000;
 
-		// if (currentTime - timeStart > threeSeconds) {
-		// 	throw new Error("Exceeded execution time limit");
-		// }
+		if (currentTime - timeStart > threeSeconds) {
+			throw new Error("Exceeded execution time limit");
+		}
 	}
 }
