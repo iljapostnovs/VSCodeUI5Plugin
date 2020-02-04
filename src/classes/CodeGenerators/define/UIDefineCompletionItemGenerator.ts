@@ -7,7 +7,7 @@ export class DefineGenerator {
 	public async generateDefineString(node: SAPNode) {
 		let defineString: string = "";
 
-		if (node.getKind() === "class" || node.getKind() === "enum") {
+		if (node.node.visibility === "public" && (node.getKind() === "class" || node.getKind() === "enum")) {
 			const metadata: UI5Metadata = await node.getMetadata();
 			defineString = "\"" + metadata.rawMetadata.module + "\"";
 		}

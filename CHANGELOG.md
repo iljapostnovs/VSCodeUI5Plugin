@@ -42,6 +42,9 @@
 * Performance improvement for initial completion item generating
 * Dynamic completion items for XML views added. Now autocomplition works for properties and events.
 
-## 0.8.5 (03-02-2020)
+## 0.8.6 (03-02-2020)
 * Bugfixes for xml completion items
 * Added value helps for properties which has enum values for xml files
+
+## 0.8.7 (04-02-2020)
+* Improvements for version support. Now UI5 1.73.1 should be working.

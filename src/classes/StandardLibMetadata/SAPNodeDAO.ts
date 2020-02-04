@@ -58,7 +58,8 @@ export class SAPNodeDAO {
 
 		const globalStoragePath = FileReader.globalStoragePath;
 		if (globalStoragePath) {
-			const cachePath = globalStoragePath + "\\cache_appindex.json";
+			const UIVersion: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
+			const cachePath = `${globalStoragePath}\\cache_appindex_${UIVersion}.json`;
 
 			if (fs.existsSync(cachePath)) {
 				cacheFromFile = JSON.parse(fs.readFileSync(cachePath, "utf8"));
@@ -71,7 +72,8 @@ export class SAPNodeDAO {
 	private cacheApiIndex() {
 		const globalStoragePath = FileReader.globalStoragePath;
 		if (globalStoragePath) {
-			const cachePath = globalStoragePath + "\\cache_appindex.json";
+			const UIVersion: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
+			const cachePath = `${globalStoragePath}\\cache_appindex_${UIVersion}.json`;
 			if (!fs.existsSync(cachePath)) {
 				if (!fs.existsSync(globalStoragePath)) {
 					fs.mkdirSync(globalStoragePath);

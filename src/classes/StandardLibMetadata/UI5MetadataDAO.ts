@@ -45,7 +45,8 @@ export class UI5MetadataPreloader {
 	}
 
 	private loadCache(context: vscode.ExtensionContext) {
-		const cachePath = context.globalStoragePath + "\\cache.json";
+		const UIVersion: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
+		const cachePath = `${context.globalStoragePath}\\cache_${UIVersion}.json`;
 		let cacheFromFile;
 
 		if (fs.existsSync(cachePath)) {
@@ -56,7 +57,8 @@ export class UI5MetadataPreloader {
 	}
 
 	private writeCache(context: vscode.ExtensionContext) {
-		const cachePath = context.globalStoragePath + "\\cache.json";
+		const UIVersion: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
+		const cachePath = `${context.globalStoragePath}\\cache_${UIVersion}.json`;
 		if (!fs.existsSync(cachePath)) {
 			if (!fs.existsSync(context.globalStoragePath)) {
 				fs.mkdirSync(context.globalStoragePath);
@@ -92,7 +94,12 @@ export class UI5MetadataDAO {
 	}
 
 	public async getMetadataForLib(lib: string) {
-		const metadatas = await this.fetchMetadataForLib(lib);
+		let metadatas;
+		try {
+			metadatas = await this.fetchMetadataForLib(lib);
+		} catch (error) {
+			console.log(error);
+		}
 
 		return metadatas;
 	}
