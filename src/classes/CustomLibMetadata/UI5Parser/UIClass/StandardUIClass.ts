@@ -123,7 +123,7 @@ export class StandardUIClass extends AbstractUIClass {
 			const typeNode = this.findSAPNode(type);
 			if (typeNode) {
 				const metadata = typeNode.getMetadataSync();
-				if (metadata) {
+				if (metadata && metadata.rawMetadata && metadata.rawMetadata.properties) {
 					additionalDescription = metadata.rawMetadata.properties.reduce((accumulator: string, property: any) => {
 						accumulator += `${property.name}\n`;
 
