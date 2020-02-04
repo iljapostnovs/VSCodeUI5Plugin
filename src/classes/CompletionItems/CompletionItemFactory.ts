@@ -296,7 +296,8 @@ export class CompletionItemFactory {
 			const insertTextValues = property.typeValues.length > 0 ? `|${property.typeValues.join(",")}|` : "";
 			completionItem.insertText =  new vscode.SnippetString(`${property.name}="\${1${insertTextValues}}"$0`);
 			completionItem.detail = `${property.name}: ${property.type}`;
-			completionItem.documentation = property.description;
+			const UI5ApiUri = `[UI5 API](https://ui5.sap.com/${vscode.workspace.getConfiguration("ui5.plugin").get("ui5version")}/#/api/${UIClass.className}/controlProperties)\n`;
+			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${property.description}`);
 
 			return completionItem;
 		});
@@ -312,7 +313,8 @@ export class CompletionItemFactory {
 			completionItem.kind = vscode.CompletionItemKind.Event;
 			completionItem.insertText = new vscode.SnippetString(`${event.name}="\${1}"$0`);
 			completionItem.detail = event.name;
-			completionItem.documentation = event.description;
+			const UI5ApiUri = `[UI5 API](https://ui5.sap.com/${vscode.workspace.getConfiguration("ui5.plugin").get("ui5version")}/#/api/${UIClass.className}/events/Events)\n`;
+			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${event.description}`);
 
 			return completionItem;
 		});
