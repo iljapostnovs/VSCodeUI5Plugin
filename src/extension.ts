@@ -3,8 +3,8 @@ import { FileReader } from "./classes/Util/FileReader";
 import { CommandRegistrator } from "./classes/Util/registrators/CommandRegistrator";
 import { CompletionItemRegistrator } from "./classes/Util/registrators/CompletionItemRegistrator";
 import { DefinitionProviderRegistrator } from "./classes/Util/registrators/DefinitionProviderRegistrator";
-// import { SignatureHelpRegistrator } from "./classes/Util/SignatureHelpRegistrator";
 import { FileWatcher } from "./classes/Util/FileWatcher";
+import { SignatureHelpRegistrator } from "./classes/Util/registrators/SignatureHelpRegistrator";
 
 export async function activate(context: vscode.ExtensionContext) {
 	FileReader.globalStoragePath = context.globalStoragePath;
@@ -31,7 +31,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 					DefinitionProviderRegistrator.register(context);
 
-					// SignatureHelpRegistrator.register(context);
+					SignatureHelpRegistrator.register(context);
 
 					resolve();
 				} catch (error) {

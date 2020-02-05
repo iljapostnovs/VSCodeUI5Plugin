@@ -64,7 +64,7 @@ export class UIClassDefinitionFinder {
 		return location;
 	}
 
-	private static getVariableClass(variable?: string) {
+	static getVariableClass(variable?: string) {
 		//TODO: this should work not only for current document
 		let UIClassName: string | undefined;
 		if (!variable) {
