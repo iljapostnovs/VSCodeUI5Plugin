@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
+import { SyntaxAnalyzer } from "../../CustomLibMetadata/SyntaxAnalyzer";
 
 export class SignatureHelpRegistrator {
 	static async register(context: vscode.ExtensionContext) {

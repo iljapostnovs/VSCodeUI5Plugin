@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { FileReader } from "./classes/Util/FileReader";
-import { CommandRegistrator } from "./classes/Util/CommandRegistrator";
-import { CompletionItemRegistrator } from "./classes/Util/CompletionItemRegistrator";
-import { DefinitionProviderRegistrator } from "./classes/Util/DefinitionProviderRegistrator";
+import { CommandRegistrator } from "./classes/Util/registrators/CommandRegistrator";
+import { CompletionItemRegistrator } from "./classes/Util/registrators/CompletionItemRegistrator";
+import { DefinitionProviderRegistrator } from "./classes/Util/registrators/DefinitionProviderRegistrator";
 // import { SignatureHelpRegistrator } from "./classes/Util/SignatureHelpRegistrator";
 import { FileWatcher } from "./classes/Util/FileWatcher";
 
