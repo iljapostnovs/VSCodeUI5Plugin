@@ -66,7 +66,7 @@ export class WorkspaceCompletionItemFactory {
 				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
 				const manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
 				const UI5ComponentName:string = UI5Manifest["sap.app"].id;
-				const projectJSFiles:any = await this.findJSFilesForComponentName(UI5ComponentName);
+				const projectJSFiles:any = await this.findJSFilesInWorkspaceFolder(wsFolder);
 
 				projectJSFiles.forEach((projectJSFile:any) => {
 					if (projectJSFile.fsPath.indexOf(manifestFsPath) > -1) {
@@ -85,9 +85,12 @@ export class WorkspaceCompletionItemFactory {
 		return workspaceJSFiles;
 	}
 
-	private findJSFilesForComponentName(componentName: string) {
-		return new Promise((resolve) => {
-			workspace.findFiles("**/*.js")
+	private findJSFilesInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
+		return new Promise(resolve => {
+			const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
+
+			vscode.workspace
+			.findFiles(new vscode.RelativePattern(wsFolder, `${src}/**/*.js`))
 			.then(resolve);
 		});
 	}

@@ -249,7 +249,7 @@ export class CompletionItemFactory {
 			if (positionType === PositionType.InTheTag) {
 				const className = XMLParser.getClassNameInPosition(XMLText, currentPositionOffset);
 				if (className) {
-					const UIClass = this.getFirstStandardClassInInheritanceTree(className);
+					const UIClass = UIClassFactory.getUIClass(className);
 					completionItems = this.getPropertyCompletionItemsFromClass(UIClass);
 					completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(UIClass));
 				}
@@ -258,7 +258,7 @@ export class CompletionItemFactory {
 
 				const className = XMLParser.getClassNameInPosition(XMLText, positionBeforeString);
 				if (className) {
-					const UIClass = this.getFirstStandardClassInInheritanceTree(className);
+					const UIClass = UIClassFactory.getUIClass(className);
 					const propertyName = XMLParser.getNearestProperty(XMLText, positionBeforeString);
 					const UIProperty = UIClass.properties.find(property => property.name === propertyName);
 					if (UIProperty && UIProperty.typeValues.length > 0) {
@@ -278,16 +278,6 @@ export class CompletionItemFactory {
 		});
 	}
 
-	private getFirstStandardClassInInheritanceTree(className: string) {
-		let UIClass = UIClassFactory.getUIClass(className);
-
-		if (!className.startsWith("sap.")) {
-			UIClass = this.getFirstStandardClassInInheritanceTree(UIClass.parentClassNameDotNotation);
-		}
-
-		return UIClass;
-	}
-
 	private getPropertyCompletionItemsFromClass(UIClass: AbstractUIClass) {
 		let completionItems:vscode.CompletionItem[] = [];
 
@@ -302,6 +292,11 @@ export class CompletionItemFactory {
 
 			return completionItem;
 		});
+
+		if (UIClass.parentClassNameDotNotation) {
+			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
+			completionItems = completionItems.concat(this.getPropertyCompletionItemsFromClass(parentClass));
+		}
 
 		return completionItems;
 	}
@@ -319,6 +314,11 @@ export class CompletionItemFactory {
 
 			return completionItem;
 		});
+
+		if (UIClass.parentClassNameDotNotation) {
+			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
+			completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(parentClass));
+		}
 
 		return completionItems;
 	}

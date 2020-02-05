@@ -1,6 +1,7 @@
 import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
 import { CustomUIClass } from "./CustomUIClass";
 import { StandardUIClass } from "./StandardUIClass";
+import { EndlessLoopLocker } from "../../../Util/EndlessLoopLocker";
 
 export interface FieldsAndMethods {
 	fields: UIField[];
@@ -88,6 +89,7 @@ export class UIClassFactory {
 
 	public static getUIClass(className: string) {
 		if (!this.UIClasses[className]) {
+			EndlessLoopLocker.beginProcess();
 			this.UIClasses[className] = UIClassFactory.getInstance(className);
 		}
 

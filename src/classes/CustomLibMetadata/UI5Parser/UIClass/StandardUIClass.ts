@@ -1,4 +1,4 @@
-import { AbstractUIClass, UIMethod, UIProperties, UIEvents } from "./AbstractUIClass";
+import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation } from "./AbstractUIClass";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
 import { URLBuilder } from "../../../Util/URLBuilder";
@@ -10,10 +10,11 @@ export class StandardUIClass extends AbstractUIClass {
 	constructor(className: string) {
 		super(className);
 
-		this.fillMethods();
 		this.fillParentClassName();
+		this.fillMethods();
 		this.fillProperties();
 		this.fillEvents();
+		this.fillAggregations();
 	}
 
 	private fillMethods() {
@@ -39,10 +40,6 @@ export class StandardUIClass extends AbstractUIClass {
 					}
 					return accumulator;
 				}, []);
-
-				if (metadata.rawMetadata.extends) {
-					classMethods = classMethods.concat(this.getStandardClassMethods(metadata.rawMetadata.extends, false));
-				}
 			}
 		}
 		return classMethods;
@@ -87,13 +84,13 @@ export class StandardUIClass extends AbstractUIClass {
 	}
 
 	private getStandardClassProperties(className: string) {
-		let classPropeties:UIProperties[] = [];
+		let classPropeties:UIProperty[] = [];
 		const SAPNode = this.findSAPNode(className);
 		if (SAPNode) {
 			const metadata = SAPNode.getMetadataSync();
 			if (metadata) {
 				if (metadata.getUI5Metadata().properties) {
-					classPropeties = metadata.getUI5Metadata().properties.reduce((accumulator: UIProperties[], {visibility, name, type, description}:any) => {
+					classPropeties = metadata.getUI5Metadata().properties.reduce((accumulator: UIProperty[], {visibility, name, type, description}:any) => {
 						const additionalDescription = this.generateAdditionalDescriptionFrom(type);
 						if (visibility === "public") {
 							accumulator.push({
@@ -105,10 +102,6 @@ export class StandardUIClass extends AbstractUIClass {
 						}
 						return accumulator;
 					}, []);
-				}
-
-				if (metadata.rawMetadata.extends) {
-					classPropeties = classPropeties.concat(this.getStandardClassProperties(metadata.rawMetadata.extends));
 				}
 			}
 		}
@@ -154,13 +147,13 @@ export class StandardUIClass extends AbstractUIClass {
 	}
 
 	private getStandardClassEvents(className: string) {
-		let classEvents:UIEvents[] = [];
+		let classEvents:UIEvent[] = [];
 		const SAPNode = this.findSAPNode(className);
 		if (SAPNode) {
 			const metadata = SAPNode.getMetadataSync();
 			if (metadata) {
 				if (metadata.rawMetadata.events) {
-					classEvents = metadata.rawMetadata.events.reduce((accumulator: UIEvents[], event:any) => {
+					classEvents = metadata.rawMetadata.events.reduce((accumulator: UIEvent[], event:any) => {
 						if (event.visibility === "public") {
 							accumulator.push({
 								name: event.name,
@@ -170,14 +163,40 @@ export class StandardUIClass extends AbstractUIClass {
 						return accumulator;
 					}, []);
 				}
-
-				if (metadata.rawMetadata.extends) {
-					classEvents = classEvents.concat(this.getStandardClassEvents(metadata.rawMetadata.extends));
-				}
 			}
 
 		}
 		return classEvents;
+	}
+
+	private fillAggregations() {
+		this.aggregations = this.getStandardClassAggregations(this.className);
+	}
+
+	private getStandardClassAggregations(className: string) {
+		let classAggregations: UIAggregation[] = [];
+		const SAPNode = this.findSAPNode(className);
+
+		if (SAPNode) {
+			const metadata = SAPNode.getMetadataSync();
+			if (metadata) {
+				if (metadata.getUI5Metadata() && metadata.getUI5Metadata().aggregations) {
+					classAggregations = metadata.getUI5Metadata().aggregations.reduce((accumulator: UIAggregation[], aggregation:any) => {
+						if (aggregation.visibility === "public") {
+							accumulator.push({
+								name: aggregation.name,
+								type: aggregation.type,
+								multiple: aggregation.coordinality === "0..n",
+								singularName: aggregation.singularName
+							});
+						}
+						return accumulator;
+					}, []);
+				}
+			}
+
+		}
+		return classAggregations;
 	}
 }
 

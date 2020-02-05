@@ -10,13 +10,19 @@ export interface UIField {
 	type: string | undefined;
 	description: string;
 }
-export interface UIProperties {
+export interface UIProperty {
 	name: string;
 	type: string | undefined;
 	typeValues: string[];
 	description: string;
 }
-export interface UIEvents {
+export interface UIAggregation {
+	name: string;
+	type: string | undefined;
+	multiple: boolean;
+	singularName: string;
+}
+export interface UIEvent {
 	name: string;
 	description: string;
 }
@@ -24,8 +30,9 @@ export abstract class AbstractUIClass {
 	public className: string;
 	public methods: UIMethod[] = [];
 	public fields: UIField[] = [];
-	public properties: UIProperties[] = [];
-	public events: UIEvents[] = [];
+	public properties: UIProperty[] = [];
+	public aggregations: UIAggregation[] = [];
+	public events: UIEvent[] = [];
 	public parentClassNameDotNotation: string = "";
 
 	constructor(className: string, documentText?: string) {

@@ -90,10 +90,6 @@ export class XMLParser {
 		} else {
 			className = tagNameParts[0];
 		}
-		const bIsThisAggregation = className[0].toUpperCase() !== className[0];
-		if (bIsThisAggregation) {
-			className = "";
-		}
 
 		return className;
 	}
