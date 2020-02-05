@@ -25,7 +25,7 @@ export class CommandRegistrator {
 			context.subscriptions.push(cleacCacheCommand);
 
 			/* Events */
-			ClearCacheCommand.subscribeToPropertyChange(context);
+			ClearCacheCommand.subscribeToPropertyChange();
 		}
 
 		console.log("Commands registered");

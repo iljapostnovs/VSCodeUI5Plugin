@@ -1,8 +1,8 @@
-import * as fs from "fs";
 import * as vscode from "vscode";
+import { FileReader } from "../Util/FileReader";
 
 export class ClearCacheCommand {
-	static subscribeToPropertyChange(context: vscode.ExtensionContext) {
+	static subscribeToPropertyChange() {
 		vscode.workspace.onDidChangeConfiguration(event => {
 			const isLibraryVersionAffected = event.affectsConfiguration("ui5.plugin.ui5version");
 			const isSrcAffected = event.affectsConfiguration("ui5.plugin.src");
@@ -13,16 +13,9 @@ export class ClearCacheCommand {
 		});
 	}
 
-	static clearCache(context: vscode.ExtensionContext) {
-		const UIVersion: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
-		let cachePath = `${context.globalStoragePath}\\cache_${UIVersion}.json`;
-		if (fs.existsSync(cachePath)) {
-			fs.unlinkSync(cachePath);
-		}
-		cachePath = `${context.globalStoragePath}\\cache_appindex_${UIVersion}.json`;
-		if (fs.existsSync(cachePath)) {
-			fs.unlinkSync(cachePath);
-		}
+	static clearCache() {
+		FileReader.clearCache(FileReader.CacheType.APIIndex);
+		FileReader.clearCache(FileReader.CacheType.Metadata);
 
 		ClearCacheCommand.reloadWindow();
 	}

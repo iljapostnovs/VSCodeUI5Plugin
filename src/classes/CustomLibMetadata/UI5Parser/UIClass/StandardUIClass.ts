@@ -1,7 +1,7 @@
 import { AbstractUIClass, UIMethod, UIProperties, UIEvents } from "./AbstractUIClass";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
-import * as vscode from "vscode";
+import { URLBuilder } from "../../../Util/URLBuilder";
 
 export class StandardUIClass extends AbstractUIClass {
 	private nodeDAO = new SAPNodeDAO();
@@ -22,8 +22,6 @@ export class StandardUIClass extends AbstractUIClass {
 
 	private getStandardClassMethods(className: string, isParent: boolean) {
 		let classMethods:StandardClassUIMethod[] = [];
-		const UIVersion: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
-		const isMajorVersionBiggerThanSeventyThree = parseFloat(UIVersion.split(".")[1]) >= 73;
 		const SAPNode = this.findSAPNode(className);
 		if (SAPNode) {
 			const metadata = SAPNode.getMetadataSync();
@@ -36,7 +34,7 @@ export class StandardUIClass extends AbstractUIClass {
 							params: method.parameters ? method.parameters.map((parameter: any) => parameter.name + (parameter.optional ? "?" : "")) : [],
 							returnType: method.returnValue ? method.returnValue.type : "void",
 							isFromParent: !isParent,
-							api: `[UI5 API](https://ui5.sap.com/${UIVersion}/#/api/${SAPNode.getName()}${isMajorVersionBiggerThanSeventyThree ? "%23" : "/"}methods/${method.name})`
+							api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name)
 						});
 					}
 					return accumulator;

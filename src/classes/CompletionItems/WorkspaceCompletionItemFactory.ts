@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { ExportToI18NCommand } from "../VSCommands/ExportToI18NCommand";
 import { FileReader } from "../Util/FileReader";
 
 const workspace = vscode.workspace;

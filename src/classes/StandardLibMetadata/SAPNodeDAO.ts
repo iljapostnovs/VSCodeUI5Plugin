@@ -1,11 +1,10 @@
 import { SAPNode } from "./SAPNode";
 import rp from "request-promise";
-import * as vscode from "vscode";
-import fs from "fs";
 import { FileReader } from "../Util/FileReader";
+import { URLBuilder } from "../Util/URLBuilder";
 
 export class SAPNodeDAO {
-	private static nodePath:string = `https://ui5.sap.com/${vscode.workspace.getConfiguration("ui5.plugin").get("ui5version")}/docs/api/api-index.json`;
+	private static nodePath:string = URLBuilder.getInstance().getAPIIndexUrl();
 	private nodes: any;
 	private static SAPNodes: SAPNode[] = [];
 	constructor() {}
@@ -54,36 +53,12 @@ export class SAPNodeDAO {
 	}
 
 	private getApiIndexFromCache() {
-		let cacheFromFile;
-
-		const globalStoragePath = FileReader.globalStoragePath;
-		if (globalStoragePath) {
-			const UIVersion: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
-			const cachePath = `${globalStoragePath}\\cache_appindex_${UIVersion}.json`;
-
-			if (fs.existsSync(cachePath)) {
-				cacheFromFile = JSON.parse(fs.readFileSync(cachePath, "utf8"));
-			}
-		}
-
-		return cacheFromFile;
+		return FileReader.getCache(FileReader.CacheType.APIIndex);
 	}
 
 	private cacheApiIndex() {
-		const globalStoragePath = FileReader.globalStoragePath;
-		if (globalStoragePath) {
-			const UIVersion: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
-			const cachePath = `${globalStoragePath}\\cache_appindex_${UIVersion}.json`;
-			if (!fs.existsSync(cachePath)) {
-				if (!fs.existsSync(globalStoragePath)) {
-					fs.mkdirSync(globalStoragePath);
-				}
-				fs.writeFileSync(cachePath, "", "utf8");
-			}
-
-			const cache = JSON.stringify(this.nodes);
-			fs.writeFileSync(cachePath, cache, "utf8");
-		}
+		const cache = JSON.stringify(this.nodes);
+		FileReader.setCache(FileReader.CacheType.APIIndex, cache);
 	}
 
 	private fetchApiIndex() {

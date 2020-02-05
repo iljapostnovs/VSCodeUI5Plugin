@@ -8,6 +8,7 @@ import { StandardUIClass } from "./StandardUIClass";
 import { DifferentJobs } from "../../JSParser/DifferentJobs";
 import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
 import { AbstractUIClass } from "./AbstractUIClass";
+import { URLBuilder } from "../../../Util/URLBuilder";
 
 export class UIClassDefinitionFinder {
 	public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {
@@ -93,8 +94,8 @@ export class UIClassDefinitionFinder {
 				if (methodFromClass.isFromParent) {
 					this.openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
 				} else {
-					const UI5Version = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
-					const linkToDocumentation = `https://ui5.sap.com/${UI5Version}#/api/${classNameDotNotation}/methods/${methodName}`;
+					const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
+					const linkToDocumentation = URLBuilder.getInstance().getUrlForMethodApi(UIClass, methodName);
 					vscode.env.openExternal(vscode.Uri.parse(linkToDocumentation));
 				}
 			}

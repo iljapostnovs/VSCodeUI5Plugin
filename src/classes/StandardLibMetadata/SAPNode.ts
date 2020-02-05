@@ -33,7 +33,7 @@ export class SAPNode {
 		return node;
 	}
 
-	public getName() {
+	public getName() : string {
 		return this.node.name;
 	}
 

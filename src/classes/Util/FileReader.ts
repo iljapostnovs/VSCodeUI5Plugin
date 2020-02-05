@@ -4,9 +4,10 @@ import * as glob from "glob";
 const workspace = vscode.workspace;
 
 export class FileReader {
-	private static manifests:UIManifest[] = [];
-	private static viewCache:LooseObject = {};
-	public static globalStoragePath:string | undefined;
+	private static manifests: UIManifest[] = [];
+	private static viewCache: LooseObject = {};
+	private static UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
+	public static globalStoragePath: string | undefined;
 
 	public static setNewViewContentToCache(viewContent: string) {
 		const controllerName = this.getControllerNameFromView(viewContent);
@@ -219,6 +220,60 @@ export class FileReader {
 		}
 
 		return className;
+	}
+
+	static getCache(cacheType: FileReader.CacheType) {
+		let cache;
+		const cachePath = cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() : FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() : null;
+
+		if (cachePath && fs.existsSync(cachePath)) {
+			cache = JSON.parse(fs.readFileSync(cachePath, "utf8"));
+		}
+
+		return cache;
+	}
+
+	static setCache(cacheType: FileReader.CacheType, cache: string) {
+		const cachePath = cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() : FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() : null;
+
+		if (cachePath) {
+			if (!fs.existsSync(cachePath)) {
+				this.ensureThatPluginCacheFolderExists();
+			}
+
+			fs.writeFileSync(cachePath, cache, "utf8");
+		}
+	}
+
+	static clearCache(cacheType: FileReader.CacheType) {
+		const cachePath = cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() : FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() : null;
+
+		if (cachePath && fs.existsSync(cachePath)) {
+			fs.unlinkSync(cachePath);
+		}
+	}
+
+	private static ensureThatPluginCacheFolderExists() {
+		if (this.globalStoragePath) {
+			if (!fs.existsSync(this.globalStoragePath)) {
+				fs.mkdirSync(this.globalStoragePath);
+			}
+		}
+	}
+
+	private static getMetadataCachePath() {
+		return `${this.globalStoragePath}\\cache_${this.UI5Version}.json`;
+	}
+
+	private static getAPIIndexCachePath() {
+		return `${this.globalStoragePath}\\cache_appindex_${this.UI5Version}.json`;
+	}
+}
+
+export module FileReader {
+	export enum CacheType {
+		Metadata = "1",
+		APIIndex = "2"
 	}
 }
 

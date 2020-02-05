@@ -2,7 +2,8 @@ import { UI5Metadata } from "./UI5Metadata";
 import { SAPNode } from "./SAPNode";
 import rp from "request-promise";
 import * as vscode from "vscode";
-import * as fs from "fs";
+import { URLBuilder } from "../Util/URLBuilder";
+import { FileReader } from "../Util/FileReader";
 
 interface LooseObject {
 	[key: string]: any;
@@ -17,8 +18,8 @@ export class UI5MetadataPreloader {
 		this.nodes = nodes;
 	}
 
-	public async preloadLibs(progress: vscode.Progress<{ message?: string | undefined; increment?: number | undefined; }>, context: vscode.ExtensionContext) {
-		var cache = this.loadCache(context);
+	public async preloadLibs(progress: vscode.Progress<{ message?: string | undefined; increment?: number | undefined; }>) {
+		var cache = this.loadCache();
 		if (!cache) {
 			const promises = [];
 			const metadataDAO = new UI5MetadataDAO();
@@ -36,7 +37,7 @@ export class UI5MetadataPreloader {
 
 			return Promise.all(promises).then(() => {
 				cache = namespaceDesignTimes;
-				this.writeCache(context);
+				this.writeCache();
 			});
 		} else {
 			progress.report({ increment: 50 });
@@ -44,30 +45,13 @@ export class UI5MetadataPreloader {
 		}
 	}
 
-	private loadCache(context: vscode.ExtensionContext) {
-		const UIVersion: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
-		const cachePath = `${context.globalStoragePath}\\cache_${UIVersion}.json`;
-		let cacheFromFile;
-
-		if (fs.existsSync(cachePath)) {
-			cacheFromFile = JSON.parse(fs.readFileSync(cachePath, "utf8"));
-		}
-
-		return cacheFromFile;
+	private loadCache() {
+		return FileReader.getCache(FileReader.CacheType.Metadata);
 	}
 
-	private writeCache(context: vscode.ExtensionContext) {
-		const UIVersion: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
-		const cachePath = `${context.globalStoragePath}\\cache_${UIVersion}.json`;
-		if (!fs.existsSync(cachePath)) {
-			if (!fs.existsSync(context.globalStoragePath)) {
-				fs.mkdirSync(context.globalStoragePath);
-			}
-			fs.writeFileSync(cachePath, "", "utf8");
-		}
-
+	private writeCache() {
 		const cache = JSON.stringify(namespaceDesignTimes);
-		fs.writeFileSync(cachePath, cache, "utf8");
+		FileReader.setCache(FileReader.CacheType.Metadata, cache);
 	}
 
 	private getUniqueLibNames(node: SAPNode) {
@@ -115,7 +99,7 @@ export class UI5MetadataDAO {
 					resolve(namespaceDesignTimes[lib]);
 				}
 			} else {
-				const readPath: string = `https://ui5.sap.com/${vscode.workspace.getConfiguration("ui5.plugin").get("ui5version")}/test-resources/${lib.replace(/\./g, "/")}/designtime/apiref/api.json`;
+				const readPath: string = URLBuilder.getInstance().getDesignTimeUrlForLib(lib);
 				const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
 				const options: rp.RequestPromiseOptions | undefined = proxy ? {
 					proxy: proxy
