@@ -4,9 +4,9 @@ import * as glob from "glob";
 const workspace = vscode.workspace;
 
 export class FileReader {
-	private static manifests: UIManifest[] = [];
-	private static viewCache: LooseObject = {};
-	private static UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
+	private static readonly manifests: UIManifest[] = [];
+	private static readonly viewCache: LooseObject = {};
+	private static readonly UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
 	public static globalStoragePath: string | undefined;
 
 	public static setNewViewContentToCache(viewContent: string) {

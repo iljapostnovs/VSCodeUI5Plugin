@@ -4,7 +4,7 @@ import { UI5Metadata } from "../../StandardLibMetadata/UI5Metadata";
 import { SAPNodeDAO } from "../../StandardLibMetadata/SAPNodeDAO";
 
 export class XMLPropertyGenerator implements IPropertyGenerator {
-	private nodeDAO = new SAPNodeDAO();
+	private readonly nodeDAO = new SAPNodeDAO();
 
 	public async generateProperties(node: SAPNode) {
 		let properties: string = "";

@@ -7,7 +7,7 @@ export interface FieldsAndMethods {
 	methods: UIMethod[];
 }
 export class UIClassFactory {
-	private static UIClasses: UIClassMap = {};
+	private static readonly UIClasses: UIClassMap = {};
 
 	private static getInstance(className: string, documentText?: string) {
 		let returnClass: AbstractUIClass;

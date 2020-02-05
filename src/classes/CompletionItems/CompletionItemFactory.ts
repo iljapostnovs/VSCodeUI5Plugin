@@ -13,8 +13,8 @@ import { AbstractUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/Abstract
 import { URLBuilder } from "../Util/URLBuilder";
 
 export class CompletionItemFactory {
-	private nodeDAO = new SAPNodeDAO();
-	private language: GeneratorFactory.language;
+	private readonly nodeDAO = new SAPNodeDAO();
+	private readonly language: GeneratorFactory.language;
 
 	constructor(completionItemType: GeneratorFactory.language) {
 		this.language = completionItemType;

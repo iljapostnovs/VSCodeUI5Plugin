@@ -5,7 +5,7 @@ import { IAggregationGenerator } from "./aggregation/IAggregationGenerator";
 import { DefineGenerator } from "./define/UIDefineCompletionItemGenerator";
 
 export class GeneratorFactory {
-	private static generatorMap = {
+	private static readonly generatorMap = {
 		aggregation: {
 			"xml": XMLAggregationGenerator,
 			"js": XMLAggregationGenerator //TODO: add js aggr. generator

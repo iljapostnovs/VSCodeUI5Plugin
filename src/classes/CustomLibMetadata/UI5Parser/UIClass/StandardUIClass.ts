@@ -4,7 +4,7 @@ import { MainLooper } from "../../JSParser/MainLooper";
 import { URLBuilder } from "../../../Util/URLBuilder";
 
 export class StandardUIClass extends AbstractUIClass {
-	private nodeDAO = new SAPNodeDAO();
+	private readonly nodeDAO = new SAPNodeDAO();
 	public methods: StandardClassUIMethod[] = [];
 
 	constructor(className: string) {

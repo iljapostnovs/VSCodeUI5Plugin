@@ -12,8 +12,8 @@ interface LooseObject {
 const namespaceDesignTimes: LooseObject = {};
 
 export class UI5MetadataPreloader {
-	private libNames: LooseObject = {};
-	private nodes: SAPNode[];
+	private readonly libNames: LooseObject = {};
+	private readonly nodes: SAPNode[];
 	constructor(nodes: SAPNode[]) {
 		this.nodes = nodes;
 	}

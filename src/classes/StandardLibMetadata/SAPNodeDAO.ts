@@ -4,9 +4,9 @@ import { FileReader } from "../Util/FileReader";
 import { URLBuilder } from "../Util/URLBuilder";
 
 export class SAPNodeDAO {
-	private static nodePath:string = URLBuilder.getInstance().getAPIIndexUrl();
+	private static readonly nodePath:string = URLBuilder.getInstance().getAPIIndexUrl();
 	private nodes: any;
-	private static SAPNodes: SAPNode[] = [];
+	private static readonly SAPNodes: SAPNode[] = [];
 	constructor() {}
 
 	public async getAllNodes() {

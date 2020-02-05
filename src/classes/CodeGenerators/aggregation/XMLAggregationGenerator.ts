@@ -3,7 +3,7 @@ import { IAggregationGenerator } from "./IAggregationGenerator";
 import { SAPNode } from "../../StandardLibMetadata/SAPNode";
 
 export class XMLAggregationGenerator implements IAggregationGenerator {
-	private nodeDAO = new SAPNodeDAO();
+	private readonly nodeDAO = new SAPNodeDAO();
 
 	public async generateAggregations(node: SAPNode) {
 		let aggregationString: string = "";
