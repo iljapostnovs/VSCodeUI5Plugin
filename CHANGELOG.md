@@ -48,3 +48,8 @@
 
 ## 0.8.7 (04-02-2020)
 * Improvements for version support. Now UI5 1.73.1 should be working.
+
+## 0.9.0 (06-02-2020)
+* Method and constructor Signature Helper is added.
+* Custom class Method Completion Items now are generated using custom defined metadata, meaning that all property/event/aggregation methods will also be suggested.
+* Bugfixes and refactoring

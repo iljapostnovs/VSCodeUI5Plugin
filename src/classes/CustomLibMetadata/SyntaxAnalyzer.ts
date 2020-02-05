@@ -221,9 +221,6 @@ export class SyntaxAnalyzer {
 			);
 			currentActiveText = vscode.window.activeTextEditor.document.getText(rangeOfVariable);
 			currentActiveText = currentActiveText.replace(".prototype", "");
-			if (currentActiveText.endsWith("(")) {
-				currentActiveText = currentActiveText.substring(0, currentActiveText.length - 1);
-			}
 
 			//remove last part of the var (it ends with .)
 			// const temporaryVariableParts = currentActiveText.split(".");
@@ -235,11 +232,12 @@ export class SyntaxAnalyzer {
 	}
 
 	private static getDeltaOfTheActiveTextBegining(iDelta: number) {
-		let deltaToReturn = iDelta - 1; //Filter( => ignore first parentheses
+		const separatorExcludeChars = ", ";
+		let deltaToReturn = iDelta;
 		if (vscode.window.activeTextEditor) {
 			const startingPosition = vscode.window.activeTextEditor.selection.start;
 			let selectedText = "";
-			let parenthesesCount = 0;
+			let parenthesesCount = 1; //lets assume that all variables has one (
 			let ignoreParentheses = false;
 
 			let sCurrentChar = selectedText[0];
@@ -257,13 +255,13 @@ export class SyntaxAnalyzer {
 					characterDelta: deltaToReturn
 				}), startingPosition);
 				selectedText = vscode.window.activeTextEditor.document.getText(range);
-				if (!this.isSeparator(sCurrentChar, ignoreParentheses)) {
+				if (!this.isSeparator(sCurrentChar, ignoreParentheses) || separatorExcludeChars.indexOf(sCurrentChar) > -1) {
 					deltaToReturn += iDelta;
 				} else {
 					deltaToReturn += -iDelta;
 				}
 
-			} while (!this.isSeparator(sCurrentChar, ignoreParentheses) && startingPosition.character + deltaToReturn > 0);
+			} while ((!this.isSeparator(sCurrentChar, ignoreParentheses) || separatorExcludeChars.indexOf(sCurrentChar) > -1) && startingPosition.character + deltaToReturn > 0);
 		}
 		deltaToReturn += -iDelta;
 

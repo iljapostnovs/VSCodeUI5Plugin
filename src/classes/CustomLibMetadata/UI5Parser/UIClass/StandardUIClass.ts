@@ -2,6 +2,7 @@ import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation } from ".
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
 import { URLBuilder } from "../../../Util/URLBuilder";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 
 export class StandardUIClass extends AbstractUIClass {
 	private readonly nodeDAO = new SAPNodeDAO();
@@ -15,6 +16,7 @@ export class StandardUIClass extends AbstractUIClass {
 		this.fillProperties();
 		this.fillEvents();
 		this.fillAggregations();
+		this.fillConstructor();
 	}
 
 	private fillMethods() {
@@ -197,6 +199,29 @@ export class StandardUIClass extends AbstractUIClass {
 
 		}
 		return classAggregations;
+	}
+
+	public fillConstructor() {
+		const SAPNode = this.findSAPNode(this.className);
+		const metadata = SAPNode ? SAPNode.getMetadataSync() : undefined;
+		if (metadata && metadata.rawMetadata && metadata.rawMetadata.constructor) {
+			const constructor = metadata.rawMetadata.constructor;
+			// let parameters = constructor.parameters || [];
+			// parameters = parameters.map((parameter: any) => parameter.name);
+			const codeExample = this.removeTags(constructor.codeExample);
+			let parameterText = MainLooper.getEndOfChar("(", ")", codeExample);
+			parameterText = parameterText.substring(1, parameterText.length - 1); //remove ()
+			const parameters = parameterText.split(", ");
+
+			this.methods.push({
+				name: "constructor",
+				description: this.removeTags(constructor.codeExample),
+				params: parameters,
+				returnType: this.className,
+				isFromParent: false,
+				api: URLBuilder.getInstance().getUrlForClassApi(this)
+			});
+		}
 	}
 }
 
