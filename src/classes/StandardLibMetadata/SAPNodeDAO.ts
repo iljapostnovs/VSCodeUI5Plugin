@@ -34,7 +34,8 @@ export class SAPNodeDAO {
 			"sap.ui.support": true,
 			"sap.ui.table": true,
 			"sap.ui.unified": true,
-			"sap.ushell": true
+			"sap.ushell": true,
+			"sap.tnt": true
 		};
 		for (const node of this.nodes.symbols) {
 			if (libs[node.lib]) {
