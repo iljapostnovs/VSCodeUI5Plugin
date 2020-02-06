@@ -5,6 +5,7 @@ import { CompletionItemRegistrator } from "./classes/Util/registrators/Completio
 import { DefinitionProviderRegistrator } from "./classes/Util/registrators/DefinitionProviderRegistrator";
 import { FileWatcher } from "./classes/Util/FileWatcher";
 import { SignatureHelpRegistrator } from "./classes/Util/registrators/SignatureHelpRegistrator";
+import { DiagnosticsRegistrator } from "./classes/Util/registrators/DiagnosticsRegistrator";
 
 export async function activate(context: vscode.ExtensionContext) {
 	FileReader.globalStoragePath = context.globalStoragePath;
@@ -33,6 +34,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
 					SignatureHelpRegistrator.register(context);
 
+					DiagnosticsRegistrator.register(context);
+
 					resolve();
 				} catch (error) {
 					console.log(error);
@@ -41,3 +44,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		});
 	}
 }
+
+// export function deactivate() {
+
+// }

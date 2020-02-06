@@ -65,7 +65,6 @@ export class UIClassDefinitionFinder {
 	}
 
 	static getVariableClass(variable?: string) {
-		//TODO: this should work not only for current document
 		let UIClassName: string | undefined;
 		if (!variable) {
 			variable = SyntaxAnalyzer.getCurrentVariable();

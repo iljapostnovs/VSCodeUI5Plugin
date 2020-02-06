@@ -7,6 +7,11 @@ export interface FieldsAndMethods {
 	fields: UIField[];
 	methods: UIMethod[];
 }
+
+interface UIClassMap {
+	[key: string]: AbstractUIClass;
+}
+
 export class UIClassFactory {
 	private static readonly UIClasses: UIClassMap = {};
 
@@ -106,8 +111,4 @@ export class UIClassFactory {
 		}
 		return className;
 	}
-}
-
-interface UIClassMap {
-	[key: string]: AbstractUIClass;
 }

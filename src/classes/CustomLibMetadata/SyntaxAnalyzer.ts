@@ -221,11 +221,6 @@ export class SyntaxAnalyzer {
 			);
 			currentActiveText = vscode.window.activeTextEditor.document.getText(rangeOfVariable);
 			currentActiveText = currentActiveText.replace(".prototype", "");
-
-			//remove last part of the var (it ends with .)
-			// const temporaryVariableParts = currentActiveText.split(".");
-			// temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
-			// currentActiveText = temporaryVariableParts.join(".");
 		}
 
 		return currentActiveText;

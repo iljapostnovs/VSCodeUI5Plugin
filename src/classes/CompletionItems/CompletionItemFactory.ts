@@ -9,7 +9,7 @@ import { SyntaxAnalyzer, UICompletionItem } from "../CustomLibMetadata/SyntaxAna
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
 import { FieldsAndMethods, UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { XMLParser, PositionType } from "../Util/XMLParser";
-import { AbstractUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass, UIProperty } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { URLBuilder } from "../Util/URLBuilder";
 
 export class CompletionItemFactory {
@@ -260,7 +260,7 @@ export class CompletionItemFactory {
 				if (className) {
 					const UIClass = UIClassFactory.getUIClass(className);
 					const propertyName = XMLParser.getNearestProperty(XMLText, positionBeforeString);
-					const UIProperty = UIClass.properties.find(property => property.name === propertyName);
+					const UIProperty = this.getUIPropertyRecursively(UIClass, propertyName);
 					if (UIProperty && UIProperty.typeValues.length > 0) {
 						completionItems = this.generateCompletionItemsFromTypeValues(UIProperty.typeValues);
 					}
@@ -270,6 +270,17 @@ export class CompletionItemFactory {
 		}
 
 		return completionItems;
+	}
+
+	private getUIPropertyRecursively(UIClass: AbstractUIClass, propertyName: string): UIProperty | undefined {
+		let property: UIProperty | undefined;
+		property = UIClass.properties.find(property => property.name === propertyName);
+		if (!property && UIClass.parentClassNameDotNotation) {
+			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
+			property = this.getUIPropertyRecursively(parentClass, propertyName);
+		}
+
+		return property;
 	}
 
 	private generateCompletionItemsFromTypeValues(typeValues: string[]) {

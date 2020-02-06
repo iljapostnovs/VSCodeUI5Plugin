@@ -39,7 +39,7 @@ export class XMLParser {
 		return tagText;
 	}
 
-	private static getIfPositionIsInString(XMLViewText: string, position: number) {
+	static getIfPositionIsInString(XMLViewText: string, position: number) {
 		let quotionMarkCount = 0;
 
 		let i = 0;
@@ -54,7 +54,7 @@ export class XMLParser {
 		return quotionMarkCount % 2 === 1;
 	}
 
-	private static getTagPrefix(tagText: string) {
+	static getTagPrefix(tagText: string) {
 		let tagPrefix = "";
 
 		let i = 0;
@@ -73,7 +73,7 @@ export class XMLParser {
 		return tagPrefix;
 	}
 
-	private static getClassNameFromTag(tagText: string) {
+	static getClassNameFromTag(tagText: string) {
 		let className = "";
 
 		let i = 0;
@@ -94,7 +94,7 @@ export class XMLParser {
 		return className;
 	}
 
-	private static getLibraryPathFromTagPrefix(XMLViewText: string, tagPrefix: string) {
+	static getLibraryPathFromTagPrefix(XMLViewText: string, tagPrefix: string) {
 		let libraryPath = "";
 		let regExpBase;
 		if (!tagPrefix) {
