@@ -186,6 +186,7 @@ export class CustomUIClass extends AbstractUIClass {
 		this.fillPropertyMethods(additionalMethods);
 		this.fillAggregationMethods(additionalMethods);
 		this.fillEventMethods(additionalMethods);
+		// this.fillAssociationMethods(additionalMethods); //TODO
 
 		this.methods = this.methods.concat(additionalMethods);
 	}
@@ -281,7 +282,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private findParentClassNameDotNotation() {
-		if (this.classBody && this.classBody.parent) {
+		if (this.classBody?.parent) {
 			const parsedParentName = this.classBody.parent.parsedName;
 			const parentClassUIDefineName = parsedParentName.replace("return", "").replace(".extend", "").replace(".declareStaticClass", "").trim();
 			const parentClassUIDefine = this.UIDefine.find(UIDefine => UIDefine.className === parentClassUIDefineName);
@@ -309,7 +310,7 @@ export class CustomUIClass extends AbstractUIClass {
 					}
 				} else {
 					const field = this.fields.find(field => field.name === variableName);
-					if (field && field.type) {
+					if (field?.type) {
 						className = field.type;
 					} else if (field && !field.type && this.classBody) {
 						//TODO: THIS ABOUT THIS! reason for this is that not always all types for this. variables are found right away.

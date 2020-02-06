@@ -35,7 +35,8 @@ export class SAPNodeDAO {
 			"sap.ui.table": true,
 			"sap.ui.unified": true,
 			"sap.ushell": true,
-			"sap.tnt": true
+			"sap.tnt": true,
+			"sap.suite.ui.microchart": true
 		};
 		for (const node of this.nodes.symbols) {
 			if (libs[node.lib]) {

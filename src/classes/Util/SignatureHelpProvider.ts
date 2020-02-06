@@ -8,7 +8,7 @@ export class SignatureHelpProvider {
 	static getSignature() {
 		const signatureHelp = new vscode.SignatureHelp();
 
-		let currentVariable = SyntaxAnalyzer.getCurrentActiveText();
+		let currentVariable = SyntaxAnalyzer.getCurrentActiveText().trim();
 		if (currentVariable) {
 			let currentParamIndex = currentVariable.length - 1;
 			while (currentVariable[currentParamIndex] !== "(" && currentParamIndex > 0) {

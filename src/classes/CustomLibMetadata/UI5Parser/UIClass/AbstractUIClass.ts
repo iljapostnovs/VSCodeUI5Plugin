@@ -26,6 +26,11 @@ export interface UIEvent {
 	name: string;
 	description: string;
 }
+export interface UIAssociation {
+	name: string;
+	type: string | undefined;
+	description: string;
+}
 export abstract class AbstractUIClass {
 	public className: string;
 	public methods: UIMethod[] = [];
@@ -33,6 +38,7 @@ export abstract class AbstractUIClass {
 	public properties: UIProperty[] = [];
 	public aggregations: UIAggregation[] = [];
 	public events: UIEvent[] = [];
+	public associations: UIAssociation[] = [];
 	public parentClassNameDotNotation: string = "";
 
 	constructor(className: string, documentText?: string) {

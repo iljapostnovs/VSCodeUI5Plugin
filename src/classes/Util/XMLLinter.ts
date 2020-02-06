@@ -1,7 +1,11 @@
 import { XMLParser } from "./XMLParser";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import * as vscode from "vscode";
-import LineColumn from 'line-column';
+import LineColumn from "line-column";
+
+function isNumeric(value: string) {
+	return /^-{0,1}\d+$/.test(value);
+}
 
 export interface Error {
 	code: string;
@@ -14,6 +18,11 @@ export interface Tag {
 	text: string;
 	positionBegin: number;
 	positionEnd: number;
+}
+
+interface AttributeValidation {
+	valid: boolean;
+	message?: string;
 }
 
 export class XMLLinter {
@@ -32,14 +41,14 @@ export class XMLLinter {
 					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(document, tagPrefix);
 					const classOfTheTag = [libraryPath, className].join(".");
 					tagAttributes.forEach(tagAttribute => {
-						const isAttributeValid = this.validateTagAttribute(classOfTheTag, tagAttribute);
-						if (!isAttributeValid) {
+						const attributeValidation = this.validateTagAttribute(classOfTheTag, tagAttribute);
+						if (!attributeValidation.valid) {
 							const indexOfTagBegining = tag.text.indexOf(tagAttribute);
 							const position = LineColumn(document).fromIndex(tag.positionBegin + indexOfTagBegining);
 							if (position) {
 								errors.push({
 									code: "UI5plugin",
-									message: "Invalid attribute",
+									message: attributeValidation.message || "Invalid attribute",
 									source: tagAttribute,
 									range: new vscode.Range(
 										new vscode.Position(position.line - 1, position.col),
@@ -86,33 +95,79 @@ export class XMLLinter {
 		return i;
 	}
 
-	private static validateTagAttribute(className: string, attribute: string): boolean {
-		let isAttributeValid = false;
-
-		const exclusions = [
-			"id",
-			"controllerName",
-			"class",
-			"fragmentName"
-		];
+	private static validateTagAttribute(className: string, attribute: string): AttributeValidation {
+		let attributeValidation: AttributeValidation = {
+			valid: false
+		};
 
 		const UIClass = UIClassFactory.getUIClass(className);
 		const indexOfEqualSign = attribute.indexOf("=");
 		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
+
+		const isExclusion = attributeName.startsWith("xmlns") || this.isAttributeAlwaysValid(className, attributeName);
+		const attributeNameValid = isExclusion || this.validateAttributeName(className, attribute);
+		const attributeValueValid = this.validateAttributeValue(className, attribute);
+		attributeValidation.valid = attributeNameValid && attributeValueValid;
+
+		if (!attributeNameValid && UIClass.parentClassNameDotNotation) {
+			attributeValidation = this.validateTagAttribute(UIClass.parentClassNameDotNotation, attribute);
+		} else if (!attributeValidation.valid) {
+			attributeValidation.message = !attributeNameValid ? "Invalid attribute name" : !attributeValueValid ? "Invalid value" : undefined;
+		}
+
+		return attributeValidation;
+	}
+
+	private static validateAttributeValue(className: string, attribute: string) {
+		let isValueValid = true;
+		const indexOfEqualSign = attribute.indexOf("=");
+		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
+		const attributeValue = attribute.substring(indexOfEqualSign + 2, attribute.length - 1);
+
+		const UIClass = UIClassFactory.getUIClass(className);
+		const property = UIClass.properties.find(property => property.name === attributeName);
+		const isAttributeBinded = attributeValue.startsWith("{") && attributeValue.endsWith("}");
+		if (isAttributeBinded) {
+			isValueValid = true;
+		} else if (property && property.typeValues.length > 0) {
+			isValueValid = property.typeValues.indexOf(attributeValue) > -1;
+		} else if (property?.type === "boolean") {
+			isValueValid = attributeValue === "true" || attributeValue === "false";
+		} else if (property?.type === "int") {
+			isValueValid = isNumeric(attributeValue);
+		}
+
+		return isValueValid;
+	}
+
+	private static validateAttributeName(className: string, attribute: string) {
+		const indexOfEqualSign = attribute.indexOf("=");
+		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
+		const UIClass = UIClassFactory.getUIClass(className);
+
 		const property = UIClass.properties.find(property => property.name === attributeName);
 		const event = UIClass.events.find(event => event.name === attributeName);
 		const aggregation = UIClass.aggregations.find(aggregation => aggregation.name === attributeName);
-		const somethingInClassWasFound = !!(property || event || aggregation);
-		const isExclusion = attributeName.startsWith("xmlns") || exclusions.indexOf(attributeName) > -1;
+		const association = UIClass.associations.find(association => association.name === attributeName);
 
-		if (isExclusion) {
-			isAttributeValid = true;
-		} else if (!somethingInClassWasFound && UIClass.parentClassNameDotNotation) {
-			isAttributeValid = this.validateTagAttribute(UIClass.parentClassNameDotNotation, attribute);
-		} else if (somethingInClassWasFound) {
-			isAttributeValid = true;
-		}
+		const somethingInClassWasFound = !!(property || event || aggregation || association);
 
-		return isAttributeValid;
+		return somethingInClassWasFound;
+	}
+
+	private static isAttributeAlwaysValid(className: string, attribute: string) {
+		const exclusions: any = {
+			"*": ["id", "class"],
+			"sap.ui.core.mvc.View": ["controllerName"],
+			"sap.ui.core.mvc.XMLView": ["async"],
+			"sap.ui.core.Fragment": ["fragmentName"],
+			"sap.ui.core.ExtensionPoint": ["name"]
+		};
+
+		const isClassExclusion = exclusions[className] && exclusions[className].indexOf(attribute) > -1;
+		const isAlwaysExclusion = exclusions["*"].indexOf(attribute) > -1;
+
+		return isClassExclusion || isAlwaysExclusion;
+
 	}
 }
