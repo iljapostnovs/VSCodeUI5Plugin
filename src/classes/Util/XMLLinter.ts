@@ -31,7 +31,7 @@ export class XMLLinter {
 
 		const tags = this.getAllTags(document);
 		tags.forEach(tag => {
-			const tagAttributes = tag.text.match(/(?<=\s)(\w|:)*="(\w|\.)*"/g);
+			const tagAttributes = tag.text.match(/(?<=\s)(\w|:)*="(\s|.)*?"/g);
 			if (tagAttributes) {
 
 				const tagPrefix = XMLParser.getTagPrefix(tag.text);

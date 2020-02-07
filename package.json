@@ -75,7 +75,7 @@
 		"@types/line-column": "^1.0.0",
 		"@types/node": "^13.7.0",
 		"@types/request-promise": "^4.1.45",
-		"@types/vscode": "^1.41.0",
+		"@types/vscode": "^1.42.0",
 		"ts-loader": "^6.2.1",
 		"tslint": "^6.0.0",
 		"typescript": "^3.7.5",
