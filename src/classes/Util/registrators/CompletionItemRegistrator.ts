@@ -20,8 +20,6 @@ export class CompletionItemRegistrator {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
 				let itemsToReturn:vscode.CompletionItem[] = [];
 				try {
-					EndlessLoopLocker.beginProcess();
-
 					if (DefineGenerator.getIfCurrentPositionIsInDefine(position)) {
 						itemsToReturn = JSDefineCompletionItems;
 					} else {

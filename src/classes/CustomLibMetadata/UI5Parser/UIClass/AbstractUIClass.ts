@@ -21,6 +21,7 @@ export interface UIAggregation {
 	type: string | undefined;
 	multiple: boolean;
 	singularName: string;
+	description: string;
 }
 export interface UIEvent {
 	name: string;
@@ -30,6 +31,8 @@ export interface UIAssociation {
 	name: string;
 	type: string | undefined;
 	description: string;
+	multiple: boolean;
+	singularName: string;
 }
 export abstract class AbstractUIClass {
 	public className: string;

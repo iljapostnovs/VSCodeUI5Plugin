@@ -129,11 +129,11 @@ export class StandardUIClass extends AbstractUIClass {
 	}
 
 	private generateTypeValues(type: string) {
-		let typeValues = [];
+		let typeValues: string[] = [];
 		if (type?.startsWith("sap.")) {
 			const typeNode = this.findSAPNode(type);
 			const metadata = typeNode?.getMetadataSync();
-			typeValues = metadata?.rawMetadata?.properties?.map((property: any) => `${property.name}`.replace(`${type}.`, ""));
+			typeValues = metadata?.rawMetadata?.properties?.map((property: any) => `${property.name}`.replace(`${type}.`, "")) || [];
 		}
 
 		return typeValues;
@@ -177,7 +177,8 @@ export class StandardUIClass extends AbstractUIClass {
 						name: aggregation.name,
 						type: aggregation.type,
 						multiple: aggregation.coordinality === "0..n",
-						singularName: aggregation.singularName
+						singularName: aggregation.singularName,
+						description: this.removeTags(aggregation.description)
 					});
 				}
 				return accumulator;
@@ -202,7 +203,9 @@ export class StandardUIClass extends AbstractUIClass {
 					accumulator.push({
 						name: association.name,
 						type: association.type,
-						description: this.removeTags(association.description)
+						description: this.removeTags(association.description),
+						multiple: association.multiple || association.coordinality === "0..n",
+						singularName: association.singularName
 					});
 				}
 				return accumulator;

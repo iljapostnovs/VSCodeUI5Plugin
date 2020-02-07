@@ -15,8 +15,6 @@ export class SAPUIDefineCommand {
 			const currentClassName = SyntaxAnalyzer.getCurrentClassName();
 
 			if (currentClassName) {
-				EndlessLoopLocker.beginProcess();
-
 				UIClassFactory.setNewCodeForClass(currentClassName, document.getText());
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				if (UIClass.jsPasredBody) {

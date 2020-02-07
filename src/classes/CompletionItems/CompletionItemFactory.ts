@@ -252,6 +252,9 @@ export class CompletionItemFactory {
 					const UIClass = UIClassFactory.getUIClass(className);
 					completionItems = this.getPropertyCompletionItemsFromClass(UIClass);
 					completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(UIClass));
+					completionItems = completionItems.concat(this.getAggregationCompletionItemsFromClass(UIClass));
+					completionItems = completionItems.concat(this.getAssociationCompletionItemsFromClass(UIClass));
+					completionItems = this.removeDuplicateCompletionItems(completionItems);
 				}
 			} else if (positionType === PositionType.InTheString) {
 				const positionBeforeString = XMLParser.getPositionBeforeStringBegining(XMLText, currentPositionOffset);
@@ -320,7 +323,7 @@ export class CompletionItemFactory {
 			completionItem.kind = vscode.CompletionItemKind.Event;
 			completionItem.insertText = new vscode.SnippetString(`${event.name}="\${1}"$0`);
 			completionItem.detail = event.name;
-			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForEventsApi(UIClass);
+			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForEventsApi(UIClass, event.name);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${event.description}`);
 
 			return completionItem;
@@ -330,6 +333,62 @@ export class CompletionItemFactory {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
 			completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(parentClass));
 		}
+
+		return completionItems;
+	}
+
+	private getAggregationCompletionItemsFromClass(UIClass: AbstractUIClass) {
+		let completionItems:vscode.CompletionItem[] = [];
+
+		completionItems = UIClass.aggregations.map(aggregation => {
+			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(aggregation.name);
+			completionItem.kind = vscode.CompletionItemKind.Property;
+			completionItem.insertText = new vscode.SnippetString(`${aggregation.name}="\${1}"$0`);
+			completionItem.detail = aggregation.name;
+			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForAggregationApi(UIClass);
+			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${aggregation.description}`);
+
+			return completionItem;
+		});
+
+		if (UIClass.parentClassNameDotNotation) {
+			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
+			completionItems = completionItems.concat(this.getAggregationCompletionItemsFromClass(parentClass));
+		}
+
+		return completionItems;
+	}
+
+	private getAssociationCompletionItemsFromClass(UIClass: AbstractUIClass) {
+		let completionItems:vscode.CompletionItem[] = [];
+
+		completionItems = UIClass.associations.map(association => {
+			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(association.name);
+			completionItem.kind = vscode.CompletionItemKind.Property;
+			completionItem.insertText = new vscode.SnippetString(`${association.name}="\${1}"$0`);
+			completionItem.detail = association.name;
+			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForAssociationApi(UIClass);
+			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${association.description}`);
+
+			return completionItem;
+		});
+
+		if (UIClass.parentClassNameDotNotation) {
+			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
+			completionItems = completionItems.concat(this.getAssociationCompletionItemsFromClass(parentClass));
+		}
+
+		return completionItems;
+	}
+
+	private removeDuplicateCompletionItems(completionItems: vscode.CompletionItem[]) {
+		completionItems = completionItems.reduce((accumulator: vscode.CompletionItem[], completionItem: vscode.CompletionItem) => {
+			const methodInAccumulator = accumulator.find(accumulatedCompletionItem => accumulatedCompletionItem.label === completionItem.label);
+			if (!methodInAccumulator) {
+				accumulator.push(completionItem);
+			}
+			return accumulator;
+		}, []);
 
 		return completionItems;
 	}

@@ -6,7 +6,7 @@ import { JSFunction } from "../../JSParser/types/Function";
 import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
 import { JSObject } from "../../JSParser/types/Object";
 import { JSVariable } from "../../JSParser/types/Variable";
-import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty } from "./AbstractUIClass";
+import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
 import { JSString } from "../../JSParser/types/String";
 
 interface UIDefine {
@@ -186,7 +186,7 @@ export class CustomUIClass extends AbstractUIClass {
 		this.fillPropertyMethods(additionalMethods);
 		this.fillAggregationMethods(additionalMethods);
 		this.fillEventMethods(additionalMethods);
-		// this.fillAssociationMethods(additionalMethods); //TODO
+		this.fillAssociationMethods(additionalMethods);
 
 		this.methods = this.methods.concat(additionalMethods);
 	}
@@ -267,6 +267,37 @@ export class CustomUIClass extends AbstractUIClass {
 					returnType: "void"
 				});
 			});
+		});
+	}
+
+	private fillAssociationMethods(additionalMethods: UIMethod[]) {
+		this.associations.forEach(association => {
+			const associationWithFirstBigLetter = `${association.singularName[0].toUpperCase()}${association.singularName.substring(1, association.singularName.length)}`;
+
+			let aMethods = [];
+			if (association.multiple) {
+				aMethods = [
+					`get${associationWithFirstBigLetter}`,
+					`add${associationWithFirstBigLetter}`,
+					`remove${associationWithFirstBigLetter}`,
+					`removeAll${associationWithFirstBigLetter}s`,
+				];
+			} else {
+				aMethods = [
+					`get${associationWithFirstBigLetter}`,
+					`set${associationWithFirstBigLetter}`
+				];
+			}
+
+			aMethods.forEach(methodName => {
+				additionalMethods.push({
+					name: methodName,
+					description: `Generic method from ${association.name} association`,
+					params: [],
+					returnType: "void"
+				});
+			});
+
 		});
 	}
 
@@ -354,6 +385,7 @@ export class CustomUIClass extends AbstractUIClass {
 				this.fillAggregations(<JSObject>metadataObject);
 				this.fillEvents(<JSObject>metadataObject);
 				this.fillProperties(<JSObject>metadataObject);
+				this.fillAssociations(<JSObject>metadataObject);
 			}
 		}
 	}
@@ -393,7 +425,8 @@ export class CustomUIClass extends AbstractUIClass {
 					name: partName,
 					type: aggregationType,
 					multiple: multiple,
-					singularName: singularName
+					singularName: singularName,
+					description: ""
 				};
 				return UIAggregations;
 			});
@@ -437,6 +470,49 @@ export class CustomUIClass extends AbstractUIClass {
 				};
 
 				return UIProperties;
+			});
+		}
+	}
+
+	private fillAssociations(metadata: JSObject) {
+		const indexOfAssociations = metadata.partNames.indexOf("associations");
+
+		if (indexOfAssociations > -1) {
+			const associations = <JSObject>metadata.parts[indexOfAssociations];
+			this.associations = associations.partNames.map((partName, i) => {
+				const associationProps = <JSObject>associations.parts[i];
+
+				const associationTypeIndex = associationProps.partNames.indexOf("type");
+				let associationType: undefined | string = undefined;
+				if (associationTypeIndex > -1) {
+					associationType = (<JSString>associationProps.parts[associationTypeIndex]).parsedBody;
+					associationType = associationType.substring(1, associationType.length - 1);
+				}
+
+				const multipleIndex = associationProps.partNames.indexOf("multiple");
+				let multiple = true;
+				if (multipleIndex > -1) {
+					multiple = associationProps.parts[multipleIndex].parsedName === "true";
+				}
+
+				const singularNameIndex = associationProps.partNames.indexOf("singularName");
+				let singularName = "";
+				if (singularNameIndex > -1) {
+					singularName = (<JSString>associationProps.parts[singularNameIndex]).parsedBody;
+					singularName = singularName.substring(1, singularName.length - 1);
+				}
+				if (!singularName) {
+					singularName = partName.substring(0, partName.length - 1);
+				}
+
+				const UIAssociations: UIAssociation = {
+					name: partName,
+					type: associationType,
+					multiple: multiple,
+					singularName: singularName,
+					description: ""
+				};
+				return UIAssociations;
 			});
 		}
 	}

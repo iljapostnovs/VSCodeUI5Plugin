@@ -29,8 +29,16 @@ export class URLBuilder {
 		return this.wrapInMarkup(this.getUrlForPropertiesApi(SAPClass));
 	}
 
-	getMarkupUrlForEventsApi(SAPClass: AbstractUIClass) {
-		return this.wrapInMarkup(this.geUrlForEventsApi(SAPClass));
+	getMarkupUrlForAggregationApi(SAPClass: AbstractUIClass) {
+		return this.wrapInMarkup(this.geUrlForAggregationApi(SAPClass));
+	}
+
+	getMarkupUrlForAssociationApi(SAPClass: AbstractUIClass) {
+		return this.wrapInMarkup(this.geUrlForAssociationApi(SAPClass));
+	}
+
+	getMarkupUrlForEventsApi(SAPClass: AbstractUIClass, eventName: string = "Events") {
+		return this.wrapInMarkup(this.geUrlForEventsApi(SAPClass, eventName));
 	}
 
 	getMarkupUrlForMethodApi(SAPClass: AbstractUIClass | SAPNode, methodName: string) {
@@ -48,9 +56,19 @@ export class URLBuilder {
 		return `${urlBase}/controlProperties`;
 	}
 
-	geUrlForEventsApi(SAPClass: AbstractUIClass) {
+	geUrlForEventsApi(SAPClass: AbstractUIClass, eventName: string) {
 		const urlBase = this.getUrlClassApiBase(SAPClass.className);
-		return `${urlBase}/events/Events`;
+		return `${urlBase}/events/${eventName}`;
+	}
+
+	geUrlForAggregationApi(SAPClass: AbstractUIClass) {
+		const urlBase = this.getUrlClassApiBase(SAPClass.className);
+		return `${urlBase}/aggregations`;
+	}
+
+	geUrlForAssociationApi(SAPClass: AbstractUIClass) {
+		const urlBase = this.getUrlClassApiBase(SAPClass.className);
+		return `${urlBase}/associations`;
 	}
 
 	getUrlForMethodApi(SAPClass: AbstractUIClass | SAPNode, methodName: string) {

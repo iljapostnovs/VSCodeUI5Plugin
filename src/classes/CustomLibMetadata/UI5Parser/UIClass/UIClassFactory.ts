@@ -20,6 +20,7 @@ export class UIClassFactory {
 		if (className.startsWith("sap.")) {
 			returnClass = new StandardUIClass(className);
 		} else {
+			EndlessLoopLocker.beginProcess();
 			console.time(`Class parsing for ${className} took:`);
 			returnClass = new CustomUIClass(className, documentText);
 			console.timeEnd(`Class parsing for ${className} took:`);
@@ -94,7 +95,6 @@ export class UIClassFactory {
 
 	public static getUIClass(className: string) {
 		if (!this.UIClasses[className]) {
-			EndlessLoopLocker.beginProcess();
 			this.UIClasses[className] = UIClassFactory.getInstance(className);
 		}
 
