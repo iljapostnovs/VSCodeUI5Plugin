@@ -53,8 +53,25 @@ export class StandardUIClass extends AbstractUIClass {
 	}
 
 	private removeTags(text: string) {
-		const noTagsTestResult = /(?<=\<.*\>).*(?=\<.*\>)/.exec(text);
-		return noTagsTestResult ? noTagsTestResult[0] : text;
+		let textWithoutTags = "";
+		let i = 0;
+
+		let tagOpened = 0;
+		let tagClosed = 0;
+
+		while (i < text.length) {
+			if (text[i] === "<") {
+				tagOpened++;
+			} else if (text[i] === ">") {
+				tagClosed++;
+			} else if (tagOpened - tagClosed === 0) {
+				textWithoutTags += text[i];
+			}
+
+			i++;
+		}
+
+		return textWithoutTags;
 	}
 
 	private fillParentClassName() {
