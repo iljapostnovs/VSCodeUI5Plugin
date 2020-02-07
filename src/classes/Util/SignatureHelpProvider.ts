@@ -9,7 +9,8 @@ export class SignatureHelpProvider {
 		const signatureHelp = new vscode.SignatureHelp();
 
 		let currentVariable = SyntaxAnalyzer.getCurrentActiveText().trim();
-		if (currentVariable) {
+		const parenthesesAreOpen = this.getIfParenthesesAreOpen(currentVariable);
+		if (currentVariable && parenthesesAreOpen) {
 			let currentParamIndex = currentVariable.length - 1;
 			while (currentVariable[currentParamIndex] !== "(" && currentParamIndex > 0) {
 				currentParamIndex--;
@@ -58,5 +59,20 @@ export class SignatureHelpProvider {
 		}
 
 		return methodToReturn;
+	}
+
+	private static getIfParenthesesAreOpen(variable: string) {
+		let parenthesesCount = 0;
+		let i = 0;
+		while (i < variable.length) {
+			if (variable[i] === "(") {
+				parenthesesCount++;
+			} else if (variable[i] === ")") {
+				parenthesesCount--;
+			}
+			i++;
+		}
+
+		return parenthesesCount !== 0;
 	}
 }

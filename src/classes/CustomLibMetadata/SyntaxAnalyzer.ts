@@ -85,7 +85,7 @@ export class SyntaxAnalyzer {
 		const thisIsGetViewByIdVariable = joinedVariable.startsWith("this.getView().byId(");
 
 		if (thisIsByIdVariable || thisIsGetViewByIdVariable) {
-			const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*(?="\))/.exec(joinedVariable);
+			const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*?(?="\))/.exec(joinedVariable);
 			const controlId = controlIdResult ? controlIdResult[0] : "";
 			if (controlId) {
 				classNameOfTheVariable = FileReader.getClassNameFromView(theClass.className, controlId);

@@ -51,5 +51,5 @@
 
 ## 0.9.0 (06-02-2020)
 * Method and constructor Signature Helper is added.
-* Custom class Method Completion Items now are generated using custom defined metadata, meaning that all property/event/aggregation methods will also be suggested.
+* Custom class Method Completion Items now are generated using custom defined metadata, meaning that all property/event/aggregation/association methods will also be suggested.
 * Bugfixes and refactoring
