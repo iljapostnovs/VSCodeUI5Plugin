@@ -52,7 +52,7 @@ export abstract class AbstractType {
 
 		const bodyResult = rMyFullBody.exec(text);
 		if (bodyResult) {
-			const shouldOneCharBeAdded = /[^a-zA-Z]/.test(bodyResult[0][0]);
+			const shouldOneCharBeAdded = bodyResult[0].length > fullBody.length;//if one additional char from the upper regex added one char
 			this.positionBegin = startingIndex + bodyResult.index + (shouldOneCharBeAdded ? 1 : 0);
 			this.positionEnd = this.positionBegin + fullBody.length;
 		}
