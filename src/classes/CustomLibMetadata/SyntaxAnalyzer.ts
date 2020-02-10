@@ -189,13 +189,13 @@ export class SyntaxAnalyzer {
 					characterDelta: deltaToReturn
 				}), startingPosition);
 				selectedText = vscode.window.activeTextEditor.document.getText(range);
-				if (!this.isSeparator(sCurrentChar, ignoreParentheses)) {
+				if (ignoreParentheses || !this.isSeparator(sCurrentChar, false)) {
 					deltaToReturn += iDelta;
 				} else {
 					deltaToReturn += -iDelta;
 				}
 
-			} while (!this.isSeparator(sCurrentChar, ignoreParentheses) && startingPosition.character + deltaToReturn > 0);
+			} while (ignoreParentheses || !this.isSeparator(sCurrentChar, false) && startingPosition.character + deltaToReturn > 0);
 		}
 		deltaToReturn += -iDelta;
 

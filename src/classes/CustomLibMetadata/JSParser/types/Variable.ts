@@ -50,7 +50,7 @@ export class JSVariable extends AbstractType {
 	}
 
 	static isVariable(text: string) {
-		return /((var|const|let)\s)?(.*=)|this\..*\s=|(var|const|let)\s.*?(?=;)/.test(text);
+		return /((var|const|let)\s)?(.*=)|this\..*\s=|(var|const|let)\s.*?(?=;)/.test(text) || text.endsWith(";");
 	}
 
 }

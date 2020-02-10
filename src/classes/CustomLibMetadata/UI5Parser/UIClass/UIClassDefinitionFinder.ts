@@ -44,17 +44,17 @@ export class UIClassDefinitionFinder {
 		const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
 
 		if (UIClass instanceof CustomUIClass && UIClass.classBody) {
-			const currentMethodIndex = UIClass.classBody.partNames.indexOf(methodName);
-			if (currentMethodIndex > -1) {
-				const methodFunction = UIClass.classBody.parts[currentMethodIndex];
+			const currentMethod = UIClass.methods.find(method => method.name === methodName);
+			if (currentMethod) {
 				const classPath = FileReader.getClassPath(UIClass.className);
 				if (classPath) {
 					const classUri = vscode.Uri.file(classPath);
-					const methodPositionOffset = methodFunction.positionBegin;
-					const position = LineColumn(UIClass.classText).fromIndex(methodPositionOffset);
-					if (position) {
-						const methodPosition = new vscode.Position(position.line - 1, position.col);
-						location = new vscode.Location(classUri, methodPosition);
+					if (currentMethod.position) {
+						const position = LineColumn(UIClass.classText).fromIndex(currentMethod.position);
+						if (position) {
+							const methodPosition = new vscode.Position(position.line - 1, position.col - 1);
+							location = new vscode.Location(classUri, methodPosition);
+						}
 					}
 				}
 			}

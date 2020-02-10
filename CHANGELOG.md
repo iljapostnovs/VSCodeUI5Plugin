@@ -52,5 +52,7 @@
 ## 0.9.0 (06-02-2020)
 * Method and constructor Signature Helper is added.
 * Custom class Method Completion Items now are generated using custom defined metadata, meaning that all property/event/aggregation/association methods will also be suggested.
-* Bugfixes and refactoring
 * Now classes that returns objects only ("static classes", map of functions, usually formatters) are also recognized.
+* XML linting is implemented. Now attribute values are validated.
+* Improved parsing for custom classes. Now Class.prototype.method and Class.method are parsed as well.
+* Bugfixes and refactoring

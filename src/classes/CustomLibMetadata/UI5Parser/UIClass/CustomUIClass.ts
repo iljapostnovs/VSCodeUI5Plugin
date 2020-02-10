@@ -8,17 +8,23 @@ import { JSObject } from "../../JSParser/types/Object";
 import { JSVariable } from "../../JSParser/types/Variable";
 import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
 import { JSString } from "../../JSParser/types/String";
+import { JSComment } from "../../JSParser/types/JSComment";
 
 interface UIDefine {
 	path: string;
 	className: string;
 	classNameDotNotation: string;
 }
+interface CustomClassUIMethod extends UIMethod {
+	position?: number;
+}
 export class CustomUIClass extends AbstractUIClass {
+	public methods: CustomClassUIMethod[] = [];
 	public classBody: JSObject | undefined;
 	public classText: string = "";
 	public UIDefine: UIDefine[] = [];
 	public jsPasredBody: AbstractType | undefined;
+	private currentClassHolderVariable: AbstractType | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
@@ -75,7 +81,6 @@ export class CustomUIClass extends AbstractUIClass {
 			classBody = this.getClassBodyFromReturnedObject();
 		}
 
-
 		return classBody;
 	}
 
@@ -83,15 +88,19 @@ export class CustomUIClass extends AbstractUIClass {
 		let classBody: JSObject | undefined;
 
 		if (this.jsPasredBody) {
-			const classFNCall = this.jsPasredBody.parts[1].parts.find(part => part instanceof JSFunctionCall && (part.parsedName.indexOf(".extend") > -1 || part.parsedName.indexOf(".declareStaticClass")) > -1);
+			//returns Object.extend("", {}) right away
+			const classFNCall = this.jsPasredBody.parts[1].parts.find(part => this.isThisPartAClassBody(part));
 			if (classFNCall) {
 				classBody = <JSObject>classFNCall.parts[1];
 			} else {
+				//there is a variable which has the class assigned. E.g. var Class = Object.extend("", {});
 				for (let index = 0; index < this.jsPasredBody.parts[1].parts.length; index++) {
 					const part = this.jsPasredBody.parts[1].parts[index];
 
-					const classFNCall = part.parts.find(part => part instanceof JSFunctionCall);
+					const classFNCall = part.parts.find(part => this.isThisPartAClassBody(part));
 					if (classFNCall) {
+						this.currentClassHolderVariable = part;
+						(<JSVariable>part).jsType = this.className;
 						classBody = <JSObject>classFNCall.parts[1];
 						break;
 					}
@@ -100,6 +109,10 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 
 		return classBody;
+	}
+
+	private isThisPartAClassBody(part: AbstractType) {
+		return part instanceof JSFunctionCall && (part.parsedName.indexOf(".extend") > -1 || part.parsedName.indexOf(".declareStaticClass")) > -1;
 	}
 
 	private getClassBodyFromReturnedObject() {
@@ -182,31 +195,60 @@ export class CustomUIClass extends AbstractUIClass {
 			this.classBody.partNames.forEach((partName, index) => {
 				if (this.classBody) {
 					const part = this.classBody.parts[index];
-					if (part instanceof JSFunction) {
-						const description = `(${part.params.map(part => part.parsedName).join(", ")}) : ${(part.returnType ? part.returnType : "void")}`;
-						this.methods.push({
-							name: partName,
-							params: part.params.map(part => part.parsedName),
-							returnType: part.returnType || "void",
-							description: description
-						});
-
-					} else if (part instanceof JSVariable) {
-						this.fields.push({
-							name: partName.replace("this.", ""),
-							type: part.jsType,
-							description: part.jsType || ""
-						});
-					}
+					this.fillMethodsAndFieldsFromPart(part, partName);
 				}
 			});
+
+			if (this.currentClassHolderVariable) {
+				const rIsFieldOrMethod = new RegExp(`${this.currentClassHolderVariable.parsedName}(\\.prototype)?\\..*`);
+
+				const body = this.currentClassHolderVariable.parent;
+				if (body) {
+					body.parts.forEach((part, index) => {
+						if (rIsFieldOrMethod.test(part.parsedName)) {
+							if (part.parts.length === 1) {
+								let name = part.parsedName.replace(`${this.currentClassHolderVariable?.parsedName}.`, "");
+								name = name.replace(`prototype.`, "");
+
+								const previousPart = body.parts[index - 1];
+								if (previousPart && previousPart instanceof JSComment) {
+									if (previousPart.isJSDoc() && part.parts[0] instanceof JSFunction) {
+										(<JSFunction>part.parts[0]).setJSDoc(previousPart);
+									}
+								}
+								this.fillMethodsAndFieldsFromPart(part.parts[0], name);
+							}
+						}
+					});
+				}
+			}
 		}
 
 		this.fillMethodsFromMetadata();
 	}
 
+	private fillMethodsAndFieldsFromPart(part: AbstractType, partName: string) {
+		if (part instanceof JSFunction) {
+			const description = `(${part.params.map(part => part.parsedName).join(", ")}) : ${(part.returnType ? part.returnType : "void")}`;
+			this.methods.push({
+				name: partName,
+				params: part.params.map(part => part.parsedName),
+				returnType: part.returnType || "void",
+				description: description,
+				position: part.positionBegin
+			});
+
+		} else if (part instanceof JSVariable) {
+			this.fields.push({
+				name: partName.replace("this.", ""),
+				type: part.jsType,
+				description: part.jsType || ""
+			});
+		}
+	}
+
 	private fillMethodsFromMetadata() {
-		const additionalMethods: UIMethod[] = [];
+		const additionalMethods: CustomClassUIMethod[] = [];
 
 		this.fillPropertyMethods(additionalMethods);
 		this.fillAggregationMethods(additionalMethods);
@@ -216,7 +258,7 @@ export class CustomUIClass extends AbstractUIClass {
 		this.methods = this.methods.concat(additionalMethods);
 	}
 
-	private fillPropertyMethods(aMethods: UIMethod[]) {
+	private fillPropertyMethods(aMethods: CustomClassUIMethod[]) {
 		this.properties.forEach(property => {
 			const propertyWithFirstBigLetter = `${property.name[0].toUpperCase()}${property.name.substring(1, property.name.length)}`;
 			const getter = `get${propertyWithFirstBigLetter}`;
@@ -238,7 +280,7 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private fillAggregationMethods(additionalMethods: UIMethod[]) {
+	private fillAggregationMethods(additionalMethods: CustomClassUIMethod[]) {
 		this.aggregations.forEach(aggregation => {
 			const aggregationWithFirstBigLetter = `${aggregation.singularName[0].toUpperCase()}${aggregation.singularName.substring(1, aggregation.singularName.length)}`;
 
@@ -275,7 +317,7 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private fillEventMethods(aMethods: UIMethod[]) {
+	private fillEventMethods(aMethods: CustomClassUIMethod[]) {
 		this.events.forEach(event => {
 			const eventWithFirstBigLetter = `${event.name[0].toUpperCase()}${event.name.substring(1, event.name.length)}`;
 			const aEventMethods = [
@@ -295,7 +337,7 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private fillAssociationMethods(additionalMethods: UIMethod[]) {
+	private fillAssociationMethods(additionalMethods: CustomClassUIMethod[]) {
 		this.associations.forEach(association => {
 			const associationWithFirstBigLetter = `${association.singularName[0].toUpperCase()}${association.singularName.substring(1, association.singularName.length)}`;
 
