@@ -87,6 +87,14 @@ export class URLBuilder {
 		return `${this.getUrlBase()}/test-resources/${libPath}/designtime/apiref/api.json`;
 	}
 
+	getIconURIs() {
+		return [
+			`${this.getUrlBase()}/test-resources/sap/m/demokit/iconExplorer/webapp/model/SAP-icons/groups.json`,
+			`${this.getUrlBase()}/test-resources/sap/m/demokit/iconExplorer/webapp/model/SAP-icons-TNT/groups.json`,
+			`${this.getUrlBase()}/test-resources/sap/m/demokit/iconExplorer/webapp/model/BusinessSuiteInAppSymbols/groups.json`
+		];
+	}
+
 	private wrapInMarkup(url: string) {
 		return `[UI5 API](${url})\n`;
 	}

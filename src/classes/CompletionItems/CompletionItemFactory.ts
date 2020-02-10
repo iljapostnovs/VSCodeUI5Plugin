@@ -9,8 +9,10 @@ import { SyntaxAnalyzer, UICompletionItem } from "../CustomLibMetadata/SyntaxAna
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
 import { FieldsAndMethods, UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { XMLParser, PositionType } from "../Util/XMLParser";
-import { AbstractUIClass, UIProperty } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass, UIProperty, UIEvent, UIMethod } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { URLBuilder } from "../Util/URLBuilder";
+import { FileReader } from "../Util/FileReader";
+import { SAPIcons } from "../CustomLibMetadata/SAPIcons";
 
 export class CompletionItemFactory {
 	private readonly nodeDAO = new SAPNodeDAO();
@@ -31,7 +33,10 @@ export class CompletionItemFactory {
 			SAPNodes = await this.nodeDAO.getAllNodes();
 
 			const metadataProvider: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
-			await metadataProvider.preloadLibs(progress);
+			await Promise.all([
+				metadataProvider.preloadLibs(progress),
+				SAPIcons.preloadIcons()
+			]);
 			console.log("Libs are preloaded");
 
 			completionItems = await this.generateAggregationPropertyCompletionItems(progress);
@@ -250,11 +255,12 @@ export class CompletionItemFactory {
 				const className = XMLParser.getClassNameInPosition(XMLText, currentPositionOffset);
 				if (className) {
 					const UIClass = UIClassFactory.getUIClass(className);
+					let controllerMethods = XMLParser.getMethodsOfTheCurrentViewsController().map(method => method.name);
+					controllerMethods = [...new Set(controllerMethods)];
 					completionItems = this.getPropertyCompletionItemsFromClass(UIClass);
-					completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(UIClass));
+					completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(UIClass, controllerMethods));
 					completionItems = completionItems.concat(this.getAggregationCompletionItemsFromClass(UIClass));
 					completionItems = completionItems.concat(this.getAssociationCompletionItemsFromClass(UIClass));
-					completionItems = this.removeDuplicateCompletionItems(completionItems);
 				}
 			} else if (positionType === PositionType.InTheString) {
 				const positionBeforeString = XMLParser.getPositionBeforeStringBegining(XMLText, currentPositionOffset);
@@ -262,16 +268,23 @@ export class CompletionItemFactory {
 				const className = XMLParser.getClassNameInPosition(XMLText, positionBeforeString);
 				if (className) {
 					const UIClass = UIClassFactory.getUIClass(className);
-					const propertyName = XMLParser.getNearestProperty(XMLText, positionBeforeString);
-					const UIProperty = this.getUIPropertyRecursively(UIClass, propertyName);
+					const attributeName = XMLParser.getNearestAttribute(XMLText, positionBeforeString);
+					const UIProperty = this.getUIPropertyRecursively(UIClass, attributeName);
 					if (UIProperty && UIProperty.typeValues.length > 0) {
 						completionItems = this.generateCompletionItemsFromTypeValues(UIProperty.typeValues);
+					} else {
+						const UIEvent = this.getUIEventRecursively(UIClass, attributeName);
+						if (UIEvent) {
+							const methods = XMLParser.getMethodsOfTheCurrentViewsController().map(classMethod => classMethod.name);
+							completionItems = this.generateCompletionItemsFromTypeValues(methods);
+						}
 					}
 				}
 			}
 
 		}
 
+		completionItems = this.removeDuplicateCompletionItems(completionItems);
 		return completionItems;
 	}
 
@@ -286,11 +299,23 @@ export class CompletionItemFactory {
 		return property;
 	}
 
-	private generateCompletionItemsFromTypeValues(typeValues: string[]) {
-		return typeValues.map(typeValue => {
-			return new vscode.CompletionItem(typeValue, vscode.CompletionItemKind.Keyword);
-		});
+	private getUIEventRecursively(UIClass: AbstractUIClass, eventName: string): UIEvent | undefined {
+		let event: UIEvent | undefined;
+		event = UIClass.events.find(event => event.name === eventName);
+		if (!event && UIClass.parentClassNameDotNotation) {
+			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
+			event = this.getUIEventRecursively(parentClass, eventName);
+		}
+
+		return event;
 	}
+
+	private generateCompletionItemsFromTypeValues(typeValues: string[]) {
+		return this.removeDuplicateCompletionItems(typeValues.map(typeValue => {
+			return new vscode.CompletionItem(typeValue, vscode.CompletionItemKind.Keyword);
+		}));
+	}
+
 
 	private getPropertyCompletionItemsFromClass(UIClass: AbstractUIClass) {
 		let completionItems:vscode.CompletionItem[] = [];
@@ -315,13 +340,14 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	private getEventCompletionItemsFromClass(UIClass: AbstractUIClass) {
+	private getEventCompletionItemsFromClass(UIClass: AbstractUIClass, eventValues: string[] = []) {
 		let completionItems:vscode.CompletionItem[] = [];
 
 		completionItems = UIClass.events.map(event => {
 			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(event.name);
 			completionItem.kind = vscode.CompletionItemKind.Event;
-			completionItem.insertText = new vscode.SnippetString(`${event.name}="\${1}"$0`);
+			const insertTextValues = eventValues.length > 0 ? `|${eventValues.join(",")}|` : "";
+			completionItem.insertText =  new vscode.SnippetString(`${event.name}="\${1${insertTextValues}}"$0`);
 			completionItem.detail = event.name;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForEventsApi(UIClass, event.name);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${event.description}`);
@@ -331,7 +357,7 @@ export class CompletionItemFactory {
 
 		if (UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
-			completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(parentClass));
+			completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(parentClass, eventValues));
 		}
 
 		return completionItems;

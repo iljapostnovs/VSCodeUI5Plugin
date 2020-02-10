@@ -2,7 +2,7 @@ import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssoci
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
 import { URLBuilder } from "../../../Util/URLBuilder";
-import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
+import { SAPIcons } from "../../SAPIcons";
 
 export class StandardUIClass extends AbstractUIClass {
 	private readonly nodeDAO = new SAPNodeDAO();
@@ -147,7 +147,9 @@ export class StandardUIClass extends AbstractUIClass {
 
 	private generateTypeValues(type: string) {
 		let typeValues: string[] = [];
-		if (type?.startsWith("sap.")) {
+		if (type === "sap.ui.core.URI") {
+			typeValues = SAPIcons.icons;
+		} else if (type?.startsWith("sap.")) {
 			const typeNode = this.findSAPNode(type);
 			const metadata = typeNode?.getMetadataSync();
 			typeValues = metadata?.rawMetadata?.properties?.map((property: any) => `${property.name}`.replace(`${type}.`, "")) || [];

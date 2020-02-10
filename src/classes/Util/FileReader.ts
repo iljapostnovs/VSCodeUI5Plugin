@@ -173,7 +173,7 @@ export class FileReader {
 		}
 	}
 
-	private static getControllerNameFromView(viewContent: string) {
+	static getControllerNameFromView(viewContent: string) {
 		const controllerNameResult = /(?<=controllerName=").*(?=")/.exec(viewContent);
 
 		return controllerNameResult ? controllerNameResult[0] : undefined;
@@ -224,7 +224,11 @@ export class FileReader {
 
 	static getCache(cacheType: FileReader.CacheType) {
 		let cache;
-		const cachePath = cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() : FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() : null;
+		const cachePath =
+			cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() :
+			cacheType === FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() :
+			cacheType === FileReader.CacheType.Icons ? this.getIconCachePath() :
+			null;
 
 		if (cachePath && fs.existsSync(cachePath)) {
 			cache = JSON.parse(fs.readFileSync(cachePath, "utf8"));
@@ -234,7 +238,11 @@ export class FileReader {
 	}
 
 	static setCache(cacheType: FileReader.CacheType, cache: string) {
-		const cachePath = cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() : FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() : null;
+		const cachePath =
+			cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() :
+			cacheType === FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() :
+			cacheType === FileReader.CacheType.Icons ? this.getIconCachePath() :
+			null;
 
 		if (cachePath) {
 			if (!fs.existsSync(cachePath)) {
@@ -246,7 +254,11 @@ export class FileReader {
 	}
 
 	static clearCache(cacheType: FileReader.CacheType) {
-		const cachePath = cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() : FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() : null;
+		const cachePath =
+			cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() :
+			cacheType === FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() :
+			cacheType === FileReader.CacheType.Icons ? this.getIconCachePath() :
+			null;
 
 		if (cachePath && fs.existsSync(cachePath)) {
 			fs.unlinkSync(cachePath);
@@ -268,12 +280,17 @@ export class FileReader {
 	private static getAPIIndexCachePath() {
 		return `${this.globalStoragePath}\\cache_appindex_${this.UI5Version}.json`;
 	}
+
+	private static getIconCachePath() {
+		return `${this.globalStoragePath}\\cache_icons_${this.UI5Version}.json`;
+	}
 }
 
 export module FileReader {
 	export enum CacheType {
 		Metadata = "1",
-		APIIndex = "2"
+		APIIndex = "2",
+		Icons = "3"
 	}
 }
 

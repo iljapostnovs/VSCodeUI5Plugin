@@ -1,3 +1,8 @@
+import * as vscode from "vscode";
+import { FileReader } from "./FileReader";
+import { UIMethod } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+
 export enum PositionType {
 	InTheTag = "1",
 	Content = "2",
@@ -153,7 +158,7 @@ export class XMLParser {
 		return i;
 	}
 
-	static getNearestProperty(XMLViewText: string, currentPosition: number) {
+	static getNearestAttribute(XMLViewText: string, currentPosition: number) {
 		let i = currentPosition;
 
 		while (!/\s/.test(XMLViewText[i]) && i > 0) {
@@ -161,5 +166,32 @@ export class XMLParser {
 		}
 
 		return XMLViewText.substring(i + 1, currentPosition).replace("=", "");
+	}
+
+	static getMethodsOfTheCurrentViewsController() {
+		let classMethods: UIMethod[] = [];
+		const currentDocument = vscode.window.activeTextEditor?.document;
+		if (currentDocument && currentDocument.fileName.endsWith("view.xml")) {
+			const currentDocumentText = currentDocument.getText();
+			const controllerName = FileReader.getControllerNameFromView(currentDocumentText);
+
+			if (controllerName) {
+				classMethods = this.getClassMethodsRecursively(controllerName);
+			}
+		}
+
+		return classMethods;
+	}
+
+	private static getClassMethodsRecursively(className: string, onlyCustomMethods: boolean = true) {
+		let methods: UIMethod[] = [];
+		const UIClass = UIClassFactory.getUIClass(className);
+		methods = UIClass.methods;
+
+		if (UIClass.parentClassNameDotNotation && (!onlyCustomMethods || !UIClass.parentClassNameDotNotation.startsWith("sap."))) {
+			methods = methods.concat(this.getClassMethodsRecursively(UIClass.parentClassNameDotNotation));
+		}
+
+		return methods;
 	}
 }

@@ -16,6 +16,7 @@ export class ClearCacheCommand {
 	static clearCache() {
 		FileReader.clearCache(FileReader.CacheType.APIIndex);
 		FileReader.clearCache(FileReader.CacheType.Metadata);
+		FileReader.clearCache(FileReader.CacheType.Icons);
 
 		ClearCacheCommand.reloadWindow();
 	}

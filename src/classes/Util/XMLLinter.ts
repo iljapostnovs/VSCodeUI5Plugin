@@ -2,6 +2,8 @@ import { XMLParser } from "./XMLParser";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import * as vscode from "vscode";
 import LineColumn from "line-column";
+import { FileReader } from "./FileReader";
+import { UIMethod } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 
 function isNumeric(value: string) {
 	return /^-{0,1}\d+$/.test(value);
@@ -126,7 +128,9 @@ export class XMLLinter {
 
 		const UIClass = UIClassFactory.getUIClass(className);
 		const property = UIClass.properties.find(property => property.name === attributeName);
+		const event = UIClass.events.find(event => event.name === attributeName);
 		const isAttributeBinded = attributeValue.startsWith("{") && attributeValue.endsWith("}");
+
 		if (isAttributeBinded) {
 			isValueValid = true;
 		} else if (property && property.typeValues.length > 0) {
@@ -135,6 +139,8 @@ export class XMLLinter {
 			isValueValid = attributeValue === "true" || attributeValue === "false";
 		} else if (property?.type === "int") {
 			isValueValid = isNumeric(attributeValue);
+		} else if (event) {
+			isValueValid = !!XMLParser.getMethodsOfTheCurrentViewsController().find(method => method.name === attributeValue);
 		}
 
 		return isValueValid;
