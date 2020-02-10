@@ -308,6 +308,11 @@ export class SyntaxAnalyzer {
 			const rCurrentClassResults = rCurrentClass.exec(documentText);
 			if (rCurrentClassResults) {
 				returnClassName = rCurrentClassResults[0];
+			} else {
+				const classPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+				if (classPath) {
+					returnClassName = FileReader.getClassNameFromPath(classPath);
+				}
 			}
 		}
 

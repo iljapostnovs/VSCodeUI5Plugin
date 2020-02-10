@@ -69,7 +69,19 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private getThisClassBody() {
+		let classBody: JSObject | undefined = this.getClassBodyFromClassExtend();
+
+		if (!classBody) {
+			classBody = this.getClassBodyFromReturnedObject();
+		}
+
+
+		return classBody;
+	}
+
+	private getClassBodyFromClassExtend() {
 		let classBody: JSObject | undefined;
+
 		if (this.jsPasredBody) {
 			const classFNCall = this.jsPasredBody.parts[1].parts.find(part => part instanceof JSFunctionCall && (part.parsedName.indexOf(".extend") > -1 || part.parsedName.indexOf(".declareStaticClass")) > -1);
 			if (classFNCall) {
@@ -84,6 +96,19 @@ export class CustomUIClass extends AbstractUIClass {
 						break;
 					}
 				}
+			}
+		}
+
+		return classBody;
+	}
+
+	private getClassBodyFromReturnedObject() {
+		let classBody: JSObject | undefined;
+
+		if (this.jsPasredBody) {
+			const jsObject = this.jsPasredBody.parts[1].parts.find(part => part instanceof JSObject);
+			if (jsObject) {
+				classBody = <JSObject>jsObject;
 			}
 		}
 

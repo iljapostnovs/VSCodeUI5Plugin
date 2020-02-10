@@ -53,3 +53,4 @@
 * Method and constructor Signature Helper is added.
 * Custom class Method Completion Items now are generated using custom defined metadata, meaning that all property/event/aggregation/association methods will also be suggested.
 * Bugfixes and refactoring
+* Now classes that returns objects only ("static classes", map of functions, usually formatters) are also recognized.
