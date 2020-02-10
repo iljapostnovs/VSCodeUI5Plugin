@@ -147,7 +147,13 @@ export class StandardUIClass extends AbstractUIClass {
 
 	private generateTypeValues(type: string) {
 		let typeValues: string[] = [];
-		if (type === "sap.ui.core.URI") {
+
+		if (type === "boolean") {
+			typeValues = [
+				"true",
+				"false"
+			];
+		} else if (type === "sap.ui.core.URI") {
 			typeValues = SAPIcons.icons;
 		} else if (type?.startsWith("sap.")) {
 			const typeNode = this.findSAPNode(type);
