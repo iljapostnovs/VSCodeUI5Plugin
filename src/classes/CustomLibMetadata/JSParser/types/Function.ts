@@ -4,6 +4,10 @@ import { JSComment } from "./JSComment";
 import { MainLooper } from "../MainLooper";
 import { IfStatement } from "./IfStatement";
 import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
+import { JSString } from "./String";
+import { JSArray } from "./Array";
+import { JSClass } from "./Class";
+import { JSReturnKeyword } from "./ReturnKeyword";
 
 export class JSFunction extends AbstractType {
 	public jsDoc: JSComment | undefined;
@@ -115,6 +119,21 @@ export class JSFunction extends AbstractType {
 		}
 	}
 
+	public parseBody() {
+		super.parseBody();
+		let part = this.parts.find(part => part instanceof JSReturnKeyword);
+		if (part && part.parts.length === 1) {
+			part = part.parts[0];
+			if (part instanceof JSString) {
+				this.returnType = "string";
+			} else if (part instanceof JSArray) {
+				this.returnType = "array";
+			} else if (part instanceof JSClass && part.parsedName === "Promise") {
+				this.returnType = "Promise";
+			}
+		}
+	}
+
 	public getContentLength() {
 		return this.functionText.length;
 	}
@@ -181,6 +200,10 @@ export class JSFunction extends AbstractType {
 			jsType = jsTypeResult[0];
 		}
 
+		if (jsType?.endsWith("[]")) {
+			jsType = "array";
+		}
+
 		return jsType;
 	}
 
@@ -195,6 +218,9 @@ export class JSFunction extends AbstractType {
 				const jsTypeResult = /(?<=return(s?)\s\{).*(?=\})/.exec(jsDoc);
 				if (jsTypeResult) {
 					returnType = jsTypeResult[0];
+					if (returnType.endsWith("[]")) {
+						returnType = "array";
+					}
 				}
 			}
 		}

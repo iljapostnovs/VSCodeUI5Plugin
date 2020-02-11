@@ -16,6 +16,7 @@ import { JSUnknown } from "./types/JSUnknown";
 import { JSTernaryOperation } from "./types/TernaryOperation";
 import { JSIncrement } from "./types/JSIncrement";
 import { EndlessLoopLocker } from "../../Util/EndlessLoopLocker";
+import { JSReturnKeyword } from "./types/ReturnKeyword";
 
 export class MainLooper {
 	static startAnalysing(javascript: string, runBeforeChar?: string) {
@@ -76,6 +77,8 @@ export class MainLooper {
 			} else if (JSString.isAString(currentChar)) {
 				syntaxType = new JSString("", javascript);
 
+			} else if (JSReturnKeyword.isReturnKeyword(currentText)) {
+				syntaxType = new JSReturnKeyword("", javascript);
 			}
 			if (syntaxType) {
 				parts.push(syntaxType);

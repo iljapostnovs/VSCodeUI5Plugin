@@ -1,5 +1,6 @@
 import { AbstractType } from "./AbstractType";
 import { JSClass } from "./Class";
+import { JSArray } from "./Array";
 
 export class JSVariable extends AbstractType {
 	public jsType: string | undefined;
@@ -27,6 +28,8 @@ export class JSVariable extends AbstractType {
 		const myCLass = this.parts.find(part => part instanceof JSClass);
 		if (myCLass) {
 			this.jsType = myCLass.parsedName;
+		} else if (this.parts.length === 1 && this.parts[0] instanceof JSArray) {
+			this.jsType = "array";
 		}
 	}
 

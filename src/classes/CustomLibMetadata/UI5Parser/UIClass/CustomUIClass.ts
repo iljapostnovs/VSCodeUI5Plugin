@@ -9,6 +9,8 @@ import { JSVariable } from "../../JSParser/types/Variable";
 import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
 import { JSString } from "../../JSParser/types/String";
 import { JSComment } from "../../JSParser/types/JSComment";
+import { JSReturnKeyword } from "../../JSParser/types/ReturnKeyword";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 
 interface UIDefine {
 	path: string;
@@ -17,6 +19,7 @@ interface UIDefine {
 }
 interface CustomClassUIMethod extends UIMethod {
 	position?: number;
+	fnRef?: JSFunction;
 }
 export class CustomUIClass extends AbstractUIClass {
 	public methods: CustomClassUIMethod[] = [];
@@ -235,7 +238,8 @@ export class CustomUIClass extends AbstractUIClass {
 				params: part.params.map(part => part.parsedName),
 				returnType: part.returnType || "void",
 				description: description,
-				position: part.positionBegin
+				position: part.positionBegin,
+				fnRef: part
 			});
 
 		} else if (part instanceof JSVariable) {
@@ -404,6 +408,18 @@ export class CustomUIClass extends AbstractUIClass {
 					const methodName = variableName.replace(methodParams, "");
 					const method = this.methods.find(method => method.name === methodName);
 					if (method) {
+						if (method.fnRef && !method.fnRef.returnType) {
+							const returnOfTheFn = method.fnRef.parts.find(part => part instanceof JSReturnKeyword);
+							if (returnOfTheFn) {
+
+								const variableParts = returnOfTheFn.parts[0].getFullBody().split(".");
+								const position = returnOfTheFn.parts[0].positionEnd;
+								const UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, this, 1, position);
+								if (UIClassName) {
+									method.returnType = UIClassName;
+								}
+							}
+						}
 						className = method.returnType;
 					}
 				} else {

@@ -11,7 +11,7 @@ export class SyntaxAnalyzer {
 			variable = this.getCurrentVariable();
 		}
 		const currentClassName = this.getCurrentClassName();
-		const variableParts = variable.split(".");
+		const variableParts = variable.split(".");//TODO class.method(this.param);
 
 		const activeTextEditor = vscode.window.activeTextEditor;
 		if (currentClassName && activeTextEditor) {

@@ -2,6 +2,7 @@ import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
 import { CustomUIClass } from "./CustomUIClass";
 import { StandardUIClass } from "./StandardUIClass";
 import { EndlessLoopLocker } from "../../../Util/EndlessLoopLocker";
+import { JSClass } from "./JSClass";
 
 export interface FieldsAndMethods {
 	fields: UIField[];
@@ -13,7 +14,10 @@ interface UIClassMap {
 }
 
 export class UIClassFactory {
-	private static readonly UIClasses: UIClassMap = {};
+	private static readonly UIClasses: UIClassMap = {
+		Promise: new JSClass("Promise"),
+		array: new JSClass("array")
+	};
 
 	private static getInstance(className: string, documentText?: string) {
 		let returnClass: AbstractUIClass;
