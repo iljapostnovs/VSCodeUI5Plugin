@@ -170,17 +170,24 @@ export class XMLParser {
 
 	static getMethodsOfTheCurrentViewsController() {
 		let classMethods: UIMethod[] = [];
-		const currentDocument = vscode.window.activeTextEditor?.document;
-		if (currentDocument && currentDocument.fileName.endsWith("view.xml")) {
-			const currentDocumentText = currentDocument.getText();
-			const controllerName = FileReader.getControllerNameFromView(currentDocumentText);
 
-			if (controllerName) {
-				classMethods = this.getClassMethodsRecursively(controllerName);
-			}
+		const controllerName = this.getControllerNameOfTheCurrentDocument();
+		if (controllerName) {
+			classMethods = this.getClassMethodsRecursively(controllerName);
 		}
 
 		return classMethods;
+	}
+
+	static getControllerNameOfTheCurrentDocument() {
+		let controllerName;
+		const currentDocument = vscode.window.activeTextEditor?.document;
+		if (currentDocument && currentDocument.fileName.endsWith("view.xml")) {
+			const currentDocumentText = currentDocument.getText();
+			controllerName = FileReader.getControllerNameFromView(currentDocumentText);
+		}
+
+		return controllerName;
 	}
 
 	private static getClassMethodsRecursively(className: string, onlyCustomMethods: boolean = true) {

@@ -139,7 +139,7 @@ export class XMLLinter {
 			isValueValid = attributeValue === "true" || attributeValue === "false";
 		} else if (property?.type === "int") {
 			isValueValid = isNumeric(attributeValue);
-		} else if (event) {
+		} else if (event && XMLParser.getControllerNameOfTheCurrentDocument()) {
 			isValueValid = !!XMLParser.getMethodsOfTheCurrentViewsController().find(method => method.name === attributeValue);
 		}
 
