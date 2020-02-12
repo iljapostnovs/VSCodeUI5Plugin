@@ -5,6 +5,7 @@ import * as glob from "glob";
 import * as fs from "fs";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { WorkspaceCompletionItemFactory } from "../CompletionItems/WorkspaceCompletionItemFactory";
+import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
 
 const workspace = vscode.workspace;
 
@@ -22,6 +23,9 @@ export class FileWatcher {
 				let viewContent = document.getText();
 				viewContent = FileReader.replaceFragments(viewContent);
 				FileReader.setNewViewContentToCache(viewContent);
+			} else if (document.fileName.endsWith(".properties")) {
+
+				ResourceModelData.readTexts();
 			}
 		});
 

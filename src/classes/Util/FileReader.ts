@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as glob from "glob";
+import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
 const workspace = vscode.workspace;
 
 export class FileReader {
@@ -80,7 +81,8 @@ export class FileReader {
 				const manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
 				const UIManifest = {
 					componentName: UI5Manifest["sap.app"].id,
-					fsPath: manifestFsPath
+					fsPath: manifestFsPath,
+					content: UI5Manifest
 				};
 				this.manifests.push(UIManifest);
 			}
@@ -284,6 +286,39 @@ export class FileReader {
 	private static getIconCachePath() {
 		return `${this.globalStoragePath}\\cache_icons_${this.UI5Version}.json`;
 	}
+
+	public static getResourceModelFiles() {
+		const manifests = this.getAllManifests();
+		return manifests.map(manifest => {
+			return {
+				content: this.readResourceModelFile(manifest.fsPath),
+				componentName: manifest.componentName
+			};
+		});
+	}
+
+	private static readResourceModelFile(componentFsPath: string) {
+		let resourceModelFileContent = "";
+		const resourceModelFilePath = `${componentFsPath}\\i18n\\i18n.properties`;
+		try {
+			resourceModelFileContent = fs.readFileSync(resourceModelFilePath, "ascii");
+		} catch {
+			resourceModelFileContent = "";
+		}
+
+		return resourceModelFileContent;
+	}
+
+	public static getComponentNameOfAppInCurrentWorkspaceFolder() {
+		return this.getCurrentWorkspaceFoldersManifest()?.componentName;
+	}
+
+	public static getCurrentWorkspaceFoldersManifest() {
+		const currentClassName = SyntaxAnalyzer.getCurrentClassName();
+		if (currentClassName) {
+			return this.getManifestForClass(currentClassName);
+		}
+	}
 }
 
 export module FileReader {
@@ -297,6 +332,7 @@ export module FileReader {
 interface UIManifest {
 	fsPath: string;
 	componentName: string;
+	content: any;
 }
 
 interface manifestPaths {

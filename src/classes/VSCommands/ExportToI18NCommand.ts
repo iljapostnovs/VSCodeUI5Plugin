@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
+import { FileReader } from "../Util/FileReader";
+import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
 const workspace = vscode.workspace;
 
 export class ExportToI18NCommand {
@@ -144,22 +146,14 @@ export class ExportToI18NCommand {
 	}
 
 	private static async insertIntoi18NFile(stringToInsert: string) {
-		const editor = vscode.window.activeTextEditor;
-		if (editor) {
-			const wsFolders = workspace.workspaceFolders || [];
-			const currentlyOpenedFileFSPath = editor.document.fileName;
-			const currentWSFolder = wsFolders.find(wsFolder => currentlyOpenedFileFSPath.indexOf(wsFolder.uri.fsPath) > -1);
+		const manifest = FileReader.getCurrentWorkspaceFoldersManifest();
+		const manifestFsPath = manifest?.fsPath;
+		const i18nRelativePath = manifest?.content["sap.app"].i18n;
+		if (manifestFsPath && i18nRelativePath) {
+			const i18nFSPath = manifestFsPath + "\\" + i18nRelativePath.replace(/\//g, "\\");
 
-			if (currentWSFolder) {
-				const manifests:any = await this.findManifestsInWorkspaceFolder(currentWSFolder);
-				for (const manifest of manifests) {
-					const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
-					const manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
-					const i18nRelativePath:string = UI5Manifest["sap.app"].i18n;
-					const i18nFSPath = manifestFsPath + "\\" + i18nRelativePath.replace(/\//g, "\\");
-					fs.appendFileSync(i18nFSPath, stringToInsert, "utf8");
-				}
-			}
+			fs.appendFileSync(i18nFSPath, stringToInsert, "utf8");
+			ResourceModelData.readTexts();
 		}
 	}
 

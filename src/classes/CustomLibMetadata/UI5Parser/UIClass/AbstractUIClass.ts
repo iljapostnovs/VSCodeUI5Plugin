@@ -1,3 +1,7 @@
+import { SAPIcons } from "../../SAPIcons";
+import { FileReader } from "../../../Util/FileReader";
+import { ResourceModelData } from "../../ResourceModelData";
+
 export interface UIMethod {
 	name: string;
 	params: string[];
@@ -10,10 +14,14 @@ export interface UIField {
 	type: string | undefined;
 	description: string;
 }
+export interface TypeValue {
+	text: string;
+	description: string;
+}
 export interface UIProperty {
 	name: string;
 	type: string | undefined;
-	typeValues: string[];
+	typeValues: TypeValue[];
 	description: string;
 }
 export interface UIAggregation {
@@ -49,4 +57,24 @@ export abstract class AbstractUIClass {
 	}
 
 	public abstract getClassOfTheVariable(variableName: string, position: number) : string | undefined;
+
+	protected generateTypeValues(type: string) {
+		let typeValues: TypeValue[] = [];
+
+		if (type === "boolean") {
+			typeValues = [
+				{text: "true", description: "boolean true"},
+				{text: "false", description: "boolean false"}
+			];
+		} else if (type === "sap.ui.core.URI") {
+			typeValues = SAPIcons.icons.map(icon => ({text: icon, description: icon}));
+		} else if (type === "string") {
+			const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
+			if (currentComponentName) {
+				typeValues = ResourceModelData.resourceModels[currentComponentName];
+			}
+		}
+
+		return typeValues;
+	}
 }

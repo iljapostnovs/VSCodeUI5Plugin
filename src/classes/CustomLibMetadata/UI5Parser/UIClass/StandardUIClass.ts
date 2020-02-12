@@ -1,8 +1,7 @@
-import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssociation } from "./AbstractUIClass";
+import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssociation, TypeValue } from "./AbstractUIClass";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
 import { URLBuilder } from "../../../Util/URLBuilder";
-import { SAPIcons } from "../../SAPIcons";
 
 export class StandardUIClass extends AbstractUIClass {
 	private readonly nodeDAO = new SAPNodeDAO();
@@ -145,20 +144,18 @@ export class StandardUIClass extends AbstractUIClass {
 		return additionalDescription;
 	}
 
-	private generateTypeValues(type: string) {
-		let typeValues: string[] = [];
+	protected generateTypeValues(type: string) {
+		let typeValues = super.generateTypeValues(type);
 
-		if (type === "boolean") {
-			typeValues = [
-				"true",
-				"false"
-			];
-		} else if (type === "sap.ui.core.URI") {
-			typeValues = SAPIcons.icons;
-		} else if (type?.startsWith("sap.")) {
+		if (typeValues.length === 0 && type?.startsWith("sap.")) {
 			const typeNode = this.findSAPNode(type);
 			const metadata = typeNode?.getMetadataSync();
-			typeValues = metadata?.rawMetadata?.properties?.map((property: any) => `${property.name}`.replace(`${type}.`, "")) || [];
+			typeValues = metadata?.rawMetadata?.properties?.map((property: any): TypeValue => {
+				return {
+					text: `${property.name}`.replace(`${type}.`, ""),
+					description: this.removeTags(property.description)
+				};
+			}) || [];
 		}
 
 		return typeValues;

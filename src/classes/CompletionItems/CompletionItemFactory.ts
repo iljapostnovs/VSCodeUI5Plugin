@@ -9,10 +9,10 @@ import { SyntaxAnalyzer, UICompletionItem } from "../CustomLibMetadata/SyntaxAna
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
 import { FieldsAndMethods, UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { XMLParser, PositionType } from "../Util/XMLParser";
-import { AbstractUIClass, UIProperty, UIEvent, UIMethod } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass, UIProperty, UIEvent, TypeValue } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { URLBuilder } from "../Util/URLBuilder";
-import { FileReader } from "../Util/FileReader";
 import { SAPIcons } from "../CustomLibMetadata/SAPIcons";
+import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
 
 export class CompletionItemFactory {
 	private readonly nodeDAO = new SAPNodeDAO();
@@ -35,7 +35,8 @@ export class CompletionItemFactory {
 			const metadataProvider: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
 			await Promise.all([
 				metadataProvider.preloadLibs(progress),
-				SAPIcons.preloadIcons()
+				SAPIcons.preloadIcons(),
+				ResourceModelData.readTexts()
 			]);
 			console.log("Libs are preloaded");
 
@@ -275,7 +276,13 @@ export class CompletionItemFactory {
 					} else {
 						const UIEvent = this.getUIEventRecursively(UIClass, attributeName);
 						if (UIEvent) {
-							const methods = XMLParser.getMethodsOfTheCurrentViewsController().map(classMethod => classMethod.name);
+							const methods = XMLParser.getMethodsOfTheCurrentViewsController()
+							.map(classMethod =>
+								({
+									text: classMethod.name,
+									description: classMethod.description
+								})
+							);
 							completionItems = this.generateCompletionItemsFromTypeValues(methods);
 						}
 					}
@@ -310,9 +317,12 @@ export class CompletionItemFactory {
 		return event;
 	}
 
-	private generateCompletionItemsFromTypeValues(typeValues: string[]) {
+	private generateCompletionItemsFromTypeValues(typeValues: TypeValue[]) {
 		return this.removeDuplicateCompletionItems(typeValues.map(typeValue => {
-			return new vscode.CompletionItem(typeValue, vscode.CompletionItemKind.Keyword);
+			const completionItem =  new vscode.CompletionItem(typeValue.text, vscode.CompletionItemKind.Keyword);
+			completionItem.detail = typeValue.text;
+			completionItem.documentation = typeValue.description;
+			return completionItem;
 		}));
 	}
 

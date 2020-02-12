@@ -6,11 +6,12 @@ import { JSFunction } from "../../JSParser/types/Function";
 import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
 import { JSObject } from "../../JSParser/types/Object";
 import { JSVariable } from "../../JSParser/types/Variable";
-import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
+import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, TypeValue } from "./AbstractUIClass";
 import { JSString } from "../../JSParser/types/String";
 import { JSComment } from "../../JSParser/types/JSComment";
 import { JSReturnKeyword } from "../../JSParser/types/ReturnKeyword";
 import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
+import { SAPIcons } from "../../SAPIcons";
 
 interface UIDefine {
 	path: string;
@@ -549,7 +550,7 @@ export class CustomUIClass extends AbstractUIClass {
 					name: partName,
 					type: propertyType,
 					description: "",
-					typeValues: []
+					typeValues: this.generateTypeValues(propertyType || "")
 				};
 
 				return UIProperties;

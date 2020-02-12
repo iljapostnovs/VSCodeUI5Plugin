@@ -131,10 +131,10 @@ export class XMLLinter {
 		const event = UIClass.events.find(event => event.name === attributeName);
 		const isAttributeBinded = attributeValue.startsWith("{") && attributeValue.endsWith("}");
 
-		if (isAttributeBinded) {
+		if (isAttributeBinded || property?.type === "string") {
 			isValueValid = true;
 		} else if (property && property.typeValues.length > 0) {
-			isValueValid = property.typeValues.indexOf(attributeValue) > -1;
+			isValueValid = !!property.typeValues.find(typeValue => typeValue.text === attributeValue);
 		} else if (property?.type === "boolean") {
 			isValueValid = attributeValue === "true" || attributeValue === "false";
 		} else if (property?.type === "int") {
