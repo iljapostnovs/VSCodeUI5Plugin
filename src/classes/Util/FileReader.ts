@@ -291,15 +291,15 @@ export class FileReader {
 		const manifests = this.getAllManifests();
 		return manifests.map(manifest => {
 			return {
-				content: this.readResourceModelFile(manifest.fsPath),
+				content: this.readResourceModelFile(manifest),
 				componentName: manifest.componentName
 			};
 		});
 	}
 
-	private static readResourceModelFile(componentFsPath: string) {
+	public static readResourceModelFile(manifest: UIManifest) {
 		let resourceModelFileContent = "";
-		const resourceModelFilePath = `${componentFsPath}\\i18n\\i18n.properties`;
+		const resourceModelFilePath = this.getResourceModelUriForManifest(manifest);
 		try {
 			resourceModelFileContent = fs.readFileSync(resourceModelFilePath, "ascii");
 		} catch {
@@ -307,6 +307,12 @@ export class FileReader {
 		}
 
 		return resourceModelFileContent;
+	}
+
+	public static getResourceModelUriForManifest(manifest: UIManifest) {
+		const i18nRelativePath = manifest.content["sap.app"].i18n || "i18n\\i18n.properties";
+		const i18nPath = i18nRelativePath.replace(/\//g, "\\");
+		return `${manifest.fsPath}\\${i18nPath}`;
 	}
 
 	public static getComponentNameOfAppInCurrentWorkspaceFolder() {
