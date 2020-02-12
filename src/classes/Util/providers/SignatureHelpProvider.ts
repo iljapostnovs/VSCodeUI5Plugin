@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
-import { UIClassDefinitionFinder } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassDefinitionFinder";
-import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
-import { UIMethod, AbstractUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { SyntaxAnalyzer } from "../../CustomLibMetadata/SyntaxAnalyzer";
+import { UIClassDefinitionFinder } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassDefinitionFinder";
+import { UIClassFactory } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { UIMethod, AbstractUIClass } from "../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 
 export class SignatureHelpProvider {
 	static getSignature() {

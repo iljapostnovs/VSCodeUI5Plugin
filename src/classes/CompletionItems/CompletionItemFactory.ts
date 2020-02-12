@@ -120,12 +120,12 @@ export class CompletionItemFactory {
 		const properties: string = await propertyGenerator.generateProperties(node);
 		const aggregations: string = await aggregationGenerator.generateAggregations(node);
 
-		let insertText: string = node.getDisplayName() + "\n";
+		let insertText: string = `${node.getDisplayName()}\n`;
 		insertText += properties;
 		insertText += ">\n";
 		insertText += aggregations;
 
-		insertText += "</" + node.getDisplayName() + ">";
+		insertText += `</${node.getDisplayName()}>`;
 		return insertText;
 	}
 

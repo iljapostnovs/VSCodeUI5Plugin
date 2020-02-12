@@ -14,7 +14,7 @@ export class XMLPropertyGenerator implements IPropertyGenerator {
 		if (ui5Metadata && ui5Metadata.properties) {
 			ui5Metadata.properties.forEach((property: any) => {
 				if (property.visibility === "public" && !property.deprecatedText) {
-					properties += "    " + property.name + "=\"" + property.defaultValue + "\"\n";
+					properties += `    ${property.name}="${property.defaultValue}"\n`;
 				}
 			});
 		}

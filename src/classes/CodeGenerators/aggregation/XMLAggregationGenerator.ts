@@ -12,9 +12,9 @@ export class XMLAggregationGenerator implements IAggregationGenerator {
 		if (aggregations) {
 			aggregations.forEach((aggregation: any) => {
 				if (aggregation.visibility === "public") {
-					aggregationString += "    <" + aggregation.name + ">\n";
-					aggregationString += "        <!--" + aggregation.type + "-->\n";
-					aggregationString += "    </" + aggregation.name + ">\n";
+					aggregationString += `    <${aggregation.name}>\n`;
+					aggregationString += `        <!--${aggregation.type}-->\n`;
+					aggregationString += `    </${aggregation.name}>\n`;
 				}
 			});
 		}

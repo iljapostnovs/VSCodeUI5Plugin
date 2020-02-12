@@ -6,7 +6,7 @@ import { DefinitionProviderRegistrator } from "./classes/Util/registrators/Defin
 import { FileWatcher } from "./classes/Util/FileWatcher";
 import { SignatureHelpRegistrator } from "./classes/Util/registrators/SignatureHelpRegistrator";
 import { DiagnosticsRegistrator } from "./classes/Util/registrators/DiagnosticsRegistrator";
-import { XMLCodeLensProvider } from "./classes/Util/XMLCodeLensProvider";
+import { XMLCodeLensProvider } from "./classes/Util/providers/XMLCodeLensProvider";
 import { XMLResourceModelCodeLensRegistrator } from "./classes/Util/registrators/XMLResourceModelCodeLensRegistrator";
 
 export async function activate(context: vscode.ExtensionContext) {

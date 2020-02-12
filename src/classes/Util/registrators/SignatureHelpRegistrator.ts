@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { SignatureHelpProvider } from "../SignatureHelpProvider";
+import { SignatureHelpProvider } from "../providers/SignatureHelpProvider";
 
 export class SignatureHelpRegistrator {
 	static async register(context: vscode.ExtensionContext) {

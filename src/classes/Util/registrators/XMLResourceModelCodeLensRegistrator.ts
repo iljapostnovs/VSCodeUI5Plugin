@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {XMLCodeLensProvider} from "../XMLCodeLensProvider";
+import {XMLCodeLensProvider} from "../providers/XMLCodeLensProvider";
 
 export class XMLResourceModelCodeLensRegistrator {
 	static register(context: vscode.ExtensionContext) {
