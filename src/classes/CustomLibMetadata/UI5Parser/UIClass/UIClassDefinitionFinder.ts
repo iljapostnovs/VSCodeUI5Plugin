@@ -78,7 +78,8 @@ export class UIClassDefinitionFinder {
 
 			if (currentClassName) {
 				const currentClass = UIClassFactory.getUIClass(currentClassName);
-				UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variable.split("."), currentClass, undefined, currentPositionOffset);
+				const variableParts = SyntaxAnalyzer.splitVariableIntoParts(variable);
+				UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, currentClass, undefined, currentPositionOffset);
 			}
 		}
 
@@ -109,7 +110,8 @@ export class UIClassDefinitionFinder {
 					const allPartsAreFunctionCalls = !variable.parts.find(part => !(part instanceof JSFunctionCall));
 					if (allPartsAreFunctionCalls) {
 						//TODO: calls parsing twice.
-						variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variable.parsedBody.split("."), UIClass, undefined, variable.positionEnd);
+						const variableParts = SyntaxAnalyzer.splitVariableIntoParts(variable.parsedBody);
+						variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, undefined, variable.positionEnd);
 					}
 				}
 			});

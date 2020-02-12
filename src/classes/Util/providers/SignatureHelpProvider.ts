@@ -23,7 +23,7 @@ export class SignatureHelpProvider {
 				currentVariable = currentVariable.replace("new ", "") + ".constructor";
 			}
 
-			const currentMethodParts = currentVariable.split(".");
+			const currentMethodParts = SyntaxAnalyzer.splitVariableIntoParts(currentVariable);
 			const currentMethodText = currentMethodParts[currentMethodParts.length - 1];
 			currentMethodParts.splice(currentMethodParts.length - 1, 1);
 			const variableToGetClassFrom = currentMethodParts.join(".");

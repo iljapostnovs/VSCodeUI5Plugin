@@ -5,13 +5,43 @@ import { UIClassDefinitionFinder } from "./UI5Parser/UIClass/UIClassDefinitionFi
 import { AbstractUIClass } from "./UI5Parser/UIClass/AbstractUIClass";
 
 export class SyntaxAnalyzer {
+	static splitVariableIntoParts(variable: string) {
+		const variableParts: string[] = [];
+		let openParenthesesCount = 0;
+		let closedParenthesesCount = 0;
+		let i = 0;
+
+		let variablePart = "";
+
+		while(i < variable.length) {
+			const char = variable[i];
+			if (char === ")") {
+				closedParenthesesCount++;
+			} else if (char === "(") {
+				openParenthesesCount++;
+			}
+
+			if (char === "." && openParenthesesCount - closedParenthesesCount === 0) {
+				variableParts.push(variablePart);
+				variablePart = "";
+			} else {
+				variablePart += char;
+			}
+
+			i++;
+		}
+		variableParts.push(variablePart);
+
+		return variableParts;
+	}
+
 	static getFieldsAndMethodsOfTheCurrentVariable(variable?: string) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 		if (!variable) {
 			variable = this.getCurrentVariable();
 		}
 		const currentClassName = this.getCurrentClassName();
-		const variableParts = variable.split(".");//TODO class.method(this.param);
+		const variableParts = this.splitVariableIntoParts(variable);
 
 		const activeTextEditor = vscode.window.activeTextEditor;
 		if (currentClassName && activeTextEditor) {
@@ -158,7 +188,7 @@ export class SyntaxAnalyzer {
 			currentVariable = currentVariable.replace(".prototype", "");
 
 			//remove last part of the var (it ends with .)
-			const temporaryVariableParts = currentVariable.split(".");
+			const temporaryVariableParts = this.splitVariableIntoParts(currentVariable);
 			temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
 			currentVariable = temporaryVariableParts.join(".");
 		}

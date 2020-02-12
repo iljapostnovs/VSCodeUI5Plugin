@@ -413,7 +413,7 @@ export class CustomUIClass extends AbstractUIClass {
 							const returnOfTheFn = method.fnRef.parts.find(part => part instanceof JSReturnKeyword);
 							if (returnOfTheFn) {
 
-								const variableParts = returnOfTheFn.parts[0].getFullBody().split(".");
+								const variableParts = SyntaxAnalyzer.splitVariableIntoParts(returnOfTheFn.parts[0].getFullBody());
 								const position = returnOfTheFn.parts[0].positionEnd;
 								const UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, this, 1, position);
 								if (UIClassName) {
