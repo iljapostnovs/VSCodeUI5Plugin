@@ -305,9 +305,9 @@ export class SyntaxAnalyzer {
 
 		const currentClass = this.getCurrentClassName();
 		if (currentClass) {
-			const view = FileReader.getViewText(currentClass);
-			if (view) {
-				const IdsResult = view.match(/(?<=id=").*(?="\s)/g);
+			const viewText = FileReader.getViewText(currentClass);
+			if (viewText) {
+				const IdsResult = viewText.match(/(?<=id=").*(?="\s)/g);
 				if (IdsResult) {
 					completionItems = IdsResult.map(Id => {
 						const uniqueViewId: UICompletionItem = {

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { FileReader } from "../Util/FileReader";
+import { FileReader } from "../../Util/FileReader";
 
 const workspace = vscode.workspace;
 

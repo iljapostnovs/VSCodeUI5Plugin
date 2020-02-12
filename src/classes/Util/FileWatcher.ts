@@ -4,7 +4,7 @@ import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
 import * as glob from "glob";
 import * as fs from "fs";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
-import { WorkspaceCompletionItemFactory } from "../CompletionItems/WorkspaceCompletionItemFactory";
+import { WorkspaceCompletionItemFactory } from "../CompletionItems/completionitemfactories/WorkspaceCompletionItemFactory";
 import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
 
 const workspace = vscode.workspace;
