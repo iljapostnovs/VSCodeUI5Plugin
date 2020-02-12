@@ -40,7 +40,7 @@ export class XMLCodeLensProvider {
 		const manifest = FileReader.getCurrentWorkspaceFoldersManifest();
 		if (manifest) {
 			const resourceModelText = FileReader.readResourceModelFile(manifest);
-			const rTextPosition = new RegExp(`${escapeRegExp(textId)}\\s?=`);
+			const rTextPosition = new RegExp(`(?<=${escapeRegExp(textId)}\\s?=).*`);
 			const result = rTextPosition.exec(resourceModelText);
 			if (result) {
 				const resourceModelFSPath = FileReader.getResourceModelUriForManifest(manifest);
@@ -48,9 +48,10 @@ export class XMLCodeLensProvider {
 				const uri = vscode.Uri.file(resourceModelFSPath);
 				vscode.window.showTextDocument(uri)
 				.then(textEditor => {
-					const position = textEditor.document.positionAt(result.index + result[0].length);
-					textEditor.selection = new vscode.Selection(position, position);
-					textEditor.revealRange(new vscode.Range(position, position), vscode.TextEditorRevealType.InCenter);
+					const positionBegin = textEditor.document.positionAt(result.index);
+					const positionEnd = textEditor.document.positionAt(result.index + result[0].length);
+					textEditor.selection = new vscode.Selection(positionBegin, positionEnd);
+					textEditor.revealRange(new vscode.Range(positionBegin, positionEnd), vscode.TextEditorRevealType.InCenter);
 				});
 			}
 		}
