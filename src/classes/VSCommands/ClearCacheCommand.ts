@@ -4,19 +4,25 @@ import { FileReader } from "../Util/FileReader";
 export class ClearCacheCommand {
 	static subscribeToPropertyChange() {
 		vscode.workspace.onDidChangeConfiguration(event => {
-			const isLibraryVersionAffected = event.affectsConfiguration("ui5.plugin.ui5version");
-			const isSrcAffected = event.affectsConfiguration("ui5.plugin.src");
+			const isAnyConfigurationAffected =
+				event.affectsConfiguration("ui5.plugin.ui5version") ||
+				event.affectsConfiguration("ui5.plugin.src") ||
+				event.affectsConfiguration("ui5.plugin.jsCodeLens") ||
+				event.affectsConfiguration("ui5.plugin.xmlCodeLens") ||
+				event.affectsConfiguration("ui5.plugin.signatureHelp") ||
+				event.affectsConfiguration("ui5.plugin.libsToLoad") ||
+				event.affectsConfiguration("ui5.plugin.xmlDiagnostics");
 
-			if (isLibraryVersionAffected || isSrcAffected) {
+			if (event.affectsConfiguration("ui5.plugin.libsToLoad")) {
+				this.clearCache();
+			} else if (isAnyConfigurationAffected) {
 				ClearCacheCommand.reloadWindow();
 			}
 		});
 	}
 
 	static clearCache() {
-		FileReader.clearCache(FileReader.CacheType.APIIndex);
-		FileReader.clearCache(FileReader.CacheType.Metadata);
-		FileReader.clearCache(FileReader.CacheType.Icons);
+		FileReader.clearCache();
 
 		ClearCacheCommand.reloadWindow();
 	}

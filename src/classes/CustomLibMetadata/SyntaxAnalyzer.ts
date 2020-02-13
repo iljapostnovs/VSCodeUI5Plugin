@@ -148,14 +148,16 @@ export class SyntaxAnalyzer {
 		return concatenatedString;
 	}
 
-	private static setNewContentForCurrentUIClass() {
+	public static setNewContentForCurrentUIClass() {
 		if (vscode.window.activeTextEditor) {
 			let documentText = vscode.window.activeTextEditor.document.getText();
 			const position = vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start);
 
 			const currentClassName = this.getCurrentClassName();
 			if (currentClassName) {
-				documentText = documentText.substring(0, position - 1) + ";" + documentText.substring(position, documentText.length);
+				if (documentText[position] === ".") {
+					documentText = documentText.substring(0, position - 1) + ";" + documentText.substring(position, documentText.length);
+				}
 				UIClassFactory.setNewCodeForClass(currentClassName, documentText);
 			} else {
 				debugger;

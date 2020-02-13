@@ -35,6 +35,45 @@
 					"type": "string",
 					"default": "src",
 					"description": "Source folder in your workspace"
+				},
+				"ui5.plugin.jsCodeLens": {
+					"type": "boolean",
+					"default": false,
+					"description": "Should javascript CodeLens be enabled"
+				},
+				"ui5.plugin.xmlCodeLens": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should xml CodeLens be enabled"
+				},
+				"ui5.plugin.signatureHelp": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should UI5 Signature Help be enabled"
+				},
+				"ui5.plugin.xmlDiagnostics": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should UI5 XML Diagnostics be enabled"
+				},
+				"ui5.plugin.libsToLoad": {
+					"type": "array",
+					"default": [
+						"sap.m",
+						"sap.ui.comp",
+						"sap.f",
+						"sap.ui.core",
+						"sap.ui.commons",
+						"sap.ui.export",
+						"sap.ui.layout",
+						"sap.ui.support",
+						"sap.ui.table",
+						"sap.ui.unified",
+						"sap.ushell",
+						"sap.tnt",
+						"sap.suite.ui.microchart"
+					],
+					"description": "List of libs to be loaded"
 				}
 			}
 		},

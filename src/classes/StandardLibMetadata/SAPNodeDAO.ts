@@ -1,5 +1,6 @@
 import { SAPNode } from "./SAPNode";
 import rp from "request-promise";
+import * as vscode from "vscode";
 import { FileReader } from "../Util/FileReader";
 import { URLBuilder } from "../Util/URLBuilder";
 
@@ -23,23 +24,14 @@ export class SAPNodeDAO {
 	}
 
 	private generateSAPNodes() {
-		const libs: any = {
-			"sap.m": true,
-			"sap.ui.comp": true,
-			"sap.f": true,
-			"sap.ui.core": true,
-			"sap.ui.commons": true,
-			"sap.ui.export": true,
-			"sap.ui.layout": true,
-			"sap.ui.support": true,
-			"sap.ui.table": true,
-			"sap.ui.unified": true,
-			"sap.ushell": true,
-			"sap.tnt": true,
-			"sap.suite.ui.microchart": true
-		};
+		const libs: any = vscode.workspace.getConfiguration("ui5.plugin").get("libsToLoad");
+		const libMap: any = {};
+		libs.forEach((lib: any) => {
+			libMap[lib] = true;
+		});
+
 		for (const node of this.nodes.symbols) {
-			if (libs[node.lib]) {
+			if (libMap[node.lib]) {
 				const newNode = new SAPNode(node);
 				SAPNodeDAO.SAPNodes.push(newNode);
 			}

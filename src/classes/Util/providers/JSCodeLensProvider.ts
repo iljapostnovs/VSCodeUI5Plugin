@@ -4,33 +4,34 @@ import { UIClassFactory } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClas
 import { UIMethod } from "../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { CustomClassUIMethod } from "../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
 
-function escapeRegExp(string: string) {
-	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 export class JSCodeLensProvider {
-	static getCodeLenses(document: vscode.TextDocument) {
-		let codeLenses: vscode.CodeLens[] = [];
+	static getCodeLenses() : Promise<vscode.CodeLens[]> {
+		return new Promise(resolve => {
+			let codeLenses: vscode.CodeLens[] = [];
+			setTimeout(() => {
+				SyntaxAnalyzer.setNewContentForCurrentUIClass();
+				const currentClass = SyntaxAnalyzer.getCurrentClassName();
+				if (currentClass) {
+					const UIClass = UIClassFactory.getUIClass(currentClass);
+					const rootMethods = UIClass.methods;
+					if (UIClass.parentClassNameDotNotation) {
+						const overridenMethods: UIMethod[] = [];
+						const parentMethods = this.getAllParentMethods(UIClass.parentClassNameDotNotation);
 
-		const currentClass = SyntaxAnalyzer.getCurrentClassName();
-		if (currentClass) {
-			const UIClass = UIClassFactory.getUIClass(currentClass);
-			const rootMethods = UIClass.methods;
-			if (UIClass.parentClassNameDotNotation) {
-				const overridenMethods: UIMethod[] = [];
-				const parentMethods = this.getAllParentMethods(UIClass.parentClassNameDotNotation);
+						rootMethods.forEach(method => {
+							const methodFromParent = parentMethods.find(methodFromparent => methodFromparent.name === method.name);
+							if (methodFromParent) {
+								overridenMethods.push(method);
+							}
+						});
 
-				rootMethods.forEach(method => {
-					const methodFromParent = parentMethods.find(methodFromparent => methodFromparent.name === method.name);
-					if (methodFromParent) {
-						overridenMethods.push(method);
+						codeLenses = this.generateCodeLensesForMethods(overridenMethods);
+
+						resolve(codeLenses);
 					}
-				});
-
-				codeLenses = this.generateCodeLensesForMethods(overridenMethods);
-			}
-		}
-		return codeLenses;
+				}
+			}, 200);
+		});
 	}
 
 	private static getAllParentMethods(className: string) {
@@ -46,9 +47,9 @@ export class JSCodeLensProvider {
 
 	private static generateCodeLensesForMethods(methods: CustomClassUIMethod[]) {
 		const codeLenses: vscode.CodeLens[] = [];
+		const document = vscode.window.activeTextEditor?.document;
 
-		if (vscode.window.activeTextEditor) {
-			const document = vscode.window.activeTextEditor.document;
+		if (document) {
 			methods.forEach(method => {
 				if (method.position) {
 					const positionBegin = document.positionAt(method.position);

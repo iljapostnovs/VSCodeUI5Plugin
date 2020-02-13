@@ -255,15 +255,17 @@ export class FileReader {
 		}
 	}
 
-	static clearCache(cacheType: FileReader.CacheType) {
-		const cachePath =
-			cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() :
-			cacheType === FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() :
-			cacheType === FileReader.CacheType.Icons ? this.getIconCachePath() :
-			null;
-
-		if (cachePath && fs.existsSync(cachePath)) {
-			fs.unlinkSync(cachePath);
+	static clearCache() {
+		if (this.globalStoragePath) {
+			if (fs.existsSync(this.globalStoragePath)) {
+				const path = require("path");
+				const directory = this.globalStoragePath;
+				fs.readdir(directory, (err, files) => {
+					for (const file of files) {
+						fs.unlinkSync(path.join(directory, file));
+					}
+				});
+			}
 		}
 	}
 
