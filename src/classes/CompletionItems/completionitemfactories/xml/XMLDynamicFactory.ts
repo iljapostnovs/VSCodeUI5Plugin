@@ -95,7 +95,8 @@ export class XMLDynamicFactory {
 		completionItems = UIClass.properties.map(property => {
 			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(property.name);
 			completionItem.kind = vscode.CompletionItemKind.Property;
-			const insertTextValues = property.typeValues.length > 0 ? `|${property.typeValues.join(",")}|` : "";
+			const typeValueValues = property.typeValues.map(typeValue => typeValue.text);
+			const insertTextValues = typeValueValues.length > 0 ? `|${typeValueValues.join(",")}|` : "";
 			completionItem.insertText =  new vscode.SnippetString(`${property.name}="\${1${insertTextValues}}"$0`);
 			completionItem.detail = `${property.name}: ${property.type}`;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForPropertiesApi(UIClass);
