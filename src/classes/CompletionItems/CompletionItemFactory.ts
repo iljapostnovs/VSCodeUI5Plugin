@@ -5,7 +5,7 @@ import { GeneratorFactory } from "../CodeGenerators/GeneratorFactory";
 import { UI5MetadataPreloader } from "../StandardLibMetadata/UI5MetadataDAO";
 import { SAPIcons } from "../CustomLibMetadata/SAPIcons";
 import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
-import { ClassFactory as XMLClassFactory } from "./completionitemfactories/xml/ClassFactory";
+import { XMLClassFactory as XMLClassFactory } from "./completionitemfactories/xml/XMLClassFactory";
 import { UIDefineFactory } from "./completionitemfactories/javascript/UIDefineFactory";
 import { IDFactory } from "./completionitemfactories/javascript/IDFactory";
 import { JSDynamicFactory } from "./completionitemfactories/javascript/JSDynamicFactory";

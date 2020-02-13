@@ -6,8 +6,7 @@ import { DefinitionProviderRegistrator } from "./classes/Util/registrators/Defin
 import { FileWatcher } from "./classes/Util/FileWatcher";
 import { SignatureHelpRegistrator } from "./classes/Util/registrators/SignatureHelpRegistrator";
 import { DiagnosticsRegistrator } from "./classes/Util/registrators/DiagnosticsRegistrator";
-import { XMLCodeLensProvider } from "./classes/Util/providers/XMLCodeLensProvider";
-import { XMLResourceModelCodeLensRegistrator } from "./classes/Util/registrators/XMLResourceModelCodeLensRegistrator";
+import { CodeLensRegistrator } from "./classes/Util/registrators/CodeLensRegistrator";
 
 export async function activate(context: vscode.ExtensionContext) {
 	FileReader.globalStoragePath = context.globalStoragePath;
@@ -31,7 +30,7 @@ export async function activate(context: vscode.ExtensionContext) {
 					DefinitionProviderRegistrator.register(context);
 					SignatureHelpRegistrator.register(context);
 					DiagnosticsRegistrator.register(context);
-					XMLResourceModelCodeLensRegistrator.register(context);
+					CodeLensRegistrator.register(context);
 
 					resolve();
 				} catch (error) {
