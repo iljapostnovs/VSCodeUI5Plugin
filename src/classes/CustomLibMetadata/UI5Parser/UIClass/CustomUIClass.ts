@@ -18,7 +18,7 @@ interface UIDefine {
 	className: string;
 	classNameDotNotation: string;
 }
-interface CustomClassUIMethod extends UIMethod {
+export interface CustomClassUIMethod extends UIMethod {
 	position?: number;
 	fnRef?: JSFunction;
 }
