@@ -4,25 +4,24 @@ import { ViewControllerSwitcher } from "../../VSCommands/switchers/ViewControlle
 import { ClearCacheCommand } from "../../VSCommands/ClearCacheCommand";
 import { ExportToI18NCommand } from "../../VSCommands/ExportToI18NCommand";
 import { InsertCustomClassNameCommand } from "../../VSCommands/InsertCustomClassNameCommand";
+import { UI5Plugin } from "../../../UI5Plugin";
 
 export class CommandRegistrator {
-	static register(context: vscode.ExtensionContext, metadataLoaded: boolean) {
+	static register(metadataLoaded: boolean) {
 		/* Commands */
 		if (metadataLoaded) {
 			const insertUIDefineCommand = vscode.commands.registerCommand("ui5plugin.moveDefineToFunctionParameters", SAPUIDefineCommand.insertUIDefine);
-			context.subscriptions.push(insertUIDefineCommand);
-
 			const switcherCommand = vscode.commands.registerCommand("ui5plugin.switchBetweenVC", ViewControllerSwitcher.switchBetweenViewController);
-			context.subscriptions.push(switcherCommand);
-
 			const exportToI18NCommand = vscode.commands.registerCommand("ui5plugin.exportToi18n", ExportToI18NCommand.export);
-			context.subscriptions.push(exportToI18NCommand);
-
 			const insertCustomClassNameCommand = vscode.commands.registerCommand("ui5plugin.insertCustomClassName", InsertCustomClassNameCommand.insertCustomClassName);
-			context.subscriptions.push(insertCustomClassNameCommand);
+
+			UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
+			UI5Plugin.getInstance().addDisposable(switcherCommand);
+			UI5Plugin.getInstance().addDisposable(exportToI18NCommand);
+			UI5Plugin.getInstance().addDisposable(insertCustomClassNameCommand);
 		} else {
-			const cleacCacheCommand = vscode.commands.registerCommand("ui5plugin.clearCache", ClearCacheCommand.clearCache.bind(undefined, context));
-			context.subscriptions.push(cleacCacheCommand);
+			const cleacCacheCommand = vscode.commands.registerCommand("ui5plugin.clearCache", ClearCacheCommand.clearCache);
+			UI5Plugin.getInstance().addDisposable(cleacCacheCommand);
 
 			/* Events */
 			ClearCacheCommand.subscribeToPropertyChange();

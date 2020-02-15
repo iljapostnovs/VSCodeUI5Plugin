@@ -46,7 +46,7 @@ export class UIClassDefinitionFinder {
 		if (UIClass instanceof CustomUIClass && UIClass.classBody) {
 			const currentMethod = UIClass.methods.find(method => method.name === methodName);
 			if (currentMethod) {
-				const classPath = FileReader.getClassPath(UIClass.className);
+				const classPath = FileReader.getClassPathFromClassName(UIClass.className);
 				if (classPath) {
 					const classUri = vscode.Uri.file(classPath);
 					if (currentMethod.position) {

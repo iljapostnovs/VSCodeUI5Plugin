@@ -19,7 +19,7 @@ export class CompletionItemFactory {
 		this.language = completionItemType;
 	}
 
-	public async getLanguageSpecificCompletionItems(progress: vscode.Progress<{ message?: string | undefined; increment?: number | undefined; }>, context: vscode.ExtensionContext) {
+	public async getLanguageSpecificCompletionItems() {
 		var completionItems:vscode.CompletionItem[] = [];
 
 		if (this.language === GeneratorFactory.language.js) {
@@ -32,14 +32,14 @@ export class CompletionItemFactory {
 
 			const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
 			await Promise.all([
-				metadataPreloader.preloadLibs(progress),
+				metadataPreloader.preloadLibs(),
 				SAPIcons.preloadIcons(),
 				ResourceModelData.readTexts()
 			]);
 			console.log("Libs are preloaded");
 
 			const xmlClassFactoy = new XMLClassFactory();
-			completionItems = await xmlClassFactoy.generateAggregationPropertyCompletionItems(progress);
+			completionItems = await xmlClassFactoy.generateAggregationPropertyCompletionItems();
 			console.log("After the preload XML Completion Items are generated successfully");
 		}
 

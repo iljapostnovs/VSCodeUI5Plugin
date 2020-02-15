@@ -1,8 +1,9 @@
 import { UIClassDefinitionFinder } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassDefinitionFinder";
 import * as vscode from "vscode";
+import { UI5Plugin } from "../../../UI5Plugin";
 
 export class DefinitionProviderRegistrator {
-	static register(context: vscode.ExtensionContext) {
+	static register() {
 		/* Definition provider */
 		const definitionProviderDisposable = vscode.languages.registerDefinitionProvider({language: "javascript", scheme: "file"}, {
 			provideDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken) {
@@ -14,7 +15,8 @@ export class DefinitionProviderRegistrator {
 				return UIClassDefinitionFinder.getPositionAndUriOfCurrentVariableDefinition("", "", true);
 			}
 		});
-		context.subscriptions.push(definitionProviderDisposable);
-		context.subscriptions.push(typeDefinitionProviderDisposable);
+
+		UI5Plugin.getInstance().addDisposable(definitionProviderDisposable);
+		UI5Plugin.getInstance().addDisposable(typeDefinitionProviderDisposable);
 	}
 }

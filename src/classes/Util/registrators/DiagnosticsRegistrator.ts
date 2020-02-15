@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
 import { XMLLinter } from "../XMLLinter";
+import { UI5Plugin } from "../../../UI5Plugin";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 
 export class DiagnosticsRegistrator {
-	static register(context: vscode.ExtensionContext) {
+	static register() {
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("xmlDiagnostics")) {
 			diagnosticCollection = vscode.languages.createDiagnosticCollection("XML");
 
@@ -24,9 +25,8 @@ export class DiagnosticsRegistrator {
 				}
 			});
 
-			context.subscriptions.push(changeActiveTextEditor);
-			context.subscriptions.push(textDocumentChange);
-			context.subscriptions.push(diagnosticCollection);
+			UI5Plugin.getInstance().addDisposable(changeActiveTextEditor);
+			UI5Plugin.getInstance().addDisposable(textDocumentChange);
 		}
 	}
 

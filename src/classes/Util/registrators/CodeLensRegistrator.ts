@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 import { XMLCodeLensProvider } from "../providers/XMLCodeLensProvider";
 import { JSCodeLensProvider } from "../providers/JSCodeLensProvider";
+import { UI5Plugin } from "../../../UI5Plugin";
 
 export class CodeLensRegistrator {
-	static register(context: vscode.ExtensionContext) {
+	static register() {
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("xmlCodeLens")) {
 			const XMLCodeLens = vscode.languages.registerCodeLensProvider({language: "xml", scheme: "file"}, {
 				provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken) {
@@ -16,8 +17,8 @@ export class CodeLensRegistrator {
 					XMLCodeLensProvider.goToResourceModel(i18nId[0]);
 				}
 			});
-			context.subscriptions.push(XMLCodeLens);
-			context.subscriptions.push(vscodeCommand);
+			UI5Plugin.getInstance().addDisposable(XMLCodeLens);
+			UI5Plugin.getInstance().addDisposable(vscodeCommand);
 
 		}
 
@@ -28,7 +29,7 @@ export class CodeLensRegistrator {
 				}
 			});
 
-			context.subscriptions.push(JSCodeLens);
+			UI5Plugin.getInstance().addDisposable(JSCodeLens);
 		}
 	}
 }

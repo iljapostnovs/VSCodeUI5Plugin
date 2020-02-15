@@ -1,9 +1,9 @@
 import { UI5Metadata } from "./UI5Metadata";
 import { SAPNode } from "./SAPNode";
 import rp from "request-promise";
-import * as vscode from "vscode";
 import { URLBuilder } from "../Util/URLBuilder";
 import { FileReader } from "../Util/FileReader";
+import { UI5Plugin } from "../../UI5Plugin";
 
 interface LooseObject {
 	[key: string]: any;
@@ -18,7 +18,7 @@ export class UI5MetadataPreloader {
 		this.nodes = nodes;
 	}
 
-	public async preloadLibs(progress: vscode.Progress<{ message?: string | undefined; increment?: number | undefined; }>) {
+	public async preloadLibs() {
 		var cache = this.loadCache();
 		if (!cache) {
 			const promises = [];
@@ -31,7 +31,7 @@ export class UI5MetadataPreloader {
 
 			for (const i in this.libNames) {
 				promises.push(metadataDAO.getMetadataForLib(i).then(() => {
-					progress.report({ increment: incrementStep});
+					UI5Plugin.getInstance().initializationProgress?.report({ increment: incrementStep});
 				}));
 			}
 
@@ -40,7 +40,9 @@ export class UI5MetadataPreloader {
 				this.writeCache();
 			});
 		} else {
-			progress.report({ increment: 50 });
+			UI5Plugin.getInstance().initializationProgress?.report({
+				increment: 50
+			});
 			return new Promise(resolve => resolve(cache));
 		}
 	}

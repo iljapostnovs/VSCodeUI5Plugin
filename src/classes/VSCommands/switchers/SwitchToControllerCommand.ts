@@ -48,7 +48,7 @@ export class SwitchToControllerCommand {
 	}
 
 	private static getControllerFileContent(controllerFSPath: string) {
-		return fs.readFileSync(controllerFSPath, "ascii");
+		return fs.readFileSync(controllerFSPath, "utf8");
 	}
 
 	private static getControllerName(controller: string) {

@@ -40,7 +40,6 @@ export class ExportToI18NCommand {
 			const iDeltaStart = ExportToI18NCommand.getDetlaForFirstOccuraneOf("\"", -1);
 			const iDeltaEnd = ExportToI18NCommand.getDetlaForFirstOccuraneOf("\"", 1);
 			const range = new vscode.Range(editor.selection.start.translate(0, iDeltaStart), editor.selection.start.translate(0, iDeltaEnd));
-			// let selectedText = editor.document.getText(range);
 			return range;
 		}
 	}

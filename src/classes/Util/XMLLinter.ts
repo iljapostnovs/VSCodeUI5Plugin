@@ -2,8 +2,6 @@ import { XMLParser } from "./XMLParser";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import * as vscode from "vscode";
 import LineColumn from "line-column";
-import { FileReader } from "./FileReader";
-import { UIMethod } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 
 function isNumeric(value: string) {
 	return /^-{0,1}\d+$/.test(value);

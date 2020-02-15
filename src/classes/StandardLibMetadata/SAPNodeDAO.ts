@@ -5,7 +5,7 @@ import { FileReader } from "../Util/FileReader";
 import { URLBuilder } from "../Util/URLBuilder";
 
 export class SAPNodeDAO {
-	private static readonly nodePath:string = URLBuilder.getInstance().getAPIIndexUrl();
+	private static readonly nodePath: string = URLBuilder.getInstance().getAPIIndexUrl();
 	private nodes: any;
 	private static readonly SAPNodes: SAPNode[] = [];
 	constructor() {}

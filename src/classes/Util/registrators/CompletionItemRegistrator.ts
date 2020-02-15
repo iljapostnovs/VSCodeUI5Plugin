@@ -3,17 +3,17 @@ import { CompletionItemFactory } from "../../CompletionItems/CompletionItemFacto
 import { GeneratorFactory } from "../../CodeGenerators/GeneratorFactory";
 import { DefineGenerator } from "../../CodeGenerators/define/UIDefineCompletionItemGenerator";
 import { FileWatcher } from "../FileWatcher";
-import { EndlessLoopLocker } from "../EndlessLoopLocker";
+import { UI5Plugin } from "../../../UI5Plugin";
 
 export class CompletionItemRegistrator {
-	static async register(context: vscode.ExtensionContext, progress: vscode.Progress<{message?: string | undefined;increment?: number | undefined;}>) {
+	static async register() {
 		/* Completion Items */
 		const XMLCompletionItemFactory = new CompletionItemFactory(GeneratorFactory.language.xml);
-		const XMLCompletionItems = await XMLCompletionItemFactory.getLanguageSpecificCompletionItems(progress, context);
+		const XMLCompletionItems = await XMLCompletionItemFactory.getLanguageSpecificCompletionItems();
 		console.log("XML Completion Items generated");
 
 		const JSCompletionItemDAO = new CompletionItemFactory(GeneratorFactory.language.js);
-		const JSDefineCompletionItems = await JSCompletionItemDAO.getLanguageSpecificCompletionItems(progress, context);
+		const JSDefineCompletionItems = await JSCompletionItemDAO.getLanguageSpecificCompletionItems();
 		console.log("JS Completion Items generated");
 
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
@@ -47,9 +47,9 @@ export class CompletionItemRegistrator {
 			}
 		});
 
-		context.subscriptions.push(XMLProvider);
-		context.subscriptions.push(JSMethodPropertyProvider);
-		context.subscriptions.push(JSViewIDProvider);
+		UI5Plugin.getInstance().addDisposable(XMLProvider);
+		UI5Plugin.getInstance().addDisposable(JSMethodPropertyProvider);
+		UI5Plugin.getInstance().addDisposable(JSViewIDProvider);
 
 		FileWatcher.syncrhoniseJSDefineCompletionItems(JSDefineCompletionItems);
 	}

@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
+import { FileReader } from "../../Util/FileReader";
 const workspace = vscode.workspace;
 
 export class SwitchToViewCommand {
@@ -45,11 +46,10 @@ export class SwitchToViewCommand {
 	}
 
 	private static getViewFileContent(controllerFSPath: string) {
-		return fs.readFileSync(controllerFSPath, "ascii");
+		return fs.readFileSync(controllerFSPath, "utf8");
 	}
 
 	private static getControllerNameOfTheView(view: string) {
-		const result = /(?<=controllerName=").*(?=")/.exec(view) || [];
-		return result[0] ? result[0] : null;
+		return FileReader.getControllerNameFromView(view);
 	}
 }

@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 import { FileReader } from "../Util/FileReader";
+import { UI5Plugin } from "../../UI5Plugin";
 
 export class ClearCacheCommand {
 	static subscribeToPropertyChange() {
-		vscode.workspace.onDidChangeConfiguration(event => {
+		const disposable = vscode.workspace.onDidChangeConfiguration(event => {
 			const isAnyConfigurationAffected =
 				event.affectsConfiguration("ui5.plugin.ui5version") ||
 				event.affectsConfiguration("ui5.plugin.src") ||
@@ -19,6 +20,8 @@ export class ClearCacheCommand {
 				ClearCacheCommand.reloadWindow();
 			}
 		});
+
+		UI5Plugin.getInstance().addDisposable(disposable);
 	}
 
 	static clearCache() {
@@ -27,7 +30,7 @@ export class ClearCacheCommand {
 		ClearCacheCommand.reloadWindow();
 	}
 
-	private static reloadWindow() {
+	public static reloadWindow() {
 		const action = "Reload";
 		vscode.window
 		.showInformationMessage( `Reload window in order for change in extension ui5.plugin configuration to take effect.`, action)

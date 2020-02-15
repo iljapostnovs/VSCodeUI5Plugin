@@ -5,11 +5,12 @@ import { GeneratorFactory } from "../../../CodeGenerators/GeneratorFactory";
 import { IAggregationGenerator } from "../../../CodeGenerators/aggregation/IAggregationGenerator";
 import { IPropertyGenerator } from "../../../CodeGenerators/property/IPropertyGenerator";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
+import { UI5Plugin } from "../../../../UI5Plugin";
 
 export class XMLClassFactory {
 	private readonly nodeDAO = new SAPNodeDAO();
 
-	async generateAggregationPropertyCompletionItems(progress: vscode.Progress<{ message?: string | undefined; increment?: number | undefined; }>) {
+	async generateAggregationPropertyCompletionItems() {
 		var completionItems:vscode.CompletionItem[] = [];
 		let SAPNodes: SAPNode[];
 		const availableProgressLeft = 50;
@@ -19,7 +20,7 @@ export class XMLClassFactory {
 		for (const node of SAPNodes) {
 			const promise = this.generateAggregationCompletionItemsRecursively(node)
 			.then((generatedItems) => {
-				progress.report({
+				UI5Plugin.getInstance().initializationProgress?.report({
 					message: "Generating Completion Items: " + node.getDisplayName(),
 					increment: availableProgressLeft / SAPNodes.length
 				});

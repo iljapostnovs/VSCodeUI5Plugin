@@ -2,9 +2,8 @@ import * as vscode from "vscode";
 import { SAPNode } from "../StandardLibMetadata/SAPNode";
 import { AbstractUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 
-let URLBuilderInstance: null | URLBuilder  = null;
-
 export class URLBuilder {
+	private static URLBuilderInstance?: URLBuilder;
 	private readonly UI5Version: string;
 	private readonly URLHost = "https://ui5.sap.com/";
 
@@ -13,12 +12,12 @@ export class URLBuilder {
 	}
 
 	static getInstance() {
-		if (!URLBuilderInstance) {
+		if (!this.URLBuilderInstance) {
 			const UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
-			URLBuilderInstance = new URLBuilder(UI5Version);
+			this.URLBuilderInstance = new URLBuilder(UI5Version);
 		}
 
-		return URLBuilderInstance;
+		return this.URLBuilderInstance;
 	}
 
 	getMarkupUrlForClassApi(SAPClass: SAPNode | AbstractUIClass) {

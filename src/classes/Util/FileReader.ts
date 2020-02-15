@@ -5,7 +5,7 @@ import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
 const workspace = vscode.workspace;
 
 export class FileReader {
-	private static readonly manifests: UIManifest[] = [];
+	private static manifests: UIManifest[] = [];
 	private static readonly viewCache: LooseObject = {};
 	private static readonly UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
 	public static globalStoragePath: string | undefined;
@@ -19,26 +19,23 @@ export class FileReader {
 
 	public static getDocumentTextFromCustomClassName(className: string, isFragment?: boolean) {
 		let documentText;
-		const classPath = this.getClassPath(className, isFragment);
+		const classPath = this.getClassPathFromClassName(className, isFragment);
 		if (classPath) {
-			documentText = fs.readFileSync(classPath, "ascii");
+			documentText = fs.readFileSync(classPath, "utf8");
 		}
 
 		return documentText;
 	}
 
-	public static getClassPath(className: string, isFragment?: boolean) {
-		let classPath: string | undefined;
-		const extension = isFragment ? ".fragment.xml" : ".js";
-		const manifest = this.getManifestForClass(className);
-		if (manifest) {
-			classPath = manifest.fsPath + className.replace(manifest.componentName, "").replace(/\./g, "\\").trim() + extension;
+	public static getClassPathFromClassName(className: string, isFragment?: boolean) {
+		let classPath = this.convertClassNameToFSPath(className, false, isFragment);
+
+		if (classPath) {
 			try {
 				fs.readFileSync(classPath);
 			} catch (error) {
-				if (extension === ".js") {
-					//thx to controllers for this
-					classPath = classPath.replace(".js", ".controller.js");
+				classPath = this.convertClassNameToFSPath(className, true);
+				if (classPath) {
 					try {
 						fs.readFileSync(classPath);
 					} catch (error) {
@@ -51,19 +48,43 @@ export class FileReader {
 		return classPath;
 	}
 
+	public static convertClassNameToFSPath(className: string, isController: boolean = false, isFragment: boolean = false, isView: boolean = false) {
+		let FSPath;
+		let extension = ".js";
+		const manifest = this.getManifestForClass(className);
+		if (manifest) {
+			if (isController) {
+				extension = ".controller.js";
+			} else if (isFragment) {
+				extension = ".fragment.xml";
+			} else if (isView) {
+				extension = ".view.xml";
+			}
+
+			FSPath = manifest.fsPath + className.replace(manifest.componentName, "").replace(/\./g, "\\").trim() + extension;
+		}
+
+		return FSPath;
+	}
+
 	public static getAllManifests() {
 		if (this.manifests.length === 0) {
-			this.readAllWorkspaceManifests();
+			this.fetchAllWorkspaceManifests();
 		}
 
 		return this.manifests;
+	}
+
+	public static rereadAllManifests() {
+		this.manifests = [];
+		this.fetchAllWorkspaceManifests();
 	}
 
 	private static getManifestForClass(className: string) {
 		let returnManifest:UIManifest | undefined;
 		if (vscode.window.activeTextEditor) {
 			if (this.manifests.length === 0) {
-				this.readAllWorkspaceManifests();
+				this.fetchAllWorkspaceManifests();
 			}
 
 			returnManifest = this.manifests.find(UIManifest => className.indexOf(UIManifest.componentName) > -1);
@@ -72,12 +93,12 @@ export class FileReader {
 		return returnManifest;
 	}
 
-	private static readAllWorkspaceManifests() {
+	private static fetchAllWorkspaceManifests() {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const manifests = this.getManifestsInWorkspaceFolder(wsFolder);
 			for (const manifest of manifests) {
-				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
+				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
 				const manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
 				const UIManifest = {
 					componentName: UI5Manifest["sap.app"].id,
@@ -165,7 +186,7 @@ export class FileReader {
 		for (const wsFolder of wsFolders) {
 			const viewPaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*/*.view.xml");
 			viewPaths.forEach(viewPath => {
-				let viewContent = fs.readFileSync(viewPath, "ascii");
+				let viewContent = fs.readFileSync(viewPath, "utf8");
 				viewContent = this.replaceFragments(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				if (controllerName) {
@@ -233,7 +254,12 @@ export class FileReader {
 			null;
 
 		if (cachePath && fs.existsSync(cachePath)) {
-			cache = JSON.parse(fs.readFileSync(cachePath, "utf8"));
+			const fileText = fs.readFileSync(cachePath, "utf8");
+			try {
+				cache = JSON.parse(fileText);
+			} catch (error) {
+				console.log(error);
+			}
 		}
 
 		return cache;
@@ -303,7 +329,7 @@ export class FileReader {
 		let resourceModelFileContent = "";
 		const resourceModelFilePath = this.getResourceModelUriForManifest(manifest);
 		try {
-			resourceModelFileContent = fs.readFileSync(resourceModelFilePath, "ascii");
+			resourceModelFileContent = fs.readFileSync(resourceModelFilePath, "utf8");
 		} catch {
 			resourceModelFileContent = "";
 		}

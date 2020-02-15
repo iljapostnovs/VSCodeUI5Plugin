@@ -63,7 +63,7 @@ export class WorkspaceCompletionItemFactory {
 			const manifests:any = FileReader.getManifestsInWorkspaceFolder(wsFolder);
 
 			for (const manifest of manifests) {
-				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
+				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
 				const manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
 				const UI5ComponentName:string = UI5Manifest["sap.app"].id;
 				const projectJSFiles:any = await this.findJSFilesInWorkspaceFolder(wsFolder);
