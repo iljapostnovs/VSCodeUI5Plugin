@@ -8,6 +8,7 @@ import { WorkspaceCompletionItemFactory } from "../CompletionItems/completionite
 import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
 import { ClearCacheCommand } from "../VSCommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
+import { XMLParser } from "./XMLParser";
 
 const workspace = vscode.workspace;
 
@@ -34,7 +35,7 @@ export class FileWatcher {
 
 				let viewContent = document.getText();
 				viewContent = FileReader.replaceFragments(viewContent);
-				FileReader.setNewViewContentToCache(viewContent);
+				FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath);
 			} else if (document.fileName.endsWith(".properties")) {
 
 				ResourceModelData.readTexts();
@@ -64,6 +65,10 @@ export class FileWatcher {
 
 				if (file.newUri.fsPath.endsWith(".view.xml")) {
 					this.replaceViewNames(file.oldUri, file.newUri);
+				}
+
+				if (file.newUri.fsPath.endsWith(".controller.js")) {
+					this.renameViewOfController(file.newUri);
 				}
 
 				if (file.newUri.fsPath.indexOf(".") === -1) {
@@ -152,20 +157,63 @@ export class FileWatcher {
 		const textToReplaceToDotNotation = FileReader.getClassNameFromPath(newUri.fsPath)?.replace(".view.xml", "");
 
 		if (textToReplaceFromDotNotation && textToReplaceToDotNotation) {
+			this.renameController(textToReplaceToDotNotation);
 			this.replaceViewNamesInManifests(textToReplaceFromDotNotation, textToReplaceToDotNotation);
 			this.replaceAllOccurancesInFiles(textToReplaceFromDotNotation, textToReplaceToDotNotation);
-			this.renameController(textToReplaceFromDotNotation, textToReplaceToDotNotation);
 		}
 	}
 
-	private static renameController(oldViewName: string, newViewName: string) {
-		// const class
-		// const oldClassPath = FileReader.convertClassNameToFSPath(oldViewName);
-		// const newClassPath = FileReader.convertClassNameToFSPath(newViewName);
+	private static renameController(newViewName: string) {
+		const viewNamePart = newViewName.split(".")[newViewName.split(".").length - 1];
+		const viewPath = FileReader.convertClassNameToFSPath(newViewName, false, false, true);
+		if (viewPath) {
+			const viewText = fs.readFileSync(viewPath, "utf8");
+			const controllerName = FileReader.getControllerNameFromView(viewText);
+			if (controllerName) {
+				const controllerPath = FileReader.convertClassNameToFSPath(controllerName, true);
+				if (controllerPath) {
+					const newControllerNameParts = controllerName.split(".");
+					newControllerNameParts[newControllerNameParts.length - 1] = viewNamePart;
+					const newControllerName = newControllerNameParts.join(".");
+					const newControllerPath = FileReader.convertClassNameToFSPath(newControllerName, true);
+					if (newControllerPath) {
+						fs.renameSync(controllerPath, newControllerPath);
+						const oldUri = vscode.Uri.file(controllerPath);
+						const newUri = vscode.Uri.file(newControllerPath);
+						this.replaceCurrentClassNameWithNewOne(oldUri, newUri);
+					}
+				}
+			}
+		}
+	}
 
-		// if (oldClassPath && newClassPath) {
-		// 	fs.renameSync(oldClassPath, newClassPath);
-		// }
+	private static renameViewOfController(newControllerUri: vscode.Uri) {
+		const controllerNameDotNotation = FileReader.getClassNameFromPath(newControllerUri.fsPath);
+		if (controllerNameDotNotation) {
+			const controllerName = controllerNameDotNotation.split(".")[controllerNameDotNotation.split(".").length - 1];
+			const viewCache = FileReader.getViewCache();
+			const view = Object.keys(viewCache).find(key => FileReader.getControllerNameFromView(viewCache[key].content) === controllerNameDotNotation);
+			if (view) {
+				let viewNameDotNotation = FileReader.getClassNameFromPath(viewCache[view].fsPath);
+				if (viewNameDotNotation) {
+					const viewNameDotNotationParts = viewNameDotNotation.split(".");
+					viewNameDotNotationParts[viewNameDotNotationParts.length - 1] = controllerName;
+					viewNameDotNotation = viewNameDotNotationParts.join(".");
+
+					const newViewPath = FileReader.convertClassNameToFSPath(viewNameDotNotation, false, false, true);
+					if (newViewPath) {
+						try {
+							fs.renameSync(viewCache[view].fsPath, newViewPath);
+							const oldUri = vscode.Uri.file(viewCache[view].fsPath);
+							const newUri = vscode.Uri.file(newViewPath);
+							this.replaceViewNames(oldUri, newUri);
+						} catch (error) {
+							console.log(`No ${newViewPath} found`);
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private static replaceViewNamesInManifests(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string) {
@@ -221,7 +269,7 @@ export class FileWatcher {
 							UIClassFactory.setNewCodeForClass(classNameOfTheReplacedFile, file);
 						}
 					} else if (filePath.endsWith(".view.xml")) {
-						FileReader.setNewViewContentToCache(file);
+						FileReader.setNewViewContentToCache(file, filePath);
 					}
 				}
 			});

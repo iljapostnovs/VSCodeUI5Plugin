@@ -10,11 +10,18 @@ export class FileReader {
 	private static readonly UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
 	public static globalStoragePath: string | undefined;
 
-	public static setNewViewContentToCache(viewContent: string) {
+	public static setNewViewContentToCache(viewContent: string, fsPath: string) {
 		const controllerName = this.getControllerNameFromView(viewContent);
 		if (controllerName) {
-			this.viewCache[controllerName] = viewContent;
+			this.viewCache[controllerName] = {
+				content: viewContent,
+				fsPath: fsPath
+			};
 		}
+	}
+
+	static getViewCache() {
+		return this.viewCache;
 	}
 
 	public static getDocumentTextFromCustomClassName(className: string, isFragment?: boolean) {
@@ -82,13 +89,11 @@ export class FileReader {
 
 	private static getManifestForClass(className: string) {
 		let returnManifest:UIManifest | undefined;
-		if (vscode.window.activeTextEditor) {
-			if (this.manifests.length === 0) {
-				this.fetchAllWorkspaceManifests();
-			}
-
-			returnManifest = this.manifests.find(UIManifest => className.indexOf(UIManifest.componentName) > -1);
+		if (this.manifests.length === 0) {
+			this.fetchAllWorkspaceManifests();
 		}
+
+		returnManifest = this.manifests.find(UIManifest => className.indexOf(UIManifest.componentName) > -1);
 
 		return returnManifest;
 	}
@@ -134,12 +139,11 @@ export class FileReader {
 
 	public static getViewText(controllerName: string) {
 		let viewText: string | undefined;
-		if (this.viewCache[controllerName]) {
-			viewText = this.viewCache[controllerName];
-		} else {
+		if (!this.viewCache[controllerName]) {
 			this.readAllViewsAndSaveInCache();
-			viewText = this.viewCache[controllerName];
 		}
+
+		viewText = this.viewCache[controllerName].content;
 
 		return viewText;
 	}
@@ -190,7 +194,10 @@ export class FileReader {
 				viewContent = this.replaceFragments(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				if (controllerName) {
-					this.viewCache[controllerName] = viewContent;
+					this.viewCache[controllerName] = {
+						content: viewContent,
+						fsPath: viewPath
+					};
 				}
 			});
 		}
@@ -235,11 +242,20 @@ export class FileReader {
 	}
 
 	public static getClassNameFromPath(fsPath: string) {
+		fsPath = fsPath.replace(/\//g, "\\");
 		let className: string | undefined;
 		const manifests = this.getAllManifests();
 		const currentManifest = manifests.find(manifest => fsPath.indexOf(manifest.fsPath) > -1);
 		if (currentManifest) {
-			className = fsPath.replace(currentManifest.fsPath, currentManifest.componentName).replace(".controller", "").replace(".js","").replace(/\\/g, ".");
+			className =
+				fsPath
+				.replace(currentManifest.fsPath, currentManifest.componentName)
+				.replace(".controller", "")
+				.replace(".view.xml", "")
+				.replace("fragment.xml", "")
+				.replace(".xml", "")
+				.replace(".js","")
+				.replace(/\\/g, ".");
 		}
 
 		return className;
@@ -374,5 +390,8 @@ interface manifestPaths {
 }
 
 interface LooseObject {
-	[key: string]: any;
+	[key: string]: {
+		fsPath: string;
+		content: string;
+	};
 }
