@@ -93,18 +93,14 @@ The same goes for function return data type. Use `@returns {UI5Class} UI5ClassVa
 	var oList = new List();
 }`
 
-### Custom file parsing limitations
-* All variables defined in try/catch, for/while loops are ignored for now
-
 ### Assumptions
 * File starts with sap.ui.define
-* Your class body is in AnyUI5Class.extend("name", {here});<br/>(It means that dynamic completion items will not work for e.g. formatters, when you usually return an object right away)
+* Your class body is in AnyUI5Class.extend("name", {here});<br/>
 * You have manifest.json in source folder
 * App ID (Component name) and i18n paths are defined in manifest.json
 * File is without syntax errors
 * All your strings in sap.ui.define are not Relative (e.g. "./BaseController")
 * Name of the class of the UI5Class is the same as file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
-* No ES6+ features are used (except const/let and arrow functions)
 * You have an access to ui5.sap.com for standard lib metadata preload
 
 ### Proxy
