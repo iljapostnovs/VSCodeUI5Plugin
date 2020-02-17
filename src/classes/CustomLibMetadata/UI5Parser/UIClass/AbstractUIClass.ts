@@ -69,10 +69,10 @@ export abstract class AbstractUIClass {
 		} else if (type === "sap.ui.core.URI") {
 			typeValues = SAPIcons.icons.map(icon => ({text: icon, description: icon}));
 		} else if (type === "string") {
-			const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
-			if (currentComponentName) {
-				typeValues = ResourceModelData.resourceModels[currentComponentName];
-			}
+			// const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
+			// if (currentComponentName) {
+			// 	typeValues = ResourceModelData.resourceModels[currentComponentName];
+			// }
 		}
 
 		return typeValues;

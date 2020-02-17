@@ -3,6 +3,8 @@ import { UIClassFactory } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIC
 import { AbstractUIClass, TypeValue, UIProperty, UIEvent } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { URLBuilder } from "../../../Util/URLBuilder";
 import { XMLParser, PositionType } from "../../../Util/XMLParser";
+import { ResourceModelData } from "../../../CustomLibMetadata/ResourceModelData";
+import { FileReader } from "../../../Util/FileReader";
 
 export class XMLDynamicFactory {
 	public generateXMLDynamicCompletionItems() {
@@ -35,8 +37,17 @@ export class XMLDynamicFactory {
 					const attributeName = XMLParser.getNearestAttribute(XMLText, positionBeforeString);
 					const UIProperty = this.getUIPropertyRecursively(UIClass, attributeName);
 					if (UIProperty && UIProperty.typeValues.length > 0) {
+
 						completionItems = this.generateCompletionItemsFromTypeValues(UIProperty.typeValues);
+					} else if (UIProperty?.type === "string") {
+
+						const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
+						if (currentComponentName && ResourceModelData.resourceModels[currentComponentName]) {
+							const typeValues = ResourceModelData.resourceModels[currentComponentName];
+							completionItems = this.generateCompletionItemsFromTypeValues(typeValues);
+						}
 					} else {
+
 						const UIEvent = this.getUIEventRecursively(UIClass, attributeName);
 						if (UIEvent) {
 							const methods = XMLParser.getMethodsOfTheCurrentViewsController()
