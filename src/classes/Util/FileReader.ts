@@ -143,7 +143,7 @@ export class FileReader {
 			this.readAllViewsAndSaveInCache();
 		}
 
-		viewText = this.viewCache[controllerName].content;
+		viewText = this.viewCache[controllerName]?.content;
 
 		return viewText;
 	}
