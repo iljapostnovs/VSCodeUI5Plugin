@@ -502,7 +502,7 @@ export class CustomUIClass extends AbstractUIClass {
 					singularName = singularName.substring(1, singularName.length - 1);
 				}
 				if (!singularName) {
-					singularName = partName.substring(0, partName.length - 1);
+					singularName = partName;
 				}
 
 				const UIAggregations: UIAggregation = {
@@ -544,7 +544,7 @@ export class CustomUIClass extends AbstractUIClass {
 				let propertyType: undefined | string = undefined;
 				if (propertyTypeIndex > -1) {
 					propertyType = (<JSString>aggregationProps.parts[propertyTypeIndex]).parsedBody;
-					propertyType = propertyType.substring(1, propertyType.length -1 );
+					propertyType = propertyType.substring(1, propertyType.length - 1);
 				}
 				const UIProperties: UIProperty = {
 					name: partName,
@@ -586,7 +586,7 @@ export class CustomUIClass extends AbstractUIClass {
 					singularName = singularName.substring(1, singularName.length - 1);
 				}
 				if (!singularName) {
-					singularName = partName.substring(0, partName.length - 1);
+					singularName = partName;
 				}
 
 				const UIAssociations: UIAssociation = {

@@ -198,20 +198,38 @@ export class MainLooper {
 
 	private static getCommentRanges(text: string) {
 		const ranges: CommentRanges[] = [];
-		const rComments = /(\/\*(.|\s)*?\*\/)|(\/\/.*)/g;
-		let results = rComments.exec(text);
-		while (results) {
-			const from = results.index;
-			const to = from + results[0].length;
-			ranges.push({
-				from: from,
-				to: to
-			});
 
-			results = rComments.exec(text);
+		if (this.areAllOpenedCommendsClosed(text)) {
+			const rComments = /(\/\*(.|\s)*?\*\/)|(\/\/.*)/g;
+			let results = rComments.exec(text);
+			while (results) {
+				const from = results.index;
+				const to = from + results[0].length;
+				ranges.push({
+					from: from,
+					to: to
+				});
+
+				results = rComments.exec(text);
+			}
 		}
 
 		return ranges;
+	}
+
+	private static areAllOpenedCommendsClosed(text: string) {
+		let iOpenedCommendCount = 0;
+		let iClosedCommentCount = 0;
+
+		for (let i = 0; i < text.length - 1; i++) {
+			if (text.substring(i, i + 2) === "/*") {
+				iOpenedCommendCount++;
+			} else if (text.substring(i, i + 2) === "*/") {
+				iClosedCommentCount++;
+			}
+		}
+
+		return (iOpenedCommendCount - iClosedCommentCount) === 0;
 	}
 
 	private static checkIfIndexIsInCommentRange(commentRanges: CommentRanges[], index: number) {

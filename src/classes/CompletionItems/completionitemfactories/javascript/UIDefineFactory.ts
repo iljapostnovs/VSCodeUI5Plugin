@@ -41,6 +41,7 @@ export class UIDefineFactory {
 			mardownString.appendMarkdown(URLBuilder.getInstance().getMarkupUrlForClassApi(node));
 			mardownString.appendMarkdown(metadata.rawMetadata.description);
 			completionItem.documentation = mardownString;
+			completionItem.command = {command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define"};
 
 			completionItems.push(completionItem);
 		}
