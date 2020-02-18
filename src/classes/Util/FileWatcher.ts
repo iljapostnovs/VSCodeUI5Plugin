@@ -59,25 +59,33 @@ export class FileWatcher {
 
 		disposable = workspace.onDidRenameFiles(event => {
 			event.files.forEach(file => {
-				if (file.newUri.fsPath.endsWith(".js")) {
-					this.replaceCurrentClassNameWithNewOne(file.oldUri, file.newUri);
-				}
-
-				if (file.newUri.fsPath.endsWith(".view.xml")) {
-					this.replaceViewNames(file.oldUri, file.newUri);
-				}
-
-				if (file.newUri.fsPath.endsWith(".controller.js")) {
-					this.renameViewOfController(file.newUri);
-				}
-
 				if (file.newUri.fsPath.indexOf(".") === -1) {
 					this.handleFolderRename(file.oldUri, file.newUri);
+				} else {
+					this.handleFileRename(file);
 				}
 			});
 		});
 
 		UI5Plugin.getInstance().addDisposable(disposable);
+	}
+
+	private static handleFileRename(file: {
+		oldUri: vscode.Uri;
+		newUri: vscode.Uri;
+	}) {
+
+		if (file.newUri.fsPath.endsWith(".js")) {
+			this.replaceCurrentClassNameWithNewOne(file.oldUri, file.newUri);
+		}
+
+		if (file.newUri.fsPath.endsWith(".view.xml")) {
+			this.replaceViewNames(file.oldUri, file.newUri);
+		}
+
+		if (file.newUri.fsPath.endsWith(".controller.js")) {
+			this.renameViewOfController(file.newUri);
+		}
 	}
 
 	public static syncrhoniseJSDefineCompletionItems(completionItems: vscode.CompletionItem[]) {
@@ -282,11 +290,10 @@ export class FileWatcher {
 			const newFileUri = vscode.Uri.file(filePath);
 			const oldFileUri = vscode.Uri.file(filePath.replace(newUri.fsPath.replace(/\\/g, "/"), oldUri.fsPath.replace(/\\/g, "/")));
 
-			if (filePath.endsWith(".js")) {
-				this.replaceCurrentClassNameWithNewOne(oldFileUri, newFileUri);
-			} else if (filePath.endsWith(".view.xml")) {
-				this.replaceViewNames(oldFileUri, newFileUri);
-			}
+			this.handleFileRename({
+				newUri: newFileUri,
+				oldUri: oldFileUri
+			});
 		});
 	}
 }
