@@ -9,9 +9,9 @@ export class JSVariable extends AbstractType {
 
 		this.parsedName = this.parsedName
 			.replace("=", "")
-			.replace("var", "")
-			.replace("const", "")
-			.replace("let", "")
+			.replace("var ", "")
+			.replace("const ", "")
+			.replace("let ", "")
 			.replace(",", "").trim();
 	}
 
