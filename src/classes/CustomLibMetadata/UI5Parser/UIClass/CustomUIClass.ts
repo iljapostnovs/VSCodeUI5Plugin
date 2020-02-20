@@ -28,7 +28,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public classText: string = "";
 	public UIDefine: UIDefine[] = [];
 	public jsPasredBody: AbstractType | undefined;
-	private readonly currentClassHolderVariable: AbstractType | undefined;
+	private currentClassHolderVariable: AbstractType | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
@@ -103,6 +103,10 @@ export class CustomUIClass extends AbstractUIClass {
 			const variable = partParent.parts.find(parentPart => parentPart instanceof JSVariable && parentPart.parsedName === part.parsedName && parentPart !== part);
 			if (variable) {
 				classBody = this.getClassBodyFromPart(variable.parts[0], partParent);
+				if (classBody) {
+					this.currentClassHolderVariable = variable;
+					(<JSVariable>variable).jsType = this.className;
+				}
 			}
 		}
 
@@ -112,26 +116,15 @@ export class CustomUIClass extends AbstractUIClass {
 	private getClassBodyFromClassExtend(part: AbstractType) {
 		let classBody: JSObject | undefined;
 
-		classBody = <JSObject>part.parts[1];
+		if (this.isThisPartAClassBody(part)) {
+			classBody = <JSObject>part.parts[1];
+		}
 
 		return classBody;
 	}
 
 	private isThisPartAClassBody(part: AbstractType) {
 		return part instanceof JSFunctionCall && (part.parsedName.indexOf(".extend") > -1 || part.parsedName.indexOf(".declareStaticClass")) > -1;
-	}
-
-	private getClassBodyFromReturnedObject() {
-		let classBody: JSObject | undefined;
-
-		if (this.jsPasredBody) {
-			const jsObject = this.jsPasredBody.parts[1].parts.find(part => part instanceof JSObject);
-			if (jsObject) {
-				classBody = <JSObject>jsObject;
-			}
-		}
-
-		return classBody;
 	}
 
 	private fillMethodsAndFields() {
