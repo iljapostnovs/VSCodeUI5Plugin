@@ -28,7 +28,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public classText: string = "";
 	public UIDefine: UIDefine[] = [];
 	public jsPasredBody: AbstractType | undefined;
-	private currentClassHolderVariable: AbstractType | undefined;
+	private readonly currentClassHolderVariable: AbstractType | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
@@ -53,8 +53,9 @@ export class CustomUIClass extends AbstractUIClass {
 			});
 
 			//lets concentrate on good old sap.ui.define only
-			if (parsedBodies.length === 1) {
-				this.jsPasredBody = parsedBodies[0];
+			const UIDefineMethodCall = parsedBodies.find(parsedBody => parsedBody.parsedName === "sap.ui.define");
+			if (UIDefineMethodCall) {
+				this.jsPasredBody = UIDefineMethodCall;
 				DifferentJobs.finalizeParsing(this.jsPasredBody);
 			}
 		}
@@ -78,39 +79,40 @@ export class CustomUIClass extends AbstractUIClass {
 		return UIDefine;
 	}
 
-	private getThisClassBody() {
-		let classBody: JSObject | undefined = this.getClassBodyFromClassExtend();
+	private getThisClassBody(body: AbstractType | undefined = this.jsPasredBody) {
+		let classBody: JSObject | undefined;
 
-		if (!classBody) {
-			classBody = this.getClassBodyFromReturnedObject();
+		const returnKeyword = body?.parts[1].parts.find(part => part instanceof JSReturnKeyword);
+		if (returnKeyword && body) {
+			const returnedPart = returnKeyword.parts[0];
+
+			classBody = this.getClassBodyFromPart(returnedPart, body.parts[1]);
 		}
 
 		return classBody;
 	}
 
-	private getClassBodyFromClassExtend() {
+	private getClassBodyFromPart(part: AbstractType, partParent: AbstractType) : JSObject | undefined {
 		let classBody: JSObject | undefined;
 
-		if (this.jsPasredBody) {
-			//returns Object.extend("", {}) right away
-			const classFNCall = this.jsPasredBody.parts[1].parts.find(part => this.isThisPartAClassBody(part));
-			if (classFNCall) {
-				classBody = <JSObject>classFNCall.parts[1];
-			} else {
-				//there is a variable which has the class assigned. E.g. var Class = Object.extend("", {});
-				for (let index = 0; index < this.jsPasredBody.parts[1].parts.length; index++) {
-					const part = this.jsPasredBody.parts[1].parts[index];
-
-					const classFNCall = part.parts.find(part => this.isThisPartAClassBody(part));
-					if (classFNCall) {
-						this.currentClassHolderVariable = part;
-						(<JSVariable>part).jsType = this.className;
-						classBody = <JSObject>classFNCall.parts[1];
-						break;
-					}
-				}
+		if (part instanceof JSFunctionCall) {
+			classBody = this.getClassBodyFromClassExtend(part);
+		} else if (part instanceof JSObject) {
+			classBody = part;
+		} else if (part instanceof JSVariable) {
+			const variable = partParent.parts.find(parentPart => parentPart instanceof JSVariable && parentPart.parsedName === part.parsedName && parentPart !== part);
+			if (variable) {
+				classBody = this.getClassBodyFromPart(variable.parts[0], partParent);
 			}
 		}
+
+		return classBody;
+	}
+
+	private getClassBodyFromClassExtend(part: AbstractType) {
+		let classBody: JSObject | undefined;
+
+		classBody = <JSObject>part.parts[1];
 
 		return classBody;
 	}
