@@ -83,7 +83,7 @@ export class SyntaxAnalyzer {
 					classNameOfTheVariable = UIClassName;
 				} else {
 					UIClass = UIClassFactory.getUIClass(UIClassName);
-					if (variableParts.length === 1) {
+					if (variableParts.length > 0 && variableParts[0] !== "this") {
 						variableParts = ["this"].concat(variableParts);
 					}
 					classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, UIClass, undefined, position);
