@@ -102,7 +102,9 @@ export class WorkspaceCompletionItemFactory {
 		completionItem.insertText = insertionText;
 		completionItem.detail = insertionText;
 		completionItem.documentation = insertionText;
-		completionItem.command = {command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define"};
+		if (vscode.workspace.getConfiguration("ui5.plugin").get("moveDefineToFunctionParametersOnAutocomplete")) {
+			completionItem.command = {command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define"};
+		}
 
 		return completionItem;
 	}

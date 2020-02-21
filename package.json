@@ -60,6 +60,11 @@
 					"default": true,
 					"description": "Should UI5 XML Diagnostics be enabled"
 				},
+				"ui5.plugin.moveDefineToFunctionParametersOnAutocomplete": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should sap.ui.define class names be moved to function parameters on sap.ui.define autocomplition"
+				},
 				"ui5.plugin.libsToLoad": {
 					"type": "array",
 					"default": [
