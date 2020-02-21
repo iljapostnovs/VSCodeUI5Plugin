@@ -13,6 +13,7 @@ import { XMLDynamicFactory } from "./completionitemfactories/xml/XMLDynamicFacto
 
 export class CompletionItemFactory {
 	private readonly nodeDAO = new SAPNodeDAO();
+	public static XMLStandardLibCompletionItems: vscode.CompletionItem[] = [];
 	private readonly language: GeneratorFactory.language;
 
 	constructor(completionItemType: GeneratorFactory.language) {
@@ -27,20 +28,25 @@ export class CompletionItemFactory {
 			completionItems = await UIDefineFactoy.generateUIDefineCompletionItems();
 
 		} else if (this.language === GeneratorFactory.language.xml) {
-			let SAPNodes: SAPNode[];
-			SAPNodes = await this.nodeDAO.getAllNodes();
+			if (CompletionItemFactory.XMLStandardLibCompletionItems.length === 0) {
+				let SAPNodes: SAPNode[];
+				SAPNodes = await this.nodeDAO.getAllNodes();
 
-			const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
-			await Promise.all([
-				metadataPreloader.preloadLibs(),
-				SAPIcons.preloadIcons(),
-				ResourceModelData.readTexts()
-			]);
-			console.log("Libs are preloaded");
+				const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
+				await Promise.all([
+					metadataPreloader.preloadLibs(),
+					SAPIcons.preloadIcons(),
+					ResourceModelData.readTexts()
+				]);
+				console.log("Libs are preloaded");
 
-			const xmlClassFactoy = new XMLClassFactory();
-			completionItems = await xmlClassFactoy.generateAggregationPropertyCompletionItems();
-			console.log("After the preload XML Completion Items are generated successfully");
+				const xmlClassFactoy = new XMLClassFactory();
+				completionItems = await xmlClassFactoy.generateAggregationPropertyCompletionItems();
+				CompletionItemFactory.XMLStandardLibCompletionItems = completionItems;
+				console.log("After the preload XML Completion Items are generated successfully");
+			} else {
+				completionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
+			}
 		}
 
 		return completionItems;

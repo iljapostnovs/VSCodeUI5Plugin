@@ -5,6 +5,8 @@ import { URLBuilder } from "../../../Util/URLBuilder";
 import { XMLParser, PositionType } from "../../../Util/XMLParser";
 import { ResourceModelData } from "../../../CustomLibMetadata/ResourceModelData";
 import { FileReader } from "../../../Util/FileReader";
+import { CompletionItemFactory } from "../../CompletionItemFactory";
+import { GeneratorFactory } from "../../../CodeGenerators/GeneratorFactory";
 
 export class XMLDynamicFactory {
 	public generateXMLDynamicCompletionItems() {
@@ -17,7 +19,7 @@ export class XMLDynamicFactory {
 			const XMLText = document.getText();
 			const positionType = XMLParser.getPositionType(XMLText, currentPositionOffset);
 
-			if (positionType === PositionType.InTheTag) {
+			if (positionType === PositionType.InTheTagAttributes) {
 				const className = XMLParser.getClassNameInPosition(XMLText, currentPositionOffset);
 				if (className) {
 					const UIClass = UIClassFactory.getUIClass(className);
@@ -60,6 +62,29 @@ export class XMLDynamicFactory {
 							completionItems = this.generateCompletionItemsFromTypeValues(methods);
 						}
 					}
+				}
+			} else if (positionType === PositionType.InTheClassName) {
+				const libName = XMLParser.getLibraryNameInPosition(XMLText, currentPositionOffset);
+				if (libName) {
+					const currentTagText = XMLParser.getCurrentTagText(XMLText, currentPositionOffset);
+					const tagPrefix = XMLParser.getTagPrefix(currentTagText);
+
+					const standardCompletionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
+					completionItems = standardCompletionItems.reduce((accumulator: vscode.CompletionItem[], completionItem) => {
+						if (completionItem.label.startsWith(libName)) {
+							const className = completionItem.label.replace(`${libName}.`, "");
+							const newCompletionItem = new vscode.CompletionItem(className);
+							const insertText =
+								(<string>(completionItem.insertText))
+								.replace(`</${className}`, `</${tagPrefix}${tagPrefix ? ":" : ""}${className}`);
+							newCompletionItem.insertText = insertText;
+							newCompletionItem.kind = completionItem.kind;
+							newCompletionItem.detail = completionItem.detail;
+							newCompletionItem.documentation = completionItem.documentation;
+							accumulator.push(newCompletionItem);
+						}
+						return accumulator;
+					}, []);
 				}
 			}
 		}

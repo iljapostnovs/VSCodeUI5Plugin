@@ -4,12 +4,20 @@ import { UIMethod } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 
 export enum PositionType {
-	InTheTag = "1",
+	InTheTagAttributes = "1",
 	Content = "2",
-	InTheString = "3"
+	InTheString = "3",
+	InTheClassName = "4"
 }
 
 export class XMLParser {
+	static getLibraryNameInPosition(XMLViewText: string, currentPosition: number) {
+		const currentTagText = this.getCurrentTagText(XMLViewText, currentPosition);
+		const tagPrefix = this.getTagPrefix(currentTagText);
+		const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix);
+
+		return libraryPath;
+	}
 	static getClassNameInPosition(XMLViewText: string, currentPosition: number) {
 		let currentPositionClass = "";
 		const currentTagText = this.getCurrentTagText(XMLViewText, currentPosition);
@@ -23,7 +31,7 @@ export class XMLParser {
 		return currentPositionClass;
 	}
 
-	private static getCurrentTagText(XMLViewText: string, currentPosition: number) {
+	public static getCurrentTagText(XMLViewText: string, currentPosition: number) {
 		let tagText = "";
 		let i = currentPosition;
 		let tagPositionBegin = 0;
@@ -137,9 +145,13 @@ export class XMLParser {
 
 			const positionIsInsideTheClassTag = currentPosition > tagPositionBegin && currentPosition < tagPositionEnd;
 			// const positionIsInsideTheClassBody = currentPosition > tagPositionEnd;
+			const tagText = XMLViewText.substring(tagPositionBegin, currentPosition);
+			const positionInTheAttributes = /\s/.test(tagText);
 
-			if (positionIsInsideTheClassTag) {
-				positionType = PositionType.InTheTag;
+			if (positionIsInsideTheClassTag && positionInTheAttributes) {
+				positionType = PositionType.InTheTagAttributes;
+			} else if (positionIsInsideTheClassTag) {
+				positionType = PositionType.InTheClassName;
 			} else {
 				positionType = PositionType.Content;
 			}
