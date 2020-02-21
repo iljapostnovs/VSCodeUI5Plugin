@@ -7,6 +7,8 @@ import { ResourceModelData } from "../../../CustomLibMetadata/ResourceModelData"
 import { FileReader } from "../../../Util/FileReader";
 import { CompletionItemFactory } from "../../CompletionItemFactory";
 import { GeneratorFactory } from "../../../CodeGenerators/GeneratorFactory";
+import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
+import { XMLClassFactory } from "./XMLClassFactory";
 
 export class XMLDynamicFactory {
 	public generateXMLDynamicCompletionItems() {
@@ -67,20 +69,17 @@ export class XMLDynamicFactory {
 				const libName = XMLParser.getLibraryNameInPosition(XMLText, currentPositionOffset);
 				if (libName) {
 					const currentTagText = XMLParser.getCurrentTagText(XMLText, currentPositionOffset);
-					const tagPrefix = XMLParser.getTagPrefix(currentTagText);
+					let tagPrefix = XMLParser.getTagPrefix(currentTagText);
+					tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
+					const nodeDAO = new SAPNodeDAO();
+					const XMLClassFactoryInstance = new XMLClassFactory();
 
 					const standardCompletionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
 					completionItems = standardCompletionItems.reduce((accumulator: vscode.CompletionItem[], completionItem) => {
 						if (completionItem.label.startsWith(libName)) {
-							const className = completionItem.label.replace(`${libName}.`, "");
-							const newCompletionItem = new vscode.CompletionItem(className);
-							const insertText =
-								(<string>(completionItem.insertText))
-								.replace(`</${className}`, `</${tagPrefix}${tagPrefix ? ":" : ""}${className}`);
-							newCompletionItem.insertText = insertText;
-							newCompletionItem.kind = completionItem.kind;
-							newCompletionItem.detail = completionItem.detail;
-							newCompletionItem.documentation = completionItem.documentation;
+							const node = nodeDAO.findNode(completionItem.label);
+							const newCompletionItem = XMLClassFactoryInstance.generateClassAggregationCompletionItemFromSAPNode(node, tagPrefix);
+							newCompletionItem.label = completionItem.label.replace(`${libName}.`, "");
 							accumulator.push(newCompletionItem);
 						}
 						return accumulator;
@@ -137,6 +136,7 @@ export class XMLDynamicFactory {
 			completionItem.detail = `${property.name}: ${property.type}`;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForPropertiesApi(UIClass);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${property.description}`);
+			completionItem.sortText = "1";
 
 			return completionItem;
 		});
@@ -160,6 +160,7 @@ export class XMLDynamicFactory {
 			completionItem.detail = event.name;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForEventsApi(UIClass, event.name);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${event.description}`);
+			completionItem.sortText = "2";
 
 			return completionItem;
 		});
@@ -182,6 +183,7 @@ export class XMLDynamicFactory {
 			completionItem.detail = aggregation.name;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForAggregationApi(UIClass);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${aggregation.description}`);
+			completionItem.sortText = "3";
 
 			return completionItem;
 		});
@@ -204,6 +206,7 @@ export class XMLDynamicFactory {
 			completionItem.detail = association.name;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForAssociationApi(UIClass);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${association.description}`);
+			completionItem.sortText = "4";
 
 			return completionItem;
 		});

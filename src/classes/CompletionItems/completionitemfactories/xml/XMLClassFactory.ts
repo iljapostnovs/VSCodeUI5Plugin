@@ -18,7 +18,7 @@ export class XMLClassFactory {
 
 		const promises = [];
 		for (const node of SAPNodes) {
-			const promise = this.generateAggregationCompletionItemsRecursively(node)
+			const promise = this.generateClassCompletionItemsRecursively(node)
 			.then((generatedItems) => {
 				UI5Plugin.getInstance().initializationProgress?.report({
 					message: "Generating Completion Items: " + node.getDisplayName(),
@@ -39,20 +39,20 @@ export class XMLClassFactory {
 		return completionItems;
 	}
 
-	private async generateAggregationCompletionItemsRecursively(node: SAPNode) {
+	private async generateClassCompletionItemsRecursively(node: SAPNode) {
 		var completionItems:vscode.CompletionItem[] = [];
 		if (node.nodes && node.nodes.length > 0) {
 			for (const childNode of node.nodes) {
-				completionItems = completionItems.concat(await this.generateAggregationCompletionItemsRecursively(childNode));
+				completionItems = completionItems.concat(await this.generateClassCompletionItemsRecursively(childNode));
 			}
 		}
 
 		if (node.getKind() === "class" && !node.getIsDepricated() && node.node.visibility === "public") {
 			const metadata = await node.getMetadata();
-			const stereotype = metadata.getUI5Metadata() ? metadata.getUI5Metadata().stereotype : undefined;
+			const stereotype = metadata.getUI5Metadata()?.stereotype;
 
 			if (metadata.getUI5Metadata() && (stereotype === "control" || stereotype === "element")) {
-				const completionItem = await this.generateClassAggregationCompletionItemFromSAPNode(node);
+				const completionItem = this.generateClassAggregationCompletionItemFromSAPNode(node);
 				completionItems.push(completionItem);
 			}
 		}
@@ -60,35 +60,35 @@ export class XMLClassFactory {
 		return completionItems;
 	}
 
-	private async generateClassAggregationCompletionItemFromSAPNode(node: SAPNode) {
+	public generateClassAggregationCompletionItemFromSAPNode(node: SAPNode, classPrefix: string = "") {
 		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(node.getName());
 		completionItem.kind = vscode.CompletionItemKind.Class;
-		completionItem.insertText = await this.generateClassInsertTextFor(node);
-		const metadata = await node.getMetadata();
-		completionItem.detail = metadata.rawMetadata.title;
+		completionItem.insertText = this.generateClassInsertTextFor(node, classPrefix);
+		const metadata = node.getMetadataSync();
+		completionItem.detail = metadata?.rawMetadata.title;
 
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
 		mardownString.appendMarkdown(URLBuilder.getInstance().getMarkupUrlForClassApi(node));
-		mardownString.appendMarkdown(metadata.rawMetadata.description);
+		mardownString.appendMarkdown(metadata?.rawMetadata.description);//TODO: Remove tags
 		completionItem.documentation = mardownString;
 		completionItem.sortText = "}";
 
 		return completionItem;
 	}
 
-	private async generateClassInsertTextFor(node: SAPNode) {
+	public generateClassInsertTextFor(node: SAPNode, classPrefix: string) {
 		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(GeneratorFactory.language.xml);
 		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(GeneratorFactory.language.xml);
-		const properties: string = await propertyGenerator.generateProperties(node);
-		const aggregations: string = await aggregationGenerator.generateAggregations(node);
+		const properties: string = propertyGenerator.generateProperties(node);
+		const aggregations: string = aggregationGenerator.generateAggregations(node, classPrefix);
 
 		let insertText: string = `${node.getDisplayName()}\n`;
 		insertText += properties;
 		insertText += ">\n";
 		insertText += aggregations;
 
-		insertText += `</${node.getDisplayName()}>`;
+		insertText += `</${classPrefix}${node.getDisplayName()}>`;
 		return insertText;
 	}
 }

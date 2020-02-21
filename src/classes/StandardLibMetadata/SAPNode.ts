@@ -53,15 +53,15 @@ export class SAPNode {
 		return this.node.bIsDeprecated;
 	}
 
-	public async getMetadataProperties() {
-		const metadata = await this.getMetadata();
-		return metadata.getUI5Metadata().properties;
+	public getMetadataProperties() {
+		const metadata = this.getMetadataSync();
+		return metadata?.getUI5Metadata()?.properties || [];
 	}
 
-	public async getMetadataAggregations() {
-		const metadata = await this.getMetadata();
-		const UI5Metadata: any = metadata.getUI5Metadata();
-		return UI5Metadata && UI5Metadata.aggregations ? UI5Metadata.aggregations : null;
+	public getMetadataAggregations() {
+		const metadata = this.getMetadataSync();
+		const UI5Metadata: any = metadata?.getUI5Metadata();
+		return UI5Metadata?.aggregations || [];
 	}
 
 	public async getMetadata() {
