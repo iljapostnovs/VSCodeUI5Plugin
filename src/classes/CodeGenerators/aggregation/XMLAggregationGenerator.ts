@@ -7,7 +7,7 @@ export class XMLAggregationGenerator implements IAggregationGenerator {
 
 	public generateAggregations(node: SAPNode, classPrefix: string) {
 		let aggregationString: string = "";
-		const aggregations: any = node.getMetadataAggregations();
+		const aggregations: any = node.getAggregations();
 
 		if (aggregations) {
 			aggregations.forEach((aggregation: any) => {

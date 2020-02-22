@@ -29,7 +29,7 @@ export class UIDefineFactory {
 		const insertText = await defineGenerator.generateDefineString(node);
 
 		if (insertText) {
-			const metadata = await node.getMetadata();
+			const metadata = node.getMetadata();
 
 			const completionItem = new vscode.CompletionItem(insertText);
 			completionItem.kind = vscode.CompletionItemKind.Class;

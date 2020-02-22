@@ -8,7 +8,7 @@ export class DefineGenerator {
 		let defineString: string = "";
 
 		if (node.node.visibility === "public" && (node.getKind() === "class" || node.getKind() === "enum")) {
-			const metadata: UI5Metadata = await node.getMetadata();
+			const metadata: UI5Metadata = node.getMetadata();
 			defineString = "\"" + metadata.rawMetadata.module + "\"";
 		}
 

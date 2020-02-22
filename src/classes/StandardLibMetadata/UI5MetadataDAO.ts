@@ -9,7 +9,7 @@ interface LooseObject {
 	[key: string]: any;
 }
 
-const namespaceDesignTimes: LooseObject = {};
+let namespaceDesignTimes: LooseObject = {};
 
 export class UI5MetadataPreloader {
 	private readonly libNames: LooseObject = {};
@@ -40,6 +40,7 @@ export class UI5MetadataPreloader {
 				this.writeCache();
 			});
 		} else {
+			namespaceDesignTimes = cache;
 			UI5Plugin.getInstance().initializationProgress?.report({
 				increment: 50
 			});
@@ -66,8 +67,15 @@ export class UI5MetadataPreloader {
 export class UI5MetadataDAO {
 	constructor() {}
 
-	public async getMetadataForNode(node: SAPNode) {
-		const libMetadata = await this.getMetadataForLib(node.getLib());
+	// public async getMetadataForNode(node: SAPNode) {
+	// 	const libMetadata = await this.getMetadataForLib(node.getLib());
+	// 	const metadata = this.findNodeMetadata(node, libMetadata);
+
+	// 	return new UI5Metadata(metadata);
+	// }
+
+	public getPreloadedMetadataForNode(node: SAPNode) {
+		const libMetadata = namespaceDesignTimes[node.getLib()];
 		const metadata = this.findNodeMetadata(node, libMetadata);
 
 		return new UI5Metadata(metadata);

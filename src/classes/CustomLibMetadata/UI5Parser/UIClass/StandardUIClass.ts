@@ -26,24 +26,17 @@ export class StandardUIClass extends AbstractUIClass {
 	private getStandardClassMethods(className: string, isParent: boolean) {
 		let classMethods:StandardClassUIMethod[] = [];
 		const SAPNode = this.findSAPNode(className);
-		if (SAPNode) {
-			const metadata = SAPNode.getMetadataSync();
-			if (metadata) {
-				classMethods = metadata.rawMetadata.methods.reduce((accumulator: StandardClassUIMethod[], method:any) => {
-					if (method.visibility === "public") {
-						accumulator.push({
-							name: method.name,
-							description: this.removeTags(method.code),
-							params: method.parameters ? method.parameters.map((parameter: any) => parameter.name + (parameter.optional ? "?" : "")) : [],
-							returnType: method.returnValue ? method.returnValue.type : "void",
-							isFromParent: !isParent,
-							api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name)
-						});
-					}
-					return accumulator;
-				}, []);
-			}
-		}
+		classMethods = SAPNode.getMethods().reduce((accumulator: StandardClassUIMethod[], method: any) => {
+			accumulator.push({
+				name: method.name,
+				description: this.removeTags(method.code),
+				params: method.parameters ? method.parameters.map((parameter: any) => parameter.name + (parameter.optional ? "?" : "")) : [],
+				returnType: method.returnValue ? method.returnValue.type : "void",
+				isFromParent: !isParent,
+				api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name)
+			});
+			return accumulator;
+		}, []);
 		return classMethods;
 	}
 
@@ -76,7 +69,7 @@ export class StandardUIClass extends AbstractUIClass {
 	private fillParentClassName() {
 		const SAPNode = this.findSAPNode(this.className);
 		if (SAPNode) {
-			const metadata = SAPNode.getMetadataSync();
+			const metadata = SAPNode.getMetadata();
 			if (metadata) {
 				this.parentClassNameDotNotation = metadata.rawMetadata.extends;
 			}
@@ -105,40 +98,28 @@ export class StandardUIClass extends AbstractUIClass {
 	private getStandardClassProperties(className: string) {
 		let classPropeties:UIProperty[] = [];
 		const SAPNode = this.findSAPNode(className);
-		if (SAPNode) {
-			const metadata = SAPNode.getMetadataSync();
-			if (metadata?.getUI5Metadata()?.properties) {
-				classPropeties = metadata.getUI5Metadata().properties.reduce((accumulator: UIProperty[], {visibility, name, type, description}:any) => {
-					const additionalDescription = this.generateAdditionalDescriptionFrom(type);
-					if (visibility === "public") {
-						accumulator.push({
-							name: name,
-							type: type,
-							typeValues: this.generateTypeValues(type),
-							description: `${additionalDescription}\n${this.removeTags(description)}`.trim()
-						});
-					}
-					return accumulator;
-				}, []);
-			}
-		}
+		classPropeties = SAPNode.getProperties().reduce((accumulator: UIProperty[], {name, type, description}:any) => {
+			const additionalDescription = this.generateAdditionalDescriptionFrom(type);
+			accumulator.push({
+				name: name,
+				type: type,
+				typeValues: this.generateTypeValues(type),
+				description: `${additionalDescription}\n${this.removeTags(description)}`.trim()
+			});
+			return accumulator;
+		}, []);
 		return classPropeties;
 	}
 
-	private generateAdditionalDescriptionFrom(type: string) {
+	private generateAdditionalDescriptionFrom(className: string) {
 		let additionalDescription = "";
-		if (type?.startsWith("sap.")) {
-			const typeNode = this.findSAPNode(type);
-			if (typeNode) {
-				const metadata = typeNode.getMetadataSync();
-				if (metadata?.rawMetadata?.properties) {
-					additionalDescription = metadata.rawMetadata.properties.reduce((accumulator: string, property: any) => {
-						accumulator += `${property.name}\n`;
+		if (className?.startsWith("sap.")) {
+			const SAPNode = this.findSAPNode(className);
+			additionalDescription = SAPNode.getProperties().reduce((accumulator: string, property: any) => {
+				accumulator += `${property.name}\n`;
 
-						return accumulator;
-					}, "");
-				}
-			}
+				return accumulator;
+			}, "");
 		}
 
 		return additionalDescription;
@@ -149,7 +130,7 @@ export class StandardUIClass extends AbstractUIClass {
 
 		if (typeValues.length === 0 && type?.startsWith("sap.")) {
 			const typeNode = this.findSAPNode(type);
-			const metadata = typeNode?.getMetadataSync();
+			const metadata = typeNode?.getMetadata();
 			typeValues = metadata?.rawMetadata?.properties?.map((property: any): TypeValue => {
 				return {
 					text: `${property.name}`.replace(`${type}.`, ""),
@@ -168,18 +149,14 @@ export class StandardUIClass extends AbstractUIClass {
 	private getStandardClassEvents(className: string) {
 		let classEvents: UIEvent[] = [];
 		const SAPNode = this.findSAPNode(className);
-		const metadata = SAPNode?.getMetadataSync();
-		if (metadata?.rawMetadata?.events) {
-			classEvents = metadata.rawMetadata.events.reduce((accumulator: UIEvent[], event:any) => {
-				if (event.visibility === "public") {
-					accumulator.push({
-						name: event.name,
-						description: this.removeTags(event.description)
-					});
-				}
-				return accumulator;
-			}, []);
-		}
+		classEvents = SAPNode.getEvents().reduce((accumulator: UIEvent[], event:any) => {
+			accumulator.push({
+				name: event.name,
+				description: this.removeTags(event.description)
+			});
+			return accumulator;
+		}, []);
+
 		return classEvents;
 	}
 
@@ -191,21 +168,16 @@ export class StandardUIClass extends AbstractUIClass {
 		let classAggregations: UIAggregation[] = [];
 		const SAPNode = this.findSAPNode(className);
 
-		const metadata = SAPNode?.getMetadataSync();
-		if (metadata?.getUI5Metadata()?.aggregations) {
-			classAggregations = metadata.getUI5Metadata().aggregations.reduce((accumulator: UIAggregation[], aggregation:any) => {
-				if (aggregation.visibility === "public") {
-					accumulator.push({
-						name: aggregation.name,
-						type: aggregation.type,
-						multiple: aggregation.coordinality === "0..n",
-						singularName: aggregation.singularName,
-						description: this.removeTags(aggregation.description)
-					});
-				}
-				return accumulator;
-			}, []);
-		}
+		classAggregations = SAPNode.getAggregations().reduce((accumulator: UIAggregation[], aggregation:any) => {
+			accumulator.push({
+				name: aggregation.name,
+				type: aggregation.type,
+				multiple: aggregation.coordinality === "0..n",
+				singularName: aggregation.singularName,
+				description: this.removeTags(aggregation.description)
+			});
+			return accumulator;
+		}, []);
 
 		return classAggregations;
 	}
@@ -218,31 +190,24 @@ export class StandardUIClass extends AbstractUIClass {
 		let classAssociation: UIAssociation[] = [];
 		const SAPNode = this.findSAPNode(className);
 
-		const metadata = SAPNode?.getMetadataSync();
-		if (metadata?.getUI5Metadata()?.associations) {
-			classAssociation = metadata.getUI5Metadata().associations.reduce((accumulator: UIAssociation[], association:any) => {
-				if (association.visibility === "public") {
-					accumulator.push({
-						name: association.name,
-						type: association.type,
-						description: this.removeTags(association.description),
-						multiple: association.multiple || association.coordinality === "0..n",
-						singularName: association.singularName
-					});
-				}
-				return accumulator;
-			}, []);
-		}
+		classAssociation = SAPNode.getAssociations().reduce((accumulator: UIAssociation[], association:any) => {
+			accumulator.push({
+				name: association.name,
+				type: association.type,
+				description: this.removeTags(association.description),
+				multiple: association.multiple || association.coordinality === "0..n",
+				singularName: association.singularName
+			});
+			return accumulator;
+		}, []);
 		return classAssociation;
 	}
 
 	public fillConstructor() {
 		const SAPNode = this.findSAPNode(this.className);
-		const metadata = SAPNode?.getMetadataSync();
-		if (metadata?.rawMetadata?.constructor) {
+		const metadata = SAPNode?.getMetadata();
+		if (metadata?.rawMetadata?.constructor?.codeExample) {
 			const constructor = metadata.rawMetadata.constructor;
-			// let parameters = constructor.parameters || [];
-			// parameters = parameters.map((parameter: any) => parameter.name);
 			const codeExample = this.removeTags(constructor.codeExample);
 			let parameterText = MainLooper.getEndOfChar("(", ")", codeExample);
 			parameterText = parameterText.substring(1, parameterText.length - 1); //remove ()

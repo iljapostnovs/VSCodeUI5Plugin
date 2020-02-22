@@ -8,7 +8,7 @@ export class XMLPropertyGenerator implements IPropertyGenerator {
 
 	public generateProperties(node: SAPNode) {
 		let properties: string = "";
-		const metadata: UI5Metadata | undefined = node.getMetadataSync();
+		const metadata: UI5Metadata | undefined = node.getMetadata();
 		const ui5Metadata = metadata?.getUI5Metadata();
 
 		if (ui5Metadata?.properties) {

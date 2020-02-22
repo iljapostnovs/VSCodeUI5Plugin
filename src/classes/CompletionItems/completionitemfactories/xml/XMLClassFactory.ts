@@ -14,41 +14,31 @@ export class XMLClassFactory {
 		var completionItems:vscode.CompletionItem[] = [];
 		let SAPNodes: SAPNode[];
 		const availableProgressLeft = 50;
-		SAPNodes = await this.nodeDAO.getAllNodes();
+		SAPNodes = this.nodeDAO.getAllNodesSync();
 
-		const promises = [];
+		console.time("Generating compl. items");
 		for (const node of SAPNodes) {
-			const promise = this.generateClassCompletionItemsRecursively(node)
-			.then((generatedItems) => {
-				UI5Plugin.getInstance().initializationProgress?.report({
-					message: "Generating Completion Items: " + node.getDisplayName(),
-					increment: availableProgressLeft / SAPNodes.length
-				});
-
-				return generatedItems;
+			UI5Plugin.getInstance().initializationProgress?.report({
+				message: "Generating Completion Items: " + node.getDisplayName(),
+				increment: availableProgressLeft / SAPNodes.length
 			});
-
-			promises.push(promise);
+			completionItems = completionItems.concat(this.generateClassCompletionItemsRecursively(node));
 		}
-
-		const aGeneratedCompletionItemArrays = await Promise.all(promises);
-		aGeneratedCompletionItemArrays.forEach(aGeneratedCompletionItems => {
-			completionItems = completionItems.concat(aGeneratedCompletionItems);
-		});
+		console.timeEnd("Generating compl. items");
 
 		return completionItems;
 	}
 
-	private async generateClassCompletionItemsRecursively(node: SAPNode) {
+	private generateClassCompletionItemsRecursively(node: SAPNode) {
 		var completionItems:vscode.CompletionItem[] = [];
 		if (node.nodes && node.nodes.length > 0) {
 			for (const childNode of node.nodes) {
-				completionItems = completionItems.concat(await this.generateClassCompletionItemsRecursively(childNode));
+				completionItems = completionItems.concat(this.generateClassCompletionItemsRecursively(childNode));
 			}
 		}
 
 		if (node.getKind() === "class" && !node.getIsDepricated() && node.node.visibility === "public") {
-			const metadata = await node.getMetadata();
+			const metadata = node.getMetadata();
 			const stereotype = metadata.getUI5Metadata()?.stereotype;
 
 			if (metadata.getUI5Metadata() && (stereotype === "control" || stereotype === "element")) {
@@ -64,7 +54,7 @@ export class XMLClassFactory {
 		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(node.getName());
 		completionItem.kind = vscode.CompletionItemKind.Class;
 		completionItem.insertText = this.generateClassInsertTextFor(node, classPrefix);
-		const metadata = node.getMetadataSync();
+		const metadata = node.getMetadata();
 		completionItem.detail = metadata?.rawMetadata.title;
 
 		const mardownString = new vscode.MarkdownString();
