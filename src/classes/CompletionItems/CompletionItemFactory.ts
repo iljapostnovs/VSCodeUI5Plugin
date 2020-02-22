@@ -12,7 +12,7 @@ import { JSDynamicFactory } from "./completionitemfactories/javascript/JSDynamic
 import { XMLDynamicFactory } from "./completionitemfactories/xml/XMLDynamicFactory";
 
 export class CompletionItemFactory {
-	private readonly nodeDAO = new SAPNodeDAO();
+	private static readonly nodeDAO = new SAPNodeDAO();
 	public static XMLStandardLibCompletionItems: vscode.CompletionItem[] = [];
 	private readonly language: GeneratorFactory.language;
 
@@ -30,7 +30,7 @@ export class CompletionItemFactory {
 		} else if (this.language === GeneratorFactory.language.xml) {
 			if (CompletionItemFactory.XMLStandardLibCompletionItems.length === 0) {
 				let SAPNodes: SAPNode[];
-				SAPNodes = await this.nodeDAO.getAllNodes();
+				SAPNodes = await CompletionItemFactory.nodeDAO.getAllNodes();
 
 				const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
 				await Promise.all([

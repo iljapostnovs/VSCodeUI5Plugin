@@ -1,4 +1,4 @@
-import { IPropertyGenerator } from "./property/IPropertyGenerator";
+import { IPropertyGenerator } from "./property/interfaces/IPropertyGenerator";
 import { XMLPropertyGenerator } from "./property/XMLPropertyGenerator";
 import { XMLAggregationGenerator } from "./aggregation/XMLAggregationGenerator";
 import { IAggregationGenerator } from "./aggregation/IAggregationGenerator";

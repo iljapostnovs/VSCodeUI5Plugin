@@ -4,7 +4,7 @@ import { UI5Metadata } from "../../StandardLibMetadata/UI5Metadata";
 
 export class DefineGenerator {
 
-	public async generateDefineString(node: SAPNode) {
+	public generateDefineString(node: SAPNode) {
 		let defineString: string = "";
 
 		if (node.node.visibility === "public" && (node.getKind() === "class" || node.getKind() === "enum")) {

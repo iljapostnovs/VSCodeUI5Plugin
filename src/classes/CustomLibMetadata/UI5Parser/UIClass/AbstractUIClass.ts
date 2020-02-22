@@ -1,6 +1,4 @@
 import { SAPIcons } from "../../SAPIcons";
-import { FileReader } from "../../../Util/FileReader";
-import { ResourceModelData } from "../../ResourceModelData";
 
 export interface UIMethod {
 	name: string;

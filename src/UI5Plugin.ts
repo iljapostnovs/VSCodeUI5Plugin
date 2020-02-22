@@ -30,7 +30,7 @@ export class UI5Plugin {
 		return new Promise((resolve, reject) => {
 			this.context = context;
 			vscode.window.withProgress({
-				location: vscode.ProgressLocation.Notification,
+				location: vscode.ProgressLocation.Window,
 				title: "Loading Libs",
 				cancellable: false
 			}, async progress => {

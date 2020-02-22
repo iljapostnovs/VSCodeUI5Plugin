@@ -6,16 +6,16 @@ import { GeneratorFactory } from "../../../CodeGenerators/GeneratorFactory";
 import { URLBuilder } from "../../../Util/URLBuilder";
 
 export class UIDefineFactory {
-	private readonly nodeDAO = new SAPNodeDAO();
+	private static readonly nodeDAO = new SAPNodeDAO();
 
 	public async generateUIDefineCompletionItems() {
 		const workspaceCompletionItemDAO = new WorkspaceCompletionItemFactory();
 		let completionItems:vscode.CompletionItem[] = [];
 
-		const SAPNodes: SAPNode[] = await this.nodeDAO.getAllNodes();
+		const SAPNodes: SAPNode[] = await UIDefineFactory.nodeDAO.getAllNodes();
 
 		for (const node of SAPNodes) {
-			completionItems = completionItems.concat(await this.recursiveUIDefineCompletionItemGeneration(node));
+			completionItems = completionItems.concat(this.recursiveUIDefineCompletionItemGeneration(node));
 		}
 
 		completionItems = completionItems.concat(await workspaceCompletionItemDAO.getCompletionItems());
@@ -23,10 +23,10 @@ export class UIDefineFactory {
 		return completionItems;
 	}
 
-	private async recursiveUIDefineCompletionItemGeneration(node: SAPNode) {
+	private recursiveUIDefineCompletionItemGeneration(node: SAPNode) {
 		let completionItems:vscode.CompletionItem[] = [];
 		const defineGenerator = GeneratorFactory.getDefineGenerator();
-		const insertText = await defineGenerator.generateDefineString(node);
+		const insertText = defineGenerator.generateDefineString(node);
 
 		if (insertText) {
 			const metadata = node.getMetadata();
@@ -51,7 +51,7 @@ export class UIDefineFactory {
 
 		if (node.nodes) {
 			for (const nextNode of node.nodes) {
-				completionItems = completionItems.concat(await this.recursiveUIDefineCompletionItemGeneration(nextNode));
+				completionItems = completionItems.concat(this.recursiveUIDefineCompletionItemGeneration(nextNode));
 			}
 		}
 

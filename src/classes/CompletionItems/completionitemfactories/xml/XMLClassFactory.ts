@@ -3,9 +3,10 @@ import { SAPNode } from "../../../StandardLibMetadata/SAPNode";
 import { URLBuilder } from "../../../Util/URLBuilder";
 import { GeneratorFactory } from "../../../CodeGenerators/GeneratorFactory";
 import { IAggregationGenerator } from "../../../CodeGenerators/aggregation/IAggregationGenerator";
-import { IPropertyGenerator } from "../../../CodeGenerators/property/IPropertyGenerator";
+import { IPropertyGenerator } from "../../../CodeGenerators/property/interfaces/IPropertyGenerator";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { UI5Plugin } from "../../../../UI5Plugin";
+import { SAPNodePropertyGenerationStrategy } from "../../../CodeGenerators/property/strategies/SAPNodePropertyGetterStrategy";
 
 export class XMLClassFactory {
 	private readonly nodeDAO = new SAPNodeDAO();
@@ -70,7 +71,9 @@ export class XMLClassFactory {
 	public generateClassInsertTextFor(node: SAPNode, classPrefix: string) {
 		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(GeneratorFactory.language.xml);
 		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(GeneratorFactory.language.xml);
-		const properties: string = propertyGenerator.generateProperties(node);
+
+		const strategy = new SAPNodePropertyGenerationStrategy(node);
+		const properties: string = propertyGenerator.generateProperties(strategy);
 		const aggregations: string = aggregationGenerator.generateAggregations(node, classPrefix);
 
 		let insertText: string = `${node.getDisplayName()}\n`;
