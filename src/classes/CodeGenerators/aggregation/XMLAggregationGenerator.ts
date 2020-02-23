@@ -1,27 +1,21 @@
-import { SAPNodeDAO } from "../../StandardLibMetadata/SAPNodeDAO";
-import { IAggregationGenerator } from "./IAggregationGenerator";
-import { SAPNode } from "../../StandardLibMetadata/SAPNode";
+import { IAggregationGenerator } from "./interfaces/IAggregationGenerator";
+import { IAggregationGetterStrategy } from "./interfaces/IAggregationGetterStrategy";
 
 export class XMLAggregationGenerator implements IAggregationGenerator {
-	private static readonly nodeDAO = new SAPNodeDAO();
-
-	public generateAggregations(node: SAPNode, classPrefix: string) {
+	public generateAggregations(strategy: IAggregationGetterStrategy, classPrefix: string) {
 		let aggregationString: string = "";
-		const aggregations: any = node.getAggregations();
+		const aggregations: any = strategy.getAggregations();
 
-		if (aggregations) {
-			aggregations.forEach((aggregation: any) => {
-				aggregationString += `    <${classPrefix}${aggregation.name}>\n`;
-				aggregationString += `        <!--${aggregation.type}-->\n`;
-				aggregationString += `    </${classPrefix}${aggregation.name}>\n`;
-			});
-		}
+		aggregations.forEach((aggregation: any) => {
+			const parsedAggregation = strategy.getAggregation(aggregation);
+			aggregationString += `    <${classPrefix}${parsedAggregation.name}>\n`;
+			aggregationString += `        <!--${parsedAggregation.type}-->\n`;
+			aggregationString += `    </${classPrefix}${parsedAggregation.name}>\n`;
+		});
 
-		if (node.node.extends) {
-			const extendNode: SAPNode = XMLAggregationGenerator.nodeDAO.findNode(node.node.extends);
-			if (extendNode) {
-				aggregationString += this.generateAggregations(extendNode, classPrefix);
-			}
+		const parent = strategy.getParent();
+		if (parent) {
+			aggregationString += this.generateAggregations(parent, classPrefix);
 		}
 
 		return aggregationString;

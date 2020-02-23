@@ -24,10 +24,7 @@ export class SAPNodePropertyGenerationStrategy implements IPropertyGetterStrateg
 	}
 
 	getProperties() : any[] {
-		const metadata: UI5Metadata | undefined = this.node.getMetadata();
-		const ui5Metadata = metadata?.getUI5Metadata();
-
-		return ui5Metadata?.properties || [];
+		return this.node.getProperties();
 	}
 
 	getProperty(property: any): { name: string; defaultValue: any; } {
