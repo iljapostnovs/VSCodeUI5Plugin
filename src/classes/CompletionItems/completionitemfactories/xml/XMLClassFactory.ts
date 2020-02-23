@@ -8,6 +8,9 @@ import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { UI5Plugin } from "../../../../UI5Plugin";
 import { SAPNodePropertyGenerationStrategy } from "../../../CodeGenerators/property/strategies/SAPNodePropertyGetterStrategy";
 import { SAPNodeAggregationGetterStrategy } from "../../../CodeGenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
+import { AbstractUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { SAPClassPropertyGetterStrategy } from "../../../CodeGenerators/property/strategies/SAPClassPropertyGetterStrategy";
+import { SAPClassAggregationGetterStrategy } from "../../../CodeGenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
 
 export class XMLClassFactory {
 	private readonly nodeDAO = new SAPNodeDAO();
@@ -55,21 +58,21 @@ export class XMLClassFactory {
 	public generateClassAggregationCompletionItemFromSAPNode(node: SAPNode, classPrefix: string = "") {
 		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(node.getName());
 		completionItem.kind = vscode.CompletionItemKind.Class;
-		completionItem.insertText = this.generateClassInsertTextFor(node, classPrefix);
-		const metadata = node.getMetadata();
-		completionItem.detail = metadata?.rawMetadata.title;
+		completionItem.insertText = this.generateClassInsertTextFromSAPNode(node, classPrefix);
+		const metadata = node.getMetadata()?.getRawMetadata();
+		completionItem.detail = metadata.title;
 
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
 		mardownString.appendMarkdown(URLBuilder.getInstance().getMarkupUrlForClassApi(node));
-		mardownString.appendMarkdown(metadata?.rawMetadata.description);//TODO: Remove tags
+		mardownString.appendMarkdown(metadata.description);//TODO: Remove tags
 		completionItem.documentation = mardownString;
 		completionItem.sortText = "}";
 
 		return completionItem;
 	}
 
-	public generateClassInsertTextFor(node: SAPNode, classPrefix: string) {
+	public generateClassInsertTextFromSAPNode(node: SAPNode, classPrefix: string) {
 		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(GeneratorFactory.language.xml);
 		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(GeneratorFactory.language.xml);
 
@@ -78,12 +81,33 @@ export class XMLClassFactory {
 		const properties: string = propertyGenerator.generateProperties(propertyGeneratorStrategy);
 		const aggregations: string = aggregationGenerator.generateAggregations(aggregationGeneratorStrategy, classPrefix);
 
-		let insertText: string = `${node.getDisplayName()}\n`;
+		return this.generateInsertStringFrom(node.getDisplayName(), properties, aggregations, classPrefix);
+	}
+
+	public generateClassInsertTextFromSAPClass(UIClass: AbstractUIClass, classPrefix: string) {
+		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(GeneratorFactory.language.xml);
+		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(GeneratorFactory.language.xml);
+
+		const propertyGeneratorStrategy = new SAPClassPropertyGetterStrategy(UIClass);
+		const aggregationGeneratorStrategy = new SAPClassAggregationGetterStrategy(UIClass);
+		const properties: string = propertyGenerator.generateProperties(propertyGeneratorStrategy);
+		const aggregations: string = aggregationGenerator.generateAggregations(aggregationGeneratorStrategy, classPrefix);
+
+		let className = UIClass.className;
+		const classNameParts = className.split(".");
+		className = classNameParts[classNameParts.length - 1];
+
+		return this.generateInsertStringFrom(className, properties, aggregations, classPrefix);
+	}
+
+	private generateInsertStringFrom(className: string, properties: string, aggregations: string, classPrefix: string) {
+		let insertText: string = `${className}\n`;
 		insertText += properties;
 		insertText += ">\n";
 		insertText += aggregations;
 
-		insertText += `</${classPrefix}${node.getDisplayName()}>`;
+		insertText += `</${classPrefix}${className}>`;
+
 		return insertText;
 	}
 }
