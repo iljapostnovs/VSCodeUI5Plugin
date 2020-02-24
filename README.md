@@ -29,6 +29,15 @@ Definitions for custom methods are provided.<br/>
 ![Definition](/images/Definition.gif)
 
 ----------
+## Code Lens
+Code Lens for Internalization Texts is provided<br/>
+![DynamicCompletionItems](/images/XMLResourceModel.gif)
+----------
+## XML Diagnostics
+XML Diagnostics is provided<br/>
+![DynamicCompletionItems](/images/XMLDiagnostics.gif)
+
+----------
 ## Commands
 
 > Idea to put hotkeys for commands might be useful
