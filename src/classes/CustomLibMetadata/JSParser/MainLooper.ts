@@ -222,9 +222,10 @@ export class MainLooper {
 		let iClosedCommentCount = 0;
 
 		for (let i = 0; i < text.length - 1; i++) {
-			if (text.substring(i, i + 2) === "/*") {
+			const nextTwoChars = text.substring(i, i + 2);
+			if (nextTwoChars === "/*") {
 				iOpenedCommendCount++;
-			} else if (text.substring(i, i + 2) === "*/") {
+			} else if (nextTwoChars === "*/") {
 				iClosedCommentCount++;
 			}
 		}

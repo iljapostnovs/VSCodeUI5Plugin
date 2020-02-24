@@ -11,7 +11,6 @@ import { JSString } from "../../JSParser/types/String";
 import { JSComment } from "../../JSParser/types/JSComment";
 import { JSReturnKeyword } from "../../JSParser/types/ReturnKeyword";
 import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
-import { SAPIcons } from "../../SAPIcons";
 
 interface UIDefine {
 	path: string;

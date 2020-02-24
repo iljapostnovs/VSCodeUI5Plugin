@@ -73,17 +73,20 @@ export class XMLDynamicFactory {
 					tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
 					const nodeDAO = new SAPNodeDAO();
 					const XMLClassFactoryInstance = new XMLClassFactory();
-
-					const standardCompletionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
-					completionItems = standardCompletionItems.reduce((accumulator: vscode.CompletionItem[], completionItem) => {
-						if (completionItem.label.startsWith(libName)) {
-							const node = nodeDAO.findNode(completionItem.label);
-							const newCompletionItem = XMLClassFactoryInstance.generateClassAggregationCompletionItemFromSAPNode(node, tagPrefix);
-							newCompletionItem.label = completionItem.label.replace(`${libName}.`, "");
-							accumulator.push(newCompletionItem);
-						}
-						return accumulator;
-					}, []);
+					if (libName.startsWith("sap.")) {
+						const standardCompletionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
+						completionItems = standardCompletionItems.reduce((accumulator: vscode.CompletionItem[], completionItem) => {
+							if (completionItem.label.startsWith(libName)) {
+								const node = nodeDAO.findNode(completionItem.label);
+								const newCompletionItem = XMLClassFactoryInstance.generateXMLClassCompletionItemFromSAPNode(node, tagPrefix);
+								newCompletionItem.label = completionItem.label.replace(`${libName}.`, "");
+								accumulator.push(newCompletionItem);
+							}
+							return accumulator;
+						}, []);
+					} else {
+						//TODO: Logic for custom classes
+					}
 				}
 			}
 		}
