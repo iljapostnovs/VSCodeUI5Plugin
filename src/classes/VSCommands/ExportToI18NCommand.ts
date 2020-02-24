@@ -108,7 +108,7 @@ export class ExportToI18NCommand {
 
 	private static generateStringForI18NInsert(selectedText: string, I18nID: string) {
 		//TODO: generate also different types than YMSG
-		const textToInsert = `\r\n#YMSG: ${I18nID}\n${I18nID} = ${selectedText}`;
+		const textToInsert = `\n#YMSG: ${I18nID}\n${I18nID} = ${selectedText}`;
 		return textToInsert;
 	}
 

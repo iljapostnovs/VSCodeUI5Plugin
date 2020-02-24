@@ -226,29 +226,24 @@ export class FileWatcher {
 
 	private static replaceViewNamesInManifests(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string) {
 		const manifests = FileReader.getAllManifests();
-			let atLeastOneManifestWasRewritten = false;
 
-			manifests.forEach(manifest => {
-				const viewPath = manifest.content["sap.ui5"]?.routing?.config?.viewPath;
+		manifests.forEach(manifest => {
+			const viewPath = manifest.content["sap.ui5"]?.routing?.config?.viewPath;
 
-				if (viewPath && textToReplaceFromDotNotation.startsWith(viewPath)) {
-					const oldPath = `"${textToReplaceFromDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
-					const newPath = `"${textToReplaceToDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
+			if (viewPath && textToReplaceFromDotNotation.startsWith(viewPath)) {
+				const oldPath = `"${textToReplaceFromDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
+				const newPath = `"${textToReplaceToDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
 
-					if (JSON.stringify(manifest.content).indexOf(oldPath) > -1) {
-						const fsPath = `${manifest.fsPath}\\manifest.json`;
-						let manifestText = fs.readFileSync(fsPath, "utf8");
-						manifestText = manifestText.replace(new RegExp(`${escapeRegExp(oldPath)}`), newPath);
-						fs.writeFileSync(fsPath, manifestText);
+				if (JSON.stringify(manifest.content).indexOf(oldPath) > -1) {
+					const fsPath = `${manifest.fsPath}\\manifest.json`;
+					let manifestText = fs.readFileSync(fsPath, "utf8");
+					manifestText = manifestText.replace(new RegExp(`${escapeRegExp(oldPath)}`, "g"), newPath);
+					fs.writeFileSync(fsPath, manifestText);
+					FileReader.rereadAllManifests();
 
-						atLeastOneManifestWasRewritten = true;
-					}
 				}
-			});
-
-			if (atLeastOneManifestWasRewritten) {
-				FileReader.rereadAllManifests();
 			}
+		});
 	}
 
 	private static replaceAllOccurancesInFiles(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string) {
