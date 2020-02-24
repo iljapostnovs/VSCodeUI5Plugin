@@ -32,6 +32,7 @@ Definitions for custom methods are provided.<br/>
 ## Code Lens
 Code Lens for Internalization Texts is provided<br/>
 ![DynamicCompletionItems](/images/XMLResourceModel.gif)
+
 ----------
 ## XML Diagnostics
 XML Diagnostics is provided<br/>
