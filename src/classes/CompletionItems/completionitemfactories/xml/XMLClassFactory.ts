@@ -47,7 +47,7 @@ export class XMLClassFactory {
 			const stereotype = metadata.getUI5Metadata()?.stereotype;
 
 			if (metadata.getUI5Metadata() && (stereotype === "control" || stereotype === "element")) {
-				const completionItem = this.generateClassAggregationCompletionItemFromSAPNode(node);
+				const completionItem = this.generateXMLClassCompletionItemFromSAPNode(node);
 				completionItems.push(completionItem);
 			}
 		}
@@ -55,18 +55,37 @@ export class XMLClassFactory {
 		return completionItems;
 	}
 
-	public generateClassAggregationCompletionItemFromSAPNode(node: SAPNode, classPrefix: string = "") {
-		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(node.getName());
-		completionItem.kind = vscode.CompletionItemKind.Class;
-		completionItem.insertText = this.generateClassInsertTextFromSAPNode(node, classPrefix);
+	public generateXMLClassCompletionItemFromSAPNode(node: SAPNode, classPrefix: string = "") {
 		const metadata = node.getMetadata()?.getRawMetadata();
-		completionItem.detail = metadata.title;
 
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
 		mardownString.appendMarkdown(URLBuilder.getInstance().getMarkupUrlForClassApi(node));
 		mardownString.appendMarkdown(metadata.description);//TODO: Remove tags
-		completionItem.documentation = mardownString;
+
+		return this.generateXMLClassCompletionItemUsing({
+			markdown: mardownString,
+			insertText: this.generateClassInsertTextFromSAPNode(node, classPrefix),
+			detail: metadata?.title || "",
+			className: node.getName()
+		});
+	}
+
+	public generateXMLClassCompletionItemFromUIClass(UIClass: AbstractUIClass, classPrefix: string = "") {
+		return this.generateXMLClassCompletionItemUsing({
+			markdown: new vscode.MarkdownString("Custom class"),
+			insertText: this.generateClassInsertTextFromSAPClass(UIClass, classPrefix),
+			detail: UIClass.className,
+			className: UIClass.className
+		});
+	}
+
+	private generateXMLClassCompletionItemUsing(data: {className: string, insertText: string, detail: string, markdown: vscode.MarkdownString}) {
+		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(data.className);
+		completionItem.kind = vscode.CompletionItemKind.Class;
+		completionItem.insertText = data.insertText;
+		completionItem.detail = data.detail;
+		completionItem.documentation = data.markdown;
 		completionItem.sortText = "}";
 
 		return completionItem;
