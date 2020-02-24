@@ -1,22 +1,36 @@
 import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
 import { CustomUIClass } from "./CustomUIClass";
 import { StandardUIClass } from "./StandardUIClass";
+import { EndlessLoopLocker } from "../../../Util/EndlessLoopLocker";
+import { JSClass } from "./JSClass";
 
 export interface FieldsAndMethods {
 	fields: UIField[];
 	methods: UIMethod[];
 }
+
+interface UIClassMap {
+	[key: string]: AbstractUIClass;
+}
+
 export class UIClassFactory {
-	private static UIClasses: UIClassMap = {};
+	public static getAllUIClassesContainingPath(pathDotNotation: string) {
+		//TODO: this
+	}
+	private static readonly UIClasses: UIClassMap = {
+		Promise: new JSClass("Promise"),
+		array: new JSClass("array")
+	};
 
 	private static getInstance(className: string, documentText?: string) {
 		let returnClass: AbstractUIClass;
 		if (className.startsWith("sap.")) {
 			returnClass = new StandardUIClass(className);
 		} else {
-			console.time(`Class parsing for ${className} took:`);
+			EndlessLoopLocker.beginProcess();
+			console.time(`Class parsing for ${className} took`);
 			returnClass = new CustomUIClass(className, documentText);
-			console.timeEnd(`Class parsing for ${className} took:`);
+			console.timeEnd(`Class parsing for ${className} took`);
 		}
 
 		return returnClass;
@@ -104,8 +118,4 @@ export class UIClassFactory {
 		}
 		return className;
 	}
-}
-
-interface UIClassMap {
-	[key: string]: AbstractUIClass;
 }

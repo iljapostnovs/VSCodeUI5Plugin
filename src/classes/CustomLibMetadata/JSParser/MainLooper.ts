@@ -16,6 +16,7 @@ import { JSUnknown } from "./types/JSUnknown";
 import { JSTernaryOperation } from "./types/TernaryOperation";
 import { JSIncrement } from "./types/JSIncrement";
 import { EndlessLoopLocker } from "../../Util/EndlessLoopLocker";
+import { JSReturnKeyword } from "./types/ReturnKeyword";
 
 export class MainLooper {
 	static startAnalysing(javascript: string, runBeforeChar?: string) {
@@ -76,6 +77,8 @@ export class MainLooper {
 			} else if (JSString.isAString(currentChar)) {
 				syntaxType = new JSString("", javascript);
 
+			} else if (JSReturnKeyword.isReturnKeyword(currentText)) {
+				syntaxType = new JSReturnKeyword("", javascript);
 			}
 			if (syntaxType) {
 				parts.push(syntaxType);
@@ -195,20 +198,39 @@ export class MainLooper {
 
 	private static getCommentRanges(text: string) {
 		const ranges: CommentRanges[] = [];
-		const rComments = /(\/\*(.|\s)*?\*\/)|(\/\/.*)/g;
-		let results = rComments.exec(text);
-		while (results) {
-			const from = results.index;
-			const to = from + results[0].length;
-			ranges.push({
-				from: from,
-				to: to
-			});
 
-			results = rComments.exec(text);
+		if (this.areAllOpenedCommendsClosed(text)) {
+			const rComments = /(\/\*(.|\s)*?\*\/)|(\/\/.*)/g;
+			let results = rComments.exec(text);
+			while (results) {
+				const from = results.index;
+				const to = from + results[0].length;
+				ranges.push({
+					from: from,
+					to: to
+				});
+
+				results = rComments.exec(text);
+			}
 		}
 
 		return ranges;
+	}
+
+	private static areAllOpenedCommendsClosed(text: string) {
+		let iOpenedCommendCount = 0;
+		let iClosedCommentCount = 0;
+
+		for (let i = 0; i < text.length - 1; i++) {
+			const nextTwoChars = text.substring(i, i + 2);
+			if (nextTwoChars === "/*") {
+				iOpenedCommendCount++;
+			} else if (nextTwoChars === "*/") {
+				iClosedCommentCount++;
+			}
+		}
+
+		return (iOpenedCommendCount - iClosedCommentCount) === 0;
 	}
 
 	private static checkIfIndexIsInCommentRange(commentRanges: CommentRanges[], index: number) {

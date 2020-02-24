@@ -2,8 +2,12 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.8.7",
+	"version": "0.9.0",
 	"publisher": "iljapostnovs",
+	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
+	"contributors": [
+		"Ilja Postnovs <ilja.postnovs@gmail.com>"
+	],
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/iljapostnovs/VSCodeUI5Plugin.git"
@@ -14,7 +18,7 @@
 	"icon": "images/ui5.png",
 	"homepage": "https://github.com/iljapostnovs/VSCodeUI5Plugin/blob/master/README.md",
 	"engines": {
-		"vscode": "^1.41.0"
+		"vscode": "^1.42.0"
 	},
 	"categories": [
 		"Extension Packs"
@@ -35,6 +39,50 @@
 					"type": "string",
 					"default": "src",
 					"description": "Source folder in your workspace"
+				},
+				"ui5.plugin.jsCodeLens": {
+					"type": "boolean",
+					"default": false,
+					"description": "Should javascript CodeLens be enabled"
+				},
+				"ui5.plugin.xmlCodeLens": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should xml CodeLens be enabled"
+				},
+				"ui5.plugin.signatureHelp": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should UI5 Signature Help be enabled"
+				},
+				"ui5.plugin.xmlDiagnostics": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should UI5 XML Diagnostics be enabled"
+				},
+				"ui5.plugin.moveDefineToFunctionParametersOnAutocomplete": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should sap.ui.define class names be moved to function parameters on sap.ui.define autocomplition"
+				},
+				"ui5.plugin.libsToLoad": {
+					"type": "array",
+					"default": [
+						"sap.m",
+						"sap.ui.comp",
+						"sap.f",
+						"sap.ui.core",
+						"sap.ui.commons",
+						"sap.ui.export",
+						"sap.ui.layout",
+						"sap.ui.support",
+						"sap.ui.table",
+						"sap.ui.unified",
+						"sap.ushell",
+						"sap.tnt",
+						"sap.suite.ui.microchart"
+					],
+					"description": "List of libs to be loaded"
 				}
 			}
 		},
@@ -73,19 +121,19 @@
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
 		"@types/line-column": "^1.0.0",
-		"@types/node": "^13.5.3",
+		"@types/node": "^13.7.1",
 		"@types/request-promise": "^4.1.45",
-		"@types/vscode": "^1.41.0",
+		"@types/vscode": "^1.42.0",
 		"ts-loader": "^6.2.1",
-		"tslint": "^5.20.1",
+		"tslint": "^6.0.0",
 		"typescript": "^3.7.5",
-		"webpack": "^4.41.5",
-		"webpack-cli": "^3.3.10"
+		"webpack": "^4.41.6",
+		"webpack-cli": "^3.3.11"
 	},
 	"dependencies": {
 		"glob": "^7.1.6",
 		"line-column": "^1.0.2",
-		"request": "^2.88.0",
+		"request": "^2.88.2",
 		"request-promise": "^4.2.5"
 	}
 }

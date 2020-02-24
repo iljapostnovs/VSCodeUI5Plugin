@@ -52,7 +52,7 @@ export abstract class AbstractType {
 
 		const bodyResult = rMyFullBody.exec(text);
 		if (bodyResult) {
-			const shouldOneCharBeAdded = /[^a-zA-Z]/.test(bodyResult[0][0]);
+			const shouldOneCharBeAdded = bodyResult[0].length > fullBody.length;//if one additional char from the upper regex added one char
 			this.positionBegin = startingIndex + bodyResult.index + (shouldOneCharBeAdded ? 1 : 0);
 			this.positionEnd = this.positionBegin + fullBody.length;
 		}
@@ -115,11 +115,7 @@ export abstract class AbstractType {
 
 	public findDefinition(anything: AbstractType): AbstractType | undefined {
 		let definition;
-		// let i = 0;
 
-		// while (!definition && i < this.parts.length) {
-		// 	this.parts[i].findDefinition();
-		// }
 		if (this.parent) {
 			definition = this.parent.findDefinition(anything);
 		}
@@ -127,23 +123,8 @@ export abstract class AbstractType {
 		return definition;
 	}
 
-	//TODO: put it somewhere else
 	public findAllDefinitionsForVars(anything: AbstractType) {
 
-		// if (this.parts.length === 1) {
-		// 	const part = this.parts[0]
-		// 	if (part instanceof JSClass) {
-		// 		this.jsType = part.parsedName;
-		// 	} else if (part instanceof JSVariable) {
-		// 		if (!part.jsType) {
-		// 			const definition = part.findDefinition(part);
-		// 			if (definition && definition instanceof JSVariable) {
-		// 				this.jsType = definition.jsType;
-		// 			}
-		// 		}
-		// 		this.jsType = part.jsType;
-		// 	}
-		// }
 	}
 }
 

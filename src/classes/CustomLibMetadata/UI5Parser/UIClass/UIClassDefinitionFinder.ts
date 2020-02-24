@@ -8,6 +8,7 @@ import { StandardUIClass } from "./StandardUIClass";
 import { DifferentJobs } from "../../JSParser/DifferentJobs";
 import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
 import { AbstractUIClass } from "./AbstractUIClass";
+import { URLBuilder } from "../../../Util/URLBuilder";
 
 export class UIClassDefinitionFinder {
 	public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {
@@ -43,17 +44,17 @@ export class UIClassDefinitionFinder {
 		const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
 
 		if (UIClass instanceof CustomUIClass && UIClass.classBody) {
-			const currentMethodIndex = UIClass.classBody.partNames.indexOf(methodName);
-			if (currentMethodIndex > -1) {
-				const methodFunction = UIClass.classBody.parts[currentMethodIndex];
-				const classPath = FileReader.getClassPath(UIClass.className);
+			const currentMethod = UIClass.methods.find(method => method.name === methodName);
+			if (currentMethod) {
+				const classPath = FileReader.getClassPathFromClassName(UIClass.className);
 				if (classPath) {
 					const classUri = vscode.Uri.file(classPath);
-					const methodPositionOffset = methodFunction.positionBegin;
-					const position = LineColumn(UIClass.classText).fromIndex(methodPositionOffset);
-					if (position) {
-						const methodPosition = new vscode.Position(position.line - 1, position.col);
-						location = new vscode.Location(classUri, methodPosition);
+					if (currentMethod.position) {
+						const position = LineColumn(UIClass.classText).fromIndex(currentMethod.position);
+						if (position) {
+							const methodPosition = new vscode.Position(position.line - 1, position.col - 1);
+							location = new vscode.Location(classUri, methodPosition);
+						}
 					}
 				}
 			}
@@ -63,8 +64,7 @@ export class UIClassDefinitionFinder {
 		return location;
 	}
 
-	private static getVariableClass(variable?: string) {
-		//TODO: this should work not only for current document
+	static getVariableClass(variable?: string) {
 		let UIClassName: string | undefined;
 		if (!variable) {
 			variable = SyntaxAnalyzer.getCurrentVariable();
@@ -78,7 +78,8 @@ export class UIClassDefinitionFinder {
 
 			if (currentClassName) {
 				const currentClass = UIClassFactory.getUIClass(currentClassName);
-				UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variable.split("."), currentClass, undefined, currentPositionOffset);
+				const variableParts = SyntaxAnalyzer.splitVariableIntoParts(variable);
+				UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, currentClass, undefined, currentPositionOffset);
 			}
 		}
 
@@ -93,8 +94,8 @@ export class UIClassDefinitionFinder {
 				if (methodFromClass.isFromParent) {
 					this.openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
 				} else {
-					const UI5Version = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
-					const linkToDocumentation = `https://ui5.sap.com/${UI5Version}#/api/${classNameDotNotation}/methods/${methodName}`;
+					const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
+					const linkToDocumentation = URLBuilder.getInstance().getUrlForMethodApi(UIClass, methodName);
 					vscode.env.openExternal(vscode.Uri.parse(linkToDocumentation));
 				}
 			}
@@ -109,7 +110,8 @@ export class UIClassDefinitionFinder {
 					const allPartsAreFunctionCalls = !variable.parts.find(part => !(part instanceof JSFunctionCall));
 					if (allPartsAreFunctionCalls) {
 						//TODO: calls parsing twice.
-						variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variable.parsedBody.split("."), UIClass, undefined, variable.positionEnd);
+						const variableParts = SyntaxAnalyzer.splitVariableIntoParts(variable.parsedBody);
+						variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, undefined, variable.positionEnd);
 					}
 				}
 			});

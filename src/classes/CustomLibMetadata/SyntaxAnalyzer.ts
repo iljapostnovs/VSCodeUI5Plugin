@@ -5,13 +5,43 @@ import { UIClassDefinitionFinder } from "./UI5Parser/UIClass/UIClassDefinitionFi
 import { AbstractUIClass } from "./UI5Parser/UIClass/AbstractUIClass";
 
 export class SyntaxAnalyzer {
+	static splitVariableIntoParts(variable: string) {
+		const variableParts: string[] = [];
+		let openParenthesesCount = 0;
+		let closedParenthesesCount = 0;
+		let i = 0;
+
+		let variablePart = "";
+
+		while(i < variable.length) {
+			const char = variable[i];
+			if (char === ")") {
+				closedParenthesesCount++;
+			} else if (char === "(") {
+				openParenthesesCount++;
+			}
+
+			if (char === "." && openParenthesesCount - closedParenthesesCount === 0) {
+				variableParts.push(variablePart);
+				variablePart = "";
+			} else {
+				variablePart += char;
+			}
+
+			i++;
+		}
+		variableParts.push(variablePart);
+
+		return variableParts;
+	}
+
 	static getFieldsAndMethodsOfTheCurrentVariable(variable?: string) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 		if (!variable) {
 			variable = this.getCurrentVariable();
 		}
 		const currentClassName = this.getCurrentClassName();
-		const variableParts = variable.split(".");
+		const variableParts = this.splitVariableIntoParts(variable);
 
 		const activeTextEditor = vscode.window.activeTextEditor;
 		if (currentClassName && activeTextEditor) {
@@ -53,7 +83,7 @@ export class SyntaxAnalyzer {
 					classNameOfTheVariable = UIClassName;
 				} else {
 					UIClass = UIClassFactory.getUIClass(UIClassName);
-					if (variableParts.length === 1) {
+					if (variableParts.length > 0 && variableParts[0] !== "this") {
 						variableParts = ["this"].concat(variableParts);
 					}
 					classNameOfTheVariable = this.getClassNameFromVariableParts(variableParts, UIClass, undefined, position);
@@ -85,7 +115,7 @@ export class SyntaxAnalyzer {
 		const thisIsGetViewByIdVariable = joinedVariable.startsWith("this.getView().byId(");
 
 		if (thisIsByIdVariable || thisIsGetViewByIdVariable) {
-			const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*(?="\))/.exec(joinedVariable);
+			const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*?(?="\))/.exec(joinedVariable);
 			const controlId = controlIdResult ? controlIdResult[0] : "";
 			if (controlId) {
 				classNameOfTheVariable = FileReader.getClassNameFromView(theClass.className, controlId);
@@ -118,14 +148,16 @@ export class SyntaxAnalyzer {
 		return concatenatedString;
 	}
 
-	private static setNewContentForCurrentUIClass() {
+	public static setNewContentForCurrentUIClass() {
 		if (vscode.window.activeTextEditor) {
 			let documentText = vscode.window.activeTextEditor.document.getText();
 			const position = vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start);
 
 			const currentClassName = this.getCurrentClassName();
 			if (currentClassName) {
-				documentText = documentText.substring(0, position - 1) + ";" + documentText.substring(position, documentText.length);
+				if (documentText[position] === ".") {
+					documentText = documentText.substring(0, position - 1) + ";" + documentText.substring(position, documentText.length);
+				}
 				UIClassFactory.setNewCodeForClass(currentClassName, documentText);
 			} else {
 				debugger;
@@ -158,7 +190,7 @@ export class SyntaxAnalyzer {
 			currentVariable = currentVariable.replace(".prototype", "");
 
 			//remove last part of the var (it ends with .)
-			const temporaryVariableParts = currentVariable.split(".");
+			const temporaryVariableParts = this.splitVariableIntoParts(currentVariable);
 			temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
 			currentVariable = temporaryVariableParts.join(".");
 		}
@@ -189,13 +221,13 @@ export class SyntaxAnalyzer {
 					characterDelta: deltaToReturn
 				}), startingPosition);
 				selectedText = vscode.window.activeTextEditor.document.getText(range);
-				if (!this.isSeparator(sCurrentChar, ignoreParentheses)) {
+				if (ignoreParentheses || !this.isSeparator(sCurrentChar, false)) {
 					deltaToReturn += iDelta;
 				} else {
 					deltaToReturn += -iDelta;
 				}
 
-			} while (!this.isSeparator(sCurrentChar, ignoreParentheses) && startingPosition.character + deltaToReturn > 0);
+			} while (ignoreParentheses || !this.isSeparator(sCurrentChar, false) && startingPosition.character + deltaToReturn > 0);
 		}
 		deltaToReturn += -iDelta;
 
@@ -221,25 +253,18 @@ export class SyntaxAnalyzer {
 			);
 			currentActiveText = vscode.window.activeTextEditor.document.getText(rangeOfVariable);
 			currentActiveText = currentActiveText.replace(".prototype", "");
-			if (currentActiveText.endsWith("(")) {
-				currentActiveText = currentActiveText.substring(0, currentActiveText.length - 1);
-			}
-
-			//remove last part of the var (it ends with .)
-			// const temporaryVariableParts = currentActiveText.split(".");
-			// temporaryVariableParts.splice(temporaryVariableParts.length - 1, 1);
-			// currentActiveText = temporaryVariableParts.join(".");
 		}
 
 		return currentActiveText;
 	}
 
 	private static getDeltaOfTheActiveTextBegining(iDelta: number) {
-		let deltaToReturn = iDelta - 1; //Filter( => ignore first parentheses
+		const separatorExcludeChars = ", ";
+		let deltaToReturn = iDelta;
 		if (vscode.window.activeTextEditor) {
 			const startingPosition = vscode.window.activeTextEditor.selection.start;
 			let selectedText = "";
-			let parenthesesCount = 0;
+			let parenthesesCount = 1; //lets assume that all variables has one (
 			let ignoreParentheses = false;
 
 			let sCurrentChar = selectedText[0];
@@ -257,13 +282,13 @@ export class SyntaxAnalyzer {
 					characterDelta: deltaToReturn
 				}), startingPosition);
 				selectedText = vscode.window.activeTextEditor.document.getText(range);
-				if (!this.isSeparator(sCurrentChar, ignoreParentheses)) {
+				if (!this.isSeparator(sCurrentChar, ignoreParentheses) || separatorExcludeChars.indexOf(sCurrentChar) > -1) {
 					deltaToReturn += iDelta;
 				} else {
 					deltaToReturn += -iDelta;
 				}
 
-			} while (!this.isSeparator(sCurrentChar, ignoreParentheses) && startingPosition.character + deltaToReturn > 0);
+			} while ((!this.isSeparator(sCurrentChar, ignoreParentheses) || separatorExcludeChars.indexOf(sCurrentChar) > -1) && startingPosition.character + deltaToReturn > 0);
 		}
 		deltaToReturn += -iDelta;
 
@@ -282,9 +307,9 @@ export class SyntaxAnalyzer {
 
 		const currentClass = this.getCurrentClassName();
 		if (currentClass) {
-			const view = FileReader.getViewText(currentClass);
-			if (view) {
-				const IdsResult = view.match(/(?<=id=").*(?="\s)/g);
+			const viewText = FileReader.getViewText(currentClass);
+			if (viewText) {
+				const IdsResult = viewText.match(/(?<=id=").*(?="\s)/g);
 				if (IdsResult) {
 					completionItems = IdsResult.map(Id => {
 						const uniqueViewId: UICompletionItem = {
@@ -315,6 +340,11 @@ export class SyntaxAnalyzer {
 			const rCurrentClassResults = rCurrentClass.exec(documentText);
 			if (rCurrentClassResults) {
 				returnClassName = rCurrentClassResults[0];
+			} else {
+				const classPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+				if (classPath) {
+					returnClassName = FileReader.getClassNameFromPath(classPath);
+				}
 			}
 		}
 

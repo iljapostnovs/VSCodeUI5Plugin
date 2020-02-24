@@ -1,42 +1,48 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as glob from "glob";
+import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
 const workspace = vscode.workspace;
 
 export class FileReader {
-	private static manifests:UIManifest[] = [];
-	private static viewCache:LooseObject = {};
-	public static globalStoragePath:string | undefined;
+	private static manifests: UIManifest[] = [];
+	private static readonly viewCache: LooseObject = {};
+	private static readonly UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
+	public static globalStoragePath: string | undefined;
 
-	public static setNewViewContentToCache(viewContent: string) {
+	public static setNewViewContentToCache(viewContent: string, fsPath: string) {
 		const controllerName = this.getControllerNameFromView(viewContent);
 		if (controllerName) {
-			this.viewCache[controllerName] = viewContent;
+			this.viewCache[controllerName] = {
+				content: viewContent,
+				fsPath: fsPath
+			};
 		}
+	}
+
+	static getViewCache() {
+		return this.viewCache;
 	}
 
 	public static getDocumentTextFromCustomClassName(className: string, isFragment?: boolean) {
 		let documentText;
-		const classPath = this.getClassPath(className, isFragment);
+		const classPath = this.getClassPathFromClassName(className, isFragment);
 		if (classPath) {
-			documentText = fs.readFileSync(classPath, "ascii");
+			documentText = fs.readFileSync(classPath, "utf8");
 		}
 
 		return documentText;
 	}
 
-	public static getClassPath(className: string, isFragment?: boolean) {
-		let classPath: string | undefined;
-		const extension = isFragment ? ".fragment.xml" : ".js";
-		const manifest = this.getManifestForClass(className);
-		if (manifest) {
-			classPath = manifest.fsPath + className.replace(manifest.componentName, "").replace(/\./g, "\\").trim() + extension;
+	public static getClassPathFromClassName(className: string, isFragment?: boolean) {
+		let classPath = this.convertClassNameToFSPath(className, false, isFragment);
+
+		if (classPath) {
 			try {
 				fs.readFileSync(classPath);
 			} catch (error) {
-				if (extension === ".js") {
-					//thx to controllers for this
-					classPath = classPath.replace(".js", ".controller.js");
+				classPath = this.convertClassNameToFSPath(className, true);
+				if (classPath) {
 					try {
 						fs.readFileSync(classPath);
 					} catch (error) {
@@ -49,37 +55,60 @@ export class FileReader {
 		return classPath;
 	}
 
+	public static convertClassNameToFSPath(className: string, isController: boolean = false, isFragment: boolean = false, isView: boolean = false) {
+		let FSPath;
+		let extension = ".js";
+		const manifest = this.getManifestForClass(className);
+		if (manifest) {
+			if (isController) {
+				extension = ".controller.js";
+			} else if (isFragment) {
+				extension = ".fragment.xml";
+			} else if (isView) {
+				extension = ".view.xml";
+			}
+
+			FSPath = manifest.fsPath + className.replace(manifest.componentName, "").replace(/\./g, "\\").trim() + extension;
+		}
+
+		return FSPath;
+	}
+
 	public static getAllManifests() {
 		if (this.manifests.length === 0) {
-			this.readAllWorkspaceManifests();
+			this.fetchAllWorkspaceManifests();
 		}
 
 		return this.manifests;
 	}
 
+	public static rereadAllManifests() {
+		this.manifests = [];
+		this.fetchAllWorkspaceManifests();
+	}
+
 	private static getManifestForClass(className: string) {
 		let returnManifest:UIManifest | undefined;
-		if (vscode.window.activeTextEditor) {
-			if (this.manifests.length === 0) {
-				this.readAllWorkspaceManifests();
-			}
-
-			returnManifest = this.manifests.find(UIManifest => className.indexOf(UIManifest.componentName) > -1);
+		if (this.manifests.length === 0) {
+			this.fetchAllWorkspaceManifests();
 		}
+
+		returnManifest = this.manifests.find(UIManifest => className.indexOf(UIManifest.componentName) > -1);
 
 		return returnManifest;
 	}
 
-	private static readAllWorkspaceManifests() {
+	private static fetchAllWorkspaceManifests() {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const manifests = this.getManifestsInWorkspaceFolder(wsFolder);
 			for (const manifest of manifests) {
-				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "ascii"));
+				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
 				const manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
 				const UIManifest = {
 					componentName: UI5Manifest["sap.app"].id,
-					fsPath: manifestFsPath
+					fsPath: manifestFsPath,
+					content: UI5Manifest
 				};
 				this.manifests.push(UIManifest);
 			}
@@ -110,12 +139,11 @@ export class FileReader {
 
 	public static getViewText(controllerName: string) {
 		let viewText: string | undefined;
-		if (this.viewCache[controllerName]) {
-			viewText = this.viewCache[controllerName];
-		} else {
+		if (!this.viewCache[controllerName]) {
 			this.readAllViewsAndSaveInCache();
-			viewText = this.viewCache[controllerName];
 		}
+
+		viewText = this.viewCache[controllerName]?.content;
 
 		return viewText;
 	}
@@ -162,17 +190,20 @@ export class FileReader {
 		for (const wsFolder of wsFolders) {
 			const viewPaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*/*.view.xml");
 			viewPaths.forEach(viewPath => {
-				let viewContent = fs.readFileSync(viewPath, "ascii");
+				let viewContent = fs.readFileSync(viewPath, "utf8");
 				viewContent = this.replaceFragments(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				if (controllerName) {
-					this.viewCache[controllerName] = viewContent;
+					this.viewCache[controllerName] = {
+						content: viewContent,
+						fsPath: viewPath
+					};
 				}
 			});
 		}
 	}
 
-	private static getControllerNameFromView(viewContent: string) {
+	static getControllerNameFromView(viewContent: string) {
 		const controllerNameResult = /(?<=controllerName=").*(?=")/.exec(viewContent);
 
 		return controllerNameResult ? controllerNameResult[0] : undefined;
@@ -211,20 +242,147 @@ export class FileReader {
 	}
 
 	public static getClassNameFromPath(fsPath: string) {
+		fsPath = fsPath.replace(/\//g, "\\");
 		let className: string | undefined;
 		const manifests = this.getAllManifests();
 		const currentManifest = manifests.find(manifest => fsPath.indexOf(manifest.fsPath) > -1);
 		if (currentManifest) {
-			className = fsPath.replace(currentManifest.fsPath, currentManifest.componentName).replace(".controller", "").replace(".js","").replace(/\\/g, ".");
+			className =
+				fsPath
+				.replace(currentManifest.fsPath, currentManifest.componentName)
+				.replace(".controller", "")
+				.replace(".view.xml", "")
+				.replace("fragment.xml", "")
+				.replace(".xml", "")
+				.replace(".js","")
+				.replace(/\\/g, ".");
 		}
 
 		return className;
+	}
+
+	static getCache(cacheType: FileReader.CacheType) {
+		let cache;
+		const cachePath =
+			cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() :
+			cacheType === FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() :
+			cacheType === FileReader.CacheType.Icons ? this.getIconCachePath() :
+			null;
+
+		if (cachePath && fs.existsSync(cachePath)) {
+			const fileText = fs.readFileSync(cachePath, "utf8");
+			try {
+				cache = JSON.parse(fileText);
+			} catch (error) {
+				console.log(error);
+			}
+		}
+
+		return cache;
+	}
+
+	static setCache(cacheType: FileReader.CacheType, cache: string) {
+		const cachePath =
+			cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() :
+			cacheType === FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() :
+			cacheType === FileReader.CacheType.Icons ? this.getIconCachePath() :
+			null;
+
+		if (cachePath) {
+			if (!fs.existsSync(cachePath)) {
+				this.ensureThatPluginCacheFolderExists();
+			}
+
+			fs.writeFileSync(cachePath, cache, "utf8");
+		}
+	}
+
+	static clearCache() {
+		if (this.globalStoragePath) {
+			if (fs.existsSync(this.globalStoragePath)) {
+				const path = require("path");
+				const directory = this.globalStoragePath;
+				fs.readdir(directory, (err, files) => {
+					for (const file of files) {
+						fs.unlinkSync(path.join(directory, file));
+					}
+				});
+			}
+		}
+	}
+
+	private static ensureThatPluginCacheFolderExists() {
+		if (this.globalStoragePath) {
+			if (!fs.existsSync(this.globalStoragePath)) {
+				fs.mkdirSync(this.globalStoragePath);
+			}
+		}
+	}
+
+	private static getMetadataCachePath() {
+		return `${this.globalStoragePath}\\cache_${this.UI5Version}.json`;
+	}
+
+	private static getAPIIndexCachePath() {
+		return `${this.globalStoragePath}\\cache_appindex_${this.UI5Version}.json`;
+	}
+
+	private static getIconCachePath() {
+		return `${this.globalStoragePath}\\cache_icons_${this.UI5Version}.json`;
+	}
+
+	public static getResourceModelFiles() {
+		const manifests = this.getAllManifests();
+		return manifests.map(manifest => {
+			return {
+				content: this.readResourceModelFile(manifest),
+				componentName: manifest.componentName
+			};
+		});
+	}
+
+	public static readResourceModelFile(manifest: UIManifest) {
+		let resourceModelFileContent = "";
+		const resourceModelFilePath = this.getResourceModelUriForManifest(manifest);
+		try {
+			resourceModelFileContent = fs.readFileSync(resourceModelFilePath, "utf8");
+		} catch {
+			resourceModelFileContent = "";
+		}
+
+		return resourceModelFileContent;
+	}
+
+	public static getResourceModelUriForManifest(manifest: UIManifest) {
+		const i18nRelativePath = manifest.content["sap.app"].i18n || "i18n\\i18n.properties";
+		const i18nPath = i18nRelativePath.replace(/\//g, "\\");
+		return `${manifest.fsPath}\\${i18nPath}`;
+	}
+
+	public static getComponentNameOfAppInCurrentWorkspaceFolder() {
+		return this.getCurrentWorkspaceFoldersManifest()?.componentName;
+	}
+
+	public static getCurrentWorkspaceFoldersManifest() {
+		const currentClassName = SyntaxAnalyzer.getCurrentClassName();
+		if (currentClassName) {
+			return this.getManifestForClass(currentClassName);
+		}
+	}
+}
+
+export module FileReader {
+	export enum CacheType {
+		Metadata = "1",
+		APIIndex = "2",
+		Icons = "3"
 	}
 }
 
 interface UIManifest {
 	fsPath: string;
 	componentName: string;
+	content: any;
 }
 
 interface manifestPaths {
@@ -232,5 +390,8 @@ interface manifestPaths {
 }
 
 interface LooseObject {
-	[key: string]: any;
+	[key: string]: {
+		fsPath: string;
+		content: string;
+	};
 }

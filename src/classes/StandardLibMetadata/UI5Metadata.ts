@@ -7,4 +7,8 @@ export class UI5Metadata {
 	public getUI5Metadata() {
 		return this.rawMetadata["ui5-metadata"];
 	}
+
+	public getRawMetadata() {
+		return this.rawMetadata;
+	}
 }

@@ -6,6 +6,7 @@ This plugin contains perks for UI5 developers.
 ### XML
 XML Completion Items for UI5 Controls.<br/>
 ![XMLCompletionItems](/images/XMLCompletionItems.gif)<br/>
+XML Completion Items for properties, aggregations, associations and events<br/>
 ![DynamicXMLCompletionItems](/images/DynamicXMLCompletionItems.gif)<br/>
 
 ### JS
@@ -18,14 +19,24 @@ Strings for import in sap.ui.define are provided.<br/>
 IDs from the corresponding view of the controller are provided for view.byId or controller.byId method<br/>
 ![GetView](/images/GetView.gif)
 
-#### Dynamic completion items
-Completion items which are generated dynamically depending on current variable class. Trigger character - dot.<br/>
+#### Dynamic Completion Items
+Completion items which are generated dynamically depending on current variable type or method return value type. Trigger character - dot.<br/>
 ![DynamicCompletionItems](/images/DynamicCompletionItems.gif)
 
 ----------
 ## Method Definitions
 Definitions for custom methods are provided.<br/>
 ![Definition](/images/Definition.gif)
+
+----------
+## Code Lens
+Code Lens for Internalization Texts is provided<br/>
+![DynamicCompletionItems](/images/XMLResourceModel.gif)
+
+----------
+## XML Diagnostics
+XML Diagnostics is provided<br/>
+![DynamicCompletionItems](/images/XMLDiagnostics.gif)
 
 ----------
 ## Commands
@@ -65,16 +76,14 @@ Extension listens for .js file creation event (rename technically is file deleti
 
 ----------
 ## Settings
-There are two settings available:
-* Your source folder name where manifest.json should be located at
-* Library version (For now - tested only for 1.60.11)<br/>
+Eight settings are available for extension configuration:<br/>
 ![Settings](/images/Settings.png)
 
 ----------
 # How it works
 ## SAPUI5 Metadata
 * Standard SAPUI5 Library Metadata is fetched from ui5.sap.com and saved locally
-* Tested using 1.60.11 only
+* Extension is working for 1.60+ UI5 library versions
 > If you are using different versions, you might meet an unexpected behavior if the structure of the standard lib metadata is different
 
 ## Custom class metadata
@@ -93,18 +102,14 @@ The same goes for function return data type. Use `@returns {UI5Class} UI5ClassVa
 	var oList = new List();
 }`
 
-### Custom file parsing limitations
-* All variables defined in try/catch, for/while loops are ignored for now
-
 ### Assumptions
 * File starts with sap.ui.define
-* Your class body is in AnyUI5Class.extend("name", {here});<br/>(It means that dynamic completion items will not work for e.g. formatters, when you usually return an object right away)
+* Your class body is in AnyUI5Class.extend("name", {_here_});<br/>
 * You have manifest.json in source folder
 * App ID (Component name) and i18n paths are defined in manifest.json
 * File is without syntax errors
 * All your strings in sap.ui.define are not Relative (e.g. "./BaseController")
 * Name of the class of the UI5Class is the same as file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
-* No ES6+ features are used (except const/let and arrow functions)
 * You have an access to ui5.sap.com for standard lib metadata preload
 
 ### Proxy

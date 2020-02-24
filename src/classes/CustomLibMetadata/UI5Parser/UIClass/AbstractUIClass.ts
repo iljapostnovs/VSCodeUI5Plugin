@@ -1,3 +1,5 @@
+import { SAPIcons } from "../../SAPIcons";
+
 export interface UIMethod {
 	name: string;
 	params: string[];
@@ -10,22 +12,42 @@ export interface UIField {
 	type: string | undefined;
 	description: string;
 }
-export interface UIProperties {
-	name: string;
-	type: string | undefined;
-	typeValues: string[];
+export interface TypeValue {
+	text: string;
 	description: string;
 }
-export interface UIEvents {
+export interface UIProperty {
+	name: string;
+	type: string | undefined;
+	typeValues: TypeValue[];
+	description: string;
+}
+export interface UIAggregation {
+	name: string;
+	type: string | undefined;
+	multiple: boolean;
+	singularName: string;
+	description: string;
+}
+export interface UIEvent {
 	name: string;
 	description: string;
+}
+export interface UIAssociation {
+	name: string;
+	type: string | undefined;
+	description: string;
+	multiple: boolean;
+	singularName: string;
 }
 export abstract class AbstractUIClass {
 	public className: string;
 	public methods: UIMethod[] = [];
 	public fields: UIField[] = [];
-	public properties: UIProperties[] = [];
-	public events: UIEvents[] = [];
+	public properties: UIProperty[] = [];
+	public aggregations: UIAggregation[] = [];
+	public events: UIEvent[] = [];
+	public associations: UIAssociation[] = [];
 	public parentClassNameDotNotation: string = "";
 
 	constructor(className: string, documentText?: string) {
@@ -33,4 +55,24 @@ export abstract class AbstractUIClass {
 	}
 
 	public abstract getClassOfTheVariable(variableName: string, position: number) : string | undefined;
+
+	protected generateTypeValues(type: string) {
+		let typeValues: TypeValue[] = [];
+
+		if (type === "boolean") {
+			typeValues = [
+				{text: "true", description: "boolean true"},
+				{text: "false", description: "boolean false"}
+			];
+		} else if (type === "sap.ui.core.URI") {
+			typeValues = SAPIcons.icons.map(icon => ({text: icon, description: icon}));
+		} else if (type === "string") {
+			// const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
+			// if (currentComponentName) {
+			// 	typeValues = ResourceModelData.resourceModels[currentComponentName];
+			// }
+		}
+
+		return typeValues;
+	}
 }

@@ -4,6 +4,8 @@ export class SAPNode {
 	public node:any;
 	public metadata:UI5Metadata | undefined;
 	public nodes:SAPNode[] = [];
+
+	public static readonly metadataDAO = new UI5MetadataDAO();
 	constructor(node: any) {
 		this.node = node;
 
@@ -33,7 +35,7 @@ export class SAPNode {
 		return node;
 	}
 
-	public getName() {
+	public getName() : string {
 		return this.node.name;
 	}
 
@@ -53,27 +55,40 @@ export class SAPNode {
 		return this.node.bIsDeprecated;
 	}
 
-	public async getMetadataProperties() {
-		const metadata = await this.getMetadata();
-		return metadata.getUI5Metadata().properties;
+	public getProperties(): any[] {
+		const metadata = this.getMetadata();
+		return metadata?.getUI5Metadata()?.properties?.filter((property: any) => !property.deprecatedText && property.visibility === "public") || [];
 	}
 
-	public async getMetadataAggregations() {
-		const metadata = await this.getMetadata();
-		const UI5Metadata: any = metadata.getUI5Metadata();
-		return UI5Metadata && UI5Metadata.aggregations ? UI5Metadata.aggregations : null;
+	public getAggregations(): any[] {
+		const metadata = this.getMetadata();
+		const UI5Metadata: any = metadata?.getUI5Metadata();
+		return UI5Metadata?.aggregations?.filter((aggregation: any) => !aggregation.deprecated && aggregation.visibility === "public") || [];
 	}
 
-	public async getMetadata() {
+	public getEvents(): any[] {
+		const metadata = this.getMetadata();
+		const UI5Metadata: any = metadata?.getRawMetadata();
+		return UI5Metadata?.events?.filter((event: any) => !event.deprecated && event.visibility === "public") || [];
+	}
+
+	public getAssociations(): any[] {
+		const metadata = this.getMetadata();
+		const UI5Metadata: any = metadata?.getUI5Metadata();
+		return UI5Metadata?.associations?.filter((association: any) => !association.deprecated && association.visibility === "public") || [];
+	}
+
+	public getMethods(): any[] {
+		const metadata = this.getMetadata();
+		const rawMetadata: any = metadata?.getRawMetadata();
+		return rawMetadata?.methods?.filter((method: any) => !method.deprecated && method.visibility === "public") || [];
+	}
+
+	public getMetadata() {
 		if (!this.metadata) {
-			const metadataDAO = new UI5MetadataDAO();
-			this.metadata = await metadataDAO.getMetadataForNode(this);
+			this.metadata = SAPNode.metadataDAO.getPreloadedMetadataForNode(this);
 		}
 
-		return this.metadata;
-	}
-
-	public getMetadataSync() {
 		return this.metadata;
 	}
 }
