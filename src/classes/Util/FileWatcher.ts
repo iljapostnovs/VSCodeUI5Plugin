@@ -242,11 +242,11 @@ export class FileWatcher {
 					let manifestText = fs.readFileSync(fsPath, "utf8");
 					manifestText = manifestText.replace(new RegExp(`${escapeRegExp(oldPath)}`, "g"), newPath);
 					fs.writeFileSync(fsPath, manifestText);
-					FileReader.rereadAllManifests();
-
 				}
 			}
 		});
+
+		FileReader.rereadAllManifests();
 	}
 
 	private static replaceAllOccurancesInFiles(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string) {
