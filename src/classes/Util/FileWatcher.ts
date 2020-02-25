@@ -8,7 +8,10 @@ import { WorkspaceCompletionItemFactory } from "../CompletionItems/completionite
 import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
 import { ClearCacheCommand } from "../VSCommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
-import { XMLParser } from "./XMLParser";
+import * as path from "path";
+const fileSeparator = path.sep;
+const escapedFileSeparator = "\\" + path.sep;
+
 
 const workspace = vscode.workspace;
 
@@ -235,7 +238,7 @@ export class FileWatcher {
 				const newPath = `"${textToReplaceToDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
 
 				if (JSON.stringify(manifest.content).indexOf(oldPath) > -1) {
-					const fsPath = `${manifest.fsPath}\\manifest.json`;
+					const fsPath = `${manifest.fsPath}${escapedFileSeparator}manifest.json`;
 					let manifestText = fs.readFileSync(fsPath, "utf8");
 					manifestText = manifestText.replace(new RegExp(`${escapeRegExp(oldPath)}`, "g"), newPath);
 					fs.writeFileSync(fsPath, manifestText);
@@ -267,7 +270,7 @@ export class FileWatcher {
 
 					//TODO: Use observer pattern here
 					if (filePath.endsWith(".js")) {
-						const classNameOfTheReplacedFile = FileReader.getClassNameFromPath(filePath.replace(/\//g, "\\"));
+						const classNameOfTheReplacedFile = FileReader.getClassNameFromPath(filePath.replace(/\//g, fileSeparator));
 						if (classNameOfTheReplacedFile) {
 							UIClassFactory.setNewCodeForClass(classNameOfTheReplacedFile, file);
 						}
@@ -280,10 +283,17 @@ export class FileWatcher {
 	}
 
 	private static handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
-		const newFilePaths = glob.sync(newUri.fsPath.replace(/\//g, "\\") + "/**/*{.js,.xml}");
+		const newFilePaths = glob.sync(newUri.fsPath.replace(/\//g, fileSeparator) + "/**/*{.js,.xml}");
 		newFilePaths.forEach(filePath => {
 			const newFileUri = vscode.Uri.file(filePath);
-			const oldFileUri = vscode.Uri.file(filePath.replace(newUri.fsPath.replace(/\\/g, "/"), oldUri.fsPath.replace(/\\/g, "/")));
+			const oldFileUri = vscode.Uri.file(
+				filePath
+				.replace(/\//g, fileSeparator)
+				.replace(
+					newUri.fsPath.replace(/\//g, fileSeparator),
+					oldUri.fsPath.replace(/\//g, fileSeparator)
+				)
+			);
 
 			this.handleFileRename({
 				newUri: newFileUri,

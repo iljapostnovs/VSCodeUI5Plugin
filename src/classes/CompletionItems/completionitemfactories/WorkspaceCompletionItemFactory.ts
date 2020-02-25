@@ -1,6 +1,9 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import { FileReader } from "../../Util/FileReader";
+import * as path from "path";
+const fileSeparator = path.sep;
+const escapedFileSeparator = "\\" + path.sep;
 
 const workspace = vscode.workspace;
 
@@ -59,18 +62,27 @@ export class WorkspaceCompletionItemFactory {
 	private async getAllJSFilesOfAllWorkspaces() {
 		const workspaceJSFiles:UIDefineJSFile[] = [];
 		const wsFolders = workspace.workspaceFolders || [];
+		const separator = path.sep;
 		for (const wsFolder of wsFolders) {
 			const manifests:any = FileReader.getManifestsInWorkspaceFolder(wsFolder);
 
 			for (const manifest of manifests) {
-				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
-				const manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
+				const manifestPath = path.normalize(manifest.fsPath);
+				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+				const manifestFsPath:string = manifestPath.replace(`${separator}manifest.json`, "");
 				const UI5ComponentName:string = UI5Manifest["sap.app"].id;
 				const projectJSFiles:any = await this.findJSFilesInWorkspaceFolder(wsFolder);
 
 				projectJSFiles.forEach((projectJSFile:any) => {
 					if (projectJSFile.fsPath.indexOf(manifestFsPath) > -1) {
-						const JSFileUIDefineString = projectJSFile.fsPath.replace(".js", "").replace(manifest.fsPath.replace("\\manifest.json", ""), UI5ComponentName).replace(/\./g, "/").replace(/\\/g, "/");
+						const JSFileUIDefineString =
+							projectJSFile.fsPath
+							.replace(".js", "")
+							.replace(manifestPath
+								.replace(`${separator}manifest.json`, ""), UI5ComponentName)
+								.replace(/\./g, "/")
+								.replace(new RegExp(`${escapedFileSeparator}`, "g")
+							, "/");
 						workspaceJSFiles.push(
 							new UIDefineJSFile({
 								fsPath: projectJSFile.fsPath,
@@ -96,7 +108,7 @@ export class WorkspaceCompletionItemFactory {
 	}
 
 	private static generateCompletionItem(workspaceJSFile: UIDefineJSFile) {
-		const insertionText = "\"" + workspaceJSFile.UIDefineString + "\"";
+		const insertionText = `"${workspaceJSFile.UIDefineString}"`;
 		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(insertionText);
 		completionItem.kind = vscode.CompletionItemKind.Class;
 		completionItem.insertText = insertionText;

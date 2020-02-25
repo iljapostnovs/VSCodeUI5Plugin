@@ -111,9 +111,9 @@ export class XMLParser {
 		let libraryPath = "";
 		let regExpBase;
 		if (!tagPrefix) {
-			regExpBase = `(?<=xmlns=").*?(?=")`;
+			regExpBase = `(?<=xmlns\\s?=\\s?").*?(?=")`;
 		} else {
-			regExpBase = `(?<=xmlns(:${tagPrefix})=").*?(?=")`;
+			regExpBase = `(?<=xmlns(:${tagPrefix})\\s?=\\s?").*?(?=")`;
 		}
 		const rClassName = new RegExp(regExpBase);
 		const classNameResult = rClassName.exec(XMLViewText);

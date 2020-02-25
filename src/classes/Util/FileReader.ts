@@ -2,6 +2,10 @@ import * as fs from "fs";
 import * as vscode from "vscode";
 import * as glob from "glob";
 import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
+import * as path from "path";
+const fileSeparator = path.sep;
+const escapedFileSeparator = "\\" + path.sep;
+
 const workspace = vscode.workspace;
 
 export class FileReader {
@@ -68,7 +72,8 @@ export class FileReader {
 				extension = ".view.xml";
 			}
 
-			FSPath = manifest.fsPath + className.replace(manifest.componentName, "").replace(/\./g, "\\").trim() + extension;
+			const separator = require("path").sep;
+			FSPath = `${manifest.fsPath}${className.replace(manifest.componentName, "").replace(/\./g, separator).trim()}${extension}`;
 		}
 
 		return FSPath;
@@ -88,7 +93,7 @@ export class FileReader {
 	}
 
 	private static getManifestForClass(className: string) {
-		let returnManifest:UIManifest | undefined;
+		let returnManifest: UIManifest | undefined;
 		if (this.manifests.length === 0) {
 			this.fetchAllWorkspaceManifests();
 		}
@@ -103,8 +108,8 @@ export class FileReader {
 		for (const wsFolder of wsFolders) {
 			const manifests = this.getManifestsInWorkspaceFolder(wsFolder);
 			for (const manifest of manifests) {
-				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
-				const manifestFsPath:string = manifest.fsPath.replace("\\manifest.json", "");
+				const UI5Manifest: any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
+				const manifestFsPath: string = manifest.fsPath.replace(`${fileSeparator}manifest.json`, "");
 				const UIManifest = {
 					componentName: UI5Manifest["sap.app"].id,
 					fsPath: manifestFsPath,
@@ -117,10 +122,11 @@ export class FileReader {
 
 	public static getManifestsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
 		const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
-		const manifestPaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/manifest.json");
+		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+		const manifestPaths = glob.sync(`${wsFolderFSPath}/${src}/manifest.json`);
 		const manifests: manifestPaths[] = manifestPaths.map(manifestPath => {
 			return {
-				fsPath: manifestPath.replace(/\//g, "\\")
+				fsPath: manifestPath.replace(/\//g, fileSeparator)
 			};
 		});
 		return manifests;
@@ -188,7 +194,8 @@ export class FileReader {
 		const wsFolders = workspace.workspaceFolders || [];
 		const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
 		for (const wsFolder of wsFolders) {
-			const viewPaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*/*.view.xml");
+			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+			const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.view.xml`);
 			viewPaths.forEach(viewPath => {
 				let viewContent = fs.readFileSync(viewPath, "utf8");
 				viewContent = this.replaceFragments(viewContent);
@@ -196,7 +203,7 @@ export class FileReader {
 				if (controllerName) {
 					this.viewCache[controllerName] = {
 						content: viewContent,
-						fsPath: viewPath
+						fsPath: viewPath.replace(/\//g, fileSeparator)
 					};
 				}
 			});
@@ -242,7 +249,7 @@ export class FileReader {
 	}
 
 	public static getClassNameFromPath(fsPath: string) {
-		fsPath = fsPath.replace(/\//g, "\\");
+		fsPath = fsPath.replace(/\//g, fileSeparator);
 		let className: string | undefined;
 		const manifests = this.getAllManifests();
 		const currentManifest = manifests.find(manifest => fsPath.indexOf(manifest.fsPath) > -1);
@@ -255,7 +262,7 @@ export class FileReader {
 				.replace("fragment.xml", "")
 				.replace(".xml", "")
 				.replace(".js","")
-				.replace(/\\/g, ".");
+				.replace(new RegExp(`${escapedFileSeparator}`, "g"), ".");
 		}
 
 		return className;
@@ -320,15 +327,15 @@ export class FileReader {
 	}
 
 	private static getMetadataCachePath() {
-		return `${this.globalStoragePath}\\cache_${this.UI5Version}.json`;
+		return `${this.globalStoragePath}${fileSeparator}cache_${this.UI5Version}.json`;
 	}
 
 	private static getAPIIndexCachePath() {
-		return `${this.globalStoragePath}\\cache_appindex_${this.UI5Version}.json`;
+		return `${this.globalStoragePath}${fileSeparator}cache_appindex_${this.UI5Version}.json`;
 	}
 
 	private static getIconCachePath() {
-		return `${this.globalStoragePath}\\cache_icons_${this.UI5Version}.json`;
+		return `${this.globalStoragePath}${fileSeparator}cache_icons_${this.UI5Version}.json`;
 	}
 
 	public static getResourceModelFiles() {
@@ -354,9 +361,9 @@ export class FileReader {
 	}
 
 	public static getResourceModelUriForManifest(manifest: UIManifest) {
-		const i18nRelativePath = manifest.content["sap.app"].i18n || "i18n\\i18n.properties";
-		const i18nPath = i18nRelativePath.replace(/\//g, "\\");
-		return `${manifest.fsPath}\\${i18nPath}`;
+		const i18nRelativePath = manifest.content["sap.app"].i18n || `i18n${fileSeparator}i18n.properties`;
+		const i18nPath = i18nRelativePath.replace(/\//g, fileSeparator);
+		return `${manifest.fsPath}${fileSeparator}${i18nPath}`;
 	}
 
 	public static getComponentNameOfAppInCurrentWorkspaceFolder() {

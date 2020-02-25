@@ -31,7 +31,7 @@ export class XMLLinter {
 
 		const tags = this.getAllTags(document);
 		tags.forEach(tag => {
-			const tagAttributes = tag.text.match(/(?<=\s)(\w|:)*="(\s|.)*?"/g);
+			const tagAttributes = tag.text.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
 			if (tagAttributes) {
 
 				const tagPrefix = XMLParser.getTagPrefix(tag.text);
@@ -122,7 +122,8 @@ export class XMLLinter {
 		let isValueValid = true;
 		const indexOfEqualSign = attribute.indexOf("=");
 		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
-		const attributeValue = attribute.substring(indexOfEqualSign + 2, attribute.length - 1);
+		let attributeValue = attribute.replace(attributeName, "").replace("=", "").trim();
+		attributeValue = attributeValue.substring(1, attributeValue.length - 1); // removes ""
 
 		const UIClass = UIClassFactory.getUIClass(className);
 		const property = UIClass.properties.find(property => property.name === attributeName);
