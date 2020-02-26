@@ -238,7 +238,7 @@ export class FileWatcher {
 				const newPath = `"${textToReplaceToDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
 
 				if (JSON.stringify(manifest.content).indexOf(oldPath) > -1) {
-					const fsPath = `${manifest.fsPath}${escapedFileSeparator}manifest.json`;
+					const fsPath = `${manifest.fsPath}${fileSeparator}manifest.json`;
 					let manifestText = fs.readFileSync(fsPath, "utf8");
 					manifestText = manifestText.replace(new RegExp(`${escapeRegExp(oldPath)}`, "g"), newPath);
 					fs.writeFileSync(fsPath, manifestText);
