@@ -30,7 +30,7 @@ export class FileWatcher {
 		disposable = workspace.onDidSaveTextDocument(document => {
 			if (document.fileName.endsWith(".js")) {
 
-				const currentClassNameDotNotation = SyntaxAnalyzer.getCurrentClassName(document.getText());
+				const currentClassNameDotNotation = SyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
 				if (currentClassNameDotNotation) {
 					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
 				}

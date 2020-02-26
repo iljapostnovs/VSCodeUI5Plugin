@@ -37,10 +37,21 @@ export class SyntaxAnalyzer {
 
 	static getFieldsAndMethodsOfTheCurrentVariable(variable?: string) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
+
+		const UIClassName = this.getClassNameOfTheVariable(variable);
+		if (UIClassName) {
+			fieldsAndMethods = this.getFieldsAndMethodsFor("this", UIClassName);
+		}
+
+		return fieldsAndMethods;
+	}
+
+	static getClassNameOfTheVariable(variable?: string) {
+		let UIClassName;
 		if (!variable) {
 			variable = this.getCurrentVariable();
 		}
-		const currentClassName = this.getCurrentClassName();
+		const currentClassName = this.getClassNameOfTheCurrentDocument();
 		const variableParts = this.splitVariableIntoParts(variable);
 
 		const activeTextEditor = vscode.window.activeTextEditor;
@@ -52,13 +63,10 @@ export class SyntaxAnalyzer {
 			const UIClass = UIClassFactory.getUIClass(currentClassName);
 			UIClassDefinitionFinder.getAdditionalJSTypesHierarchically(UIClass);
 
-			const UIClassName = this.getClassNameFromVariableParts(variableParts, UIClass, 1, position);
-			if (UIClassName) {
-				fieldsAndMethods = this.getFieldsAndMethodsFor("this", UIClassName);
-			}
+			UIClassName = this.getClassNameFromVariableParts(variableParts, UIClass, 1, position);
 		}
 
-		return fieldsAndMethods;
+		return UIClassName;
 	}
 
 	public static getClassNameFromVariableParts(variableParts: string[], theClass: AbstractUIClass, usedPartQuantity: number = 1, position?: number) : string | undefined {
@@ -153,7 +161,7 @@ export class SyntaxAnalyzer {
 			let documentText = vscode.window.activeTextEditor.document.getText();
 			const position = vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start);
 
-			const currentClassName = this.getCurrentClassName();
+			const currentClassName = this.getClassNameOfTheCurrentDocument();
 			if (currentClassName) {
 				if (documentText[position] === ".") {
 					documentText = documentText.substring(0, position - 1) + ";" + documentText.substring(position, documentText.length);
@@ -305,7 +313,7 @@ export class SyntaxAnalyzer {
 	static getUICompletionItemsWithUniqueViewIds() {
 		let completionItems: UICompletionItem[] = [];
 
-		const currentClass = this.getCurrentClassName();
+		const currentClass = this.getClassNameOfTheCurrentDocument();
 		if (currentClass) {
 			const viewText = FileReader.getViewText(currentClass);
 			if (viewText) {
@@ -330,7 +338,7 @@ export class SyntaxAnalyzer {
 		return completionItems;
 	}
 
-	public static getCurrentClassName(documentText?: string) {
+	public static getClassNameOfTheCurrentDocument(documentText?: string) {
 		let returnClassName;
 		if (!documentText && vscode.window.activeTextEditor) {
 			documentText = vscode.window.activeTextEditor.document.getText();
