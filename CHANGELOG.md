@@ -61,3 +61,7 @@
 ## 0.9.1 (25-02-2020)
 * Bugfixes for unix-like OS
 * Bugfixes for XML Linting
+
+## 0.9.2 (27-02-2020)
+* Bugfixes for automatic file renaming on unix-like OS
+* Bugfix for definition provider
