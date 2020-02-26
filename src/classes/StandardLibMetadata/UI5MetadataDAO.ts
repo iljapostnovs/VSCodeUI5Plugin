@@ -31,7 +31,10 @@ export class UI5MetadataPreloader {
 
 			for (const i in this.libNames) {
 				promises.push(metadataDAO.getMetadataForLib(i).then(() => {
-					UI5Plugin.getInstance().initializationProgress?.report({ increment: incrementStep});
+					UI5Plugin.getInstance().initializationProgress?.report({
+						message: i,
+						increment: incrementStep
+					});
 				}));
 			}
 
