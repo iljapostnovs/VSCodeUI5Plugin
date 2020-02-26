@@ -12,7 +12,7 @@ export class SAPUIDefineCommand {
 
 		if (editor) {
 			const document = editor.document;
-			const currentClassName = SyntaxAnalyzer.getCurrentClassName();
+			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 
 			if (currentClassName) {
 				UIClassFactory.setNewCodeForClass(currentClassName, document.getText());

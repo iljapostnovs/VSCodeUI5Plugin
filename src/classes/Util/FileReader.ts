@@ -371,7 +371,7 @@ export class FileReader {
 	}
 
 	public static getCurrentWorkspaceFoldersManifest() {
-		const currentClassName = SyntaxAnalyzer.getCurrentClassName();
+		const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		if (currentClassName) {
 			return this.getManifestForClass(currentClassName);
 		}

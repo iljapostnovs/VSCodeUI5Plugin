@@ -10,7 +10,7 @@ export class JSCodeLensProvider {
 			let codeLenses: vscode.CodeLens[] = [];
 			setTimeout(() => {
 				SyntaxAnalyzer.setNewContentForCurrentUIClass();
-				const currentClass = SyntaxAnalyzer.getCurrentClassName();
+				const currentClass = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 				if (currentClass) {
 					const UIClass = UIClassFactory.getUIClass(currentClass);
 					const rootMethods = UIClass.methods;

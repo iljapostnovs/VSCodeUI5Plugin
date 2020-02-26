@@ -13,24 +13,28 @@ import { URLBuilder } from "../../../Util/URLBuilder";
 export class UIClassDefinitionFinder {
 	public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {
 		let location: vscode.Location | undefined;
+
+		if (!classNameDotNotation) {
+			classNameDotNotation = SyntaxAnalyzer.getClassNameOfTheVariable();
+		}
+
 		const textEditor = vscode.window.activeTextEditor;
-		if (textEditor) {
-			if (!classNameDotNotation) {
-				const document = textEditor.document;
-				const position = textEditor.selection.start;
-				methodName = document.getText(document.getWordRangeAtPosition(position));
-				classNameDotNotation = this.getVariableClass();
-			}
-			if (classNameDotNotation && methodName) {
-				if (classNameDotNotation.startsWith("sap.") && openInBrowserIfStandardMethod) {
-					this.openClassMethodInTheBrowser(classNameDotNotation, methodName);
-				} else {
-					location = this.getVSCodeMethodLocation(classNameDotNotation, methodName);
-					if (!location) {
-						const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
-						if (UIClass.parentClassNameDotNotation) {
-							location = this.getPositionAndUriOfCurrentVariableDefinition(UIClass.parentClassNameDotNotation, methodName, openInBrowserIfStandardMethod);
-						}
+		if (textEditor && !methodName) {
+
+			const document = textEditor.document;
+			const position = textEditor.selection.start;
+			methodName = document.getText(document.getWordRangeAtPosition(position));
+		}
+
+		if (classNameDotNotation && methodName) {
+			if (classNameDotNotation.startsWith("sap.") && openInBrowserIfStandardMethod) {
+				this.openClassMethodInTheBrowser(classNameDotNotation, methodName);
+			} else {
+				location = this.getVSCodeMethodLocation(classNameDotNotation, methodName);
+				if (!location) {
+					const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
+					if (UIClass.parentClassNameDotNotation) {
+						location = this.getPositionAndUriOfCurrentVariableDefinition(UIClass.parentClassNameDotNotation, methodName, openInBrowserIfStandardMethod);
 					}
 				}
 			}
@@ -74,7 +78,7 @@ export class UIClassDefinitionFinder {
 		if (textEditor) {
 			const document = textEditor.document;
 			const currentPositionOffset = document.offsetAt(textEditor.selection.start);
-			const currentClassName = SyntaxAnalyzer.getCurrentClassName();
+			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 
 			if (currentClassName) {
 				const currentClass = UIClassFactory.getUIClass(currentClassName);

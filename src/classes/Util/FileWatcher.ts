@@ -30,7 +30,7 @@ export class FileWatcher {
 		disposable = workspace.onDidSaveTextDocument(document => {
 			if (document.fileName.endsWith(".js")) {
 
-				const currentClassNameDotNotation = SyntaxAnalyzer.getCurrentClassName(document.getText());
+				const currentClassNameDotNotation = SyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
 				if (currentClassNameDotNotation) {
 					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
 				}
@@ -238,15 +238,15 @@ export class FileWatcher {
 				const newPath = `"${textToReplaceToDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
 
 				if (JSON.stringify(manifest.content).indexOf(oldPath) > -1) {
-					const fsPath = `${manifest.fsPath}${escapedFileSeparator}manifest.json`;
+					const fsPath = `${manifest.fsPath}${fileSeparator}manifest.json`;
 					let manifestText = fs.readFileSync(fsPath, "utf8");
 					manifestText = manifestText.replace(new RegExp(`${escapeRegExp(oldPath)}`, "g"), newPath);
 					fs.writeFileSync(fsPath, manifestText);
-					FileReader.rereadAllManifests();
-
 				}
 			}
 		});
+
+		FileReader.rereadAllManifests();
 	}
 
 	private static replaceAllOccurancesInFiles(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string) {
