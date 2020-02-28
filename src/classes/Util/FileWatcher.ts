@@ -10,7 +10,6 @@ import { ClearCacheCommand } from "../VSCommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
 import * as path from "path";
 const fileSeparator = path.sep;
-const escapedFileSeparator = "\\" + path.sep;
 
 
 const workspace = vscode.workspace;

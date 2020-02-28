@@ -151,7 +151,6 @@ export class JSFunction extends AbstractType {
 			let i = 0;
 			while (!definition && i < this.parts.length) {
 				if (this.parts[i] instanceof JSVariable && this.parts[i].parsedName === anything.parsedName && !this.theeseTwoAreRelated(anything, this.parts[i])) {
-					//TODO: endless recursion starts here.
 					definition = this.parts[i].findDefinition(anything);
 				} else if (this.parts[i] instanceof IfStatement) {
 					definition = this.parts[i].findDefinition(anything);

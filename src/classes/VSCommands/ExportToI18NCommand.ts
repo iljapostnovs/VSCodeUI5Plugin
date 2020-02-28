@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
+import * as path from "path";
 import { FileReader } from "../Util/FileReader";
 import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
 const workspace = vscode.workspace;
@@ -14,7 +15,7 @@ export class ExportToI18NCommand {
 			stringForReplacing = stringForReplacing.substring(1, stringForReplacing.length - 1);
 			const I18nID = await ExportToI18NCommand.askUserFori18nID();
 			if (I18nID) {
-				const textForInsertionIntoI18N = ExportToI18NCommand.generateStringForI18NInsert(stringForReplacing, I18nID);
+				const textForInsertionIntoI18N = await ExportToI18NCommand.generateStringForI18NInsert(stringForReplacing, I18nID);
 				const textForInsertionIntoCurrentFile = ExportToI18NCommand.getStringForSavingIntoi18n(I18nID);
 
 				await ExportToI18NCommand.insertIntoi18NFile(textForInsertionIntoI18N);
@@ -66,6 +67,7 @@ export class ExportToI18NCommand {
 
 	private static async askUserFori18nID() {
 		const startingProposedValue = ExportToI18NCommand.generateProposedi18nID();
+
 		const i18nID = await vscode.window.showInputBox({
 			value: startingProposedValue,
 			placeHolder: "Enter i18n ID",
@@ -97,7 +99,7 @@ export class ExportToI18NCommand {
 			currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".js", "");
 			currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".view.xml", "");
 			currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".xml", "");
-			const nameParts = currentlyOpenedFileFSName.split("\\");
+			const nameParts = currentlyOpenedFileFSName.split(path.sep);
 			const fileName = nameParts[nameParts.length -1];
 
 			proposedi18NValue = fileName + addition + ".";
@@ -106,9 +108,17 @@ export class ExportToI18NCommand {
 		return proposedi18NValue;
 	}
 
-	private static generateStringForI18NInsert(selectedText: string, I18nID: string) {
-		//TODO: generate also different types than YMSG
-		const textToInsert = `\n#YMSG: ${I18nID}\n${I18nID} = ${selectedText}`;
+	private static async generateStringForI18NInsert(selectedText: string, I18nID: string) {
+		const i18nIDs = [{
+			label: "YMSG",
+			description: "Message text (long)"
+		}].concat(require("./i18nIDs.json"));
+
+		const resourceGroups: vscode.QuickPickItem[] = i18nIDs;
+		const item = await vscode.window.showQuickPick(resourceGroups, {
+			matchOnDescription: true,
+		});
+		const textToInsert = `\n#${item?.label || "YMSG"},${selectedText.length}: ${I18nID}\n${I18nID} = ${selectedText}`;
 		return textToInsert;
 	}
 
@@ -149,7 +159,7 @@ export class ExportToI18NCommand {
 		const manifestFsPath = manifest?.fsPath;
 		const i18nRelativePath = manifest?.content["sap.app"].i18n;
 		if (manifestFsPath && i18nRelativePath) {
-			const i18nFSPath = manifestFsPath + "\\" + i18nRelativePath.replace(/\//g, "\\");
+			const i18nFSPath = `${manifestFsPath}${path.sep}${i18nRelativePath.replace(/\//g, path.sep)}`;
 
 			fs.appendFileSync(i18nFSPath, stringToInsert, "utf8");
 			ResourceModelData.readTexts();

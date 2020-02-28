@@ -113,7 +113,6 @@ export class UIClassDefinitionFinder {
 				if (!variable.jsType && variable.parts.length > 0) {
 					const allPartsAreFunctionCalls = !variable.parts.find(part => !(part instanceof JSFunctionCall));
 					if (allPartsAreFunctionCalls) {
-						//TODO: calls parsing twice.
 						const variableParts = SyntaxAnalyzer.splitVariableIntoParts(variable.parsedBody);
 						variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, undefined, variable.positionEnd);
 					}

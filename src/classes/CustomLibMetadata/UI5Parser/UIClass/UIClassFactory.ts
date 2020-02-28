@@ -14,9 +14,6 @@ interface UIClassMap {
 }
 
 export class UIClassFactory {
-	public static getAllUIClassesContainingPath(pathDotNotation: string) {
-		//TODO: this
-	}
 	private static readonly UIClasses: UIClassMap = {
 		Promise: new JSClass("Promise"),
 		array: new JSClass("array")

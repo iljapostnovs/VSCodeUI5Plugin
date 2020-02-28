@@ -25,7 +25,6 @@ export class JSObject extends AbstractType {
 					beginIndex = currentIndex;
 				} else if (this.parsedBody[currentIndex] === ":") {
 					this.partNames.push(this.parsedBody.substring(beginIndex, currentIndex).trim());
-					//todo: think how to ignore comments
 					currentIndex = currentIndex + this.parseBodyPart(this.parsedBody.substring(currentIndex + 1, this.parsedBody.length)) + 1;
 					beginIndex = currentIndex;
 				} else {
