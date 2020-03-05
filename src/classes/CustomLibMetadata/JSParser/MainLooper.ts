@@ -142,7 +142,7 @@ export class MainLooper {
 		return parts;
 	}
 
-	static getEndOfChar(charBegin: string, charEnd:string, text: string) {
+	static getEndOfChar(charBegin: string, charEnd: string, text: string) {
 		let body: string = "";
 		let charOpened = false;
 		let charBeginQuantity = 0;
