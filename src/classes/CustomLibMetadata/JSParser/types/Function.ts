@@ -232,7 +232,7 @@ export class JSFunction extends AbstractType {
 
 		if (!isFunction && fullJSText.indexOf("=>") > -1) {
 			const textBeforeArrow = fullJSText.substring(0, fullJSText.indexOf("=>") + 2).trim();
-			const results = /(async\s)?([a-zA-Z]\w*|\((\{?[a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\}?)?\))\s?=>/.exec(textBeforeArrow);
+			const results = /(async\s?)?([a-zA-Z]\w*|\((\{?[a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\}?)?\))\s?=>/.exec(textBeforeArrow);
 			if (results && results[0] === textBeforeArrow) {
 				isFunction = true;
 			}

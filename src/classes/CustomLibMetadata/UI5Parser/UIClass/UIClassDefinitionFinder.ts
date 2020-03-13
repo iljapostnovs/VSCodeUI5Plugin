@@ -102,6 +102,8 @@ export class UIClassDefinitionFinder {
 					const linkToDocumentation = URLBuilder.getInstance().getUrlForMethodApi(UIClass, methodName);
 					vscode.env.openExternal(vscode.Uri.parse(linkToDocumentation));
 				}
+			} else if (UIClass.parentClassNameDotNotation) {
+				this.openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
 			}
 		}
 	}

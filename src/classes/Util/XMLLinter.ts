@@ -171,8 +171,9 @@ export class XMLLinter {
 
 		const isClassExclusion = exclusions[className] && exclusions[className].indexOf(attribute) > -1;
 		const isAlwaysExclusion = exclusions["*"].indexOf(attribute) > -1;
+		const perhapsItIsCustomData = attribute.indexOf(":") > -1;
 
-		return isClassExclusion || isAlwaysExclusion;
+		return isClassExclusion || isAlwaysExclusion || perhapsItIsCustomData;
 
 	}
 }
