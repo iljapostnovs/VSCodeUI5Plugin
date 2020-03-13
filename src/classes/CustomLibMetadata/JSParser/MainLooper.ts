@@ -218,6 +218,11 @@ export class MainLooper {
 
 				results = rComments.exec(text);
 			}
+		} else {
+			ranges.push({
+				from: 0,
+				to: text.length
+			});
 		}
 
 		return ranges;
