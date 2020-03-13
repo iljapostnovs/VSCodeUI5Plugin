@@ -236,8 +236,10 @@ export class MainLooper {
 			const nextTwoChars = text.substring(i, i + 2);
 			if (nextTwoChars === "/*") {
 				iOpenedCommendCount++;
+				i++;
 			} else if (nextTwoChars === "*/") {
 				iClosedCommentCount++;
+				i++;
 			}
 		}
 

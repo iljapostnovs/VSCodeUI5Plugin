@@ -21,7 +21,9 @@ export class JSObject extends AbstractType {
 			let beginIndex = 0;
 			while(currentIndex < this.parsedBody.length) {
 				if (this.checkIfThisIsComment(this.parsedBody.substring(0, currentIndex))) {
-					currentIndex = currentIndex + this.parseBodyPart(this.parsedBody.substring(currentIndex - 2, this.parsedBody.length), "\n") + 1;
+					const remainingText = this.parsedBody.substring(currentIndex - 2, this.parsedBody.length);
+					const parsedBodyLength = this.parseBodyPart(remainingText, "\n");
+					currentIndex = currentIndex + parsedBodyLength - 2 /* this is `/*` or `//` */ + 1;
 					beginIndex = currentIndex;
 				} else if (this.parsedBody[currentIndex] === ":") {
 					this.partNames.push(this.parsedBody.substring(beginIndex, currentIndex).trim());
