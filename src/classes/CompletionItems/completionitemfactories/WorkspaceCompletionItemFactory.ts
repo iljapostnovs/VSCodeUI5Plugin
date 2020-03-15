@@ -98,7 +98,7 @@ export class WorkspaceCompletionItemFactory {
 
 	private findJSFilesInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
 		return new Promise(resolve => {
-			const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
+			const src = FileReader.getSrcFolderName();
 
 			vscode.workspace
 			.findFiles(new vscode.RelativePattern(wsFolder, `${src}/**/*.js`))

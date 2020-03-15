@@ -254,7 +254,7 @@ export class FileWatcher {
 
 		const workspace = vscode.workspace;
 		const wsFolders = workspace.workspaceFolders || [];
-		const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
+		const src = FileReader.getSrcFolderName();
 
 		for (const wsFolder of wsFolders) {
 			const workspaceFilePaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*{.js,.xml,.json}");

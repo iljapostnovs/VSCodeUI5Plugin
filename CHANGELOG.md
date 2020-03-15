@@ -65,3 +65,7 @@
 ## 0.9.2 (27-02-2020)
 * Bugfixes for automatic file renaming on unix-like OS
 * Bugfix for definition provider
+
+## 0.9.3 (15-03-2020)
+* For convinience now there is a check for two source folders: src and webapp, if any is found - it will be used as source folder automatically.
+* Bugfixes

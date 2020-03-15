@@ -121,11 +121,11 @@
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
 		"@types/line-column": "^1.0.0",
-		"@types/node": "^13.9.0",
+		"@types/node": "^13.9.1",
 		"@types/request-promise": "^4.1.45",
-		"@types/vscode": "^1.42.0",
+		"@types/vscode": "^1.43.0",
 		"ts-loader": "^6.2.1",
-		"tslint": "^6.0.0",
+		"tslint": "^6.1.0",
 		"typescript": "^3.8.3",
 		"webpack": "^4.42.0",
 		"webpack-cli": "^3.3.11"
