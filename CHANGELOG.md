@@ -67,7 +67,7 @@
 * Bugfix for definition provider
 
 ## 0.9.3 (15-03-2020)
-* For convinience now there is a check for two source folders: src and webapp, if any is found - it will be used as source folder automatically.
-* For "Export to i18n" there is a list of text types to choose from
-* For "Export to i18n" three configuration options were added
+* For convinience purposes now check for two source folders is supported: source folder from preferences ("src" as default) and webapp, if any is found - it will be used as source folder automatically.
+* For "Export to i18n" command there is a list of text types to choose from
+* For "Export to i18n" command three configuration options were added
 * Bugfixes
