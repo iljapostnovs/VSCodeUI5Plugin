@@ -96,14 +96,8 @@ export class MainLooper {
 					let definitions;
 					let definitionBody;
 					if (!currentText.endsWith(";")) {
-						const definitionsComma = this.startAnalysing(javascript.substring(currentIndex, javascript.length), ",");
-						const definitionCommaBody = definitionsComma.reduce((accumulator, definition) => accumulator += definition.getFullBody(), "");
 						definitions = this.startAnalysing(javascript.substring(currentIndex, javascript.length), ";");
 						definitionBody = definitions.reduce((accumulator, definition) => accumulator += definition.getFullBody(), "");
-						if (definitionCommaBody.length < definitionBody.length) {
-							definitions = definitionsComma;
-							definitionBody = definitionCommaBody;
-						}
 					} else {
 						currentText = currentText.substring(0, currentText.length - 1);
 					}
