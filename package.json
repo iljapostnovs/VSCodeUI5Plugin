@@ -91,7 +91,10 @@
 				},
 				"ui5.plugin.textTransformationStrategy": {
 					"type": "string",
-					"enum": ["Pascal Case", "Snake Upper Case"],
+					"enum": [
+						"Pascal Case",
+						"Snake Upper Case"
+					],
 					"default": "Pascal Case",
 					"description": "Case type which should be used for i18n text id proposal"
 				},
@@ -149,7 +152,6 @@
 	"dependencies": {
 		"glob": "^7.1.6",
 		"line-column": "^1.0.2",
-		"request": "^2.88.2",
 		"request-promise": "^4.2.5"
 	}
 }
