@@ -68,4 +68,6 @@
 
 ## 0.9.3 (15-03-2020)
 * For convinience now there is a check for two source folders: src and webapp, if any is found - it will be used as source folder automatically.
+* For "Export to i18n" there is a list of text types to choose from
+* For "Export to i18n" three configuration options were added
 * Bugfixes

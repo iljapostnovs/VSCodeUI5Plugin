@@ -26,58 +26,72 @@ export class CompletionItemFactory {
 	}
 
 	public async getLanguageSpecificCompletionItems() {
-		var completionItems:vscode.CompletionItem[] = [];
+		let completionItems:vscode.CompletionItem[] = [];
 
 		if (this.language === GeneratorFactory.language.js) {
-
-			if (CompletionItemFactory.JSDefineCompletionItems.length === 0) {
-				const UIDefineFactoy = new UIDefineFactory();
-				completionItems = await UIDefineFactoy.generateUIDefineCompletionItems();
-				CompletionItemFactory.JSDefineCompletionItems = completionItems;
-			} else {
-				completionItems = CompletionItemFactory.JSDefineCompletionItems;
-
-				SyntaxAnalyzer.setNewContentForCurrentUIClass();
-				const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-				if (currentClassName) {
-					const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
-					const activeTextEditor = vscode.window.activeTextEditor;
-					const position = activeTextEditor?.document.offsetAt(activeTextEditor.selection.start);
-					if (position) {
-						const type = UIClass.jsPasredBody?.findTypeInPosition(position);
-						if (type instanceof JSString) {
-							completionItems = completionItems.map(completionItem => {
-								const completionItemWOQuotes = new vscode.CompletionItem(completionItem.label);
-								completionItemWOQuotes.kind = completionItem.kind;
-								completionItemWOQuotes.insertText = (<any>completionItem.insertText).substring(1, (<any>completionItem.insertText).length - 1);
-								completionItemWOQuotes.documentation = completionItem.documentation;
-								completionItemWOQuotes.command = completionItem.command;
-
-								return completionItemWOQuotes;
-							});
-						}
-					}
-				}
-			}
+			completionItems = await this.generateJSCompletionItems();
 		} else if (this.language === GeneratorFactory.language.xml) {
 			if (CompletionItemFactory.XMLStandardLibCompletionItems.length === 0) {
-				let SAPNodes: SAPNode[];
-				SAPNodes = await CompletionItemFactory.nodeDAO.getAllNodes();
-
-				const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
-				await Promise.all([
-					metadataPreloader.preloadLibs(),
-					SAPIcons.preloadIcons(),
-					ResourceModelData.readTexts()
-				]);
-				console.log("Libs are preloaded");
-
-				const xmlClassFactoy = new XMLClassFactory();
-				completionItems = await xmlClassFactoy.generateAggregationPropertyCompletionItems();
-				CompletionItemFactory.XMLStandardLibCompletionItems = completionItems;
-				console.log("After the preload XML Completion Items are generated successfully");
+				completionItems = await this.generateXMLCompletionItems();
 			} else {
 				completionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
+			}
+		}
+
+		return completionItems;
+	}
+
+	private async generateXMLCompletionItems() {
+		let completionItems:vscode.CompletionItem[] = [];
+		let SAPNodes: SAPNode[];
+		SAPNodes = await CompletionItemFactory.nodeDAO.getAllNodes();
+
+		const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
+		await Promise.all([
+			metadataPreloader.preloadLibs(),
+			SAPIcons.preloadIcons(),
+			ResourceModelData.readTexts()
+		]);
+		console.log("Libs are preloaded");
+
+		const xmlClassFactoy = new XMLClassFactory();
+		completionItems = await xmlClassFactoy.generateAggregationPropertyCompletionItems();
+		CompletionItemFactory.XMLStandardLibCompletionItems = completionItems;
+		console.log("After the preload XML Completion Items are generated successfully");
+
+		return completionItems;
+	}
+
+	private async generateJSCompletionItems() {
+		let completionItems:vscode.CompletionItem[] = [];
+
+		if (CompletionItemFactory.JSDefineCompletionItems.length === 0) {
+			const UIDefineFactoy = new UIDefineFactory();
+			completionItems = await UIDefineFactoy.generateUIDefineCompletionItems();
+			CompletionItemFactory.JSDefineCompletionItems = completionItems;
+		} else {
+			completionItems = CompletionItemFactory.JSDefineCompletionItems;
+
+			SyntaxAnalyzer.setNewContentForCurrentUIClass();
+			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			if (currentClassName) {
+				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+				const activeTextEditor = vscode.window.activeTextEditor;
+				const position = activeTextEditor?.document.offsetAt(activeTextEditor.selection.start);
+				if (position) {
+					const type = UIClass.jsPasredBody?.findTypeInPosition(position);
+					if (type instanceof JSString) {
+						completionItems = completionItems.map(completionItem => {
+							const completionItemWOQuotes = new vscode.CompletionItem(completionItem.label);
+							completionItemWOQuotes.kind = completionItem.kind;
+							completionItemWOQuotes.insertText = (<any>completionItem.insertText).substring(1, (<any>completionItem.insertText).length - 1);
+							completionItemWOQuotes.documentation = completionItem.documentation;
+							completionItemWOQuotes.command = completionItem.command;
+
+							return completionItemWOQuotes;
+						});
+					}
+				}
 			}
 		}
 

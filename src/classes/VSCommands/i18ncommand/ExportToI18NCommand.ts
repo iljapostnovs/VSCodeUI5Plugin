@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { FileReader } from "../Util/FileReader";
-import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
+import { FileReader } from "../../Util/FileReader";
+import { ResourceModelData } from "../../CustomLibMetadata/ResourceModelData";
+import { TextTransformationFactory, CaseType } from "./TextTransformationFactory";
 const workspace = vscode.workspace;
 
 export class ExportToI18NCommand {
@@ -13,7 +14,7 @@ export class ExportToI18NCommand {
 			const stringRange = ExportToI18NCommand.getStringRange() || new vscode.Range(editor.selection.start, editor.selection.start);
 			let stringForReplacing = editor.document.getText(stringRange);
 			stringForReplacing = stringForReplacing.substring(1, stringForReplacing.length - 1);
-			const I18nID = await ExportToI18NCommand.askUserFori18nID();
+			const I18nID = await ExportToI18NCommand.askUserForI18nID(stringForReplacing);
 			if (I18nID) {
 				const textForInsertionIntoI18N = await ExportToI18NCommand.generateStringForI18NInsert(stringForReplacing, I18nID);
 				const textForInsertionIntoCurrentFile = ExportToI18NCommand.getStringForSavingIntoi18n(I18nID);
@@ -65,62 +66,89 @@ export class ExportToI18NCommand {
 		return deltaToReturn;
 	}
 
-	private static async askUserFori18nID() {
-		const startingProposedValue = ExportToI18NCommand.generateProposedi18nID();
+	private static async askUserForI18nID(text: string) {
+		const startingProposedValue = ExportToI18NCommand.generateProposedI18nID(text);
+		let i18nID = startingProposedValue;
 
-		const i18nID = await vscode.window.showInputBox({
-			value: startingProposedValue,
-			placeHolder: "Enter i18n ID",
-			valueSelection: [startingProposedValue.length, startingProposedValue.length]
-		}) || "";
+		const shouldUserConfirmI18nId = vscode.workspace.getConfiguration("ui5.plugin").get("askUserToConfirmI18nId");
+		if (shouldUserConfirmI18nId) {
+			i18nID = await vscode.window.showInputBox({
+				value: startingProposedValue,
+				placeHolder: "Enter i18n ID",
+				valueSelection: [startingProposedValue.length, startingProposedValue.length]
+			}) || "";
+		}
 
 		return i18nID;
 	}
 
-	private static generateProposedi18nID() {
+	private static generateProposedI18nID(text: string) {
 		let proposedi18NValue = "";
 
 		const editor = vscode.window.activeTextEditor;
 		const openedFileType = ExportToI18NCommand.getCurrentlyOpenedFileType();
+
 		if (editor) {
-			const currentlyOpenedFileFSPath = editor.document.fileName;
-			const addition = (() => {
-				let returnString = "";
-				if (openedFileType === ExportToI18NCommand.fileType.controller) {
-					returnString = "Controller";
-				} else if (openedFileType === ExportToI18NCommand.fileType.xml) {
-					returnString = "View";
-				}
+			const textTransformationStrategyType = vscode.workspace.getConfiguration("ui5.plugin").get("textTransformationStrategy");
+			const textTransformationStrategy = TextTransformationFactory.createTextTransformationStrategy();
 
-				return returnString;
-			})();
+			if (textTransformationStrategyType === CaseType.PascalCase) {
+				const currentlyOpenedFileFSPath = editor.document.fileName;
+				const addition = (() => {
+					let returnString = "";
+					if (openedFileType === ExportToI18NCommand.fileType.controller) {
+						returnString = "Controller";
+					} else if (openedFileType === ExportToI18NCommand.fileType.xml) {
+						returnString = "View";
+					}
 
-			let currentlyOpenedFileFSName = currentlyOpenedFileFSPath.replace(".controller.js", "");
-			currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".js", "");
-			currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".view.xml", "");
-			currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".xml", "");
-			const nameParts = currentlyOpenedFileFSName.split(path.sep);
-			const fileName = nameParts[nameParts.length -1];
+					return returnString;
+				})();
 
-			proposedi18NValue = fileName + addition + ".";
+				let currentlyOpenedFileFSName = currentlyOpenedFileFSPath.replace(".controller.js", "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".js", "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".view.xml", "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".xml", "");
+				const nameParts = currentlyOpenedFileFSName.split(path.sep);
+				const fileName = nameParts[nameParts.length -1];
+
+				const transofrmatedText = textTransformationStrategy.transform(text);
+				proposedi18NValue = `${fileName}${addition}.${transofrmatedText}`;
+
+			} else if (textTransformationStrategyType === CaseType.SnakeUpperCase) {
+
+				proposedi18NValue = textTransformationStrategy.transform(text);
+			}
+
 		}
 
 		return proposedi18NValue;
 	}
 
 	private static async generateStringForI18NInsert(selectedText: string, I18nID: string) {
-		const i18nIDs = [{
-			label: "YMSG",
-			description: "Message text (long)"
-		}].concat(require("./i18nIDs.json"));
+		const shouldUserConfirmI18nId = vscode.workspace.getConfiguration("ui5.plugin").get("askUserToConfirmI18nId");
+		let item;
+		if (shouldUserConfirmI18nId) {
+			const i18nIDs = [{
+				label: "YMSG",
+				description: "Message text (long)"
+			}].concat(require("./i18nIDs.json"));
 
-		const resourceGroups: vscode.QuickPickItem[] = i18nIDs;
-		const item = await vscode.window.showQuickPick(resourceGroups, {
-			matchOnDescription: true,
-		});
-		const textToInsert = `\n#${item?.label || "YMSG"},${selectedText.length}: ${I18nID}\n${I18nID} = ${selectedText}`;
+
+			const resourceGroups: vscode.QuickPickItem[] = i18nIDs;
+			item = await vscode.window.showQuickPick(resourceGroups, {
+				matchOnDescription: true,
+			});
+		}
+
+		const shouldAddTextLength = vscode.workspace.getConfiguration("ui5.plugin").get("addI18nTextLengthLimitation");
+		const textLength = shouldAddTextLength ? `,${selectedText.length}` : "";
+
+		const textToInsert = `\n#${item?.label || "YMSG"}${textLength}: ${I18nID}\n${I18nID} = ${selectedText}`;
 		return textToInsert;
 	}
+
+
 
 	private static getStringForSavingIntoi18n(I18nID: string) {
 		const openedFileType = ExportToI18NCommand.getCurrentlyOpenedFileType();
