@@ -71,3 +71,6 @@
 * For "Export to i18n" command there is a list of text types to choose from
 * For "Export to i18n" command three configuration options were added
 * Bugfixes
+
+## 0.9.4 (15-03-2020)
+* Bugfixes
