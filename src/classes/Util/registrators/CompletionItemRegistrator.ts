@@ -13,15 +13,15 @@ export class CompletionItemRegistrator {
 		console.log("XML Completion Items generated");
 
 		const JSCompletionItemDAO = new CompletionItemFactory(GeneratorFactory.language.js);
-		const JSDefineCompletionItems = await JSCompletionItemDAO.getLanguageSpecificCompletionItems();
+		await JSCompletionItemDAO.getLanguageSpecificCompletionItems();
 		console.log("JS Completion Items generated");
 
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
-			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
+			async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
 				let itemsToReturn:vscode.CompletionItem[] = [];
 				try {
 					if (DefineGenerator.getIfCurrentPositionIsInDefine(position)) {
-						itemsToReturn = JSDefineCompletionItems;
+						itemsToReturn = await JSCompletionItemDAO.getLanguageSpecificCompletionItems();
 					} else {
 						itemsToReturn = JSCompletionItemDAO.generateUIClassCompletionItems();
 					}
@@ -51,6 +51,6 @@ export class CompletionItemRegistrator {
 		UI5Plugin.getInstance().addDisposable(JSMethodPropertyProvider);
 		UI5Plugin.getInstance().addDisposable(JSViewIDProvider);
 
-		FileWatcher.syncrhoniseJSDefineCompletionItems(JSDefineCompletionItems);
+		FileWatcher.syncrhoniseJSDefineCompletionItems(CompletionItemFactory.JSDefineCompletionItems);
 	}
 }

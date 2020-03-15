@@ -1,0 +1,198 @@
+[
+	{
+		"label": "XACT",
+		"description": "Accessibility"
+	},
+	{
+		"label": "XALT",
+		"description": "Alternative text"
+	},
+	{
+		"label": "XBCB",
+		"description": "Breadcrumb step"
+	},
+	{
+		"label": "XBLI",
+		"description": "Bullet list item text"
+	},
+	{
+		"label": "XBUT",
+		"description": "Button text"
+	},
+	{
+		"label": "XCAP",
+		"description": "Caption"
+	},
+	{
+		"label": "XCEL",
+		"description": "Cell"
+	},
+	{
+		"label": "XCKL",
+		"description": "Checkbox"
+	},
+	{
+		"label": "XCOL",
+		"description": "Column header"
+	},
+	{
+		"label": "XCRD",
+		"description": "Tabstrip"
+	},
+	{
+		"label": "XDAT",
+		"description": "Data navigation text"
+	},
+	{
+		"label": "XFLD",
+		"description": "Label"
+	},
+	{
+		"label": "XFRM",
+		"description": "Frame"
+	},
+	{
+		"label": "XGLS",
+		"description": "Term"
+	},
+	{
+		"label": "XGRP",
+		"description": "Group title"
+	},
+	{
+		"label": "XHED",
+		"description": "Heading"
+	},
+	{
+		"label": "XLGD",
+		"description": "Legend text"
+	},
+	{
+		"label": "XLNK",
+		"description": "Hyperlink text"
+	},
+	{
+		"label": "XLOG",
+		"description": "Log entry"
+	},
+	{
+		"label": "XLST",
+		"description": "List box item"
+	},
+	{
+		"label": "XMEN",
+		"description": "Menu header"
+	},
+	{
+		"label": "XMIT",
+		"description": "Menu item"
+	},
+	{
+		"label": "XMSG",
+		"description": "Message text"
+	},
+	{
+		"label": "XRBL",
+		"description": "Radio button"
+	},
+	{
+		"label": "XRMP",
+		"description": "Roadmap step"
+	},
+	{
+		"label": "XROW",
+		"description": "Table row heading"
+	},
+	{
+		"label": "XSEL",
+		"description": "Selection text"
+	},
+	{
+		"label": "XTBS",
+		"description": "Tab strip text"
+	},
+	{
+		"label": "XTIT",
+		"description": "Table title"
+	},
+	{
+		"label": "XTND",
+		"description": "Tree node text"
+	},
+	{
+		"label": "XTOL",
+		"description": "Quick info text"
+	},
+	{
+		"label": "XTXT",
+		"description": "General text"
+	},
+	{
+		"label": "YACT",
+		"description": "Accessibility (long)"
+	},
+	{
+		"label": "YBLI",
+		"description": "Bullet list item text"
+	},
+	{
+		"label": "YDEF",
+		"description": "Definition"
+	},
+	{
+		"label": "YDES",
+		"description": "Description"
+	},
+	{
+		"label": "YEXP",
+		"description": "Explanation"
+	},
+	{
+		"label": "YFAA",
+		"description": "FAQ answer"
+	},
+	{
+		"label": "YFAQ",
+		"description": "FAQ"
+	},
+	{
+		"label": "YGLS",
+		"description": "Glossary definition"
+	},
+	{
+		"label": "YINF",
+		"description": "Information"
+	},
+	{
+		"label": "YINS",
+		"description": "Instruction"
+	},
+	{
+		"label": "YLOG",
+		"description": "Log entry"
+	},
+	{
+		"label": "YMSE",
+		"description": "Error message"
+	},
+	{
+		"label": "YMSI",
+		"description": "Information message long"
+	},
+	{
+		"label": "YMSW",
+		"description": "Warning message"
+	},
+	{
+		"label": "YTEC",
+		"description": "Technical text"
+	},
+	{
+		"label": "YTIC",
+		"description": "Ticker / Marquee"
+	},
+	{
+		"label": "YTXT",
+		"description": "General text long"
+	}
+]

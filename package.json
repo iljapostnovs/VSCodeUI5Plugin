@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.9.2",
+	"version": "0.9.3",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"contributors": [
@@ -18,7 +18,7 @@
 	"icon": "images/ui5.png",
 	"homepage": "https://github.com/iljapostnovs/VSCodeUI5Plugin/blob/master/README.md",
 	"engines": {
-		"vscode": "^1.42.0"
+		"vscode": "^1.43.0"
 	},
 	"categories": [
 		"Extension Packs"
@@ -83,6 +83,25 @@
 						"sap.suite.ui.microchart"
 					],
 					"description": "List of libs to be loaded"
+				},
+				"ui5.plugin.addI18nTextLengthLimitation": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should text length be added to i18n text id (e.g. #YMSG,14)"
+				},
+				"ui5.plugin.textTransformationStrategy": {
+					"type": "string",
+					"enum": [
+						"Pascal Case",
+						"Snake Upper Case"
+					],
+					"default": "Pascal Case",
+					"description": "Case type which should be used for i18n text id proposal"
+				},
+				"ui5.plugin.askUserToConfirmI18nId": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should user confirm proposed i18n id"
 				}
 			}
 		},
@@ -121,13 +140,13 @@
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
 		"@types/line-column": "^1.0.0",
-		"@types/node": "^13.7.6",
+		"@types/node": "^13.9.1",
 		"@types/request-promise": "^4.1.45",
-		"@types/vscode": "^1.42.0",
+		"@types/vscode": "^1.43.0",
 		"ts-loader": "^6.2.1",
-		"tslint": "^6.0.0",
-		"typescript": "^3.8.2",
-		"webpack": "^4.41.6",
+		"tslint": "^6.1.0",
+		"typescript": "^3.8.3",
+		"webpack": "^4.42.0",
 		"webpack-cli": "^3.3.11"
 	},
 	"dependencies": {

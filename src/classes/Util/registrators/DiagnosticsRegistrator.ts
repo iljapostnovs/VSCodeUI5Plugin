@@ -9,7 +9,7 @@ export class DiagnosticsRegistrator {
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("xmlDiagnostics")) {
 			diagnosticCollection = vscode.languages.createDiagnosticCollection("XML");
 
-			if (vscode.window.activeTextEditor) {
+			if (vscode.window.activeTextEditor &&  vscode.window.activeTextEditor.document.fileName.endsWith(".xml")) {
 				this.updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
 			}
 

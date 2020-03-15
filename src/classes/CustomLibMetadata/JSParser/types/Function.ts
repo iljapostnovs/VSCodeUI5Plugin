@@ -151,7 +151,6 @@ export class JSFunction extends AbstractType {
 			let i = 0;
 			while (!definition && i < this.parts.length) {
 				if (this.parts[i] instanceof JSVariable && this.parts[i].parsedName === anything.parsedName && !this.theeseTwoAreRelated(anything, this.parts[i])) {
-					//TODO: endless recursion starts here.
 					definition = this.parts[i].findDefinition(anything);
 				} else if (this.parts[i] instanceof IfStatement) {
 					definition = this.parts[i].findDefinition(anything);
@@ -233,7 +232,7 @@ export class JSFunction extends AbstractType {
 
 		if (!isFunction && fullJSText.indexOf("=>") > -1) {
 			const textBeforeArrow = fullJSText.substring(0, fullJSText.indexOf("=>") + 2).trim();
-			const results = /(async\s)?([a-zA-Z]\w*|\((\{?[a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\}?)?\))\s?=>/.exec(textBeforeArrow);
+			const results = /(async\s?)?([a-zA-Z]\w*|\((\{?[a-zA-Z]\w*(,\s*[a-zA-Z]\w*)*\}?)?\))\s?=>/.exec(textBeforeArrow);
 			if (results && results[0] === textBeforeArrow) {
 				isFunction = true;
 			}

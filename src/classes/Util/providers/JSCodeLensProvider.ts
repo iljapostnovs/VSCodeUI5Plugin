@@ -9,7 +9,7 @@ export class JSCodeLensProvider {
 		return new Promise(resolve => {
 			let codeLenses: vscode.CodeLens[] = [];
 			setTimeout(() => {
-				SyntaxAnalyzer.setNewContentForCurrentUIClass();
+				// SyntaxAnalyzer.setNewContentForCurrentUIClass();
 				const currentClass = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 				if (currentClass) {
 					const UIClass = UIClassFactory.getUIClass(currentClass);

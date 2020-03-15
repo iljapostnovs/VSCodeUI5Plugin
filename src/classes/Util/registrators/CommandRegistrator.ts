@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { SAPUIDefineCommand } from "../../VSCommands/SAPUIDefineCommand";
 import { ViewControllerSwitcher } from "../../VSCommands/switchers/ViewControllerSwitcher";
 import { ClearCacheCommand } from "../../VSCommands/ClearCacheCommand";
-import { ExportToI18NCommand } from "../../VSCommands/ExportToI18NCommand";
+import { ExportToI18NCommand } from "../../VSCommands/i18ncommand/ExportToI18NCommand";
 import { InsertCustomClassNameCommand } from "../../VSCommands/InsertCustomClassNameCommand";
 import { UI5Plugin } from "../../../UI5Plugin";
 

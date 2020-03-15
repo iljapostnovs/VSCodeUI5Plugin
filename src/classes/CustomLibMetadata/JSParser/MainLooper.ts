@@ -96,8 +96,14 @@ export class MainLooper {
 					let definitions;
 					let definitionBody;
 					if (!currentText.endsWith(";")) {
-						definitions = this.startAnalysing(javascript.substring(currentIndex, javascript.length), ";");//think about formatter: Formatter,
+						const definitionsComma = this.startAnalysing(javascript.substring(currentIndex, javascript.length), ",");
+						const definitionCommaBody = definitionsComma.reduce((accumulator, definition) => accumulator += definition.getFullBody(), "");
+						definitions = this.startAnalysing(javascript.substring(currentIndex, javascript.length), ";");
 						definitionBody = definitions.reduce((accumulator, definition) => accumulator += definition.getFullBody(), "");
+						if (definitionCommaBody.length < definitionBody.length) {
+							definitions = definitionsComma;
+							definitionBody = definitionCommaBody;
+						}
 					} else {
 						currentText = currentText.substring(0, currentText.length - 1);
 					}
@@ -136,7 +142,7 @@ export class MainLooper {
 		return parts;
 	}
 
-	static getEndOfChar(charBegin: string, charEnd:string, text: string) {
+	static getEndOfChar(charBegin: string, charEnd: string, text: string) {
 		let body: string = "";
 		let charOpened = false;
 		let charBeginQuantity = 0;
@@ -212,6 +218,11 @@ export class MainLooper {
 
 				results = rComments.exec(text);
 			}
+		} else {
+			ranges.push({
+				from: 0,
+				to: text.length
+			});
 		}
 
 		return ranges;
@@ -225,8 +236,10 @@ export class MainLooper {
 			const nextTwoChars = text.substring(i, i + 2);
 			if (nextTwoChars === "/*") {
 				iOpenedCommendCount++;
+				i++;
 			} else if (nextTwoChars === "*/") {
 				iClosedCommentCount++;
+				i++;
 			}
 		}
 

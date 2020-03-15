@@ -92,7 +92,7 @@ export abstract class AbstractType {
 
 	private findJSTypeWithSmallestDelta(data: findingData) {
 		const myCurrentDelta = Math.abs(this.positionEnd - data.position);
-		if (myCurrentDelta < data.delta) {
+		if (myCurrentDelta < data.delta && data.position < this.positionEnd && data.position > this.positionBegin) {
 			data.type = this;
 			data.delta = myCurrentDelta;
 		}
@@ -107,6 +107,16 @@ export abstract class AbstractType {
 		}
 
 		return data;
+	}
+
+	public findTypeInPosition(position: number) {
+		const data = this.findJSTypeWithSmallestDelta({
+			type: this,
+			position: position,
+			delta: Math.abs(this.positionEnd - position)
+		});
+
+		return data.type;
 	}
 
 	public setParent(parent: AbstractType) {

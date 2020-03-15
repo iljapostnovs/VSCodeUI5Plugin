@@ -22,76 +22,117 @@ export class XMLDynamicFactory {
 			const positionType = XMLParser.getPositionType(XMLText, currentPositionOffset);
 
 			if (positionType === PositionType.InTheTagAttributes) {
-				const className = XMLParser.getClassNameInPosition(XMLText, currentPositionOffset);
-				if (className) {
-					const UIClass = UIClassFactory.getUIClass(className);
-					let controllerMethods = XMLParser.getMethodsOfTheCurrentViewsController().map(method => method.name);
-					controllerMethods = [...new Set(controllerMethods)];
-					completionItems = this.getPropertyCompletionItemsFromClass(UIClass);
-					completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(UIClass, controllerMethods));
-					completionItems = completionItems.concat(this.getAggregationCompletionItemsFromClass(UIClass));
-					completionItems = completionItems.concat(this.getAssociationCompletionItemsFromClass(UIClass));
-				}
+				completionItems = this.getAttributes();
+
 			} else if (positionType === PositionType.InTheString) {
-				const positionBeforeString = XMLParser.getPositionBeforeStringBegining(XMLText, currentPositionOffset);
+				completionItems = this.getAtributeValues();
 
-				const className = XMLParser.getClassNameInPosition(XMLText, positionBeforeString);
-				if (className) {
-					const UIClass = UIClassFactory.getUIClass(className);
-					const attributeName = XMLParser.getNearestAttribute(XMLText, positionBeforeString);
-					const UIProperty = this.getUIPropertyRecursively(UIClass, attributeName);
-					if (UIProperty && UIProperty.typeValues.length > 0) {
-
-						completionItems = this.generateCompletionItemsFromTypeValues(UIProperty.typeValues);
-					} else if (UIProperty?.type === "string") {
-
-						const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
-						if (currentComponentName && ResourceModelData.resourceModels[currentComponentName]) {
-							const typeValues = ResourceModelData.resourceModels[currentComponentName];
-							completionItems = this.generateCompletionItemsFromTypeValues(typeValues);
-						}
-					} else {
-
-						const UIEvent = this.getUIEventRecursively(UIClass, attributeName);
-						if (UIEvent) {
-							const methods = XMLParser.getMethodsOfTheCurrentViewsController()
-							.map(classMethod =>
-								({
-									text: classMethod.name,
-									description: classMethod.description
-								})
-							);
-							completionItems = this.generateCompletionItemsFromTypeValues(methods);
-						}
-					}
-				}
 			} else if (positionType === PositionType.InTheClassName) {
-				const libName = XMLParser.getLibraryNameInPosition(XMLText, currentPositionOffset);
-				if (libName) {
-					const currentTagText = XMLParser.getCurrentTagText(XMLText, currentPositionOffset);
-					let tagPrefix = XMLParser.getTagPrefix(currentTagText);
-					tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
-					const nodeDAO = new SAPNodeDAO();
-					const XMLClassFactoryInstance = new XMLClassFactory();
-					if (libName.startsWith("sap.")) {
-						const standardCompletionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
-						completionItems = standardCompletionItems.reduce((accumulator: vscode.CompletionItem[], completionItem) => {
-							if (completionItem.label.startsWith(libName)) {
-								const node = nodeDAO.findNode(completionItem.label);
-								const newCompletionItem = XMLClassFactoryInstance.generateXMLClassCompletionItemFromSAPNode(node, tagPrefix);
-								newCompletionItem.label = completionItem.label.replace(`${libName}.`, "");
-								accumulator.push(newCompletionItem);
-							}
-							return accumulator;
-						}, []);
-					} else {
-						//TODO: Logic for custom classes
+
+				completionItems = this.getTags();
+			}
+		}
+
+		completionItems = this.removeDuplicateCompletionItems(completionItems);
+		return completionItems;
+	}
+
+
+	private getAtributeValues() {
+		let completionItems: vscode.CompletionItem[] = [];
+		const XMLText = vscode.window.activeTextEditor?.document.getText();
+		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
+
+		if (XMLText && currentPositionOffset) {
+			const positionBeforeString = XMLParser.getPositionBeforeStringBegining(XMLText, currentPositionOffset);
+
+			const className = XMLParser.getClassNameInPosition(XMLText, positionBeforeString);
+			if (className) {
+				const UIClass = UIClassFactory.getUIClass(className);
+				const attributeName = XMLParser.getNearestAttribute(XMLText, positionBeforeString);
+				const UIProperty = this.getUIPropertyRecursively(UIClass, attributeName);
+				if (UIProperty && UIProperty.typeValues.length > 0) {
+
+					completionItems = this.generateCompletionItemsFromTypeValues(UIProperty.typeValues);
+				} else if (UIProperty?.type === "string") {
+
+					const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
+					if (currentComponentName && ResourceModelData.resourceModels[currentComponentName]) {
+						const typeValues = ResourceModelData.resourceModels[currentComponentName];
+						completionItems = this.generateCompletionItemsFromTypeValues(typeValues);
+					}
+				} else {
+
+					const UIEvent = this.getUIEventRecursively(UIClass, attributeName);
+					if (UIEvent) {
+						const methods = XMLParser.getMethodsOfTheCurrentViewsController()
+						.map(classMethod =>
+							({
+								text: classMethod.name,
+								description: classMethod.description
+							})
+						);
+						completionItems = this.generateCompletionItemsFromTypeValues(methods);
 					}
 				}
 			}
 		}
 
-		completionItems = this.removeDuplicateCompletionItems(completionItems);
+		return completionItems;
+	}
+
+	private getTags() {
+		let completionItems: vscode.CompletionItem[] = [];
+		const XMLText = vscode.window.activeTextEditor?.document.getText();
+		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
+
+		if (XMLText && currentPositionOffset) {
+			const libName = XMLParser.getLibraryNameInPosition(XMLText, currentPositionOffset);
+			if (libName) {
+				const currentTagText = XMLParser.getCurrentTagText(XMLText, currentPositionOffset);
+				let tagPrefix = XMLParser.getTagPrefix(currentTagText);
+				tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
+				const nodeDAO = new SAPNodeDAO();
+				const XMLClassFactoryInstance = new XMLClassFactory();
+				if (libName.startsWith("sap.")) {
+					const standardCompletionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
+					completionItems = standardCompletionItems.reduce((accumulator: vscode.CompletionItem[], completionItem) => {
+						if (completionItem.label.startsWith(libName)) {
+							const node = nodeDAO.findNode(completionItem.label);
+							const newCompletionItem = XMLClassFactoryInstance.generateXMLClassCompletionItemFromSAPNode(node, tagPrefix);
+							newCompletionItem.label = completionItem.label.replace(`${libName}.`, "");
+							accumulator.push(newCompletionItem);
+						}
+						return accumulator;
+					}, []);
+				} else {
+					//TODO: Logic for custom classes
+				}
+			}
+		}
+
+		return completionItems;
+	}
+
+	private getAttributes() {
+		let completionItems: vscode.CompletionItem[] = [];
+
+		const XMLText = vscode.window.activeTextEditor?.document.getText();
+		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
+
+		if (XMLText && currentPositionOffset) {
+			const className = XMLParser.getClassNameInPosition(XMLText, currentPositionOffset);
+			if (className) {
+				const UIClass = UIClassFactory.getUIClass(className);
+				let controllerMethods = XMLParser.getMethodsOfTheCurrentViewsController().map(method => method.name);
+				controllerMethods = [...new Set(controllerMethods)];
+				completionItems = this.getPropertyCompletionItemsFromClass(UIClass);
+				completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(UIClass, controllerMethods));
+				completionItems = completionItems.concat(this.getAggregationCompletionItemsFromClass(UIClass));
+				completionItems = completionItems.concat(this.getAssociationCompletionItemsFromClass(UIClass));
+			}
+		}
+
 		return completionItems;
 	}
 

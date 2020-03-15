@@ -121,7 +121,7 @@ export class FileReader {
 	}
 
 	public static getManifestsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
-		const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
+		const src = this.getSrcFolderName();
 		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
 		const manifestPaths = glob.sync(`${wsFolderFSPath}/${src}/manifest.json`);
 		const manifests: manifestPaths[] = manifestPaths.map(manifestPath => {
@@ -192,7 +192,7 @@ export class FileReader {
 
 	private static readAllViewsAndSaveInCache() {
 		const wsFolders = workspace.workspaceFolders || [];
-		const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
+		const src = this.getSrcFolderName();
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
 			const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.view.xml`);
@@ -375,6 +375,22 @@ export class FileReader {
 		if (currentClassName) {
 			return this.getManifestForClass(currentClassName);
 		}
+	}
+
+	public static getSrcFolderName() {
+		const wsFolders = workspace.workspaceFolders || [];
+		let src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
+		for (const wsFolder of wsFolders) {
+			const srcPath = `${wsFolder.uri.fsPath}${fileSeparator}${src}`;
+			if (!fs.existsSync(srcPath)) {
+				const webappPath = `${wsFolder.uri.fsPath}${fileSeparator}webapp`;
+				if (fs.existsSync(webappPath)) {
+					src = "webapp";
+				}
+			}
+		}
+
+		return src;
 	}
 }
 

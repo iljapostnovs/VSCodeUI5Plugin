@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import { FileReader } from "../../Util/FileReader";
 import * as path from "path";
-const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
 const workspace = vscode.workspace;
@@ -99,7 +98,7 @@ export class WorkspaceCompletionItemFactory {
 
 	private findJSFilesInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
 		return new Promise(resolve => {
-			const src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
+			const src = FileReader.getSrcFolderName();
 
 			vscode.workspace
 			.findFiles(new vscode.RelativePattern(wsFolder, `${src}/**/*.js`))
