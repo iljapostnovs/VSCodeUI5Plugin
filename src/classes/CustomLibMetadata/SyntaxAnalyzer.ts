@@ -46,7 +46,7 @@ export class SyntaxAnalyzer {
 		return fieldsAndMethods;
 	}
 
-	static getClassNameOfTheVariable(variable?: string) {
+	static getClassNameOfTheVariable(variable?: string, setNewContentForClass: boolean = true) {
 		let UIClassName;
 		if (!variable) {
 			variable = this.getCurrentVariable();
@@ -56,7 +56,9 @@ export class SyntaxAnalyzer {
 
 		const activeTextEditor = vscode.window.activeTextEditor;
 		if (currentClassName && activeTextEditor) {
-			this.setNewContentForCurrentUIClass();
+			if (setNewContentForClass) {
+				this.setNewContentForCurrentUIClass();
+			}
 
 			const position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
 

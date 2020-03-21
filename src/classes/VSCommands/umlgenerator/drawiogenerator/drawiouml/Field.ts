@@ -4,6 +4,8 @@ import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 import { ClassHead } from "./ClassHead";
 import { SyntaxAnalyzer } from "../../../../CustomLibMetadata/SyntaxAnalyzer";
 import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
+import { UIClassDefinitionFinder } from "../../../../CustomLibMetadata/UI5Parser/UIClass/UIClassDefinitionFinder";
+import { UIClassFactory } from "../../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 
 export class Field implements IUMLGenerator, ITextLengthGettable {
 	id: number;
@@ -13,20 +15,25 @@ export class Field implements IUMLGenerator, ITextLengthGettable {
 		this.id = DrawIOUMLDiagram.getUniqueId();
 		this.UIField = UIField;
 		this.parent = parent;
-
-		if (!this.UIField.type) {
-			this.UIField.type = SyntaxAnalyzer.getClassNameOfTheVariable(`this.${this.UIField.name}`);
-		}
 	}
 	getTextLength(): number {
-		return `${this.UIField.name}: ${this.UIField.type}`.length;
+		return this.getValue().length;
 	}
-	generateXML(): string {
+
+	getValue() {
 		const isPrivate = this.UIField.name.startsWith("_");
 		const privateSign = isPrivate ? "-" : "+";
+		const value = `${privateSign} ${this.UIField.name}: ${this.UIField.type}`;
 
+		return value.replace(/\"/g, "").replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&apos;');
+	}
+	generateXML(): string {
 		return `
-		<mxCell id="${this.id}" value="${privateSign} ${this.UIField.name}: ${this.UIField.type}" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="${this.parent.id}">
+		<mxCell id="${this.id}" value="${this.getValue()}" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="${this.parent.id}">
 			<mxGeometry y="26" width="160" height="26" as="geometry" />
 		</mxCell>`;
 	}

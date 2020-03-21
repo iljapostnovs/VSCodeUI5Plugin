@@ -183,6 +183,12 @@ export class CustomUIClass extends AbstractUIClass {
 			}
 		}
 
+		this.fields.forEach(field => {
+			if (!field.type) {
+				field.type = this.getTypeFromHungariantNotation(field.name);
+			}
+		});
+
 		this.fillMethodsFromMetadata();
 	}
 
@@ -252,6 +258,36 @@ export class CustomUIClass extends AbstractUIClass {
 				description: part.jsType || ""
 			});
 		}
+	}
+
+	private getTypeFromHungariantNotation(variable: string) {
+		let type;
+		interface looseObject {
+			[key: string]: any;
+		}
+		const map: looseObject = {
+			$: "dom",
+			o: "object",
+			a: "array",
+			i: "int",
+			f: "float",
+			m: "map",
+			s: "string",
+			b: "boolean",
+			p: "Promise",
+			d: "Date",
+			r: "RegExp",
+			v: "any"
+		};
+
+		variable = variable.replace("_", "");
+		const firstChar = variable[0];
+		const secondChar = variable[1];
+		if (map[firstChar] && secondChar === secondChar.toUpperCase()) {
+			type = map[firstChar];
+		}
+
+		return type;
 	}
 
 	private fillMethodsFromMetadata() {

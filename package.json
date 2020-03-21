@@ -129,6 +129,10 @@
 			{
 				"command": "ui5plugin.generateUMLClassDiagram",
 				"title": "UI5: Generate UML Class diagram for current document"
+			},
+			{
+				"command": "ui5plugin.generateUMLClassDiagramsForWholeProject",
+				"title": "UI5: Generate UML Class diagram for whole project"
 			}
 		]
 	},

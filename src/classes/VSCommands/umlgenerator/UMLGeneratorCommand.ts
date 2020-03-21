@@ -3,6 +3,7 @@ import { UIClassFactory } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClas
 import { DrawIOUMLDiagram } from "./drawiogenerator/DrawIOUMLDiagram";
 import * as vscode from "vscode";
 import * as fs from "fs";
+import { MassDrawIOUMLDiagram } from "./drawiogenerator/MassDrawIOUMLDiagram";
 
 export class UMLGeneratorCommand {
 	static generateUMLForCurrentClass() {
@@ -17,5 +18,14 @@ export class UMLGeneratorCommand {
 
 			vscode.window.showInformationMessage("UML Diagram generated successfully");
 		}
+	}
+
+	static async generateUMLForWholeProject() {
+		const diagramXML = await MassDrawIOUMLDiagram.generateUMLClassDiagrams();
+		fs.writeFileSync(`C:\\Users\\Encraft\\Downloads\\ProjectUML.xml`, diagramXML, {
+			encoding: "utf8"
+		});
+
+		vscode.window.showInformationMessage("UML Diagram generated successfully");
 	}
 }

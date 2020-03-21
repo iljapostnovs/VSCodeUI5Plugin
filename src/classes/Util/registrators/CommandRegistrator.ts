@@ -16,12 +16,14 @@ export class CommandRegistrator {
 			const exportToI18NCommand = vscode.commands.registerCommand("ui5plugin.exportToi18n", ExportToI18NCommand.export);
 			const insertCustomClassNameCommand = vscode.commands.registerCommand("ui5plugin.insertCustomClassName", InsertCustomClassNameCommand.insertCustomClassName);
 			const generateUMLClassDiagramCommand = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagram", UMLGeneratorCommand.generateUMLForCurrentClass);
+			const generateUMLClassDiagramForWholeProject = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagramsForWholeProject", UMLGeneratorCommand.generateUMLForWholeProject);
 
 			UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
 			UI5Plugin.getInstance().addDisposable(switcherCommand);
 			UI5Plugin.getInstance().addDisposable(exportToI18NCommand);
 			UI5Plugin.getInstance().addDisposable(insertCustomClassNameCommand);
 			UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramCommand);
+			UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramForWholeProject);
 		} else {
 			const clearCacheCommand = vscode.commands.registerCommand("ui5plugin.clearCache", ClearCacheCommand.clearCache);
 			UI5Plugin.getInstance().addDisposable(clearCacheCommand);
