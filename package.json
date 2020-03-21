@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.9.4",
+	"version": "0.9.5",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"contributors": [
@@ -125,6 +125,10 @@
 			{
 				"command": "ui5plugin.insertCustomClassName",
 				"title": "UI5: Insert Custom Class name"
+			},
+			{
+				"command": "ui5plugin.generateUMLClassDiagram",
+				"title": "UI5: Generate UML Class diagram for current document"
 			}
 		]
 	},

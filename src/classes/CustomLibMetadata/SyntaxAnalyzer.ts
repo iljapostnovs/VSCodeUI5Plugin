@@ -244,7 +244,7 @@ export class SyntaxAnalyzer {
 
 	public static isSeparator(char: string, ignoreParentheses: boolean) {
 		//TODO: sync with FileReader
-		const separators = ", 	;\n\t\r=:";
+		const separators = ", 	;\n\t\r=:[";
 
 		return separators.indexOf(char) > -1 || (char === "(" && !ignoreParentheses);
 	}

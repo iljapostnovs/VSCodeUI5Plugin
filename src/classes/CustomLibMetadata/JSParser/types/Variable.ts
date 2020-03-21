@@ -1,6 +1,7 @@
 import { AbstractType } from "./AbstractType";
 import { JSClass } from "./Class";
 import { JSArray } from "./Array";
+import { JSFunctionCall } from "./FunctionCall";
 
 export class JSVariable extends AbstractType {
 	public jsType: string | undefined;
@@ -41,7 +42,7 @@ export class JSVariable extends AbstractType {
 		}
 
 		/* if no definition in this variable, search in parent */
-		if (!definition && this.parts.length === 1 && this.parts[0] instanceof JSVariable && this.parent) {
+		if (!definition && this.parts.length === 1 && (this.parts[0] instanceof JSVariable || this.parts[0] instanceof JSFunctionCall) && this.parent) {
 			definition = this.parent.findDefinition(this.parts[0]);
 
 			if (definition && definition instanceof JSVariable) {

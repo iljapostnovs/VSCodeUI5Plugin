@@ -128,48 +128,9 @@ export class CustomUIClass extends AbstractUIClass {
 
 	private fillMethodsAndFields() {
 		if (this.classBody) {
-			//find all variables
-			const allVariables = DifferentJobs.getAllVariables(this.classBody);
+			this.finishParsing();
 
-			//transform all var types to types from UI Define dot notation
-			allVariables.forEach(variable => {
-				if (variable.jsType) {
-					const classNameDotNotation = this.getClassNameFromUIDefine(variable.jsType);
-					if (classNameDotNotation) {
-						variable.jsType = classNameDotNotation;
-					}
-				} else {
-					const classNameDotNotation = this.getClassNameFromUIDefine(variable.parsedName);
-					if (classNameDotNotation) {
-						variable.jsType = classNameDotNotation;
-					}
-				}
-			});
-
-			//fill getView types from view
-			const allGetViewVars = allVariables.filter(
-				variable => variable.parsedBody.startsWith("this.getView().byId(") ||
-							variable.parsedBody.startsWith("this.byId(")
-			);
-			allGetViewVars.forEach(jsVariable => {
-				const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*(?="\))/.exec(jsVariable.parsedBody);
-				const controlId = controlIdResult ? controlIdResult[0] : "";
-				if (controlId) {
-					jsVariable.jsType = FileReader.getClassNameFromView(this.className, controlId);
-				}
-			});
-
-			const allThisVariables = allVariables.filter(jsVariable => jsVariable.parsedName.startsWith("this."));
-			//share all this variable data types
-			allThisVariables.forEach(thisVariable => {
-				if (!thisVariable.jsType) {
-					const theSameThisVariable = allThisVariables.find(correspondingThisVariable => correspondingThisVariable.parsedName === thisVariable.parsedName && thisVariable !== correspondingThisVariable && !!correspondingThisVariable.jsType);
-					if (theSameThisVariable) {
-						thisVariable.jsType = theSameThisVariable.jsType;
-					}
-
-				}
-			});
+			const allThisVariables = DifferentJobs.getAllVariables(this.classBody).filter(jsVariable => jsVariable.parsedName.startsWith("this."));
 
 			allThisVariables.forEach(thisVariable => {
 				this.fields.push({
@@ -225,6 +186,53 @@ export class CustomUIClass extends AbstractUIClass {
 		this.fillMethodsFromMetadata();
 	}
 
+	private finishParsing() {
+		if (this.classBody) {
+			//find all variables
+			const allVariables = DifferentJobs.getAllVariables(this.classBody);
+
+			//transform all var types to types from UI Define dot notation
+			allVariables.forEach(variable => {
+				if (variable.jsType) {
+					const classNameDotNotation = this.getClassNameFromUIDefine(variable.jsType);
+					if (classNameDotNotation) {
+						variable.jsType = classNameDotNotation;
+					}
+				} else {
+					const classNameDotNotation = this.getClassNameFromUIDefine(variable.parsedName);
+					if (classNameDotNotation) {
+						variable.jsType = classNameDotNotation;
+					}
+				}
+			});
+
+			//fill getView types from view
+			const allGetViewVars = allVariables.filter(
+				variable => variable.parsedBody.startsWith("this.getView().byId(") ||
+							variable.parsedBody.startsWith("this.byId(")
+			);
+			allGetViewVars.forEach(jsVariable => {
+				const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*(?="\))/.exec(jsVariable.parsedBody);
+				const controlId = controlIdResult ? controlIdResult[0] : "";
+				if (controlId) {
+					jsVariable.jsType = FileReader.getClassNameFromView(this.className, controlId);
+				}
+			});
+
+			const allThisVariables = allVariables.filter(jsVariable => jsVariable.parsedName.startsWith("this."));
+			//share all this variable data types
+			allThisVariables.forEach(thisVariable => {
+				if (!thisVariable.jsType) {
+					const theSameThisVariable = allThisVariables.find(correspondingThisVariable => correspondingThisVariable.parsedName === thisVariable.parsedName && thisVariable !== correspondingThisVariable && !!correspondingThisVariable.jsType);
+					if (theSameThisVariable) {
+						thisVariable.jsType = theSameThisVariable.jsType;
+					}
+
+				}
+			});
+		}
+	}
+
 	private fillMethodsAndFieldsFromPart(part: AbstractType, partName: string) {
 		if (part instanceof JSFunction) {
 			const description = `(${part.params.map(part => part.parsedName).join(", ")}) : ${(part.returnType ? part.returnType : "void")}`;
@@ -267,7 +275,7 @@ export class CustomUIClass extends AbstractUIClass {
 				name: getter,
 				description: `Getter for property ${property.name}`,
 				params: [],
-				returnType: "void"
+				returnType: property.type || "void"
 			});
 
 			aMethods.push({
@@ -309,7 +317,7 @@ export class CustomUIClass extends AbstractUIClass {
 					name: methodName,
 					description: `Generic method from ${aggregation.name} aggregation`,
 					params: [],
-					returnType: "void"
+					returnType: aggregation.type || "void"
 				});
 			});
 
@@ -330,7 +338,7 @@ export class CustomUIClass extends AbstractUIClass {
 					name: eventMethod,
 					description: `Generic method for event ${event.name}`,
 					params: [],
-					returnType: "void"
+					returnType: this.className
 				});
 			});
 		});
@@ -360,7 +368,7 @@ export class CustomUIClass extends AbstractUIClass {
 					name: methodName,
 					description: `Generic method from ${association.name} association`,
 					params: [],
-					returnType: "void"
+					returnType: association.type || this.className
 				});
 			});
 
@@ -455,6 +463,7 @@ export class CustomUIClass extends AbstractUIClass {
 	private fillUI5Metadata() {
 		if (this.classBody) {
 			const metadataExists = this.classBody.partNames.indexOf("metadata") > -1;
+			const customMetadataExists = this.classBody.partNames.indexOf("customMetadata") > -1;
 
 			if (metadataExists) {
 				const metadataObjectIndex = this.classBody.partNames.indexOf("metadata");
@@ -463,7 +472,14 @@ export class CustomUIClass extends AbstractUIClass {
 				this.fillAggregations(<JSObject>metadataObject);
 				this.fillEvents(<JSObject>metadataObject);
 				this.fillProperties(<JSObject>metadataObject);
-				this.fillAssociations(<JSObject>metadataObject);
+				this.fillByAssociations(<JSObject>metadataObject);
+			}
+
+			if (customMetadataExists) {
+				const customMetadataObjectIndex = this.classBody.partNames.indexOf("customMetadata");
+				const customMetadataObject = this.classBody.parts[customMetadataObjectIndex];
+
+				this.fillByAssociations(<JSObject>customMetadataObject);
 			}
 		}
 	}
@@ -552,12 +568,12 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private fillAssociations(metadata: JSObject) {
+	private fillByAssociations(metadata: JSObject) {
 		const indexOfAssociations = metadata.partNames.indexOf("associations");
 
 		if (indexOfAssociations > -1) {
 			const associations = <JSObject>metadata.parts[indexOfAssociations];
-			this.associations = associations.partNames.map((partName, i) => {
+			this.associations = this.associations.concat(associations.partNames.map((partName, i) => {
 				const associationProps = <JSObject>associations.parts[i];
 
 				const associationTypeIndex = associationProps.partNames.indexOf("type");
@@ -591,7 +607,7 @@ export class CustomUIClass extends AbstractUIClass {
 					description: ""
 				};
 				return UIAssociations;
-			});
+			}));
 		}
 	}
 }
