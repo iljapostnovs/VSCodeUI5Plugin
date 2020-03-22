@@ -280,7 +280,7 @@ export class CustomUIClass extends AbstractUIClass {
 			v: "any"
 		};
 
-		variable = variable.replace("_", "");
+		variable = variable.replace("_", "").replace("this.", "");
 		const firstChar = variable[0];
 		const secondChar = variable[1];
 		if (map[firstChar] && secondChar === secondChar.toUpperCase()) {

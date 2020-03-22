@@ -4,10 +4,14 @@ import { FileReader } from "../../../Util/FileReader";
 import { UIClassFactory } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { DrawIOUMLDiagram } from "./DrawIOUMLDiagram";
 import * as vscode from "vscode";
+import { CustomUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
+import { DependencyLine } from "./drawiouml/lines/DependencyLine";
+import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
+import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
 
 export class MassDrawIOUMLDiagram {
 	static generateUMLClassDiagrams() {
-		return new Promise((resolve, reject) => {
+		return new Promise(resolve => {
 
 			const header = new Header();
 			const footer = new Footer();
@@ -21,6 +25,7 @@ export class MassDrawIOUMLDiagram {
 				const classNames = FileReader.getAllJSClassNamesFromProject();
 				const classQuantity = classNames.length;
 
+				const UMLDiagrams: DrawIOUMLDiagram[] = [];
 				let body = "";
 				for (const className of classNames) {
 					await (() => {
@@ -29,10 +34,11 @@ export class MassDrawIOUMLDiagram {
 							setTimeout(() => {
 								try {
 									const UIClass = UIClassFactory.getUIClass(className);
-									const UMLDiagram = new DrawIOUMLDiagram(UIClass);
+									const UMLDiagram = new DrawIOUMLDiagram(UIClass, header);
+									UMLDiagrams.push(UMLDiagram);
 									UMLDiagram.xAxis = xAxis;
 
-									body += UMLDiagram.generateBody(header);
+									body += UMLDiagram.generateBody();
 									xAxis += UMLDiagram.width + 10;
 
 									progress.report({message: `${className} generated`, increment: Math.round(100 / classQuantity)});
@@ -45,7 +51,26 @@ export class MassDrawIOUMLDiagram {
 					})();
 				}
 
-				const UMLDiagram = header.generateXML() + body + footer.generateXML();
+				let lines = "";
+				UMLDiagrams.forEach(UMLDiagram => {
+					const UIClass = UMLDiagram.UIClass;
+					if (UIClass instanceof CustomUIClass) {
+						UIClass.UIDefine.forEach(define => {
+							const accordingUMLDiagram = UMLDiagrams.find(diagram => diagram.UIClass.className === define.classNameDotNotation);
+							if (accordingUMLDiagram) {
+								let line: IUMLGenerator;
+								if (accordingUMLDiagram.UIClass.className === UMLDiagram.UIClass.parentClassNameDotNotation) {
+									line = new ImplementationLine(header, {source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead});
+								} else {
+									line = new DependencyLine(header, {source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead});
+								}
+								lines += line.generateXML();
+							}
+						});
+					}
+				});
+
+				const UMLDiagram = header.generateXML() + lines + body + footer.generateXML();
 				resolve(UMLDiagram);
 			});
 		});

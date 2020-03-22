@@ -11,13 +11,14 @@ import { SyntaxAnalyzer } from "../../../CustomLibMetadata/SyntaxAnalyzer";
 import { UIClassDefinitionFinder } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassDefinitionFinder";
 
 export class DrawIOUMLDiagram {
-	private readonly UIClass: AbstractUIClass;
-	private static id = 2;
+	readonly UIClass: AbstractUIClass;
+	static id = 2;
 	public xAxis = 70;
 	public width = 0;
-
-	private static readonly pixelsPerChar = 7;
-	constructor(UIClass: AbstractUIClass) {
+	private static readonly pixelsPerChar = 6;
+	readonly classHead: ClassHead;
+	readonly header: Header;
+	constructor(UIClass: AbstractUIClass, header: Header = new Header()) {
 		this.UIClass = UIClass;
 
 		this.UIClass.fields.forEach(field => {
@@ -35,43 +36,39 @@ export class DrawIOUMLDiagram {
 				method.returnType = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, 1, 0) || "void";
 			}
 		});
-	}
 
-	private findTypes() {
-
+		this.header = header;
+		this.classHead = new ClassHead(this.UIClass, header);
 	}
 	static getUniqueId() {
 		return ++this.id;
 	}
 	generateUMLClassDiagram() {
-		const header = new Header();
-		const footer = new Footer();
+		const body = this.generateBody();
 
-		const body = this.generateBody(header);
-
-		const UMLDiagram = header.generateXML() + body + footer.generateXML();
+		const UMLDiagram = this.header.generateXML() + body + new Footer().generateXML();
 
 		return UMLDiagram;
 	}
 
-	generateBody(header: Header) {
-		const classHead = new ClassHead(this.UIClass, header);
-		classHead.xAxis = this.xAxis;
-		const separator = new Separator(classHead);
-		const properties = this.UIClass.properties.map(property => new Property(property, classHead));
-		const fields = this.UIClass.fields.map(field => new Field(field, classHead));
-		const methods = this.UIClass.methods.map(method => new Method(method, classHead));
+	generateBody() {
+		this.classHead.xAxis = this.xAxis;
+		const separator = new Separator(this.classHead);
+		const properties = this.UIClass.properties.map(property => new Property(property, this.classHead));
+		const fields = this.UIClass.fields.map(field => new Field(field, this.classHead));
+		const methods = this.UIClass.methods.map(method => new Method(method, this.classHead));
 
 		let items: ITextLengthGettable[] = properties;
 		items = items.concat(methods);
 		items = items.concat(fields);
-		items = items.concat(classHead);
+		items = items.concat(this.classHead);
 
 		const longestTextLength = this.getLongestTextLength(items);
-		this.width = DrawIOUMLDiagram.pixelsPerChar * longestTextLength;
-		classHead.width = this.width;
+		const pixelsPerChar = longestTextLength === this.classHead.getTextLength() ? DrawIOUMLDiagram.pixelsPerChar + 1 : DrawIOUMLDiagram.pixelsPerChar;
+		this.width = pixelsPerChar * longestTextLength;
+		this.classHead.width = this.width;
 
-		return 	classHead.generateXML() +
+		return 	this.classHead.generateXML() +
 				properties.map(property => property.generateXML()).join("") +
 				fields.map(field => field.generateXML()).join("") +
 				separator.generateXML() +

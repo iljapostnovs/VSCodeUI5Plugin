@@ -16,7 +16,8 @@ interface UIClassMap {
 export class UIClassFactory {
 	private static readonly UIClasses: UIClassMap = {
 		Promise: new JSClass("Promise"),
-		array: new JSClass("array")
+		array: new JSClass("array"),
+		string: new JSClass("string")
 	};
 
 	private static getInstance(className: string, documentText?: string) {

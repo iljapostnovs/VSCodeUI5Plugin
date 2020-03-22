@@ -1,5 +1,16 @@
 import { AbstractUIClass, UIMethod } from "./AbstractUIClass";
 import { MainLooper } from "../../JSParser/MainLooper";
+function getAllFuncs(toCheck: any) {
+	let props: string[] = [];
+	let obj = toCheck;
+	do {
+		props = props.concat(Object.getOwnPropertyNames(obj));
+	} while (obj = Object.getPrototypeOf(obj));
+
+	return props.sort().filter(function(e, i, arr) {
+		if (e!=arr[i+1] && typeof toCheck[e] == 'function') return true;
+	});
+}
 const classData: {[key: string]: {methods: UIMethod[]}} = {
 	Promise: {
 		methods: [{
@@ -22,62 +33,32 @@ const classData: {[key: string]: {methods: UIMethod[]}} = {
 		}]
 	},
 	array: {
-		methods: [{
-			name: "map",
-			params: ["function"],
-			description: "map",
-			returnType: "array"
-		},{
-			name: "find",
-			params: ["function"],
-			description: "find",
-			returnType: "any"
-		},{
-			name: "filter",
-			params: ["function"],
-			description: "filter",
-			returnType: "array"
-		},{
-			name: "forEach",
-			params: ["function"],
-			description: "forEach",
-			returnType: "void"
-		},{
-			name: "some",
-			params: ["function"],
-			description: "some",
-			returnType: "boolean"
-		},{
-			name: "reduce",
-			params: ["function"],
-			description: "reduce",
-			returnType: "array"
-		},{
-			name: "concat",
-			params: ["array"],
-			description: "concat",
-			returnType: "array"
-		},{
-			name: "pop",
-			params: [],
-			description: "pop",
-			returnType: "any"
-		},{
-			name: "push",
-			params: [],
-			description: "push",
-			returnType: "void"
-		},{
-			name: "slice",
-			params: ["begin", "end"],
-			description: "slice",
-			returnType: "array"
-		},{
-			name: "splice",
-			params: ["start", "deleteCount"],
-			description: "splice",
-			returnType: "array"
-		}]
+		methods: getAllFuncs([]).reduce((accumulator: UIMethod[], key: any) => {
+			if (Array.prototype[key] instanceof Function) {
+				accumulator.push({
+					name: key,
+					params: [],
+					description: key,
+					returnType: "array"
+				});
+			}
+
+			return accumulator;
+		}, [])
+	},
+	string: {
+		methods: getAllFuncs("").reduce((accumulator: UIMethod[], key: any) => {
+			if (Array.prototype[key] instanceof Function) {
+				accumulator.push({
+					name: key,
+					params: [],
+					description: key,
+					returnType: "string"
+				});
+			}
+
+			return accumulator;
+		}, [])
 	}
 };
 export class JSClass extends AbstractUIClass {
