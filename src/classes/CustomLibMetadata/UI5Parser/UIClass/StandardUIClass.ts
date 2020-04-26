@@ -43,7 +43,7 @@ export class StandardUIClass extends AbstractUIClass {
 		return this.nodeDAO.findNode(className);
 	}
 
-	public removeTags(text: string) {
+	public removeTags(text: string = "") {
 		let textWithoutTags = "";
 		let i = 0;
 

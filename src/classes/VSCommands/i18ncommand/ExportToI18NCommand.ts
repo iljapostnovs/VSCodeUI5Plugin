@@ -83,6 +83,7 @@ export class ExportToI18NCommand {
 	}
 
 	private static generateProposedI18nID(text: string) {
+		text = text.trim();
 		let proposedi18NValue = "";
 
 		const editor = vscode.window.activeTextEditor;
