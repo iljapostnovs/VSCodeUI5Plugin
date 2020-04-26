@@ -74,3 +74,6 @@
 
 ## 0.9.4 (15-03-2020)
 * Bugfixes
+
+## 0.9.5 (26-04-2020)
+* Bugfix for XML Linting and View -> Controller switching issues
