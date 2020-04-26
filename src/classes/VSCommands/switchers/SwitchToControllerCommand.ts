@@ -43,7 +43,7 @@ export class SwitchToControllerCommand {
 
 	private static getControllerNameOfCurrentView() {
 		const currentViewContent = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.getText() : "";
-		const result = /(?<=controllerName=").*(?=")/.exec(currentViewContent) || [];
+		const result = /(?<=controllerName=").*?(?=")/.exec(currentViewContent) || [];
 		return result[0] ? result[0] : null;
 	}
 
