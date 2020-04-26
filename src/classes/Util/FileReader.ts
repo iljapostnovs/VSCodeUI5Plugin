@@ -234,7 +234,7 @@ export class FileReader {
 	}
 
 	static getControllerNameFromView(viewContent: string) {
-		const controllerNameResult = /(?<=controllerName=").*(?=")/.exec(viewContent);
+		const controllerNameResult = /(?<=controllerName=").*?(?=")/.exec(viewContent);
 
 		return controllerNameResult ? controllerNameResult[0] : undefined;
 	}
