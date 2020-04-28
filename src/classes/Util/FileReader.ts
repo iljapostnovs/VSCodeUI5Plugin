@@ -97,8 +97,8 @@ export class FileReader {
 		if (this.manifests.length === 0) {
 			this.fetchAllWorkspaceManifests();
 		}
-
-		returnManifest = this.manifests.find(UIManifest => className.indexOf(UIManifest.componentName) > -1);
+		
+		returnManifest = this.manifests.find(UIManifest => className.indexOf(UIManifest.componentName + ".") > -1);
 
 		return returnManifest;
 	}
