@@ -9,18 +9,22 @@ export class DiagnosticsRegistrator {
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("xmlDiagnostics")) {
 			diagnosticCollection = vscode.languages.createDiagnosticCollection("XML");
 
-			if (vscode.window.activeTextEditor &&  vscode.window.activeTextEditor.document.fileName.endsWith(".xml")) {
-				this.updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
+			if (vscode.window.activeTextEditor) {
+				const fileName = vscode.window.activeTextEditor.document.fileName;
+				if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
+					this.updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
+				}
 			}
 
 			const changeActiveTextEditor = vscode.window.onDidChangeActiveTextEditor(editor => {
-				if (editor && editor.document.fileName.endsWith(".xml")) {
+				const fileName = editor?.document.fileName;
+				if (editor && fileName && (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml"))) {
 					this.updateDiagnostics(editor.document, diagnosticCollection);
 				}
 			});
 
 			const textDocumentChange = vscode.workspace.onDidChangeTextDocument(event => {
-				if (event && event.document.fileName.endsWith(".xml")) {
+				if (event && (event.document.fileName.endsWith(".fragment.xml") || event.document.fileName.endsWith(".view.xml"))) {
 					this.updateDiagnostics(event.document, diagnosticCollection);
 				}
 			});
