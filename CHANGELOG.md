@@ -76,4 +76,7 @@
 * Bugfixes
 
 ## 0.9.5 (26-04-2020)
-* Bugfix for XML Linting and View -> Controller switching issues
+* Bugfix for XML Linting and View -> Controller switching issues (thanks to @jeremies)
+
+## 0.9.6 (29-04-2020)
+* Bugfix for multiple workspaces, when there are multiple apps with same component name begining (thanks to @CarlosOrozco88)
