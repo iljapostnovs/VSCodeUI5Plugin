@@ -10,7 +10,7 @@ import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
 import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
 
 export class MassDrawIOUMLDiagram {
-	static generateUMLClassDiagrams(wsFolder: vscode.WorkspaceFolder) {
+	static generateUMLClassDiagrams(wsFolder: vscode.WorkspaceFolder): Promise<string> {
 		return new Promise(resolve => {
 
 			const header = new Header();
