@@ -210,25 +210,19 @@ export class FileReader {
 		}
 	}
 
-	public static getAllJSClassNamesFromProject() {
+	public static getAllJSClassNamesFromProject(wsFolder: vscode.WorkspaceFolder) {
 		let classNames: string[] = [];
-		const activeFileUri = vscode.window.activeTextEditor?.document.uri;
-		if (activeFileUri) {
-			const wsFolder = workspace.getWorkspaceFolder(activeFileUri);
-			if (wsFolder) {
-				const src = this.getSrcFolderName();
-				const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-				const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.js`);
-				classNames = viewPaths.reduce((accumulator: string[], viewPath) => {
-					const path = this.getClassNameFromPath(viewPath);
-					if (path) {
-						accumulator.push(path);
-					}
-
-					return accumulator;
-				}, []);
+		const src = this.getSrcFolderName();
+		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+		const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.js`);
+		classNames = viewPaths.reduce((accumulator: string[], viewPath) => {
+			const path = this.getClassNameFromPath(viewPath);
+			if (path) {
+				accumulator.push(path);
 			}
-		}
+
+			return accumulator;
+		}, []);
 
 		return classNames;
 	}

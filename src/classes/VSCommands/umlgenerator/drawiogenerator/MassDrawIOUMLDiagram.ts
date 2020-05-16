@@ -10,7 +10,7 @@ import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
 import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
 
 export class MassDrawIOUMLDiagram {
-	static generateUMLClassDiagrams() {
+	static generateUMLClassDiagrams(wsFolder: vscode.WorkspaceFolder) {
 		return new Promise(resolve => {
 
 			const header = new Header();
@@ -22,7 +22,7 @@ export class MassDrawIOUMLDiagram {
 				title: "Generating UML",
 				cancellable: false
 			}, async progress => {
-				const classNames = FileReader.getAllJSClassNamesFromProject();
+				const classNames = FileReader.getAllJSClassNamesFromProject(wsFolder);
 				const classQuantity = classNames.length;
 
 				const UMLDiagrams: DrawIOUMLDiagram[] = [];

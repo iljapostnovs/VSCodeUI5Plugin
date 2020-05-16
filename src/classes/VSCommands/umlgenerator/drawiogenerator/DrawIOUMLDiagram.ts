@@ -67,6 +67,7 @@ export class DrawIOUMLDiagram {
 		const pixelsPerChar = longestTextLength === this.classHead.getTextLength() ? DrawIOUMLDiagram.pixelsPerChar + 1 : DrawIOUMLDiagram.pixelsPerChar;
 		this.width = pixelsPerChar * longestTextLength;
 		this.classHead.width = this.width;
+		this.classHead.height = items.length * this.classHead.height;
 
 		return 	this.classHead.generateXML() +
 				properties.map(property => property.generateXML()).join("") +
