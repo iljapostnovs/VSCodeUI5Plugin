@@ -51,28 +51,34 @@ export class MassDrawIOUMLDiagram {
 					})();
 				}
 
-				let lines = "";
-				UMLDiagrams.forEach(UMLDiagram => {
-					const UIClass = UMLDiagram.UIClass;
-					if (UIClass instanceof CustomUIClass) {
-						UIClass.UIDefine.forEach(define => {
-							const accordingUMLDiagram = UMLDiagrams.find(diagram => diagram.UIClass.className === define.classNameDotNotation);
-							if (accordingUMLDiagram) {
-								let line: IUMLGenerator;
-								if (accordingUMLDiagram.UIClass.className === UMLDiagram.UIClass.parentClassNameDotNotation) {
-									line = new ImplementationLine(header, {source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead});
-								} else {
-									line = new DependencyLine(header, {source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead});
-								}
-								lines += line.generateXML();
-							}
-						});
-					}
-				});
+				const lines = MassDrawIOUMLDiagram.generateLines(UMLDiagrams, header);
 
 				const UMLDiagram = header.generateXML() + lines + body + footer.generateXML();
 				resolve(UMLDiagram);
 			});
 		});
+	}
+
+	private static generateLines(UMLDiagrams: DrawIOUMLDiagram[], header: Header) {
+		let lines = "";
+		UMLDiagrams.forEach(UMLDiagram => {
+			const UIClass = UMLDiagram.UIClass;
+			if (UIClass instanceof CustomUIClass) {
+				UIClass.UIDefine.forEach(define => {
+					const accordingUMLDiagram = UMLDiagrams.find(diagram => diagram.UIClass.className === define.classNameDotNotation);
+					if (accordingUMLDiagram) {
+						let line: IUMLGenerator;
+						if (accordingUMLDiagram.UIClass.className === UMLDiagram.UIClass.parentClassNameDotNotation) {
+							line = new ImplementationLine(header, {source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead});
+						} else {
+							line = new DependencyLine(header, {source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead});
+						}
+						lines += line.generateXML();
+					}
+				});
+			}
+		});
+
+		return lines;
 	}
 }
