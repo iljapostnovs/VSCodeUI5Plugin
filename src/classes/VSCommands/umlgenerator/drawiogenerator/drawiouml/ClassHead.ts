@@ -8,7 +8,7 @@ export class ClassHead implements IUMLGenerator, ITextLengthGettable {
 	id: number;
 	parent: Header;
 	width: number = 160;
-	height: number = 80;
+	height: number = 26;
 	xAxis: number = 70;
 	UIClass: AbstractUIClass;
 	constructor(UIClass: AbstractUIClass, parent: Header) {

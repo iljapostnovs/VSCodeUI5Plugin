@@ -40,9 +40,11 @@ export class DrawIOUMLDiagram {
 		this.header = header;
 		this.classHead = new ClassHead(this.UIClass, header);
 	}
+
 	static getUniqueId() {
 		return ++this.id;
 	}
+
 	generateUMLClassDiagram() {
 		const body = this.generateBody();
 

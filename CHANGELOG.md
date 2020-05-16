@@ -80,3 +80,7 @@
 
 ## 0.9.6 (29-04-2020)
 * Bugfix for multiple workspaces, when there are multiple apps with same component name begining (thanks to @CarlosOrozco88)
+
+## 0.9.7 (16-05-2020)
+* Bugfixes for XML Linting
+* UML Class Generation for .js files added
