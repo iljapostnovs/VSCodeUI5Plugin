@@ -97,7 +97,7 @@ export class FileReader {
 		if (this.manifests.length === 0) {
 			this.fetchAllWorkspaceManifests();
 		}
-		
+
 		returnManifest = this.manifests.find(UIManifest => className.indexOf(UIManifest.componentName + ".") > -1);
 
 		return returnManifest;
@@ -175,10 +175,10 @@ export class FileReader {
 			const classTagParts = classTag.split(":");
 			let className;
 			if (classTagParts.length === 1) {
-				regExpBase = `(?<=xmlns=").*(?=")`;
+				regExpBase = `(?<=xmlns=").*?(?=")`;
 				className = classTagParts[0];
 			} else {
-				regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*(?=")`;
+				regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*?(?=")`;
 				className = classTagParts[1];
 			}
 			const rClassName = new RegExp(regExpBase);

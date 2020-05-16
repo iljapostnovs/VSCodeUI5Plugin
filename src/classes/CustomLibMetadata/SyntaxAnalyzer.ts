@@ -319,7 +319,7 @@ export class SyntaxAnalyzer {
 		if (currentClass) {
 			const viewText = FileReader.getViewText(currentClass);
 			if (viewText) {
-				const IdsResult = viewText.match(/(?<=id=").*(?="\s)/g);
+				const IdsResult = viewText.match(/(?<=\sid=").*?(?="\s)/g);
 				if (IdsResult) {
 					completionItems = IdsResult.map(Id => {
 						const uniqueViewId: UICompletionItem = {
@@ -346,7 +346,7 @@ export class SyntaxAnalyzer {
 			documentText = vscode.window.activeTextEditor.document.getText();
 		}
 		if (documentText) {
-			const rCurrentClass = /(?<=.*\..*(extend|declareStaticClass)\(\").*(?=\")/;
+			const rCurrentClass = /(?<=.*\..*?(extend|declareStaticClass)\(\").*?(?=\")/;
 			const rCurrentClassResults = rCurrentClass.exec(documentText);
 			if (rCurrentClassResults) {
 				returnClassName = rCurrentClassResults[0];

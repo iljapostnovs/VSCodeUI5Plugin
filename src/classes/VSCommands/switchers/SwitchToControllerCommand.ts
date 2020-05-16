@@ -52,7 +52,7 @@ export class SwitchToControllerCommand {
 	}
 
 	private static getControllerName(controller: string) {
-		const result = /(?<=.extend\(").*(?=")/.exec(controller);
+		const result = /(?<=.extend\(").*?(?=")/.exec(controller);
 
 		return result && result[0] ? result[0] : null;
 	}

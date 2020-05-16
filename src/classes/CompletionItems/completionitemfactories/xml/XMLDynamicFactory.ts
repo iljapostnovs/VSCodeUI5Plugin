@@ -89,7 +89,7 @@ export class XMLDynamicFactory {
 		if (XMLText && currentPositionOffset) {
 			const libName = XMLParser.getLibraryNameInPosition(XMLText, currentPositionOffset);
 			if (libName) {
-				const currentTagText = XMLParser.getCurrentTagText(XMLText, currentPositionOffset);
+				const currentTagText = XMLParser.getTagInPosition(XMLText, currentPositionOffset);
 				let tagPrefix = XMLParser.getTagPrefix(currentTagText);
 				tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
 				const nodeDAO = new SAPNodeDAO();

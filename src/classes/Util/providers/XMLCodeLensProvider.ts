@@ -15,7 +15,7 @@ export class XMLCodeLensProvider {
 			const currentResourceModelTexts = ResourceModelData.resourceModels[componentName];
 			const XMLText = document.getText();
 
-			const rTranslatedTexts = /\{i18n>.*\}/g;
+			const rTranslatedTexts = /\{i18n>.*?\}/g;
 			let results = rTranslatedTexts.exec(XMLText);
 			while (results) {
 				const positionBegin = document.positionAt(results.index);
@@ -25,7 +25,7 @@ export class XMLCodeLensProvider {
 				const codeLens = new vscode.CodeLens(range, {
 					command: "ui5plugin.gotoresourcemodel",
 					tooltip: currentText?.description || "",
-					arguments: [/(?<=\{i18n>).*(?=\})/.exec(currentText?.text || "")],
+					arguments: [/(?<=\{i18n>).*?(?=\})/.exec(currentText?.text || "")],
 					title: currentText?.description || ""
 				});
 

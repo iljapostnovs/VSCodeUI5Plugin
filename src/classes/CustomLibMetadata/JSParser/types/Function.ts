@@ -213,7 +213,7 @@ export class JSFunction extends AbstractType {
 		if (isAsync) {
 			returnType = "Promise";
 		} else {
-			const jsTypeResult = /(?<=return(s?)\s\{).*(?=\})/.exec(jsDoc);
+			const jsTypeResult = /(?<=return(s?)\s\{).*?(?=\})/.exec(jsDoc);
 			if (jsTypeResult) {
 				returnType = jsTypeResult[0];
 				if (returnType.endsWith("[]")) {
