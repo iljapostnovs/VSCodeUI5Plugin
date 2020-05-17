@@ -183,13 +183,15 @@ export class CustomUIClass extends AbstractUIClass {
 			}
 		}
 
+		this.fillMethodsFromMetadata();
+	}
+
+	public fillTypesFromHungarionNotation() {
 		this.fields.forEach(field => {
 			if (!field.type) {
 				field.type = this.getTypeFromHungariantNotation(field.name);
 			}
 		});
-
-		this.fillMethodsFromMetadata();
 	}
 
 	private finishParsing() {

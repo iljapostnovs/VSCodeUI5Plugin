@@ -76,9 +76,9 @@ Extension listens for .js file creation event (rename technically is file deleti
 
 ----------
 ## UML Class Diagram generation
-You can generate UML Class diagram for .js file.<br/>
-You can generate UML Class diagram either for currently active document or for the whole project.<br/>
-The generated diagram should be imported to draw.io<br/>
+UML Class diagram can be generated either for currently active document or for the whole project.<br/>
+The generated diagram can be imported to draw.io<br/>
+![UML.png](/images/UML.png)
 
 
 ----------

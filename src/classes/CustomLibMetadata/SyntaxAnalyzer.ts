@@ -3,6 +3,7 @@ import { UIClassFactory, FieldsAndMethods } from "./UI5Parser/UIClass/UIClassFac
 import { FileReader } from "../Util/FileReader";
 import { UIClassDefinitionFinder } from "./UI5Parser/UIClass/UIClassDefinitionFinder";
 import { AbstractUIClass } from "./UI5Parser/UIClass/AbstractUIClass";
+import { CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
 
 export class SyntaxAnalyzer {
 	static splitVariableIntoParts(variable: string) {

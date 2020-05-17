@@ -9,6 +9,7 @@ import { DifferentJobs } from "../../JSParser/DifferentJobs";
 import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
 import { AbstractUIClass } from "./AbstractUIClass";
 import { URLBuilder } from "../../../Util/URLBuilder";
+import { JSVariable } from "../../JSParser/types/Variable";
 
 export class UIClassDefinitionFinder {
 	public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {
@@ -114,9 +115,15 @@ export class UIClassDefinitionFinder {
 			variables.forEach(variable => {
 				if (!variable.jsType && variable.parts.length > 0) {
 					const allPartsAreFunctionCalls = !variable.parts.find(part => !(part instanceof JSFunctionCall));
+					const theOnlyPartIsAnotherVariable = variable.parts.length === 1 && variable.parts[0] instanceof JSVariable;
 					if (allPartsAreFunctionCalls) {
 						const variableParts = SyntaxAnalyzer.splitVariableIntoParts(variable.parsedBody);
 						variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, undefined, variable.positionEnd);
+					} else if (theOnlyPartIsAnotherVariable) {
+						const definition = <JSVariable>variable.findDefinition(variable);
+						if (definition && definition instanceof JSVariable) {
+							variable.jsType = definition.jsType;
+						}
 					}
 				}
 			});

@@ -9,6 +9,7 @@ import { Separator } from "./drawiouml/Separator";
 import { ITextLengthGettable } from "./drawiouml/interfaces/ITextLengthGettable";
 import { SyntaxAnalyzer } from "../../../CustomLibMetadata/SyntaxAnalyzer";
 import { UIClassDefinitionFinder } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassDefinitionFinder";
+import { CustomUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
 
 export class DrawIOUMLDiagram {
 	readonly UIClass: AbstractUIClass;
@@ -36,6 +37,11 @@ export class DrawIOUMLDiagram {
 				method.returnType = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, 1, 0) || "void";
 			}
 		});
+
+		if (this.UIClass instanceof CustomUIClass) {
+			this.UIClass.fillTypesFromHungarionNotation();
+		}
+
 
 		this.header = header;
 		this.classHead = new ClassHead(this.UIClass, header);
