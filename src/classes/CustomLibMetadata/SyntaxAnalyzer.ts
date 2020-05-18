@@ -3,6 +3,7 @@ import { UIClassFactory, FieldsAndMethods } from "./UI5Parser/UIClass/UIClassFac
 import { FileReader } from "../Util/FileReader";
 import { UIClassDefinitionFinder } from "./UI5Parser/UIClass/UIClassDefinitionFinder";
 import { AbstractUIClass } from "./UI5Parser/UIClass/AbstractUIClass";
+import { CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
 
 export class SyntaxAnalyzer {
 	static splitVariableIntoParts(variable: string) {
@@ -46,7 +47,7 @@ export class SyntaxAnalyzer {
 		return fieldsAndMethods;
 	}
 
-	static getClassNameOfTheVariable(variable?: string) {
+	static getClassNameOfTheVariable(variable?: string, setNewContentForClass: boolean = true) {
 		let UIClassName;
 		if (!variable) {
 			variable = this.getCurrentVariable();
@@ -56,7 +57,9 @@ export class SyntaxAnalyzer {
 
 		const activeTextEditor = vscode.window.activeTextEditor;
 		if (currentClassName && activeTextEditor) {
-			this.setNewContentForCurrentUIClass();
+			if (setNewContentForClass) {
+				this.setNewContentForCurrentUIClass();
+			}
 
 			const position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
 
@@ -244,7 +247,7 @@ export class SyntaxAnalyzer {
 
 	public static isSeparator(char: string, ignoreParentheses: boolean) {
 		//TODO: sync with FileReader
-		const separators = ", 	;\n\t\r=:";
+		const separators = ", 	;\n\t\r=:[";
 
 		return separators.indexOf(char) > -1 || (char === "(" && !ignoreParentheses);
 	}
@@ -317,7 +320,7 @@ export class SyntaxAnalyzer {
 		if (currentClass) {
 			const viewText = FileReader.getViewText(currentClass);
 			if (viewText) {
-				const IdsResult = viewText.match(/(?<=id=").*(?="\s)/g);
+				const IdsResult = viewText.match(/(?<=\sid=").*?(?="\s)/g);
 				if (IdsResult) {
 					completionItems = IdsResult.map(Id => {
 						const uniqueViewId: UICompletionItem = {
@@ -344,7 +347,7 @@ export class SyntaxAnalyzer {
 			documentText = vscode.window.activeTextEditor.document.getText();
 		}
 		if (documentText) {
-			const rCurrentClass = /(?<=.*\..*(extend|declareStaticClass)\(\").*(?=\")/;
+			const rCurrentClass = /(?<=.*\..*?(extend|declareStaticClass)\(\").*?(?=\")/;
 			const rCurrentClassResults = rCurrentClass.exec(documentText);
 			if (rCurrentClassResults) {
 				returnClassName = rCurrentClassResults[0];

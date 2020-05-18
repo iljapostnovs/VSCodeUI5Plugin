@@ -12,28 +12,34 @@ export enum PositionType {
 
 export class XMLParser {
 	static getLibraryNameInPosition(XMLViewText: string, currentPosition: number) {
-		const currentTagText = this.getCurrentTagText(XMLViewText, currentPosition);
+		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition);
 		const tagPrefix = this.getTagPrefix(currentTagText);
-		const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix);
+		const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix, currentPosition);
 
 		return libraryPath;
 	}
 	static getClassNameInPosition(XMLViewText: string, currentPosition: number) {
 		let currentPositionClass = "";
-		const currentTagText = this.getCurrentTagText(XMLViewText, currentPosition);
+		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition);
 		const tagPrefix = this.getTagPrefix(currentTagText);
 		const className = this.getClassNameFromTag(currentTagText);
 		if (className) {
-			const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix);
+			const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix, currentPosition);
 			currentPositionClass = [libraryPath, className].join(".");
 		}
 
 		return currentPositionClass;
 	}
 
-	public static getCurrentTagText(XMLViewText: string, currentPosition: number) {
-		let tagText = "";
-		let i = currentPosition;
+	public static getTagInPosition(XMLViewText: string, position: number) {
+		const { positionBegin, positionEnd } =this.getTagBeginEndPosition(XMLViewText, position);
+		const tagText = XMLViewText.substring(positionBegin, positionEnd);
+
+		return tagText;
+	}
+
+	private static getTagBeginEndPosition(XMLViewText: string, position: number) {
+		let i = position;
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 
@@ -47,9 +53,10 @@ export class XMLParser {
 		}
 		tagPositionEnd = i + 1;
 
-		tagText = XMLViewText.substring(tagPositionBegin, tagPositionEnd);
-
-		return tagText;
+		return {
+			positionBegin: tagPositionBegin,
+			positionEnd: tagPositionEnd
+		};
 	}
 
 	static getIfPositionIsInString(XMLViewText: string, position: number) {
@@ -107,19 +114,50 @@ export class XMLParser {
 		return className;
 	}
 
-	static getLibraryPathFromTagPrefix(XMLViewText: string, tagPrefix: string) {
+	static getLibraryPathFromTagPrefix(XMLViewText: string, tagPrefix: string, position: number) {
 		let libraryPath = "";
 		let regExpBase;
+		let delta = 0;
+		const results = [];
+		const tagPositionEnd = this.getTagBeginEndPosition(XMLViewText, position).positionEnd;
+
 		if (!tagPrefix) {
 			regExpBase = `(?<=xmlns\\s?=\\s?").*?(?=")`;
 		} else {
 			regExpBase = `(?<=xmlns(:${tagPrefix})\\s?=\\s?").*?(?=")`;
 		}
-		const rClassName = new RegExp(regExpBase);
-		const classNameResult = rClassName.exec(XMLViewText);
+		const rClassName = new RegExp(regExpBase, "g");
 
-		if (classNameResult) {
-			libraryPath = classNameResult[0];
+		let classNameResult = rClassName.exec(XMLViewText);
+
+		while (classNameResult) {
+			results.push({
+				result: classNameResult[0],
+				position: classNameResult.index
+			});
+
+			classNameResult = rClassName.exec(XMLViewText);
+		}
+
+		if (results.length > 0) {
+			//needed for in-tag xmlns declaration
+			//TODO: Make it hierarchical
+			delta = Math.abs(position - results[0].position);
+			let closestReult = results[0];
+			results.forEach(result => {
+				const currentDelta = Math.abs(position - result.position);
+
+				if (currentDelta < delta && result.position < tagPositionEnd) {
+					libraryPath = result.result;
+
+					delta = currentDelta;
+					closestReult = result;
+				}
+			});
+
+			if (closestReult) {
+				libraryPath = closestReult.result;
+			}
 		}
 
 		return libraryPath;

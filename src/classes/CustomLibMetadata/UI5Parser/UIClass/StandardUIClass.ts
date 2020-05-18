@@ -26,17 +26,16 @@ export class StandardUIClass extends AbstractUIClass {
 	private getStandardClassMethods(className: string, isParent: boolean) {
 		let classMethods:StandardClassUIMethod[] = [];
 		const SAPNode = this.findSAPNode(className);
-		classMethods = SAPNode.getMethods().reduce((accumulator: StandardClassUIMethod[], method: any) => {
-			accumulator.push({
-				name: method.name,
+		classMethods = SAPNode.getMethods().map((method: any) => {
+			return {
+				name: method.name.replace(`${this.className}.`, ""),
 				description: this.removeTags(method.code),
 				params: method.parameters ? method.parameters.map((parameter: any) => parameter.name + (parameter.optional ? "?" : "")) : [],
 				returnType: method.returnValue ? method.returnValue.type : "void",
 				isFromParent: !isParent,
 				api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name)
-			});
-			return accumulator;
-		}, []);
+			};
+		});
 		return classMethods;
 	}
 
@@ -44,7 +43,7 @@ export class StandardUIClass extends AbstractUIClass {
 		return this.nodeDAO.findNode(className);
 	}
 
-	private removeTags(text: string) {
+	public removeTags(text: string = "") {
 		let textWithoutTags = "";
 		let i = 0;
 

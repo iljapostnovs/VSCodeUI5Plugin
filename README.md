@@ -75,6 +75,13 @@ Extension listens for .js file creation event (rename technically is file deleti
 ![AutomaticClassNameReplacingOnRename](/images/AutomaticClassNameReplacingOnRename.gif)
 
 ----------
+## UML Class Diagram generation
+UML Class diagram can be generated either for currently active document or for the whole project.<br/>
+The generated diagram can be imported to draw.io<br/>
+![UML.png](/images/UML.png)
+
+
+----------
 ## Settings
 Eight settings are available for extension configuration:<br/>
 ![Settings](/images/Settings.png)

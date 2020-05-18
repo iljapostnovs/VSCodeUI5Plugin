@@ -38,7 +38,7 @@ export class XMLLinter {
 				const className = XMLParser.getClassNameFromTag(tag.text);
 
 				if (className) {
-					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(document, tagPrefix);
+					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(document, tagPrefix, tag.positionEnd);
 					const classOfTheTag = [libraryPath, className].join(".");
 					tagAttributes.forEach(tagAttribute => {
 						const attributeValidation = this.validateTagAttribute(classOfTheTag, tagAttribute);
@@ -135,10 +135,11 @@ export class XMLLinter {
 		} else if (property && property.typeValues.length > 0) {
 			isValueValid = !!property.typeValues.find(typeValue => typeValue.text === attributeValue);
 		} else if (property?.type === "boolean") {
-			isValueValid = attributeValue === "true" || attributeValue === "false";
+			isValueValid = ["true", "false"].indexOf(attributeValue) > -1;
 		} else if (property?.type === "int") {
 			isValueValid = isNumeric(attributeValue);
 		} else if (event && XMLParser.getControllerNameOfTheCurrentDocument()) {
+			attributeValue = attributeValue.replace(".", "");
 			isValueValid = !!XMLParser.getMethodsOfTheCurrentViewsController().find(method => method.name === attributeValue);
 		}
 

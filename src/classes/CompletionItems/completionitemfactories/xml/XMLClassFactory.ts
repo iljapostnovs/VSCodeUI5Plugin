@@ -11,6 +11,7 @@ import { SAPNodeAggregationGetterStrategy } from "../../../CodeGenerators/aggreg
 import { AbstractUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { SAPClassPropertyGetterStrategy } from "../../../CodeGenerators/property/strategies/SAPClassPropertyGetterStrategy";
 import { SAPClassAggregationGetterStrategy } from "../../../CodeGenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
+import { StandardUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/StandardUIClass";
 
 export class XMLClassFactory {
 	private readonly nodeDAO = new SAPNodeDAO();
@@ -61,7 +62,7 @@ export class XMLClassFactory {
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
 		mardownString.appendMarkdown(URLBuilder.getInstance().getMarkupUrlForClassApi(node));
-		mardownString.appendMarkdown(metadata.description);//TODO: Remove tags
+		mardownString.appendMarkdown(StandardUIClass.prototype.removeTags(metadata.description));
 
 		return this.generateXMLClassCompletionItemUsing({
 			markdown: mardownString,

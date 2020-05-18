@@ -112,22 +112,24 @@ export class UI5MetadataDAO {
 					resolve(namespaceDesignTimes[lib]);
 				}
 			} else {
-				const readPath: string = URLBuilder.getInstance().getDesignTimeUrlForLib(lib);
-				const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
-				const options: rp.RequestPromiseOptions | undefined = proxy ? {
-					proxy: proxy
-				} : undefined;
+				setTimeout(() => {
+					const readPath: string = URLBuilder.getInstance().getDesignTimeUrlForLib(lib);
+					const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
+					const options: rp.RequestPromiseOptions | undefined = proxy ? {
+						proxy: proxy
+					} : undefined;
 
-				namespaceDesignTimes[lib] = rp(readPath, options)
-				.then((data: any) => {
-					try {
-						namespaceDesignTimes[lib] = JSON.parse(data);
-						resolve(namespaceDesignTimes[lib]);
-					} catch (error) {
-						console.log(lib);
-					}
-				})
-				.catch(reject);
+					namespaceDesignTimes[lib] = rp(readPath, options)
+					.then((data: any) => {
+						try {
+							namespaceDesignTimes[lib] = JSON.parse(data);
+							resolve(namespaceDesignTimes[lib]);
+						} catch (error) {
+							console.log(lib);
+						}
+					})
+					.catch(reject);
+				}, Math.round(Math.random() * 150));
 			}
 		});
 	}

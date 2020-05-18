@@ -97,7 +97,7 @@ export class FileReader {
 		if (this.manifests.length === 0) {
 			this.fetchAllWorkspaceManifests();
 		}
-		
+
 		returnManifest = this.manifests.find(UIManifest => className.indexOf(UIManifest.componentName + ".") > -1);
 
 		return returnManifest;
@@ -175,10 +175,10 @@ export class FileReader {
 			const classTagParts = classTag.split(":");
 			let className;
 			if (classTagParts.length === 1) {
-				regExpBase = `(?<=xmlns=").*(?=")`;
+				regExpBase = `(?<=xmlns=").*?(?=")`;
 				className = classTagParts[0];
 			} else {
-				regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*(?=")`;
+				regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*?(?=")`;
 				className = classTagParts[1];
 			}
 			const rClassName = new RegExp(regExpBase);
@@ -208,6 +208,23 @@ export class FileReader {
 				}
 			});
 		}
+	}
+
+	public static getAllJSClassNamesFromProject(wsFolder: vscode.WorkspaceFolder) {
+		let classNames: string[] = [];
+		const src = this.getSrcFolderName();
+		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+		const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.js`);
+		classNames = viewPaths.reduce((accumulator: string[], viewPath) => {
+			const path = this.getClassNameFromPath(viewPath);
+			if (path) {
+				accumulator.push(path);
+			}
+
+			return accumulator;
+		}, []);
+
+		return classNames;
 	}
 
 	static getControllerNameFromView(viewContent: string) {
