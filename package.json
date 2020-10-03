@@ -18,7 +18,7 @@
 	"icon": "images/ui5.png",
 	"homepage": "https://github.com/iljapostnovs/VSCodeUI5Plugin/blob/master/README.md",
 	"engines": {
-		"vscode": "^1.45.1"
+		"vscode": "^1.49.0"
 	},
 	"categories": [
 		"Extension Packs"
