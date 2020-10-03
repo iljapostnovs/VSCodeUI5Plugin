@@ -1,5 +1,6 @@
 import { IAggregationGenerator } from "./interfaces/IAggregationGenerator";
 import { IAggregationGetterStrategy } from "./interfaces/IAggregationGetterStrategy";
+import vscode from "vscode";
 
 export class XMLAggregationGenerator implements IAggregationGenerator {
 	public generateAggregations(strategy: IAggregationGetterStrategy, classPrefix: string) {
@@ -13,9 +14,14 @@ export class XMLAggregationGenerator implements IAggregationGenerator {
 			aggregationString += `    </${classPrefix}${parsedAggregation.name}>\n`;
 		});
 
-		const parent = strategy.getParent();
-		if (parent) {
-			aggregationString += this.generateAggregations(parent, classPrefix);
+
+		const shouldAddInheritedProperties = vscode.workspace.getConfiguration("ui5.plugin").get("addInheritedPropertiesAndAggregations");
+
+		if (shouldAddInheritedProperties) {
+			const parent = strategy.getParent();
+			if (parent) {
+				aggregationString += this.generateAggregations(parent, classPrefix);
+			}
 		}
 
 		return aggregationString;

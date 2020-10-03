@@ -102,6 +102,11 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Should user confirm proposed i18n id"
+				},
+				"ui5.plugin.addInheritedPropertiesAndAggregations": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should inherited properties/aggregations be added in XML completion items"
 				}
 			}
 		},
