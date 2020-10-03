@@ -7,9 +7,14 @@ export class PascalCaseStrategy implements ITextTransformationStrategy {
 		const stringWithLiteralCharactersOnly = text.replace(/[^a-zA-Z| ]/g, "");
 
 		pascalCaseString = stringWithLiteralCharactersOnly.split(" ").map(stringPart => {
-			const firstCharUpper = stringPart[0].toUpperCase();
+			let returnString = "";
+			if (stringPart && stringPart[0]) {
+				const firstCharUpper = stringPart[0].toUpperCase();
+				returnString = `${firstCharUpper}${stringPart.substring(1, stringPart.length)}`;
 
-			return `${firstCharUpper}${stringPart.substring(1, stringPart.length)}`;
+			}
+
+			return returnString;
 		}).join("");
 
 		return pascalCaseString;
