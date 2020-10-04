@@ -155,6 +155,8 @@ export class XMLLinter {
 
 		if (isAttributeBinded || property?.type === "string") {
 			isValueValid = true;
+		} else if (property?.type === "sap.ui.core.URI") {
+			isValueValid = true;
 		} else if (property && property.typeValues.length > 0) {
 			isValueValid = !!property.typeValues.find(typeValue => typeValue.text === attributeValue);
 		} else if (property?.type === "boolean") {
