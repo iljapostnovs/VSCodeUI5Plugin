@@ -107,6 +107,11 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Should inherited properties/aggregations be added in XML completion items"
+				},
+				"ui5.plugin.dataSource": {
+					"type": "string",
+					"default": "https://ui5.sap.com/",
+					"description": "UI5 metadata source URL"
 				}
 			}
 		},
