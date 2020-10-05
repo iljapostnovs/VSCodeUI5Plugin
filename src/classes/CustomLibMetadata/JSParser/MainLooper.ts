@@ -71,14 +71,13 @@ export class MainLooper {
 			} else if (JSArray.isAnArray(currentChar)) {
 				syntaxType = new JSArray(currentText, javascript);
 
+			} else if (JSReturnKeyword.isReturnKeyword(currentText)) {
+				syntaxType = new JSReturnKeyword("", javascript);
 			} else if (JSObject.isAnObject(currentChar)) {
 				syntaxType = new JSObject(currentText, javascript);
 
 			} else if (JSString.isAString(currentChar)) {
 				syntaxType = new JSString("", javascript);
-
-			} else if (JSReturnKeyword.isReturnKeyword(currentText)) {
-				syntaxType = new JSReturnKeyword("", javascript);
 			}
 			if (syntaxType) {
 				parts.push(syntaxType);

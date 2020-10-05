@@ -89,3 +89,6 @@
 * Bugfixes
 * XML Linting now checks for unused namespaces
 * UI5 Metadata source URL can now be configured
+
+## 0.9.9 (05-10-2020)
+* Bugfixes

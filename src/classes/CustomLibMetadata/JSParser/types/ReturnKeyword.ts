@@ -23,6 +23,6 @@ export class JSReturnKeyword extends AbstractType {
 	}
 
 	static isReturnKeyword(text: string) {
-		return text.trim().startsWith("return ");
+		return text.trim().startsWith("return");
 	}
 }
