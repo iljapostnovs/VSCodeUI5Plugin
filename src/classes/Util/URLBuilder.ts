@@ -5,7 +5,7 @@ import { AbstractUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/Abstract
 export class URLBuilder {
 	private static URLBuilderInstance?: URLBuilder;
 	private readonly UI5Version: string;
-	private readonly URLHost = "https://ui5.sap.com/";
+	private readonly URLHost = vscode.workspace.getConfiguration("ui5.plugin").get("dataSource");
 
 	private constructor(UI5Version: string) {
 		this.UI5Version = UI5Version;

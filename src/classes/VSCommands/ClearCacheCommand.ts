@@ -12,9 +12,10 @@ export class ClearCacheCommand {
 				event.affectsConfiguration("ui5.plugin.xmlCodeLens") ||
 				event.affectsConfiguration("ui5.plugin.signatureHelp") ||
 				event.affectsConfiguration("ui5.plugin.libsToLoad") ||
+				event.affectsConfiguration("ui5.plugin.dataSource") ||
 				event.affectsConfiguration("ui5.plugin.xmlDiagnostics");
 
-			if (event.affectsConfiguration("ui5.plugin.libsToLoad")) {
+			if (event.affectsConfiguration("ui5.plugin.libsToLoad") || event.affectsConfiguration("ui5.plugin.dataSource")) {
 				this.clearCache();
 			} else if (isAnyConfigurationAffected) {
 				ClearCacheCommand.reloadWindow();

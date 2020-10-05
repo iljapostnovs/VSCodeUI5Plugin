@@ -36,7 +36,8 @@ export class SwitchToViewCommand {
 	}
 
 	private static async findAllViews() {
-		return workspace.findFiles("**/*.view.xml");
+		const sSrcFolderName = FileReader.getSrcFolderName();
+		return workspace.findFiles(`${sSrcFolderName}/**/*.view.xml`);
 	}
 
 	private static getControllerName() {

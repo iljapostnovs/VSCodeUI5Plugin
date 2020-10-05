@@ -84,3 +84,8 @@
 ## 0.9.7 (16-05-2020)
 * Bugfixes for XML Linting
 * UML Class Generation for .js files added
+
+## 0.9.8 (05-10-2020)
+* Bugfixes
+* XML Linting now checks for unused namespaces
+* UI5 Metadata source URL can now be configured

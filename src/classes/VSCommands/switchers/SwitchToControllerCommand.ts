@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
+import { FileReader } from "../../Util/FileReader";
 const workspace = vscode.workspace;
 
 export class SwitchToControllerCommand {
@@ -38,7 +39,8 @@ export class SwitchToControllerCommand {
 	}
 
 	private static async findAllControllers() {
-		return workspace.findFiles("**/*.controller.js");
+		const sSrcFolderName = FileReader.getSrcFolderName();
+		return workspace.findFiles(`${sSrcFolderName}/**/*.controller.js`);
 	}
 
 	private static getControllerNameOfCurrentView() {

@@ -58,6 +58,29 @@ export class XMLLinter {
 							}
 						}
 					});
+
+
+				}
+			}
+		});
+
+		const aPrefixes = document.match(/(?<=xmlns:).*?(?==)/g);
+		aPrefixes?.forEach(prefix => {
+			const aPrefixes = new RegExp(`(?<=<)${prefix}:`, "g").exec(document);
+			if (!aPrefixes || aPrefixes.length === 0) {
+
+				const positionBegin = document.indexOf(`xmlns:${prefix}=`);
+				const position = LineColumn(document).fromIndex(positionBegin - 1);
+				if (position) {
+					errors.push({
+						code: "UI5plugin",
+						message: "Unused namespace",
+						source: prefix,
+						range: new vscode.Range(
+							new vscode.Position(position.line - 1, position.col),
+							new vscode.Position(position.line - 1, position.col + "xmlns:".length + prefix.length)
+						)
+					});
 				}
 			}
 		});
@@ -131,6 +154,8 @@ export class XMLLinter {
 		const isAttributeBinded = attributeValue.startsWith("{") && attributeValue.endsWith("}");
 
 		if (isAttributeBinded || property?.type === "string") {
+			isValueValid = true;
+		} else if (property?.type === "sap.ui.core.URI") {
 			isValueValid = true;
 		} else if (property && property.typeValues.length > 0) {
 			isValueValid = !!property.typeValues.find(typeValue => typeValue.text === attributeValue);

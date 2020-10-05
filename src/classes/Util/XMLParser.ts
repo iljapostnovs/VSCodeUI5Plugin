@@ -11,6 +11,9 @@ export enum PositionType {
 }
 
 export class XMLParser {
+	static getXmlnsTagPrefixes(XMLViewText: string) {
+		return XMLViewText.match(/(?<=xmlns:).*?(?==)/g);
+	}
 	static getLibraryNameInPosition(XMLViewText: string, currentPosition: number) {
 		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition);
 		const tagPrefix = this.getTagPrefix(currentTagText);
