@@ -48,16 +48,27 @@ export class ExportToI18NCommand {
 
 	private static getDetlaForFirstOccuraneOf(sChar: string, iDelta: number) {
 		const editor = vscode.window.activeTextEditor;
-		let deltaToReturn = 1;
+		let deltaToReturn = iDelta;
 		if (editor) {
 			const startingPosition = editor.selection.start;
 			let selectedText = "";
 
 			while (selectedText[iDelta > 0 ? selectedText.length - 1 : 0] !== sChar) {
-				const range = new vscode.Range(startingPosition.translate(0, deltaToReturn < 0 ? deltaToReturn : 0), startingPosition.translate(0, deltaToReturn > 0 ? deltaToReturn : 0));
-				selectedText = editor.document.getText(range);
-				if (selectedText[iDelta > 0 ? selectedText.length - 1 : 0] !== sChar) {
-					deltaToReturn += iDelta;
+				try {
+					const range = new vscode.Range(
+						startingPosition.translate(0, deltaToReturn < 0 ? deltaToReturn : 0),
+						startingPosition.translate(0, deltaToReturn > 0 ? deltaToReturn : 0)
+					);
+					selectedText = editor.document.getText(range);
+					if (selectedText[iDelta > 0 ? selectedText.length - 1 : 0] !== sChar) {
+						deltaToReturn += iDelta;
+					}
+				} catch (error) {
+					throw new Error("No string for export to i18n found");
+				}
+
+				if (Math.abs(deltaToReturn) > editor.document.getText().length) {
+					throw new Error("No string for export to i18n found");
 				}
 			}
 
