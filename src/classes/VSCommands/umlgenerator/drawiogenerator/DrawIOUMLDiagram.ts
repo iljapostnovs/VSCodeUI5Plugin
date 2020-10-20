@@ -22,21 +22,21 @@ export class DrawIOUMLDiagram {
 	constructor(UIClass: AbstractUIClass, header: Header = new Header()) {
 		this.UIClass = UIClass;
 
-		this.UIClass.fields.forEach(field => {
-			if (!field.type) {
-				const variableParts = SyntaxAnalyzer.splitVariableIntoParts(`this.${field.name}`);
-				UIClassDefinitionFinder.getAdditionalJSTypesHierarchically(UIClass);
-				field.type = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, 1, 0);
-			}
-		});
+		// this.UIClass.fields.forEach(field => {
+		// 	if (!field.type) {
+		// 		const variableParts = SyntaxAnalyzer.splitVariableIntoParts(`this.${field.name}`);
+		// 		UIClassDefinitionFinder.getAdditionalJSTypesHierarchically(UIClass);
+		// 		field.type = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, 1, 0);
+		// 	}
+		// });
 
-		this.UIClass.methods.forEach(method => {
-			if (method.returnType === "void") {
-				const variableParts = SyntaxAnalyzer.splitVariableIntoParts(`this.${method.name}()`);
-				UIClassDefinitionFinder.getAdditionalJSTypesHierarchically(UIClass);
-				method.returnType = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, 1, 0) || "void";
-			}
-		});
+		// this.UIClass.methods.forEach(method => {
+		// 	if (method.returnType === "void") {
+		// 		const variableParts = SyntaxAnalyzer.splitVariableIntoParts(`this.${method.name}()`);
+		// 		UIClassDefinitionFinder.getAdditionalJSTypesHierarchically(UIClass);
+		// 		method.returnType = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, 1, 0) || "void";
+		// 	}
+		// });
 
 		if (this.UIClass instanceof CustomUIClass) {
 			this.UIClass.fillTypesFromHungarionNotation();

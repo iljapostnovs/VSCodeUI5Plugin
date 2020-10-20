@@ -5,11 +5,7 @@ import { CustomUIClass } from "./CustomUIClass";
 import { FileReader } from "../../../Util/FileReader";
 import LineColumn from 'line-column';
 import { StandardUIClass } from "./StandardUIClass";
-import { DifferentJobs } from "../../JSParser/DifferentJobs";
-import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
-import { AbstractUIClass } from "./AbstractUIClass";
 import { URLBuilder } from "../../../Util/URLBuilder";
-import { JSVariable } from "../../JSParser/types/Variable";
 
 export class UIClassDefinitionFinder {
 	public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {
@@ -69,28 +65,6 @@ export class UIClassDefinitionFinder {
 		return location;
 	}
 
-	static getVariableClass(variable?: string) {
-		let UIClassName: string | undefined;
-		if (!variable) {
-			variable = SyntaxAnalyzer.getCurrentVariable();
-		}
-		const textEditor = vscode.window.activeTextEditor;
-
-		if (textEditor) {
-			const document = textEditor.document;
-			const currentPositionOffset = document.offsetAt(textEditor.selection.start);
-			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-
-			if (currentClassName) {
-				const currentClass = UIClassFactory.getUIClass(currentClassName);
-				const variableParts = SyntaxAnalyzer.splitVariableIntoParts(variable);
-				UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, currentClass, undefined, currentPositionOffset);
-			}
-		}
-
-		return UIClassName;
-	}
-
 	private static openClassMethodInTheBrowser(classNameDotNotation: string, methodName: string) {
 		const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
 		if (UIClass instanceof StandardUIClass) {
@@ -106,27 +80,6 @@ export class UIClassDefinitionFinder {
 			} else if (UIClass.parentClassNameDotNotation) {
 				this.openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
 			}
-		}
-	}
-
-	public static getAdditionalJSTypesHierarchically(UIClass: AbstractUIClass) {
-		if (UIClass instanceof CustomUIClass &&  UIClass.classBody) {
-			const variables = DifferentJobs.getAllVariables(UIClass.classBody);
-			variables.forEach(variable => {
-				if (!variable.jsType && variable.parts.length > 0) {
-					const allPartsAreFunctionCalls = !variable.parts.find(part => !(part instanceof JSFunctionCall));
-					const theOnlyPartIsAnotherVariable = variable.parts.length === 1 && variable.parts[0] instanceof JSVariable;
-					if (allPartsAreFunctionCalls) {
-						const variableParts = SyntaxAnalyzer.splitVariableIntoParts(variable.parsedBody);
-						variable.jsType = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, UIClass, undefined, variable.positionEnd);
-					} else if (theOnlyPartIsAnotherVariable) {
-						const definition = <JSVariable>variable.findDefinition(variable);
-						if (definition && definition instanceof JSVariable) {
-							variable.jsType = definition.jsType;
-						}
-					}
-				}
-			});
 		}
 	}
 }
