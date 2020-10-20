@@ -227,6 +227,10 @@ export class SyntaxAnalyzer {
 					className = this.getClassNameFromAcornVariableDeclaration(neededDeclaration, UIClass);
 				} else {
 					className = this.getClassNameFromUIDefineDotNotation(currentNode.name, UIClass);
+
+					if (!className) {
+						className = this.getClassNameFromMethodParams(currentNode, UIClass);
+					}
 				}
 
 			}/* else {
@@ -345,14 +349,29 @@ export class SyntaxAnalyzer {
 		return className;
 	}
 
-	// private findLocalField
-
 	private static getClassNameFromUIDefineDotNotation(UIDefineClassName: string, UIClass: CustomUIClass) {
 		let className = "";
 		if (UIDefineClassName) {
 			const UIDefine = UIClass.UIDefine.find(UIDefine => UIDefine.className === UIDefineClassName);
 			if (UIDefine) {
 				className = UIDefine.classNameDotNotation;
+			}
+		}
+
+		return className;
+	}
+
+	private static getClassNameFromMethodParams(node: any, UIClass: CustomUIClass) {
+		let className = "";
+
+		const methodNode = this.findAcornNode(UIClass.acornClassBody?.properties, node.end - 1);
+		if (methodNode) {
+			const params = methodNode.value?.params;
+			if (params) {
+				const param = params.find((param: any) => param.name === node.name);
+				if (param) {
+					className = param.jsType;
+				}
 			}
 		}
 

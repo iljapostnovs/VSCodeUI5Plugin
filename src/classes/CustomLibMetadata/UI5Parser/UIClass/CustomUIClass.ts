@@ -42,6 +42,38 @@ export class CustomUIClass extends AbstractUIClass {
 		this.findParentClassNameDotNotation();
 		this.fillUI5Metadata();
 		this.fillMethodsAndFields();
+		this.enrichMethodInfoWithJSDocs();
+	}
+
+	private enrichMethodInfoWithJSDocs() {
+		if (this.acornClassBody) {
+			const methods = this.acornClassBody.properties.filter((node: any) => node.value.type === "FunctionExpression");
+			methods.forEach((method: any) => {
+				const methodName = method.key.name;
+				const params = method.value.params;
+				const comment = this.comments.find(comment => comment.start - method.start < 5);
+				if (comment) {
+					const paramTags = comment.jsdoc?.tags?.filter((tag: any) => tag.tag === "param");
+					const returnTag = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "return" || tag.tag === "returns");
+
+					if (paramTags) {
+						paramTags.forEach((tag: any) => {
+							const param = params.find((param: any) => param.name === tag.name);
+							if (param) {
+								param.jsType = tag.type;
+							}
+						});
+					}
+
+					if (returnTag) {
+						const UIMethod = this.methods.find(method => method.name === methodName);
+						if (UIMethod) {
+							UIMethod.returnType = returnTag.type;
+						}
+					}
+				}
+			});
+		}
 	}
 
 	private readFileContainingThisClassCode(documentText?: string) {
