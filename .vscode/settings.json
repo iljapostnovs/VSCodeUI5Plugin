@@ -1,5 +1,8 @@
 {
 	"editor.insertSpaces": false,
 	"editor.wordBasedSuggestions": false,
-	"javascript.suggest.names": false
+	"javascript.suggest.names": false,
+	"files.watcherExclude": {
+		"**/target": true
+	}
 }
