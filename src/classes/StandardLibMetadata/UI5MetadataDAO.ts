@@ -70,13 +70,6 @@ export class UI5MetadataPreloader {
 export class UI5MetadataDAO {
 	constructor() {}
 
-	// public async getMetadataForNode(node: SAPNode) {
-	// 	const libMetadata = await this.getMetadataForLib(node.getLib());
-	// 	const metadata = this.findNodeMetadata(node, libMetadata);
-
-	// 	return new UI5Metadata(metadata);
-	// }
-
 	public getPreloadedMetadataForNode(node: SAPNode) {
 		const libMetadata = namespaceDesignTimes[node.getLib()];
 		const metadata = this.findNodeMetadata(node, libMetadata);

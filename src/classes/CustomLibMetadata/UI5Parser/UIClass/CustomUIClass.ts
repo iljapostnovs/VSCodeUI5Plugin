@@ -1,7 +1,5 @@
 import { FileReader } from "../../../Util/FileReader";
-import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
-// import * as acorn from "acorn-loose";
 const commentParser = require("comment-parser");
 const acornLoose = require("acorn-loose");
 

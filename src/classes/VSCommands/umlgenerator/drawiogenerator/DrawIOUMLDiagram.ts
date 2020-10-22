@@ -8,7 +8,6 @@ import { Footer } from "./drawiouml/Footer";
 import { Separator } from "./drawiouml/Separator";
 import { ITextLengthGettable } from "./drawiouml/interfaces/ITextLengthGettable";
 import { SyntaxAnalyzer } from "../../../CustomLibMetadata/SyntaxAnalyzer";
-import { UIClassDefinitionFinder } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassDefinitionFinder";
 import { CustomUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
 
 export class DrawIOUMLDiagram {
