@@ -161,8 +161,8 @@ export class CustomUIClass extends AbstractUIClass {
 		if (this.fileContent) {
 			const args = this.fileContent?.body[0]?.expression?.arguments;
 			if (args && args.length === 2) {
-				const UIDefinePaths: string[] = args[0].elements?.map((part: any) => part.value);
-				const UIDefineClassNames: string[] = args[1].params?.map((part: any) => part.name);
+				const UIDefinePaths: string[] = args[0].elements?.map((part: any) => part.value) || [];
+				const UIDefineClassNames: string[] = args[1].params?.map((part: any) => part.name) || [];
 				UIDefine = UIDefineClassNames.map((className, index) : UIDefine => {
 					return {
 						path: UIDefinePaths[index],

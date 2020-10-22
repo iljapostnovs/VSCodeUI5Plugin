@@ -137,6 +137,14 @@ export class SyntaxAnalyzer {
 				innerNode = declaration.init;
 			}
 
+		} else if (node.type === "TryStatement") {
+			innerNode = this.findAcornNode(node.block.body, position);
+			if (!innerNode && node.handler) {
+				innerNode = this.findAcornNode(node.handler?.body?.body, position);
+			}
+			if (!innerNode && node.finalizer) {
+				innerNode = this.findAcornNode(node.finalizer?.body, position);
+			}
 		} else if (node.type === "CallExpression") {
 			innerNode = this.findAcornNode(node.arguments, position);
 			if (!innerNode) {
@@ -144,6 +152,8 @@ export class SyntaxAnalyzer {
 			}
 		} else if (node.type === "MemberExpression") {
 			innerNode = node.object;
+		} else if (node.type === "BlockStatement") {
+			innerNode = this.findAcornNode(node.body, position);
 		} else if (node.type === "AwaitExpression") {
 			innerNode = node.argument;
 		} else if (node.type === "ExpressionStatement") {
@@ -176,7 +186,8 @@ export class SyntaxAnalyzer {
 		} else if (
 			node.type === "WhileStatement" ||
 			node.type === "DoWhileStatement" ||
-			node.type === "ForStatement"
+			node.type === "ForStatement" ||
+			node.type === "ForInStatement"
 		) {
 			innerNode = this.findAcornNode(node.body.body, position);
 		}
@@ -483,6 +494,16 @@ export class SyntaxAnalyzer {
 			innerNodes.push(node.argument);
 		} else if (node.type === "ArrayExpression") {
 			innerNodes = node.elements;
+		} else if (node.type === "TryStatement") {
+			innerNodes = node.block.body;
+			if (node.handler?.body?.body) {
+				innerNodes = innerNodes.concat(node.handler.body.body);
+			}
+			if (node.finalizer?.body) {
+				innerNodes = innerNodes.concat(node.finalizer.body.body);
+			}
+		} else if (node.type === "BlockStatement") {
+			innerNodes = node.body;
 		} else if (node.type === "ReturnStatement") {
 			innerNodes.push(node.argument);
 		} else if (node.type === "IfStatement") {
@@ -509,7 +530,8 @@ export class SyntaxAnalyzer {
 		} else if (
 			node.type === "WhileStatement" ||
 			node.type === "DoWhileStatement" ||
-			node.type === "ForStatement"
+			node.type === "ForStatement" ||
+			node.type === "ForInStatement"
 		) {
 			innerNodes = node.body.body;
 		}
