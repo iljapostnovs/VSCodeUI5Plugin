@@ -1,10 +1,9 @@
 import { FileReader } from "../../../Util/FileReader";
-import { AbstractType } from "../../JSParser/types/AbstractType";
-import { JSFunction } from "../../JSParser/types/Function";
-import { JSObject } from "../../JSParser/types/Object";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
-import * as acorn from "acorn";
+// import * as acorn from "acorn-loose";
 const commentParser = require("comment-parser");
+const acornLoose = require("acorn-loose");
 
 interface UIDefine {
 	path: string;
@@ -20,18 +19,17 @@ interface Comment {
 }
 export interface CustomClassUIMethod extends UIMethod {
 	position?: number;
-	fnRef?: JSFunction;
 }
 export class CustomUIClass extends AbstractUIClass {
 	public methods: CustomClassUIMethod[] = [];
-	public classBody: JSObject | undefined;
 	public classText: string = "";
 	public UIDefine: UIDefine[] = [];
-	public jsPasredBody: AbstractType | undefined;
 	public comments: Comment[] = [];
 	public acornClassBody: any;
+	public acronMethods: any[] = [];
 	public fileContent: any;
 	private parentVariableName: any;
+	private classBodyAcronVariableName: string | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
@@ -47,14 +45,55 @@ export class CustomUIClass extends AbstractUIClass {
 
 	private enrichMethodInfoWithJSDocs() {
 		if (this.acornClassBody) {
-			const methods = this.acornClassBody.properties.filter((node: any) => node.value.type === "FunctionExpression");
+			//instance methods
+			let methods = this.acornClassBody.properties?.filter((node: any) =>
+				node.value.type === "FunctionExpression" ||
+				node.value.type === "ArrowFunctionExpression"
+			) || [];
+
+			//static methods
+			const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
+			if (UIDefineBody && this.classBodyAcronVariableName) {
+				const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
+					return 	node.type === "ExpressionStatement" &&
+							(
+								node.expression?.left?.object?.name === this.classBodyAcronVariableName ||
+								node.expression?.left?.object?.object?.name === this.classBodyAcronVariableName
+							);
+				});
+
+				const staticMethods = thisClassVariableAssignments
+				.filter(node => {
+					const assignmentBody = node.expression.right;
+					return assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
+				}).map(node => ({
+					key: {
+						name: node.expression.left.property.name,
+						start: node.expression.left.property.start,
+						end: node.expression.left.property.end,
+						type:'Identifier'
+					},
+					value: node.expression.right,
+					start: node.expression.left.object.start,
+					end: node.expression.right.end,
+					type: "Property"
+				}));
+				methods = methods.concat(staticMethods);
+			}
+
+			this.acronMethods = methods;
+
 			methods.forEach((method: any) => {
 				const methodName = method.key.name;
 				const params = method.value.params;
-				const comment = this.comments.find(comment => comment.start - method.start < 5);
+				const comment = this.comments.find(comment => {
+					const positionDifference = method.start - comment.end;
+					return positionDifference < 5 && positionDifference > 0;
+				});
 				if (comment) {
 					const paramTags = comment.jsdoc?.tags?.filter((tag: any) => tag.tag === "param");
 					const returnTag = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "return" || tag.tag === "returns");
+					const asyncTag = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "async");
 
 					if (paramTags) {
 						paramTags.forEach((tag: any) => {
@@ -65,10 +104,16 @@ export class CustomUIClass extends AbstractUIClass {
 						});
 					}
 
-					if (returnTag) {
+					if (asyncTag) {
+						const UIMethod = this.methods.find(method => method.name === methodName);
+						if (UIMethod) {
+							UIMethod.returnType = "Promise";
+						}
+					} else if (returnTag) {
 						const UIMethod = this.methods.find(method => method.name === methodName);
 						if (UIMethod) {
 							UIMethod.returnType = returnTag.type;
+							this.generateDescriptionForMethod(UIMethod);
 						}
 					}
 				}
@@ -84,8 +129,8 @@ export class CustomUIClass extends AbstractUIClass {
 		if (documentText) {
 
 			try {
-				this.fileContent = acorn.parse(documentText, {
-					ecmaVersion: 2020,
+				this.fileContent = acornLoose.parse(documentText, {
+					ecmaVersion: 11,
 					onComment: (isBlock: boolean, text: string, start: number, end: number) => {
 						if (isBlock && text.startsWith("*")) {
 							this.comments.push({
@@ -96,9 +141,10 @@ export class CustomUIClass extends AbstractUIClass {
 							});
 						}
 
-					}}
-				);
+					}
+				});
 			} catch (error) {
+				console.error(error);
 				this.fileContent = null;
 			}
 		}
@@ -158,6 +204,7 @@ export class CustomUIClass extends AbstractUIClass {
 			if (variable) {
 				const neededDeclaration = variable.declarations.find((declaration: any) => declaration.id.name === part.name);
 				classBody = this.getClassBodyFromPartAcorn(neededDeclaration.init, partParent);
+				this.classBodyAcronVariableName = part.name;
 			}
 		}
 
@@ -188,9 +235,9 @@ export class CustomUIClass extends AbstractUIClass {
 				node.expression.left.object.type === "ThisExpression";
 	}
 	private fillMethodsAndFields() {
-		if (this.acornClassBody) {
+		if (this.acornClassBody?.properties) {
 			this.acornClassBody.properties.forEach((property: any) => {
-				if (property.value.type === "FunctionExpression") {
+				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
 					const functionParts = property.value.body.body;
 					functionParts.forEach((node: any) => {
 						if (this.isAssignmentStatementForThisVariable(node)) {
@@ -205,17 +252,17 @@ export class CustomUIClass extends AbstractUIClass {
 			});
 
 			this.acornClassBody.properties.forEach((property: any) => {
-				if (property.value.type === "FunctionExpression") {
-					const description = `(${property.value.params.map((param: any) => param.name).join(", ")}) : ${(property.returnType ? property.returnType : "void")}`;
-					this.methods.push({
+				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
+					const method: CustomClassUIMethod = {
 						name: property.key.name,
 						params: property.value.params.map((param: any) => param.name),
-						returnType: property.returnType || "void",
-						description: description,
+						returnType: property.returnType || property.value.async ? "Promise" : "void",
 						position: property.start,
-						fnRef: undefined
-					});
-				} else if (property.value.type === "Identifier") {
+						description: ""
+					};
+					this.generateDescriptionForMethod(method);
+					this.methods.push(method);
+				} else if (property.value.type === "Identifier" || property.value.type === "Literal") {
 					this.fields.push({
 						name: property.key.name,
 						type: property.jsType,
@@ -223,6 +270,8 @@ export class CustomUIClass extends AbstractUIClass {
 					});
 				}
 			});
+
+			this.fillStaticMethodsAndFields();
 
 			//remove duplicates. Think about how to find data type for same variables w/o data type
 			this.fields = this.fields.reduce((accumulator: UIField[], field: UIField) => {
@@ -237,6 +286,50 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 
 		this.fillMethodsFromMetadata();
+	}
+
+	private fillStaticMethodsAndFields() {
+		const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
+
+		if (UIDefineBody && this.classBodyAcronVariableName) {
+			const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
+				return 	node.type === "ExpressionStatement" &&
+						(
+							node.expression?.left?.object?.name === this.classBodyAcronVariableName ||
+							node.expression?.left?.object?.object?.name === this.classBodyAcronVariableName
+						);
+			});
+
+			thisClassVariableAssignments.forEach(node => {
+				const assignmentBody = node.expression.right;
+				const isMethod = assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
+				const isField = !isMethod;
+
+				const name = node.expression.left.property.name;
+				if (isMethod) {
+					const method: CustomClassUIMethod = {
+						name: name,
+						params: assignmentBody.params.map((param: any) => param.name),
+						returnType: assignmentBody.returnType || assignmentBody.async ? "Promise" : "void",
+						position: assignmentBody.start,
+						description: ""
+					};
+					this.generateDescriptionForMethod(method);
+					this.methods.push(method);
+				} else if (isField) {
+					this.fields.push({
+						name: name,
+						type: assignmentBody.jsType,
+						description: assignmentBody.jsType || ""
+					});
+				}
+			});
+		}
+	}
+
+	public generateDescriptionForMethod(method: UIMethod) {
+		const description = `(${method.params.map(param => param).join(", ")}) : ${(method.returnType ? method.returnType : "void")}`;
+		method.description = description;
 	}
 
 	public fillTypesFromHungarionNotation() {
@@ -289,7 +382,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillPropertyMethods(aMethods: CustomClassUIMethod[]) {
-		this.properties.forEach(property => {
+		this.properties?.forEach(property => {
 			const propertyWithFirstBigLetter = `${property.name[0].toUpperCase()}${property.name.substring(1, property.name.length)}`;
 			const getter = `get${propertyWithFirstBigLetter}`;
 			const setter = `set${propertyWithFirstBigLetter}`;
@@ -412,7 +505,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillUI5Metadata() {
-		if (this.acornClassBody) {
+		if (this.acornClassBody?.properties) {
 			const metadataExists = !!this.acornClassBody.properties.find((property: any) => property.key.name === "metadata");
 			const customMetadataExists = !!this.acornClassBody.properties.find((property: any) => property.key.name === "customMetadata");
 

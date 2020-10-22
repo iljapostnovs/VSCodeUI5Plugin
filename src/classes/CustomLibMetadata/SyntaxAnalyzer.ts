@@ -1,25 +1,23 @@
 import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "./UI5Parser/UIClass/UIClassFactory";
 import { FileReader } from "../Util/FileReader";
-import { UIClassDefinitionFinder } from "./UI5Parser/UIClass/UIClassDefinitionFinder";
-import { AbstractUIClass, UIField, UIMethod } from "./UI5Parser/UIClass/AbstractUIClass";
+import { UIField, UIMethod } from "./UI5Parser/UIClass/AbstractUIClass";
 import { CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
-import { assert } from "console";
 
 export class SyntaxAnalyzer {
 
-	static getFieldsAndMethodsOfTheCurrentVariable(variable?: string) {
+	static getFieldsAndMethodsOfTheCurrentVariable() {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 
-		const UIClassName = this.getClassNameOfTheVariable();
+	const UIClassName = this.getClassNameOfTheVariable();
 		if (UIClassName) {
-			fieldsAndMethods = this.getFieldsAndMethodsFor("this", UIClassName);
+			fieldsAndMethods = this.getFieldsAndMethodsFor(UIClassName);
 		}
 
 		return fieldsAndMethods;
 	}
 
-	static getClassNameOfTheVariable(variable?: string, setNewContentForClass: boolean = true) {
+	static getClassNameOfTheVariable(setNewContentForClass: boolean = true) {
 		let UIClassName;
 		const currentClassName = this.getClassNameOfTheCurrentDocument();
 
@@ -47,12 +45,12 @@ export class SyntaxAnalyzer {
 		return classNameOfTheCurrentVariable;
 	}
 
-	public static getStackOfNodesForPosition(className: string, position: number) {
+	public static getStackOfNodesForPosition(className: string, position: number, checkForLastPosition: boolean = false) {
 		const stack: any[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 
 		if (UIClass instanceof CustomUIClass) {
-			const methodNode = UIClass.acornClassBody?.properties.find((node: any) => {
+			const methodNode = UIClass.acronMethods.find((node: any) => {
 				return node.start < position && node.end >= position;
 			})?.value;
 
@@ -61,7 +59,7 @@ export class SyntaxAnalyzer {
 				const nodeWithCurrentPosition = this.findAcornNode(methodBody, position);
 
 				if (nodeWithCurrentPosition) {
-					this.generateStackOfNodes(nodeWithCurrentPosition, position, stack);
+					this.generateStackOfNodes(nodeWithCurrentPosition, position, stack, checkForLastPosition);
 				}
 			}
 		}
@@ -69,13 +67,22 @@ export class SyntaxAnalyzer {
 		return stack;
 	}
 
-	private static generateStackOfNodes(node: any, position: number, stack: any[]) {
+	private static generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
 		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "VariableDeclaration", "ThisExpression", "NewExpression", "Identifier"];
-		let innerNode: any;
-		if (node && node.end <= position && nodeTypesToUnshift.indexOf(node.type) > -1) {
+		const positionIsCorrect = node.end < position || (checkForLastPosition && node.end === position);
+		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖") {
 			stack.unshift(node);
 		}
 
+		const innerNode: any = this.findInnerNode(node, position);
+
+		if (innerNode) {
+			this.generateStackOfNodes(innerNode, position, stack, checkForLastPosition);
+		}
+	}
+
+	private static findInnerNode(node: any, position: number) {
+		let innerNode: any;
 		if (node.type === "VariableDeclaration") {
 			const declaration = this.findAcornNode(node.declarations, position - 1);
 			if (declaration) {
@@ -83,19 +90,39 @@ export class SyntaxAnalyzer {
 			}
 
 		} else if (node.type === "CallExpression") {
-			innerNode = node.callee;
+			innerNode = this.findAcornNode(node.arguments, position);
+			if (!innerNode) {
+				innerNode = node.callee;
+			}
 		} else if (node.type === "MemberExpression") {
 			innerNode = node.object;
 		} else if (node.type === "ExpressionStatement") {
 			innerNode = node.expression;
 		} else if (node.type === "ThisExpression") {
 			// innerNode = node.object;
+		} else if (node.type === "ArrayExpression") {
+			innerNode = this.findAcornNode(node.elements, position);
 		} else if (node.type === "ReturnStatement") {
 			innerNode = node.argument;
 		} else if (node.type === "IfStatement") {
 			innerNode = this.getIfStatementPart(node, position);
 		} else if (node.type === "SwitchStatement") {
 			innerNode = this.getSwitchStatementPart(node, position);
+		} else if (node.type === "AssignmentExpression") {
+			innerNode = node.right;
+		} else if (node.type === "NewExpression") {
+			if (node.callee.end > position) {
+				innerNode = node.callee;
+			} else {
+				innerNode = this.findAcornNode(node.arguments, position);
+			}
+		} else if (node.type === "ObjectExpression") {
+			innerNode = this.findAcornNode(node.properties, position)?.value;
+		} else if (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
+			innerNode = this.findAcornNode(node.body.body, position);
+			if (!innerNode) {
+				innerNode = this.findAcornNode(node.params, position);
+			}
 		} else if (
 			node.type === "WhileStatement" ||
 			node.type === "DoWhileStatement" ||
@@ -104,14 +131,8 @@ export class SyntaxAnalyzer {
 			innerNode = this.findAcornNode(node.body.body, position);
 		}
 
-
-		if (innerNode) {
-			innerNode = this.generateStackOfNodes(innerNode, position, stack);
-		}
-
 		return innerNode;
 	}
-
 	private static getSwitchStatementPart(node: any, position: number) {
 		let correctPart: any;
 
@@ -195,18 +216,25 @@ export class SyntaxAnalyzer {
 					className = this.findClassNameForStack(stack, className);
 				}
 			} else if (currentNode.type === "Identifier") {
-				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
-
-				const variableDeclaration = this.getAcornVariableDeclarationFromUIClass(currentClassName, currentNode.name, currentNode.end);
-
-				if (variableDeclaration) {
-					const neededDeclaration = variableDeclaration.declarations.find((declaration: any) => declaration.id.name === currentNode.name);
-					className = this.getClassNameFromAcornVariableDeclaration(neededDeclaration, UIClass);
+				if (currentNode.name === "sap") {
+					className = this.generateStandardClassNameFromStack(stack);
+					if (stack.length > 0) {
+						className = this.findClassNameForStack(stack, className);
+					}
 				} else {
-					className = this.getClassNameFromUIDefineDotNotation(currentNode.name, UIClass);
+					const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 
-					if (!className) {
-						className = this.getClassNameFromMethodParams(currentNode, UIClass);
+					const variableDeclaration = this.getAcornVariableDeclarationFromUIClass(currentClassName, currentNode.name, currentNode.end);
+
+					if (variableDeclaration) {
+						const neededDeclaration = variableDeclaration.declarations.find((declaration: any) => declaration.id.name === currentNode.name);
+						className = this.getClassNameFromAcornVariableDeclaration(neededDeclaration, UIClass);
+					} else {
+						className = this.getClassNameFromUIDefineDotNotation(currentNode.name, UIClass);
+
+						if (!className) {
+							className = this.getClassNameFromMethodParams(currentNode, UIClass);
+						}
 					}
 				}
 
@@ -220,6 +248,33 @@ export class SyntaxAnalyzer {
 		}
 
 		return className;
+	}
+
+	private static generateStandardClassNameFromStack(stack: any[]) {
+		const classNameParts: string[] = [];
+		let usedNodeCount = 0;
+
+		let node = stack[usedNodeCount];
+
+		while (node && node.type === "MemberExpression") {
+			if (node.object.type === "Identifier") {
+				classNameParts.push(node.object.name);
+			}
+			classNameParts.push(node.property.name);
+
+			usedNodeCount++;
+			node = stack[usedNodeCount];
+		}
+
+		if (stack[usedNodeCount]?.type === "CallExpression") {
+			//this means that last MemberExpression was related to the method name, not to the class name
+			classNameParts.pop();
+			usedNodeCount--;
+		}
+
+		stack.splice(0, usedNodeCount);
+
+		return classNameParts.join(".");
 	}
 
 	private static checkForGetViewByIdException(stack: any[]) {
@@ -253,33 +308,41 @@ export class SyntaxAnalyzer {
 		return className;
 	}
 
-	private static findMethodReturnType(method: UIMethod, className: string) {
-		assert(!method.returnType || method.returnType === "void");
+	public static findMethodReturnType(method: UIMethod, className: string, includeParentMethods: boolean = true) {
+		if (method.returnType === "void") {
+			const UIClass = UIClassFactory.getUIClass(className);
 
-		const UIClass = UIClassFactory.getUIClass(className);
+			const innerMethod = UIClass.methods.find(innermethod => method.name === innermethod.name);
+			if (innerMethod && innerMethod.returnType !== "void") {
+				method.returnType = innerMethod.returnType;
+			} else if (UIClass instanceof CustomUIClass) {
+				const methodNode = UIClass.acronMethods?.find((property: any) => property.key.name === method.name);
+				if (methodNode) {
+					const methodBody = methodNode?.value?.body?.body;
+					const returnStatement = methodBody?.find((bodyPart: any) => bodyPart.type === "ReturnStatement");
 
-		if (UIClass instanceof CustomUIClass) {
-			const methodNode = UIClass.acornClassBody?.properties.find((property: any) => property.key.name === method.name);
-			if (methodNode) {
-				const methodBody = methodNode.value.body.body;
-				const returnStatement = methodBody.find((bodyPart: any) => bodyPart.type === "ReturnStatement");
-
-				method.returnType = this.acornGetClassName(className, returnStatement.argument.end + 1) || "void";
+					if (returnStatement) {
+						method.returnType = this.acornGetClassName(className, returnStatement.argument.end + 1) || "void";
+						UIClass.generateDescriptionForMethod(method);
+					}
+				}
 			}
-		}
 
-		if ((!method.returnType || method.returnType === "void") && UIClass.parentClassNameDotNotation) {
-			this.findMethodReturnType(method, UIClass.parentClassNameDotNotation);
+			if (includeParentMethods && (!method.returnType || method.returnType === "void") && UIClass.parentClassNameDotNotation) {
+				this.findMethodReturnType(method, UIClass.parentClassNameDotNotation);
+			}
 		}
 	}
 
-	private static findFieldType(field: UIField, className: string) {
-		assert(!field.type);
+	public static findFieldType(field: UIField, className: string) {
 		const UIClass = UIClassFactory.getUIClass(className);
 
-		if (UIClass instanceof CustomUIClass) {
-			UIClass.acornClassBody?.properties.forEach((property: any) => {
-				if (property.value.type === "FunctionExpression") {
+		const innerField = UIClass.fields.find(innerfield => innerfield.name === field.name);
+		if (innerField && innerField.type) {
+			field.type = innerField.type;
+		} else if (UIClass instanceof CustomUIClass) {
+			UIClass.acronMethods.forEach((property: any) => {
+				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
 					const functionParts = property.value.body.body;
 					functionParts.forEach((node: any) => {
 						if (UIClass.isAssignmentStatementForThisVariable(node) && node.expression?.left?.property?.name === field.name) {
@@ -298,21 +361,93 @@ export class SyntaxAnalyzer {
 	}
 
 	private static getAcornVariableDeclarationFromUIClass(className: string, variableName: string, position: number) {
+		let variableDeclaration: any;
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 
-		const functionExpressions = UIClass.acornClassBody?.properties.filter((property: any) => property.value.type === "FunctionExpression");
-		const functionExpression = functionExpressions.find((expression: any) => expression.start < position && expression.end >= position);
-		const functionParts = functionExpression.value.body.body;
-		const variableDeclaration = functionParts.find((node: any) => {
-			let declarationFound = false;
-			if (node.type === "VariableDeclaration") {
-				declarationFound = !!node.declarations.find((declaration: any) => declaration.id.name === variableName);
-			}
+		const functionExpressions = UIClass.acronMethods.filter((property: any) =>
+			property.value.type === "FunctionExpression" ||
+			property.value.type === "ArrowFunctionExpression"
+		);
+		const functionExpression = functionExpressions?.find((expression: any) => expression.start < position && expression.end >= position);
+		const functionParts = functionExpression?.value?.body?.body;
 
-			return declarationFound;
-		});
+		if (functionParts) {
+			const variableDeclarations = this.findAllDeclarations(functionParts);
+			variableDeclaration = variableDeclarations.find(declaration => {
+				return declaration.declarations.find((declaration: any) => declaration.id.name === variableName);
+			});
+		}
 
 		return variableDeclaration;
+	}
+
+	private static findAllDeclarations(nodes: any[]) {
+		let declarations: any[] = [];
+		nodes.forEach((node: any) => {
+			const content = this.expandAllContent(node);
+			declarations = declarations.concat(content.filter((node: any) => node.type === "VariableDeclaration"));
+		});
+
+		return declarations;
+	}
+
+	private static expandAllContent(node: any, content: any[] = []) {
+		content.push(node);
+		let innerNodes: any[] = [];
+
+		if (node.type === "VariableDeclaration") {
+			innerNodes = node.declarations.map((declaration: any) => declaration.init);
+		} else if (node.type === "CallExpression") {
+			innerNodes = node.arguments;
+			if (node.callee) {
+				innerNodes.push(node.callee);
+			}
+		} else if (node.type === "MemberExpression") {
+			innerNodes.push(node.object);
+		} else if (node.type === "ExpressionStatement") {
+			innerNodes.push(node.expression);
+		} else if (node.type === "ThisExpression") {
+			//
+		} else if (node.type === "ArrayExpression") {
+			innerNodes = node.elements;
+		} else if (node.type === "ReturnStatement") {
+			innerNodes.push(node.argument);
+		} else if (node.type === "IfStatement") {
+			if (node.consequent) {
+				innerNodes = innerNodes.concat(node.consequent.body);
+			} else if (node.alternate) {
+				innerNodes.push(node.alternate);
+			} else if (node.body) {
+				innerNodes = innerNodes.concat(node.body);
+			}
+		} else if (node.type === "SwitchStatement") {
+			innerNodes = node.cases.map((body: any) => body.consequent);
+		} else if (node.type === "AssignmentExpression") {
+			innerNodes.push(node.right);
+		} else if (node.type === "NewExpression") {
+			if (node.callee) {
+				innerNodes.push(node.callee);
+			}
+			innerNodes = innerNodes.concat(node.arguments);
+		} else if (node.type === "ObjectExpression") {
+			innerNodes = node.properties.map((declaration: any) => declaration.value);
+		} else if (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
+			innerNodes = node.body.body.concat(node.params);
+		} else if (
+			node.type === "WhileStatement" ||
+			node.type === "DoWhileStatement" ||
+			node.type === "ForStatement"
+		) {
+			innerNodes = node.body.body;
+		}
+
+		innerNodes.forEach((node: any) => {
+			if (node) {
+				this.expandAllContent(node, content);
+			}
+		});
+
+		return content;
 	}
 
 	private static getClassNameFromAcornVariableDeclaration(declaration: any, UIClass: CustomUIClass) {
@@ -321,9 +456,9 @@ export class SyntaxAnalyzer {
 
 	private static getClassNameOfTheDeclaration(node: any, UIClass: CustomUIClass) {
 		let className = "";
-		if (node.type === "NewExpression") {
+		if (node?.type === "NewExpression") {
 			className = this.getClassNameFromUIDefineDotNotation(node.callee?.name, UIClass);
-		} else if (node.type === "CallExpression" || node.type === "MemberExpression" || node.type === "Identifier") {
+		} else if (node?.type === "CallExpression" || node?.type === "MemberExpression" || node?.type === "Identifier") {
 			className = this.acornGetClassName(UIClass.className, node.end + 1) || "";
 		}
 
@@ -345,7 +480,7 @@ export class SyntaxAnalyzer {
 	private static getClassNameFromMethodParams(node: any, UIClass: CustomUIClass) {
 		let className = "";
 
-		const methodNode = this.findAcornNode(UIClass.acornClassBody?.properties, node.end - 1);
+		const methodNode = this.findAcornNode(UIClass.acronMethods, node.end - 1);
 		if (methodNode) {
 			const params = methodNode.value?.params;
 			if (params) {
@@ -389,14 +524,10 @@ export class SyntaxAnalyzer {
 
 	public static setNewContentForCurrentUIClass() {
 		if (vscode.window.activeTextEditor) {
-			let documentText = vscode.window.activeTextEditor.document.getText();
-			const position = vscode.window.activeTextEditor.document.offsetAt(vscode.window.activeTextEditor.selection.start);
+			const documentText = vscode.window.activeTextEditor.document.getText();
 
 			const currentClassName = this.getClassNameOfTheCurrentDocument();
 			if (currentClassName) {
-				if (documentText[position - 1] === ".") {
-					documentText = documentText.substring(0, position - 1) + ";" + documentText.substring(position, documentText.length);
-				}
 				UIClassFactory.setNewCodeForClass(currentClassName, documentText);
 			} else {
 				debugger;
@@ -404,10 +535,10 @@ export class SyntaxAnalyzer {
 		}
 	}
 
-	private static getFieldsAndMethodsFor(variable: string, className: string, position: number = 0) {
+	private static getFieldsAndMethodsFor(className: string) {
 		let fieldsAndMethods;
 		if (vscode.window.activeTextEditor) {
-			fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForVariable(variable, className, position);
+			fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(className);
 		}
 		return fieldsAndMethods;
 	}

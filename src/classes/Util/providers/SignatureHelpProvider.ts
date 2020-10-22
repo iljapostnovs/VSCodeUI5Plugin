@@ -6,8 +6,6 @@ export class SignatureHelpProvider {
 	static getSignature(document: vscode.TextDocument) {
 		const signatureHelp = new vscode.SignatureHelp();
 
-			// const variableClassName = SyntaxAnalyzer.getClassNameOfTheVariable();
-
 			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 			if (currentClassName) {
 				UIClassFactory.setNewCodeForClass(currentClassName, document.getText());
@@ -17,11 +15,11 @@ export class SignatureHelpProvider {
 			const position = activeTextEditor?.document.offsetAt(activeTextEditor.selection.start);
 
 			if (currentClassName && position) {
-				const stackOfNodes = SyntaxAnalyzer.getStackOfNodesForPosition(currentClassName, position + 1);
+				const stackOfNodes = SyntaxAnalyzer.getStackOfNodesForPosition(currentClassName, position + 1, true);
 
-				if (stackOfNodes.length > 0) {
+				if (stackOfNodes. length > 0) {
 					const callExpression = stackOfNodes[stackOfNodes.length - 1].type === "CallExpression" ? stackOfNodes.pop() : null; //removes CallExpression
-					const lastNode = stackOfNodes.pop();
+					const lastNode = stackOfNodes.length > 0 ? stackOfNodes.pop() : callExpression;
 					let methodName = lastNode.property?.name;
 
 					if (stackOfNodes.length === 0) {
