@@ -616,7 +616,7 @@ export class SyntaxAnalyzer {
 		return field;
 	}
 
-	private static findAcornNode(nodes: any[], position: number) {
+	public static findAcornNode(nodes: any[], position: number) {
 		return nodes.find((node: any) => node.start < position && node.end >= position);
 	}
 

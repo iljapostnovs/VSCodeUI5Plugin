@@ -22,7 +22,7 @@ export class DefineGenerator {
 		if (editor) {
 			const document = editor.document;
 			const documentText: string = document.getText();
-			const regexResult = /sap\.ui\.define\(\[(.|\n|\r)*\],.?function.?\(/.exec(documentText);
+			const regexResult = /sap\.ui\.define\(\s?\[(.|\n|\r)*\],.?function.?\(/.exec(documentText);
 			if (regexResult) {
 				const indexDefineEnd = regexResult[0].length;
 				const positionDefineEnd = document.positionAt(indexDefineEnd);
