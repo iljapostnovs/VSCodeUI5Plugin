@@ -8,6 +8,9 @@ interface UIDefine {
 	className: string;
 	classNameDotNotation: string;
 }
+interface LooseObject {
+	[key: string]: any;
+}
 
 interface Comment {
 	text: string;
@@ -18,8 +21,12 @@ interface Comment {
 export interface CustomClassUIMethod extends UIMethod {
 	position?: number;
 }
+export interface CustomClassUIField extends UIField {
+	customData?: LooseObject;
+}
 export class CustomUIClass extends AbstractUIClass {
 	public methods: CustomClassUIMethod[] = [];
+	public fields: CustomClassUIField[] = [];
 	public classText: string = "";
 	public UIDefine: UIDefine[] = [];
 	public comments: Comment[] = [];
@@ -86,7 +93,7 @@ export class CustomUIClass extends AbstractUIClass {
 				const params = method.value.params;
 				const comment = this.comments.find(comment => {
 					const positionDifference = method.start - comment.end;
-					return positionDifference < 5 && positionDifference > 0;
+					return positionDifference < 10 && positionDifference > 0;
 				});
 				if (comment) {
 					const paramTags = comment.jsdoc?.tags?.filter((tag: any) => tag.tag === "param");
@@ -253,7 +260,7 @@ export class CustomUIClass extends AbstractUIClass {
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
 					const method: CustomClassUIMethod = {
 						name: property.key.name,
-						params: property.value.params.map((param: any) => param.name),
+						params: this.generateParamTextForMethod(property.value.params),
 						returnType: property.returnType || property.value.async ? "Promise" : "void",
 						position: property.start,
 						description: ""
@@ -265,6 +272,13 @@ export class CustomUIClass extends AbstractUIClass {
 						name: property.key.name,
 						type: property.jsType,
 						description: property.jsType || ""
+					});
+				} else if (property.value.type === "ObjectExpression") {
+					this.fields.push({
+						name: property.key.name,
+						type: "__map__",
+						description: "map",
+						customData: this.generateCustomDataForObject(property.value)
 					});
 				}
 			});
@@ -284,6 +298,31 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 
 		this.fillMethodsFromMetadata();
+	}
+
+	private generateParamTextForMethod(acornParams: any[]) {
+		const params: string[] = acornParams.map((param: any) => {
+			if (param.type === "Identifier") {
+				return param.name || "Unknown";
+			} else if (param.type === "AssignmentPattern") {
+				return param.left?.name || "Unknown";
+			} else {
+				return "Unknown";
+			}
+		});
+
+		return params;
+	}
+
+	private generateCustomDataForObject(node: any, looseObject: LooseObject = {}) {
+		node.properties.forEach((property: any) => {
+			looseObject[property.key.name] = {};
+			if (property.value.type === "ObjectExpression") {
+				this.generateCustomDataForObject(property.value, looseObject[property.key.name]);
+			}
+		});
+
+		return looseObject;
 	}
 
 	private fillStaticMethodsAndFields() {
@@ -340,10 +379,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 	private getTypeFromHungariantNotation(variable: string) {
 		let type;
-		interface looseObject {
-			[key: string]: any;
-		}
-		const map: looseObject = {
+		const map: LooseObject = {
 			$: "dom",
 			o: "object",
 			a: "array",

@@ -2,19 +2,67 @@ import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "./UI5Parser/UIClass/UIClassFactory";
 import { FileReader } from "../Util/FileReader";
 import { UIField, UIMethod } from "./UI5Parser/UIClass/AbstractUIClass";
-import { CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
+import { CustomClassUIField, CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
 
 export class SyntaxAnalyzer {
 
 	static getFieldsAndMethodsOfTheCurrentVariable() {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 
-	const UIClassName = this.getClassNameOfTheVariable();
+		const UIClassName = this.getClassNameOfTheVariable();
 		if (UIClassName) {
-			fieldsAndMethods = this.getFieldsAndMethodsFor(UIClassName);
+			const classNameParts = UIClassName.split("__map__");
+
+			if (classNameParts.length === 1) {
+				fieldsAndMethods = this.getFieldsAndMethodsFor(classNameParts[0]);
+			} else {
+				const className = classNameParts.shift();
+				if (className) {
+					const mapFields = classNameParts;
+					const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+					const currentFieldName = mapFields.shift();
+					const field = UIClass.fields.find(field => field.name === currentFieldName);
+					if (field) {
+						fieldsAndMethods = this.getFieldsAndMethodsForMap(field, mapFields);
+					}
+				}
+			}
 		}
 
 		return fieldsAndMethods;
+	}
+
+	private static getFieldsAndMethodsForMap(field: CustomClassUIField, mapFields: string[]) {
+		const fieldsAndMethods: FieldsAndMethods = {
+			fields: this.getUIFieldsForMap(field.customData, mapFields),
+			methods: []
+		};
+
+		return fieldsAndMethods;
+	}
+
+	private static getUIFieldsForMap(customData: any, mapFields: string[], fields: UIField[] = []) {
+		const fieldName = mapFields.shift();
+		if (fieldName) {
+			customData = customData[fieldName];
+		}
+
+		if (mapFields.length === 0) {
+			const newFields: UIField[] = Object.keys(customData).map(key => {
+				return {
+					name: key,
+					description: "",
+					type: undefined
+				};
+			});
+			newFields.forEach(newField => {
+				fields.push(newField);
+			});
+		} else {
+			this.getUIFieldsForMap(customData, mapFields, fields);
+		}
+
+		return fields;
 	}
 
 	static getClassNameOfTheVariable(setNewContentForClass: boolean = true) {
@@ -70,7 +118,7 @@ export class SyntaxAnalyzer {
 	private static generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
 		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "VariableDeclaration", "ThisExpression", "NewExpression", "Identifier"];
 		const positionIsCorrect = node.end < position || (checkForLastPosition && node.end === position);
-		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖") {
+		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖" && node.property?.name !== "prototype") {
 			stack.unshift(node);
 		}
 
@@ -96,6 +144,8 @@ export class SyntaxAnalyzer {
 			}
 		} else if (node.type === "MemberExpression") {
 			innerNode = node.object;
+		} else if (node.type === "AwaitExpression") {
+			innerNode = node.argument;
 		} else if (node.type === "ExpressionStatement") {
 			innerNode = node.expression;
 		} else if (node.type === "ThisExpression") {
@@ -161,7 +211,7 @@ export class SyntaxAnalyzer {
 	public static findClassNameForStack(stack: any[], currentClassName: string) {
 		let className: string = "";
 
-		if (stack.length === 0) {
+		if (stack.length === 0 || !currentClassName) {
 			return "";
 		}
 
@@ -205,8 +255,12 @@ export class SyntaxAnalyzer {
 					if (field) {
 						if (!field.type) {
 							this.findFieldType(field, currentClassName);
+							className = field.type || "";
+						} else if (field.type === "__map__") {
+							className = `${currentClassName}__map__${memberName}`;
+							className = this.generateClassNameFromStack(stack, className);
+							stack = [];
 						}
-						className = field.type || "";
 					} else {
 						stack = [];
 					}
@@ -235,6 +289,10 @@ export class SyntaxAnalyzer {
 						if (!className) {
 							className = this.getClassNameFromMethodParams(currentNode, UIClass);
 						}
+
+						if (stack.length > 0) {
+							className = this.findClassNameForStack(stack, className);
+						}
 					}
 				}
 
@@ -245,6 +303,19 @@ export class SyntaxAnalyzer {
 			}/* else {
 				className = currentClassName;
 			}*/
+		}
+
+		return className;
+	}
+
+	private static generateClassNameFromStack(stack: any[], className: string) {
+		const nextProperty = stack.shift();
+		if (nextProperty && nextProperty.type === "MemberExpression") {
+			className += `__map__${nextProperty.property.name}`;
+		}
+
+		if (stack.length > 0) {
+			className = this.generateClassNameFromStack(stack, className);
 		}
 
 		return className;
@@ -408,6 +479,8 @@ export class SyntaxAnalyzer {
 			innerNodes.push(node.expression);
 		} else if (node.type === "ThisExpression") {
 			//
+		} else if (node.type === "AwaitExpression") {
+			innerNodes.push(node.argument);
 		} else if (node.type === "ArrayExpression") {
 			innerNodes = node.elements;
 		} else if (node.type === "ReturnStatement") {
@@ -472,6 +545,9 @@ export class SyntaxAnalyzer {
 			if (UIDefine) {
 				className = UIDefine.classNameDotNotation;
 			}
+		}
+		if (UIDefineClassName === "Promise") {
+			className = "Promise";
 		}
 
 		return className;

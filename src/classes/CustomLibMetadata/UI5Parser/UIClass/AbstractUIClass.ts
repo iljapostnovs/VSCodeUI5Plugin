@@ -1,14 +1,14 @@
 import { SAPIcons } from "../../SAPIcons";
 
 export interface UIMethod {
-	name: string;
-	params: string[];
+	readonly name: string;
+	readonly params: string[];
 	returnType: string;
 	description: string;
 	api?: string;
 }
 export interface UIField {
-	name: string;
+	readonly name: string;
 	type: string | undefined;
 	description: string;
 }
