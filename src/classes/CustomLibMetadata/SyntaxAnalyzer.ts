@@ -8,13 +8,12 @@ export class SyntaxAnalyzer {
 
 	static getFieldsAndMethodsOfTheCurrentVariable() {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
-
 		const UIClassName = this.getClassNameOfTheVariable();
 		if (UIClassName) {
 			const classNameParts = UIClassName.split("__map__");
 
 			if (classNameParts.length === 1) {
-				fieldsAndMethods = this.getFieldsAndMethodsFor(classNameParts[0]);
+				fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(classNameParts[0]);
 			} else {
 				const className = classNameParts.shift();
 				if (className) {
@@ -65,8 +64,9 @@ export class SyntaxAnalyzer {
 		return fields;
 	}
 
-	static getClassNameOfTheVariable(setNewContentForClass: boolean = true) {
+	public static getClassNameOfTheVariable(setNewContentForClass: boolean = true) {
 		let UIClassName;
+		this.declarationStack = [];
 		const currentClassName = this.getClassNameOfTheCurrentDocument();
 
 		const activeTextEditor = vscode.window.activeTextEditor;
@@ -83,7 +83,7 @@ export class SyntaxAnalyzer {
 		return UIClassName;
 	}
 
-	public static acornGetClassName(className: string, position: number) {
+	private static acornGetClassName(className: string, position: number) {
 		let classNameOfTheCurrentVariable;
 		const stack = this.getStackOfNodesForPosition(className, position);
 		if (stack.length > 0) {
@@ -98,13 +98,13 @@ export class SyntaxAnalyzer {
 		const UIClass = UIClassFactory.getUIClass(className);
 
 		if (UIClass instanceof CustomUIClass) {
-			const methodNode = UIClass.acronMethods.find((node: any) => {
+			const methodNode = UIClass.acronMethodsAndFields.find((node: any) => {
 				return node.start < position && node.end >= position;
 			})?.value;
 
 			if (methodNode) {
-				const methodBody = methodNode.body.body;
-				const nodeWithCurrentPosition = this.findAcornNode(methodBody, position);
+				const methodBody = methodNode.body?.body;
+				const nodeWithCurrentPosition = methodBody && this.findAcornNode(methodBody, position);
 
 				if (nodeWithCurrentPosition) {
 					this.generateStackOfNodes(nodeWithCurrentPosition, position, stack, checkForLastPosition);
@@ -179,7 +179,9 @@ export class SyntaxAnalyzer {
 		} else if (node.type === "ObjectExpression") {
 			innerNode = this.findAcornNode(node.properties, position)?.value;
 		} else if (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
-			innerNode = this.findAcornNode(node.body.body, position);
+			if (node.body?.body) {
+				innerNode = this.findAcornNode(node.body?.body, position);
+			}
 			if (!innerNode) {
 				innerNode = this.findAcornNode(node.params, position);
 			}
@@ -189,7 +191,7 @@ export class SyntaxAnalyzer {
 			node.type === "ForStatement" ||
 			node.type === "ForInStatement"
 		) {
-			innerNode = this.findAcornNode(node.body.body, position);
+			innerNode = this.findAcornNode(node.body?.body, position);
 		}
 
 		return innerNode;
@@ -282,7 +284,7 @@ export class SyntaxAnalyzer {
 				}
 			} else if (currentNode.type === "Identifier") {
 				if (currentNode.name === "sap") {
-					className = this.generateStandardClassNameFromStack(stack);
+					className = this.generateSAPStandardClassNameFromStack(stack);
 					if (stack.length > 0) {
 						className = this.findClassNameForStack(stack, className);
 					}
@@ -332,7 +334,7 @@ export class SyntaxAnalyzer {
 		return className;
 	}
 
-	private static generateStandardClassNameFromStack(stack: any[]) {
+	private static generateSAPStandardClassNameFromStack(stack: any[]) {
 		const classNameParts: string[] = [];
 		let usedNodeCount = 0;
 
@@ -398,7 +400,7 @@ export class SyntaxAnalyzer {
 			if (innerMethod && innerMethod.returnType !== "void") {
 				method.returnType = innerMethod.returnType;
 			} else if (UIClass instanceof CustomUIClass) {
-				const methodNode = UIClass.acronMethods?.find((property: any) => property.key.name === method.name);
+				const methodNode = UIClass.acronMethodsAndFields?.find((property: any) => property.key.name === method.name);
 				if (methodNode) {
 					const methodBody = methodNode?.value?.body?.body;
 					const returnStatement = methodBody?.find((bodyPart: any) => bodyPart.type === "ReturnStatement");
@@ -423,12 +425,12 @@ export class SyntaxAnalyzer {
 		if (innerField && innerField.type) {
 			field.type = innerField.type;
 		} else if (UIClass instanceof CustomUIClass) {
-			UIClass.acronMethods.forEach((property: any) => {
+			UIClass.acronMethodsAndFields.forEach((property: any) => {
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
-					const functionParts = property.value.body.body;
+					const functionParts = property.value.body?.body || [];
 					functionParts.forEach((node: any) => {
 						if (UIClass.isAssignmentStatementForThisVariable(node) && node.expression?.left?.property?.name === field.name) {
-							field.type = this.getClassNameOfTheDeclaration(node.expression.right, UIClass);
+							field.type = this.getClassNameFromAcronTheDeclaration(node.expression.right, UIClass);
 						}
 					});
 				} else if (property.value.type === "Identifier" && property.key.name === field.name) {
@@ -446,11 +448,7 @@ export class SyntaxAnalyzer {
 		let variableDeclaration: any;
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 
-		const functionExpressions = UIClass.acronMethods.filter((property: any) =>
-			property.value.type === "FunctionExpression" ||
-			property.value.type === "ArrowFunctionExpression"
-		);
-		const functionExpression = functionExpressions?.find((expression: any) => expression.start < position && expression.end >= position);
+		const functionExpression = UIClass.acronMethodsAndFields?.find((method: any) => method.start < position && method.end >= position);
 		const functionParts = functionExpression?.value?.body?.body;
 
 		if (functionParts) {
@@ -526,14 +524,14 @@ export class SyntaxAnalyzer {
 		} else if (node.type === "ObjectExpression") {
 			innerNodes = node.properties.map((declaration: any) => declaration.value);
 		} else if (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
-			innerNodes = node.body.body.concat(node.params);
+			innerNodes = node.body.body?.concat(node.params) || node.params;
 		} else if (
 			node.type === "WhileStatement" ||
 			node.type === "DoWhileStatement" ||
 			node.type === "ForStatement" ||
 			node.type === "ForInStatement"
 		) {
-			innerNodes = node.body.body;
+			innerNodes = node.body?.body || [];
 		}
 
 		innerNodes.forEach((node: any) => {
@@ -546,15 +544,22 @@ export class SyntaxAnalyzer {
 	}
 
 	private static getClassNameFromAcornVariableDeclaration(declaration: any, UIClass: CustomUIClass) {
-		return this.getClassNameOfTheDeclaration(declaration.init, UIClass);
+		return this.getClassNameFromAcronTheDeclaration(declaration.init, UIClass);
 	}
 
-	private static getClassNameOfTheDeclaration(node: any, UIClass: CustomUIClass) {
+	private static declarationStack: any[] = [];
+
+	private static getClassNameFromAcronTheDeclaration(declaration: any, UIClass: CustomUIClass) {
 		let className = "";
-		if (node?.type === "NewExpression") {
-			className = this.getClassNameFromUIDefineDotNotation(node.callee?.name, UIClass);
-		} else if (node?.type === "CallExpression" || node?.type === "MemberExpression" || node?.type === "Identifier") {
-			className = this.acornGetClassName(UIClass.className, node.end + 1) || "";
+		if (this.declarationStack.indexOf(declaration) > -1) {
+			this.declarationStack = [];
+		}  else {
+			this.declarationStack.push(declaration);
+			if (declaration?.type === "NewExpression") {
+				className = this.getClassNameFromUIDefineDotNotation(declaration.callee?.name, UIClass);
+			} else if (declaration?.type === "CallExpression" || declaration?.type === "MemberExpression" || declaration?.type === "Identifier") {
+				className = this.acornGetClassName(UIClass.className, declaration.end + 1) || "";
+			}
 		}
 
 		return className;
@@ -578,7 +583,7 @@ export class SyntaxAnalyzer {
 	private static getClassNameFromMethodParams(node: any, UIClass: CustomUIClass) {
 		let className = "";
 
-		const methodNode = this.findAcornNode(UIClass.acronMethods, node.end - 1);
+		const methodNode = this.findAcornNode(UIClass.acronMethodsAndFields, node.end - 1);
 		if (methodNode) {
 			const params = methodNode.value?.params;
 			if (params) {
@@ -616,29 +621,19 @@ export class SyntaxAnalyzer {
 		return field;
 	}
 
-	public static findAcornNode(nodes: any[], position: number) {
+	public static findAcornNode(nodes: any[] = [], position: number) {
 		return nodes.find((node: any) => node.start < position && node.end >= position);
 	}
 
 	public static setNewContentForCurrentUIClass() {
-		if (vscode.window.activeTextEditor) {
-			const documentText = vscode.window.activeTextEditor.document.getText();
+		const documentText = vscode.window.activeTextEditor?.document.getText();
+		const currentClassName = this.getClassNameOfTheCurrentDocument();
 
-			const currentClassName = this.getClassNameOfTheCurrentDocument();
-			if (currentClassName) {
-				UIClassFactory.setNewCodeForClass(currentClassName, documentText);
-			} else {
-				debugger;
-			}
+		if (currentClassName && documentText) {
+			UIClassFactory.setNewCodeForClass(currentClassName, documentText);
+		} else {
+			debugger;
 		}
-	}
-
-	private static getFieldsAndMethodsFor(className: string) {
-		let fieldsAndMethods;
-		if (vscode.window.activeTextEditor) {
-			fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(className);
-		}
-		return fieldsAndMethods;
 	}
 
 	/* =========================================================== */

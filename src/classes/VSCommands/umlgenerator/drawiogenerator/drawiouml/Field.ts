@@ -2,10 +2,7 @@ import { IUMLGenerator } from "./interfaces/IUMLGenerator";
 import { UIField } from "../../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 import { ClassHead } from "./ClassHead";
-import { SyntaxAnalyzer } from "../../../../CustomLibMetadata/SyntaxAnalyzer";
 import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
-import { UIClassDefinitionFinder } from "../../../../CustomLibMetadata/UI5Parser/UIClass/UIClassDefinitionFinder";
-import { UIClassFactory } from "../../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 
 export class Field implements IUMLGenerator, ITextLengthGettable {
 	id: number;
@@ -23,7 +20,7 @@ export class Field implements IUMLGenerator, ITextLengthGettable {
 	getValue() {
 		const isPrivate = this.UIField.name.startsWith("_");
 		const privateSign = isPrivate ? "-" : "+";
-		const value = `${privateSign} ${this.UIField.name}: ${this.UIField.type}`;
+		const value = `${privateSign} ${this.UIField.name}: ${this.UIField.type?.replace("__map__", "map") || "any"}`;
 
 		return value.replace(/\"/g, "").replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')

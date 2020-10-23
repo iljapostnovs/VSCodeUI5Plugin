@@ -21,17 +21,21 @@ export class DrawIOUMLDiagram {
 	constructor(UIClass: AbstractUIClass, header: Header = new Header()) {
 		this.UIClass = UIClass;
 
-		this.UIClass.fields.forEach(field => {
-			if (!field.type) {
-				SyntaxAnalyzer.findFieldType(field, this.UIClass.className);
-			}
-		});
+		try {
+			this.UIClass.fields.forEach(field => {
+				if (!field.type) {
+					SyntaxAnalyzer.findFieldType(field, this.UIClass.className);
+				}
+			});
 
-		this.UIClass.methods.forEach(method => {
-			if (method.returnType === "void") {
-				SyntaxAnalyzer.findMethodReturnType(method, this.UIClass.className);
-			}
-		});
+			this.UIClass.methods.forEach(method => {
+				if (method.returnType === "void") {
+					SyntaxAnalyzer.findMethodReturnType(method, this.UIClass.className);
+				}
+			});
+		} catch (error) {
+			console.error(error);
+		}
 
 		if (this.UIClass instanceof CustomUIClass) {
 			this.UIClass.fillTypesFromHungarionNotation();

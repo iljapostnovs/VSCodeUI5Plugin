@@ -31,7 +31,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public UIDefine: UIDefine[] = [];
 	public comments: Comment[] = [];
 	public acornClassBody: any;
-	public acronMethods: any[] = [];
+	public acronMethodsAndFields: any[] = [];
 	public fileContent: any;
 	private parentVariableName: any;
 	private classBodyAcronVariableName: string | undefined;
@@ -57,6 +57,7 @@ export class CustomUIClass extends AbstractUIClass {
 			) || [];
 
 			//static methods
+			//TODO: Move this
 			const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
 			if (UIDefineBody && this.classBodyAcronVariableName) {
 				const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
@@ -86,7 +87,7 @@ export class CustomUIClass extends AbstractUIClass {
 				methods = methods.concat(staticMethods);
 			}
 
-			this.acronMethods = methods;
+			this.acronMethodsAndFields = this.acronMethodsAndFields.concat(methods);
 
 			methods.forEach((method: any) => {
 				const methodName = method.key.name;
@@ -243,7 +244,7 @@ export class CustomUIClass extends AbstractUIClass {
 		if (this.acornClassBody?.properties) {
 			this.acornClassBody.properties.forEach((property: any) => {
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
-					const functionParts = property.value.body.body;
+					const functionParts = property.value.body?.body || [];
 					functionParts.forEach((node: any) => {
 						if (this.isAssignmentStatementForThisVariable(node)) {
 							this.fields.push({
@@ -251,6 +252,11 @@ export class CustomUIClass extends AbstractUIClass {
 								type: node.expression.left.property.name.jsType,
 								description: node.expression.left.property.name.jsType || ""
 							});
+
+							// this.acronMethodsAndFields.push({
+							// 	key: node.expression.left.property,
+							// 	value: node.expression.right
+							// });
 						}
 					});
 				}
@@ -273,6 +279,7 @@ export class CustomUIClass extends AbstractUIClass {
 						type: property.jsType,
 						description: property.jsType || ""
 					});
+					this.acronMethodsAndFields.push(property);
 				} else if (property.value.type === "ObjectExpression") {
 					this.fields.push({
 						name: property.key.name,
@@ -280,6 +287,7 @@ export class CustomUIClass extends AbstractUIClass {
 						description: "map",
 						customData: this.generateCustomDataForObject(property.value)
 					});
+					this.acronMethodsAndFields.push(property);
 				}
 			});
 
