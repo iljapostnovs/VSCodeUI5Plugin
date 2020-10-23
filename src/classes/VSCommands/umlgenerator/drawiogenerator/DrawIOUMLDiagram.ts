@@ -1,4 +1,4 @@
-import { AbstractUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass, UIField, UIMethod } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { Property } from "./drawiouml/Property";
 import { Method } from "./drawiouml/Method";
 import { Field } from "./drawiouml/Field";
@@ -61,8 +61,18 @@ export class DrawIOUMLDiagram {
 		this.classHead.xAxis = this.xAxis;
 		const separator = new Separator(this.classHead);
 		const properties = this.UIClass.properties.map(property => new Property(property, this.classHead));
-		const fields = this.UIClass.fields.map(field => new Field(field, this.classHead));
-		const methods = this.UIClass.methods.map(method => new Method(method, this.classHead));
+		const fields = this.UIClass.fields.sort((a: UIField, b: UIField) => {
+			const isFirstFieldPrivate = a.name.startsWith("_");
+			const isSecondFieldPrivate = b.name.startsWith("_");
+
+			return isFirstFieldPrivate === isSecondFieldPrivate ? 0 : isFirstFieldPrivate ? 1 : -1;
+		}).map(field => new Field(field, this.classHead));
+		const methods = this.UIClass.methods.sort((a: UIMethod, b: UIMethod) => {
+			const isFirstMethodPrivate = a.name.startsWith("_");
+			const isSecondMethodPrivate = b.name.startsWith("_");
+
+			return isFirstMethodPrivate === isSecondMethodPrivate ? 0 : isFirstMethodPrivate ? 1 : -1;
+		}).map(method => new Method(method, this.classHead));
 
 		let items: ITextLengthGettable[] = properties;
 		items = items.concat(methods);
