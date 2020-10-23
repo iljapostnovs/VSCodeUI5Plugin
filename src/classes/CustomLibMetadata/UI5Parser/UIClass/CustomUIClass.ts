@@ -114,6 +114,7 @@ export class CustomUIClass extends AbstractUIClass {
 						const UIMethod = this.methods.find(method => method.name === methodName);
 						if (UIMethod) {
 							UIMethod.returnType = "Promise";
+							this.generateDescriptionForMethod(UIMethod)
 						}
 					} else if (returnTag) {
 						const UIMethod = this.methods.find(method => method.name === methodName);

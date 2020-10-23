@@ -278,16 +278,9 @@ export class SyntaxAnalyzer {
 						stack = [];
 					}
 				}
-
-				if (stack.length > 0) {
-					className = this.findClassNameForStack(stack, className);
-				}
 			} else if (currentNode.type === "Identifier") {
 				if (currentNode.name === "sap") {
 					className = this.generateSAPStandardClassNameFromStack(stack);
-					if (stack.length > 0) {
-						className = this.findClassNameForStack(stack, className);
-					}
 				} else {
 					const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 
@@ -302,10 +295,6 @@ export class SyntaxAnalyzer {
 						if (!className) {
 							className = this.getClassNameFromMethodParams(currentNode, UIClass);
 						}
-
-						if (stack.length > 0) {
-							className = this.findClassNameForStack(stack, className);
-						}
 					}
 				}
 
@@ -316,6 +305,9 @@ export class SyntaxAnalyzer {
 			}/* else {
 				className = currentClassName;
 			}*/
+		}
+		if (stack.length > 0) {
+			className = this.findClassNameForStack(stack, className);
 		}
 
 		return className;
@@ -559,6 +551,10 @@ export class SyntaxAnalyzer {
 				className = this.getClassNameFromUIDefineDotNotation(declaration.callee?.name, UIClass);
 			} else if (declaration?.type === "CallExpression" || declaration?.type === "MemberExpression" || declaration?.type === "Identifier") {
 				className = this.acornGetClassName(UIClass.className, declaration.end + 1) || "";
+			} else if (declaration?.type === "ArrayExpression") {
+				className = "array";
+			} else if (declaration?.type === "ObjectExpression") {
+				className = "map";
 			}
 		}
 
