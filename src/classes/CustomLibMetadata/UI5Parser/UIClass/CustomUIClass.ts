@@ -285,7 +285,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 			this.fillStaticMethodsAndFields();
 
-			//remove duplicates. Think about how to find data type for same variables w/o data type
+			//remove duplicates
 			this.fields = this.fields.reduce((accumulator: UIField[], field: UIField) => {
 				const existingField = accumulator.find(accumulatedField => accumulatedField.name === field.name);
 				if (existingField && field.type && !existingField.type) {

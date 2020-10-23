@@ -55,9 +55,21 @@ export class SAPNode {
 		return this.node.bIsDeprecated;
 	}
 
+	public getFields() {
+		const metadata = this.getMetadata();
+		const rawMetadata = metadata?.getRawMetadata();
+		const fields = rawMetadata?.properties?.filter((field: any) => !field.deprecatedText && field.visibility === "public");
+		fields?.forEach((field: any) => {
+			field.name = field.name.replace(rawMetadata?.name + "." || "", "");
+		});
+
+		return fields || [];
+	}
+
 	public getProperties(): any[] {
 		const metadata = this.getMetadata();
-		return metadata?.getUI5Metadata()?.properties?.filter((property: any) => !property.deprecatedText && property.visibility === "public") || [];
+		const properties = metadata?.getUI5Metadata()?.properties?.filter((property: any) => !property.deprecatedText && property.visibility === "public");
+		return properties || [];
 	}
 
 	public getAggregations(): any[] {

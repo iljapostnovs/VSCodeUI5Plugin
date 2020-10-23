@@ -1,6 +1,5 @@
 import { SAPNode } from "../../StandardLibMetadata/SAPNode";
 import * as vscode from "vscode";
-import { UI5Metadata } from "../../StandardLibMetadata/UI5Metadata";
 
 export class DefineGenerator {
 
@@ -8,8 +7,7 @@ export class DefineGenerator {
 		let defineString: string = "";
 
 		if (node.node.visibility === "public" && (node.getKind() === "class" || node.getKind() === "enum")) {
-			const metadata: UI5Metadata = node.getMetadata();
-			defineString = `"${metadata.rawMetadata.module}"`;
+			defineString = `"${node.getName().replace(/\./g, "/")}"`;
 		}
 
 		return defineString;
