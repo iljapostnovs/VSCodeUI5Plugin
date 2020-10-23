@@ -90,6 +90,6 @@
 * XML Linting now checks for unused namespaces
 * UI5 Metadata source URL can now be configured
 
-## 0.9.9 (22-10-2020)
-* Acron-loose is now used as JS parser
+## 0.9.9 (23-10-2020)
+* Acorn-loose is now used as JS parser
 * Bugfixes

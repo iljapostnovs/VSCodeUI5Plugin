@@ -31,10 +31,10 @@ export class CustomUIClass extends AbstractUIClass {
 	public UIDefine: UIDefine[] = [];
 	public comments: Comment[] = [];
 	public acornClassBody: any;
-	public acronMethodsAndFields: any[] = [];
+	public acornMethodsAndFields: any[] = [];
 	public fileContent: any;
 	private parentVariableName: any;
-	private classBodyAcronVariableName: string | undefined;
+	private classBodyacornVariableName: string | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
@@ -59,12 +59,12 @@ export class CustomUIClass extends AbstractUIClass {
 			//static methods
 			//TODO: Move this
 			const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
-			if (UIDefineBody && this.classBodyAcronVariableName) {
+			if (UIDefineBody && this.classBodyacornVariableName) {
 				const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
 					return 	node.type === "ExpressionStatement" &&
 							(
-								node.expression?.left?.object?.name === this.classBodyAcronVariableName ||
-								node.expression?.left?.object?.object?.name === this.classBodyAcronVariableName
+								node.expression?.left?.object?.name === this.classBodyacornVariableName ||
+								node.expression?.left?.object?.object?.name === this.classBodyacornVariableName
 							);
 				});
 
@@ -87,7 +87,7 @@ export class CustomUIClass extends AbstractUIClass {
 				methods = methods.concat(staticMethods);
 			}
 
-			this.acronMethodsAndFields = this.acronMethodsAndFields.concat(methods);
+			this.acornMethodsAndFields = this.acornMethodsAndFields.concat(methods);
 
 			methods.forEach((method: any) => {
 				const methodName = method.key.name;
@@ -210,7 +210,7 @@ export class CustomUIClass extends AbstractUIClass {
 			if (variable) {
 				const neededDeclaration = variable.declarations.find((declaration: any) => declaration.id.name === part.name);
 				classBody = this.getClassBodyFromPartAcorn(neededDeclaration.init, partParent);
-				this.classBodyAcronVariableName = part.name;
+				this.classBodyacornVariableName = part.name;
 			}
 		}
 
@@ -253,7 +253,7 @@ export class CustomUIClass extends AbstractUIClass {
 								description: node.expression.left.property.name.jsType || ""
 							});
 
-							// this.acronMethodsAndFields.push({
+							// this.acornMethodsAndFields.push({
 							// 	key: node.expression.left.property,
 							// 	value: node.expression.right
 							// });
@@ -279,7 +279,7 @@ export class CustomUIClass extends AbstractUIClass {
 						type: property.jsType,
 						description: property.jsType || ""
 					});
-					this.acronMethodsAndFields.push(property);
+					this.acornMethodsAndFields.push(property);
 				} else if (property.value.type === "ObjectExpression") {
 					this.fields.push({
 						name: property.key.name,
@@ -287,7 +287,7 @@ export class CustomUIClass extends AbstractUIClass {
 						description: "map",
 						customData: this.generateCustomDataForObject(property.value)
 					});
-					this.acronMethodsAndFields.push(property);
+					this.acornMethodsAndFields.push(property);
 				}
 			});
 
@@ -336,12 +336,12 @@ export class CustomUIClass extends AbstractUIClass {
 	private fillStaticMethodsAndFields() {
 		const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
 
-		if (UIDefineBody && this.classBodyAcronVariableName) {
+		if (UIDefineBody && this.classBodyacornVariableName) {
 			const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
 				return 	node.type === "ExpressionStatement" &&
 						(
-							node.expression?.left?.object?.name === this.classBodyAcronVariableName ||
-							node.expression?.left?.object?.object?.name === this.classBodyAcronVariableName
+							node.expression?.left?.object?.name === this.classBodyacornVariableName ||
+							node.expression?.left?.object?.object?.name === this.classBodyacornVariableName
 						);
 			});
 
