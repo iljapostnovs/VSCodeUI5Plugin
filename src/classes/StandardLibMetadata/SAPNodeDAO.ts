@@ -72,7 +72,7 @@ export class SAPNodeDAO {
 	}
 
 	public findNode(name: string) {
-		let correctNode: SAPNode = SAPNodeDAO.SAPNodes[0];
+		let correctNode: SAPNode | undefined;
 
 		for (const node of SAPNodeDAO.SAPNodes) {
 			const theNode: SAPNode = node.findNode(name);

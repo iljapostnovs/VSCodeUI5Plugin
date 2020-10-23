@@ -27,7 +27,7 @@ export class StandardUIClass extends AbstractUIClass {
 	private getStandardClassMethods(className: string, isParent: boolean) {
 		let classMethods:StandardClassUIMethod[] = [];
 		const SAPNode = this.findSAPNode(className);
-		classMethods = SAPNode.getMethods().map((method: any) => {
+		classMethods = SAPNode?.getMethods().map((method: any) => {
 			return {
 				name: method.name.replace(`${this.className}.`, ""),
 				description: this.removeTags(method.code),
@@ -36,7 +36,7 @@ export class StandardUIClass extends AbstractUIClass {
 				isFromParent: !isParent,
 				api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name)
 			};
-		});
+		}) || [];
 		return classMethods;
 	}
 
@@ -93,7 +93,7 @@ export class StandardUIClass extends AbstractUIClass {
 
 	private fillFields() {
 		const SAPNode = this.findSAPNode(this.className);
-		this.fields = SAPNode.getFields().reduce((accumulator: UIField[], {name, type, description}:any) => {
+		this.fields = SAPNode?.getFields().reduce((accumulator: UIField[], {name, type, description}:any) => {
 			const additionalDescription = this.generateAdditionalDescriptionFrom(type);
 			accumulator.push({
 				name: name,
@@ -111,7 +111,7 @@ export class StandardUIClass extends AbstractUIClass {
 	private getStandardClassProperties(className: string) {
 		let classPropeties: UIProperty[] = [];
 		const SAPNode = this.findSAPNode(className);
-		classPropeties = SAPNode.getProperties().reduce((accumulator: UIProperty[], {name, type, description}:any) => {
+		classPropeties = SAPNode?.getProperties().reduce((accumulator: UIProperty[], {name, type, description}:any) => {
 			const additionalDescription = this.generateAdditionalDescriptionFrom(type);
 			accumulator.push({
 				name: name,
@@ -120,7 +120,7 @@ export class StandardUIClass extends AbstractUIClass {
 				description: `${additionalDescription}\n${this.removeTags(description)}`.trim()
 			});
 			return accumulator;
-		}, []);
+		}, []) || [];
 		return classPropeties;
 	}
 
@@ -128,11 +128,11 @@ export class StandardUIClass extends AbstractUIClass {
 		let additionalDescription = "";
 		if (className?.startsWith("sap.")) {
 			const SAPNode = this.findSAPNode(className);
-			additionalDescription = SAPNode.getProperties().reduce((accumulator: string, property: any) => {
+			additionalDescription = SAPNode?.getProperties().reduce((accumulator: string, property: any) => {
 				accumulator += `${property.name}\n`;
 
 				return accumulator;
-			}, "");
+			}, "") || "";
 		}
 
 		return additionalDescription;
@@ -162,13 +162,13 @@ export class StandardUIClass extends AbstractUIClass {
 	private getStandardClassEvents(className: string) {
 		let classEvents: UIEvent[] = [];
 		const SAPNode = this.findSAPNode(className);
-		classEvents = SAPNode.getEvents().reduce((accumulator: UIEvent[], event:any) => {
+		classEvents = SAPNode?.getEvents().reduce((accumulator: UIEvent[], event:any) => {
 			accumulator.push({
 				name: event.name,
 				description: this.removeTags(event.description)
 			});
 			return accumulator;
-		}, []);
+		}, []) || [];
 
 		return classEvents;
 	}
@@ -181,7 +181,7 @@ export class StandardUIClass extends AbstractUIClass {
 		let classAggregations: UIAggregation[] = [];
 		const SAPNode = this.findSAPNode(className);
 
-		classAggregations = SAPNode.getAggregations().reduce((accumulator: UIAggregation[], aggregation:any) => {
+		classAggregations = SAPNode?.getAggregations().reduce((accumulator: UIAggregation[], aggregation:any) => {
 			accumulator.push({
 				name: aggregation.name,
 				type: aggregation.type,
@@ -190,7 +190,7 @@ export class StandardUIClass extends AbstractUIClass {
 				description: this.removeTags(aggregation.description)
 			});
 			return accumulator;
-		}, []);
+		}, []) || [];
 
 		return classAggregations;
 	}
@@ -203,7 +203,7 @@ export class StandardUIClass extends AbstractUIClass {
 		let classAssociation: UIAssociation[] = [];
 		const SAPNode = this.findSAPNode(className);
 
-		classAssociation = SAPNode.getAssociations().reduce((accumulator: UIAssociation[], association:any) => {
+		classAssociation = SAPNode?.getAssociations().reduce((accumulator: UIAssociation[], association:any) => {
 			accumulator.push({
 				name: association.name,
 				type: association.type,
@@ -212,7 +212,7 @@ export class StandardUIClass extends AbstractUIClass {
 				singularName: association.singularName
 			});
 			return accumulator;
-		}, []);
+		}, []) || [];
 		return classAssociation;
 	}
 
