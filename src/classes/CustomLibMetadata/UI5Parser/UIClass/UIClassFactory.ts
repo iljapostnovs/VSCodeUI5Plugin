@@ -5,6 +5,7 @@ import { JSClass } from "./JSClass";
 import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 
 export interface FieldsAndMethods {
+	className: string;
 	fields: UIField[];
 	methods: UIMethod[];
 }
@@ -35,10 +36,14 @@ export class UIClassFactory {
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
 		this.UIClasses[classNameDotNotation] = UIClassFactory.getInstance(classNameDotNotation, classFileText);
+		this.UIClasses[classNameDotNotation].methods.forEach(method => {
+			SyntaxAnalyzer.findMethodReturnType(method, classNameDotNotation, false);
+		});
 	}
 
 	public static getFieldsAndMethodsForClass(className: string) {
 		const fieldsAndMethods: FieldsAndMethods = {
+			className: className,
 			fields: [],
 			methods: []
 		};

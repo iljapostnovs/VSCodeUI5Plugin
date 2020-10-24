@@ -100,6 +100,9 @@ export class CustomUIClass extends AbstractUIClass {
 					const paramTags = comment.jsdoc?.tags?.filter((tag: any) => tag.tag === "param");
 					const returnTag = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "return" || tag.tag === "returns");
 					const asyncTag = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "async");
+					const isPrivate = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "private");
+					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
+					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
 
 					if (paramTags) {
 						paramTags.forEach((tag: any) => {
@@ -110,11 +113,17 @@ export class CustomUIClass extends AbstractUIClass {
 						});
 					}
 
+					if (isPrivate || isPublic || isProtected) {
+						const UIMethod = this.methods.find(method => method.name === methodName);
+						if (UIMethod) {
+							UIMethod.visibility = isPrivate ? "private" : isProtected ? "protected" : isPublic ? "public" : UIMethod.visibility;
+						}
+					}
 					if (asyncTag) {
 						const UIMethod = this.methods.find(method => method.name === methodName);
 						if (UIMethod) {
 							UIMethod.returnType = "Promise";
-							this.generateDescriptionForMethod(UIMethod)
+							this.generateDescriptionForMethod(UIMethod);
 						}
 					} else if (returnTag) {
 						const UIMethod = this.methods.find(method => method.name === methodName);
@@ -251,7 +260,8 @@ export class CustomUIClass extends AbstractUIClass {
 							this.fields.push({
 								name: node.expression.left.property.name,
 								type: node.expression.left.property.name.jsType,
-								description: node.expression.left.property.name.jsType || ""
+								description: node.expression.left.property.name.jsType || "",
+								visibility: node.expression.left.property.name.startsWith("_") ? "private" : "public"
 							});
 
 							// this.acornMethodsAndFields.push({
@@ -270,7 +280,8 @@ export class CustomUIClass extends AbstractUIClass {
 						params: this.generateParamTextForMethod(property.value.params),
 						returnType: property.returnType || property.value.async ? "Promise" : "void",
 						position: property.start,
-						description: ""
+						description: "",
+						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					};
 					this.generateDescriptionForMethod(method);
 					this.methods.push(method);
@@ -278,7 +289,8 @@ export class CustomUIClass extends AbstractUIClass {
 					this.fields.push({
 						name: property.key.name,
 						type: property.jsType,
-						description: property.jsType || ""
+						description: property.jsType || "",
+						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value.type === "ObjectExpression") {
@@ -286,7 +298,8 @@ export class CustomUIClass extends AbstractUIClass {
 						name: property.key.name,
 						type: "__map__",
 						description: "map",
-						customData: this.generateCustomDataForObject(property.value)
+						customData: this.generateCustomDataForObject(property.value),
+						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
 				}
@@ -358,13 +371,15 @@ export class CustomUIClass extends AbstractUIClass {
 						params: assignmentBody.params.map((param: any) => param.name),
 						returnType: assignmentBody.returnType || assignmentBody.async ? "Promise" : "void",
 						position: assignmentBody.start,
-						description: ""
+						description: "",
+						visibility: name?.startsWith("_") ? "private" : "public"
 					};
 					this.generateDescriptionForMethod(method);
 					this.methods.push(method);
 				} else if (isField) {
 					this.fields.push({
 						name: name,
+						visibility: name?.startsWith("_") ? "private" : "public",
 						type: assignmentBody.jsType,
 						description: assignmentBody.jsType || ""
 					});
@@ -427,21 +442,23 @@ export class CustomUIClass extends AbstractUIClass {
 	private fillPropertyMethods(aMethods: CustomClassUIMethod[]) {
 		this.properties?.forEach(property => {
 			const propertyWithFirstBigLetter = `${property.name[0].toUpperCase()}${property.name.substring(1, property.name.length)}`;
-			const getter = `get${propertyWithFirstBigLetter}`;
-			const setter = `set${propertyWithFirstBigLetter}`;
+			const getterName = `get${propertyWithFirstBigLetter}`;
+			const setterName = `set${propertyWithFirstBigLetter}`;
 
 			aMethods.push({
-				name: getter,
+				name: getterName,
 				description: `Getter for property ${property.name}`,
 				params: [],
-				returnType: property.type || "void"
+				returnType: property.type || "void",
+				visibility: property.visibility
 			});
 
 			aMethods.push({
-				name: setter,
+				name: setterName,
 				description: `Setter for property ${property.name}`,
 				params: [`v${propertyWithFirstBigLetter}`],
-				returnType: "void"
+				returnType: this.className,
+				visibility: property.visibility
 			});
 		});
 	}
@@ -476,7 +493,8 @@ export class CustomUIClass extends AbstractUIClass {
 					name: methodName,
 					description: `Generic method from ${aggregation.name} aggregation`,
 					params: [],
-					returnType: aggregation.type || "void"
+					returnType: aggregation.type || "void",
+					visibility: aggregation.visibility
 				});
 			});
 
@@ -497,7 +515,8 @@ export class CustomUIClass extends AbstractUIClass {
 					name: eventMethod,
 					description: `Generic method for event ${event.name}`,
 					params: [],
-					returnType: this.className
+					returnType: this.className,
+					visibility: event.visibility
 				});
 			});
 		});
@@ -527,7 +546,8 @@ export class CustomUIClass extends AbstractUIClass {
 					name: methodName,
 					description: `Generic method from ${association.name} association`,
 					params: [],
-					returnType: association.type || this.className
+					returnType: association.type || this.className,
+					visibility: association.visibility
 				});
 			});
 
@@ -598,12 +618,19 @@ export class CustomUIClass extends AbstractUIClass {
 					singularName = aggregationName;
 				}
 
+				let visibility = "public";
+				const visibilityProp = aggregationProps.find((associationProperty: any) => associationProperty.key.name === "visibility");
+				if (visibilityProp) {
+					visibility = visibilityProp.value.value;
+				}
+
 				const UIAggregations: UIAggregation = {
 					name: aggregationName,
 					type: aggregationType,
 					multiple: multiple,
 					singularName: singularName,
-					description: ""
+					description: "",
+					visibility: visibility
 				};
 				return UIAggregations;
 			});
@@ -614,11 +641,18 @@ export class CustomUIClass extends AbstractUIClass {
 		const eventMetadataNode = metadata.value.properties.find((metadataNode: any) => metadataNode.key.name === "events");
 
 		if (eventMetadataNode) {
+
 			const events = eventMetadataNode.value.properties;
 			this.events = events.map((eventNode: any) => {
+				let visibility = "public";
+				const visibilityProp = eventNode.value.properties.find((node: any) => node.key.name === "visibility");
+				if (visibilityProp) {
+					visibility = visibilityProp.value.value;
+				}
 				const UIEvent: UIEvent = {
 					name: eventNode.key.name,
-					description: ""
+					description: "",
+					visibility: visibility
 
 				};
 				return UIEvent;
@@ -631,7 +665,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 		if (propertiesMetadataNode) {
 			const properties = propertiesMetadataNode.value.properties;
-			this.properties = properties.map((propertyNode: any, i: any) => {
+			this.properties = properties.map((propertyNode: any) => {
 
 				const propertyName = propertyNode.key.name;
 				const propertyProps = propertyNode.value.properties;
@@ -642,9 +676,16 @@ export class CustomUIClass extends AbstractUIClass {
 					propertyType = propertyTypeProp.value.value;
 				}
 
+				let visibility = "public";
+				const visibilityProp = propertyProps.find((associationProperty: any) => associationProperty.key.name === "visibility");
+				if (visibilityProp) {
+					visibility = visibilityProp.value.value;
+				}
+
 				const UIProperties: UIProperty = {
 					name: propertyName,
 					type: propertyType,
+					visibility: visibility,
 					description: "",
 					typeValues: this.generateTypeValues(propertyType || "")
 				};
@@ -685,12 +726,19 @@ export class CustomUIClass extends AbstractUIClass {
 					singularName = associationName;
 				}
 
+				let visibility = "public";
+				const visibilityProp = associationProps.find((associationProperty: any) => associationProperty.key.name === "visibility");
+				if (visibilityProp) {
+					visibility = visibilityProp.value.value;
+				}
+
 				const UIAssociations: UIAssociation = {
 					name: associationName,
 					type: associationType,
 					multiple: multiple,
 					singularName: singularName,
-					description: ""
+					description: "",
+					visibility: visibility
 				};
 				return UIAssociations;
 			}));

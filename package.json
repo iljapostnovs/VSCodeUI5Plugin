@@ -112,6 +112,11 @@
 					"type": "string",
 					"default": "https://ui5.sap.com/",
 					"description": "UI5 metadata source URL"
+				},
+				"ui5.plugin.ignoreAccessLevelModifiers": {
+					"type": "boolean",
+					"default": false,
+					"description": "Should JS completion items ignore access modifiers (private, protected, public). If flag is set to true, all of the completion items for methods and fields will be shown, however, if set to false, completion items will be generated according to access modifiers."
 				}
 			}
 		},

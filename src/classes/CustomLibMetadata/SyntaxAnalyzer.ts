@@ -23,9 +23,24 @@ export class SyntaxAnalyzer {
 					const field = UIClass.fields.find(field => field.name === currentFieldName);
 					if (field) {
 						fieldsAndMethods = this.getFieldsAndMethodsForMap(field, mapFields);
+						fieldsAndMethods.className = className;
 					}
 				}
 			}
+
+			const ignoreAccessLevelModifiers = vscode.workspace.getConfiguration("ui5.plugin").get("ignoreAccessLevelModifiers");
+			if (!ignoreAccessLevelModifiers) {
+				const sCurrentDocumentClassName = this.getClassNameOfTheCurrentDocument();
+				if (sCurrentDocumentClassName !== UIClassName) {
+					if (fieldsAndMethods?.fields) {
+						fieldsAndMethods.fields = fieldsAndMethods.fields.filter(field => field.visibility === "public");
+					}
+					if (fieldsAndMethods?.methods) {
+						fieldsAndMethods.methods = fieldsAndMethods.methods.filter(method => method.visibility === "public");
+					}
+				}
+			}
+
 		}
 
 		return fieldsAndMethods;
@@ -33,6 +48,7 @@ export class SyntaxAnalyzer {
 
 	private static getFieldsAndMethodsForMap(field: CustomClassUIField, mapFields: string[]) {
 		const fieldsAndMethods: FieldsAndMethods = {
+			className: "",
 			fields: this.getUIFieldsForMap(field.customData, mapFields),
 			methods: []
 		};
@@ -51,7 +67,8 @@ export class SyntaxAnalyzer {
 				return {
 					name: key,
 					description: "",
-					type: undefined
+					type: undefined,
+					visibility: "public"
 				};
 			});
 			newFields.forEach(newField => {
@@ -385,8 +402,8 @@ export class SyntaxAnalyzer {
 	}
 
 	public static findMethodReturnType(method: UIMethod, className: string, includeParentMethods: boolean = true) {
+		const UIClass = UIClassFactory.getUIClass(className);
 		if (method.returnType === "void") {
-			const UIClass = UIClassFactory.getUIClass(className);
 
 			const innerMethod = UIClass.methods.find(innermethod => method.name === innermethod.name);
 			if (innerMethod && innerMethod.returnType !== "void") {
@@ -399,7 +416,6 @@ export class SyntaxAnalyzer {
 
 					if (returnStatement) {
 						method.returnType = this.acornGetClassName(className, returnStatement.argument.end + 1) || "void";
-						UIClass.generateDescriptionForMethod(method);
 					}
 				}
 			}
@@ -407,6 +423,9 @@ export class SyntaxAnalyzer {
 			if (includeParentMethods && (!method.returnType || method.returnType === "void") && UIClass.parentClassNameDotNotation) {
 				this.findMethodReturnType(method, UIClass.parentClassNameDotNotation);
 			}
+		}
+		if (UIClass instanceof CustomUIClass) {
+			UIClass.generateDescriptionForMethod(method);
 		}
 	}
 
@@ -555,6 +574,8 @@ export class SyntaxAnalyzer {
 				className = "array";
 			} else if (declaration?.type === "ObjectExpression") {
 				className = "map";
+			} else if (declaration?.type === "Literal") {
+				className = typeof declaration.value;
 			}
 		}
 
