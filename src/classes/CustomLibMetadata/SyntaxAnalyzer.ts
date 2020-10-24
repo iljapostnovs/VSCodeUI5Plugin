@@ -290,6 +290,8 @@ export class SyntaxAnalyzer {
 							className = `${currentClassName}__map__${memberName}`;
 							className = this.generateClassNameFromStack(stack, className);
 							stack = [];
+						} else {
+							className = field.type;
 						}
 					} else {
 						stack = [];
@@ -323,7 +325,7 @@ export class SyntaxAnalyzer {
 				className = currentClassName;
 			}*/
 		}
-		if (stack.length > 0) {
+		if (className && stack.length > 0) {
 			className = this.findClassNameForStack(stack, className);
 		}
 
@@ -436,7 +438,8 @@ export class SyntaxAnalyzer {
 		if (innerField && innerField.type) {
 			field.type = innerField.type;
 		} else if (UIClass instanceof CustomUIClass) {
-			UIClass.acornMethodsAndFields.forEach((property: any) => {
+			UIClass.acornMethodsAndFields.find((property: any) => {
+				let typeFound = false;
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
 					const functionParts = property.value.body?.body || [];
 					functionParts.forEach((node: any) => {
@@ -447,6 +450,11 @@ export class SyntaxAnalyzer {
 				} else if (property.value.type === "Identifier" && property.key.name === field.name) {
 					field.type = this.getClassNameFromUIDefineDotNotation(property.value.name, UIClass);
 				}
+				if (field.type) {
+					typeFound = true;
+				}
+
+				return typeFound;
 			});
 		}
 
