@@ -7,10 +7,10 @@ export class Footer implements IUMLGenerator {
 	}
 	generateXML(): string {
 		return `
-				</root>
-			</mxGraphModel>
-			</diagram>
-		</mxfile>`;
+			</root>
+		</mxGraphModel>
+	</diagram>
+</mxfile>`;
 	}
 
 }

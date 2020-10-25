@@ -1,6 +1,6 @@
 import { FileReader } from "../Util/FileReader";
 import { URLBuilder } from "../Util/URLBuilder";
-import rp from "request-promise";
+import * as rp from "request-promise";
 
 export class SAPIcons {
 	public static icons: string[] = [];

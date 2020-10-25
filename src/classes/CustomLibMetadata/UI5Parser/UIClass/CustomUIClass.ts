@@ -94,7 +94,7 @@ export class CustomUIClass extends AbstractUIClass {
 				const params = method.value.params;
 				const comment = this.comments.find(comment => {
 					const positionDifference = method.start - comment.end;
-					return positionDifference < 10 && positionDifference > 0;
+					return positionDifference < 15 && positionDifference > 0;
 				});
 				if (comment) {
 					const paramTags = comment.jsdoc?.tags?.filter((tag: any) => tag.tag === "param");
@@ -380,7 +380,7 @@ export class CustomUIClass extends AbstractUIClass {
 					this.fields.push({
 						name: name,
 						visibility: name?.startsWith("_") ? "private" : "public",
-						type: assignmentBody.jsType,
+						type: typeof assignmentBody.value,
 						description: assignmentBody.jsType || ""
 					});
 				}

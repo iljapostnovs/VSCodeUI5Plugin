@@ -40,7 +40,7 @@ export class JSDynamicFactory {
 			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(classField.name);
 			completionItem.kind = vscode.CompletionItemKind.Field;
 			completionItem.insertText = classField.name;
-			completionItem.detail = `(${classField.visibility}) ${classField.name}`;
+			completionItem.detail = `(${classField.visibility}) ${classField.name}: ${classField.type ? classField.type : "any"}`;
 			completionItem.documentation = classField.description;
 
 			return completionItem;

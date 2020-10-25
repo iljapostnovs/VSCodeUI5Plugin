@@ -100,7 +100,7 @@ export class SyntaxAnalyzer {
 		return UIClassName;
 	}
 
-	private static acornGetClassName(className: string, position: number) {
+	public static acornGetClassName(className: string, position: number) {
 		let classNameOfTheCurrentVariable;
 		const stack = this.getStackOfNodesForPosition(className, position);
 		if (stack.length > 0) {
@@ -319,11 +319,15 @@ export class SyntaxAnalyzer {
 
 			} else if (currentNode.type === "NewExpression") {
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
-				className = this.getClassNameFromUIDefineDotNotation(currentNode.callee?.name, UIClass);
+				if (currentNode.callee?.type === "Identifier") {
+					className = this.getClassNameFromUIDefineDotNotation(currentNode.callee?.name, UIClass);
+				} else if (currentNode.callee?.type === "MemberExpression") {
+					const newStack = this.expandAllContent(currentNode).reverse();
+					newStack.pop(); //removes NewExpression
+					className = this.findClassNameForStack(newStack, currentClassName);
+				}
 
-			}/* else {
-				className = currentClassName;
-			}*/
+			}
 		}
 		if (className && stack.length > 0) {
 			className = this.findClassNameForStack(stack, className);
@@ -417,7 +421,8 @@ export class SyntaxAnalyzer {
 					const returnStatement = methodBody?.find((bodyPart: any) => bodyPart.type === "ReturnStatement");
 
 					if (returnStatement) {
-						method.returnType = this.acornGetClassName(className, returnStatement.argument.end + 1) || "void";
+						method.returnType = this.getClassNameFromAcornDeclaration(returnStatement.argument, UIClass) || "void";
+						//this.acornGetClassName(className, returnStatement.argument.end + 1) || "void";
 					}
 				}
 			}
@@ -431,7 +436,7 @@ export class SyntaxAnalyzer {
 		}
 	}
 
-	public static findFieldType(field: UIField, className: string) {
+	public static findFieldType(field: UIField, className: string, includeParentMethods: boolean = true) {
 		const UIClass = UIClassFactory.getUIClass(className);
 
 		const innerField = UIClass.fields.find(innerfield => innerfield.name === field.name);
@@ -444,7 +449,7 @@ export class SyntaxAnalyzer {
 					const functionParts = property.value.body?.body || [];
 					functionParts.forEach((node: any) => {
 						if (UIClass.isAssignmentStatementForThisVariable(node) && node.expression?.left?.property?.name === field.name) {
-							field.type = this.getClassNameFromacornTheDeclaration(node.expression.right, UIClass);
+							field.type = this.getClassNameFromAcornDeclaration(node.expression.right, UIClass);
 						}
 					});
 				} else if (property.value.type === "Identifier" && property.key.name === field.name) {
@@ -458,7 +463,7 @@ export class SyntaxAnalyzer {
 			});
 		}
 
-		if (!field.type && UIClass.parentClassNameDotNotation) {
+		if (includeParentMethods && !field.type && UIClass.parentClassNameDotNotation) {
 			this.findFieldType(field, UIClass.parentClassNameDotNotation);
 		}
 	}
@@ -563,12 +568,12 @@ export class SyntaxAnalyzer {
 	}
 
 	private static getClassNameFromAcornVariableDeclaration(declaration: any, UIClass: CustomUIClass) {
-		return this.getClassNameFromacornTheDeclaration(declaration.init, UIClass);
+		return this.getClassNameFromAcornDeclaration(declaration.init, UIClass);
 	}
 
 	private static declarationStack: any[] = [];
 
-	private static getClassNameFromacornTheDeclaration(declaration: any, UIClass: CustomUIClass) {
+	private static getClassNameFromAcornDeclaration(declaration: any, UIClass: CustomUIClass) {
 		let className = "";
 		if (this.declarationStack.indexOf(declaration) > -1) {
 			this.declarationStack = [];

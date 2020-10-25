@@ -100,6 +100,9 @@ export class UIClassFactory {
 			this.UIClasses[className].methods.forEach(method => {
 				SyntaxAnalyzer.findMethodReturnType(method, className, false);
 			});
+			this.UIClasses[className].fields.forEach(field => {
+				SyntaxAnalyzer.findFieldType(field, className, false);
+			});
 		}
 
 		return this.UIClasses[className];

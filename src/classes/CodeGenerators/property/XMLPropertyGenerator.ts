@@ -1,9 +1,9 @@
 import { IPropertyGenerator } from "./interfaces/IPropertyGenerator";
 import { IPropertyGetterStrategy } from "./interfaces/IPropertyGetterStrategy";
-import vscode from "vscode";
+import * as vscode from "vscode";
 export class XMLPropertyGenerator implements IPropertyGenerator {
 	public generateProperties(strategy: IPropertyGetterStrategy) {
-		let properties: string = "";
+		let properties = "";
 
 		strategy.getProperties().forEach((property: any) => {
 			const propertyTexts = strategy.getProperty(property);

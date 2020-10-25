@@ -1,10 +1,10 @@
 import { IAggregationGenerator } from "./interfaces/IAggregationGenerator";
 import { IAggregationGetterStrategy } from "./interfaces/IAggregationGetterStrategy";
-import vscode from "vscode";
+import * as vscode from "vscode";
 
 export class XMLAggregationGenerator implements IAggregationGenerator {
 	public generateAggregations(strategy: IAggregationGetterStrategy, classPrefix: string) {
-		let aggregationString: string = "";
+		let aggregationString = "";
 		const aggregations: any = strategy.getAggregations();
 
 		aggregations.forEach((aggregation: any) => {

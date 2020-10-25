@@ -1,5 +1,5 @@
 import { SAPNode } from "./SAPNode";
-import rp from "request-promise";
+import * as rp from "request-promise";
 import * as vscode from "vscode";
 import { FileReader } from "../Util/FileReader";
 import { URLBuilder } from "../Util/URLBuilder";

@@ -3,10 +3,9 @@ import * as vscode from "vscode";
 import { UIClassFactory } from "./UIClassFactory";
 import { CustomUIClass } from "./CustomUIClass";
 import { FileReader } from "../../../Util/FileReader";
-import LineColumn from 'line-column';
 import { StandardUIClass } from "./StandardUIClass";
 import { URLBuilder } from "../../../Util/URLBuilder";
-
+import LineColumn = require("line-column");
 export class UIClassDefinitionFinder {
 	public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {
 		let location: vscode.Location | undefined;
