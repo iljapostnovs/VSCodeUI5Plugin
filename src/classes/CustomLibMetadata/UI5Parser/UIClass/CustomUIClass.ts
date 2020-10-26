@@ -1,43 +1,140 @@
 import { FileReader } from "../../../Util/FileReader";
-import { MainLooper } from "../../JSParser/MainLooper";
-import { AbstractType } from "../../JSParser/types/AbstractType";
-import { DifferentJobs } from "../../JSParser/DifferentJobs";
-import { JSFunction } from "../../JSParser/types/Function";
-import { JSFunctionCall } from "../../JSParser/types/FunctionCall";
-import { JSObject } from "../../JSParser/types/Object";
-import { JSVariable } from "../../JSParser/types/Variable";
-import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, TypeValue } from "./AbstractUIClass";
-import { JSString } from "../../JSParser/types/String";
-import { JSComment } from "../../JSParser/types/JSComment";
-import { JSReturnKeyword } from "../../JSParser/types/ReturnKeyword";
-import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
+import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
+const commentParser = require("comment-parser");
+const acornLoose = require("acorn-loose");
 
 interface UIDefine {
 	path: string;
 	className: string;
 	classNameDotNotation: string;
 }
+interface LooseObject {
+	[key: string]: any;
+}
+
+interface Comment {
+	text: string;
+	start: number;
+	end: number;
+	jsdoc: any;
+}
 export interface CustomClassUIMethod extends UIMethod {
 	position?: number;
-	fnRef?: JSFunction;
+}
+export interface CustomClassUIField extends UIField {
+	customData?: LooseObject;
 }
 export class CustomUIClass extends AbstractUIClass {
 	public methods: CustomClassUIMethod[] = [];
-	public classBody: JSObject | undefined;
+	public fields: CustomClassUIField[] = [];
 	public classText: string = "";
 	public UIDefine: UIDefine[] = [];
-	public jsPasredBody: AbstractType | undefined;
-	private currentClassHolderVariable: AbstractType | undefined;
+	public comments: Comment[] = [];
+	public acornClassBody: any;
+	public acornMethodsAndFields: any[] = [];
+	public fileContent: any;
+	private parentVariableName: any;
+	private classBodyacornVariableName: string | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
 
 		this.readFileContainingThisClassCode(documentText); //todo: rename. not always reading anyore.
 		this.UIDefine = this.getUIDefine();
-		this.classBody = this.getThisClassBody();
+		this.acornClassBody = this.getThisClassBodyAcorn();
 		this.findParentClassNameDotNotation();
 		this.fillUI5Metadata();
 		this.fillMethodsAndFields();
+		this.enrichMethodInfoWithJSDocs();
+	}
+
+	private enrichMethodInfoWithJSDocs() {
+		if (this.acornClassBody) {
+			//instance methods
+			let methods = this.acornClassBody.properties?.filter((node: any) =>
+				node.value.type === "FunctionExpression" ||
+				node.value.type === "ArrowFunctionExpression"
+			) || [];
+
+			//static methods
+			//TODO: Move this
+			const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
+			if (UIDefineBody && this.classBodyacornVariableName) {
+				const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
+					return 	node.type === "ExpressionStatement" &&
+							(
+								node.expression?.left?.object?.name === this.classBodyacornVariableName ||
+								node.expression?.left?.object?.object?.name === this.classBodyacornVariableName
+							);
+				});
+
+				const staticMethods = thisClassVariableAssignments
+				.filter(node => {
+					const assignmentBody = node.expression.right;
+					return assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
+				}).map(node => ({
+					key: {
+						name: node.expression.left.property.name,
+						start: node.expression.left.property.start,
+						end: node.expression.left.property.end,
+						type:'Identifier'
+					},
+					value: node.expression.right,
+					start: node.expression.left.object.start,
+					end: node.expression.right.end,
+					type: "Property"
+				}));
+				methods = methods.concat(staticMethods);
+			}
+
+			this.acornMethodsAndFields = this.acornMethodsAndFields.concat(methods);
+
+			methods.forEach((method: any) => {
+				const methodName = method.key.name;
+				const params = method.value.params;
+				const comment = this.comments.find(comment => {
+					const positionDifference = method.start - comment.end;
+					return positionDifference < 15 && positionDifference > 0;
+				});
+				if (comment) {
+					const paramTags = comment.jsdoc?.tags?.filter((tag: any) => tag.tag === "param");
+					const returnTag = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "return" || tag.tag === "returns");
+					const asyncTag = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "async");
+					const isPrivate = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "private");
+					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
+					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
+
+					if (paramTags) {
+						paramTags.forEach((tag: any) => {
+							const param = params.find((param: any) => param.name === tag.name);
+							if (param) {
+								param.jsType = tag.type;
+							}
+						});
+					}
+
+					if (isPrivate || isPublic || isProtected) {
+						const UIMethod = this.methods.find(method => method.name === methodName);
+						if (UIMethod) {
+							UIMethod.visibility = isPrivate ? "private" : isProtected ? "protected" : isPublic ? "public" : UIMethod.visibility;
+						}
+					}
+					if (asyncTag) {
+						const UIMethod = this.methods.find(method => method.name === methodName);
+						if (UIMethod) {
+							UIMethod.returnType = "Promise";
+							this.generateDescriptionForMethod(UIMethod);
+						}
+					} else if (returnTag) {
+						const UIMethod = this.methods.find(method => method.name === methodName);
+						if (UIMethod) {
+							UIMethod.returnType = returnTag.type;
+							this.generateDescriptionForMethod(UIMethod);
+						}
+					}
+				}
+			});
+		}
 	}
 
 	private readFileContainingThisClassCode(documentText?: string) {
@@ -46,16 +143,25 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 		this.classText = documentText || "";
 		if (documentText) {
-			const parsedBodies = MainLooper.startAnalysing(documentText);
-			parsedBodies.forEach(part => {
-				part.setPositions();
-			});
 
-			//lets concentrate on good old sap.ui.define only
-			const UIDefineMethodCall = parsedBodies.find(parsedBody => parsedBody.parsedName === "sap.ui.define");
-			if (UIDefineMethodCall) {
-				this.jsPasredBody = UIDefineMethodCall;
-				DifferentJobs.finalizeParsing(this.jsPasredBody);
+			try {
+				this.fileContent = acornLoose.parse(documentText, {
+					ecmaVersion: 11,
+					onComment: (isBlock: boolean, text: string, start: number, end: number) => {
+						if (isBlock && text.startsWith("*")) {
+							this.comments.push({
+								text: text,
+								start: start,
+								end: end,
+								jsdoc: commentParser(`/*${text}*/`)[0]
+							});
+						}
+
+					}
+				});
+			} catch (error) {
+				console.error(error);
+				this.fileContent = null;
 			}
 		}
 	}
@@ -63,84 +169,145 @@ export class CustomUIClass extends AbstractUIClass {
 	private getUIDefine() {
 		let UIDefine: UIDefine[] = [];
 
-		if (this.jsPasredBody) {
-			const UIDefinePaths = this.jsPasredBody.parts[0].parts.map(part => part.parsedBody.substring(1, part.parsedBody.length - 1));
-			const UIDefineClassNames = (<JSFunction>this.jsPasredBody.parts[1]).params.map(part => part.parsedName);
-			UIDefine = UIDefineClassNames.map((className, index) : UIDefine => {
-				return {
-					path: UIDefinePaths[index],
-					className: className,
-					classNameDotNotation: UIDefinePaths[index] ? UIDefinePaths[index].replace(/\//g, ".") : ""
-				};
-			});
+		if (this.fileContent) {
+			const args = this.fileContent?.body[0]?.expression?.arguments;
+			if (args && args.length === 2) {
+				const UIDefinePaths: string[] = args[0].elements?.map((part: any) => part.value) || [];
+				const UIDefineClassNames: string[] = args[1].params?.map((part: any) => part.name) || [];
+				UIDefine = UIDefineClassNames.map((className, index) : UIDefine => {
+					return {
+						path: UIDefinePaths[index],
+						className: className,
+						classNameDotNotation: UIDefinePaths[index] ? UIDefinePaths[index].replace(/\//g, ".") : ""
+					};
+				});
+			}
 		}
 
 		return UIDefine;
 	}
 
-	private getThisClassBody(body: AbstractType | undefined = this.jsPasredBody) {
-		let classBody: JSObject | undefined;
+	private getThisClassBodyAcorn() {
+		const body = this.fileContent;
+		let classBody: any;
 
-		const returnKeyword = body?.parts[1].parts.find(part => part instanceof JSReturnKeyword);
+		const returnKeyword = body?.body[0]?.expression?.arguments[1]?.body?.body?.find((body: any) => body.type === "ReturnStatement");
 		if (returnKeyword && body) {
-			const returnedPart = returnKeyword.parts[0];
-
-			classBody = this.getClassBodyFromPart(returnedPart, body.parts[1]);
+			classBody = this.getClassBodyFromPartAcorn(returnKeyword.argument, body.body[0].expression.arguments[1].body);
 		}
 
 		return classBody;
 	}
 
-	private getClassBodyFromPart(part: AbstractType, partParent: AbstractType) : JSObject | undefined {
-		let classBody: JSObject | undefined;
+	private getClassBodyFromPartAcorn(part: any, partParent: any) : any {
+		let classBody: any;
 
-		if (part instanceof JSFunctionCall) {
-			classBody = this.getClassBodyFromClassExtend(part);
-		} else if (part instanceof JSObject) {
+		if (part.type === "CallExpression") {
+			classBody = this.getClassBodyFromClassExtendAcorn(part);
+
+			if (classBody) {
+				this.parentVariableName = part.callee.object.name;
+			}
+		} else if (part.type === "ObjectExpression") {
 			classBody = part;
-		} else if (part instanceof JSVariable) {
-			const variable = partParent.parts.find(parentPart => parentPart instanceof JSVariable && parentPart.parsedName === part.parsedName && parentPart !== part);
+		} else if (part.type === "Identifier") {
+			const variable = partParent.body
+			.filter((body: any) => body.type === "VariableDeclaration")
+			.find((variable: any) =>
+				variable.declarations.find((declaration: any) => declaration.id.name === part.name)
+			);
+
 			if (variable) {
-				classBody = this.getClassBodyFromPart(variable.parts[0], partParent);
-				if (classBody) {
-					this.currentClassHolderVariable = variable;
-					(<JSVariable>variable).jsType = this.className;
-				}
+				const neededDeclaration = variable.declarations.find((declaration: any) => declaration.id.name === part.name);
+				classBody = this.getClassBodyFromPartAcorn(neededDeclaration.init, partParent);
+				this.classBodyacornVariableName = part.name;
 			}
 		}
 
 		return classBody;
 	}
 
-	private getClassBodyFromClassExtend(part: AbstractType) {
-		let classBody: JSObject | undefined;
+	private getClassBodyFromClassExtendAcorn(part: any) {
+		let classBody: any;
 
-		if (this.isThisPartAClassBody(part)) {
-			classBody = <JSObject>part.parts[1];
+		if (this.isThisPartAClassBodyAcorn(part)) {
+			classBody = part.arguments[1];
 		}
 
 		return classBody;
 	}
 
-	private isThisPartAClassBody(part: AbstractType) {
-		return part instanceof JSFunctionCall && (part.parsedName.indexOf(".extend") > -1 || part.parsedName.indexOf(".declareStaticClass")) > -1;
+	private isThisPartAClassBodyAcorn(part: any) {
+		const propertyName = part?.callee?.property?.name;
+
+		return propertyName === "extend" || propertyName === "declareStaticClass";
 	}
 
+	public isAssignmentStatementForThisVariable(node: any) {
+		return 	node.type === "ExpressionStatement" &&
+				node.expression.type === "AssignmentExpression" &&
+				node.expression.operator === "=" &&
+				node.expression.left.type === "MemberExpression" &&
+				node.expression.left.object.type === "ThisExpression";
+	}
 	private fillMethodsAndFields() {
-		if (this.classBody) {
-			this.finishParsing();
+		if (this.acornClassBody?.properties) {
+			this.acornClassBody.properties.forEach((property: any) => {
+				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
+					const functionParts = property.value.body?.body || [];
+					functionParts.forEach((node: any) => {
+						if (this.isAssignmentStatementForThisVariable(node)) {
+							this.fields.push({
+								name: node.expression.left.property.name,
+								type: node.expression.left.property.name.jsType,
+								description: node.expression.left.property.name.jsType || "",
+								visibility: node.expression.left.property.name.startsWith("_") ? "private" : "public"
+							});
 
-			const allThisVariables = DifferentJobs.getAllVariables(this.classBody).filter(jsVariable => jsVariable.parsedName.startsWith("this."));
-
-			allThisVariables.forEach(thisVariable => {
-				this.fields.push({
-					name: thisVariable.parsedName.replace("this.", ""),
-					type: (<JSVariable>thisVariable).jsType,
-					description: ""
-				});
+							// this.acornMethodsAndFields.push({
+							// 	key: node.expression.left.property,
+							// 	value: node.expression.right
+							// });
+						}
+					});
+				}
 			});
 
-			//remove duplicates. Think about how to find data type for same variables w/o data type
+			this.acornClassBody.properties.forEach((property: any) => {
+				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
+					const method: CustomClassUIMethod = {
+						name: property.key.name,
+						params: this.generateParamTextForMethod(property.value.params),
+						returnType: property.returnType || property.value.async ? "Promise" : "void",
+						position: property.start,
+						description: "",
+						visibility: property.key.name.startsWith("_") ? "private" : "public"
+					};
+					this.generateDescriptionForMethod(method);
+					this.methods.push(method);
+				} else if (property.value.type === "Identifier" || property.value.type === "Literal") {
+					this.fields.push({
+						name: property.key.name,
+						type: property.jsType,
+						description: property.jsType || "",
+						visibility: property.key.name.startsWith("_") ? "private" : "public"
+					});
+					this.acornMethodsAndFields.push(property);
+				} else if (property.value.type === "ObjectExpression") {
+					this.fields.push({
+						name: property.key.name,
+						type: "__map__",
+						description: "map",
+						customData: this.generateCustomDataForObject(property.value),
+						visibility: property.key.name.startsWith("_") ? "private" : "public"
+					});
+					this.acornMethodsAndFields.push(property);
+				}
+			});
+
+			this.fillStaticMethodsAndFields();
+
+			//remove duplicates
 			this.fields = this.fields.reduce((accumulator: UIField[], field: UIField) => {
 				const existingField = accumulator.find(accumulatedField => accumulatedField.name === field.name);
 				if (existingField && field.type && !existingField.type) {
@@ -150,40 +317,80 @@ export class CustomUIClass extends AbstractUIClass {
 				}
 				return accumulator;
 			}, []);
-
-			this.classBody.partNames.forEach((partName, index) => {
-				if (this.classBody) {
-					const part = this.classBody.parts[index];
-					this.fillMethodsAndFieldsFromPart(part, partName);
-				}
-			});
-
-			if (this.currentClassHolderVariable) {
-				const rIsFieldOrMethod = new RegExp(`${this.currentClassHolderVariable.parsedName}(\\.prototype)?\\..*`);
-
-				const body = this.currentClassHolderVariable.parent;
-				if (body) {
-					body.parts.forEach((part, index) => {
-						if (rIsFieldOrMethod.test(part.parsedName)) {
-							if (part.parts.length === 1) {
-								let name = part.parsedName.replace(`${this.currentClassHolderVariable?.parsedName}.`, "");
-								name = name.replace(`prototype.`, "");
-
-								const previousPart = body.parts[index - 1];
-								if (previousPart && previousPart instanceof JSComment) {
-									if (previousPart.isJSDoc() && part.parts[0] instanceof JSFunction) {
-										(<JSFunction>part.parts[0]).setJSDoc(previousPart);
-									}
-								}
-								this.fillMethodsAndFieldsFromPart(part.parts[0], name);
-							}
-						}
-					});
-				}
-			}
 		}
 
 		this.fillMethodsFromMetadata();
+	}
+
+	private generateParamTextForMethod(acornParams: any[]) {
+		const params: string[] = acornParams.map((param: any) => {
+			if (param.type === "Identifier") {
+				return param.name || "Unknown";
+			} else if (param.type === "AssignmentPattern") {
+				return param.left?.name || "Unknown";
+			} else {
+				return "Unknown";
+			}
+		});
+
+		return params;
+	}
+
+	private generateCustomDataForObject(node: any, looseObject: LooseObject = {}) {
+		node.properties.forEach((property: any) => {
+			looseObject[property.key.name] = {};
+			if (property.value.type === "ObjectExpression") {
+				this.generateCustomDataForObject(property.value, looseObject[property.key.name]);
+			}
+		});
+
+		return looseObject;
+	}
+
+	private fillStaticMethodsAndFields() {
+		const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
+
+		if (UIDefineBody && this.classBodyacornVariableName) {
+			const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
+				return 	node.type === "ExpressionStatement" &&
+						(
+							node.expression?.left?.object?.name === this.classBodyacornVariableName ||
+							node.expression?.left?.object?.object?.name === this.classBodyacornVariableName
+						);
+			});
+
+			thisClassVariableAssignments.forEach(node => {
+				const assignmentBody = node.expression.right;
+				const isMethod = assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
+				const isField = !isMethod;
+
+				const name = node.expression.left.property.name;
+				if (isMethod) {
+					const method: CustomClassUIMethod = {
+						name: name,
+						params: assignmentBody.params.map((param: any) => param.name),
+						returnType: assignmentBody.returnType || assignmentBody.async ? "Promise" : "void",
+						position: assignmentBody.start,
+						description: "",
+						visibility: name?.startsWith("_") ? "private" : "public"
+					};
+					this.generateDescriptionForMethod(method);
+					this.methods.push(method);
+				} else if (isField) {
+					this.fields.push({
+						name: name,
+						visibility: name?.startsWith("_") ? "private" : "public",
+						type: typeof assignmentBody.value,
+						description: assignmentBody.jsType || ""
+					});
+				}
+			});
+		}
+	}
+
+	public generateDescriptionForMethod(method: UIMethod) {
+		const description = `(${method.params.map(param => param).join(", ")}) : ${(method.returnType ? method.returnType : "void")}`;
+		method.description = description;
 	}
 
 	public fillTypesFromHungarionNotation() {
@@ -194,80 +401,9 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private finishParsing() {
-		if (this.classBody) {
-			//find all variables
-			const allVariables = DifferentJobs.getAllVariables(this.classBody);
-
-			//transform all var types to types from UI Define dot notation
-			allVariables.forEach(variable => {
-				if (variable.jsType) {
-					const classNameDotNotation = this.getClassNameFromUIDefine(variable.jsType);
-					if (classNameDotNotation) {
-						variable.jsType = classNameDotNotation;
-					}
-				} else {
-					const classNameDotNotation = this.getClassNameFromUIDefine(variable.parsedName);
-					if (classNameDotNotation) {
-						variable.jsType = classNameDotNotation;
-					}
-				}
-			});
-
-			//fill getView types from view
-			const allGetViewVars = allVariables.filter(
-				variable => variable.parsedBody.startsWith("this.getView().byId(") ||
-							variable.parsedBody.startsWith("this.byId(")
-			);
-			allGetViewVars.forEach(jsVariable => {
-				const controlIdResult = /(?<=this\.(getView\(\)\.)?byId\(").*?(?="\))/.exec(jsVariable.parsedBody);
-				const controlId = controlIdResult ? controlIdResult[0] : "";
-				if (controlId) {
-					jsVariable.jsType = FileReader.getClassNameFromView(this.className, controlId);
-				}
-			});
-
-			const allThisVariables = allVariables.filter(jsVariable => jsVariable.parsedName.startsWith("this."));
-			//share all this variable data types
-			allThisVariables.forEach(thisVariable => {
-				if (!thisVariable.jsType) {
-					const theSameThisVariable = allThisVariables.find(correspondingThisVariable => correspondingThisVariable.parsedName === thisVariable.parsedName && thisVariable !== correspondingThisVariable && !!correspondingThisVariable.jsType);
-					if (theSameThisVariable) {
-						thisVariable.jsType = theSameThisVariable.jsType;
-					}
-
-				}
-			});
-		}
-	}
-
-	private fillMethodsAndFieldsFromPart(part: AbstractType, partName: string) {
-		if (part instanceof JSFunction) {
-			const description = `(${part.params.map(part => part.parsedName).join(", ")}) : ${(part.returnType ? part.returnType : "void")}`;
-			this.methods.push({
-				name: partName,
-				params: part.params.map(part => part.parsedName),
-				returnType: part.returnType || "void",
-				description: description,
-				position: part.positionBegin,
-				fnRef: part
-			});
-
-		} else if (part instanceof JSVariable) {
-			this.fields.push({
-				name: partName.replace("this.", ""),
-				type: part.jsType,
-				description: part.jsType || ""
-			});
-		}
-	}
-
 	private getTypeFromHungariantNotation(variable: string) {
 		let type;
-		interface looseObject {
-			[key: string]: any;
-		}
-		const map: looseObject = {
+		const map: LooseObject = {
 			$: "dom",
 			o: "object",
 			a: "array",
@@ -304,23 +440,25 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillPropertyMethods(aMethods: CustomClassUIMethod[]) {
-		this.properties.forEach(property => {
+		this.properties?.forEach(property => {
 			const propertyWithFirstBigLetter = `${property.name[0].toUpperCase()}${property.name.substring(1, property.name.length)}`;
-			const getter = `get${propertyWithFirstBigLetter}`;
-			const setter = `set${propertyWithFirstBigLetter}`;
+			const getterName = `get${propertyWithFirstBigLetter}`;
+			const setterName = `set${propertyWithFirstBigLetter}`;
 
 			aMethods.push({
-				name: getter,
+				name: getterName,
 				description: `Getter for property ${property.name}`,
 				params: [],
-				returnType: property.type || "void"
+				returnType: property.type || "void",
+				visibility: property.visibility
 			});
 
 			aMethods.push({
-				name: setter,
+				name: setterName,
 				description: `Setter for property ${property.name}`,
 				params: [`v${propertyWithFirstBigLetter}`],
-				returnType: "void"
+				returnType: this.className,
+				visibility: property.visibility
 			});
 		});
 	}
@@ -355,7 +493,8 @@ export class CustomUIClass extends AbstractUIClass {
 					name: methodName,
 					description: `Generic method from ${aggregation.name} aggregation`,
 					params: [],
-					returnType: aggregation.type || "void"
+					returnType: aggregation.type || "void",
+					visibility: aggregation.visibility
 				});
 			});
 
@@ -376,7 +515,8 @@ export class CustomUIClass extends AbstractUIClass {
 					name: eventMethod,
 					description: `Generic method for event ${event.name}`,
 					params: [],
-					returnType: this.className
+					returnType: this.className,
+					visibility: event.visibility
 				});
 			});
 		});
@@ -406,29 +546,17 @@ export class CustomUIClass extends AbstractUIClass {
 					name: methodName,
 					description: `Generic method from ${association.name} association`,
 					params: [],
-					returnType: association.type || this.className
+					returnType: association.type || this.className,
+					visibility: association.visibility
 				});
 			});
 
 		});
 	}
 
-	private getClassNameFromUIDefine(className: string) {
-		let classNameFromUIDefine: string | undefined;
-		const accordingUIDefine = this.UIDefine.find(UIDefine => {
-			return UIDefine.className === className;
-		});
-		if (accordingUIDefine) {
-			classNameFromUIDefine = accordingUIDefine.classNameDotNotation;
-		}
-		return classNameFromUIDefine;
-	}
-
 	private findParentClassNameDotNotation() {
-		if (this.classBody?.parent) {
-			const parsedParentName = this.classBody.parent.parsedName;
-			const parentClassUIDefineName = parsedParentName.replace("return", "").replace(".extend", "").replace(".declareStaticClass", "").trim();
-			const parentClassUIDefine = this.UIDefine.find(UIDefine => UIDefine.className === parentClassUIDefineName);
+		if (this.parentVariableName) {
+			const parentClassUIDefine = this.UIDefine.find(UIDefine => UIDefine.className === this.parentVariableName);
 			if (parentClassUIDefine) {
 				this.parentClassNameDotNotation = parentClassUIDefine.classNameDotNotation;
 			}
@@ -436,144 +564,95 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	public getClassOfTheVariable(variableName: string, position: number) {
-		let className: string | undefined;
-
-		if (variableName === "this") {
-			className = this.className;
-		} else {
-			const isMethod = variableName.endsWith(")");
-			if (variableName.startsWith("this.")) {
-				variableName = variableName.replace("this.", "");
-				if (isMethod) {
-					const methodParams = MainLooper.getEndOfChar("(", ")", variableName);
-					const methodName = variableName.replace(methodParams, "");
-					const method = this.methods.find(method => method.name === methodName);
-					if (method) {
-						if (method.fnRef && !method.fnRef.returnType) {
-							const returnOfTheFn = method.fnRef.parts.find(part => part instanceof JSReturnKeyword);
-							if (returnOfTheFn) {
-
-								const variableParts = SyntaxAnalyzer.splitVariableIntoParts(returnOfTheFn.parts[0].getFullBody());
-								const position = returnOfTheFn.parts[0].positionEnd;
-								const UIClassName = SyntaxAnalyzer.getClassNameFromVariableParts(variableParts, this, 1, position);
-								if (UIClassName) {
-									method.returnType = UIClassName;
-								}
-							}
-						}
-						className = method.returnType;
-					}
-				} else {
-					const field = this.fields.find(field => field.name === variableName);
-					if (field?.type) {
-						className = field.type;
-					} else if (field && !field.type && this.classBody) {
-						//TODO: THIS ABOUT THIS! reason for this is that not always all types for this. variables are found right away.
-						const allVariables = DifferentJobs.getAllVariables(this.classBody);
-						const thisVariable = allVariables.find(variable => variable.parsedName === "this." + variableName);
-						if (thisVariable) {
-							const definition = thisVariable.findDefinition(thisVariable);
-							if (definition) {
-								className = (<JSVariable>definition).jsType;
-							}
-						}
-					}
-				}
-			} else if (this.classBody) {
-				const definitionFromUIDefine = this.UIDefine.find(UIDefineVar => UIDefineVar.className === variableName);
-				if (definitionFromUIDefine) {
-					className = definitionFromUIDefine.classNameDotNotation;
-				} else {
-					const currentFunction = this.classBody.findFunctionByPosition(position);
-					if (currentFunction) {
-						const definition = currentFunction.findDefinition(new JSVariable(variableName, ""));
-						if (definition) {
-							className = (<JSVariable>definition).jsType;
-						}
-					}
-				}
-			}
-		}
-
-		return className;
+		return "";
 	}
 
 	private fillUI5Metadata() {
-		if (this.classBody) {
-			const metadataExists = this.classBody.partNames.indexOf("metadata") > -1;
-			const customMetadataExists = this.classBody.partNames.indexOf("customMetadata") > -1;
+		if (this.acornClassBody?.properties) {
+			const metadataExists = !!this.acornClassBody.properties.find((property: any) => property.key.name === "metadata");
+			const customMetadataExists = !!this.acornClassBody.properties.find((property: any) => property.key.name === "customMetadata");
 
 			if (metadataExists) {
-				const metadataObjectIndex = this.classBody.partNames.indexOf("metadata");
-				const metadataObject = this.classBody.parts[metadataObjectIndex];
+				const metadataObject = this.acornClassBody.properties.find((property: any) => property.key.name === "metadata");
 
-				this.fillAggregations(<JSObject>metadataObject);
-				this.fillEvents(<JSObject>metadataObject);
-				this.fillProperties(<JSObject>metadataObject);
-				this.fillByAssociations(<JSObject>metadataObject);
+				this.fillAggregations(metadataObject);
+				this.fillEvents(metadataObject);
+				this.fillProperties(metadataObject);
+				this.fillByAssociations(metadataObject);
 			}
 
 			if (customMetadataExists) {
-				const customMetadataObjectIndex = this.classBody.partNames.indexOf("customMetadata");
-				const customMetadataObject = this.classBody.parts[customMetadataObjectIndex];
+				const customMetadataObject = this.acornClassBody.properties.find((property: any) => property.key.name === "customMetadata");
 
-				this.fillByAssociations(<JSObject>customMetadataObject);
+				this.fillByAssociations(customMetadataObject);
 			}
 		}
 	}
 
-	private fillAggregations(metadata: JSObject) {
-		const indexOfAggregations = metadata.partNames.indexOf("aggregations");
+	private fillAggregations(metadata: any) {
+		const aggregations = metadata.value.properties.find((metadataNode: any) => metadataNode.key.name === "aggregations");
 
-		if (indexOfAggregations > -1) {
-			const aggregations = <JSObject>metadata.parts[indexOfAggregations];
-			this.aggregations = aggregations.partNames.map((partName, i) => {
-				const aggregationProps = <JSObject>aggregations.parts[i];
+		if (aggregations) {
+			this.aggregations = aggregations.value.properties.map((aggregationNode: any) => {
+				const aggregationName = aggregationNode.key.name;
+				const aggregationProps = aggregationNode.value.properties;
 
-				const aggregationTypeIndex = aggregationProps.partNames.indexOf("type");
 				let aggregationType: undefined | string = undefined;
-				if (aggregationTypeIndex > -1) {
-					aggregationType = (<JSString>aggregationProps.parts[aggregationTypeIndex]).parsedBody;
-					aggregationType = aggregationType.substring(1, aggregationType.length - 1);
+				const aggregationTypeProp = aggregationProps.find((aggregationProperty: any) => aggregationProperty.key.name === "type");
+				if (aggregationTypeProp) {
+					aggregationType = aggregationTypeProp.value.value;
 				}
 
-				const multipleIndex = aggregationProps.partNames.indexOf("multiple");
 				let multiple = true;
-				if (multipleIndex > -1) {
-					multiple = aggregationProps.parts[multipleIndex].parsedName === "true";
+				const multipleProp = aggregationProps.find((aggregationProperty: any) => aggregationProperty.key.name === "multiple");
+				if (multipleProp) {
+					multiple = multipleProp.value.value;
 				}
 
-				const singularNameIndex = aggregationProps.partNames.indexOf("singularName");
 				let singularName = "";
-				if (singularNameIndex > -1) {
-					singularName = (<JSString>aggregationProps.parts[singularNameIndex]).parsedBody;
-					singularName = singularName.substring(1, singularName.length - 1);
+				const singularNameProp = aggregationProps.find((aggregationProperty: any) => aggregationProperty.key.name === "singularName");
+				if (singularNameProp) {
+					singularName = singularNameProp.value.value;
 				}
 				if (!singularName) {
-					singularName = partName;
+					singularName = aggregationName;
+				}
+
+				let visibility = "public";
+				const visibilityProp = aggregationProps.find((associationProperty: any) => associationProperty.key.name === "visibility");
+				if (visibilityProp) {
+					visibility = visibilityProp.value.value;
 				}
 
 				const UIAggregations: UIAggregation = {
-					name: partName,
+					name: aggregationName,
 					type: aggregationType,
 					multiple: multiple,
 					singularName: singularName,
-					description: ""
+					description: "",
+					visibility: visibility
 				};
 				return UIAggregations;
 			});
 		}
 	}
 
-	private fillEvents(metadata: JSObject) {
-		const indexOfEvents = metadata.partNames.indexOf("events");
+	private fillEvents(metadata: any) {
+		const eventMetadataNode = metadata.value.properties.find((metadataNode: any) => metadataNode.key.name === "events");
 
-		if (indexOfEvents > -1) {
-			const events = <JSObject>metadata.parts[indexOfEvents];
-			this.events = events.partNames.map(partName => {
+		if (eventMetadataNode) {
+
+			const events = eventMetadataNode.value.properties;
+			this.events = events.map((eventNode: any) => {
+				let visibility = "public";
+				const visibilityProp = eventNode.value.properties.find((node: any) => node.key.name === "visibility");
+				if (visibilityProp) {
+					visibility = visibilityProp.value.value;
+				}
 				const UIEvent: UIEvent = {
-					name: partName,
-					description: ""
+					name: eventNode.key.name,
+					description: "",
+					visibility: visibility
 
 				};
 				return UIEvent;
@@ -581,22 +660,32 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private fillProperties(metadata: JSObject) {
-		const indexOfProperties = metadata.partNames.indexOf("properties");
+	private fillProperties(metadata: any) {
+		const propertiesMetadataNode = metadata.value.properties.find((metadataNode: any) => metadataNode.key.name === "properties");
 
-		if (indexOfProperties > -1) {
-			const properties = <JSObject>metadata.parts[indexOfProperties];
-			this.properties = properties.partNames.map((partName, i) => {
-				const aggregationProps = <JSObject>properties.parts[i];
-				const propertyTypeIndex = aggregationProps.partNames.indexOf("type");
+		if (propertiesMetadataNode) {
+			const properties = propertiesMetadataNode.value.properties;
+			this.properties = properties.map((propertyNode: any) => {
+
+				const propertyName = propertyNode.key.name;
+				const propertyProps = propertyNode.value.properties;
+
 				let propertyType: undefined | string = undefined;
-				if (propertyTypeIndex > -1) {
-					propertyType = (<JSString>aggregationProps.parts[propertyTypeIndex]).parsedBody;
-					propertyType = propertyType.substring(1, propertyType.length - 1);
+				const propertyTypeProp = propertyProps.find((property: any) => property.key.name === "type");
+				if (propertyTypeProp) {
+					propertyType = propertyTypeProp.value.value;
 				}
+
+				let visibility = "public";
+				const visibilityProp = propertyProps.find((associationProperty: any) => associationProperty.key.name === "visibility");
+				if (visibilityProp) {
+					visibility = visibilityProp.value.value;
+				}
+
 				const UIProperties: UIProperty = {
-					name: partName,
+					name: propertyName,
 					type: propertyType,
+					visibility: visibility,
 					description: "",
 					typeValues: this.generateTypeValues(propertyType || "")
 				};
@@ -606,43 +695,50 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private fillByAssociations(metadata: JSObject) {
-		const indexOfAssociations = metadata.partNames.indexOf("associations");
+	private fillByAssociations(metadata: any) {
+		const associationMetadataNode = metadata.value.properties.find((metadataNode: any) => metadataNode.key.name === "associations");
 
-		if (indexOfAssociations > -1) {
-			const associations = <JSObject>metadata.parts[indexOfAssociations];
-			this.associations = this.associations.concat(associations.partNames.map((partName, i) => {
-				const associationProps = <JSObject>associations.parts[i];
+		if (associationMetadataNode) {
+			const associations = associationMetadataNode.value.properties;
+			this.associations = this.associations.concat(associations.map((associationNode: any) => {
 
-				const associationTypeIndex = associationProps.partNames.indexOf("type");
+				const associationName = associationNode.key.name;
+				const associationProps = associationNode.value.properties;
+
 				let associationType: undefined | string = undefined;
-				if (associationTypeIndex > -1) {
-					associationType = (<JSString>associationProps.parts[associationTypeIndex]).parsedBody;
-					associationType = associationType.substring(1, associationType.length - 1);
+				const associationTypeProp = associationProps.find((associationProperty: any) => associationProperty.key.name === "type");
+				if (associationTypeProp) {
+					associationType = associationTypeProp.value.value;
 				}
 
-				const multipleIndex = associationProps.partNames.indexOf("multiple");
 				let multiple = true;
-				if (multipleIndex > -1) {
-					multiple = associationProps.parts[multipleIndex].parsedName === "true";
+				const multipleProp = associationProps.find((associationProperty: any) => associationProperty.key.name === "multiple");
+				if (multipleProp) {
+					multiple = multipleProp.value.value;
 				}
 
-				const singularNameIndex = associationProps.partNames.indexOf("singularName");
 				let singularName = "";
-				if (singularNameIndex > -1) {
-					singularName = (<JSString>associationProps.parts[singularNameIndex]).parsedBody;
-					singularName = singularName.substring(1, singularName.length - 1);
+				const singularNameProp = associationProps.find((associationProperty: any) => associationProperty.key.name === "singularName");
+				if (singularNameProp) {
+					singularName = singularNameProp.value.value;
 				}
 				if (!singularName) {
-					singularName = partName;
+					singularName = associationName;
+				}
+
+				let visibility = "public";
+				const visibilityProp = associationProps.find((associationProperty: any) => associationProperty.key.name === "visibility");
+				if (visibilityProp) {
+					visibility = visibilityProp.value.value;
 				}
 
 				const UIAssociations: UIAssociation = {
-					name: partName,
+					name: associationName,
 					type: associationType,
 					multiple: multiple,
 					singularName: singularName,
-					description: ""
+					description: "",
+					visibility: visibility
 				};
 				return UIAssociations;
 			}));

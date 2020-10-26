@@ -1,4 +1,4 @@
-import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssociation, TypeValue } from "./AbstractUIClass";
+import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssociation, TypeValue, UIField } from "./AbstractUIClass";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
 import { URLBuilder } from "../../../Util/URLBuilder";
@@ -13,6 +13,7 @@ export class StandardUIClass extends AbstractUIClass {
 		this.fillParentClassName();
 		this.fillMethods();
 		this.fillProperties();
+		this.fillFields();
 		this.fillEvents();
 		this.fillAggregations();
 		this.fullAssociations();
@@ -26,16 +27,17 @@ export class StandardUIClass extends AbstractUIClass {
 	private getStandardClassMethods(className: string, isParent: boolean) {
 		let classMethods:StandardClassUIMethod[] = [];
 		const SAPNode = this.findSAPNode(className);
-		classMethods = SAPNode.getMethods().map((method: any) => {
+		classMethods = SAPNode?.getMethods().map((method: any) => {
 			return {
 				name: method.name.replace(`${this.className}.`, ""),
 				description: this.removeTags(method.code),
 				params: method.parameters ? method.parameters.map((parameter: any) => parameter.name + (parameter.optional ? "?" : "")) : [],
 				returnType: method.returnValue ? method.returnValue.type : "void",
 				isFromParent: !isParent,
-				api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name)
+				api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name),
+				visibility: method.visibility
 			};
-		});
+		}) || [];
 		return classMethods;
 	}
 
@@ -90,23 +92,38 @@ export class StandardUIClass extends AbstractUIClass {
 		return className;
 	}
 
+	private fillFields() {
+		const SAPNode = this.findSAPNode(this.className);
+		this.fields = SAPNode?.getFields().reduce((accumulator: UIField[], {name, type, description, visibility}:any) => {
+			const additionalDescription = this.generateAdditionalDescriptionFrom(type);
+			accumulator.push({
+				name: name,
+				type: type,
+				description: `${additionalDescription}\n${this.removeTags(description)}`.trim(),
+				visibility: visibility
+			});
+			return accumulator;
+		}, []);
+	}
+
 	private fillProperties() {
 		this.properties = this.getStandardClassProperties(this.className);
 	}
 
 	private getStandardClassProperties(className: string) {
-		let classPropeties:UIProperty[] = [];
+		let classPropeties: UIProperty[] = [];
 		const SAPNode = this.findSAPNode(className);
-		classPropeties = SAPNode.getProperties().reduce((accumulator: UIProperty[], {name, type, description}:any) => {
+		classPropeties = SAPNode?.getProperties().reduce((accumulator: UIProperty[], {name, type, description, visibility}:any) => {
 			const additionalDescription = this.generateAdditionalDescriptionFrom(type);
 			accumulator.push({
 				name: name,
 				type: type,
 				typeValues: this.generateTypeValues(type),
-				description: `${additionalDescription}\n${this.removeTags(description)}`.trim()
+				description: `${additionalDescription}\n${this.removeTags(description)}`.trim(),
+				visibility: visibility
 			});
 			return accumulator;
-		}, []);
+		}, []) || [];
 		return classPropeties;
 	}
 
@@ -114,11 +131,11 @@ export class StandardUIClass extends AbstractUIClass {
 		let additionalDescription = "";
 		if (className?.startsWith("sap.")) {
 			const SAPNode = this.findSAPNode(className);
-			additionalDescription = SAPNode.getProperties().reduce((accumulator: string, property: any) => {
+			additionalDescription = SAPNode?.getProperties().reduce((accumulator: string, property: any) => {
 				accumulator += `${property.name}\n`;
 
 				return accumulator;
-			}, "");
+			}, "") || "";
 		}
 
 		return additionalDescription;
@@ -148,13 +165,14 @@ export class StandardUIClass extends AbstractUIClass {
 	private getStandardClassEvents(className: string) {
 		let classEvents: UIEvent[] = [];
 		const SAPNode = this.findSAPNode(className);
-		classEvents = SAPNode.getEvents().reduce((accumulator: UIEvent[], event:any) => {
+		classEvents = SAPNode?.getEvents().reduce((accumulator: UIEvent[], event:any) => {
 			accumulator.push({
 				name: event.name,
-				description: this.removeTags(event.description)
+				description: this.removeTags(event.description),
+				visibility: event.visibility
 			});
 			return accumulator;
-		}, []);
+		}, []) || [];
 
 		return classEvents;
 	}
@@ -167,16 +185,17 @@ export class StandardUIClass extends AbstractUIClass {
 		let classAggregations: UIAggregation[] = [];
 		const SAPNode = this.findSAPNode(className);
 
-		classAggregations = SAPNode.getAggregations().reduce((accumulator: UIAggregation[], aggregation:any) => {
+		classAggregations = SAPNode?.getAggregations().reduce((accumulator: UIAggregation[], aggregation:any) => {
 			accumulator.push({
 				name: aggregation.name,
 				type: aggregation.type,
 				multiple: aggregation.coordinality === "0..n",
 				singularName: aggregation.singularName,
-				description: this.removeTags(aggregation.description)
+				description: this.removeTags(aggregation.description),
+				visibility: aggregation.visibility
 			});
 			return accumulator;
-		}, []);
+		}, []) || [];
 
 		return classAggregations;
 	}
@@ -189,16 +208,17 @@ export class StandardUIClass extends AbstractUIClass {
 		let classAssociation: UIAssociation[] = [];
 		const SAPNode = this.findSAPNode(className);
 
-		classAssociation = SAPNode.getAssociations().reduce((accumulator: UIAssociation[], association:any) => {
+		classAssociation = SAPNode?.getAssociations().reduce((accumulator: UIAssociation[], association:any) => {
 			accumulator.push({
 				name: association.name,
 				type: association.type,
 				description: this.removeTags(association.description),
 				multiple: association.multiple || association.coordinality === "0..n",
-				singularName: association.singularName
+				singularName: association.singularName,
+				visibility: association.visibility
 			});
 			return accumulator;
-		}, []);
+		}, []) || [];
 		return classAssociation;
 	}
 
@@ -218,7 +238,8 @@ export class StandardUIClass extends AbstractUIClass {
 				params: parameters,
 				returnType: this.className,
 				isFromParent: false,
-				api: URLBuilder.getInstance().getUrlForClassApi(this)
+				api: URLBuilder.getInstance().getUrlForClassApi(this),
+				visibility: "public"
 			});
 		}
 	}

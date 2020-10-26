@@ -13,7 +13,7 @@ export class SAPNodePropertyGenerationStrategy implements IPropertyGetterStrateg
 	getParent(): IPropertyGetterStrategy | undefined {
 		let theParent: SAPNodePropertyGenerationStrategy | undefined;
 		if (this.node.node.extends) {
-			const parentNode: SAPNode = SAPNodePropertyGenerationStrategy.nodeDAO.findNode(this.node.node.extends);
+			const parentNode = SAPNodePropertyGenerationStrategy.nodeDAO.findNode(this.node.node.extends);
 			if (parentNode) {
 				theParent = new SAPNodePropertyGenerationStrategy(parentNode);
 			}

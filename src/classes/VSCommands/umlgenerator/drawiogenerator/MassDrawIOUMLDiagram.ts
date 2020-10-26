@@ -27,29 +27,27 @@ export class MassDrawIOUMLDiagram {
 
 				const UMLDiagrams: DrawIOUMLDiagram[] = [];
 				let body = "";
-				for (const className of classNames) {
-					await (() => {
+				const promises = classNames.map(className => {
+					return new Promise(resolve => {
+						setTimeout(() => {
+							try {
+								const UIClass = UIClassFactory.getUIClass(className);
+								const UMLDiagram = new DrawIOUMLDiagram(UIClass, header);
+								UMLDiagrams.push(UMLDiagram);
+								UMLDiagram.xAxis = xAxis;
 
-						return new Promise(resolve => {
-							setTimeout(() => {
-								try {
-									const UIClass = UIClassFactory.getUIClass(className);
-									const UMLDiagram = new DrawIOUMLDiagram(UIClass, header);
-									UMLDiagrams.push(UMLDiagram);
-									UMLDiagram.xAxis = xAxis;
+								body += UMLDiagram.generateBody();
+								xAxis += UMLDiagram.width + 10;
 
-									body += UMLDiagram.generateBody();
-									xAxis += UMLDiagram.width + 10;
-
-									progress.report({message: `${className} generated`, increment: Math.round(100 / classQuantity)});
-								} catch (error) {
-									console.log(`Failed to generate UML Diagram for ${className}`);
-								}
-								resolve();
-							}, 0);
-						});
-					})();
-				}
+								progress.report({message: `${className} generated`, increment: Math.round(100 / classQuantity)});
+							} catch (error) {
+								console.log(`Failed to generate UML Diagram for ${className}`);
+							}
+							resolve();
+						}, 0);
+					});
+				});
+				await Promise.all(promises);
 
 				const lines = MassDrawIOUMLDiagram.generateLines(UMLDiagrams, header);
 

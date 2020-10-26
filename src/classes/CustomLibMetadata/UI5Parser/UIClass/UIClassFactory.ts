@@ -1,10 +1,11 @@
 import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
 import { CustomUIClass } from "./CustomUIClass";
 import { StandardUIClass } from "./StandardUIClass";
-import { EndlessLoopLocker } from "../../../Util/EndlessLoopLocker";
 import { JSClass } from "./JSClass";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 
 export interface FieldsAndMethods {
+	className: string;
 	fields: UIField[];
 	methods: UIMethod[];
 }
@@ -25,10 +26,9 @@ export class UIClassFactory {
 		if (className.startsWith("sap.")) {
 			returnClass = new StandardUIClass(className);
 		} else {
-			EndlessLoopLocker.beginProcess();
-			console.time(`Class parsing for ${className} took`);
+			// console.time(`Class parsing for ${className} took`);
 			returnClass = new CustomUIClass(className, documentText);
-			console.timeEnd(`Class parsing for ${className} took`);
+			// console.timeEnd(`Class parsing for ${className} took`);
 		}
 
 		return returnClass;
@@ -36,25 +36,21 @@ export class UIClassFactory {
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
 		this.UIClasses[classNameDotNotation] = UIClassFactory.getInstance(classNameDotNotation, classFileText);
+		this.UIClasses[classNameDotNotation].methods.forEach(method => {
+			SyntaxAnalyzer.findMethodReturnType(method, classNameDotNotation, false);
+		});
 	}
 
-	public static getFieldsAndMethodsForVariable(variable: string, className: string, position: number) {
+	public static getFieldsAndMethodsForClass(className: string) {
 		const fieldsAndMethods: FieldsAndMethods = {
+			className: className,
 			fields: [],
 			methods: []
 		};
-		const currentClass = this.getUIClass(className);
-		let currentVariableClassName: string | undefined;
 
-		if (variable === "this") {
-			currentVariableClassName = className;
-		} else {
-			currentVariableClassName = (<CustomUIClass>currentClass).getClassOfTheVariable(variable, position);
-		}
-
-		if (currentVariableClassName) {
-			fieldsAndMethods.fields = this.getClassFields(currentVariableClassName);
-			fieldsAndMethods.methods = this.getClassMethods(currentVariableClassName);
+		if (className) {
+			fieldsAndMethods.fields = this.getClassFields(className);
+			fieldsAndMethods.methods = this.getClassMethods(className);
 		}
 
 		return fieldsAndMethods;
@@ -101,19 +97,14 @@ export class UIClassFactory {
 	public static getUIClass(className: string) {
 		if (!this.UIClasses[className]) {
 			this.UIClasses[className] = UIClassFactory.getInstance(className);
+			this.UIClasses[className].methods.forEach(method => {
+				SyntaxAnalyzer.findMethodReturnType(method, className, false);
+			});
+			this.UIClasses[className].fields.forEach(field => {
+				SyntaxAnalyzer.findFieldType(field, className, false);
+			});
 		}
 
 		return this.UIClasses[className];
-	}
-
-	public static getClassOfTheVariableHierarchically(variable: string, UIClass: AbstractUIClass, position: number = 0) : string | undefined {
-		let className: string | undefined;
-		className = UIClass.getClassOfTheVariable(variable, position);
-
-		if (!className && UIClass.parentClassNameDotNotation) {
-			UIClass = this.getUIClass(UIClass.parentClassNameDotNotation);
-			className = this.getClassOfTheVariableHierarchically(variable, UIClass);
-		}
-		return className;
 	}
 }

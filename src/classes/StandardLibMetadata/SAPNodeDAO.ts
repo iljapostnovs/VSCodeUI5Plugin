@@ -1,5 +1,5 @@
 import { SAPNode } from "./SAPNode";
-import rp from "request-promise";
+import * as rp from "request-promise";
 import * as vscode from "vscode";
 import { FileReader } from "../Util/FileReader";
 import { URLBuilder } from "../Util/URLBuilder";
@@ -72,7 +72,7 @@ export class SAPNodeDAO {
 	}
 
 	public findNode(name: string) {
-		let correctNode: SAPNode = SAPNodeDAO.SAPNodes[0];
+		let correctNode: SAPNode | undefined;
 
 		for (const node of SAPNodeDAO.SAPNodes) {
 			const theNode: SAPNode = node.findNode(name);

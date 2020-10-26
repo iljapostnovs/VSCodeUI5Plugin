@@ -17,19 +17,22 @@ const classData: {[key: string]: {methods: UIMethod[]}} = {
 			name: "then",
 			params: ["fnThen"],
 			description: "Promise .then",
-			returnType: "Promise"
+			returnType: "Promise",
+			visibility: "public"
 		},
 		{
 			name: "catch",
 			params: ["fnCatch"],
 			description: "Promise .catch",
-			returnType: "Promise"
+			returnType: "Promise",
+			visibility: "public"
 		},
 		{
 			name: "finally",
 			params: ["fnFinally"],
 			description: "Promise .finally",
-			returnType: "Promise"
+			returnType: "Promise",
+			visibility: "public"
 		}]
 	},
 	array: {
@@ -39,7 +42,8 @@ const classData: {[key: string]: {methods: UIMethod[]}} = {
 					name: key,
 					params: [],
 					description: key,
-					returnType: "array"
+					returnType: "array",
+					visibility: "public"
 				});
 			}
 
@@ -53,7 +57,8 @@ const classData: {[key: string]: {methods: UIMethod[]}} = {
 					name: key,
 					params: [],
 					description: key,
-					returnType: "string"
+					returnType: "string",
+					visibility: "public"
 				});
 			}
 

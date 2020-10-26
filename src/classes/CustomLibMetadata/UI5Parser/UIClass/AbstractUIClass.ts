@@ -1,15 +1,17 @@
 import { SAPIcons } from "../../SAPIcons";
 
 export interface UIMethod {
-	name: string;
-	params: string[];
+	readonly name: string;
+	readonly params: string[];
 	returnType: string;
 	description: string;
+	visibility: string;
 	api?: string;
 }
 export interface UIField {
-	name: string;
+	readonly name: string;
 	type: string | undefined;
+	visibility: string;
 	description: string;
 }
 export interface TypeValue {
@@ -20,6 +22,7 @@ export interface UIProperty {
 	name: string;
 	type: string | undefined;
 	typeValues: TypeValue[];
+	visibility: string;
 	description: string;
 }
 export interface UIAggregation {
@@ -27,16 +30,19 @@ export interface UIAggregation {
 	type: string | undefined;
 	multiple: boolean;
 	singularName: string;
+	visibility: string;
 	description: string;
 }
 export interface UIEvent {
 	name: string;
+	visibility: string;
 	description: string;
 }
 export interface UIAssociation {
 	name: string;
 	type: string | undefined;
 	description: string;
+	visibility: string;
 	multiple: boolean;
 	singularName: string;
 }

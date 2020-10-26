@@ -22,7 +22,7 @@ export class JSDynamicFactory {
 			const mandatoryParams = classMethod.params.filter(param => !param.endsWith("?"));
 			const paramString = mandatoryParams.map((param, index) => `\${${index + 1}:${param}}`).join(", ");
 			completionItem.insertText = new vscode.SnippetString(`${classMethod.name}(${paramString})$0`);
-			completionItem.detail = classMethod.name;
+			completionItem.detail = `(${classMethod.visibility}) ${classMethod.name}`;
 
 			const mardownString = new vscode.MarkdownString();
 			mardownString.isTrusted = true;
@@ -40,7 +40,7 @@ export class JSDynamicFactory {
 			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(classField.name);
 			completionItem.kind = vscode.CompletionItemKind.Field;
 			completionItem.insertText = classField.name;
-			completionItem.detail = classField.name;
+			completionItem.detail = `(${classField.visibility}) ${classField.name}: ${classField.type ? classField.type : "any"}`;
 			completionItem.documentation = classField.description;
 
 			return completionItem;

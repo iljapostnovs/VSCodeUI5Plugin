@@ -13,7 +13,6 @@ import { XMLDynamicFactory } from "./completionitemfactories/xml/XMLDynamicFacto
 import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { CustomUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
-import { JSString } from "../CustomLibMetadata/JSParser/types/String";
 
 export class CompletionItemFactory {
 	private static readonly nodeDAO = new SAPNodeDAO();
@@ -79,17 +78,25 @@ export class CompletionItemFactory {
 				const activeTextEditor = vscode.window.activeTextEditor;
 				const position = activeTextEditor?.document.offsetAt(activeTextEditor.selection.start);
 				if (position) {
-					const type = UIClass.jsPasredBody?.findTypeInPosition(position);
-					if (type instanceof JSString) {
-						completionItems = completionItems.map(completionItem => {
-							const completionItemWOQuotes = new vscode.CompletionItem(completionItem.label);
-							completionItemWOQuotes.kind = completionItem.kind;
-							completionItemWOQuotes.insertText = (<any>completionItem.insertText).substring(1, (<any>completionItem.insertText).length - 1);
-							completionItemWOQuotes.documentation = completionItem.documentation;
-							completionItemWOQuotes.command = completionItem.command;
 
-							return completionItemWOQuotes;
-						});
+					if (UIClass.fileContent) {
+						const args = UIClass.fileContent?.body[0]?.expression?.arguments;
+						if (args && args.length === 2) {
+							const UIDefinePaths: string[] = args[0].elements || [];
+							const node = SyntaxAnalyzer.findAcornNode(UIDefinePaths, position);
+							const isString = node?.type === "Literal";
+							if (isString) {
+								completionItems = completionItems.map(completionItem => {
+									const completionItemWOQuotes = new vscode.CompletionItem(completionItem.label);
+									completionItemWOQuotes.kind = completionItem.kind;
+									completionItemWOQuotes.insertText = (<any>completionItem.insertText).substring(1, (<any>completionItem.insertText).length - 1);
+									completionItemWOQuotes.documentation = completionItem.documentation;
+									completionItemWOQuotes.command = completionItem.command;
+
+									return completionItemWOQuotes;
+								});
+							}
+						}
 					}
 				}
 			}

@@ -18,6 +18,20 @@
 			],
 			"sourceMaps": true,
 			"preLaunchTask": "npm: watch"
+		},
+		{
+			"name": "Extension Tests",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+			  "--extensionDevelopmentPath=${workspaceFolder}/testproject",
+			  "--extensionTestsPath=${workspaceFolder}/dist/test/suite/index",
+			  "--testWorkspace=${workspaceFolder}/testproject"
+			],
+			"outFiles": ["${workspaceFolder}/dist/test/**/*.js"],
+			"sourceMaps": true,
+			"preLaunchTask": "npm: compilets"
 		}
 	]
 }

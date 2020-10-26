@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.9.8",
+	"version": "0.10.0",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"contributors": [
@@ -112,6 +112,11 @@
 					"type": "string",
 					"default": "https://ui5.sap.com/",
 					"description": "UI5 metadata source URL"
+				},
+				"ui5.plugin.ignoreAccessLevelModifiers": {
+					"type": "boolean",
+					"default": false,
+					"description": "Should JS completion items ignore access modifiers (private, protected, public). If flag is set to true, all of the completion items for methods and fields will be shown, however, if set to false, completion items will be generated according to access modifiers."
 				}
 			}
 		},
@@ -152,23 +157,32 @@
 		"webpack": "webpack --mode development",
 		"webpack-dev": "webpack --mode development --watch",
 		"compile": "webpack --mode none",
+		"compilets": "npx tsc",
 		"lint": "tslint -p ./",
-		"watch": "webpack --mode none"
+		"test": "node ./dist/test/TestRunner.js",
+		"pretest": "npm run compilets",
+		"watch": "npm run compilets"
 	},
 	"devDependencies": {
-		"@types/glob": "^7.1.3",
+		"@types/glob": "^7.1.1",
 		"@types/line-column": "^1.0.0",
-		"@types/node": "^14.11.2",
+		"@types/mocha": "^8.0.3",
+		"@types/node": "^14.14.2",
 		"@types/request-promise": "^4.1.46",
 		"@types/vscode": "^1.49.0",
-		"ts-loader": "^8.0.4",
+		"clean-webpack-plugin": "^3.0.0",
+		"mocha": "^8.2.0",
+		"ts-loader": "^8.0.7",
 		"tslint": "^6.1.3",
 		"typescript": "^4.0.3",
-		"webpack": "^4.44.2",
-		"webpack-cli": "^3.3.12"
+		"vscode-test": "^1.4.0",
+		"webpack": "^5.2.0",
+		"webpack-cli": "^4.1.0"
 	},
 	"dependencies": {
-		"glob": "^7.1.6",
+		"acorn-loose": "^8.0.1",
+		"comment-parser": "^0.7.6",
+		"glob": "^7.1.4",
 		"line-column": "^1.0.2",
 		"request": "^2.88.2",
 		"request-promise": "^4.2.6"

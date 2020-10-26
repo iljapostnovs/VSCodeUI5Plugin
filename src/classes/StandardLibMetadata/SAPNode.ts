@@ -55,15 +55,27 @@ export class SAPNode {
 		return this.node.bIsDeprecated;
 	}
 
+	public getFields() {
+		const metadata = this.getMetadata();
+		const rawMetadata = metadata?.getRawMetadata();
+		const fields = rawMetadata?.properties?.filter((field: any) => !field.deprecatedText && (field.visibility === "public" || field.visibility === "protected"));
+		fields?.forEach((field: any) => {
+			field.name = field.name.replace(rawMetadata?.name + "." || "", "");
+		});
+
+		return fields || [];
+	}
+
 	public getProperties(): any[] {
 		const metadata = this.getMetadata();
-		return metadata?.getUI5Metadata()?.properties?.filter((property: any) => !property.deprecatedText && property.visibility === "public") || [];
+		const properties = metadata?.getUI5Metadata()?.properties?.filter((property: any) => !property.deprecatedText && (property.visibility === "public" || property.visibility === "protected"));
+		return properties || [];
 	}
 
 	public getAggregations(): any[] {
 		const metadata = this.getMetadata();
 		const UI5Metadata: any = metadata?.getUI5Metadata();
-		return UI5Metadata?.aggregations?.filter((aggregation: any) => !aggregation.deprecated && aggregation.visibility === "public") || [];
+		return UI5Metadata?.aggregations?.filter((aggregation: any) => !aggregation.deprecated && (aggregation.visibility === "public" || aggregation.visibility === "protected")) || [];
 	}
 
 	public getEvents(): any[] {
@@ -81,7 +93,7 @@ export class SAPNode {
 	public getMethods(): any[] {
 		const metadata = this.getMetadata();
 		const rawMetadata: any = metadata?.getRawMetadata();
-		return rawMetadata?.methods?.filter((method: any) => !method.deprecated && method.visibility === "public") || [];
+		return rawMetadata?.methods?.filter((method: any) => !method.deprecated && (method.visibility === "public" || method.visibility === "protected")) || [];
 	}
 
 	public getMetadata() {

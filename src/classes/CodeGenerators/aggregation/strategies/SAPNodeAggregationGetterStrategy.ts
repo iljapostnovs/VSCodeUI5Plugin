@@ -13,7 +13,7 @@ export class SAPNodeAggregationGetterStrategy implements IAggregationGetterStrat
 	getParent(): IAggregationGetterStrategy | undefined {
 		let theParent: SAPNodeAggregationGetterStrategy | undefined;
 		if (this.node.node.extends) {
-			const parentNode: SAPNode = SAPNodeAggregationGetterStrategy.nodeDAO.findNode(this.node.node.extends);
+			const parentNode = SAPNodeAggregationGetterStrategy.nodeDAO.findNode(this.node.node.extends);
 			if (parentNode) {
 				theParent = new SAPNodeAggregationGetterStrategy(parentNode);
 			}

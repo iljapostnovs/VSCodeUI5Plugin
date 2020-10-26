@@ -3,7 +3,7 @@ import { UI5Plugin } from "./UI5Plugin";
 import { FileReader } from "./classes/Util/FileReader";
 
 export async function activate(context: vscode.ExtensionContext) {
-	FileReader.globalStoragePath = context.globalStoragePath;
+	FileReader.globalStoragePath = context.globalStorageUri.fsPath;
 	const manifests = FileReader.getAllManifests();
 
 	if (manifests.length > 0) {

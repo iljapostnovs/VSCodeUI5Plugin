@@ -1,0 +1,88 @@
+{
+	"data": [{
+		"className": "com.test.controller.Master",
+		"methods": [{
+			"name": "onShowHello",
+			"returnType": "sap.m.Dialog"
+		},{
+			"name": "onOpenDialog",
+			"returnType": "Promise"
+		},{
+			"name": "_getTable",
+			"returnType": "sap.m.Table"
+		},{
+			"name": "_getArray",
+			"returnType": "array"
+		},{
+			"name": "_getString",
+			"returnType": "string"
+		},{
+			"name": "_getMap",
+			"returnType": "map"
+		}],
+		"fields": [{
+			"name": "formatter",
+			"type": "com.test.util.Formatter"
+		},{
+			"name": "_test2",
+			"type": "com.test.util.Formatter"
+		},{
+			"name": "_test",
+			"type": "com.test.util.Formatter"
+		},{
+			"name": "_customClassExtend",
+			"type": "com.test.util.CustomClassExtend"
+		},{
+			"name": "_oMessageBox",
+			"type": "sap.m.MessageBox"
+		},{
+			"name": "_oText",
+			"type": "sap.m.Text"
+		},{
+			"name": "_oTable",
+			"type": "sap.m.Table"
+		}]
+	},{
+		"className": "com.test.util.Formatter",
+		"methods": [{
+			"name": "customMethod",
+			"returnType": "sap.m.Dialog"
+		},{
+			"name": "asyncCustomMethod",
+			"returnType": "Promise"
+		},{
+			"name": "anotherCustomMethod",
+			"returnType": "sap.m.Label"
+		}],
+		"fields": []
+	},{
+		"className": "com.test.util.CustomClassExtend",
+		"methods": [{
+			"name": "customMethodExtended",
+			"returnType": "sap.m.Dialog"
+		},{
+			"name": "staticTest",
+			"returnType": "sap.m.Dialog"
+		},{
+			"name": "instanceTest",
+			"returnType": "sap.m.Text"
+		}],
+		"fields": [{
+			"name": "staticTest2",
+			"type": "string"
+		},{
+			"name": "_customField"
+		}]
+	},{
+		"className": "com.test.util.CustomClass",
+		"methods": [{
+			"name": "customMethod",
+			"returnType": "sap.m.Text"
+		}],
+		"fields": [{
+			"name": "_customField",
+			"type": "sap.m.Text"
+		}]
+	}],
+	"SyntaxAnalyser": []
+}

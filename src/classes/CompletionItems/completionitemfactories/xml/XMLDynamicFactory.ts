@@ -99,9 +99,11 @@ export class XMLDynamicFactory {
 					completionItems = standardCompletionItems.reduce((accumulator: vscode.CompletionItem[], completionItem) => {
 						if (completionItem.label.startsWith(libName)) {
 							const node = nodeDAO.findNode(completionItem.label);
-							const newCompletionItem = XMLClassFactoryInstance.generateXMLClassCompletionItemFromSAPNode(node, tagPrefix);
-							newCompletionItem.label = completionItem.label.replace(`${libName}.`, "");
-							accumulator.push(newCompletionItem);
+							if (node) {
+								const newCompletionItem = XMLClassFactoryInstance.generateXMLClassCompletionItemFromSAPNode(node, tagPrefix);
+								newCompletionItem.label = completionItem.label.replace(`${libName}.`, "");
+								accumulator.push(newCompletionItem);
+							}
 						}
 						return accumulator;
 					}, []);

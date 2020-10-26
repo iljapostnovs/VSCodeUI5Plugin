@@ -1,6 +1,6 @@
 import { UI5Metadata } from "./UI5Metadata";
 import { SAPNode } from "./SAPNode";
-import rp from "request-promise";
+import * as rp from "request-promise";
 import { URLBuilder } from "../Util/URLBuilder";
 import { FileReader } from "../Util/FileReader";
 import { UI5Plugin } from "../../UI5Plugin";
@@ -69,13 +69,6 @@ export class UI5MetadataPreloader {
 }
 export class UI5MetadataDAO {
 	constructor() {}
-
-	// public async getMetadataForNode(node: SAPNode) {
-	// 	const libMetadata = await this.getMetadataForLib(node.getLib());
-	// 	const metadata = this.findNodeMetadata(node, libMetadata);
-
-	// 	return new UI5Metadata(metadata);
-	// }
 
 	public getPreloadedMetadataForNode(node: SAPNode) {
 		const libMetadata = namespaceDesignTimes[node.getLib()];

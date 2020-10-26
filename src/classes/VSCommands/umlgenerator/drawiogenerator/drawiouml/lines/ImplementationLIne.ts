@@ -18,8 +18,8 @@ export class ImplementationLine implements IUMLGenerator {
 	}
 	generateXML(): string {
 		return `
-        <mxCell id="${this.id}" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;endArrow=block;endFill=0;endSize=14;" edge="1" parent="${this.parent.id}" source="${this.sourceTarget.source.id}" target="${this.sourceTarget.target.id}">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>`;
+				<mxCell id="${this.id}" style="jumpStyle=arc;jumpSize=25;edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;endSize=14;" edge="1" parent="${this.parent.id}" source="${this.sourceTarget.source.id}" target="${this.sourceTarget.target.id}">
+					<mxGeometry relative="1" as="geometry" />
+				</mxCell>`;
 	}
 }
