@@ -36,6 +36,9 @@
 			"name": "_oMessageBox",
 			"type": "sap.m.MessageBox"
 		},{
+			"name": "_oText",
+			"type": "sap.m.Text"
+		},{
 			"name": "_oTable",
 			"type": "sap.m.Table"
 		}]
@@ -81,13 +84,5 @@
 			"type": "sap.m.Text"
 		}]
 	}],
-	"SyntaxAnalyser": [{
-		"className": "com.test.controller.Master",
-		"position": 1435,
-		"type": "sap.m.Text"
-	},{
-		"className": "com.test.controller.Master",
-		"position": 1627,
-		"type": "sap.m.Text"
-	}]
+	"SyntaxAnalyser": []
 }
