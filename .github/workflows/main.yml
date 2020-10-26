@@ -21,6 +21,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: Launch tests
         run: |
-          npm install typescript -g
+          git clone https://github.com/iljapostnovs/VSCodeUI5PluginUsageExampleApp.git
+          move VSCodeUI5PluginUsageExampleApp ../VSCodeUI5PluginUsageExampleApp
+          npm install -g typescript
           npm install
           npm test
