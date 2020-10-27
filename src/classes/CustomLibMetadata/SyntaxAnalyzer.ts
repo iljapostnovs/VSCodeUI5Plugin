@@ -227,11 +227,13 @@ export class SyntaxAnalyzer {
 	private static getIfStatementPart(node: any, position: number) {
 		let correctPart: any;
 
-		if (node.consequent?.start < position && node.consequent?.end > position) {
+		if (node.test?.start < position && node.test?.end >= position) {
+			correctPart = node.test;
+		} if (node.consequent?.start < position && node.consequent?.end >= position) {
 			correctPart = this.findAcornNode(node.consequent.body, position);
 		} else if (node.alternate) {
 			correctPart = this.getIfStatementPart(node.alternate, position);
-		} else if (node.start < position && node.end > position && node.type === "BlockStatement") {
+		} else if (node.start < position && node.end >= position && node.type === "BlockStatement") {
 			correctPart = this.findAcornNode(node.body, position);
 		}
 

@@ -89,7 +89,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 			this.acornMethodsAndFields = this.acornMethodsAndFields.concat(methods);
 
-			methods.forEach((method: any) => {
+			methods?.forEach((method: any) => {
 				const methodName = method.key.name;
 				const params = method.value.params;
 				const comment = this.comments.find(comment => {
@@ -252,10 +252,10 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 	private fillMethodsAndFields() {
 		if (this.acornClassBody?.properties) {
-			this.acornClassBody.properties.forEach((property: any) => {
+			this.acornClassBody.properties?.forEach((property: any) => {
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
 					const functionParts = property.value.body?.body || [];
-					functionParts.forEach((node: any) => {
+					functionParts?.forEach((node: any) => {
 						if (this.isAssignmentStatementForThisVariable(node)) {
 							this.fields.push({
 								name: node.expression.left.property.name,
@@ -337,7 +337,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private generateCustomDataForObject(node: any, looseObject: LooseObject = {}) {
-		node.properties.forEach((property: any) => {
+		node.properties?.forEach((property: any) => {
 			looseObject[property.key.name] = {};
 			if (property.value.type === "ObjectExpression") {
 				this.generateCustomDataForObject(property.value, looseObject[property.key.name]);
@@ -359,7 +359,7 @@ export class CustomUIClass extends AbstractUIClass {
 						);
 			});
 
-			thisClassVariableAssignments.forEach(node => {
+			thisClassVariableAssignments?.forEach(node => {
 				const assignmentBody = node.expression.right;
 				const isMethod = assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
 				const isField = !isMethod;
@@ -464,7 +464,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillAggregationMethods(additionalMethods: CustomClassUIMethod[]) {
-		this.aggregations.forEach(aggregation => {
+		this.aggregations?.forEach(aggregation => {
 			const aggregationWithFirstBigLetter = `${aggregation.singularName[0].toUpperCase()}${aggregation.singularName.substring(1, aggregation.singularName.length)}`;
 
 			let aMethods = [];
@@ -488,7 +488,7 @@ export class CustomUIClass extends AbstractUIClass {
 				];
 			}
 
-			aMethods.forEach(methodName => {
+			aMethods?.forEach(methodName => {
 				additionalMethods.push({
 					name: methodName,
 					description: `Generic method from ${aggregation.name} aggregation`,
@@ -502,7 +502,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillEventMethods(aMethods: CustomClassUIMethod[]) {
-		this.events.forEach(event => {
+		this.events?.forEach(event => {
 			const eventWithFirstBigLetter = `${event.name[0].toUpperCase()}${event.name.substring(1, event.name.length)}`;
 			const aEventMethods = [
 				`fire${eventWithFirstBigLetter}`,
@@ -510,7 +510,7 @@ export class CustomUIClass extends AbstractUIClass {
 				`detach${eventWithFirstBigLetter}`
 			];
 
-			aEventMethods.forEach(eventMethod => {
+			aEventMethods?.forEach(eventMethod => {
 				aMethods.push({
 					name: eventMethod,
 					description: `Generic method for event ${event.name}`,
@@ -523,7 +523,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillAssociationMethods(additionalMethods: CustomClassUIMethod[]) {
-		this.associations.forEach(association => {
+		this.associations?.forEach(association => {
 			const associationWithFirstBigLetter = `${association.singularName[0].toUpperCase()}${association.singularName.substring(1, association.singularName.length)}`;
 
 			let aMethods = [];
@@ -541,7 +541,7 @@ export class CustomUIClass extends AbstractUIClass {
 				];
 			}
 
-			aMethods.forEach(methodName => {
+			aMethods?.forEach(methodName => {
 				additionalMethods.push({
 					name: methodName,
 					description: `Generic method from ${association.name} association`,
