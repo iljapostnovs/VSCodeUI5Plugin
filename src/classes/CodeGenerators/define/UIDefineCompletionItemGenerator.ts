@@ -1,5 +1,8 @@
 import { SAPNode } from "../../StandardLibMetadata/SAPNode";
 import * as vscode from "vscode";
+import { SyntaxAnalyzer } from "../../CustomLibMetadata/SyntaxAnalyzer";
+import { UIClassFactory } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { CustomUIClass } from "../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
 
 export class DefineGenerator {
 
@@ -16,16 +19,19 @@ export class DefineGenerator {
 	public static getIfCurrentPositionIsInDefine(position: vscode.Position) {
 		const editor = vscode.window.activeTextEditor;
 		let isCurrentPositionInUIDefine = false;
+		const textEditor = vscode.window.activeTextEditor;
+		const document = textEditor?.document;
+		if (textEditor) {
+			const currentPositionOffset = document?.offsetAt(textEditor.selection.start);
+			const currentClass = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			const UIClass = currentClass && UIClassFactory.getUIClass(currentClass);
 
-		if (editor) {
-			const document = editor.document;
-			const documentText: string = document.getText();
-			const regexResult = /sap\.ui\.define\(\s?\[(.|\n|\r)*\],.?function.?\(/.exec(documentText);
-			if (regexResult) {
-				const indexDefineEnd = regexResult[0].length;
-				const positionDefineEnd = document.positionAt(indexDefineEnd);
-				if (positionDefineEnd.isAfter(position)) {
-					isCurrentPositionInUIDefine = true;
+			if (UIClass instanceof CustomUIClass&& currentPositionOffset) {
+				const args = UIClass.fileContent?.body[0]?.expression?.arguments;
+				if (args && args.length === 2) {
+					const UIDefinePaths: any = args[0];
+
+					isCurrentPositionInUIDefine = currentPositionOffset > UIDefinePaths.start && currentPositionOffset <= UIDefinePaths.end;
 				}
 			}
 		}

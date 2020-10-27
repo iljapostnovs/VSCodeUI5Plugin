@@ -34,7 +34,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public acornMethodsAndFields: any[] = [];
 	public fileContent: any;
 	private parentVariableName: any;
-	private classBodyacornVariableName: string | undefined;
+	private classBodyAcornVariableName: string | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
@@ -59,12 +59,12 @@ export class CustomUIClass extends AbstractUIClass {
 			//static methods
 			//TODO: Move this
 			const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
-			if (UIDefineBody && this.classBodyacornVariableName) {
+			if (UIDefineBody && this.classBodyAcornVariableName) {
 				const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
 					return 	node.type === "ExpressionStatement" &&
 							(
-								node.expression?.left?.object?.name === this.classBodyacornVariableName ||
-								node.expression?.left?.object?.object?.name === this.classBodyacornVariableName
+								node.expression?.left?.object?.name === this.classBodyAcornVariableName ||
+								node.expression?.left?.object?.object?.name === this.classBodyAcornVariableName
 							);
 				});
 
@@ -220,7 +220,7 @@ export class CustomUIClass extends AbstractUIClass {
 			if (variable) {
 				const neededDeclaration = variable.declarations.find((declaration: any) => declaration.id.name === part.name);
 				classBody = this.getClassBodyFromPartAcorn(neededDeclaration.init, partParent);
-				this.classBodyacornVariableName = part.name;
+				this.classBodyAcornVariableName = part.name;
 			}
 		}
 
@@ -350,12 +350,12 @@ export class CustomUIClass extends AbstractUIClass {
 	private fillStaticMethodsAndFields() {
 		const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
 
-		if (UIDefineBody && this.classBodyacornVariableName) {
+		if (UIDefineBody && this.classBodyAcornVariableName) {
 			const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
 				return 	node.type === "ExpressionStatement" &&
 						(
-							node.expression?.left?.object?.name === this.classBodyacornVariableName ||
-							node.expression?.left?.object?.object?.name === this.classBodyacornVariableName
+							node.expression?.left?.object?.name === this.classBodyAcornVariableName ||
+							node.expression?.left?.object?.object?.name === this.classBodyAcornVariableName
 						);
 			});
 
