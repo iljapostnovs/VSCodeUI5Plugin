@@ -154,7 +154,7 @@ export class MassDrawIOUMLDiagram {
 		const previousDiagramColumnCount =  previousRootDiagrams.reduce((accumulator, diagram) => {
 			accumulator += this.getLeavesCount(usageMap, diagram);
 			return accumulator;
-		}, 0) || 1;
+		}, 0);
 
 		const columnWidths = this.getColumnWidths(usageMap, rootUMLDiagram);
 		const usageMapEntry = usageMap[UMLDiagram.UIClass.className];
@@ -250,7 +250,7 @@ export class MassDrawIOUMLDiagram {
 			}
 		});
 
-		return leavesCount;
+		return leavesCount || 1;
 	}
 
 	private static buildUsageMap(UMLDiagrams: DrawIOUMLDiagram[], usageMap: UsageMap = {}) {
@@ -324,7 +324,7 @@ export class MassDrawIOUMLDiagram {
 			} else {
 				usageMapEntry.column = currentChildrenColumn;
 			}
-			currentChildrenColumn += this.getLeavesCount(usageMap, diagram) || 1;
+			currentChildrenColumn += this.getLeavesCount(usageMap, diagram);
 
 			this.setColumnsForTree(diagram, usageMap);
 		});

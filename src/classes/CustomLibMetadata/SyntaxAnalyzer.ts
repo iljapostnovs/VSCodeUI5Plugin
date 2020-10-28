@@ -643,7 +643,7 @@ export class SyntaxAnalyzer {
 		let field: UIField | undefined;
 		const UIClass = UIClassFactory.getUIClass(className);
 
-		field = UIClass.fields.find(field => field.name === fieldName);
+		field = UIClass.fields?.find(field => field.name === fieldName);
 		if (!field && UIClass.parentClassNameDotNotation) {
 			field = this.findFieldHierarchically(UIClass.parentClassNameDotNotation, fieldName);
 		}

@@ -191,12 +191,23 @@ export class CustomUIClass extends AbstractUIClass {
 		const body = this.fileContent;
 		let classBody: any;
 
-		const returnKeyword = body?.body[0]?.expression?.arguments[1]?.body?.body?.find((body: any) => body.type === "ReturnStatement");
+		const returnKeyword = this.getReturnKeywordFromBody();
 		if (returnKeyword && body) {
 			classBody = this.getClassBodyFromPartAcorn(returnKeyword.argument, body.body[0].expression.arguments[1].body);
 		}
 
 		return classBody;
+	}
+
+	private getReturnKeywordFromBody() {
+		let returnKeyword;
+		const UIDefineBody = this.getUIDefineAcornBody();
+
+		if (UIDefineBody) {
+			returnKeyword = UIDefineBody.find((body: any) => body.type === "ReturnStatement");
+		}
+
+		return returnKeyword;
 	}
 
 	private getClassBodyFromPartAcorn(part: any, partParent: any) : any {
@@ -245,10 +256,11 @@ export class CustomUIClass extends AbstractUIClass {
 
 	public isAssignmentStatementForThisVariable(node: any) {
 		return 	node.type === "ExpressionStatement" &&
-				node.expression.type === "AssignmentExpression" &&
-				node.expression.operator === "=" &&
-				node.expression.left.type === "MemberExpression" &&
-				node.expression.left.object.type === "ThisExpression";
+				node.expression?.type === "AssignmentExpression" &&
+				node.expression?.operator === "=" &&
+				node.expression?.left?.type === "MemberExpression" &&
+				node.expression?.left?.property?.name &&
+				node.expression?.left?.object?.type === "ThisExpression";
 	}
 	private fillMethodsAndFields() {
 		if (this.acornClassBody?.properties) {
@@ -347,8 +359,24 @@ export class CustomUIClass extends AbstractUIClass {
 		return looseObject;
 	}
 
+	private getUIDefineAcornBody() {
+		let UIDefineBody;
+		const body = this.fileContent;
+
+		const UIDefineBodyExists =
+			this.fileContent?.body &&
+			this.fileContent?.body[0]?.expression?.arguments &&
+			body?.body[0]?.expression?.arguments[1]?.body?.body;
+
+		if (UIDefineBodyExists) {
+			UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
+		}
+
+		return UIDefineBody;
+	}
+
 	private fillStaticMethodsAndFields() {
-		const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
+		const UIDefineBody = this.getUIDefineAcornBody();
 
 		if (UIDefineBody && this.classBodyacornVariableName) {
 			const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {

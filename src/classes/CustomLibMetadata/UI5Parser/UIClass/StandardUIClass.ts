@@ -103,7 +103,7 @@ export class StandardUIClass extends AbstractUIClass {
 				visibility: visibility
 			});
 			return accumulator;
-		}, []);
+		}, []) || [];
 	}
 
 	private fillProperties() {
