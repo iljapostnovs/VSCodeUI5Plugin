@@ -9,7 +9,8 @@ export class ClassHead implements IUMLGenerator, ITextLengthGettable {
 	parent: Header;
 	width: number = 160;
 	height: number = 26;
-	xAxis: number = 70;
+	xAxis: number = 0;
+	yAxis: number = 0;
 	UIClass: AbstractUIClass;
 	constructor(UIClass: AbstractUIClass, parent: Header) {
 		this.id = DrawIOUMLDiagram.getUniqueId();
@@ -22,7 +23,7 @@ export class ClassHead implements IUMLGenerator, ITextLengthGettable {
 	generateXML(): string {
 		return `
 				<mxCell id="${this.id}" value="${this.UIClass.className}" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#DAE8FC;" vertex="1" parent="${this.parent.id}">
-					<mxGeometry x="${this.xAxis}" y="80" width="${this.width}" height="${this.height}" as="geometry" />
+					<mxGeometry x="${this.xAxis}" y="${this.yAxis}" width="${this.width}" height="${this.height}" as="geometry" />
 				</mxCell>`;
 	}
 
