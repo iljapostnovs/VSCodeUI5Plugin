@@ -16,8 +16,7 @@ export class DefineGenerator {
 		return defineString;
 	}
 
-	public static getIfCurrentPositionIsInDefine(position: vscode.Position) {
-		const editor = vscode.window.activeTextEditor;
+	public static getIfCurrentPositionIsInDefine() {
 		let isCurrentPositionInUIDefine = false;
 		const textEditor = vscode.window.activeTextEditor;
 		const document = textEditor?.document;
