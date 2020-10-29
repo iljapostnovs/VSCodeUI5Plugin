@@ -7,7 +7,9 @@ export enum PositionType {
 	InTheTagAttributes = "1",
 	Content = "2",
 	InTheString = "3",
-	InTheClassName = "4"
+	InTheClassName = "4",
+	InComments = "5",
+	InBodyOfTheClass = "6"
 }
 
 export class XMLParser {
@@ -35,13 +37,13 @@ export class XMLParser {
 	}
 
 	public static getTagInPosition(XMLViewText: string, position: number) {
-		const { positionBegin, positionEnd } =this.getTagBeginEndPosition(XMLViewText, position);
+		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLViewText, position);
 		const tagText = XMLViewText.substring(positionBegin, positionEnd);
 
 		return tagText;
 	}
 
-	private static getTagBeginEndPosition(XMLViewText: string, position: number) {
+	public static getTagBeginEndPosition(XMLViewText: string, position: number) {
 		let i = position;
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
@@ -171,6 +173,7 @@ export class XMLParser {
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 		let positionType: PositionType = PositionType.Content;
+
 		if (this.getIfPositionIsInString(XMLViewText, currentPosition)) {
 			positionType = PositionType.InTheString;
 		} else {
@@ -194,7 +197,7 @@ export class XMLParser {
 			} else if (positionIsInsideTheClassTag) {
 				positionType = PositionType.InTheClassName;
 			} else {
-				positionType = PositionType.Content;
+				positionType = PositionType.InBodyOfTheClass;
 			}
 		}
 

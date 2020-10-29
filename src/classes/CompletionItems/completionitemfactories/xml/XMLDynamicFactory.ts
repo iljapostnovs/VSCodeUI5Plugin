@@ -1,12 +1,11 @@
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
-import { AbstractUIClass, TypeValue, UIProperty, UIEvent } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass, TypeValue, UIProperty, UIEvent, UIAggregation } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { URLBuilder } from "../../../Util/URLBuilder";
 import { XMLParser, PositionType } from "../../../Util/XMLParser";
 import { ResourceModelData } from "../../../CustomLibMetadata/ResourceModelData";
 import { FileReader } from "../../../Util/FileReader";
 import { CompletionItemFactory } from "../../CompletionItemFactory";
-import { GeneratorFactory } from "../../../CodeGenerators/GeneratorFactory";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { XMLClassFactory } from "./XMLClassFactory";
 
@@ -22,14 +21,18 @@ export class XMLDynamicFactory {
 			const positionType = XMLParser.getPositionType(XMLText, currentPositionOffset);
 
 			if (positionType === PositionType.InTheTagAttributes) {
-				completionItems = this.getAttributes();
+				completionItems = this.getAttributeCompletionItems();
 
 			} else if (positionType === PositionType.InTheString) {
-				completionItems = this.getAtributeValues();
+				completionItems = this.getAtributeValuesCompletionItems();
 
 			} else if (positionType === PositionType.InTheClassName) {
 
-				completionItems = this.getTags();
+				completionItems = this.getTagCompletionItems();
+			} else if (positionType === PositionType.InBodyOfTheClass) {
+
+				completionItems = this.getCompletionItemsFromClassBody();
+
 			}
 		}
 
@@ -38,7 +41,7 @@ export class XMLDynamicFactory {
 	}
 
 
-	private getAtributeValues() {
+	private getAtributeValuesCompletionItems() {
 		let completionItems: vscode.CompletionItem[] = [];
 		const XMLText = vscode.window.activeTextEditor?.document.getText();
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
@@ -81,7 +84,7 @@ export class XMLDynamicFactory {
 		return completionItems;
 	}
 
-	private getTags() {
+	private getTagCompletionItems() {
 		let completionItems: vscode.CompletionItem[] = [];
 		const XMLText = vscode.window.activeTextEditor?.document.getText();
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
@@ -116,7 +119,43 @@ export class XMLDynamicFactory {
 		return completionItems;
 	}
 
-	private getAttributes() {
+	private getCompletionItemsFromClassBody() {
+		let completionItems: vscode.CompletionItem[] = [];
+		const XMLText = vscode.window.activeTextEditor?.document.getText();
+		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
+
+		if (XMLText && currentPositionOffset) {
+			let tagName = XMLParser.getTagInPosition(XMLText, currentPositionOffset);
+			tagName = tagName.substring(1, tagName.length - 1); //remove "<" and ">"
+			const tagNameParts = tagName.split(":");
+			tagName = tagNameParts.length === 1 ? tagNameParts[0] : tagNameParts[1];
+			if (tagName && tagName[0] === tagName[0].toUpperCase()) {
+				debugger;
+			} else {
+				const aggregationName = tagName;
+				const { positionBegin } = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset);
+				const classTag = XMLParser.getTagInPosition(XMLText, positionBegin - 1);
+				const classTagPositions = XMLParser.getTagBeginEndPosition(XMLText, positionBegin - 1);
+				const classTagPrefix = XMLParser.getTagPrefix(classTag);
+				const className = XMLParser.getClassNameFromTag(classTag);
+				const libraryPath = XMLParser.getLibraryPathFromTagPrefix(XMLText, classTagPrefix, classTagPositions.positionEnd);
+				const classOfTheTag = [libraryPath, className].join(".");
+				const UIClass = UIClassFactory.getUIClass(classOfTheTag);
+				const UIAggregation = this.getUIAggregationRecursively(UIClass, aggregationName);
+				if (UIAggregation?.type) {
+					const aggregationType = UIAggregation.type;
+					const nodeDAO = new SAPNodeDAO();
+					const nodes = nodeDAO.gatAllFlatNodes();
+					const nodesForThisAggregation = nodes.filter(node => nodeDAO.isInstanceOf(aggregationType, node.getName()));
+					completionItems = nodesForThisAggregation.map(node => new XMLClassFactory().generateXMLClassCompletionItemFromSAPNode(node, classTagPrefix));
+				}
+			}
+		}
+
+		return completionItems;
+	}
+
+	private getAttributeCompletionItems() {
 		let completionItems: vscode.CompletionItem[] = [];
 
 		const XMLText = vscode.window.activeTextEditor?.document.getText();
@@ -136,6 +175,17 @@ export class XMLDynamicFactory {
 		}
 
 		return completionItems;
+	}
+
+	private getUIAggregationRecursively(UIClass: AbstractUIClass, aggregationName: string): UIAggregation | undefined {
+		let aggregation: UIAggregation | undefined;
+		aggregation = UIClass.aggregations.find(aggregation => aggregation.name === aggregationName);
+		if (!aggregation && UIClass.parentClassNameDotNotation) {
+			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
+			aggregation = this.getUIAggregationRecursively(parentClass, aggregationName);
+		}
+
+		return aggregation;
 	}
 
 	private getUIPropertyRecursively(UIClass: AbstractUIClass, propertyName: string): UIProperty | undefined {

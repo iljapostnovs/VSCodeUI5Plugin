@@ -19,6 +19,45 @@ export class SAPNodeDAO {
 		return SAPNodeDAO.SAPNodes;
 	}
 
+	public isInstanceOf(classParent: string, classChild: string): boolean {
+		let isInstance = classParent === classChild;
+		const childNode = this.findNode(classChild);
+
+		const childMetadata = childNode?.getMetadata()?.getRawMetadata();
+		if (!isInstance && childMetadata && childMetadata?.extends) {
+			isInstance = this.isInstanceOf(classParent, childMetadata?.extends);
+		}
+
+		return isInstance;
+	}
+
+	public gatAllFlatNodes() {
+		let flatNodes: SAPNode[] = [];
+		SAPNodeDAO.SAPNodes.forEach(node => {
+			flatNodes.push(node);
+			if (node.nodes && node.nodes.length > 0) {
+				const childrenNodes = this.getContentOfNode(node);
+				flatNodes = flatNodes.concat(childrenNodes);
+			}
+		});
+
+		return flatNodes;
+	}
+
+	private getContentOfNode(node: SAPNode) {
+		let children: SAPNode[] = [];
+		children.push(node);
+
+		if (node.nodes) {
+			node.nodes.forEach(node => {
+				children = children.concat(this.getContentOfNode(node));
+			});
+		}
+
+
+		return children;
+	}
+
 	public getAllNodesSync() {
 		return SAPNodeDAO.SAPNodes;
 	}
