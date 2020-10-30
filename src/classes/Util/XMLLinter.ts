@@ -29,6 +29,7 @@ export class XMLLinter {
 	static lintDocument(document: string) {
 		const errors: Error[] = [];
 
+		//check tags
 		const tags = this.getAllTags(document);
 		tags.forEach(tag => {
 			const tagAttributes = tag.text.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
@@ -41,11 +42,12 @@ export class XMLLinter {
 					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(document, tagPrefix, tag.positionEnd);
 					const classOfTheTag = [libraryPath, className].join(".");
 					tagAttributes.forEach(tagAttribute => {
+						//check tag attributes
 						const attributeValidation = this.validateTagAttribute(classOfTheTag, tagAttribute);
 						if (!attributeValidation.valid) {
 							const indexOfTagBegining = tag.text.indexOf(tagAttribute);
 							const position = LineColumn(document).fromIndex(tag.positionBegin + indexOfTagBegining);
-							if (position) {
+							if (position && this.positionIsNotInComments(document, tag.positionBegin)) {
 								errors.push({
 									code: "UI5plugin",
 									message: attributeValidation.message || "Invalid attribute",
@@ -64,6 +66,7 @@ export class XMLLinter {
 			}
 		});
 
+		// check unused namespaces
 		const aPrefixes = document.match(/(?<=xmlns:).*?(?==)/g);
 		aPrefixes?.forEach(prefix => {
 			const aPrefixes = new RegExp(`(?<=<)${prefix}:`, "g").exec(document);
@@ -86,6 +89,24 @@ export class XMLLinter {
 		});
 
 		return errors;
+	}
+
+	private static positionIsNotInComments(document: string, position: number) {
+		let isPositionNotInComments = true;
+		const regExp = new RegExp("<!--(.|\\s)*?-->", "g");
+		const aComments: RegExpExecArray[] = [];
+
+		let result = regExp.exec(document);
+		while (result) {
+			aComments.push(result);
+			result = regExp.exec(document);
+		}
+
+		const comment = aComments.find(comment => comment.index <= position && comment.index + comment[0].length > position);
+
+		isPositionNotInComments = !comment;
+
+		return isPositionNotInComments;
 	}
 
 	private static getAllTags(document: string) {

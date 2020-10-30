@@ -34,7 +34,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public acornMethodsAndFields: any[] = [];
 	public fileContent: any;
 	private parentVariableName: any;
-	private classBodyacornVariableName: string | undefined;
+	private classBodyAcornVariableName: string | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
@@ -59,12 +59,12 @@ export class CustomUIClass extends AbstractUIClass {
 			//static methods
 			//TODO: Move this
 			const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
-			if (UIDefineBody && this.classBodyacornVariableName) {
+			if (UIDefineBody && this.classBodyAcornVariableName) {
 				const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
 					return 	node.type === "ExpressionStatement" &&
 							(
-								node.expression?.left?.object?.name === this.classBodyacornVariableName ||
-								node.expression?.left?.object?.object?.name === this.classBodyacornVariableName
+								node.expression?.left?.object?.name === this.classBodyAcornVariableName ||
+								node.expression?.left?.object?.object?.name === this.classBodyAcornVariableName
 							);
 				});
 
@@ -89,7 +89,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 			this.acornMethodsAndFields = this.acornMethodsAndFields.concat(methods);
 
-			methods.forEach((method: any) => {
+			methods?.forEach((method: any) => {
 				const methodName = method.key.name;
 				const params = method.value.params;
 				const comment = this.comments.find(comment => {
@@ -191,12 +191,23 @@ export class CustomUIClass extends AbstractUIClass {
 		const body = this.fileContent;
 		let classBody: any;
 
-		const returnKeyword = body?.body[0]?.expression?.arguments[1]?.body?.body?.find((body: any) => body.type === "ReturnStatement");
+		const returnKeyword = this.getReturnKeywordFromBody();
 		if (returnKeyword && body) {
 			classBody = this.getClassBodyFromPartAcorn(returnKeyword.argument, body.body[0].expression.arguments[1].body);
 		}
 
 		return classBody;
+	}
+
+	private getReturnKeywordFromBody() {
+		let returnKeyword;
+		const UIDefineBody = this.getUIDefineAcornBody();
+
+		if (UIDefineBody) {
+			returnKeyword = UIDefineBody.find((body: any) => body.type === "ReturnStatement");
+		}
+
+		return returnKeyword;
 	}
 
 	private getClassBodyFromPartAcorn(part: any, partParent: any) : any {
@@ -220,7 +231,7 @@ export class CustomUIClass extends AbstractUIClass {
 			if (variable) {
 				const neededDeclaration = variable.declarations.find((declaration: any) => declaration.id.name === part.name);
 				classBody = this.getClassBodyFromPartAcorn(neededDeclaration.init, partParent);
-				this.classBodyacornVariableName = part.name;
+				this.classBodyAcornVariableName = part.name;
 			}
 		}
 
@@ -245,17 +256,18 @@ export class CustomUIClass extends AbstractUIClass {
 
 	public isAssignmentStatementForThisVariable(node: any) {
 		return 	node.type === "ExpressionStatement" &&
-				node.expression.type === "AssignmentExpression" &&
-				node.expression.operator === "=" &&
-				node.expression.left.type === "MemberExpression" &&
-				node.expression.left.object.type === "ThisExpression";
+				node.expression?.type === "AssignmentExpression" &&
+				node.expression?.operator === "=" &&
+				node.expression?.left?.type === "MemberExpression" &&
+				node.expression?.left?.property?.name &&
+				node.expression?.left?.object?.type === "ThisExpression";
 	}
 	private fillMethodsAndFields() {
 		if (this.acornClassBody?.properties) {
-			this.acornClassBody.properties.forEach((property: any) => {
+			this.acornClassBody.properties?.forEach((property: any) => {
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
 					const functionParts = property.value.body?.body || [];
-					functionParts.forEach((node: any) => {
+					functionParts?.forEach((node: any) => {
 						if (this.isAssignmentStatementForThisVariable(node)) {
 							this.fields.push({
 								name: node.expression.left.property.name,
@@ -337,7 +349,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private generateCustomDataForObject(node: any, looseObject: LooseObject = {}) {
-		node.properties.forEach((property: any) => {
+		node.properties?.forEach((property: any) => {
 			looseObject[property.key.name] = {};
 			if (property.value.type === "ObjectExpression") {
 				this.generateCustomDataForObject(property.value, looseObject[property.key.name]);
@@ -347,19 +359,35 @@ export class CustomUIClass extends AbstractUIClass {
 		return looseObject;
 	}
 
-	private fillStaticMethodsAndFields() {
-		const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
+	private getUIDefineAcornBody() {
+		let UIDefineBody;
+		const body = this.fileContent;
 
-		if (UIDefineBody && this.classBodyacornVariableName) {
+		const UIDefineBodyExists =
+			this.fileContent?.body &&
+			this.fileContent?.body[0]?.expression?.arguments &&
+			body?.body[0]?.expression?.arguments[1]?.body?.body;
+
+		if (UIDefineBodyExists) {
+			UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
+		}
+
+		return UIDefineBody;
+	}
+
+	private fillStaticMethodsAndFields() {
+		const UIDefineBody = this.getUIDefineAcornBody();
+
+		if (UIDefineBody && this.classBodyAcornVariableName) {
 			const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
 				return 	node.type === "ExpressionStatement" &&
 						(
-							node.expression?.left?.object?.name === this.classBodyacornVariableName ||
-							node.expression?.left?.object?.object?.name === this.classBodyacornVariableName
+							node.expression?.left?.object?.name === this.classBodyAcornVariableName ||
+							node.expression?.left?.object?.object?.name === this.classBodyAcornVariableName
 						);
 			});
 
-			thisClassVariableAssignments.forEach(node => {
+			thisClassVariableAssignments?.forEach(node => {
 				const assignmentBody = node.expression.right;
 				const isMethod = assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
 				const isField = !isMethod;
@@ -464,7 +492,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillAggregationMethods(additionalMethods: CustomClassUIMethod[]) {
-		this.aggregations.forEach(aggregation => {
+		this.aggregations?.forEach(aggregation => {
 			const aggregationWithFirstBigLetter = `${aggregation.singularName[0].toUpperCase()}${aggregation.singularName.substring(1, aggregation.singularName.length)}`;
 
 			let aMethods = [];
@@ -488,7 +516,7 @@ export class CustomUIClass extends AbstractUIClass {
 				];
 			}
 
-			aMethods.forEach(methodName => {
+			aMethods?.forEach(methodName => {
 				additionalMethods.push({
 					name: methodName,
 					description: `Generic method from ${aggregation.name} aggregation`,
@@ -502,7 +530,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillEventMethods(aMethods: CustomClassUIMethod[]) {
-		this.events.forEach(event => {
+		this.events?.forEach(event => {
 			const eventWithFirstBigLetter = `${event.name[0].toUpperCase()}${event.name.substring(1, event.name.length)}`;
 			const aEventMethods = [
 				`fire${eventWithFirstBigLetter}`,
@@ -510,7 +538,7 @@ export class CustomUIClass extends AbstractUIClass {
 				`detach${eventWithFirstBigLetter}`
 			];
 
-			aEventMethods.forEach(eventMethod => {
+			aEventMethods?.forEach(eventMethod => {
 				aMethods.push({
 					name: eventMethod,
 					description: `Generic method for event ${event.name}`,
@@ -523,7 +551,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillAssociationMethods(additionalMethods: CustomClassUIMethod[]) {
-		this.associations.forEach(association => {
+		this.associations?.forEach(association => {
 			const associationWithFirstBigLetter = `${association.singularName[0].toUpperCase()}${association.singularName.substring(1, association.singularName.length)}`;
 
 			let aMethods = [];
@@ -541,7 +569,7 @@ export class CustomUIClass extends AbstractUIClass {
 				];
 			}
 
-			aMethods.forEach(methodName => {
+			aMethods?.forEach(methodName => {
 				additionalMethods.push({
 					name: methodName,
 					description: `Generic method from ${association.name} association`,

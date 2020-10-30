@@ -19,8 +19,9 @@ export class CompletionItemRegistrator {
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
 			async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
 				let itemsToReturn:vscode.CompletionItem[] = [];
+				// console.time(`Position ${document.fileName} parsing took`);
 				try {
-					if (DefineGenerator.getIfCurrentPositionIsInDefine(position)) {
+					if (DefineGenerator.getIfCurrentPositionIsInDefine()) {
 						itemsToReturn = await JSCompletionItemDAO.getLanguageSpecificCompletionItems();
 					} else {
 						itemsToReturn = JSCompletionItemDAO.generateUIClassCompletionItems();
@@ -29,6 +30,7 @@ export class CompletionItemRegistrator {
 				} catch (error) {
 					console.log(error);
 				}
+				// console.timeEnd(`Position ${document.fileName} parsing took`);
 				return itemsToReturn;
 			}
 		}, ".");

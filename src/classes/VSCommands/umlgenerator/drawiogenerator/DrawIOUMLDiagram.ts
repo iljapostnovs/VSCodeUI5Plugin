@@ -13,7 +13,8 @@ import { CustomUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/Cust
 export class DrawIOUMLDiagram {
 	readonly UIClass: AbstractUIClass;
 	static id = 2;
-	public xAxis = 70;
+	private _xAxis = 70;
+	private _yAxis = 80;
 	public width = 0;
 	private static readonly pixelsPerChar = 6;
 	readonly classHead: ClassHead;
@@ -43,23 +44,27 @@ export class DrawIOUMLDiagram {
 
 		this.header = header;
 		this.classHead = new ClassHead(this.UIClass, header);
+
+		this.calculateHeightAndWidth();
 	}
 
-	static getUniqueId() {
-		return ++this.id;
+
+	public get xAxis() {
+		return this._xAxis;
+	}
+	public set xAxis(value) {
+		this.classHead.xAxis = value;
+		this._xAxis = value;
+	}
+	public get yAxis() {
+		return this._yAxis;
+	}
+	public set yAxis(value) {
+		this.classHead.yAxis = value;
+		this._yAxis = value;
 	}
 
-	generateUMLClassDiagram() {
-		const body = this.generateBody();
-
-		const UMLDiagram = this.header.generateXML() + body + new Footer().generateXML();
-
-		return UMLDiagram;
-	}
-
-	generateBody() {
-		this.classHead.xAxis = this.xAxis;
-		const separator = new Separator(this.classHead);
+	private calculateHeightAndWidth() {
 		const properties = this.UIClass.properties.map(property => new Property(property, this.classHead));
 		const fields = this.UIClass.fields.sort((a: UIField, b: UIField) => {
 			const isFirstFieldPrivate = a.name.startsWith("_");
@@ -82,8 +87,38 @@ export class DrawIOUMLDiagram {
 		const longestTextLength = this.getLongestTextLength(items);
 		const pixelsPerChar = longestTextLength === this.classHead.getTextLength() ? DrawIOUMLDiagram.pixelsPerChar + 1 : DrawIOUMLDiagram.pixelsPerChar;
 		this.width = pixelsPerChar * longestTextLength;
+
 		this.classHead.width = this.width;
 		this.classHead.height = items.length * this.classHead.height;
+	}
+
+	static getUniqueId() {
+		return ++this.id;
+	}
+
+	generateUMLClassDiagram() {
+		const body = this.generateBody();
+
+		const UMLDiagram = this.header.generateXML() + body + new Footer().generateXML();
+
+		return UMLDiagram;
+	}
+
+	generateBody() {
+		const separator = new Separator(this.classHead);
+		const properties = this.UIClass.properties.map(property => new Property(property, this.classHead));
+		const fields = this.UIClass.fields.sort((a: UIField, b: UIField) => {
+			const isFirstFieldPrivate = a.name.startsWith("_");
+			const isSecondFieldPrivate = b.name.startsWith("_");
+
+			return isFirstFieldPrivate === isSecondFieldPrivate ? 0 : isFirstFieldPrivate ? 1 : -1;
+		}).map(field => new Field(field, this.classHead));
+		const methods = this.UIClass.methods.sort((a: UIMethod, b: UIMethod) => {
+			const isFirstMethodPrivate = a.name.startsWith("_");
+			const isSecondMethodPrivate = b.name.startsWith("_");
+
+			return isFirstMethodPrivate === isSecondMethodPrivate ? 0 : isFirstMethodPrivate ? 1 : -1;
+		}).map(method => new Method(method, this.classHead));
 
 		return 	this.classHead.generateXML() +
 				properties.map(property => property.generateXML()).join("") +
