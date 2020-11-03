@@ -47,7 +47,7 @@ export class CompletionItemRegistrator {
 
 				return XMLDynamicCompletionItems.length > 0 ? XMLDynamicCompletionItems : XMLCompletionItems;
 			}
-		});
+		}, "<", ":");
 
 		UI5Plugin.getInstance().addDisposable(XMLProvider);
 		UI5Plugin.getInstance().addDisposable(JSMethodPropertyProvider);

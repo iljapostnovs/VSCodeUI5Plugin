@@ -19,13 +19,14 @@ export class SAPNodeDAO {
 		return SAPNodeDAO.SAPNodes;
 	}
 
-	public isInstanceOf(classParent: string, classChild: string): boolean {
-		let isInstance = classParent === classChild;
-		const childNode = this.findNode(classChild);
+	public isInstanceOf(child: string, parent: string): boolean {
+		let isInstance = child === parent;
+		const parentNode = this.findNode(parent);
 
-		const childMetadata = childNode?.getMetadata()?.getRawMetadata();
-		if (!isInstance && childMetadata && childMetadata?.extends) {
-			isInstance = this.isInstanceOf(classParent, childMetadata?.extends);
+		const parentMetadata = parentNode?.getMetadata()?.getRawMetadata();
+		isInstance = isInstance || !!parentMetadata?.implements?.includes(child);
+		if (!isInstance && parentMetadata && parentMetadata?.extends) {
+			isInstance = this.isInstanceOf(child, parentMetadata?.extends);
 		}
 
 		return isInstance;

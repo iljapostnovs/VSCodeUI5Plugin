@@ -36,6 +36,47 @@ export class XMLParser {
 		return currentPositionClass;
 	}
 
+	static getParentTagAtPosition(XMLText?: string, position?: number, closedTags: string[] = []) {
+		let parentTag = {
+			positionBegin: 0,
+			positionEnd: 0,
+			tag: ""
+		};
+		if (!XMLText) {
+			XMLText = vscode.window.activeTextEditor?.document.getText();
+		}
+		if (!position) {
+			position = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
+		}
+
+		if (XMLText && position) {
+			const {positionBegin, positionEnd} = this.getTagBeginEndPosition(XMLText, position);
+			const tag = this.getTagInPosition(XMLText, position);
+			const croppedTag = tag.substring(1, tag.length - 1); // remove < >
+			const tagIsSelfClosed = croppedTag.endsWith("/");
+			const itIsClosureTag = croppedTag.startsWith("/");
+			if (tagIsSelfClosed) {
+				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+			} else if (itIsClosureTag) {
+				closedTags.push(croppedTag.substring(1, croppedTag.length));
+				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+			} else {
+				const className = this.getClassNameFromTag(tag);
+				if (closedTags.includes(className)) {
+					closedTags.splice(closedTags.indexOf(className), 1);
+					parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+				} else {
+					parentTag.positionBegin = positionBegin;
+					parentTag.positionEnd = positionEnd;
+					parentTag.tag = tag;
+				}
+
+			}
+		}
+
+		return parentTag;
+	}
+
 	public static getTagInPosition(XMLViewText: string, position: number) {
 		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLViewText, position);
 		const tagText = XMLViewText.substring(positionBegin, positionEnd);
