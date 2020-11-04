@@ -168,7 +168,7 @@ export class SyntaxAnalyzer {
 				innerNode = node.callee;
 			}
 		} else if (node.type === "MemberExpression") {
-			innerNode = node.object;
+			innerNode = this.findAcornNode([node.property], position) || node.object;
 		} else if (node.type === "BlockStatement") {
 			innerNode = this.findAcornNode(node.body, position);
 		} else if (node.type === "AwaitExpression") {
@@ -196,8 +196,8 @@ export class SyntaxAnalyzer {
 		} else if (node.type === "ObjectExpression") {
 			innerNode = this.findAcornNode(node.properties, position)?.value;
 		} else if (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
-			if (node.body?.body) {
-				innerNode = this.findAcornNode(node.body?.body, position);
+			if (node.body) {
+				innerNode = this.findAcornNode([node.body], position);
 			}
 			if (!innerNode) {
 				innerNode = this.findAcornNode(node.params, position);
