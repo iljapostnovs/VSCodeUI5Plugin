@@ -208,7 +208,7 @@ export class SyntaxAnalyzer {
 			node.type === "ForStatement" ||
 			node.type === "ForInStatement"
 		) {
-			innerNode = this.findAcornNode(node.body?.body, position);
+			innerNode = this.findAcornNode([node.body], position) || this.findAcornNode([node.test], position);
 		}
 
 		return innerNode;
@@ -448,10 +448,10 @@ export class SyntaxAnalyzer {
 			UIClass.acornMethodsAndFields.find((property: any) => {
 				let typeFound = false;
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
-					const functionParts = property.value.body?.body || [];
-					functionParts.forEach((node: any) => {
-						if (UIClass.isAssignmentStatementForThisVariable(node) && node.expression?.left?.property?.name === field.name) {
-							field.type = this.getClassNameFromAcornDeclaration(node.expression.right, UIClass);
+					const assignmentEpxressions = SyntaxAnalyzer.expandAllContent(property.value.body).filter((node:any) => node.type === "AssignmentExpression");
+					assignmentEpxressions.forEach((node: any) => {
+						if (UIClass.isAssignmentStatementForThisVariable(node) && node?.left?.property?.name === field.name) {
+							field.type = this.getClassNameFromAcornDeclaration(node.right, UIClass);
 						}
 					});
 				} else if (property.value.type === "Identifier" && property.key.name === field.name) {
@@ -497,7 +497,7 @@ export class SyntaxAnalyzer {
 		return declarations;
 	}
 
-	private static expandAllContent(node: any, content: any[] = []) {
+	public static expandAllContent(node: any, content: any[] = []) {
 		content.push(node);
 		let innerNodes: any[] = [];
 
@@ -550,14 +550,14 @@ export class SyntaxAnalyzer {
 		} else if (node.type === "ObjectExpression") {
 			innerNodes = node.properties.map((declaration: any) => declaration.value);
 		} else if (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
-			innerNodes = node.body.body?.concat(node.params) || node.params;
+			innerNodes = [node.body].concat(node.params);
 		} else if (
 			node.type === "WhileStatement" ||
 			node.type === "DoWhileStatement" ||
 			node.type === "ForStatement" ||
 			node.type === "ForInStatement"
 		) {
-			innerNodes = node.body?.body || [];
+			innerNodes.push(node.body);
 		}
 
 		innerNodes.forEach((node: any) => {
