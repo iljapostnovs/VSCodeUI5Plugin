@@ -21,7 +21,7 @@ export class CompletionItemRegistrator {
 				let itemsToReturn:vscode.CompletionItem[] = [];
 				// console.time(`Position ${document.fileName} parsing took`);
 				try {
-					if (DefineGenerator.getIfCurrentPositionIsInDefine(position)) {
+					if (DefineGenerator.getIfCurrentPositionIsInDefine()) {
 						itemsToReturn = await JSCompletionItemDAO.getLanguageSpecificCompletionItems();
 					} else {
 						itemsToReturn = JSCompletionItemDAO.generateUIClassCompletionItems();

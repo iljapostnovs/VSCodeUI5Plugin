@@ -94,5 +94,5 @@
 * Acorn-loose is now used as JS parser
 * Bugfixes
 
-## 0.10.1 (29-10-2020)
+## 0.10.1 (30-10-2020)
 * Bugfixes

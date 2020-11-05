@@ -6,7 +6,6 @@ import { XMLParser, PositionType } from "../../../Util/XMLParser";
 import { ResourceModelData } from "../../../CustomLibMetadata/ResourceModelData";
 import { FileReader } from "../../../Util/FileReader";
 import { CompletionItemFactory } from "../../CompletionItemFactory";
-import { GeneratorFactory } from "../../../CodeGenerators/GeneratorFactory";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { XMLClassFactory } from "./XMLClassFactory";
 
