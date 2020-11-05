@@ -25,7 +25,7 @@ export class XMLCodeLensProvider {
 				const codeLens = new vscode.CodeLens(range, {
 					command: "ui5plugin.gotoresourcemodel",
 					tooltip: currentText?.description || "",
-					arguments: [/(?<=\{i18n>).*?(?=\})/.exec(currentText?.text || "")],
+					arguments: [/(?<=i18n>).*?(?=)/.exec(currentText?.text || "")],
 					title: currentText?.description || ""
 				});
 

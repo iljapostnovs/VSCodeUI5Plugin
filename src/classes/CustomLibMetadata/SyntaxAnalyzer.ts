@@ -191,9 +191,14 @@ export class SyntaxAnalyzer {
 		} else if (node.type === "AssignmentExpression") {
 			innerNode = node.right;
 		} else if (node.type === "BinaryExpression") {
-			innerNode = this.findAcornNode([node.right], position);
+			innerNode = node.right && this.findAcornNode([node.right], position);
+		} else if (!innerNode) {
+			innerNode = node.left && this.findAcornNode([node.left], position);
+		} else if (node.type === "LogicalExpression") {
+			innerNode = node.right && this.findAcornNode([node.right], position);
+
 			if (!innerNode) {
-				innerNode = this.findAcornNode([node.left], position);
+				innerNode = node.left && this.findAcornNode([node.left], position);
 			}
 		} else if (node.type === "NewExpression") {
 			if (node.callee.end > position) {
