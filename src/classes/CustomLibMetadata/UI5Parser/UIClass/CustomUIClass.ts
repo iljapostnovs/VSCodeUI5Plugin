@@ -35,7 +35,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public acornMethodsAndFields: any[] = [];
 	public fileContent: any;
 	private parentVariableName: any;
-	private classBodyAcornVariableName: string | undefined;
+	public classBodyAcornVariableName: string | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
