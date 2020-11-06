@@ -168,8 +168,8 @@ export class SyntaxAnalyzer {
 				innerNode = node.callee;
 			}
 		} else if (node.type === "MemberExpression") {
-			innerNode = this.findAcornNode([node.object], position) || this.findAcornNode([node.property], position) || node.object;
-			// innerNode = node.object;
+			// innerNode = this.findAcornNode([node.object], position) || this.findAcornNode([node.property], position) || node.object;
+			innerNode = node.object;
 		} else if (node.type === "BlockStatement") {
 			innerNode = this.findAcornNode(node.body, position);
 		} else if (node.type === "ThrowStatement") {
@@ -192,8 +192,6 @@ export class SyntaxAnalyzer {
 			innerNode = node.right;
 		} else if (node.type === "BinaryExpression") {
 			innerNode = node.right && this.findAcornNode([node.right], position);
-		} else if (!innerNode) {
-			innerNode = node.left && this.findAcornNode([node.left], position);
 		} else if (node.type === "LogicalExpression") {
 			innerNode = node.right && this.findAcornNode([node.right], position);
 
