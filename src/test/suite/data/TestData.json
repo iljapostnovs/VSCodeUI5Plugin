@@ -86,11 +86,36 @@
 	}],
 	"SyntaxAnalyser": [{
 		"className": "com.test.controller.Master",
-		"position": 1574,
+		"methodName": "onShowHello",
+		"positionAddition": 0,
+		"node": {
+			"type": "MemberExpression",
+			"property": {
+				"name": "customMethod"
+			}
+		},
 		"type": "com.test.util.CustomClassExtend"
 	},{
 		"className": "com.test.controller.Master",
-		"position": 1580,
+		"methodName": "onShowHello",
+		"positionAddition": 1,
+		"node": {
+			"type": "MemberExpression",
+			"property": {
+				"name": "customMethod"
+			}
+		},
 		"type": "com.test.util.CustomClassExtend"
+	},{
+		"className": "com.test.controller.Master",
+		"methodName": "onShowHello",
+		"positionAddition": 0,
+		"node": {
+			"type": "MemberExpression",
+			"property": {
+				"name": "getBinding"
+			}
+		},
+		"type": "sap.m.Text"
 	}]
 }

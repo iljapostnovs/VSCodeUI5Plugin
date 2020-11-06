@@ -275,11 +275,6 @@ export class CustomUIClass extends AbstractUIClass {
 								description: node.left.property.name.jsType || "",
 								visibility: node.left.property.name.startsWith("_") ? "private" : "public"
 							});
-
-							// this.acornMethodsAndFields.push({
-							// 	key: node.expression.left.property,
-							// 	value: node.expression.right
-							// });
 						}
 					});
 				}
