@@ -117,5 +117,16 @@
 			}
 		},
 		"type": "sap.m.Text"
+	},{
+		"className": "com.test.controller.Master",
+		"methodName": "onShowHello",
+		"positionAddition": 0,
+		"node": {
+			"type": "MemberExpression",
+			"property": {
+				"name": "getProperty"
+			}
+		},
+		"type": "sap.ui.model.Model"
 	}]
 }
