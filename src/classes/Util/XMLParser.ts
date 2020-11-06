@@ -7,7 +7,9 @@ export enum PositionType {
 	InTheTagAttributes = "1",
 	Content = "2",
 	InTheString = "3",
-	InTheClassName = "4"
+	InTheClassName = "4",
+	InComments = "5",
+	InBodyOfTheClass = "6"
 }
 
 export class XMLParser {
@@ -34,14 +36,55 @@ export class XMLParser {
 		return currentPositionClass;
 	}
 
+	static getParentTagAtPosition(XMLText?: string, position?: number, closedTags: string[] = []) {
+		let parentTag = {
+			positionBegin: 0,
+			positionEnd: 0,
+			tag: ""
+		};
+		if (!XMLText) {
+			XMLText = vscode.window.activeTextEditor?.document.getText();
+		}
+		if (!position) {
+			position = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
+		}
+
+		if (XMLText && position) {
+			const {positionBegin, positionEnd} = this.getTagBeginEndPosition(XMLText, position);
+			const tag = this.getTagInPosition(XMLText, position);
+			const croppedTag = tag.substring(1, tag.length - 1); // remove < >
+			const tagIsSelfClosed = croppedTag.endsWith("/");
+			const itIsClosureTag = croppedTag.startsWith("/");
+			if (tagIsSelfClosed) {
+				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+			} else if (itIsClosureTag) {
+				closedTags.push(croppedTag.substring(1, croppedTag.length));
+				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+			} else {
+				const className = this.getClassNameFromTag(tag);
+				if (closedTags.includes(className)) {
+					closedTags.splice(closedTags.indexOf(className), 1);
+					parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+				} else {
+					parentTag.positionBegin = positionBegin;
+					parentTag.positionEnd = positionEnd;
+					parentTag.tag = tag;
+				}
+
+			}
+		}
+
+		return parentTag;
+	}
+
 	public static getTagInPosition(XMLViewText: string, position: number) {
-		const { positionBegin, positionEnd } =this.getTagBeginEndPosition(XMLViewText, position);
+		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLViewText, position);
 		const tagText = XMLViewText.substring(positionBegin, positionEnd);
 
 		return tagText;
 	}
 
-	private static getTagBeginEndPosition(XMLViewText: string, position: number) {
+	public static getTagBeginEndPosition(XMLViewText: string, position: number) {
 		let i = position;
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
@@ -171,6 +214,7 @@ export class XMLParser {
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 		let positionType: PositionType = PositionType.Content;
+
 		if (this.getIfPositionIsInString(XMLViewText, currentPosition)) {
 			positionType = PositionType.InTheString;
 		} else {
@@ -194,7 +238,7 @@ export class XMLParser {
 			} else if (positionIsInsideTheClassTag) {
 				positionType = PositionType.InTheClassName;
 			} else {
-				positionType = PositionType.Content;
+				positionType = PositionType.InBodyOfTheClass;
 			}
 		}
 

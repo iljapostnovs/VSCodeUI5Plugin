@@ -84,5 +84,13 @@
 			"type": "sap.m.Text"
 		}]
 	}],
-	"SyntaxAnalyser": []
+	"SyntaxAnalyser": [{
+		"className": "com.test.controller.Master",
+		"position": 1574,
+		"type": "com.test.util.CustomClassExtend"
+	},{
+		"className": "com.test.controller.Master",
+		"position": 1580,
+		"type": "com.test.util.CustomClassExtend"
+	}]
 }
