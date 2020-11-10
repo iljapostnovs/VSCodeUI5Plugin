@@ -9,7 +9,7 @@ export class DefineGenerator {
 	public generateDefineString(node: SAPNode) {
 		let defineString: string = "";
 
-		if (node.node.visibility === "public" && (node.getKind() === "class" || node.getKind() === "enum")) {
+		if (node.node.visibility === "public" && (node.getKind() === "class" || node.getKind() === "enum" || node.getKind() === "namespace")) {
 			defineString = `"${node.getName().replace(/\./g, "/")}"`;
 		}
 
