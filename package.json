@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.10.1",
+	"version": "0.10.2",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"contributors": [
@@ -18,7 +18,7 @@
 	"icon": "images/ui5.png",
 	"homepage": "https://github.com/iljapostnovs/VSCodeUI5Plugin/blob/master/README.md",
 	"engines": {
-		"vscode": "^1.49.0"
+		"vscode": "^1.51.0"
 	},
 	"categories": [
 		"Extension Packs"
@@ -169,7 +169,7 @@
 		"@types/mocha": "^8.0.3",
 		"@types/node": "^14.14.2",
 		"@types/request-promise": "^4.1.46",
-		"@types/vscode": "^1.49.0",
+		"@types/vscode": "^1.51.0",
 		"clean-webpack-plugin": "^3.0.0",
 		"mocha": "^8.2.0",
 		"ts-loader": "^8.0.7",
