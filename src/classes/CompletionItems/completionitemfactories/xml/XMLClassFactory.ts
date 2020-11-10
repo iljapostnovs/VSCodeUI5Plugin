@@ -59,6 +59,10 @@ export class XMLClassFactory {
 	public generateXMLClassCompletionItemFromSAPNode(node: SAPNode, classPrefix: string = "") {
 		const metadata = node.getMetadata()?.getRawMetadata();
 
+		if (classPrefix && !classPrefix.endsWith(":")) {
+			classPrefix += ":";
+		}
+
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
 		mardownString.appendMarkdown(URLBuilder.getInstance().getMarkupUrlForClassApi(node));

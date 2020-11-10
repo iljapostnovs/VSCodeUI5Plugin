@@ -1,4 +1,5 @@
 import { FileReader } from "../../../Util/FileReader";
+import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
 import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
 const commentParser = require("comment-parser");
 const acornLoose = require("acorn-loose");
@@ -34,7 +35,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public acornMethodsAndFields: any[] = [];
 	public fileContent: any;
 	private parentVariableName: any;
-	private classBodyAcornVariableName: string | undefined;
+	public classBodyAcornVariableName: string | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
@@ -255,31 +256,25 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	public isAssignmentStatementForThisVariable(node: any) {
-		return 	node.type === "ExpressionStatement" &&
-				node.expression?.type === "AssignmentExpression" &&
-				node.expression?.operator === "=" &&
-				node.expression?.left?.type === "MemberExpression" &&
-				node.expression?.left?.property?.name &&
-				node.expression?.left?.object?.type === "ThisExpression";
+		return 	node.type === "AssignmentExpression" &&
+				node.operator === "=" &&
+				node.left?.type === "MemberExpression" &&
+				node.left?.property?.name &&
+				node.left?.object?.type === "ThisExpression";
 	}
 	private fillMethodsAndFields() {
 		if (this.acornClassBody?.properties) {
 			this.acornClassBody.properties?.forEach((property: any) => {
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
-					const functionParts = property.value.body?.body || [];
-					functionParts?.forEach((node: any) => {
+					const assignmentExpressions = SyntaxAnalyzer.expandAllContent(property.value.body).filter((node:any) => node.type === "AssignmentExpression");
+					assignmentExpressions?.forEach((node: any) => {
 						if (this.isAssignmentStatementForThisVariable(node)) {
 							this.fields.push({
-								name: node.expression.left.property.name,
-								type: node.expression.left.property.name.jsType,
-								description: node.expression.left.property.name.jsType || "",
-								visibility: node.expression.left.property.name.startsWith("_") ? "private" : "public"
+								name: node.left.property.name,
+								type: node.left.property.name.jsType,
+								description: node.left.property.name.jsType || "",
+								visibility: node.left.property.name.startsWith("_") ? "private" : "public"
 							});
-
-							// this.acornMethodsAndFields.push({
-							// 	key: node.expression.left.property,
-							// 	value: node.expression.right
-							// });
 						}
 					});
 				}

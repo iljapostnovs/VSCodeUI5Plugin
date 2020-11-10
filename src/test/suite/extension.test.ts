@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 import { SyntaxAnalyzer } from "../../classes/CustomLibMetadata/SyntaxAnalyzer";
 import { UIClassFactory } from "../../classes/CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import * as data from "./data/TestData.json";
+import { CustomUIClass } from "../../classes/CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -46,8 +47,34 @@ suite("Extension Test Suite", () => {
 	test("Syntax Analyser finds correct types at positions", async () => {
 		const testData: any[] = data.SyntaxAnalyser;
 		testData.forEach((data: any) => {
-			const className = SyntaxAnalyzer.acornGetClassName(data.className, data.position);
-			assert.strictEqual(data.type, className, `${data.className} position ${data.position} type is ${className} but expected ${data.type}`);
+			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(data.className);
+			const method = UIClass.acornMethodsAndFields.find(methodOrField => methodOrField.key?.name === data.methodName);
+			const methodContent = SyntaxAnalyzer.expandAllContent(method.value.body);
+			const searchedNode = methodContent.find(node => {
+				return compareProperties(data.node, node);
+			});
+
+			const position = searchedNode.property.start + data.positionAddition;
+			const classNameAtPosition = SyntaxAnalyzer.acornGetClassName(data.className, position);
+			assert.strictEqual(data.type, classNameAtPosition, `${data.className} position ${position} type is ${classNameAtPosition} but expected ${data.type}`);
 		});
 	});
 });
+
+function compareProperties(node1: any, node2: any) : boolean {
+	let allInnerNodesExists = true;
+	for (const i in node1) {
+		if (node2[i]) {
+			if (typeof node2[i] === "object") {
+				allInnerNodesExists = compareProperties(node1[i], node2[i]);
+			} else {
+				allInnerNodesExists = allInnerNodesExists && node1[i] === node2[i];
+			}
+		} else {
+			allInnerNodesExists = false;
+		}
+
+	}
+
+	return allInnerNodesExists;
+}
