@@ -96,3 +96,6 @@
 
 ## 0.10.2 (10-11-2020)
 * Bugfixes for js and xml parsing
+
+## 0.10.3 (12-11-2020)
+* Code Actions for JS added. Now you can import variables to sap.ui.define.

@@ -7,18 +7,18 @@ import LineColumn = require("line-column");
 
 export class CodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
-		const selectedVariableName = document.getText(range);
+		const selectedVariableName = this.getCurrentVariable(document, range);
 		const providerResult: vscode.CodeAction[] = [];
 
 		if (selectedVariableName) {
 			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
 			if (currentClassName) {
+				SyntaxAnalyzer.setNewContentForCurrentUIClass();
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				const UIDefine = await new UIDefineFactory().generateUIDefineCompletionItems();
-				const filteredUIDefineCompletionItems = UIDefine
-				.filter(completionItem => completionItem.label.indexOf(selectedVariableName) > -1)
-				.filter(completionItem => !UIClass.UIDefine.find(UIDefine => `"${UIDefine.path}"` === completionItem.label))
-				.reverse();
+				const filteredUIDefineCompletionItems = UIDefine.filter(completionItem => completionItem.label.indexOf(selectedVariableName) > -1)
+																.filter(completionItem => !UIClass.UIDefine.find(UIDefine => `"${UIDefine.path}"` === completionItem.label))
+																.reverse();
 
 				filteredUIDefineCompletionItems.forEach(completionItem => {
 					const UIDefineCodeAction = new vscode.CodeAction(`Import ${completionItem.label}`, vscode.CodeActionKind.QuickFix);
@@ -34,7 +34,31 @@ export class CodeActionProvider {
 				});
 			}
 		}
+
 		return providerResult;
+	}
+
+	private static getCurrentVariable(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
+		let selectedVariableName = document.getText(range);
+
+		if (!selectedVariableName) {
+			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
+			if (currentClassName && vscode.window.activeTextEditor) {
+				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+				const currentPositionOffset = document?.offsetAt(range.end);
+				const node = SyntaxAnalyzer.findAcornNode(UIClass.acornMethodsAndFields, currentPositionOffset);
+				if (node && node.value) {
+					const content = SyntaxAnalyzer.expandAllContent(node.value).filter(node => node.type === "Identifier");
+					const neededIdentifier = SyntaxAnalyzer.findAcornNode(content, currentPositionOffset);
+					if (neededIdentifier) {
+						selectedVariableName = neededIdentifier.name;
+					}
+				}
+			}
+		}
+
+
+		return selectedVariableName;
 	}
 
 	private static getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
