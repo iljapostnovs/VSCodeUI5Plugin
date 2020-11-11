@@ -354,7 +354,7 @@ export class CustomUIClass extends AbstractUIClass {
 		return looseObject;
 	}
 
-	private getUIDefineAcornBody() {
+	public getUIDefineAcornBody() {
 		let UIDefineBody;
 		const body = this.fileContent;
 
