@@ -33,6 +33,8 @@ Schema for manifest.json properties is added.<br/>
 ----------
 ## Method Definitions
 Definitions for custom methods are provided.<br/>
+> Hotkey: Ctrl + Left Click<br/>
+
 ![Definition](/images/Definition.gif)
 
 ----------
@@ -44,6 +46,13 @@ Code Lens for Internalization Texts is provided<br/>
 ## XML Diagnostics
 XML Diagnostics is provided<br/>
 ![DynamicCompletionItems](/images/XMLDiagnostics.gif)
+
+----------
+## Code Action Provider
+Code Actions for UI5 modules import in .js files are provided.<br/>
+> Hotkey: Alt + Enter<br/>
+
+![CodeActionsProvider](/images/CodeActionsProvider.gif)
 
 ----------
 ## Commands
@@ -109,14 +118,6 @@ The generated diagram can be imported to draw.io<br/>
 | F4            | Export string to i18n                    |
 | F5            | Move sap.ui.define imports to parameters |
 | F6            | Insert custom class name                 |
-
-----------
-## Code Action Provider
-Code Actions for import in .js files are provided.<br/>
-You can import UI5 modules
-> Hotkey: Alt + Enter.<br/>
-
-![CodeActionsProvider](/images/CodeActionsProvider.gif)
 
 ----------
 ## Settings
