@@ -101,3 +101,4 @@
 * Code Actions for JS added. Now you can import variables to sap.ui.define.
 * Hotkeys for commands added
 * Schema for manifest.json added
+* JS Code Lens for i18n texts added
