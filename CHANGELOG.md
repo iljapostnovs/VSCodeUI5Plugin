@@ -13,7 +13,7 @@
 ## 0.7.0 (05-12-2019)
 * "Insert Custom Class name" command added
 * Now code templates are automatically added to new .js files
-* Now on file renaming all occurances of previous class name are replaced with new class name (for now works for .js files only)
+* Now on file renaming all occurrences of previous class name are replaced with new class name (for now works for .js files only)
 * Bugfixes for method definition finder
 * Partial support for ES6 added
 
@@ -67,7 +67,7 @@
 * Bugfix for definition provider
 
 ## 0.9.3 (15-03-2020)
-* For convinience purposes now check for two source folders is supported: source folder from preferences ("src" as default) and webapp, if any is found - it will be used as source folder automatically.
+* For convenience purposes now check for two source folders is supported: source folder from preferences ("src" as default) and webapp, if any is found - it will be used as source folder automatically.
 * For "Export to i18n" command there is a list of text types to choose from
 * For "Export to i18n" command three configuration options were added
 * Bugfixes
@@ -99,3 +99,5 @@
 
 ## 0.10.3 (12-11-2020)
 * Code Actions for JS added. Now you can import variables to sap.ui.define.
+* Hotkeys for commands added
+* Schema for manifest.json added

@@ -5,6 +5,8 @@ This plugin contains perks for UI5 developers.
 ## Completion Items
 ### XML
 XML Completion Items for UI5 Controls.<br/>
+> Check *ui5.plugin.addInheritedPropertiesAndAggregations* preference if you want to generate less properties and aggregations<br/>
+
 ![XMLCompletionItems](/images/XMLCompletionItems.gif)<br/>
 XML Completion Items for properties, aggregations, associations and events<br/>
 ![DynamicXMLCompletionItems](/images/DynamicXMLCompletionItems.gif)<br/>
@@ -22,6 +24,11 @@ IDs from the corresponding view of the controller are provided for view.byId or 
 #### Dynamic Completion Items
 Completion items which are generated dynamically depending on current variable type or method return value type. Trigger character - dot.<br/>
 ![DynamicCompletionItems](/images/DynamicCompletionItems.gif)
+
+### Manifest.json
+Schema for manifest.json properties is added.<br/>
+
+![ManifestCompletionItems](/images/ManifestCompletionItems.gif)
 
 ----------
 ## Method Definitions
@@ -41,23 +48,36 @@ XML Diagnostics is provided<br/>
 ----------
 ## Commands
 
-> Idea to put hotkeys for commands might be useful
-
 ### Move sap.ui.define to parameters
+> Hotkey: F5<br/>
+
+> Related preference entries: *ui5.plugin.moveDefineToFunctionParametersOnAutocomplete*<br/>
+
 ![UIDefine](/images/UIDefine.gif)
 
 ### Export to i18n
 Set your position to the string you want to export to i18n.properties file and execute command. Works both in XML and JS files.
 > `this.getBundle()` method which returns ResourceBundle should be defined in Controller/BaseController
 
+> Related preference entries:<br/>
+> *ui5.plugin.askUserToConfirmI18nId*<br/>
+> *ui5.plugin.addI18nTextLengthLimitation*<br/>
+> *ui5.plugin.textTransformationStrategy*<br/>
+
+> Hotkey: F4<br/>
+
 ![ExportToI18n](/images/ExportToI18n.gif)
 
 ### Switch View/Controller
 Goes to view from controller and to controller from view<br/>
+> Hotkey: F3<br/>
+
 ![SwitchViewController](/images/SwitchViewController.gif)
 
 ### Insert Custom Class name
 Inserts the class name into current position<br/>
+> Hotkey: F6<br/>
+
 ![InsertCustomClassNameCommand](/images/InsertCustomClassNameCommand.gif)
 
 ### Clear Cache
@@ -71,7 +91,7 @@ Extends "sap/ui/core/mvc/Controller" if file name ends with .controller.js and "
 
 ----------
 ## Automatic class name and class path renaming
-Extension listens for .js file creation event (rename technically is file deletion and creation) and replaces all occurances of class name to the new one<br/>
+Extension listens for .js file creation event (rename technically is file deletion and creation) and replaces all occurrences of class name to the new one<br/>
 ![AutomaticClassNameReplacingOnRename](/images/AutomaticClassNameReplacingOnRename.gif)
 
 ----------
@@ -80,10 +100,27 @@ UML Class diagram can be generated either for currently active document or for t
 The generated diagram can be imported to draw.io<br/>
 ![UML.png](/images/UML.png)
 
+----------
+## Hotkeys
+| Hotkey        | Command                                  |
+|:-------------:| -------------                            |
+| Alt + Enter   | Quick Fix Action                         |
+| F3            | Switch View/Controller                   |
+| F4            | Export string to i18n                    |
+| F5            | Move sap.ui.define imports to parameters |
+| F6            | Insert custom class name                 |
+
+----------
+## Code Action Provider
+Code Actions for import in .js files are provided.<br/>
+You can import UI5 modules
+> Hotkey: Alt + Enter.<br/>
+
+![CodeActionsProvider](/images/CodeActionsProvider.gif)
 
 ----------
 ## Settings
-Eight settings are available for extension configuration:<br/>
+14 settings are available for extension configuration:<br/>
 ![Settings](/images/Settings.png)
 
 ----------

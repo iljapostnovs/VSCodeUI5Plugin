@@ -27,6 +27,28 @@
 		"*"
 	],
 	"contributes": {
+		"jsonValidation": [{
+			"fileMatch": [
+				"**/manifest.json"
+			],
+			"url": "https://raw.githubusercontent.com/SAP/ui5-manifest/master/schema.json"
+		}],
+		"keybindings": [{
+			"command": "editor.action.quickFix",
+			"key": "alt+enter"
+		},{
+			"command": "ui5plugin.insertCustomClassName",
+			"key": "f6"
+		},{
+			"command": "ui5plugin.moveDefineToFunctionParameters",
+			"key": "f5"
+		},{
+			"command": "ui5plugin.switchBetweenVC",
+			"key": "f3"
+		},{
+			"command": "ui5plugin.exportToi18n",
+			"key": "f4"
+		}],
 		"configuration": {
 			"title": "SAPUI5 Plugin",
 			"properties": {
