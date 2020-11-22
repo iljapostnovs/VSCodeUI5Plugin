@@ -6,6 +6,7 @@ import { FileWatcher } from "./classes/Util/FileWatcher";
 import { SignatureHelpRegistrator } from "./classes/Util/registrators/SignatureHelpRegistrator";
 import { DiagnosticsRegistrator } from "./classes/Util/registrators/DiagnosticsRegistrator";
 import { CodeLensRegistrator } from "./classes/Util/registrators/CodeLensRegistrator";
+import { JSCodeActionRegistrator } from "./classes/Util/registrators/JSCodeActionRegistrator";
 
 export class UI5Plugin {
 	private static instance?: UI5Plugin;
@@ -54,5 +55,6 @@ export class UI5Plugin {
 		SignatureHelpRegistrator.register();
 		DiagnosticsRegistrator.register();
 		CodeLensRegistrator.register();
+		JSCodeActionRegistrator.register();
 	}
 }

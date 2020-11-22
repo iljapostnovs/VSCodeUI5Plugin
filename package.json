@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.10.2",
+	"version": "0.10.3",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"contributors": [
@@ -27,6 +27,28 @@
 		"*"
 	],
 	"contributes": {
+		"jsonValidation": [{
+			"fileMatch": [
+				"**/manifest.json"
+			],
+			"url": "https://raw.githubusercontent.com/SAP/ui5-manifest/master/schema.json"
+		}],
+		"keybindings": [{
+			"command": "editor.action.quickFix",
+			"key": "alt+enter"
+		},{
+			"command": "ui5plugin.insertCustomClassName",
+			"key": "f6"
+		},{
+			"command": "ui5plugin.moveDefineToFunctionParameters",
+			"key": "f5"
+		},{
+			"command": "ui5plugin.switchBetweenVC",
+			"key": "f3"
+		},{
+			"command": "ui5plugin.exportToi18n",
+			"key": "f4"
+		}],
 		"configuration": {
 			"title": "SAPUI5 Plugin",
 			"properties": {
@@ -42,7 +64,7 @@
 				},
 				"ui5.plugin.jsCodeLens": {
 					"type": "boolean",
-					"default": false,
+					"default": true,
 					"description": "Should javascript CodeLens be enabled"
 				},
 				"ui5.plugin.xmlCodeLens": {

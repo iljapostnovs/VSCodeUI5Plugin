@@ -15,21 +15,29 @@ export class XMLCodeLensProvider {
 			const currentResourceModelTexts = ResourceModelData.resourceModels[componentName];
 			const XMLText = document.getText();
 
-			const rTranslatedTexts = /\{i18n>.*?\}/g;
+			const rTranslatedTexts = /(\{|')i18n>.*?(\}|')/g;
 			let results = rTranslatedTexts.exec(XMLText);
 			while (results) {
+				results = results || [];
+				if (results && results[0]) {
+					results[0] = results[0].replace("'", "{");
+					results[0] = results[0].replace("'", "}");
+				}
 				const positionBegin = document.positionAt(results.index);
 				const positionEnd = document.positionAt(results.index + results[0].length);
 				const range = new vscode.Range(positionBegin, positionEnd);
 				const currentText = currentResourceModelTexts.find(text => text.text === (results || [])[0]);
-				const codeLens = new vscode.CodeLens(range, {
-					command: "ui5plugin.gotoresourcemodel",
-					tooltip: currentText?.description || "",
-					arguments: [/(?<=i18n>).*?(?=)/.exec(currentText?.text || "")],
-					title: currentText?.description || ""
-				});
+				if (currentText) {
+					const codeLens = new vscode.CodeLens(range, {
+						command: "ui5plugin.gotoresourcemodel",
+						tooltip: currentText?.description || "",
+						arguments: [/(?<=\{i18n>).*?(?=\})/.exec(currentText?.text || "")],
+						title: currentText?.description || ""
+					});
 
-				codeLenses.push(codeLens);
+					codeLenses.push(codeLens);
+				}
+
 				results = rTranslatedTexts.exec(XMLText);
 			}
 		}

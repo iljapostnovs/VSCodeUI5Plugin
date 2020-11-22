@@ -78,20 +78,20 @@ export class UI5MetadataDAO {
 	}
 
 	private findNodeMetadata(node: SAPNode, libMetadata: any) {
-		return libMetadata.symbols ? libMetadata.symbols.find(
+		return libMetadata?.symbols ? libMetadata.symbols.find(
 			(metadata: any) => metadata.name === node.getName()
 		) : {};
 	}
 
 	public async getMetadataForLib(lib: string) {
-		let metadatas;
+		let metadata;
 		try {
-			metadatas = await this.fetchMetadataForLib(lib);
+			metadata = await this.fetchMetadataForLib(lib);
 		} catch (error) {
 			console.log(error);
 		}
 
-		return metadatas;
+		return metadata;
 	}
 
 	private fetchMetadataForLib(lib: string) {

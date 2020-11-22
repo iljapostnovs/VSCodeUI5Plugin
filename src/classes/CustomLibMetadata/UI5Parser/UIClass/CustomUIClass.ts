@@ -354,7 +354,7 @@ export class CustomUIClass extends AbstractUIClass {
 		return looseObject;
 	}
 
-	private getUIDefineAcornBody() {
+	public getUIDefineAcornBody() {
 		let UIDefineBody;
 		const body = this.fileContent;
 
@@ -419,12 +419,12 @@ export class CustomUIClass extends AbstractUIClass {
 	public fillTypesFromHungarionNotation() {
 		this.fields.forEach(field => {
 			if (!field.type) {
-				field.type = this.getTypeFromHungariantNotation(field.name);
+				field.type = this.getTypeFromHungarianNotation(field.name);
 			}
 		});
 	}
 
-	private getTypeFromHungariantNotation(variable: string) {
+	private getTypeFromHungarianNotation(variable: string) {
 		let type;
 		const map: LooseObject = {
 			$: "dom",
