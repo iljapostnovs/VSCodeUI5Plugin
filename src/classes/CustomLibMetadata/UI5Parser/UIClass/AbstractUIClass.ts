@@ -60,8 +60,6 @@ export abstract class AbstractUIClass {
 		this.className = className;
 	}
 
-	public abstract getClassOfTheVariable(variableName: string, position: number) : string | undefined;
-
 	protected generateTypeValues(type: string) {
 		let typeValues: TypeValue[] = [];
 

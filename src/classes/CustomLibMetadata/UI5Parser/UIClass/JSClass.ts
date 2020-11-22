@@ -72,20 +72,4 @@ export class JSClass extends AbstractUIClass {
 
 		this.methods = classData[className].methods;
 	}
-
-	public getClassOfTheVariable(variableName: string, position: number): string | undefined {
-		let className: string | undefined;
-		if (variableName === "this") {
-			className = this.className;
-		} else {
-			const methodParams = MainLooper.getEndOfChar("(", ")", variableName);
-			const methodName = variableName.replace(methodParams, "").replace("this.", "");
-			const method = this.methods.find(method => method.name === methodName);
-			if (method) {
-				className = method.returnType;
-			}
-		}
-
-		return className;
-	}
 }

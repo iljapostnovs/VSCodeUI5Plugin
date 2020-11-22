@@ -586,10 +586,6 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	public getClassOfTheVariable(variableName: string, position: number) {
-		return "";
-	}
-
 	private fillUI5Metadata() {
 		if (this.acornClassBody?.properties) {
 			const metadataExists = !!this.acornClassBody.properties.find((property: any) => property.key.name === "metadata");
