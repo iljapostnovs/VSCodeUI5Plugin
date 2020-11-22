@@ -189,7 +189,7 @@ export class XMLParser {
 			//needed for in-tag xmlns declaration
 			//TODO: Make it hierarchical
 			delta = Math.abs(position - results[0].position);
-			let closestReult = results[0];
+			let closestResult = results[0];
 			results.forEach(result => {
 				const currentDelta = Math.abs(position - result.position);
 
@@ -197,12 +197,12 @@ export class XMLParser {
 					libraryPath = result.result;
 
 					delta = currentDelta;
-					closestReult = result;
+					closestResult = result;
 				}
 			});
 
-			if (closestReult) {
-				libraryPath = closestReult.result;
+			if (closestResult) {
+				libraryPath = closestResult.result;
 			}
 		}
 

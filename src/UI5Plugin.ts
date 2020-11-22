@@ -7,7 +7,6 @@ import { SignatureHelpRegistrator } from "./classes/Util/registrators/SignatureH
 import { DiagnosticsRegistrator } from "./classes/Util/registrators/DiagnosticsRegistrator";
 import { CodeLensRegistrator } from "./classes/Util/registrators/CodeLensRegistrator";
 import { JSCodeActionRegistrator } from "./classes/Util/registrators/JSCodeActionRegistrator";
-
 export class UI5Plugin {
 	private static instance?: UI5Plugin;
 	public static getInstance() {
@@ -56,5 +55,9 @@ export class UI5Plugin {
 		DiagnosticsRegistrator.register();
 		CodeLensRegistrator.register();
 		JSCodeActionRegistrator.register();
+	}
+
+	static registerFallbackCommands() {
+		CommandRegistrator.registerFallbackCommands();
 	}
 }

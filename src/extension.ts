@@ -8,5 +8,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	if (manifests.length > 0) {
 		await (UI5Plugin.getInstance().initialize(context));
+	} else {
+		UI5Plugin.registerFallbackCommands();
 	}
 }
