@@ -9,6 +9,7 @@ import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
 import { ClearCacheCommand } from "../VSCommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
 import * as path from "path";
+import { TemplateGeneratorFactory } from "../templateinserters/TemplateGeneratorFactory";
 const fileSeparator = path.sep;
 
 
@@ -50,11 +51,7 @@ export class FileWatcher {
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = workspace.onDidCreateFiles(event => {
-			event.files.forEach(file => {
-				if (file.fsPath.endsWith(".js")) {
-					this.handleJSFileCreate(file);
-				}
-			});
+			event.files.forEach(this.handleFileCreate.bind(this));
 		});
 
 		UI5Plugin.getInstance().addDisposable(disposable);
@@ -90,11 +87,11 @@ export class FileWatcher {
 		}
 	}
 
-	public static syncrhoniseJSDefineCompletionItems(completionItems: vscode.CompletionItem[]) {
+	public static synchronizeJSDefineCompletionItems(completionItems: vscode.CompletionItem[]) {
 		let disposable = workspace.onDidCreateFiles(event => {
 			event.files.forEach(file => {
 				if (file.fsPath.endsWith(".js")) {
-					WorkspaceCompletionItemFactory.synchroniseCreate(completionItems, file);
+					WorkspaceCompletionItemFactory.synchronizeCreate(completionItems, file);
 				}
 			});
 		});
@@ -104,7 +101,7 @@ export class FileWatcher {
 		disposable = workspace.onDidDeleteFiles(event => {
 			event.files.forEach(file => {
 				if (file.fsPath.endsWith(".js")) {
-					WorkspaceCompletionItemFactory.synchroniseDelete(completionItems, file);
+					WorkspaceCompletionItemFactory.synchronizeDelete(completionItems, file);
 				}
 			});
 		});
@@ -114,8 +111,8 @@ export class FileWatcher {
 		disposable = workspace.onDidRenameFiles(event => {
 			event.files.forEach(file => {
 				if (file.newUri.fsPath.endsWith(".js")) {
-					WorkspaceCompletionItemFactory.synchroniseCreate(completionItems, file.newUri);
-					WorkspaceCompletionItemFactory.synchroniseDelete(completionItems, file.oldUri);
+					WorkspaceCompletionItemFactory.synchronizeCreate(completionItems, file.newUri);
+					WorkspaceCompletionItemFactory.synchronizeDelete(completionItems, file.oldUri);
 				}
 			});
 		});
@@ -123,7 +120,7 @@ export class FileWatcher {
 		UI5Plugin.getInstance().addDisposable(disposable);
 	}
 
-	private static handleJSFileCreate(uri: vscode.Uri) {
+	private static handleFileCreate(uri: vscode.Uri) {
 		const changedFileText = fs.readFileSync(uri.fsPath, "utf8");
 
 		const thisFileIsEmpty = changedFileText.length === 0;
@@ -134,19 +131,11 @@ export class FileWatcher {
 	}
 
 	private static insertCodeTemplate(uri: vscode.Uri) {
-		const textToInsert = this.generateTextToInsertIntoFile(uri);
-		fs.writeFileSync(uri.fsPath, textToInsert);
-	}
-
-	private static generateTextToInsertIntoFile(uri: vscode.Uri) {
-		const isController = uri.fsPath.endsWith(".controller.js");
-		const classNameDotNotation = FileReader.getClassNameFromPath(uri.fsPath);
-
-		const standardUIDefineClassForExtension = isController ? "sap/ui/core/mvc/Controller" : "sap/ui/base/ManagedObject";
-		const UIDefineClassNameParts = standardUIDefineClassForExtension.split("/");
-		const controlName = UIDefineClassNameParts[UIDefineClassNameParts.length - 1];
-
-		return `sap.ui.define([\r\n\t\"${standardUIDefineClassForExtension}\"\r\n], function(\r\n\t${controlName}\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ${controlName}.extend(\"${classNameDotNotation}\", {\r\n\t});\r\n});`;
+		const templateInserter = TemplateGeneratorFactory.createInstance(uri.fsPath);
+		const textToInsert = templateInserter?.generateTemplate(uri);
+		if (textToInsert) {
+			fs.writeFileSync(uri.fsPath, textToInsert);
+		}
 	}
 
 	private static replaceCurrentClassNameWithNewOne(oldUri: vscode.Uri, newUri: vscode.Uri) {

@@ -94,7 +94,7 @@ Clears cache with SAPUI5 lib metadata
 
 ----------
 ## Automatic template insertion
-Inserts initial text for .js files<br/>
+Inserts initial text for .js and .xml files<br/>
 Extends "sap/ui/core/mvc/Controller" if file name ends with .controller.js and "sap/ui/base/ManagedObject" if file name ends with .js<br/>
 ![AutomaticTemplates](/images/AutomaticTemplates.gif)
 

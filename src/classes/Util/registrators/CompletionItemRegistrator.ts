@@ -53,6 +53,6 @@ export class CompletionItemRegistrator {
 		UI5Plugin.getInstance().addDisposable(JSMethodPropertyProvider);
 		UI5Plugin.getInstance().addDisposable(JSViewIDProvider);
 
-		FileWatcher.syncrhoniseJSDefineCompletionItems(CompletionItemFactory.JSDefineCompletionItems);
+		FileWatcher.synchronizeJSDefineCompletionItems(CompletionItemFactory.JSDefineCompletionItems);
 	}
 }

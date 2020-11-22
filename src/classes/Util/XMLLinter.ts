@@ -69,7 +69,7 @@ export class XMLLinter {
 		// check unused namespaces
 		const aPrefixes = document.match(/(?<=xmlns:).*?(?==)/g);
 		aPrefixes?.forEach(prefix => {
-			const aPrefixes = new RegExp(`${prefix}:`, "g").exec(document);
+			const aPrefixes = new RegExp(`\\<${prefix}:`, "g").exec(document);
 			if (!aPrefixes || aPrefixes.length === 0) {
 				const positionBegin = document.indexOf(`xmlns:${prefix}=`);
 				const position = LineColumn(document).fromIndex(positionBegin - 1);

@@ -20,7 +20,7 @@ class UIDefineJSFile {
 	}
 }
 export class WorkspaceCompletionItemFactory {
-	static async synchroniseCreate(completionItems: vscode.CompletionItem[], textDocument: vscode.Uri) {
+	static async synchronizeCreate(completionItems: vscode.CompletionItem[], textDocument: vscode.Uri) {
 		const fileFsPath = textDocument.fsPath;
 		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
 		if (defineString) {
@@ -35,7 +35,7 @@ export class WorkspaceCompletionItemFactory {
 		}
 	}
 
-	static async synchroniseDelete(completionItems: vscode.CompletionItem[], textDocument: vscode.Uri) {
+	static async synchronizeDelete(completionItems: vscode.CompletionItem[], textDocument: vscode.Uri) {
 		const fileFsPath = textDocument.fsPath;
 		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
 		if (defineString) {

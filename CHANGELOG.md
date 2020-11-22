@@ -102,3 +102,6 @@
 * Hotkeys for commands added
 * Schema for manifest.json added
 * JS Code Lens for i18n texts added
+
+## 0.10.4 (22-11-2020)
+* Automatic template insertion for .xml files added
