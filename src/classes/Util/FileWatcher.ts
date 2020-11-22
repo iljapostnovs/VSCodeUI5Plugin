@@ -10,14 +10,9 @@ import { ClearCacheCommand } from "../VSCommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
 import * as path from "path";
 import { TemplateGeneratorFactory } from "../templateinserters/TemplateGeneratorFactory";
+import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
 const fileSeparator = path.sep;
-
-
 const workspace = vscode.workspace;
-
-function escapeRegExp(string: string) {
-	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 export class FileWatcher {
 	static register() {
@@ -73,18 +68,7 @@ export class FileWatcher {
 		oldUri: vscode.Uri;
 		newUri: vscode.Uri;
 	}) {
-
-		if (file.newUri.fsPath.endsWith(".js")) {
-			this.replaceCurrentClassNameWithNewOne(file.oldUri, file.newUri);
-		}
-
-		if (file.newUri.fsPath.endsWith(".view.xml")) {
-			this.replaceViewNames(file.oldUri, file.newUri);
-		}
-
-		if (file.newUri.fsPath.endsWith(".controller.js")) {
-			this.renameViewOfController(file.newUri);
-		}
+		FileRenameMediator.handleFileRename(file);
 	}
 
 	public static synchronizeJSDefineCompletionItems(completionItems: vscode.CompletionItem[]) {
@@ -135,138 +119,6 @@ export class FileWatcher {
 		const textToInsert = templateInserter?.generateTemplate(uri);
 		if (textToInsert) {
 			fs.writeFileSync(uri.fsPath, textToInsert);
-		}
-	}
-
-	private static replaceCurrentClassNameWithNewOne(oldUri: vscode.Uri, newUri: vscode.Uri) {
-		const oldClassNameDotNotation = FileReader.getClassNameFromPath(oldUri.fsPath);
-
-		if (oldClassNameDotNotation) {
-			const newClassNameDotNotation = FileReader.getClassNameFromPath(newUri.fsPath);
-			if (newClassNameDotNotation) {
-				if (oldClassNameDotNotation !== newClassNameDotNotation) {
-					this.replaceAllOccurancesInFiles(oldClassNameDotNotation, newClassNameDotNotation);
-				}
-			}
-		}
-	}
-
-	private static replaceViewNames(oldUri: vscode.Uri, newUri: vscode.Uri) {
-		const textToReplaceFromDotNotation = FileReader.getClassNameFromPath(oldUri.fsPath)?.replace(".view.xml", "");
-		const textToReplaceToDotNotation = FileReader.getClassNameFromPath(newUri.fsPath)?.replace(".view.xml", "");
-
-		if (textToReplaceFromDotNotation && textToReplaceToDotNotation) {
-			this.renameController(textToReplaceToDotNotation);
-			this.replaceViewNamesInManifests(textToReplaceFromDotNotation, textToReplaceToDotNotation);
-			this.replaceAllOccurancesInFiles(textToReplaceFromDotNotation, textToReplaceToDotNotation);
-		}
-	}
-
-	private static renameController(newViewName: string) {
-		const viewNamePart = newViewName.split(".")[newViewName.split(".").length - 1];
-		const viewPath = FileReader.convertClassNameToFSPath(newViewName, false, false, true);
-		if (viewPath) {
-			const viewText = fs.readFileSync(viewPath, "utf8");
-			const controllerName = FileReader.getControllerNameFromView(viewText);
-			if (controllerName) {
-				const controllerPath = FileReader.convertClassNameToFSPath(controllerName, true);
-				if (controllerPath) {
-					const newControllerNameParts = controllerName.split(".");
-					newControllerNameParts[newControllerNameParts.length - 1] = viewNamePart;
-					const newControllerName = newControllerNameParts.join(".");
-					const newControllerPath = FileReader.convertClassNameToFSPath(newControllerName, true);
-					if (newControllerPath) {
-						fs.renameSync(controllerPath, newControllerPath);
-						const oldUri = vscode.Uri.file(controllerPath);
-						const newUri = vscode.Uri.file(newControllerPath);
-						this.replaceCurrentClassNameWithNewOne(oldUri, newUri);
-					}
-				}
-			}
-		}
-	}
-
-	private static renameViewOfController(newControllerUri: vscode.Uri) {
-		const controllerNameDotNotation = FileReader.getClassNameFromPath(newControllerUri.fsPath);
-		if (controllerNameDotNotation) {
-			const controllerName = controllerNameDotNotation.split(".")[controllerNameDotNotation.split(".").length - 1];
-			const viewCache = FileReader.getViewCache();
-			const view = Object.keys(viewCache).find(key => FileReader.getControllerNameFromView(viewCache[key].content) === controllerNameDotNotation);
-			if (view) {
-				let viewNameDotNotation = FileReader.getClassNameFromPath(viewCache[view].fsPath);
-				if (viewNameDotNotation) {
-					const viewNameDotNotationParts = viewNameDotNotation.split(".");
-					viewNameDotNotationParts[viewNameDotNotationParts.length - 1] = controllerName;
-					viewNameDotNotation = viewNameDotNotationParts.join(".");
-
-					const newViewPath = FileReader.convertClassNameToFSPath(viewNameDotNotation, false, false, true);
-					if (newViewPath) {
-						try {
-							fs.renameSync(viewCache[view].fsPath, newViewPath);
-							const oldUri = vscode.Uri.file(viewCache[view].fsPath);
-							const newUri = vscode.Uri.file(newViewPath);
-							this.replaceViewNames(oldUri, newUri);
-						} catch (error) {
-							console.log(`No ${newViewPath} found`);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	private static replaceViewNamesInManifests(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string) {
-		const manifests = FileReader.getAllManifests();
-
-		manifests.forEach(manifest => {
-			const viewPath = manifest.content["sap.ui5"]?.routing?.config?.viewPath;
-
-			if (viewPath && textToReplaceFromDotNotation.startsWith(viewPath)) {
-				const oldPath = `"${textToReplaceFromDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
-				const newPath = `"${textToReplaceToDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
-
-				if (JSON.stringify(manifest.content).indexOf(oldPath) > -1) {
-					const fsPath = `${manifest.fsPath}${fileSeparator}manifest.json`;
-					let manifestText = fs.readFileSync(fsPath, "utf8");
-					manifestText = manifestText.replace(new RegExp(`${escapeRegExp(oldPath)}`, "g"), newPath);
-					fs.writeFileSync(fsPath, manifestText);
-				}
-			}
-		});
-
-		FileReader.rereadAllManifests();
-	}
-
-	private static replaceAllOccurancesInFiles(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string) {
-		const textToReplaceFromSlashNotation = textToReplaceFromDotNotation.replace(/\./g, "/");
-		const textToReplaceToSlashNotation = textToReplaceToDotNotation.replace(/\./g, "/");
-
-		const workspace = vscode.workspace;
-		const wsFolders = workspace.workspaceFolders || [];
-		const src = FileReader.getSrcFolderName();
-
-		for (const wsFolder of wsFolders) {
-			const workspaceFilePaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*{.js,.xml,.json}");
-			workspaceFilePaths.forEach(filePath => {
-				let file = fs.readFileSync(filePath, "utf8");
-				if (file.indexOf(textToReplaceFromDotNotation) > -1 || file.indexOf(textToReplaceFromSlashNotation) > -1) {
-					file = file.replace(new RegExp('\\"' + textToReplaceFromDotNotation.replace(/\./g, "\\.") + '\\"', "g"), '"' + textToReplaceToDotNotation + '"');
-					file = file.replace(new RegExp('\\"' + textToReplaceFromSlashNotation.replace(/\./g, "\\.") + '\\"', "g"), '"' + textToReplaceToSlashNotation + '"');
-					//TODO: Think how to do it async. Sync currently needed for folder rename, where mass file change is fired and
-					//there might be multiple changes for the same file
-					fs.writeFileSync(filePath, file);
-
-					//TODO: Use observer pattern here
-					if (filePath.endsWith(".js")) {
-						const classNameOfTheReplacedFile = FileReader.getClassNameFromPath(filePath.replace(/\//g, fileSeparator));
-						if (classNameOfTheReplacedFile) {
-							UIClassFactory.setNewCodeForClass(classNameOfTheReplacedFile, file);
-						}
-					} else if (filePath.endsWith(".view.xml")) {
-						FileReader.setNewViewContentToCache(file, filePath);
-					}
-				}
-			});
 		}
 	}
 
