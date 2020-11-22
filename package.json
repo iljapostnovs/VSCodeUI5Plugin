@@ -64,7 +64,7 @@
 				},
 				"ui5.plugin.jsCodeLens": {
 					"type": "boolean",
-					"default": false,
+					"default": true,
 					"description": "Should javascript CodeLens be enabled"
 				},
 				"ui5.plugin.xmlCodeLens": {
