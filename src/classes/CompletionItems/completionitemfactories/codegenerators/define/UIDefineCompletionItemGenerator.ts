@@ -1,9 +1,8 @@
-import { SAPNode } from "../../StandardLibMetadata/SAPNode";
 import * as vscode from "vscode";
-import { SyntaxAnalyzer } from "../../CustomLibMetadata/SyntaxAnalyzer";
-import { UIClassFactory } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
-import { CustomUIClass } from "../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
-const acornLoose = require("acorn-loose");
+import { SyntaxAnalyzer } from "../../../../CustomLibMetadata/SyntaxAnalyzer";
+import { CustomUIClass } from "../../../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { SAPNode } from "../../../../StandardLibMetadata/SAPNode";
 
 export class DefineGenerator {
 

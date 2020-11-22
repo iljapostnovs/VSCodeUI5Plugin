@@ -1,6 +1,6 @@
+import { AbstractUIClass } from "../../../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { UIClassFactory } from "../../../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { IAggregationGetterStrategy } from "../interfaces/IAggregationGetterStrategy";
-import { AbstractUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
-import { UIClassFactory } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 
 export class SAPClassAggregationGetterStrategy implements IAggregationGetterStrategy {
 	private readonly UIClass: AbstractUIClass;

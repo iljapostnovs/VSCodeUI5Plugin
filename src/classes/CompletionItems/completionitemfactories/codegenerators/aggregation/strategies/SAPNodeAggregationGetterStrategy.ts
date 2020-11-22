@@ -1,5 +1,5 @@
-import { SAPNode } from "../../../StandardLibMetadata/SAPNode";
-import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
+import { SAPNode } from "../../../../../StandardLibMetadata/SAPNode";
+import { SAPNodeDAO } from "../../../../../StandardLibMetadata/SAPNodeDAO";
 import { IAggregationGetterStrategy } from "../interfaces/IAggregationGetterStrategy";
 
 export class SAPNodeAggregationGetterStrategy implements IAggregationGetterStrategy {

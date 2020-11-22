@@ -3,7 +3,6 @@ import * as fs from "fs";
 import { FileReader } from "../../Util/FileReader";
 import * as path from "path";
 const escapedFileSeparator = "\\" + path.sep;
-
 const workspace = vscode.workspace;
 
 interface WorkspaceJSFileConstructor {

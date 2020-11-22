@@ -1,6 +1,6 @@
+import { AbstractUIClass } from "../../../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { UIClassFactory } from "../../../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { IPropertyGetterStrategy } from "../interfaces/IPropertyGetterStrategy";
-import { AbstractUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
-import { UIClassFactory } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 
 export class SAPClassPropertyGetterStrategy implements IPropertyGetterStrategy {
 	private readonly UIClass: AbstractUIClass;

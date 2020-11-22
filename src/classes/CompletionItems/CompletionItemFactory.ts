@@ -1,7 +1,6 @@
 import { SAPNodeDAO } from "../StandardLibMetadata/SAPNodeDAO";
 import { SAPNode } from "../StandardLibMetadata/SAPNode";
 import * as vscode from "vscode";
-import { GeneratorFactory } from "../CodeGenerators/GeneratorFactory";
 import { UI5MetadataPreloader } from "../StandardLibMetadata/UI5MetadataDAO";
 import { SAPIcons } from "../CustomLibMetadata/SAPIcons";
 import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
@@ -13,6 +12,7 @@ import { XMLDynamicFactory } from "./completionitemfactories/xml/XMLDynamicFacto
 import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { CustomUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
+import { GeneratorFactory } from "./completionitemfactories/codegenerators/GeneratorFactory";
 
 export class CompletionItemFactory {
 	private static readonly nodeDAO = new SAPNodeDAO();

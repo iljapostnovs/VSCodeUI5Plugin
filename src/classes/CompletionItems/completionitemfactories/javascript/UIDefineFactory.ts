@@ -2,8 +2,8 @@ import * as vscode from "vscode";
 import { WorkspaceCompletionItemFactory } from "../WorkspaceCompletionItemFactory";
 import { SAPNode } from "../../../StandardLibMetadata/SAPNode";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
-import { GeneratorFactory } from "../../../CodeGenerators/GeneratorFactory";
 import { URLBuilder } from "../../../Util/URLBuilder";
+import { GeneratorFactory } from "../codegenerators/GeneratorFactory";
 
 export class UIDefineFactory {
 	private static readonly nodeDAO = new SAPNodeDAO();

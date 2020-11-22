@@ -1,6 +1,6 @@
+import { SAPNode } from "../../../../../StandardLibMetadata/SAPNode";
+import { SAPNodeDAO } from "../../../../../StandardLibMetadata/SAPNodeDAO";
 import { IPropertyGetterStrategy } from "../interfaces/IPropertyGetterStrategy";
-import { SAPNode } from "../../../StandardLibMetadata/SAPNode";
-import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 
 export class SAPNodePropertyGenerationStrategy implements IPropertyGetterStrategy {
 	private static readonly nodeDAO = new SAPNodeDAO();

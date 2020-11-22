@@ -1,17 +1,17 @@
 import * as vscode from "vscode";
 import { SAPNode } from "../../../StandardLibMetadata/SAPNode";
 import { URLBuilder } from "../../../Util/URLBuilder";
-import { GeneratorFactory } from "../../../CodeGenerators/GeneratorFactory";
-import { IAggregationGenerator } from "../../../CodeGenerators/aggregation/interfaces/IAggregationGenerator";
-import { IPropertyGenerator } from "../../../CodeGenerators/property/interfaces/IPropertyGenerator";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { UI5Plugin } from "../../../../UI5Plugin";
-import { SAPNodePropertyGenerationStrategy } from "../../../CodeGenerators/property/strategies/SAPNodePropertyGetterStrategy";
-import { SAPNodeAggregationGetterStrategy } from "../../../CodeGenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
 import { AbstractUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
-import { SAPClassPropertyGetterStrategy } from "../../../CodeGenerators/property/strategies/SAPClassPropertyGetterStrategy";
-import { SAPClassAggregationGetterStrategy } from "../../../CodeGenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
 import { StandardUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/StandardUIClass";
+import { IPropertyGenerator } from "../codegenerators/property/interfaces/IPropertyGenerator";
+import { GeneratorFactory } from "../codegenerators/GeneratorFactory";
+import { IAggregationGenerator } from "../codegenerators/aggregation/interfaces/IAggregationGenerator";
+import { SAPNodePropertyGenerationStrategy } from "../codegenerators/property/strategies/SAPNodePropertyGetterStrategy";
+import { SAPClassAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
+import { SAPNodeAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
+import { SAPClassPropertyGetterStrategy } from "../codegenerators/property/strategies/SAPClassPropertyGetterStrategy";
 
 export class XMLClassFactory {
 	private readonly nodeDAO = new SAPNodeDAO();
