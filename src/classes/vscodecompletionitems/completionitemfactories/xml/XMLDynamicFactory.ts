@@ -24,7 +24,7 @@ export class XMLDynamicFactory {
 				completionItems = this.getAttributeCompletionItems();
 
 			} else if (positionType === PositionType.InTheString) {
-				completionItems = this.getAtributeValuesCompletionItems();
+				completionItems = this.getAttributeValuesCompletionItems();
 
 			} else if (positionType === PositionType.InTheClassName) {
 
@@ -41,7 +41,7 @@ export class XMLDynamicFactory {
 	}
 
 
-	private getAtributeValuesCompletionItems() {
+	private getAttributeValuesCompletionItems() {
 		let completionItems: vscode.CompletionItem[] = [];
 		const XMLText = vscode.window.activeTextEditor?.document.getText();
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
