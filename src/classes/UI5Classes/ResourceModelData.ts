@@ -1,4 +1,4 @@
-import { FileReader } from "../Util/FileReader";
+import { FileReader } from "../utils/FileReader";
 import { TypeValue } from "./UI5Parser/UIClass/AbstractUIClass";
 
 interface ResourceModel {

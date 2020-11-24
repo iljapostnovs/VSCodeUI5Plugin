@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
-import { FileReader } from "../../Util/FileReader";
+import { FileReader } from "../../utils/FileReader";
 import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
 import { CustomClassUIField, CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
 

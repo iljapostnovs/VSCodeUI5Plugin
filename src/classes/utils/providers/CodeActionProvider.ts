@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { UIDefineFactory } from "../../CompletionItems/completionitemfactories/javascript/UIDefineFactory";
+import { UIDefineFactory } from "../../vscodecompletionitems/completionitemfactories/javascript/UIDefineFactory";
 import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../UI5Classes/UIClassFactory";

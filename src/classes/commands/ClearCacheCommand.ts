@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { FileReader } from "../Util/FileReader";
+import { FileReader } from "../utils/FileReader";
 import { UI5Plugin } from "../../UI5Plugin";
 
 export class ClearCacheCommand {

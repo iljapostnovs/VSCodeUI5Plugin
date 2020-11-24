@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { AbstractUIClass, TypeValue, UIProperty, UIEvent, UIAggregation } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { URLBuilder } from "../../../Util/URLBuilder";
-import { XMLParser, PositionType } from "../../../Util/XMLParser";
+import { URLBuilder } from "../../../utils/URLBuilder";
+import { XMLParser, PositionType } from "../../../utils/XMLParser";
 import { ResourceModelData } from "../../../UI5Classes/ResourceModelData";
-import { FileReader } from "../../../Util/FileReader";
+import { FileReader } from "../../../utils/FileReader";
 import { CompletionItemFactory } from "../../CompletionItemFactory";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { XMLClassFactory } from "./XMLClassFactory";

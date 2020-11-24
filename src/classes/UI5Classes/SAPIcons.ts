@@ -1,5 +1,5 @@
-import { FileReader } from "../Util/FileReader";
-import { URLBuilder } from "../Util/URLBuilder";
+import { FileReader } from "../utils/FileReader";
+import { URLBuilder } from "../utils/URLBuilder";
 import * as rp from "request-promise";
 
 export class SAPIcons {

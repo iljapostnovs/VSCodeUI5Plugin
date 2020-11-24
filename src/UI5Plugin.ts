@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { CommandRegistrator } from "./classes/Util/registrators/CommandRegistrator";
-import { CompletionItemRegistrator } from "./classes/Util/registrators/CompletionItemRegistrator";
-import { DefinitionProviderRegistrator } from "./classes/Util/registrators/DefinitionProviderRegistrator";
-import { FileWatcher } from "./classes/Util/FileWatcher";
-import { SignatureHelpRegistrator } from "./classes/Util/registrators/SignatureHelpRegistrator";
-import { DiagnosticsRegistrator } from "./classes/Util/registrators/DiagnosticsRegistrator";
-import { CodeLensRegistrator } from "./classes/Util/registrators/CodeLensRegistrator";
-import { JSCodeActionRegistrator } from "./classes/Util/registrators/JSCodeActionRegistrator";
+import { CommandRegistrator } from "./classes/utils/registrators/CommandRegistrator";
+import { CompletionItemRegistrator } from "./classes/utils/registrators/CompletionItemRegistrator";
+import { DefinitionProviderRegistrator } from "./classes/utils/registrators/DefinitionProviderRegistrator";
+import { FileWatcher } from "./classes/utils/FileWatcher";
+import { SignatureHelpRegistrator } from "./classes/utils/registrators/SignatureHelpRegistrator";
+import { DiagnosticsRegistrator } from "./classes/utils/registrators/DiagnosticsRegistrator";
+import { CodeLensRegistrator } from "./classes/utils/registrators/CodeLensRegistrator";
+import { JSCodeActionRegistrator } from "./classes/utils/registrators/JSCodeActionRegistrator";
 export class UI5Plugin {
 	private static instance?: UI5Plugin;
 	public static getInstance() {

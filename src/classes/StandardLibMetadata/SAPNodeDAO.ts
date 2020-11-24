@@ -1,8 +1,8 @@
 import { SAPNode } from "./SAPNode";
 import * as rp from "request-promise";
 import * as vscode from "vscode";
-import { FileReader } from "../Util/FileReader";
-import { URLBuilder } from "../Util/URLBuilder";
+import { FileReader } from "../utils/FileReader";
+import { URLBuilder } from "../utils/URLBuilder";
 
 export class SAPNodeDAO {
 	private static readonly nodePath: string = URLBuilder.getInstance().getAPIIndexUrl();

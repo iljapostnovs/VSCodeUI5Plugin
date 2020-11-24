@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { FileReader } from "../../Util/FileReader";
+import { FileReader } from "../../utils/FileReader";
 import { FileRenameHandler } from "./abstraction/FileRenameHandler";
 import * as fs from "fs";
 import * as path from "path";

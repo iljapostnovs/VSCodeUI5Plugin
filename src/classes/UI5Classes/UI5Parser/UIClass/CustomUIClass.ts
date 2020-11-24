@@ -1,4 +1,4 @@
-import { FileReader } from "../../../Util/FileReader";
+import { FileReader } from "../../../utils/FileReader";
 import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
 const commentParser = require("comment-parser");

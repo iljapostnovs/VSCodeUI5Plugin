@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
 import { SAPNode } from "../../../StandardLibMetadata/SAPNode";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
-import { URLBuilder } from "../../../Util/URLBuilder";
+import { URLBuilder } from "../../../utils/URLBuilder";
 import { GeneratorFactory } from "../codegenerators/GeneratorFactory";
 
 export class UIDefineFactory {

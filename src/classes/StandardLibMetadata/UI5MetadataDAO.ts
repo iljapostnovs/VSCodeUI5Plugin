@@ -1,8 +1,8 @@
 import { UI5Metadata } from "./UI5Metadata";
 import { SAPNode } from "./SAPNode";
 import * as rp from "request-promise";
-import { URLBuilder } from "../Util/URLBuilder";
-import { FileReader } from "../Util/FileReader";
+import { URLBuilder } from "../utils/URLBuilder";
+import { FileReader } from "../utils/FileReader";
 import { UI5Plugin } from "../../UI5Plugin";
 
 interface LooseObject {

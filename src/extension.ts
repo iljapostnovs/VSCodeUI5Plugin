@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UI5Plugin } from "./UI5Plugin";
-import { FileReader } from "./classes/Util/FileReader";
+import { FileReader } from "./classes/utils/FileReader";
 
 export async function activate(context: vscode.ExtensionContext) {
 	FileReader.globalStoragePath = context.globalStorageUri.fsPath;

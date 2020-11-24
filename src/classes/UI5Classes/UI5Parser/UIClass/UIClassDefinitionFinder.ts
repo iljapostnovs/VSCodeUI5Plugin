@@ -2,9 +2,9 @@ import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../UIClassFactory";
 import { CustomUIClass } from "./CustomUIClass";
-import { FileReader } from "../../../Util/FileReader";
+import { FileReader } from "../../../utils/FileReader";
 import { StandardUIClass } from "./StandardUIClass";
-import { URLBuilder } from "../../../Util/URLBuilder";
+import { URLBuilder } from "../../../utils/URLBuilder";
 import LineColumn = require("line-column");
 export class UIClassDefinitionFinder {
 	public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {

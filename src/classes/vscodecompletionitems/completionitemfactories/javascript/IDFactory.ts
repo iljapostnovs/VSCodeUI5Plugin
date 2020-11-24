@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { XMLParser } from "../../../Util/XMLParser";
+import { XMLParser } from "../../../utils/XMLParser";
 
 export class IDFactory {
 	public generateIdCompletionItems() {

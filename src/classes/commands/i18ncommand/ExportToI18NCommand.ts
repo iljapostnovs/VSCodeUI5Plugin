@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { FileReader } from "../../Util/FileReader";
+import { FileReader } from "../../utils/FileReader";
 import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
 import { TextTransformationFactory, CaseType } from "./TextTransformationFactory";
 const workspace = vscode.workspace;

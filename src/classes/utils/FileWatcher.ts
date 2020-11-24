@@ -4,9 +4,9 @@ import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer"
 import * as glob from "glob";
 import * as fs from "fs";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { WorkspaceCompletionItemFactory } from "../CompletionItems/completionitemfactories/javascript/WorkspaceCompletionItemFactory";
+import { WorkspaceCompletionItemFactory } from "../vscodecompletionitems/completionitemfactories/javascript/WorkspaceCompletionItemFactory";
 import { ResourceModelData } from "../UI5Classes/ResourceModelData";
-import { ClearCacheCommand } from "../VSCommands/ClearCacheCommand";
+import { ClearCacheCommand } from "../commands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
 import * as path from "path";
 import { TemplateGeneratorFactory } from "../templateinserters/TemplateGeneratorFactory";

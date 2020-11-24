@@ -1,7 +1,7 @@
 import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssociation, TypeValue, UIField } from "./AbstractUIClass";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
-import { URLBuilder } from "../../../Util/URLBuilder";
+import { URLBuilder } from "../../../utils/URLBuilder";
 
 export class StandardUIClass extends AbstractUIClass {
 	private readonly nodeDAO = new SAPNodeDAO();

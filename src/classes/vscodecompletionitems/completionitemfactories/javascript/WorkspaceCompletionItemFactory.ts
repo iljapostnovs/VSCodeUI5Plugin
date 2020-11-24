@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { FileReader } from "../../../Util/FileReader";
+import { FileReader } from "../../../utils/FileReader";
 import * as path from "path";
 const escapedFileSeparator = "\\" + path.sep;
 const workspace = vscode.workspace;

@@ -1,4 +1,4 @@
-import { FileReader } from "../../../Util/FileReader";
+import { FileReader } from "../../../utils/FileReader";
 import * as vscode from "vscode";
 import * as glob from "glob";
 import * as fs from "fs";

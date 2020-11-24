@@ -1,6 +1,6 @@
 import { Header } from "./drawiouml/Header";
 import { Footer } from "./drawiouml/Footer";
-import { FileReader } from "../../../Util/FileReader";
+import { FileReader } from "../../../utils/FileReader";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { DrawIOUMLDiagram } from "./DrawIOUMLDiagram";
 import * as vscode from "vscode";
