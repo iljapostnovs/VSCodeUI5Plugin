@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { SignatureHelpProvider } from "../providers/SignatureHelpProvider";
-import { UI5Plugin } from "../../../UI5Plugin";
+import { UI5Plugin } from "../../UI5Plugin";
 
 export class SignatureHelpRegistrator {
 	static async register() {

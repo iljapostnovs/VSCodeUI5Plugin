@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
-import { FileReader } from "../FileReader";
+import { ResourceModelData } from "../UI5Classes/ResourceModelData";
+import { FileReader } from "../utils/FileReader";
 
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

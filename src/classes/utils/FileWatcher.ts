@@ -6,7 +6,7 @@ import * as fs from "fs";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { WorkspaceCompletionItemFactory } from "../vscodecompletionitems/completionitemfactories/javascript/WorkspaceCompletionItemFactory";
 import { ResourceModelData } from "../UI5Classes/ResourceModelData";
-import { ClearCacheCommand } from "../commands/ClearCacheCommand";
+import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
 import * as path from "path";
 import { TemplateGeneratorFactory } from "../templateinserters/TemplateGeneratorFactory";

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
-import { SAPNode } from "../../../StandardLibMetadata/SAPNode";
-import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
+import { SAPNode } from "../../../librarydata/SAPNode";
+import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 import { URLBuilder } from "../../../utils/URLBuilder";
 import { GeneratorFactory } from "../codegenerators/GeneratorFactory";
 

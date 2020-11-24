@@ -6,7 +6,7 @@ import { XMLParser, PositionType } from "../../../utils/XMLParser";
 import { ResourceModelData } from "../../../UI5Classes/ResourceModelData";
 import { FileReader } from "../../../utils/FileReader";
 import { CompletionItemFactory } from "../../CompletionItemFactory";
-import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
+import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 import { XMLClassFactory } from "./XMLClassFactory";
 
 export class XMLDynamicFactory {

@@ -1,7 +1,7 @@
-import { SAPNodeDAO } from "../StandardLibMetadata/SAPNodeDAO";
-import { SAPNode } from "../StandardLibMetadata/SAPNode";
+import { SAPNodeDAO } from "../librarydata/SAPNodeDAO";
+import { SAPNode } from "../librarydata/SAPNode";
 import * as vscode from "vscode";
-import { UI5MetadataPreloader } from "../StandardLibMetadata/UI5MetadataDAO";
+import { UI5MetadataPreloader } from "../librarydata/UI5MetadataDAO";
 import { SAPIcons } from "../UI5Classes/SAPIcons";
 import { ResourceModelData } from "../UI5Classes/ResourceModelData";
 import { XMLClassFactory as XMLClassFactory } from "./completionitemfactories/xml/XMLClassFactory";

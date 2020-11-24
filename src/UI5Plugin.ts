@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { CommandRegistrator } from "./classes/utils/registrators/CommandRegistrator";
-import { CompletionItemRegistrator } from "./classes/utils/registrators/CompletionItemRegistrator";
-import { DefinitionProviderRegistrator } from "./classes/utils/registrators/DefinitionProviderRegistrator";
+import { CommandRegistrator } from "./classes/registrators/CommandRegistrator";
+import { CompletionItemRegistrator } from "./classes/registrators/CompletionItemRegistrator";
+import { DefinitionProviderRegistrator } from "./classes/registrators/DefinitionProviderRegistrator";
 import { FileWatcher } from "./classes/utils/FileWatcher";
-import { SignatureHelpRegistrator } from "./classes/utils/registrators/SignatureHelpRegistrator";
-import { DiagnosticsRegistrator } from "./classes/utils/registrators/DiagnosticsRegistrator";
-import { CodeLensRegistrator } from "./classes/utils/registrators/CodeLensRegistrator";
-import { JSCodeActionRegistrator } from "./classes/utils/registrators/JSCodeActionRegistrator";
+import { SignatureHelpRegistrator } from "./classes/registrators/SignatureHelpRegistrator";
+import { DiagnosticsRegistrator } from "./classes/registrators/DiagnosticsRegistrator";
+import { CodeLensRegistrator } from "./classes/registrators/CodeLensRegistrator";
+import { JSCodeActionRegistrator } from "./classes/registrators/JSCodeActionRegistrator";
 export class UI5Plugin {
 	private static instance?: UI5Plugin;
 	public static getInstance() {

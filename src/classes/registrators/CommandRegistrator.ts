@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { SAPUIDefineCommand } from "../../commands/SAPUIDefineCommand";
-import { ViewControllerSwitcher } from "../../commands/switchers/ViewControllerSwitcher";
-import { ClearCacheCommand } from "../../commands/ClearCacheCommand";
-import { ExportToI18NCommand } from "../../commands/i18ncommand/ExportToI18NCommand";
-import { InsertCustomClassNameCommand } from "../../commands/InsertCustomClassNameCommand";
-import { UI5Plugin } from "../../../UI5Plugin";
-import { UMLGeneratorCommand } from "../../commands/umlgenerator/UMLGeneratorCommand";
-import { FallbackCommand } from "../../commands/FallbackCommand";
+import { UI5Plugin } from "../../UI5Plugin";
+import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
+import { FallbackCommand } from "../vscommands/FallbackCommand";
+import { ExportToI18NCommand } from "../vscommands/i18ncommand/ExportToI18NCommand";
+import { InsertCustomClassNameCommand } from "../vscommands/InsertCustomClassNameCommand";
+import { SAPUIDefineCommand } from "../vscommands/SAPUIDefineCommand";
+import { ViewControllerSwitcher } from "../vscommands/switchers/ViewControllerSwitcher";
+import { UMLGeneratorCommand } from "../vscommands/umlgenerator/UMLGeneratorCommand";
 
 export class CommandRegistrator {
 	static register(metadataLoaded: boolean) {

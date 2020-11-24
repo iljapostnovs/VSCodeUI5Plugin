@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 
 export class SignatureHelpProvider {
 	static getSignature(document: vscode.TextDocument) {

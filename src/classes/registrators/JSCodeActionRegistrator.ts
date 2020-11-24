@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../UI5Plugin";
+import { UI5Plugin } from "../../UI5Plugin";
 import { CodeActionProvider } from "../providers/CodeActionProvider";
 
 export class JSCodeActionRegistrator {

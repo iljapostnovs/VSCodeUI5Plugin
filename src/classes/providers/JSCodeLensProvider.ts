@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
-import { UIMethod } from "../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { CustomClassUIMethod } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { FileReader } from "../FileReader";
-import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
+import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { UIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { CustomClassUIMethod } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { FileReader } from "../utils/FileReader";
+import { ResourceModelData } from "../UI5Classes/ResourceModelData";
 
 export class JSCodeLensProvider {
 	static getCodeLenses() : Promise<vscode.CodeLens[]> {

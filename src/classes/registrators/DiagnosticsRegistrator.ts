@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { XMLLinter } from "../xmllinter/XMLLinter";
-import { UI5Plugin } from "../../../UI5Plugin";
+import { UI5Plugin } from "../../UI5Plugin";
 
 let diagnosticCollection: vscode.DiagnosticCollection;
 

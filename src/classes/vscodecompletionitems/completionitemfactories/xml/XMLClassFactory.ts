@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { SAPNode } from "../../../StandardLibMetadata/SAPNode";
+import { SAPNode } from "../../../librarydata/SAPNode";
 import { URLBuilder } from "../../../utils/URLBuilder";
-import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
+import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 import { UI5Plugin } from "../../../../UI5Plugin";
 import { AbstractUIClass } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
