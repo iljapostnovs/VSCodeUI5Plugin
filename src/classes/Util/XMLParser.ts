@@ -183,6 +183,9 @@ export class XMLParser {
 			});
 
 			classNameResult = rClassName.exec(XMLViewText);
+			if (results.find(result => result.position === classNameResult?.index)) {
+				classNameResult = null;
+			}
 		}
 
 		if (results.length > 0) {
