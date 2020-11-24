@@ -24,7 +24,7 @@ export class CompletionItemFactory {
 		this.language = completionItemType;
 	}
 
-	public async getLanguageSpecificCompletionItems() {
+	public async getUIDefineCompletionItems() {
 		let completionItems:vscode.CompletionItem[] = [];
 
 		if (this.language === GeneratorFactory.language.js) {
@@ -105,13 +105,13 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	public generateIdCompletionItems() {
+	public generateViewIdCompletionItems() {
 		const idCompletionItems = new IDFactory();
 
 		return idCompletionItems.generateIdCompletionItems();
 	}
 
-	public generateUIClassCompletionItems() {
+	public generatePropertyMethodCompletionItems() {
 		const jsDynamicFactory = new JSDynamicFactory();
 
 		return jsDynamicFactory.generateUIClassCompletionItems();

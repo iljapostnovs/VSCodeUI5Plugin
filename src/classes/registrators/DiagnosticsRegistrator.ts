@@ -35,7 +35,7 @@ export class DiagnosticsRegistrator {
 	}
 
 	private static updateDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
-		const errors = XMLLinter.lintDocument(document.getText());
+		const errors = XMLLinter.getLintingErrors(document.getText());
 		const diagnostics: vscode.Diagnostic[] = errors.map(error => {
 			return ({
 				code: error.code,

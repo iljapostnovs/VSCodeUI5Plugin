@@ -4,7 +4,7 @@ import { UnusedNamespaceLinter } from "./parts/UnusedNamespaceLinter";
 import { Error } from "./parts/abstraction/Linter";
 
 export class XMLLinter {
-	static lintDocument(document: string): Error[] {
+	static getLintingErrors(document: string): Error[] {
 		const linters: Linter[] = [
 			new TagAttributeLinter(),
 			new UnusedNamespaceLinter()

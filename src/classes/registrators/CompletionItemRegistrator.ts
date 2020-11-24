@@ -9,11 +9,11 @@ export class CompletionItemRegistrator {
 	static async register() {
 		/* Completion Items */
 		const XMLCompletionItemFactory = new CompletionItemFactory(GeneratorFactory.language.xml);
-		const XMLCompletionItems = await XMLCompletionItemFactory.getLanguageSpecificCompletionItems();
+		const XMLCompletionItems = await XMLCompletionItemFactory.getUIDefineCompletionItems();
 		console.log("XML Completion Items generated");
 
 		const JSCompletionItemDAO = new CompletionItemFactory(GeneratorFactory.language.js);
-		await JSCompletionItemDAO.getLanguageSpecificCompletionItems();
+		await JSCompletionItemDAO.getUIDefineCompletionItems();
 		console.log("JS Completion Items generated");
 
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
@@ -22,9 +22,9 @@ export class CompletionItemRegistrator {
 				// console.time(`Position ${document.fileName} parsing took`);
 				try {
 					if (DefineGenerator.getIfCurrentPositionIsInDefine()) {
-						itemsToReturn = await JSCompletionItemDAO.getLanguageSpecificCompletionItems();
+						itemsToReturn = await JSCompletionItemDAO.getUIDefineCompletionItems();
 					} else {
-						itemsToReturn = JSCompletionItemDAO.generateUIClassCompletionItems();
+						itemsToReturn = JSCompletionItemDAO.generatePropertyMethodCompletionItems();
 					}
 
 				} catch (error) {
@@ -37,7 +37,7 @@ export class CompletionItemRegistrator {
 
 		const JSViewIDProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
-				return JSCompletionItemDAO.generateIdCompletionItems();
+				return JSCompletionItemDAO.generateViewIdCompletionItems();
 			}
 		}, "this.getView().byId(");
 
