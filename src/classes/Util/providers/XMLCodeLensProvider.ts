@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { ResourceModelData } from "../../CustomLibMetadata/ResourceModelData";
+import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
 import { FileReader } from "../FileReader";
 
 function escapeRegExp(string: string) {

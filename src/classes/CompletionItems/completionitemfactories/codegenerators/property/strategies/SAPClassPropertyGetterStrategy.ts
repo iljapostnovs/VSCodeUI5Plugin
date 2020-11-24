@@ -1,5 +1,5 @@
-import { AbstractUIClass } from "../../../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
-import { UIClassFactory } from "../../../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { AbstractUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { IPropertyGetterStrategy } from "../interfaces/IPropertyGetterStrategy";
 
 export class SAPClassPropertyGetterStrategy implements IPropertyGetterStrategy {

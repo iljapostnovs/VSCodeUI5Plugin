@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as glob from "glob";
-import { AcornSyntaxAnalyzer } from "../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;

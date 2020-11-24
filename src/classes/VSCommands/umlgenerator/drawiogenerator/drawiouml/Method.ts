@@ -1,8 +1,8 @@
 import { IUMLGenerator } from "./interfaces/IUMLGenerator";
-import { UIMethod } from "../../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { UIMethod } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 import { ClassHead } from "./ClassHead";
-import { AcornSyntaxAnalyzer } from "../../../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
 
 export class Method implements IUMLGenerator, ITextLengthGettable {

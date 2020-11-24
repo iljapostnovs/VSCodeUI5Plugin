@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { FileReader } from "./FileReader";
-import { UIMethod } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
-import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
-import { AcornSyntaxAnalyzer } from "../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
+import { UIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 
 export enum PositionType {
 	InTheTagAttributes = "1",

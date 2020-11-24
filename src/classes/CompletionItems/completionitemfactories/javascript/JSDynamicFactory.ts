@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
-import { FieldsAndMethods } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { FieldsAndMethods } from "../../../UI5Classes/UIClassFactory";
 
 export class JSDynamicFactory {
 

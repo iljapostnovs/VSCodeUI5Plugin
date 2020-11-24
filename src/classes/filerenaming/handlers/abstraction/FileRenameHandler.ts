@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import * as glob from "glob";
 import * as fs from "fs";
 import * as path from "path";
-import { UIClassFactory } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 const fileSeparator = path.sep;
 
 
@@ -55,5 +55,5 @@ export abstract class FileRenameHandler {
 			});
 		}
 	}
-	
+
 }

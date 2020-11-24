@@ -1,10 +1,10 @@
 import { Header } from "./drawiouml/Header";
 import { Footer } from "./drawiouml/Footer";
 import { FileReader } from "../../../Util/FileReader";
-import { UIClassFactory } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { DrawIOUMLDiagram } from "./DrawIOUMLDiagram";
 import * as vscode from "vscode";
-import { CustomUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
+import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { DependencyLine } from "./drawiouml/lines/DependencyLine";
 import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
 import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";

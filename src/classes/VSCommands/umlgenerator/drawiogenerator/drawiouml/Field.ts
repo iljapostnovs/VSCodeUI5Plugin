@@ -1,5 +1,5 @@
 import { IUMLGenerator } from "./interfaces/IUMLGenerator";
-import { UIField } from "../../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { UIField } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 import { ClassHead } from "./ClassHead";
 import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";

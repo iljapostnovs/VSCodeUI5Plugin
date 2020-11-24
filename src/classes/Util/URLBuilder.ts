@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { SAPNode } from "../StandardLibMetadata/SAPNode";
-import { AbstractUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 
 export class URLBuilder {
 	private static URLBuilderInstance?: URLBuilder;

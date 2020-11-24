@@ -2,7 +2,7 @@ import { Tag, Error, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import { XMLParser } from "../../XMLParser";
 import LineColumn = require("line-column");
-import { UIClassFactory } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 
 interface AttributeValidation {
 	valid: boolean;

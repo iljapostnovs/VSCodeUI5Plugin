@@ -2,16 +2,16 @@ import { SAPNodeDAO } from "../StandardLibMetadata/SAPNodeDAO";
 import { SAPNode } from "../StandardLibMetadata/SAPNode";
 import * as vscode from "vscode";
 import { UI5MetadataPreloader } from "../StandardLibMetadata/UI5MetadataDAO";
-import { SAPIcons } from "../CustomLibMetadata/SAPIcons";
-import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
+import { SAPIcons } from "../UI5Classes/SAPIcons";
+import { ResourceModelData } from "../UI5Classes/ResourceModelData";
 import { XMLClassFactory as XMLClassFactory } from "./completionitemfactories/xml/XMLClassFactory";
 import { UIDefineFactory } from "./completionitemfactories/javascript/UIDefineFactory";
 import { IDFactory } from "./completionitemfactories/javascript/IDFactory";
 import { JSDynamicFactory } from "./completionitemfactories/javascript/JSDynamicFactory";
 import { XMLDynamicFactory } from "./completionitemfactories/xml/XMLDynamicFactory";
-import { AcornSyntaxAnalyzer } from "../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
-import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
-import { CustomUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
+import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { GeneratorFactory } from "./completionitemfactories/codegenerators/GeneratorFactory";
 
 export class CompletionItemFactory {

@@ -1,4 +1,4 @@
-import { AbstractUIClass, UIField, UIMethod } from "../../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass, UIField, UIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { Property } from "./drawiouml/Property";
 import { Method } from "./drawiouml/Method";
 import { Field } from "./drawiouml/Field";
@@ -7,8 +7,8 @@ import { Header } from "./drawiouml/Header";
 import { Footer } from "./drawiouml/Footer";
 import { Separator } from "./drawiouml/Separator";
 import { ITextLengthGettable } from "./drawiouml/interfaces/ITextLengthGettable";
-import { AcornSyntaxAnalyzer } from "../../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
-import { CustomUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
+import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 export class DrawIOUMLDiagram {
 	readonly UIClass: AbstractUIClass;

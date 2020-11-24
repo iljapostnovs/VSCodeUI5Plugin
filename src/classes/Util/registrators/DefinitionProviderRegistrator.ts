@@ -1,4 +1,4 @@
-import { UIClassDefinitionFinder } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassDefinitionFinder";
+import { UIClassDefinitionFinder } from "../../UI5Classes/UI5Parser/UIClass/UIClassDefinitionFinder";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../../UI5Plugin";
 

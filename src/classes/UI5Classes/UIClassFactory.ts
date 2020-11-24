@@ -1,8 +1,8 @@
-import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
-import { CustomUIClass } from "./CustomUIClass";
-import { StandardUIClass } from "./StandardUIClass";
-import { JSClass } from "./JSClass";
-import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
+import { AbstractUIClass, UIField, UIMethod } from "./UI5Parser/UIClass/AbstractUIClass";
+import { CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
+import { StandardUIClass } from "./UI5Parser/UIClass/StandardUIClass";
+import { JSClass } from "./UI5Parser/UIClass/JSClass";
+import { AcornSyntaxAnalyzer } from "./JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
 
 export interface FieldsAndMethods {

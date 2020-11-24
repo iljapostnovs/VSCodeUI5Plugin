@@ -1,5 +1,5 @@
-import { AcornSyntaxAnalyzer } from "../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
-import { UIClassFactory } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
 import { DrawIOUMLDiagram } from "./drawiogenerator/DrawIOUMLDiagram";
 import * as vscode from "vscode";
 import * as fs from "fs";

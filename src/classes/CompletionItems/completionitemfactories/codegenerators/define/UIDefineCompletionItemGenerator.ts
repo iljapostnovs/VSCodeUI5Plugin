@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
-import { CustomUIClass } from "../../../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
 import { SAPNode } from "../../../../StandardLibMetadata/SAPNode";
 
 export class DefineGenerator {

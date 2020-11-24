@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 import { FileReader } from "./FileReader";
-import { AcornSyntaxAnalyzer } from "../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import * as glob from "glob";
 import * as fs from "fs";
-import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
-import { WorkspaceCompletionItemFactory } from "../CompletionItems/completionitemfactories/WorkspaceCompletionItemFactory";
-import { ResourceModelData } from "../CustomLibMetadata/ResourceModelData";
+import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { WorkspaceCompletionItemFactory } from "../CompletionItems/completionitemfactories/javascript/WorkspaceCompletionItemFactory";
+import { ResourceModelData } from "../UI5Classes/ResourceModelData";
 import { ClearCacheCommand } from "../VSCommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
 import * as path from "path";

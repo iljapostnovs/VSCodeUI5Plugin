@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { WorkspaceCompletionItemFactory } from "../WorkspaceCompletionItemFactory";
+import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
 import { SAPNode } from "../../../StandardLibMetadata/SAPNode";
 import { SAPNodeDAO } from "../../../StandardLibMetadata/SAPNodeDAO";
 import { URLBuilder } from "../../../Util/URLBuilder";
@@ -9,7 +9,7 @@ export class UIDefineFactory {
 	private static readonly nodeDAO = new SAPNodeDAO();
 
 	public async generateUIDefineCompletionItems() {
-		const workspaceCompletionItemDAO = new WorkspaceCompletionItemFactory();
+		const workspaceCompletionItemFactory = new WorkspaceCompletionItemFactory();
 		let completionItems:vscode.CompletionItem[] = [];
 
 		const SAPNodes: SAPNode[] = await UIDefineFactory.nodeDAO.getAllNodes();
@@ -18,7 +18,7 @@ export class UIDefineFactory {
 			completionItems = completionItems.concat(this.recursiveUIDefineCompletionItemGeneration(node));
 		}
 
-		completionItems = completionItems.concat(await workspaceCompletionItemDAO.getCompletionItems());
+		completionItems = completionItems.concat(await workspaceCompletionItemFactory.getCompletionItems());
 
 		return completionItems;
 	}

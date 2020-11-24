@@ -5,10 +5,10 @@ import * as fs from "fs";
 // You can import and use all API from the "vscode" module
 // as well as import your extension to test it
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../classes/CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
-import { UIClassFactory } from "../../classes/CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../../classes/UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
-import { CustomUIClass } from "../../classes/CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
+import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 suite("Extension Test Suite", () => {
 	after(() => {
