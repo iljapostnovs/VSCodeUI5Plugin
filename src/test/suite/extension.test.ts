@@ -5,7 +5,7 @@ import * as fs from "fs";
 // You can import and use all API from the "vscode" module
 // as well as import your extension to test it
 import * as vscode from "vscode";
-import { SyntaxAnalyzer } from "../../classes/CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../classes/CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../../classes/CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import * as data from "./data/TestData.json";
 import { CustomUIClass } from "../../classes/CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
@@ -49,13 +49,13 @@ suite("Extension Test Suite", () => {
 		testData.forEach((data: any) => {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(data.className);
 			const method = UIClass.acornMethodsAndFields.find(methodOrField => methodOrField.key?.name === data.methodName);
-			const methodContent = SyntaxAnalyzer.expandAllContent(method.value.body);
+			const methodContent = AcornSyntaxAnalyzer.expandAllContent(method.value.body);
 			const searchedNode = methodContent.find(node => {
 				return compareProperties(data.node, node);
 			});
 
 			const position = searchedNode.property.start + data.positionAddition;
-			const classNameAtPosition = SyntaxAnalyzer.acornGetClassName(data.className, position);
+			const classNameAtPosition = AcornSyntaxAnalyzer.acornGetClassName(data.className, position);
 			assert.strictEqual(data.type, classNameAtPosition, `${data.className} position ${position} type is ${classNameAtPosition} but expected ${data.type}`);
 		});
 	});

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { FileReader } from "./FileReader";
-import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import * as glob from "glob";
 import * as fs from "fs";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
@@ -25,7 +25,7 @@ export class FileWatcher {
 		disposable = workspace.onDidSaveTextDocument(document => {
 			if (document.fileName.endsWith(".js")) {
 
-				const currentClassNameDotNotation = SyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
+				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
 				if (currentClassNameDotNotation) {
 					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
 				}

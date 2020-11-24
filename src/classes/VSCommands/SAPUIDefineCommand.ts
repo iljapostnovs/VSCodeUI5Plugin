@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
-import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import { CustomUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
 export class SAPUIDefineCommand {
 	static insertUIDefine() {
@@ -8,7 +8,7 @@ export class SAPUIDefineCommand {
 
 		if (editor) {
 			const document = editor.document;
-			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 
 			if (currentClassName) {
 				UIClassFactory.setNewCodeForClass(currentClassName, document.getText());

@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { SyntaxAnalyzer } from "../../../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethods } from "../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 
 export class JSDynamicFactory {
 
 	public generateUIClassCompletionItems() {
 		let completionItems:vscode.CompletionItem[] = [];
-		const fieldsAndMethods = SyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable();
+		const fieldsAndMethods = AcornSyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable();
 		if (fieldsAndMethods) {
 			completionItems = this.generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods);
 		}

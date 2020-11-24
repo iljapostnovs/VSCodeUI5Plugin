@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { SyntaxAnalyzer } from "../../../../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import { CustomUIClass } from "../../../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { SAPNode } from "../../../../StandardLibMetadata/SAPNode";
@@ -22,7 +22,7 @@ export class DefineGenerator {
 		const document = textEditor?.document;
 		if (document && textEditor) {
 			const currentPositionOffset = document?.offsetAt(textEditor.selection.start);
-			const currentClass = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 			const UIClass = currentClass && UIClassFactory.getUIClass(currentClass);
 			if (UIClass instanceof CustomUIClass && currentPositionOffset) {
 				const args = UIClass.fileContent?.body[0]?.expression?.arguments;

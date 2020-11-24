@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { FileReader } from "./FileReader";
 import { UIMethod } from "../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 
 export enum PositionType {
 	InTheTagAttributes = "1",
@@ -13,6 +14,18 @@ export enum PositionType {
 }
 
 export class XMLParser {
+	static getAllIDsInCurrentView() {
+		let IdsResult: string[] = [];
+		const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		if (currentClass) {
+			const viewText = FileReader.getViewText(currentClass);
+			if (viewText) {
+				IdsResult = viewText.match(/(?<=\sid=").*?(?="\s)/g) || [];
+			}
+		}
+
+		return IdsResult;
+	}
 	static getLibraryNameInPosition(XMLViewText: string, currentPosition: number) {
 		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition);
 		const tagPrefix = this.getTagPrefix(currentTagText);

@@ -2,7 +2,8 @@ import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
 import { CustomUIClass } from "./CustomUIClass";
 import { StandardUIClass } from "./StandardUIClass";
 import { JSClass } from "./JSClass";
-import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
+import * as vscode from "vscode";
 
 export interface FieldsAndMethods {
 	className: string;
@@ -34,10 +35,21 @@ export class UIClassFactory {
 		return returnClass;
 	}
 
+	public static setNewContentForCurrentUIClass() {
+		const documentText = vscode.window.activeTextEditor?.document.getText();
+		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+
+		if (currentClassName && documentText) {
+			this.setNewCodeForClass(currentClassName, documentText);
+		} else {
+			debugger;
+		}
+	}
+
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
 		this.UIClasses[classNameDotNotation] = UIClassFactory.getInstance(classNameDotNotation, classFileText);
 		this.UIClasses[classNameDotNotation].methods.forEach(method => {
-			SyntaxAnalyzer.findMethodReturnType(method, classNameDotNotation, false);
+			AcornSyntaxAnalyzer.findMethodReturnType(method, classNameDotNotation, false);
 		});
 	}
 
@@ -98,10 +110,10 @@ export class UIClassFactory {
 		if (!this.UIClasses[className]) {
 			this.UIClasses[className] = UIClassFactory.getInstance(className);
 			this.UIClasses[className].methods.forEach(method => {
-				SyntaxAnalyzer.findMethodReturnType(method, className, false);
+				AcornSyntaxAnalyzer.findMethodReturnType(method, className, false);
 			});
 			this.UIClasses[className].fields.forEach(field => {
-				SyntaxAnalyzer.findFieldType(field, className, false);
+				AcornSyntaxAnalyzer.findFieldType(field, className, false);
 			});
 		}
 

@@ -1,4 +1,4 @@
-import { SyntaxAnalyzer } from "../../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { DrawIOUMLDiagram } from "./drawiogenerator/DrawIOUMLDiagram";
 import * as vscode from "vscode";
@@ -12,7 +12,7 @@ export class UMLGeneratorCommand {
 		const activeFileUri = vscode.window.activeTextEditor?.document.uri;
 		const wsFolder = UMLGeneratorCommand.getWorkspaceFolderOfActiveTextEditor();
 		if (activeFileUri && wsFolder) {
-			const className = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			const className = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 			if (className) {
 				const UIClass = UIClassFactory.getUIClass(className);
 				const UMLClassDiagram = new DrawIOUMLDiagram(UIClass);

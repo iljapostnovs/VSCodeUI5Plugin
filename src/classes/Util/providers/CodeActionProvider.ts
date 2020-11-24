@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UIDefineFactory } from "../../CompletionItems/completionitemfactories/javascript/UIDefineFactory";
-import { SyntaxAnalyzer } from "../../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import { CustomUIClass } from "../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import LineColumn = require("line-column");
@@ -11,9 +11,9 @@ export class CodeActionProvider {
 		const providerResult: vscode.CodeAction[] = [];
 
 		if (selectedVariableName) {
-			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
+			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
 			if (currentClassName) {
-				SyntaxAnalyzer.setNewContentForCurrentUIClass();
+				UIClassFactory.setNewContentForCurrentUIClass();
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				const UIDefine = await new UIDefineFactory().generateUIDefineCompletionItems();
 				const filteredUIDefineCompletionItems = UIDefine.filter(completionItem => completionItem.label.indexOf(selectedVariableName) > -1)
@@ -42,14 +42,14 @@ export class CodeActionProvider {
 		let selectedVariableName = document.getText(range);
 
 		if (!selectedVariableName) {
-			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
+			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
 			if (currentClassName && vscode.window.activeTextEditor) {
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				const currentPositionOffset = document?.offsetAt(range.end);
-				const node = SyntaxAnalyzer.findAcornNode(UIClass.acornMethodsAndFields, currentPositionOffset);
+				const node = AcornSyntaxAnalyzer.findAcornNode(UIClass.acornMethodsAndFields, currentPositionOffset);
 				if (node && node.value) {
-					const content = SyntaxAnalyzer.expandAllContent(node.value).filter(node => node.type === "Identifier");
-					const neededIdentifier = SyntaxAnalyzer.findAcornNode(content, currentPositionOffset);
+					const content = AcornSyntaxAnalyzer.expandAllContent(node.value).filter(node => node.type === "Identifier");
+					const neededIdentifier = AcornSyntaxAnalyzer.findAcornNode(content, currentPositionOffset);
 					if (neededIdentifier) {
 						selectedVariableName = neededIdentifier.name;
 					}
@@ -63,7 +63,7 @@ export class CodeActionProvider {
 
 	private static getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
 		let position: vscode.Position | undefined;
-		const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
+		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
 		if (currentClassName) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 			const mainFunction = UIClass.fileContent?.body[0]?.expression;

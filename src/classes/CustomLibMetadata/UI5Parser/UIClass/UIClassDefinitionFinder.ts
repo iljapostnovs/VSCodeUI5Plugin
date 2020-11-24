@@ -1,4 +1,4 @@
-import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
 import { UIClassFactory } from "./UIClassFactory";
 import { CustomUIClass } from "./CustomUIClass";
@@ -11,7 +11,7 @@ export class UIClassDefinitionFinder {
 		let location: vscode.Location | undefined;
 
 		if (!classNameDotNotation) {
-			classNameDotNotation = SyntaxAnalyzer.getClassNameOfTheVariable();
+			classNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheVariableAtCurrentDocumentPosition();
 		}
 
 		const textEditor = vscode.window.activeTextEditor;

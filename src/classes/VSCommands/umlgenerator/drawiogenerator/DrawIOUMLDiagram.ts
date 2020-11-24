@@ -7,7 +7,7 @@ import { Header } from "./drawiouml/Header";
 import { Footer } from "./drawiouml/Footer";
 import { Separator } from "./drawiouml/Separator";
 import { ITextLengthGettable } from "./drawiouml/interfaces/ITextLengthGettable";
-import { SyntaxAnalyzer } from "../../../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import { CustomUIClass } from "../../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
 
 export class DrawIOUMLDiagram {
@@ -25,13 +25,13 @@ export class DrawIOUMLDiagram {
 		try {
 			this.UIClass.fields.forEach(field => {
 				if (!field.type) {
-					SyntaxAnalyzer.findFieldType(field, this.UIClass.className);
+					AcornSyntaxAnalyzer.findFieldType(field, this.UIClass.className);
 				}
 			});
 
 			this.UIClass.methods.forEach(method => {
 				if (method.returnType === "void") {
-					SyntaxAnalyzer.findMethodReturnType(method, this.UIClass.className);
+					AcornSyntaxAnalyzer.findMethodReturnType(method, this.UIClass.className);
 				}
 			});
 		} catch (error) {

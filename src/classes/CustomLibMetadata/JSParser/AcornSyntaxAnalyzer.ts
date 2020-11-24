@@ -1,14 +1,13 @@
 import * as vscode from "vscode";
-import { UIClassFactory, FieldsAndMethods } from "./UI5Parser/UIClass/UIClassFactory";
-import { FileReader } from "../Util/FileReader";
-import { UIField, UIMethod } from "./UI5Parser/UIClass/AbstractUIClass";
-import { CustomClassUIField, CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory, FieldsAndMethods } from "../UI5Parser/UIClass/UIClassFactory";
+import { FileReader } from "../../Util/FileReader";
+import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
+import { CustomClassUIField, CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
 
-export class SyntaxAnalyzer {
-
+export class AcornSyntaxAnalyzer {
 	static getFieldsAndMethodsOfTheCurrentVariable() {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
-		const UIClassName = this.getClassNameOfTheVariable();
+		const UIClassName = this.getClassNameOfTheVariableAtCurrentDocumentPosition();
 		if (UIClassName) {
 			const classNameParts = UIClassName.split("__map__");
 
@@ -30,8 +29,8 @@ export class SyntaxAnalyzer {
 
 			const ignoreAccessLevelModifiers = vscode.workspace.getConfiguration("ui5.plugin").get("ignoreAccessLevelModifiers");
 			if (!ignoreAccessLevelModifiers) {
-				const sCurrentDocumentClassName = this.getClassNameOfTheCurrentDocument();
-				if (sCurrentDocumentClassName !== UIClassName) {
+				const classNameOfTheCurrentDocument = this.getClassNameOfTheCurrentDocument();
+				if (classNameOfTheCurrentDocument !== UIClassName) {
 					if (fieldsAndMethods?.fields) {
 						fieldsAndMethods.fields = fieldsAndMethods.fields.filter(field => field.visibility === "public");
 					}
@@ -81,17 +80,13 @@ export class SyntaxAnalyzer {
 		return fields;
 	}
 
-	public static getClassNameOfTheVariable(setNewContentForClass: boolean = true) {
+	public static getClassNameOfTheVariableAtCurrentDocumentPosition() {
 		let UIClassName;
 		this.declarationStack = [];
 		const currentClassName = this.getClassNameOfTheCurrentDocument();
 
 		const activeTextEditor = vscode.window.activeTextEditor;
 		if (currentClassName && activeTextEditor) {
-			if (setNewContentForClass) {
-				this.setNewContentForCurrentUIClass();
-			}
-
 			const position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
 
 			UIClassName = this.acornGetClassName(currentClassName, position);
@@ -463,8 +458,8 @@ export class SyntaxAnalyzer {
 			UIClass.acornMethodsAndFields.find((property: any) => {
 				let typeFound = false;
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
-					const assignmentEpxressions = SyntaxAnalyzer.expandAllContent(property.value.body).filter((node:any) => node.type === "AssignmentExpression");
-					assignmentEpxressions.forEach((node: any) => {
+					const assignmentExpressions = this.expandAllContent(property.value.body).filter((node:any) => node.type === "AssignmentExpression");
+					assignmentExpressions.forEach((node: any) => {
 						if (UIClass.isAssignmentStatementForThisVariable(node) && node?.left?.property?.name === field.name) {
 							field.type = this.getClassNameFromAcornDeclaration(node.right, UIClass);
 						}
@@ -659,7 +654,7 @@ export class SyntaxAnalyzer {
 		return method;
 	}
 
-	public static findFieldHierarchically(className: string, fieldName: string) : UIField | undefined {
+	private static findFieldHierarchically(className: string, fieldName: string) : UIField | undefined {
 		let field: UIField | undefined;
 		const UIClass = UIClassFactory.getUIClass(className);
 
@@ -673,50 +668,6 @@ export class SyntaxAnalyzer {
 
 	public static findAcornNode(nodes: any[] = [], position: number) {
 		return nodes.find((node: any) => node.start < position && node.end >= position);
-	}
-
-	public static setNewContentForCurrentUIClass() {
-		const documentText = vscode.window.activeTextEditor?.document.getText();
-		const currentClassName = this.getClassNameOfTheCurrentDocument();
-
-		if (currentClassName && documentText) {
-			UIClassFactory.setNewCodeForClass(currentClassName, documentText);
-			this.declarationStack = [];
-		} else {
-			debugger;
-		}
-	}
-
-	/* =========================================================== */
-	/* begin: variable methods                                     */
-	/* =========================================================== */
-
-	static getUICompletionItemsWithUniqueViewIds() {
-		let completionItems: UICompletionItem[] = [];
-
-		const currentClass = this.getClassNameOfTheCurrentDocument();
-		if (currentClass) {
-			const viewText = FileReader.getViewText(currentClass);
-			if (viewText) {
-				const IdsResult = viewText.match(/(?<=\sid=").*?(?="\s)/g);
-				if (IdsResult) {
-					completionItems = IdsResult.map(Id => {
-						const uniqueViewId: UICompletionItem = {
-							name: Id,
-							type: vscode.CompletionItemKind.Keyword,
-							description: Id,
-							visibility: "public",
-							parameters: [],
-							returnValue: "void"
-						};
-
-						return uniqueViewId;
-					});
-				}
-			}
-		}
-
-		return completionItems;
 	}
 
 	public static getClassNameOfTheCurrentDocument(documentText?: string) {
@@ -739,15 +690,4 @@ export class SyntaxAnalyzer {
 
 		return returnClassName;
 	}
-	/* =========================================================== */
-	/* end: Find Methods from class name                           */
-	/* =========================================================== */
-}
-export interface UICompletionItem {
-	name: string;
-	description: string;
-	type: vscode.CompletionItemKind;
-	visibility: string;
-	parameters: any[];
-	returnValue: string;
 }

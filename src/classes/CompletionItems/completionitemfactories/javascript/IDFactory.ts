@@ -1,24 +1,22 @@
 import * as vscode from "vscode";
-import { SyntaxAnalyzer, UICompletionItem } from "../../../CustomLibMetadata/SyntaxAnalyzer";
+import { XMLParser } from "../../../Util/XMLParser";
 
 export class IDFactory {
 	public generateIdCompletionItems() {
 		let completionItems:vscode.CompletionItem[] = [];
-		let UICompletionItems:UICompletionItem[] = [];
-		UICompletionItems = SyntaxAnalyzer.getUICompletionItemsWithUniqueViewIds();
-
-		completionItems = this.generateCompletionItemsFromUICompletionItems(UICompletionItems);
+		const viewIDs = XMLParser.getAllIDsInCurrentView();
+		completionItems = this.generateCompletionItemsFromUICompletionItems(viewIDs);
 
 		return completionItems;
 	}
 
-	private generateCompletionItemsFromUICompletionItems(UICompletionItems: UICompletionItem[]) {
-		return UICompletionItems.map(classMethod => {
-			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(classMethod.name);
-			completionItem.kind = classMethod.type;
-			completionItem.insertText = classMethod.name;
-			completionItem.detail = classMethod.description;
-			completionItem.documentation = classMethod.description;
+	private generateCompletionItemsFromUICompletionItems(viewIDs: string[]) {
+		return viewIDs.map(viewId => {
+			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(viewId);
+			completionItem.kind = vscode.CompletionItemKind.Keyword;
+			completionItem.insertText = viewId;
+			completionItem.detail = viewId;
+			completionItem.documentation = viewId;
 
 			return completionItem;
 		});

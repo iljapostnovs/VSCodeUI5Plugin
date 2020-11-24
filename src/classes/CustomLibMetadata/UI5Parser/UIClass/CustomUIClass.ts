@@ -1,5 +1,5 @@
 import { FileReader } from "../../../Util/FileReader";
-import { SyntaxAnalyzer } from "../../SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
 const commentParser = require("comment-parser");
 const acornLoose = require("acorn-loose");
@@ -266,7 +266,7 @@ export class CustomUIClass extends AbstractUIClass {
 		if (this.acornClassBody?.properties) {
 			this.acornClassBody.properties?.forEach((property: any) => {
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
-					const assignmentExpressions = SyntaxAnalyzer.expandAllContent(property.value.body).filter((node:any) => node.type === "AssignmentExpression");
+					const assignmentExpressions = AcornSyntaxAnalyzer.expandAllContent(property.value.body).filter((node:any) => node.type === "AssignmentExpression");
 					assignmentExpressions?.forEach((node: any) => {
 						if (this.isAssignmentStatementForThisVariable(node)) {
 							this.fields.push({

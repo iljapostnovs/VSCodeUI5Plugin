@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { SyntaxAnalyzer } from "../../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { UIMethod } from "../../CustomLibMetadata/UI5Parser/UIClass/AbstractUIClass";
 import { CustomClassUIMethod } from "../../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
@@ -12,7 +12,7 @@ export class JSCodeLensProvider {
 			let codeLenses: vscode.CodeLens[] = [];
 			setTimeout(() => {
 				// SyntaxAnalyzer.setNewContentForCurrentUIClass();
-				const currentClass = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+				const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 				if (currentClass) {
 					const UIClass = UIClassFactory.getUIClass(currentClass);
 					const rootMethods = UIClass.methods;

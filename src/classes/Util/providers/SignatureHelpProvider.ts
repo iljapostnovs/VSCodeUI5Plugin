@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { SyntaxAnalyzer } from "../../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 
 export class SignatureHelpProvider {
 	static getSignature(document: vscode.TextDocument) {
 		const signatureHelp = new vscode.SignatureHelp();
 
-			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 			if (currentClassName) {
 				UIClassFactory.setNewCodeForClass(currentClassName, document.getText());
 			}
@@ -15,7 +15,7 @@ export class SignatureHelpProvider {
 			const position = activeTextEditor?.document.offsetAt(activeTextEditor.selection.start);
 
 			if (currentClassName && position) {
-				const stackOfNodes = SyntaxAnalyzer.getStackOfNodesForPosition(currentClassName, position + 1, true);
+				const stackOfNodes = AcornSyntaxAnalyzer.getStackOfNodesForPosition(currentClassName, position + 1, true);
 
 				if (stackOfNodes. length > 0) {
 					const callExpression = stackOfNodes[stackOfNodes.length - 1].type === "CallExpression" ? stackOfNodes.pop() : null; //removes CallExpression
@@ -27,10 +27,10 @@ export class SignatureHelpProvider {
 						methodName = "constructor";
 					}
 
-					const className = SyntaxAnalyzer.findClassNameForStack(stackOfNodes, currentClassName);
+					const className = AcornSyntaxAnalyzer.findClassNameForStack(stackOfNodes, currentClassName);
 
 					if (methodName && className) {
-						const method = SyntaxAnalyzer.findMethodHierarchically(className, methodName);
+						const method = AcornSyntaxAnalyzer.findMethodHierarchically(className, methodName);
 						if (method && method.params.length > 0) {
 							signatureHelp.activeParameter = callExpression?.arguments.length - 1 || 0;
 							const signature = new vscode.SignatureInformation(method.description || `${className} -> ${methodName}`);

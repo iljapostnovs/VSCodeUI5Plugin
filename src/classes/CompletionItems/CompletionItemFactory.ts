@@ -9,7 +9,7 @@ import { UIDefineFactory } from "./completionitemfactories/javascript/UIDefineFa
 import { IDFactory } from "./completionitemfactories/javascript/IDFactory";
 import { JSDynamicFactory } from "./completionitemfactories/javascript/JSDynamicFactory";
 import { XMLDynamicFactory } from "./completionitemfactories/xml/XMLDynamicFactory";
-import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../CustomLibMetadata/UI5Parser/UIClass/UIClassFactory";
 import { CustomUIClass } from "../CustomLibMetadata/UI5Parser/UIClass/CustomUIClass";
 import { GeneratorFactory } from "./completionitemfactories/codegenerators/GeneratorFactory";
@@ -71,8 +71,8 @@ export class CompletionItemFactory {
 		} else {
 			completionItems = CompletionItemFactory.JSDefineCompletionItems;
 
-			SyntaxAnalyzer.setNewContentForCurrentUIClass();
-			const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			UIClassFactory.setNewContentForCurrentUIClass();
+			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 			if (currentClassName) {
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				const activeTextEditor = vscode.window.activeTextEditor;
@@ -83,7 +83,7 @@ export class CompletionItemFactory {
 						const args = UIClass.fileContent?.body[0]?.expression?.arguments;
 						if (args && args.length === 2) {
 							const UIDefinePaths: string[] = args[0].elements || [];
-							const node = SyntaxAnalyzer.findAcornNode(UIDefinePaths, position);
+							const node = AcornSyntaxAnalyzer.findAcornNode(UIDefinePaths, position);
 							const isString = node?.type === "Literal";
 							if (isString) {
 								completionItems = completionItems.map(completionItem => {

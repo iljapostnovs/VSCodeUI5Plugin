@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as glob from "glob";
-import { SyntaxAnalyzer } from "../CustomLibMetadata/SyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../CustomLibMetadata/JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
@@ -388,7 +388,7 @@ export class FileReader {
 	}
 
 	public static getCurrentWorkspaceFoldersManifest() {
-		const currentClassName = SyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		if (currentClassName) {
 			return this.getManifestForClass(currentClassName);
 		}
