@@ -103,10 +103,29 @@ export class XMLDynamicFactory {
 						completionItem.label = completionItem.label.replace(`${libName}.`, "");
 					});
 				} else {
+					completionItems = this.getCompletionItemsForCustomClasses(libName, tagPrefix);
 					//TODO: Logic for custom classes
 				}
 			}
 		}
+
+		return completionItems;
+	}
+
+	private getCompletionItemsForCustomClasses(libName: string, tagPrefix: string) {
+		const xmlClassFactory = new XMLClassFactory();
+		const wsFolders = vscode.workspace.workspaceFolders || [];
+		const classNames = wsFolders.reduce((accumulator: string[], wsFolder: vscode.WorkspaceFolder) => {
+			const classNames = FileReader.getAllJSClassNamesFromProject(wsFolder);
+			accumulator= accumulator.concat(classNames);
+
+			return accumulator;
+		}, []);
+
+		const classNamesForLibName = classNames.filter(className => className.startsWith(libName));
+		const UIClassesForLibName = classNamesForLibName.map(className => UIClassFactory.getUIClass(className));
+		const UIClassesThatExtendsUIControl = UIClassesForLibName.filter(UIClass => UIClassFactory.isClassAExtendedByClassB(UIClass.className, "sap.ui.core.Control"));
+		const completionItems: vscode.CompletionItem[] = UIClassesThatExtendsUIControl.map(UIClass => xmlClassFactory.generateXMLClassCompletionItemFromUIClass(UIClass, tagPrefix));
 
 		return completionItems;
 	}
@@ -149,7 +168,8 @@ export class XMLDynamicFactory {
 
 		if (XMLText && currentPositionOffset) {
 			const parentTagInfo = XMLParser.getParentTagAtPosition(XMLText, currentPosition);
-			const parentTagIsAClass = parentTagInfo.tag[1] === parentTagInfo.tag[1].toUpperCase();
+			const parentTagName = XMLParser.getClassNameFromTag(parentTagInfo.tag);
+			const parentTagIsAClass = parentTagName[0] === parentTagName[0].toUpperCase();
 
 			if (parentTagIsAClass) {
 				const classTagPrefix = XMLParser.getTagPrefix(parentTagInfo.tag);
@@ -201,7 +221,7 @@ export class XMLDynamicFactory {
 			prefix = `${prefix}:`;
 		}
 
-		return new vscode.SnippetString(`${aggregation.name}>\n\t$0\n</${prefix}${aggregation.name}>`);
+		return new vscode.SnippetString(`${prefix}${aggregation.name}>\n\t$0\n</${prefix}${aggregation.name}>`);
 	}
 
 	private cloneCompletionItem(completionItem: any): vscode.CompletionItem {

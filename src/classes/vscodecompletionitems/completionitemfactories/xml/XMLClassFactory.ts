@@ -43,7 +43,7 @@ export class XMLClassFactory {
 			}
 		}
 
-		if (node.getKind() === "class" && !node.getIsDepricated() && (node.node.visibility === "public" || node.node.visibility === "protected")) {
+		if (node.getKind() === "class" && !node.getIsDeprecated() && (node.node.visibility === "public" || node.node.visibility === "protected")) {
 			const metadata = node.getMetadata();
 			const stereotype = metadata.getUI5Metadata()?.stereotype;
 

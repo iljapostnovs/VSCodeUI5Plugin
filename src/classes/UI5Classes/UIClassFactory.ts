@@ -35,6 +35,19 @@ export class UIClassFactory {
 		return returnClass;
 	}
 
+	public static isClassAExtendedByClassB(classA: string, classB: string): boolean {
+		let isExtendedBy = false;
+		const UIClass = this.getUIClass(classA);
+
+		if (classA === classB) {
+			isExtendedBy = true;
+		} else if (UIClass.parentClassNameDotNotation) {
+			isExtendedBy = this.isClassAExtendedByClassB(UIClass.parentClassNameDotNotation, classB);
+		}
+
+		return isExtendedBy;
+	}
+
 	public static setNewContentForCurrentUIClass() {
 		const documentText = vscode.window.activeTextEditor?.document.getText();
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();

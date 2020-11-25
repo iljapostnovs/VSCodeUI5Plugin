@@ -51,7 +51,7 @@ export class SAPNode {
 		return this.node.displayName || this.node.name.split(".")[this.node.name.split(".").length - 1];
 	}
 
-	public getIsDepricated() {
+	public getIsDeprecated() {
 		return this.node.bIsDeprecated;
 	}
 

@@ -99,7 +99,7 @@ export class XMLParser {
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 
-		while (i > 0 && XMLViewText[i] !== "<") {
+		while (i > 0 && (XMLViewText[i] !== "<" || this.getIfPositionIsInComments(XMLViewText, i))) {
 			i--;
 		}
 		tagPositionBegin = i;
@@ -113,6 +113,22 @@ export class XMLParser {
 			positionBegin: tagPositionBegin,
 			positionEnd: tagPositionEnd
 		};
+	}
+
+	private static getIfPositionIsInComments(XMLViewText: string, position: number) {
+		const rComments = /<!--.*?-->/g;
+		const comments = [];
+		let results = rComments.exec(XMLViewText);
+		while (results) {
+			comments.push({
+				position: results.index,
+				comment: results[0]
+			});
+
+			results = rComments.exec(XMLViewText);
+		}
+
+		return !!comments.find(comment => comment.position <= position && position <= comment.comment.length + comment.position);
 	}
 
 	static getIfPositionIsInString(XMLViewText: string, position: number) {
