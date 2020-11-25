@@ -10,12 +10,11 @@ export class XMLLinter {
 			new UnusedNamespaceLinter()
 		];
 
-		const errors: Error[] = linters.reduce((accumulator: Error[], linter) => {
-			const errors = linter.getErrors(document);
-			accumulator = accumulator.concat(errors);
+		let errors: Error[] = [];
 
-			return accumulator;
-		}, []);
+		linters.forEach(linter => {
+			errors = errors.concat(linter.getErrors(document));
+		});
 
 		return errors;
 	}

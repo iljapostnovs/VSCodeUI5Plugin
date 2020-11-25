@@ -31,7 +31,7 @@ export class TagAttributeLinter extends Linter {
 					const classOfTheTag = [libraryPath, className].join(".");
 					tagAttributes.forEach(tagAttribute => {
 						//check tag attributes
-						const attributeValidation = this.validateTagAttribute(classOfTheTag, tagAttribute);
+						const attributeValidation = this.validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes);
 						if (!attributeValidation.valid) {
 							const indexOfTagBegining = tag.text.indexOf(tagAttribute);
 							const position = LineColumn(document).fromIndex(tag.positionBegin + indexOfTagBegining);
@@ -105,7 +105,7 @@ export class TagAttributeLinter extends Linter {
 		return i;
 	}
 
-	private validateTagAttribute(className: string, attribute: string): AttributeValidation {
+	private validateTagAttribute(className: string, attribute: string, attributes: string[]): AttributeValidation {
 		let attributeValidation: AttributeValidation = {
 			valid: false
 		};
@@ -115,26 +115,39 @@ export class TagAttributeLinter extends Linter {
 		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
 
 		const isExclusion = attributeName.startsWith("xmlns") || this.isAttributeAlwaysValid(className, attributeName);
-		const attributeNameValid = isExclusion || this.validateAttributeName(className, attribute);
+		const isAttributeNameDuplicated = this.getIfAttributeNameIsDuplicated(attribute, attributes);
+		const attributeNameValid = !isAttributeNameDuplicated && (isExclusion || this.validateAttributeName(className, attribute));
 		const attributeValueValid = this.validateAttributeValue(className, attribute);
 		attributeValidation.valid = attributeNameValid && attributeValueValid;
 
 		if (!attributeNameValid && UIClass.parentClassNameDotNotation) {
-			attributeValidation = this.validateTagAttribute(UIClass.parentClassNameDotNotation, attribute);
+			attributeValidation = this.validateTagAttribute(UIClass.parentClassNameDotNotation, attribute, attributes);
 		} else if (!attributeValidation.valid) {
-			attributeValidation.message = !attributeNameValid ? "Invalid attribute name" : !attributeValueValid ? "Invalid value" : undefined;
+			let message = "";
+			if (isAttributeNameDuplicated) {
+				message = "Duplicated attribute";
+			} else if (!attributeNameValid) {
+				message = "Invalid attribute name";
+			} else if (!attributeValueValid) {
+				message = "Invalid attribute value";
+			}
+			attributeValidation.message = message;
 		}
 
 		return attributeValidation;
 	}
 
+	private getIfAttributeNameIsDuplicated(attribute: string, attributes: string[]) {
+		const attributeNames = attributes.map(attribute => this.getAttributeNameAndValue(attribute).attributeName);
+		const nameOfTheCurrentAttribute = this.getAttributeNameAndValue(attribute).attributeName;
+		const isDuplicated = attributeNames.filter(attributeName => attributeName === nameOfTheCurrentAttribute).length > 1;
+
+		return isDuplicated;
+	}
+
 	private validateAttributeValue(className: string, attribute: string) {
 		let isValueValid = true;
-		const indexOfEqualSign = attribute.indexOf("=");
-		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
-		let attributeValue = attribute.replace(attributeName, "").replace("=", "").trim();
-		attributeValue = attributeValue.substring(1, attributeValue.length - 1); // removes ""
-
+		const { attributeName, attributeValue } = this.getAttributeNameAndValue(attribute);
 		const UIClass = UIClassFactory.getUIClass(className);
 		const property = UIClass.properties.find(property => property.name === attributeName);
 		const event = UIClass.events.find(event => event.name === attributeName);
@@ -151,11 +164,23 @@ export class TagAttributeLinter extends Linter {
 		} else if (property?.type === "int") {
 			isValueValid = isNumeric(attributeValue);
 		} else if (event && XMLParser.getControllerNameOfTheCurrentDocument()) {
-			attributeValue = attributeValue.replace(".", "");
-			isValueValid = !!XMLParser.getMethodsOfTheCurrentViewsController().find(method => method.name === attributeValue);
+			const attributeValueWithoutDot = attributeValue.replace(".", "");
+			isValueValid = !!XMLParser.getMethodsOfTheCurrentViewsController().find(method => method.name === attributeValueWithoutDot);
 		}
 
 		return isValueValid;
+	}
+
+	private getAttributeNameAndValue(attribute: string) {
+		const indexOfEqualSign = attribute.indexOf("=");
+		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
+		let attributeValue = attribute.replace(attributeName, "").replace("=", "").trim();
+		attributeValue = attributeValue.substring(1, attributeValue.length - 1); // removes ""
+
+		return {
+			attributeName: attributeName,
+			attributeValue: attributeValue
+		};
 	}
 
 	private validateAttributeName(className: string, attribute: string) {
