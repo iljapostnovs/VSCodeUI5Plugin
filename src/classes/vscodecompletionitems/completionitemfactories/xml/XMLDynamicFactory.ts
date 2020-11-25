@@ -104,7 +104,6 @@ export class XMLDynamicFactory {
 					});
 				} else {
 					completionItems = this.getCompletionItemsForCustomClasses(libName, tagPrefix);
-					//TODO: Logic for custom classes
 				}
 			}
 		}
