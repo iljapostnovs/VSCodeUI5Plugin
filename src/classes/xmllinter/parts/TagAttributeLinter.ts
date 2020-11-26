@@ -35,7 +35,7 @@ export class TagAttributeLinter extends Linter {
 						if (!attributeValidation.valid) {
 							const indexOfTagBegining = tag.text.indexOf(tagAttribute);
 							const position = LineColumn(document).fromIndex(tag.positionBegin + indexOfTagBegining);
-							if (position && this.positionIsNotInComments(document, tag.positionBegin)) {
+							if (position && XMLParser.getIfPositionIsInComments(document, tag.positionBegin)) {
 								errors.push({
 									code: "UI5plugin",
 									message: attributeValidation.message || "Invalid attribute",
@@ -55,24 +55,6 @@ export class TagAttributeLinter extends Linter {
 		});
 
 		return errors;
-	}
-
-	private positionIsNotInComments(document: string, position: number) {
-		let isPositionNotInComments = true;
-		const regExp = new RegExp("<!--(.|\\s)*?-->", "g");
-		const aComments: RegExpExecArray[] = [];
-
-		let result = regExp.exec(document);
-		while (result) {
-			aComments.push(result);
-			result = regExp.exec(document);
-		}
-
-		const comment = aComments.find(comment => comment.index <= position && comment.index + comment[0].length > position);
-
-		isPositionNotInComments = !comment;
-
-		return isPositionNotInComments;
 	}
 
 	private getAllTags(document: string) {

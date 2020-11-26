@@ -115,20 +115,22 @@ export class XMLParser {
 		};
 	}
 
-	private static getIfPositionIsInComments(XMLViewText: string, position: number) {
-		const rComments = /<!--.*?-->/g;
-		const comments = [];
-		let results = rComments.exec(XMLViewText);
-		while (results) {
-			comments.push({
-				position: results.index,
-				comment: results[0]
-			});
+	public static getIfPositionIsInComments(document: string, position: number) {
+		let isPositionNotInComments = true;
+		const regExp = new RegExp("<!--(.|\\s)*?-->", "g");
+		const aComments: RegExpExecArray[] = [];
 
-			results = rComments.exec(XMLViewText);
+		let result = regExp.exec(document);
+		while (result) {
+			aComments.push(result);
+			result = regExp.exec(document);
 		}
 
-		return !!comments.find(comment => comment.position <= position && position <= comment.comment.length + comment.position);
+		const comment = aComments.find(comment => comment.index <= position && comment.index + comment[0].length > position);
+
+		isPositionNotInComments = !comment;
+
+		return isPositionNotInComments;
 	}
 
 	static getIfPositionIsInString(XMLViewText: string, position: number) {

@@ -11,7 +11,6 @@ export class XMLLinter {
 		];
 
 		let errors: Error[] = [];
-
 		linters.forEach(linter => {
 			errors = errors.concat(linter.getErrors(document));
 		});
