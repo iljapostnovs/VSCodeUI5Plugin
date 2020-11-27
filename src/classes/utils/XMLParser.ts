@@ -99,7 +99,7 @@ export class XMLParser {
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 
-		while (i > 0 && (XMLViewText[i] !== "<" || this.getIfPositionIsInComments(XMLViewText, i))) {
+		while (i > 0 && (XMLViewText[i] !== "<" || !this.getIfPositionIsNotInComments(XMLViewText, i))) {
 			i--;
 		}
 		tagPositionBegin = i;
@@ -115,7 +115,7 @@ export class XMLParser {
 		};
 	}
 
-	public static getIfPositionIsInComments(document: string, position: number) {
+	public static getIfPositionIsNotInComments(document: string, position: number) {
 		let isPositionNotInComments = true;
 		const regExp = new RegExp("<!--(.|\\s)*?-->", "g");
 		const aComments: RegExpExecArray[] = [];

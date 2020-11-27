@@ -35,7 +35,7 @@ export class TagAttributeLinter extends Linter {
 						if (!attributeValidation.valid) {
 							const indexOfTagBegining = tag.text.indexOf(tagAttribute);
 							const position = LineColumn(document).fromIndex(tag.positionBegin + indexOfTagBegining);
-							if (position && XMLParser.getIfPositionIsInComments(document, tag.positionBegin)) {
+							if (position && XMLParser.getIfPositionIsNotInComments(document, tag.positionBegin)) {
 								errors.push({
 									code: "UI5plugin",
 									message: attributeValidation.message || "Invalid attribute",
