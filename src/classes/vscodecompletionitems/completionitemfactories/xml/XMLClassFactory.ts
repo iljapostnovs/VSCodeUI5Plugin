@@ -17,7 +17,7 @@ export class XMLClassFactory {
 	private readonly nodeDAO = new SAPNodeDAO();
 
 	async generateAggregationPropertyCompletionItems() {
-		var completionItems:vscode.CompletionItem[] = [];
+		var completionItems: vscode.CompletionItem[] = [];
 		let SAPNodes: SAPNode[];
 		const availableProgressLeft = 50;
 		SAPNodes = this.nodeDAO.getAllNodesSync();
@@ -56,7 +56,7 @@ export class XMLClassFactory {
 		return completionItems;
 	}
 
-	public generateXMLClassCompletionItemFromSAPNode(node: SAPNode, classPrefix: string = "") {
+	public generateXMLClassCompletionItemFromSAPNode(node: SAPNode, classPrefix: string = "", prefixBeforeClassName: string = "") {
 		const metadata = node.getMetadata()?.getRawMetadata();
 
 		if (classPrefix && !classPrefix.endsWith(":")) {
@@ -70,7 +70,7 @@ export class XMLClassFactory {
 
 		return this.generateXMLClassCompletionItemUsing({
 			markdown: mardownString,
-			insertText: this.generateClassInsertTextFromSAPNode(node, classPrefix),
+			insertText: this.generateClassInsertTextFromSAPNode(node, classPrefix, prefixBeforeClassName),
 			detail: metadata?.title || "",
 			className: node.getName()
 		});
@@ -86,7 +86,8 @@ export class XMLClassFactory {
 	}
 
 	private generateXMLClassCompletionItemUsing(data: {className: string, insertText: string, detail: string, markdown: vscode.MarkdownString}) {
-		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(data.className);
+		const className = data.className.split(".")[data.className.split(".").length - 1];
+		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(className);
 		completionItem.kind = vscode.CompletionItemKind.Class;
 		completionItem.insertText = data.insertText;
 		completionItem.detail = data.detail;
@@ -96,7 +97,7 @@ export class XMLClassFactory {
 		return completionItem;
 	}
 
-	public generateClassInsertTextFromSAPNode(node: SAPNode, classPrefix: string) {
+	public generateClassInsertTextFromSAPNode(node: SAPNode, classPrefix: string, prefixBeforeClassName: string = "") {
 		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(GeneratorFactory.language.xml);
 		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(GeneratorFactory.language.xml);
 
@@ -105,7 +106,7 @@ export class XMLClassFactory {
 		const properties: string = propertyGenerator.generateProperties(propertyGeneratorStrategy);
 		const aggregations: string = aggregationGenerator.generateAggregations(aggregationGeneratorStrategy, classPrefix);
 
-		return this.generateInsertStringFrom(node.getDisplayName(), properties, aggregations, classPrefix);
+		return this.generateInsertStringFrom(node.getDisplayName(), properties, aggregations, classPrefix, prefixBeforeClassName);
 	}
 
 	public generateClassInsertTextFromSAPClass(UIClass: AbstractUIClass, classPrefix: string) {
@@ -124,8 +125,8 @@ export class XMLClassFactory {
 		return this.generateInsertStringFrom(className, properties, aggregations, classPrefix);
 	}
 
-	private generateInsertStringFrom(className: string, properties: string, aggregations: string, classPrefix: string) {
-		let insertText: string = `${className}\n`;
+	private generateInsertStringFrom(className: string, properties: string, aggregations: string, classPrefix: string, prefixBeforeClassName: string = "") {
+		let insertText: string = `${prefixBeforeClassName}${className}\n`;
 		insertText += properties;
 		insertText += ">\n";
 		insertText += aggregations;

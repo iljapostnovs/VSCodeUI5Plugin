@@ -13,6 +13,10 @@ export enum PositionType {
 	InBodyOfTheClass = "6"
 }
 
+function escapeRegExp(string: string) {
+	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export class XMLParser {
 	static getAllIDsInCurrentView() {
 		let IdsResult: string[] = [];
@@ -70,6 +74,9 @@ export class XMLParser {
 			} else if (itIsClosureTag) {
 				closedTags.push(croppedTag.substring(1, croppedTag.length));
 				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+			} else if (closedTags.length > 0) {
+				closedTags.pop();
+				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
 			} else {
 				const className = this.getClassNameFromTag(tag);
 				if (closedTags.includes(className)) {
@@ -99,12 +106,12 @@ export class XMLParser {
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 
-		while (i > 0 && (XMLViewText[i] !== "<" || !this.getIfPositionIsNotInComments(XMLViewText, i))) {
+		while (i > 0 && (XMLViewText[i] !== "<" || !this.getIfPositionIsNotInComments(XMLViewText, i) || this.getIfPositionIsInString(XMLViewText, i))) {
 			i--;
 		}
 		tagPositionBegin = i;
 
-		while (i < XMLViewText.length && (XMLViewText[i] !== ">")) {
+		while (i < XMLViewText.length && (XMLViewText[i] !== ">" || !this.getIfPositionIsNotInComments(XMLViewText, i) || this.getIfPositionIsInString(XMLViewText, i))) {
 			i++;
 		}
 		tagPositionEnd = i + 1;
@@ -339,5 +346,16 @@ export class XMLParser {
 		}
 
 		return methods;
+	}
+
+	static getPrefixForLibraryName(libraryName: string, document: string) {
+		let prefix: string | undefined;
+		const regExp = new RegExp(`(?<=xmlns).*?(?=="${escapeRegExp(libraryName)}")`);
+		const result = regExp.exec(document);
+		if (result) {
+			prefix = result[0].replace(":", "");
+		}
+
+		return prefix;
 	}
 }

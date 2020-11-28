@@ -91,8 +91,26 @@ export class XMLDynamicFactory {
 
 		if (XMLText && currentPositionOffset) {
 			const libName = XMLParser.getLibraryNameInPosition(XMLText, currentPositionOffset);
-			if (libName) {
-				const currentTagText = XMLParser.getTagInPosition(XMLText, currentPositionOffset);
+			const currentTagText = XMLParser.getTagInPosition(XMLText, currentPositionOffset);
+			const isTagEmpty = !currentTagText[1].match(/[a-zA-Z]/);
+			if (isTagEmpty) {
+				const { positionBegin: currentTagPositionBegin } = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset - 1);
+				completionItems = this.getParentTagCompletionItems(currentTagPositionBegin - 1);
+
+				const nodeDAO = new SAPNodeDAO();
+				completionItems = completionItems.reduce((accumulator: vscode.CompletionItem[], completionItem: vscode.CompletionItem) => {
+					const node = nodeDAO.findNode(completionItem.label);
+					if (node) {
+						const tagPrefix = XMLParser.getPrefixForLibraryName(node.getLib(), XMLText);
+						if (tagPrefix !== undefined) {
+							const classPrefix = tagPrefix.length > 0 ? `${tagPrefix}:` : tagPrefix;
+							const completionItem = this.getStandardCompletionItemWithPrefix(node, tagPrefix, classPrefix);
+							accumulator.push(completionItem);
+						}
+					}
+					return accumulator;
+				}, []);
+			} else if (libName) {
 				let tagPrefix = XMLParser.getTagPrefix(currentTagText);
 				tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
 				if (libName.startsWith("sap.")) {
@@ -131,7 +149,6 @@ export class XMLDynamicFactory {
 
 	private getStandardCompletionItemsFilteredByLibraryName(libName: string, tagPrefix: string) {
 		const nodeDAO = new SAPNodeDAO();
-		const XMLClassFactoryInstance = new XMLClassFactory();
 		let completionItems: vscode.CompletionItem[] = [];
 
 		const standardCompletionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
@@ -139,14 +156,25 @@ export class XMLDynamicFactory {
 			if (completionItem.label.startsWith(libName)) {
 				const node = nodeDAO.findNode(completionItem.label);
 				if (node) {
-					const newCompletionItem = XMLClassFactoryInstance.generateXMLClassCompletionItemFromSAPNode(node, tagPrefix);
-					accumulator.push(newCompletionItem);
+					const newCompletionItem = this.getStandardCompletionItemWithPrefix(node, tagPrefix);
+					if (newCompletionItem) {
+						accumulator.push(newCompletionItem);
+					}
 				}
 			}
 			return accumulator;
 		}, []);
 
 		return completionItems;
+	}
+
+	private getStandardCompletionItemWithPrefix(node: any, tagPrefix: string, classPrefix: string = "") {
+		let completionItem: vscode.CompletionItem | undefined;
+		const XMLClassFactoryInstance = new XMLClassFactory();
+
+		completionItem = XMLClassFactoryInstance.generateXMLClassCompletionItemFromSAPNode(node, tagPrefix, classPrefix);
+
+		return completionItem;
 	}
 
 	private filterCompletionItemsByAggregationsType(completionItems: vscode.CompletionItem[]) {
@@ -240,7 +268,11 @@ export class XMLDynamicFactory {
 			completionItems = this.getParentTagCompletionItems(currentPositionOffset);
 			completionItems = completionItems.map(completionItem => {
 				completionItem = this.cloneCompletionItem(completionItem);
-				completionItem.insertText = "<" + completionItem.insertText;
+				if (completionItem.insertText instanceof vscode.SnippetString) {
+					completionItem.insertText.value = "<" + completionItem.insertText.value;
+				} else {
+					completionItem.insertText = "<" + completionItem.insertText;
+				}
 
 				return completionItem;
 			});
