@@ -25,7 +25,7 @@ export class FileWatcher {
 		disposable = workspace.onDidSaveTextDocument(document => {
 			if (document.fileName.endsWith(".js")) {
 
-				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
+				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
 				if (currentClassNameDotNotation) {
 					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
 				}

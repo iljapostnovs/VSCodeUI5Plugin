@@ -670,19 +670,15 @@ export class AcornSyntaxAnalyzer {
 		return nodes.find((node: any) => node.start < position && node.end >= position);
 	}
 
-	public static getClassNameOfTheCurrentDocument(documentText?: string) {
+	public static getClassNameOfTheCurrentDocument(classPath?: string) {
 		let returnClassName;
-		if (documentText) {
-			const rCurrentClass = /(?<=.*\..*?(extend|declareStaticClass)\(\").*?(?=\")/;
-			const rCurrentClassResults = rCurrentClass.exec(documentText);
-			if (rCurrentClassResults) {
-				returnClassName = rCurrentClassResults[0];
-			}
-		} else {
-			const classPath = vscode.window.activeTextEditor?.document.uri.fsPath;
-			if (classPath) {
-				returnClassName = FileReader.getClassNameFromPath(classPath);
-			}
+
+		if (!classPath) {
+			classPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+		}
+
+		if (classPath) {
+			returnClassName = FileReader.getClassNameFromPath(classPath);
 		}
 
 		return returnClassName;

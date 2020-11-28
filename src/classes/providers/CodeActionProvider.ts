@@ -11,7 +11,7 @@ export class CodeActionProvider {
 		const providerResult: vscode.CodeAction[] = [];
 
 		if (selectedVariableName) {
-			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
+			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
 			if (currentClassName) {
 				UIClassFactory.setNewContentForCurrentUIClass();
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
@@ -42,7 +42,7 @@ export class CodeActionProvider {
 		let selectedVariableName = document.getText(range);
 
 		if (!selectedVariableName) {
-			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
+			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
 			if (currentClassName && vscode.window.activeTextEditor) {
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				const currentPositionOffset = document?.offsetAt(range.end);
@@ -63,7 +63,7 @@ export class CodeActionProvider {
 
 	private static getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
 		let position: vscode.Position | undefined;
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.getText());
+		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
 		if (currentClassName) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 			const mainFunction = UIClass.fileContent?.body[0]?.expression;
