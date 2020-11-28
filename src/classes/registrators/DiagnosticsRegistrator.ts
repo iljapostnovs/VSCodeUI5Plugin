@@ -34,19 +34,26 @@ export class DiagnosticsRegistrator {
 		}
 	}
 
+	private static _timeoutId: NodeJS.Timeout | null;
 	private static updateDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
-		const errors = XMLLinter.getLintingErrors(document.getText());
-		const diagnostics: vscode.Diagnostic[] = errors.map(error => {
-			return ({
-				code: error.code,
-				message: error.message,
-				range: error.range,
-				severity: vscode.DiagnosticSeverity.Error,
-				source: error.source,
-				relatedInformation: []
-			});
-		});
+		if (!this._timeoutId) {
+			this._timeoutId = setTimeout(() => {
+				const errors = XMLLinter.getLintingErrors(document.getText());
 
-		collection.set(document.uri, diagnostics);
+				const diagnostics: vscode.Diagnostic[] = errors.map(error => {
+					return ({
+						code: error.code,
+						message: error.message,
+						range: error.range,
+						severity: vscode.DiagnosticSeverity.Error,
+						source: error.source,
+						relatedInformation: []
+					});
+				});
+
+				collection.set(document.uri, diagnostics);
+				this._timeoutId = null;
+			}, 100);
+		}
 	}
 }

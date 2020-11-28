@@ -99,12 +99,12 @@ export class XMLParser {
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 
-		while (i > 0 && (XMLViewText[i] !== "<" || this.getIfPositionIsInComments(XMLViewText, i))) {
+		while (i > 0 && (XMLViewText[i] !== "<" || !this.getIfPositionIsNotInComments(XMLViewText, i))) {
 			i--;
 		}
 		tagPositionBegin = i;
 
-		while (i < XMLViewText.length && (XMLViewText[i] !== ">" || this.getIfPositionIsInString(XMLViewText, i))) {
+		while (i < XMLViewText.length && (XMLViewText[i] !== ">")) {
 			i++;
 		}
 		tagPositionEnd = i + 1;
@@ -115,18 +115,29 @@ export class XMLParser {
 		};
 	}
 
-	public static getIfPositionIsInComments(document: string, position: number) {
-		let isPositionNotInComments = true;
-		const regExp = new RegExp("<!--(.|\\s)*?-->", "g");
-		const aComments: RegExpExecArray[] = [];
+	private static lastDocument: string = "";
+	private static lastComments: RegExpExecArray[] = [];
 
-		let result = regExp.exec(document);
-		while (result) {
-			aComments.push(result);
-			result = regExp.exec(document);
+	public static getIfPositionIsNotInComments(document: string, position: number) {
+		let isPositionNotInComments = true;
+		let comments: RegExpExecArray[] = [];
+
+		if (this.lastDocument.length !== document.length) {
+			const regExp = new RegExp("<!--(.|\\s)*?-->", "g");
+
+			let result = regExp.exec(document);
+			while (result) {
+				comments.push(result);
+				result = regExp.exec(document);
+			}
+
+			this.lastComments = comments;
+			this.lastDocument = document;
+		} else {
+			comments = this.lastComments;
 		}
 
-		const comment = aComments.find(comment => comment.index <= position && comment.index + comment[0].length > position);
+		const comment = comments.find(comment => comment.index <= position && comment.index + comment[0].length > position);
 
 		isPositionNotInComments = !comment;
 
