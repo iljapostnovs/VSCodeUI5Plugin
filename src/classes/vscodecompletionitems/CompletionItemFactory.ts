@@ -13,11 +13,12 @@ import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer"
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { GeneratorFactory } from "./completionitemfactories/codegenerators/GeneratorFactory";
+import { CustomCompletionItem } from "./CustomCompletionItem";
 
 export class CompletionItemFactory {
 	private static readonly nodeDAO = new SAPNodeDAO();
-	public static XMLStandardLibCompletionItems: vscode.CompletionItem[] = [];
-	public static JSDefineCompletionItems: vscode.CompletionItem[] = [];
+	public static XMLStandardLibCompletionItems: CustomCompletionItem[] = [];
+	public static JSDefineCompletionItems: CustomCompletionItem[] = [];
 	private readonly language: GeneratorFactory.language;
 
 	constructor(completionItemType: GeneratorFactory.language) {
@@ -25,7 +26,7 @@ export class CompletionItemFactory {
 	}
 
 	public async getUIDefineCompletionItems() {
-		let completionItems:vscode.CompletionItem[] = [];
+		let completionItems:CustomCompletionItem[] = [];
 
 		if (this.language === GeneratorFactory.language.js) {
 			completionItems = await this.generateJSCompletionItems();
@@ -41,7 +42,7 @@ export class CompletionItemFactory {
 	}
 
 	private async generateXMLCompletionItems() {
-		let completionItems:vscode.CompletionItem[] = [];
+		let completionItems:CustomCompletionItem[] = [];
 		let SAPNodes: SAPNode[];
 		SAPNodes = await CompletionItemFactory.nodeDAO.getAllNodes();
 
@@ -62,7 +63,7 @@ export class CompletionItemFactory {
 	}
 
 	private async generateJSCompletionItems() {
-		let completionItems:vscode.CompletionItem[] = [];
+		let completionItems:CustomCompletionItem[] = [];
 
 		if (CompletionItemFactory.JSDefineCompletionItems.length === 0) {
 			const UIDefineFactoy = new UIDefineFactory();
@@ -87,8 +88,9 @@ export class CompletionItemFactory {
 							const isString = node?.type === "Literal";
 							if (isString) {
 								completionItems = completionItems.map(completionItem => {
-									const completionItemWOQuotes = new vscode.CompletionItem(completionItem.label);
+									const completionItemWOQuotes = new CustomCompletionItem(completionItem.label);
 									completionItemWOQuotes.kind = completionItem.kind;
+									completionItemWOQuotes.className = completionItem.className;
 									completionItemWOQuotes.insertText = (<any>completionItem.insertText).substring(1, (<any>completionItem.insertText).length - 1);
 									completionItemWOQuotes.documentation = completionItem.documentation;
 									completionItemWOQuotes.command = completionItem.command;

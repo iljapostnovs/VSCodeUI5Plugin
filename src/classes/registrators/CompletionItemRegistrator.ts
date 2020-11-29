@@ -4,6 +4,7 @@ import { FileWatcher } from "../utils/FileWatcher";
 import { UI5Plugin } from "../../UI5Plugin";
 import { GeneratorFactory } from "../vscodecompletionitems/completionitemfactories/codegenerators/GeneratorFactory";
 import { DefineGenerator } from "../vscodecompletionitems/completionitemfactories/codegenerators/define/UIDefineCompletionItemGenerator";
+import { CustomCompletionItem } from "../vscodecompletionitems/CustomCompletionItem";
 
 export class CompletionItemRegistrator {
 	static async register() {
@@ -18,7 +19,7 @@ export class CompletionItemRegistrator {
 
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
 			async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
-				let itemsToReturn:vscode.CompletionItem[] = [];
+				let itemsToReturn:CustomCompletionItem[] = [];
 				// console.time(`Position ${document.fileName} parsing took`);
 				try {
 					if (DefineGenerator.getIfCurrentPositionIsInDefine()) {
@@ -43,9 +44,7 @@ export class CompletionItemRegistrator {
 
 		const XMLProvider = vscode.languages.registerCompletionItemProvider({language: "xml", scheme: "file"}, {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
-				const XMLDynamicCompletionItems = XMLCompletionItemFactory.generateXMLDynamicCompletionItems();
-
-				return XMLDynamicCompletionItems.length > 0 ? XMLDynamicCompletionItems : XMLCompletionItems;
+				return XMLCompletionItemFactory.generateXMLDynamicCompletionItems();
 			}
 		}, "<", ":");
 

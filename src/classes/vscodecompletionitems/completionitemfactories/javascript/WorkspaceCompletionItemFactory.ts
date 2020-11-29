@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import { FileReader } from "../../../utils/FileReader";
 import * as path from "path";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
 const escapedFileSeparator = "\\" + path.sep;
 const workspace = vscode.workspace;
 
@@ -19,7 +20,7 @@ class UIDefineJSFile {
 	}
 }
 export class WorkspaceCompletionItemFactory {
-	static async synchronizeCreate(completionItems: vscode.CompletionItem[], textDocument: vscode.Uri) {
+	static async synchronizeCreate(completionItems: CustomCompletionItem[], textDocument: vscode.Uri) {
 		const fileFsPath = textDocument.fsPath;
 		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
 		if (defineString) {
@@ -34,7 +35,7 @@ export class WorkspaceCompletionItemFactory {
 		}
 	}
 
-	static async synchronizeDelete(completionItems: vscode.CompletionItem[], textDocument: vscode.Uri) {
+	static async synchronizeDelete(completionItems: CustomCompletionItem[], textDocument: vscode.Uri) {
 		const fileFsPath = textDocument.fsPath;
 		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
 		if (defineString) {
@@ -46,7 +47,7 @@ export class WorkspaceCompletionItemFactory {
 	}
 
 	async getCompletionItems() {
-		const completionItems: vscode.CompletionItem[] = [];
+		const completionItems: CustomCompletionItem[] = [];
 
 		const JSFilesOfAllWorkspaces = await this.getAllJSFilesOfAllWorkspaces();
 
@@ -107,7 +108,7 @@ export class WorkspaceCompletionItemFactory {
 
 	private static generateCompletionItem(workspaceJSFile: UIDefineJSFile) {
 		const insertionText = `"${workspaceJSFile.UIDefineString}"`;
-		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(insertionText);
+		const completionItem:CustomCompletionItem = new CustomCompletionItem(insertionText);
 		completionItem.kind = vscode.CompletionItemKind.Class;
 		completionItem.insertText = insertionText;
 		completionItem.detail = insertionText;

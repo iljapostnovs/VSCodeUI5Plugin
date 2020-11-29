@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 import { XMLParser } from "../../../utils/XMLParser";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
 
 export class IDFactory {
 	public generateIdCompletionItems() {
-		let completionItems:vscode.CompletionItem[] = [];
+		let completionItems:CustomCompletionItem[] = [];
 		const viewIDs = XMLParser.getAllIDsInCurrentView();
 		completionItems = this.generateCompletionItemsFromUICompletionItems(viewIDs);
 
@@ -12,7 +13,7 @@ export class IDFactory {
 
 	private generateCompletionItemsFromUICompletionItems(viewIDs: string[]) {
 		return viewIDs.map(viewId => {
-			const completionItem:vscode.CompletionItem = new vscode.CompletionItem(viewId);
+			const completionItem:CustomCompletionItem = new CustomCompletionItem(viewId);
 			completionItem.kind = vscode.CompletionItemKind.Keyword;
 			completionItem.insertText = viewId;
 			completionItem.detail = viewId;

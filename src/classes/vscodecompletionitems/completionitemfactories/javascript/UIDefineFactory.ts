@@ -4,13 +4,14 @@ import { SAPNode } from "../../../librarydata/SAPNode";
 import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 import { URLBuilder } from "../../../utils/URLBuilder";
 import { GeneratorFactory } from "../codegenerators/GeneratorFactory";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
 
 export class UIDefineFactory {
 	private static readonly nodeDAO = new SAPNodeDAO();
 
 	public async generateUIDefineCompletionItems() {
 		const workspaceCompletionItemFactory = new WorkspaceCompletionItemFactory();
-		let completionItems:vscode.CompletionItem[] = [];
+		let completionItems:CustomCompletionItem[] = [];
 
 		const SAPNodes: SAPNode[] = await UIDefineFactory.nodeDAO.getAllNodes();
 
@@ -24,16 +25,17 @@ export class UIDefineFactory {
 	}
 
 	private recursiveUIDefineCompletionItemGeneration(node: SAPNode) {
-		let completionItems:vscode.CompletionItem[] = [];
+		let completionItems:CustomCompletionItem[] = [];
 		const defineGenerator = GeneratorFactory.getDefineGenerator();
 		const insertText = defineGenerator.generateDefineString(node);
 
 		if (insertText) {
 			const metadata = node.getMetadata();
 
-			const completionItem = new vscode.CompletionItem(insertText);
+			const completionItem = new CustomCompletionItem(insertText);
 			completionItem.kind = vscode.CompletionItemKind.Class;
 			completionItem.insertText = insertText;
+			completionItem.className = node.getName();
 			completionItem.detail = metadata.rawMetadata.title;
 
 			const mardownString = new vscode.MarkdownString();

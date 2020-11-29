@@ -12,12 +12,13 @@ import { SAPNodePropertyGenerationStrategy } from "../codegenerators/property/st
 import { SAPClassAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
 import { SAPNodeAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
 import { SAPClassPropertyGetterStrategy } from "../codegenerators/property/strategies/SAPClassPropertyGetterStrategy";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
 
 export class XMLClassFactory {
 	private readonly nodeDAO = new SAPNodeDAO();
 
 	async generateAggregationPropertyCompletionItems() {
-		var completionItems: vscode.CompletionItem[] = [];
+		var completionItems: CustomCompletionItem[] = [];
 		let SAPNodes: SAPNode[];
 		const availableProgressLeft = 50;
 		SAPNodes = this.nodeDAO.getAllNodesSync();
@@ -36,7 +37,7 @@ export class XMLClassFactory {
 	}
 
 	private generateClassCompletionItemsRecursively(node: SAPNode) {
-		var completionItems:vscode.CompletionItem[] = [];
+		var completionItems:CustomCompletionItem[] = [];
 		if (node.nodes && node.nodes.length > 0) {
 			for (const childNode of node.nodes) {
 				completionItems = completionItems.concat(this.generateClassCompletionItemsRecursively(childNode));
@@ -87,9 +88,10 @@ export class XMLClassFactory {
 
 	private generateXMLClassCompletionItemUsing(data: {className: string, insertText: string, detail: string, markdown: vscode.MarkdownString}) {
 		const className = data.className.split(".")[data.className.split(".").length - 1];
-		const completionItem:vscode.CompletionItem = new vscode.CompletionItem(className);
+		const completionItem:CustomCompletionItem = new CustomCompletionItem(className);
 		completionItem.kind = vscode.CompletionItemKind.Class;
 		completionItem.insertText = data.insertText;
+		completionItem.className = data.className;
 		completionItem.detail = data.detail;
 		completionItem.documentation = data.markdown;
 		completionItem.sortText = "}";

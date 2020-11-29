@@ -11,6 +11,7 @@ import { UI5Plugin } from "../../UI5Plugin";
 import * as path from "path";
 import { TemplateGeneratorFactory } from "../templateinserters/TemplateGeneratorFactory";
 import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
+import { CustomCompletionItem } from "../vscodecompletionitems/CustomCompletionItem";
 const fileSeparator = path.sep;
 const workspace = vscode.workspace;
 
@@ -71,7 +72,7 @@ export class FileWatcher {
 		FileRenameMediator.handleFileRename(file);
 	}
 
-	public static synchronizeJSDefineCompletionItems(completionItems: vscode.CompletionItem[]) {
+	public static synchronizeJSDefineCompletionItems(completionItems: CustomCompletionItem[]) {
 		let disposable = workspace.onDidCreateFiles(event => {
 			event.files.forEach(file => {
 				if (file.fsPath.endsWith(".js")) {
