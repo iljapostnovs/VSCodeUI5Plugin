@@ -27,7 +27,7 @@ export class UI5Plugin {
 		this.context?.subscriptions.push(disposable);
 	}
 	public initialize(context: vscode.ExtensionContext) {
-		return new Promise((resolve, reject) => {
+		return new Promise<void>((resolve, reject) => {
 			this.context = context;
 			vscode.window.withProgress({
 				location: vscode.ProgressLocation.Window,

@@ -43,7 +43,7 @@ export class MassDrawIOUMLDiagram {
 
 				const UMLDiagrams: DrawIOUMLDiagram[] = [];
 				const promises = classNames.map(className => {
-					return new Promise(resolve => {
+					return new Promise<void>(resolve => {
 						setTimeout(() => {
 							try {
 								const UIClass = UIClassFactory.getUIClass(className);
