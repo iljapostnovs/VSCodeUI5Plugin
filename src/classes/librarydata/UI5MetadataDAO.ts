@@ -1,9 +1,9 @@
 import { UI5Metadata } from "./UI5Metadata";
 import { SAPNode } from "./SAPNode";
-import * as rp from "request-promise";
 import { URLBuilder } from "../utils/URLBuilder";
 import { FileReader } from "../utils/FileReader";
 import { UI5Plugin } from "../../UI5Plugin";
+import { HTTPHandler } from "../utils/HTTPHandler";
 
 interface LooseObject {
 	[key: string]: any;
@@ -105,23 +105,15 @@ export class UI5MetadataDAO {
 					resolve(namespaceDesignTimes[lib]);
 				}
 			} else {
-				setTimeout(() => {
+				setTimeout(async () => {
 					const readPath: string = URLBuilder.getInstance().getDesignTimeUrlForLib(lib);
-					const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
-					const options: rp.RequestPromiseOptions | undefined = proxy ? {
-						proxy: proxy
-					} : undefined;
-
-					namespaceDesignTimes[lib] = rp(readPath, options)
-					.then((data: any) => {
-						try {
-							namespaceDesignTimes[lib] = JSON.parse(data);
-							resolve(namespaceDesignTimes[lib]);
-						} catch (error) {
-							console.log(lib);
-						}
-					})
-					.catch(reject);
+					namespaceDesignTimes[lib] = HTTPHandler.get(readPath);
+					try {
+						namespaceDesignTimes[lib] = await namespaceDesignTimes[lib];
+						resolve(namespaceDesignTimes[lib]);
+					} catch (error) {
+						reject(error);
+					}
 				}, Math.round(Math.random() * 150));
 			}
 		});

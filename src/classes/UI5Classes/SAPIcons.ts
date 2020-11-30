@@ -1,6 +1,6 @@
 import { FileReader } from "../utils/FileReader";
+import { HTTPHandler } from "../utils/HTTPHandler";
 import { URLBuilder } from "../utils/URLBuilder";
-import * as rp from "request-promise";
 
 export class SAPIcons {
 	public static icons: string[] = [];
@@ -33,23 +33,9 @@ export class SAPIcons {
 		return icons;
 	}
 
-	private static requestJSONData(uri: string) {
-		return new Promise((resolve, reject) => {
-			const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
-			const options: rp.RequestPromiseOptions | undefined = proxy ? {
-				proxy: proxy
-			} : undefined;
+	private static async requestJSONData(uri: string) {
+		const data: any = await HTTPHandler.get(uri);
 
-			rp(uri, options)
-			.then((data: any) => {
-				try {
-					data = JSON.parse(data);
-					resolve(data);
-				} catch (error) {
-					reject(error);
-				}
-			})
-			.catch(reject);
-		});
+		return data;
 	}
 }

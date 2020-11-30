@@ -1,8 +1,8 @@
 import { SAPNode } from "./SAPNode";
-import * as rp from "request-promise";
 import * as vscode from "vscode";
 import { FileReader } from "../utils/FileReader";
 import { URLBuilder } from "../utils/URLBuilder";
+import { HTTPHandler } from "../utils/HTTPHandler";
 
 export class SAPNodeDAO {
 	private static readonly nodePath: string = URLBuilder.getInstance().getAPIIndexUrl();
@@ -95,20 +95,9 @@ export class SAPNodeDAO {
 		FileReader.setCache(FileReader.CacheType.APIIndex, cache);
 	}
 
-	private fetchApiIndex() {
-		return new Promise((resolve: any, reject: any) => {
-			const proxy = process.env.PROXY_HTTP || process.env.PROXY_HTTPS;
-			const options = proxy ? {
-				proxy: proxy
-			} : undefined;
-
-			rp(SAPNodeDAO.nodePath, options)
-			.then((data: any) => {
-				this.nodes = JSON.parse(data);
-				resolve();
-			})
-			.catch(reject);
-		});
+	private async fetchApiIndex() {
+		const data: any = await HTTPHandler.get(SAPNodeDAO.nodePath);
+		this.nodes = data;
 	}
 
 	public findNode(name: string) {

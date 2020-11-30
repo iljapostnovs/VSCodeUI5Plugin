@@ -139,6 +139,11 @@
 					"type": "boolean",
 					"default": false,
 					"description": "Should JS completion items ignore access modifiers (private, protected, public). If flag is set to true, all of the completion items for methods and fields will be shown, however, if set to false, completion items will be generated according to access modifiers."
+				},
+				"ui5.plugin.rejectUnauthorized": {
+					"type": "boolean",
+					"default": true,
+					"description": "Data source related property. If true, the server certificate is verified against the list of supplied CAs. Verification happens at the connection level, before the HTTP request is sent."
 				}
 			}
 		},
@@ -188,9 +193,9 @@
 	"devDependencies": {
 		"@types/glob": "^7.1.1",
 		"@types/line-column": "^1.0.0",
+		"@types/axios": "^0.14.0",
 		"@types/mocha": "^8.0.3",
 		"@types/node": "^14.14.2",
-		"@types/request-promise": "^4.1.46",
 		"@types/vscode": "^1.51.0",
 		"clean-webpack-plugin": "^3.0.0",
 		"mocha": "^8.2.0",
@@ -203,10 +208,9 @@
 	},
 	"dependencies": {
 		"acorn-loose": "^8.0.1",
+		"axios": "^0.21.0",
 		"comment-parser": "^0.7.6",
 		"glob": "^7.1.4",
-		"line-column": "^1.0.2",
-		"request": "^2.88.2",
-		"request-promise": "^4.2.6"
+		"line-column": "^1.0.2"
 	}
 }
