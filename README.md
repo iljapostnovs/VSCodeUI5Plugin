@@ -121,7 +121,7 @@ The generated diagram can be imported to draw.io<br/>
 
 ----------
 ## Settings
-14 settings are available for extension configuration:<br/>
+15 settings are available for extension configuration:<br/>
 ![Settings](/images/Settings.png)
 
 ----------
