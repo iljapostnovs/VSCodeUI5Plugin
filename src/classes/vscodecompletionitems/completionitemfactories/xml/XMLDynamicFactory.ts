@@ -463,7 +463,9 @@ export class XMLDynamicFactory {
 
 	private removeDuplicateCompletionItems(completionItems: CustomCompletionItem[]) {
 		completionItems = completionItems.reduce((accumulator: CustomCompletionItem[], completionItem: CustomCompletionItem) => {
-			const methodInAccumulator = accumulator.find(accumulatedCompletionItem => accumulatedCompletionItem.className === completionItem.className);
+			const methodInAccumulator = accumulator.find(accumulatedCompletionItem =>
+				accumulatedCompletionItem.label === completionItem.label
+			);
 			if (!methodInAccumulator) {
 				accumulator.push(completionItem);
 			}
