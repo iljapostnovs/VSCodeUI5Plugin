@@ -159,3 +159,17 @@ The same goes for function return data type. Use `@returns {UI5Class} UI5ClassVa
 
 ### Proxy
 If HTTP_PROXY or HTTPS_PROXY environment variables are set, ui5.sap.com will be requested using the proxy.
+
+### Known limitations
+acorn-loose is used as JS parser. It has issues if you have mixed spaces and tabs.
+Example:
+```javascript
+function() {
+	 var oModel = aSelectedContexts[0].getModel();
+	var asd;
+}
+test;
+```
+There is an unnecessary space before `var oModel` and acorn is parsing it incorrectly.
+As a result - the file will not be parsed as expected and you might not get JS completion items and get errors in xml views regarding wrong values for event handlers.<br/>
+Keep your code clean, it will help you to have the plugin working correctly :)
