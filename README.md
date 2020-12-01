@@ -135,17 +135,30 @@ The generated diagram can be imported to draw.io<br/>
 Custom class metadata is dynamically generated using .js and view.xml files of the project.<br/>
 There are several types of variable definitions:<br/>
 * Class Fields<br/>
-`this.variable`<br/>
+```javascript
+this.variable
+```
+<br/>
 Algorithm looks for all definitions in the functions of the object which is returned in
-`return AnyUI5Class.extend("name", {})` part
+
+```javascript
+return AnyUI5Class.extend("name", {/*here*/})
+```
 * Function parameters<br/>
-`function(oEvent) {}`<br/>
+
+```javascript
+function(oEvent) {}
+```
+<br/>
 > Only way to find out the data type of the function parameter is JSDoc. Use `@param {UI5Class} UI5ClassParameter - description` if you want completion items to work for function params.<br/>
 The same goes for function return data type. Use `@returns {UI5Class} UI5ClassVariable - description` if you want completion items to work for function return.<br/>
 * Local variables<br/>
-`function() {
-	var oList = new List();
-}`
+
+```javascript
+function() {
+    var oList = new List();
+}
+```
 
 ### Assumptions
 * File starts with sap.ui.define
@@ -160,15 +173,15 @@ The same goes for function return data type. Use `@returns {UI5Class} UI5ClassVa
 ### Proxy
 If HTTP_PROXY or HTTPS_PROXY environment variables are set, ui5.sap.com will be requested using the proxy.
 
-### Known limitations
+# Known limitations
+## acorn-loose
 acorn-loose is used as JS parser. It has issues if you have mixed spaces and tabs.
 Example:
 ```javascript
 function() {
-	 var oModel = aSelectedContexts[0].getModel();
+	 var oModel = this.getModel();
 	var asd;
 }
-test;
 ```
 There is an unnecessary space before `var oModel` and acorn is parsing it incorrectly.
 As a result - the file will not be parsed as expected and you might not get JS completion items and get errors in xml views regarding wrong values for event handlers.<br/>
