@@ -185,4 +185,8 @@ function() {
 ```
 There is an unnecessary space before `var oModel` and acorn is parsing it incorrectly.
 As a result - the file will not be parsed as expected and you might not get JS completion items and get errors in xml views regarding wrong values for event handlers.<br/>
-Keep your code clean, it will help you to have the plugin working correctly :)
+Keep your code clean, it will help you to have the plugin working correctly :)<br/>
+It's highly recommended to set formatting on save in your VS Code preferences, it will help to avoid such issues.
+```json
+"editor.formatOnSave": true
+```
