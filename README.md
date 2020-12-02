@@ -156,6 +156,7 @@ return AnyUI5Class.extend("name", {/*here*/})
 function(oEvent) {}
 ```
 <br/>
+
 > Only way to find out the data type of the function parameter is JSDoc. Use `@param {UI5Class} UI5ClassParameter - description` if you want completion items to work for function params.<br/>
 The same goes for function return data type. Use `@returns {UI5Class} UI5ClassVariable - description` if you want completion items to work for function return.<br/>
 * Local variables<br/>
