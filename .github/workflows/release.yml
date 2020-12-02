@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [ master ]
+    branches: [ development ]
 
 name: Release and deploy
 
@@ -22,17 +22,17 @@ jobs:
           body: ${{ github.event.head_commit.message }} release
           draft: false
           prerelease: false
-  deploy:
-    name: Deploy to marketplace
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: npm install
-        run: npm install
-      - name: deploy
-        uses: lannonbr/vsce-action@master
-        with:
-          args: "publish -p $VSCE_TOKEN"
-        env:
-          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
+  # deploy:
+  #   name: Deploy to marketplace
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #     - name: npm install
+  #       run: npm install
+  #     - name: deploy
+  #       uses: lannonbr/vsce-action@master
+  #       with:
+  #         args: "publish -p $VSCE_TOKEN"
+  #       env:
+  #         VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
