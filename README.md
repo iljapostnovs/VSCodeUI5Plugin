@@ -1,6 +1,12 @@
 # SAPUI5 Extension
 This plugin contains perks for UI5 developers.
 
+Before you start working with the plugin, it will be useful to set formatOnSave setting in VSCode preferences:
+```json
+"editor.formatOnSave": true
+```
+The reason for it is described in [Known limitations](#known-limitations)
+
 ----------
 ## Completion Items
 ### XML
