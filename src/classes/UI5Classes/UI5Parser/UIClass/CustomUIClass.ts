@@ -649,7 +649,8 @@ export class CustomUIClass extends AbstractUIClass {
 					multiple: multiple,
 					singularName: singularName,
 					description: "",
-					visibility: visibility
+					visibility: visibility,
+					default: false
 				};
 				return UIAggregations;
 			});

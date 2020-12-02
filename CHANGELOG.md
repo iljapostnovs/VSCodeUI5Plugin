@@ -108,3 +108,6 @@
 * Bugfixes
 * XML Completion items for custom controls added
 * rejectUnauthorized setting added
+
+## 0.10.7 (02-12-2020)
+* XML aggregation completion items are now merged with completion items of default aggregation type.
