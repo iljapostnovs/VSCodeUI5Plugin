@@ -5,3 +5,11 @@ src/
 tsconfig.json
 webpack.config.js
 images/*.gif
+images/Settings.png
+images/UML.png
+.gitignore
+.github/
+tslint.json
+tasks.json
+README.md
+CHANGELOG.md

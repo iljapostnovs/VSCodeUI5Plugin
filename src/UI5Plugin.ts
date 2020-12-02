@@ -1,13 +1,12 @@
 import * as vscode from "vscode";
-import { CommandRegistrator } from "./classes/Util/registrators/CommandRegistrator";
-import { CompletionItemRegistrator } from "./classes/Util/registrators/CompletionItemRegistrator";
-import { DefinitionProviderRegistrator } from "./classes/Util/registrators/DefinitionProviderRegistrator";
-import { FileWatcher } from "./classes/Util/FileWatcher";
-import { SignatureHelpRegistrator } from "./classes/Util/registrators/SignatureHelpRegistrator";
-import { DiagnosticsRegistrator } from "./classes/Util/registrators/DiagnosticsRegistrator";
-import { CodeLensRegistrator } from "./classes/Util/registrators/CodeLensRegistrator";
-import { JSCodeActionRegistrator } from "./classes/Util/registrators/JSCodeActionRegistrator";
-
+import { CommandRegistrator } from "./classes/registrators/CommandRegistrator";
+import { CompletionItemRegistrator } from "./classes/registrators/CompletionItemRegistrator";
+import { DefinitionProviderRegistrator } from "./classes/registrators/DefinitionProviderRegistrator";
+import { FileWatcher } from "./classes/utils/FileWatcher";
+import { SignatureHelpRegistrator } from "./classes/registrators/SignatureHelpRegistrator";
+import { DiagnosticsRegistrator } from "./classes/registrators/DiagnosticsRegistrator";
+import { CodeLensRegistrator } from "./classes/registrators/CodeLensRegistrator";
+import { JSCodeActionRegistrator } from "./classes/registrators/JSCodeActionRegistrator";
 export class UI5Plugin {
 	private static instance?: UI5Plugin;
 	public static getInstance() {
@@ -28,7 +27,7 @@ export class UI5Plugin {
 		this.context?.subscriptions.push(disposable);
 	}
 	public initialize(context: vscode.ExtensionContext) {
-		return new Promise((resolve, reject) => {
+		return new Promise<void>((resolve, reject) => {
 			this.context = context;
 			vscode.window.withProgress({
 				location: vscode.ProgressLocation.Window,
@@ -56,5 +55,9 @@ export class UI5Plugin {
 		DiagnosticsRegistrator.register();
 		CodeLensRegistrator.register();
 		JSCodeActionRegistrator.register();
+	}
+
+	static registerFallbackCommands() {
+		CommandRegistrator.registerFallbackCommands();
 	}
 }
