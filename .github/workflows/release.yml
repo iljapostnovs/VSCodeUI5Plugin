@@ -1,0 +1,38 @@
+on:
+  push:
+    branches: [ master ]
+
+name: Release and deploy
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.event.head_commit.message }}
+          release_name: ${{ github.event.head_commit.message }}
+          body: ${{ github.event.head_commit.message }} release
+          draft: false
+          prerelease: false
+  deploy:
+    name: Deploy to marketplace
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: npm install
+        run: npm install
+      - name: deploy
+        uses: lannonbr/vsce-action@master
+        with:
+          args: "publish -p $VSCE_TOKEN"
+        env:
+          VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
