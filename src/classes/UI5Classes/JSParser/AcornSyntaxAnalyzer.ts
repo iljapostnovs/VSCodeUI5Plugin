@@ -2,146 +2,29 @@ import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
 import { FileReader } from "../../utils/FileReader";
 import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
-import { CustomClassUIField, CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
-
+import { CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { FieldPropertyMethodGetterStrategy } from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
+import { InnerPropertiesStrategy } from "./strategies/InnerPropertiesStrategy";
 export class AcornSyntaxAnalyzer {
 	static getFieldsAndMethodsOfTheCurrentVariable() {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
-		const UIClassName = this.getClassNameOfTheVariableAtCurrentDocumentPosition();
-		if (UIClassName) {
-			const classNameParts = UIClassName.split("__map__");
 
-			if (classNameParts.length === 1) {
-				fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(classNameParts[0]);
-			} else {
-				const className = classNameParts.shift();
-				if (className) {
-					const mapFields = classNameParts;
-					const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
-					const currentFieldName = mapFields.shift();
-					const field = UIClass.fields.find(field => field.name === currentFieldName);
-					if (field) {
-						fieldsAndMethods = this.getFieldsAndMethodsForMap(field, mapFields);
-						fieldsAndMethods.className = className;
-					}
-				}
-			}
+		const aStrategies: FieldPropertyMethodGetterStrategy[] = [
+			new FieldsAndMethodForPositionBeforeCurrentStrategy(),
+			new InnerPropertiesStrategy()
+		];
 
-			const ignoreAccessLevelModifiers = vscode.workspace.getConfiguration("ui5.plugin").get("ignoreAccessLevelModifiers");
-			if (!ignoreAccessLevelModifiers) {
-				const classNameOfTheCurrentDocument = this.getClassNameOfTheCurrentDocument();
-				if (classNameOfTheCurrentDocument !== UIClassName) {
-					if (fieldsAndMethods?.fields) {
-						fieldsAndMethods.fields = fieldsAndMethods.fields.filter(field => field.visibility === "public");
-					}
-					if (fieldsAndMethods?.methods) {
-						fieldsAndMethods.methods = fieldsAndMethods.methods.filter(method => method.visibility === "public");
-					}
-				}
-			}
+		aStrategies.find(strategy => {
+			fieldsAndMethods = strategy.getFieldsAndMethods();
 
-		}
+			return !!fieldsAndMethods;
+		});
 
 		return fieldsAndMethods;
 	}
 
-	private static getFieldsAndMethodsForMap(field: CustomClassUIField, mapFields: string[]) {
-		const fieldsAndMethods: FieldsAndMethods = {
-			className: "",
-			fields: this.getUIFieldsForMap(field.customData, mapFields),
-			methods: []
-		};
-
-		return fieldsAndMethods;
-	}
-
-	private static getUIFieldsForMap(customData: any, mapFields: string[], fields: UIField[] = []) {
-		const fieldName = mapFields.shift();
-		if (fieldName) {
-			customData = customData[fieldName];
-		}
-
-		if (mapFields.length === 0) {
-			const newFields: UIField[] = Object.keys(customData).map(key => {
-				return {
-					name: key,
-					description: "",
-					type: undefined,
-					visibility: "public"
-				};
-			});
-			newFields.forEach(newField => {
-				fields.push(newField);
-			});
-		} else {
-			this.getUIFieldsForMap(customData, mapFields, fields);
-		}
-
-		return fields;
-	}
-
-	public static getClassNameOfTheVariableAtCurrentDocumentPosition() {
-		let UIClassName;
-		this.declarationStack = [];
-		const currentClassName = this.getClassNameOfTheCurrentDocument();
-
-		const activeTextEditor = vscode.window.activeTextEditor;
-		if (currentClassName && activeTextEditor) {
-			const position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
-
-			UIClassName = this.acornGetClassName(currentClassName, position);
-		}
-
-		return UIClassName;
-	}
-
-	public static acornGetClassName(className: string, position: number) {
-		let classNameOfTheCurrentVariable;
-		const stack = this.getStackOfNodesForPosition(className, position);
-		if (stack.length > 0) {
-			classNameOfTheCurrentVariable = this.findClassNameForStack(stack, className);
-		}
-
-		return classNameOfTheCurrentVariable;
-	}
-
-	public static getStackOfNodesForPosition(className: string, position: number, checkForLastPosition: boolean = false) {
-		const stack: any[] = [];
-		const UIClass = UIClassFactory.getUIClass(className);
-
-		if (UIClass instanceof CustomUIClass) {
-			const methodNode = UIClass.acornMethodsAndFields.find((node: any) => {
-				return node.start < position && node.end >= position;
-			})?.value;
-
-			if (methodNode) {
-				const methodBody = methodNode.body?.body;
-				const nodeWithCurrentPosition = methodBody && this.findAcornNode(methodBody, position);
-
-				if (nodeWithCurrentPosition) {
-					this.generateStackOfNodes(nodeWithCurrentPosition, position, stack, checkForLastPosition);
-				}
-			}
-		}
-
-		return stack;
-	}
-
-	private static generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
-		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "VariableDeclaration", "ThisExpression", "NewExpression", "Identifier"];
-		const positionIsCorrect = node.end < position || (checkForLastPosition && node.end === position);
-		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖" && node.property?.name !== "prototype") {
-			stack.unshift(node);
-		}
-
-		const innerNode: any = this.findInnerNode(node, position);
-
-		if (innerNode) {
-			this.generateStackOfNodes(innerNode, position, stack, checkForLastPosition);
-		}
-	}
-
-	private static findInnerNode(node: any, position: number) {
+	public static findInnerNode(node: any, position: number) {
 		let innerNode: any;
 		if (node.type === "VariableDeclaration") {
 			const declaration = this.findAcornNode(node.declarations, position - 1);
@@ -322,6 +205,11 @@ export class AcornSyntaxAnalyzer {
 						if (!className) {
 							className = this.getClassNameFromMethodParams(currentNode, UIClass);
 
+							if (className?.indexOf("__mapparam__") > -1) {
+								const fields = stack.filter(stackPart => stackPart.type === "MemberExpression").map(memberExpression => memberExpression.property.name).join(".");
+								className = `${className}__mapparam__${fields}`;
+								stack = [];
+							}
 							if (!className && currentNode.name === UIClass.classBodyAcornVariableName) {
 								className = UIClass.className;
 							}
@@ -586,7 +474,7 @@ export class AcornSyntaxAnalyzer {
 		return this.getClassNameFromAcornDeclaration(declaration.init, UIClass);
 	}
 
-	private static declarationStack: any[] = [];
+	public static declarationStack: any[] = [];
 
 	private static getClassNameFromAcornDeclaration(declaration: any, UIClass: CustomUIClass) {
 		let className = "";
@@ -597,7 +485,8 @@ export class AcornSyntaxAnalyzer {
 			if (declaration?.type === "NewExpression") {
 				className = this.getClassNameFromUIDefineDotNotation(declaration.callee?.name, UIClass);
 			} else if (declaration?.type === "CallExpression" || declaration?.type === "MemberExpression" || declaration?.type === "Identifier") {
-				className = this.acornGetClassName(UIClass.className, declaration.end + 1) || "";
+				const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+				className = positionBeforeCurrentStrategy.acornGetClassName(UIClass.className, declaration.end + 1) || "";
 			} else if (declaration?.type === "ArrayExpression") {
 				className = "array";
 			} else if (declaration?.type === "ObjectExpression") {
@@ -635,6 +524,10 @@ export class AcornSyntaxAnalyzer {
 				const param = params.find((param: any) => param.name === node.name);
 				if (param) {
 					className = param.jsType;
+					if (param.customData) {
+						const stringifiedCustomData = JSON.stringify(param.customData);
+						className = `${className}__mapparam__${stringifiedCustomData}`;
+					}
 				}
 			}
 		}

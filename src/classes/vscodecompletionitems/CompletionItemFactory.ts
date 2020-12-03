@@ -115,6 +115,7 @@ export class CompletionItemFactory {
 
 	public generatePropertyMethodCompletionItems() {
 		const jsDynamicFactory = new JSDynamicFactory();
+		UIClassFactory.setNewContentForCurrentUIClass();
 
 		return jsDynamicFactory.generateUIClassCompletionItems();
 	}

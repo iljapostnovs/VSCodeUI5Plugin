@@ -9,6 +9,7 @@ import { AcornSyntaxAnalyzer } from "../../classes/UI5Classes/JSParser/AcornSynt
 import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
 import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -55,7 +56,8 @@ suite("Extension Test Suite", () => {
 			});
 
 			const position = searchedNode.property.start + data.positionAddition;
-			const classNameAtPosition = AcornSyntaxAnalyzer.acornGetClassName(data.className, position);
+			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+			const classNameAtPosition = positionBeforeCurrentStrategy.acornGetClassName(data.className, position);
 			assert.strictEqual(data.type, classNameAtPosition, `${data.className} position ${position} type is ${classNameAtPosition} but expected ${data.type}`);
 		});
 	});

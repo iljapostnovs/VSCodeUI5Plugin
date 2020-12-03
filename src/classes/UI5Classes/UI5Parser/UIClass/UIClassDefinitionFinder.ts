@@ -6,12 +6,14 @@ import { FileReader } from "../../../utils/FileReader";
 import { StandardUIClass } from "./StandardUIClass";
 import { URLBuilder } from "../../../utils/URLBuilder";
 import LineColumn = require("line-column");
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 export class UIClassDefinitionFinder {
 	public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {
 		let location: vscode.Location | undefined;
 
 		if (!classNameDotNotation) {
-			classNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheVariableAtCurrentDocumentPosition();
+			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+			classNameDotNotation = positionBeforeCurrentStrategy.getClassNameOfTheVariableAtCurrentDocumentPosition();
 		}
 
 		const textEditor = vscode.window.activeTextEditor;
