@@ -1,5 +1,5 @@
 import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
-import { CustomUIClass, CustomClassUIMethod } from "../../UI5Parser/UIClass/CustomUIClass";
+import { CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
 import { FieldPropertyMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
@@ -26,57 +26,37 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 
 			const stack = this.getStackOfNodesForInnerParamsForPosition(currentClassName, position);
 			if (stack.length === 1 && stack[0].type === "NewExpression") {
-				const newExpression = stack[0];
-				const argument = AcornSyntaxAnalyzer.findAcornNode(newExpression.arguments, position);
-				const indexOfArgument = newExpression.arguments.indexOf(argument);
-				if (argument && argument.type === "ObjectExpression") {
 
-					const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-					const stack = positionBeforeCurrentStrategy.getStackOfNodesForPosition(currentClassName, newExpression.end + 1);
-					const classNameOfCurrentNewExpression = AcornSyntaxAnalyzer.findClassNameForStack(stack, currentClassName);
-					if (classNameOfCurrentNewExpression) {
-						const node = new SAPNodeDAO().findNode(classNameOfCurrentNewExpression);
-						const constructorParameters = node?.getMetadata()?.getRawMetadata()?.constructor?.parameters;
-						if (constructorParameters) {
-							const settings = constructorParameters.find((parameter: any) => parameter.name === "mSettings");
-							if (settings) {
-								const indexOfSettings = constructorParameters.indexOf(settings);
-								if (indexOfSettings === indexOfArgument) {
-									fieldsAndMethods = this.generatePropertyFieldsFor(classNameOfCurrentNewExpression);
-								}
-							}
-						}
-					}
-				}
+				fieldsAndMethods = this.getFieldsAndMethodsForNewExpression(stack[0]);
 			} else if (stack.length === 1 && stack[0].type === "CallExpression") {
-				const objectExpression = stack[0];
-				const argument = AcornSyntaxAnalyzer.findAcornNode(objectExpression.arguments, position);
-				const indexOfArgument = objectExpression.arguments.indexOf(argument);
-				if (argument && argument.type === "ObjectExpression") {
-					const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-					const stack = positionBeforeCurrentStrategy.getStackOfNodesForPosition(currentClassName, objectExpression.callee.end);
-					const classNameOfCurrentObjectExpression = AcornSyntaxAnalyzer.findClassNameForStack(stack, currentClassName);
-					if (classNameOfCurrentObjectExpression) {
-						const methodName = objectExpression.callee?.property?.name;
-						if (methodName) {
-							const UIClass = <CustomUIClass>UIClassFactory.getUIClass(classNameOfCurrentObjectExpression);
-							const UIMethod = UIClass.methods.find(method => method.name === methodName);
-							if (UIMethod?.acornParams) {
-								const acornParam = UIMethod.acornParams[indexOfArgument];
-								if (acornParam) {
-									fieldsAndMethods = {
-										className: acornParam.jsType,
-										methods: [],
-										fields: Object.keys(acornParam.customData).map(key => {
-											return {
-												description: key,
-												name: key,
-												type: typeof acornParam.customData[key] === "string" ? acornParam.customData[key] : typeof acornParam.customData[key],
-												visibility: "public"
-											};
-										})
-									};
-								}
+				fieldsAndMethods = this.getFieldsAndMethodsForCallExpression(stack[0]);
+			}
+		}
+
+		return fieldsAndMethods;
+	}
+
+	private getFieldsAndMethodsForNewExpression(newExpression: any) {
+		let fieldsAndMethods: FieldsAndMethods | undefined;
+		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		const position = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor.selection.start);
+		if (position && currentClassName) {
+			const argument = AcornSyntaxAnalyzer.findAcornNode(newExpression.arguments, position);
+			const indexOfArgument = newExpression.arguments.indexOf(argument);
+			if (argument && argument.type === "ObjectExpression") {
+
+				const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+				const stack = positionBeforeCurrentStrategy.getStackOfNodesForPosition(currentClassName, newExpression.end + 1);
+				const classNameOfCurrentNewExpression = AcornSyntaxAnalyzer.findClassNameForStack(stack, currentClassName);
+				if (classNameOfCurrentNewExpression) {
+					const node = new SAPNodeDAO().findNode(classNameOfCurrentNewExpression);
+					const constructorParameters = node?.getMetadata()?.getRawMetadata()?.constructor?.parameters;
+					if (constructorParameters) {
+						const settings = constructorParameters.find((parameter: any) => parameter.name === "mSettings");
+						if (settings) {
+							const indexOfSettings = constructorParameters.indexOf(settings);
+							if (indexOfSettings === indexOfArgument) {
+								fieldsAndMethods = this.generatePropertyFieldsFor(classNameOfCurrentNewExpression);
 							}
 						}
 					}
@@ -85,6 +65,83 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 		}
 
 		return fieldsAndMethods;
+	}
+
+	private getFieldsAndMethodsForCallExpression(objectExpression: any) {
+		let fieldsAndMethods: FieldsAndMethods | undefined;
+		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		const position = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor.selection.start);
+
+		if (currentClassName && position) {
+			const argument = AcornSyntaxAnalyzer.findAcornNode(objectExpression.arguments, position);
+			const indexOfArgument = objectExpression.arguments.indexOf(argument);
+			if (argument && argument.type === "ObjectExpression") {
+				const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+				const stack = positionBeforeCurrentStrategy.getStackOfNodesForPosition(currentClassName, objectExpression.callee.end);
+				const classNameOfCurrentObjectExpression = AcornSyntaxAnalyzer.findClassNameForStack(stack, currentClassName);
+				if (classNameOfCurrentObjectExpression) {
+					const methodName = objectExpression.callee?.property?.name;
+					if (methodName) {
+						const UIClass = <CustomUIClass>UIClassFactory.getUIClass(classNameOfCurrentObjectExpression);
+						const UIMethod = UIClass.methods.find(method => method.name === methodName);
+						if (UIMethod?.acornParams) {
+							const acornParam = UIMethod.acornParams[indexOfArgument];
+							const fields = this.generateFieldsFromArgument(argument);
+							const objectForCompletionItems = this.getObjectFromObject(acornParam.customData, fields);
+							if (acornParam && typeof objectForCompletionItems === "object") {
+								fieldsAndMethods = {
+									className: acornParam.jsType,
+									methods: [],
+									fields: Object.keys(objectForCompletionItems).map(key => {
+										return {
+											description: key,
+											name: key,
+											type: typeof objectForCompletionItems[key] === "string" ? objectForCompletionItems[key] : typeof objectForCompletionItems[key],
+											visibility: "public"
+										};
+									})
+								};
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return fieldsAndMethods;
+	}
+
+	private generateFieldsFromArgument(argument: any) {
+		let fields: string[] = [];
+
+		const position = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor.selection.start);
+		if (position && argument.type === "ObjectExpression" && argument.properties) {
+			const property = AcornSyntaxAnalyzer.findAcornNode(argument.properties, position);
+			if (property) {
+				fields.push(property.key.name);
+
+				if (property && property.value?.type === "ObjectExpression") {
+					fields = fields.concat(this.generateFieldsFromArgument(property.value));
+				}
+			}
+		}
+
+		return fields;
+	}
+
+	private getObjectFromObject(object: any, fields: string[]): any {
+		let objectToReturn;
+
+		const field = fields.shift();
+		if (field) {
+			objectToReturn = object[field];
+
+			objectToReturn = this.getObjectFromObject(objectToReturn, fields);
+		} else {
+			objectToReturn = object;
+		}
+
+		return objectToReturn;
 	}
 
 	private generatePropertyFieldsFor(className: string, fieldsAndMethods: FieldsAndMethods = {
