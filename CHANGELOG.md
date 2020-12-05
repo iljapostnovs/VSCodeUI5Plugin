@@ -1,5 +1,6 @@
-## 0.10.7 (03-12-2020)
-* XML aggregation completion items are now merged with completion items of default aggregation type.
+## 0.10.7 (05-12-2020)
+* XML aggregation completion items are now merged with completion items of default aggregation type
+* Bugfixes
 
 ## 0.10.4 (02-12-2020)
 * Automatic template insertion for .xml files added
