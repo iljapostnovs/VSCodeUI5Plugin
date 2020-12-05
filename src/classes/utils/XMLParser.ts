@@ -341,7 +341,8 @@ export class XMLParser {
 		const UIClass = UIClassFactory.getUIClass(className);
 		methods = UIClass.methods;
 
-		if (UIClass.parentClassNameDotNotation && (!onlyCustomMethods || !UIClass.parentClassNameDotNotation.startsWith("sap."))) {
+		const isThisClassFromAProject = !!FileReader.getManifestForClass(UIClass.parentClassNameDotNotation);
+		if (UIClass.parentClassNameDotNotation && (!onlyCustomMethods || isThisClassFromAProject)) {
 			methods = methods.concat(this.getClassMethodsRecursively(UIClass.parentClassNameDotNotation));
 		}
 
@@ -350,7 +351,7 @@ export class XMLParser {
 
 	static getPrefixForLibraryName(libraryName: string, document: string) {
 		let prefix: string | undefined;
-		const regExp = new RegExp(`(?<=xmlns).*?(?=="${escapeRegExp(libraryName)}")`);
+		const regExp = new RegExp(`(?<=xmlns)(\\w|:)*?(?=="${escapeRegExp(libraryName)}")`);
 		const result = regExp.exec(document);
 		if (result) {
 			prefix = result[0].replace(":", "");

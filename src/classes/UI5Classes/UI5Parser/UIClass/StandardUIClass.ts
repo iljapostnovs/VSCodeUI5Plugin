@@ -2,6 +2,7 @@ import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssoci
 import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
 import { URLBuilder } from "../../../utils/URLBuilder";
+import { FileReader } from "../../../utils/FileReader";
 
 export class StandardUIClass extends AbstractUIClass {
 	private readonly nodeDAO = new SAPNodeDAO();
@@ -96,9 +97,9 @@ export class StandardUIClass extends AbstractUIClass {
 	}
 
 	private getStandardClassProperties(className: string) {
-		let classPropeties: UIProperty[] = [];
+		let classProperties: UIProperty[] = [];
 		const SAPNode = this.findSAPNode(className);
-		classPropeties = SAPNode?.getProperties().reduce((accumulator: UIProperty[], {name, type, description, visibility}:any) => {
+		classProperties = SAPNode?.getProperties().reduce((accumulator: UIProperty[], {name, type, description, visibility}:any) => {
 			const additionalDescription = this.generateAdditionalDescriptionFrom(type);
 			accumulator.push({
 				name: name,
@@ -109,12 +110,13 @@ export class StandardUIClass extends AbstractUIClass {
 			});
 			return accumulator;
 		}, []) || [];
-		return classPropeties;
+		return classProperties;
 	}
 
 	private generateAdditionalDescriptionFrom(className: string) {
 		let additionalDescription = "";
-		if (className?.startsWith("sap.")) {
+		const isThisClassFromAProject = !!FileReader.getManifestForClass(className);
+		if (!isThisClassFromAProject) {
 			const SAPNode = this.findSAPNode(className);
 			additionalDescription = SAPNode?.getProperties().reduce((accumulator: string, property: any) => {
 				accumulator += `${property.name}\n`;
@@ -129,7 +131,8 @@ export class StandardUIClass extends AbstractUIClass {
 	protected generateTypeValues(type: string) {
 		let typeValues = super.generateTypeValues(type);
 
-		if (typeValues.length === 0 && type?.startsWith("sap.")) {
+		const isThisClassFromAProject = !!FileReader.getManifestForClass(type);
+		if (typeValues.length === 0 && !isThisClassFromAProject) {
 			const typeNode = this.findSAPNode(type);
 			const metadata = typeNode?.getMetadata();
 			typeValues = metadata?.rawMetadata?.properties?.map((property: any): TypeValue => {

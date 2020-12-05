@@ -119,7 +119,8 @@ export class XMLDynamicFactory {
 			} else if (libName) {
 				let tagPrefix = XMLParser.getTagPrefix(currentTagText);
 				tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
-				if (libName.startsWith("sap.")) {
+				const isThisClassFromAProject = !!FileReader.getManifestForClass(libName + ".");
+				if (!isThisClassFromAProject) {
 					completionItems = this.getStandardCompletionItemsFilteredByLibraryName(libName);
 					completionItems = this.filterCompletionItemsByAggregationsType(completionItems);
 				} else {

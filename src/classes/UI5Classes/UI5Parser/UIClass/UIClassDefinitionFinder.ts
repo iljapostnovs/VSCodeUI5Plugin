@@ -25,7 +25,8 @@ export class UIClassDefinitionFinder {
 		}
 
 		if (classNameDotNotation && methodName) {
-			if (classNameDotNotation.startsWith("sap.") && openInBrowserIfStandardMethod) {
+			const isThisClassFromAProject = !!FileReader.getManifestForClass(classNameDotNotation);
+			if (!isThisClassFromAProject && openInBrowserIfStandardMethod) {
 				this.openClassMethodInTheBrowser(classNameDotNotation, methodName);
 			} else {
 				location = this.getVSCodeMethodLocation(classNameDotNotation, methodName);
