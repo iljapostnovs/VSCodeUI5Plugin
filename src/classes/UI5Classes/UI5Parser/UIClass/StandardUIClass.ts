@@ -170,14 +170,15 @@ export class StandardUIClass extends AbstractUIClass {
 		let classAggregations: UIAggregation[] = [];
 		const SAPNode = this.findSAPNode(className);
 
-		classAggregations = SAPNode?.getAggregations().reduce((accumulator: UIAggregation[], aggregation:any) => {
+		classAggregations = SAPNode?.getAggregations().reduce((accumulator: UIAggregation[], aggregation: any) => {
 			accumulator.push({
 				name: aggregation.name,
 				type: aggregation.type,
 				multiple: aggregation.coordinality === "0..n",
 				singularName: aggregation.singularName,
 				description: this.removeTags(aggregation.description),
-				visibility: aggregation.visibility
+				visibility: aggregation.visibility,
+				default: SAPNode.getMetadata()?.getUI5Metadata()?.defaultAggregation === aggregation.name
 			});
 			return accumulator;
 		}, []) || [];

@@ -1,6 +1,12 @@
 # SAPUI5 Extension
 This plugin contains perks for UI5 developers.
 
+Before you start working with the plugin, it will be useful to set formatOnSave setting in VSCode preferences:
+```json
+"editor.formatOnSave": true
+```
+The reason for it is described in [Known limitations](#known-limitations)
+
 ----------
 ## Completion Items
 ### XML
@@ -150,6 +156,7 @@ return AnyUI5Class.extend("name", {/*here*/})
 function(oEvent) {}
 ```
 <br/>
+
 > Only way to find out the data type of the function parameter is JSDoc. Use `@param {UI5Class} UI5ClassParameter - description` if you want completion items to work for function params.<br/>
 The same goes for function return data type. Use `@returns {UI5Class} UI5ClassVariable - description` if you want completion items to work for function return.<br/>
 * Local variables<br/>
@@ -185,4 +192,8 @@ function() {
 ```
 There is an unnecessary space before `var oModel` and acorn is parsing it incorrectly.
 As a result - the file will not be parsed as expected and you might not get JS completion items and get errors in xml views regarding wrong values for event handlers.<br/>
-Keep your code clean, it will help you to have the plugin working correctly :)
+Keep your code clean, it will help you to have the plugin working correctly :)<br/>
+It's highly recommended to set formatting on save in your VS Code preferences, it will help to avoid such issues.
+```json
+"editor.formatOnSave": true
+```

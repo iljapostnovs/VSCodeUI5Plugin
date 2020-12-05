@@ -215,7 +215,20 @@ export class XMLDynamicFactory {
 				const classOfTheTag = [libraryPath, className].join(".");
 				const UIClass = UIClassFactory.getUIClass(classOfTheTag);
 				const aggregations = this.getAllAggregationsRecursively(UIClass);
-				completionItems = this.generateAggregationCompletionItems(aggregations, classTagPrefix);
+				const aggregationCompletionItems = this.generateAggregationCompletionItems(aggregations, classTagPrefix);
+				//add completion items for default aggregation
+				const defaultAggregation = aggregations.find(aggregation => aggregation.default);
+				if (defaultAggregation) {
+					const aggregationType = defaultAggregation.type;
+					if (aggregationType) {
+						const nodeDAO = new SAPNodeDAO();
+						completionItems = aggregationCompletionItems.concat(completionItems.filter(completionItem => {
+							return nodeDAO.isInstanceOf(aggregationType, completionItem.className);
+						}));
+					}
+				} else {
+					completionItems = aggregationCompletionItems;
+				}
 			} else {
 
 				// previous tag is an aggregation
@@ -250,6 +263,7 @@ export class XMLDynamicFactory {
 			completionItem.detail = aggregation.type || "";
 			return completionItem;
 		});
+
 		return completionItems;
 	}
 

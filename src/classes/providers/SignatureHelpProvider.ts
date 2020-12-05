@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 
 export class SignatureHelpProvider {
@@ -15,7 +16,8 @@ export class SignatureHelpProvider {
 			const position = activeTextEditor?.document.offsetAt(activeTextEditor.selection.start);
 
 			if (currentClassName && position) {
-				const stackOfNodes = AcornSyntaxAnalyzer.getStackOfNodesForPosition(currentClassName, position + 1, true);
+				const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+				const stackOfNodes = positionBeforeCurrentStrategy.getStackOfNodesForPosition(currentClassName, position + 1, true);
 
 				if (stackOfNodes. length > 0) {
 					const callExpression = stackOfNodes[stackOfNodes.length - 1].type === "CallExpression" ? stackOfNodes.pop() : null; //removes CallExpression

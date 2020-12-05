@@ -32,6 +32,7 @@ export interface UIAggregation {
 	singularName: string;
 	visibility: string;
 	description: string;
+	default: boolean;
 }
 export interface UIEvent {
 	name: string;

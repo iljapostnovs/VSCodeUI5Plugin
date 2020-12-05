@@ -21,6 +21,7 @@ interface Comment {
 }
 export interface CustomClassUIMethod extends UIMethod {
 	position?: number;
+	acornParams?: any;
 }
 export interface CustomClassUIField extends UIField {
 	customData?: LooseObject;
@@ -107,10 +108,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 					if (paramTags) {
 						paramTags.forEach((tag: any) => {
-							const param = params.find((param: any) => param.name === tag.name);
-							if (param) {
-								param.jsType = tag.type;
-							}
+							this.fillParamJSTypesFromTag(tag, params);
 						});
 					}
 
@@ -135,6 +133,39 @@ export class CustomUIClass extends AbstractUIClass {
 					}
 				}
 			});
+		}
+	}
+
+	private fillParamJSTypesFromTag(tag: any, params: any[]) {
+		const tagNameParts = tag.name.split(".");
+		if (tagNameParts.length > 1) {
+			const paramName = tagNameParts.shift();
+			const param = params.find((param: any) => param.name === paramName);
+			if (param) {
+				if (!param.customData) {
+					param.customData = {};
+				}
+				this.fillFieldsRecursively(param.customData, tagNameParts, tag);
+			}
+
+		} else {
+			const param = params.find((param: any) => param.name === tag.name);
+			if (param) {
+				param.jsType = tag.type;
+			}
+		}
+	}
+
+	private fillFieldsRecursively(object: any, keys: string[], tag: any) {
+		const key = keys.shift();
+		if (key) {
+			object[key] = typeof object[key] !== "object" ? {} : object[key];
+
+			if (keys.length > 0) {
+				this.fillFieldsRecursively(object[key], keys, tag);
+			} else {
+				object[key] = tag.type;
+			}
 		}
 	}
 
@@ -288,7 +319,8 @@ export class CustomUIClass extends AbstractUIClass {
 						returnType: property.returnType || property.value.async ? "Promise" : "void",
 						position: property.start,
 						description: "",
-						visibility: property.key.name.startsWith("_") ? "private" : "public"
+						visibility: property.key.name.startsWith("_") ? "private" : "public",
+						acornParams: property.value.params
 					};
 					this.generateDescriptionForMethod(method);
 					this.methods.push(method);
@@ -395,7 +427,8 @@ export class CustomUIClass extends AbstractUIClass {
 						returnType: assignmentBody.returnType || assignmentBody.async ? "Promise" : "void",
 						position: assignmentBody.start,
 						description: "",
-						visibility: name?.startsWith("_") ? "private" : "public"
+						visibility: name?.startsWith("_") ? "private" : "public",
+						acornParams: assignmentBody.params
 					};
 					this.generateDescriptionForMethod(method);
 					this.methods.push(method);
@@ -649,7 +682,8 @@ export class CustomUIClass extends AbstractUIClass {
 					multiple: multiple,
 					singularName: singularName,
 					description: "",
-					visibility: visibility
+					visibility: visibility,
+					default: false
 				};
 				return UIAggregations;
 			});
