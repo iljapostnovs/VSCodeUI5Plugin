@@ -621,11 +621,11 @@ export class CustomUIClass extends AbstractUIClass {
 
 	private fillUI5Metadata() {
 		if (this.acornClassBody?.properties) {
-			const metadataExists = !!this.acornClassBody.properties.find((property: any) => property.key.name === "metadata");
-			const customMetadataExists = !!this.acornClassBody.properties.find((property: any) => property.key.name === "customMetadata");
+			const metadataExists = !!this.acornClassBody.properties?.find((property: any) => property.key.name === "metadata");
+			const customMetadataExists = !!this.acornClassBody.properties?.find((property: any) => property.key.name === "customMetadata");
 
 			if (metadataExists) {
-				const metadataObject = this.acornClassBody.properties.find((property: any) => property.key.name === "metadata");
+				const metadataObject = this.acornClassBody.properties?.find((property: any) => property.key.name === "metadata");
 
 				this.fillAggregations(metadataObject);
 				this.fillEvents(metadataObject);
@@ -634,7 +634,7 @@ export class CustomUIClass extends AbstractUIClass {
 			}
 
 			if (customMetadataExists) {
-				const customMetadataObject = this.acornClassBody.properties.find((property: any) => property.key.name === "customMetadata");
+				const customMetadataObject = this.acornClassBody.properties?.find((property: any) => property.key.name === "customMetadata");
 
 				this.fillByAssociations(customMetadataObject);
 			}
@@ -642,27 +642,27 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillAggregations(metadata: any) {
-		const aggregations = metadata.value.properties.find((metadataNode: any) => metadataNode.key.name === "aggregations");
+		const aggregations = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "aggregations");
 
 		if (aggregations) {
-			this.aggregations = aggregations.value.properties.map((aggregationNode: any) => {
+			this.aggregations = aggregations.value?.properties?.map((aggregationNode: any) => {
 				const aggregationName = aggregationNode.key.name;
 				const aggregationProps = aggregationNode.value.properties;
 
 				let aggregationType: undefined | string = undefined;
-				const aggregationTypeProp = aggregationProps.find((aggregationProperty: any) => aggregationProperty.key.name === "type");
+				const aggregationTypeProp = aggregationProps?.find((aggregationProperty: any) => aggregationProperty.key.name === "type");
 				if (aggregationTypeProp) {
 					aggregationType = aggregationTypeProp.value.value;
 				}
 
 				let multiple = true;
-				const multipleProp = aggregationProps.find((aggregationProperty: any) => aggregationProperty.key.name === "multiple");
+				const multipleProp = aggregationProps?.find((aggregationProperty: any) => aggregationProperty.key.name === "multiple");
 				if (multipleProp) {
 					multiple = multipleProp.value.value;
 				}
 
 				let singularName = "";
-				const singularNameProp = aggregationProps.find((aggregationProperty: any) => aggregationProperty.key.name === "singularName");
+				const singularNameProp = aggregationProps?.find((aggregationProperty: any) => aggregationProperty.key.name === "singularName");
 				if (singularNameProp) {
 					singularName = singularNameProp.value.value;
 				}
@@ -671,7 +671,7 @@ export class CustomUIClass extends AbstractUIClass {
 				}
 
 				let visibility = "public";
-				const visibilityProp = aggregationProps.find((associationProperty: any) => associationProperty.key.name === "visibility");
+				const visibilityProp = aggregationProps?.find((associationProperty: any) => associationProperty.key.name === "visibility");
 				if (visibilityProp) {
 					visibility = visibilityProp.value.value;
 				}
@@ -691,14 +691,14 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillEvents(metadata: any) {
-		const eventMetadataNode = metadata.value.properties.find((metadataNode: any) => metadataNode.key.name === "events");
+		const eventMetadataNode = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "events");
 
 		if (eventMetadataNode) {
 
-			const events = eventMetadataNode.value.properties;
+			const events = eventMetadataNode.value?.properties;
 			this.events = events.map((eventNode: any) => {
 				let visibility = "public";
-				const visibilityProp = eventNode.value.properties.find((node: any) => node.key.name === "visibility");
+				const visibilityProp = eventNode.value?.properties?.find((node: any) => node.key.name === "visibility");
 				if (visibilityProp) {
 					visibility = visibilityProp.value.value;
 				}
@@ -714,7 +714,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillProperties(metadata: any) {
-		const propertiesMetadataNode = metadata.value.properties.find((metadataNode: any) => metadataNode.key.name === "properties");
+		const propertiesMetadataNode = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "properties");
 
 		if (propertiesMetadataNode) {
 			const properties = propertiesMetadataNode.value.properties;
@@ -724,13 +724,13 @@ export class CustomUIClass extends AbstractUIClass {
 				const propertyProps = propertyNode.value.properties;
 
 				let propertyType: undefined | string = undefined;
-				const propertyTypeProp = propertyProps.find((property: any) => property.key.name === "type");
+				const propertyTypeProp = propertyProps?.find((property: any) => property.key.name === "type");
 				if (propertyTypeProp) {
 					propertyType = propertyTypeProp.value.value;
 				}
 
 				let visibility = "public";
-				const visibilityProp = propertyProps.find((associationProperty: any) => associationProperty.key.name === "visibility");
+				const visibilityProp = propertyProps?.find((associationProperty: any) => associationProperty.key.name === "visibility");
 				if (visibilityProp) {
 					visibility = visibilityProp.value.value;
 				}
@@ -749,7 +749,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillByAssociations(metadata: any) {
-		const associationMetadataNode = metadata.value.properties.find((metadataNode: any) => metadataNode.key.name === "associations");
+		const associationMetadataNode = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "associations");
 
 		if (associationMetadataNode) {
 			const associations = associationMetadataNode.value.properties;
@@ -759,19 +759,19 @@ export class CustomUIClass extends AbstractUIClass {
 				const associationProps = associationNode.value.properties;
 
 				let associationType: undefined | string = undefined;
-				const associationTypeProp = associationProps.find((associationProperty: any) => associationProperty.key.name === "type");
+				const associationTypeProp = associationProps?.find((associationProperty: any) => associationProperty.key.name === "type");
 				if (associationTypeProp) {
 					associationType = associationTypeProp.value.value;
 				}
 
 				let multiple = true;
-				const multipleProp = associationProps.find((associationProperty: any) => associationProperty.key.name === "multiple");
+				const multipleProp = associationProps?.find((associationProperty: any) => associationProperty.key.name === "multiple");
 				if (multipleProp) {
 					multiple = multipleProp.value.value;
 				}
 
 				let singularName = "";
-				const singularNameProp = associationProps.find((associationProperty: any) => associationProperty.key.name === "singularName");
+				const singularNameProp = associationProps?.find((associationProperty: any) => associationProperty.key.name === "singularName");
 				if (singularNameProp) {
 					singularName = singularNameProp.value.value;
 				}
@@ -780,7 +780,7 @@ export class CustomUIClass extends AbstractUIClass {
 				}
 
 				let visibility = "public";
-				const visibilityProp = associationProps.find((associationProperty: any) => associationProperty.key.name === "visibility");
+				const visibilityProp = associationProps?.find((associationProperty: any) => associationProperty.key.name === "visibility");
 				if (visibilityProp) {
 					visibility = visibilityProp.value.value;
 				}

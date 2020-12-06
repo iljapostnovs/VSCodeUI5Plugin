@@ -1,4 +1,7 @@
 ## 0.10.8 (06-12-2020)
+* Bugfixes
+
+## 0.10.8 (06-12-2020)
 * Projects that has a namespaces starting with "sap." now works fine as well
 * Bugfixes for XML completion items
 
