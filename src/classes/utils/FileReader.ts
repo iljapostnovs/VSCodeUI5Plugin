@@ -92,7 +92,7 @@ export class FileReader {
 		this.fetchAllWorkspaceManifests();
 	}
 
-	public static getManifestForClass(className: string) {
+	public static getManifestForClass(className: string = "") {
 		let returnManifest: UIManifest | undefined;
 		if (this.manifests.length === 0) {
 			this.fetchAllWorkspaceManifests();
