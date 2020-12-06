@@ -92,13 +92,13 @@ export class FileReader {
 		this.fetchAllWorkspaceManifests();
 	}
 
-	private static getManifestForClass(className: string) {
+	public static getManifestForClass(className: string = "") {
 		let returnManifest: UIManifest | undefined;
 		if (this.manifests.length === 0) {
 			this.fetchAllWorkspaceManifests();
 		}
 
-		returnManifest = this.manifests.find(UIManifest => className.indexOf(UIManifest.componentName + ".") > -1);
+		returnManifest = this.manifests.find(UIManifest => className.startsWith(UIManifest.componentName + "."));
 
 		return returnManifest;
 	}

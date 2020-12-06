@@ -2,6 +2,54 @@ import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssoci
 import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
 import { URLBuilder } from "../../../utils/URLBuilder";
+import { FileReader } from "../../../utils/FileReader";
+
+const aXmlnsData = [{
+	tag: "xmlns",
+	value: "sap.m"
+},{
+	tag: "xmlns:f",
+	value: "sap.f"
+},{
+	tag: "xmlns:c",
+	value: "sap.ui.core"
+},{
+	tag: "xmlns:l",
+	value: "sap.ui.layout"
+},{
+	tag: "xmlns:tnt",
+	value: "sap.tnt"
+},{
+	tag: "xmlns:table",
+	value: "sap.ui.table"
+},{
+	tag: "xmlns:unified",
+	value: "sap.ui.unified"
+},{
+	tag: "xmlns:viz",
+	value: "sap.viz"
+},{
+	tag: "xmlns:chart",
+	value: "sap.chart"
+},{
+	tag: "xmlns:gantt",
+	value: "sap.gantt"
+},{
+	tag: "xmlns:ovp",
+	value: "sap.ovp"
+},{
+	tag: "xmlns:mc",
+	value: "sap.suite.ui.microchart"
+},{
+	tag: "xmlns:commons",
+	value: "sap.ui.commons"
+},{
+	tag: "xmlns:comp",
+	value: "sap.ui.comp"
+},{
+	tag: "xmlns:uxap",
+	value: "sap.uxap"
+}];
 
 export class StandardUIClass extends AbstractUIClass {
 	private readonly nodeDAO = new SAPNodeDAO();
@@ -18,6 +66,22 @@ export class StandardUIClass extends AbstractUIClass {
 		this.fillAggregations();
 		this.fullAssociations();
 		this.fillConstructor();
+
+		this.enrichWithXmlnsProperties();
+	}
+
+	private enrichWithXmlnsProperties() {
+		if (this.className === "sap.ui.core.mvc.View" || this.className === "sap.ui.core.FragmentDefinition") {
+			aXmlnsData.forEach(xmlnsData => {
+				this.properties.push({
+					name: xmlnsData.tag,
+					description: xmlnsData.value,
+					type: "string",
+					visibility: "public",
+					typeValues: [{text: xmlnsData.value, description: xmlnsData.value}]
+				});
+			});
+		}
 	}
 
 	private fillMethods() {
@@ -96,9 +160,9 @@ export class StandardUIClass extends AbstractUIClass {
 	}
 
 	private getStandardClassProperties(className: string) {
-		let classPropeties: UIProperty[] = [];
+		let classProperties: UIProperty[] = [];
 		const SAPNode = this.findSAPNode(className);
-		classPropeties = SAPNode?.getProperties().reduce((accumulator: UIProperty[], {name, type, description, visibility}:any) => {
+		classProperties = SAPNode?.getProperties().reduce((accumulator: UIProperty[], {name, type, description, visibility}:any) => {
 			const additionalDescription = this.generateAdditionalDescriptionFrom(type);
 			accumulator.push({
 				name: name,
@@ -109,12 +173,13 @@ export class StandardUIClass extends AbstractUIClass {
 			});
 			return accumulator;
 		}, []) || [];
-		return classPropeties;
+		return classProperties;
 	}
 
 	private generateAdditionalDescriptionFrom(className: string) {
 		let additionalDescription = "";
-		if (className?.startsWith("sap.")) {
+		const isThisClassFromAProject = !!FileReader.getManifestForClass(className);
+		if (!isThisClassFromAProject) {
 			const SAPNode = this.findSAPNode(className);
 			additionalDescription = SAPNode?.getProperties().reduce((accumulator: string, property: any) => {
 				accumulator += `${property.name}\n`;
@@ -129,7 +194,8 @@ export class StandardUIClass extends AbstractUIClass {
 	protected generateTypeValues(type: string) {
 		let typeValues = super.generateTypeValues(type);
 
-		if (typeValues.length === 0 && type?.startsWith("sap.")) {
+		const isThisClassFromAProject = !!FileReader.getManifestForClass(type);
+		if (typeValues.length === 0 && !isThisClassFromAProject) {
 			const typeNode = this.findSAPNode(type);
 			const metadata = typeNode?.getMetadata();
 			typeValues = metadata?.rawMetadata?.properties?.map((property: any): TypeValue => {

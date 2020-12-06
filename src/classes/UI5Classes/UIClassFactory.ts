@@ -4,6 +4,7 @@ import { StandardUIClass } from "./UI5Parser/UIClass/StandardUIClass";
 import { JSClass } from "./UI5Parser/UIClass/JSClass";
 import { AcornSyntaxAnalyzer } from "./JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
+import { FileReader } from "../utils/FileReader";
 
 export interface FieldsAndMethods {
 	className: string;
@@ -24,7 +25,8 @@ export class UIClassFactory {
 
 	private static getInstance(className: string, documentText?: string) {
 		let returnClass: AbstractUIClass;
-		if (className.startsWith("sap.")) {
+		const isThisClassFromAProject = !!FileReader.getManifestForClass(className);
+		if (!isThisClassFromAProject) {
 			returnClass = new StandardUIClass(className);
 		} else {
 			// console.time(`Class parsing for ${className} took`);

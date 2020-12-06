@@ -1,3 +1,7 @@
+## 0.10.8 (06-12-2020)
+* Projects that has a namespaces starting with "sap." now works fine as well
+* Bugfixes for XML completion items
+
 ## 0.10.7 (05-12-2020)
 * XML aggregation completion items are now merged with completion items of default aggregation type
 * Bugfixes
