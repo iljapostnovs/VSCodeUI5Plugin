@@ -32,7 +32,5 @@ export class XMLTemplateGenerator extends TemplateGenerator {
 		}
 
 		return template;
-
 	}
-
 }
