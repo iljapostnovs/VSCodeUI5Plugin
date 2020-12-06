@@ -8,7 +8,7 @@ export class GeneratorFactory {
 	private static readonly generatorMap = {
 		aggregation: {
 			"xml": XMLAggregationGenerator,
-			"js": XMLAggregationGenerator //TODO: add js aggr. generator
+			"js": XMLAggregationGenerator //TODO: add js aggregation generator
 		},
 		property: {
 			"xml": XMLPropertyGenerator,
