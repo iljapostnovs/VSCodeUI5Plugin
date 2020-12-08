@@ -1,4 +1,6 @@
-## 0.10.8 (06-12-2020)
+## 0.10.8 (08-12-2020)
+* JS Completion items for array methods: map, forEach, filter, find first parameter introduced
+* JS Completion items from hungary notation introduced
 * Bugfixes
 
 ## 0.10.8 (06-12-2020)
