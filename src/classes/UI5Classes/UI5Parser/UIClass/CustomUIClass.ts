@@ -452,12 +452,12 @@ export class CustomUIClass extends AbstractUIClass {
 	public fillTypesFromHungarionNotation() {
 		this.fields.forEach(field => {
 			if (!field.type) {
-				field.type = this.getTypeFromHungarianNotation(field.name);
+				field.type = CustomUIClass.getTypeFromHungarianNotation(field.name);
 			}
 		});
 	}
 
-	private getTypeFromHungarianNotation(variable: string) {
+	public static getTypeFromHungarianNotation(variable: string) : string | undefined {
 		let type;
 		const map: LooseObject = {
 			$: "dom",

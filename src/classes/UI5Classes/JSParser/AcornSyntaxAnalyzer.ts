@@ -159,8 +159,10 @@ export class AcornSyntaxAnalyzer {
 			} else if (currentNode.type === "MemberExpression") {
 				const memberName = currentNode.property.name;
 				const isMethod = stack[0]?.type === "CallExpression";
-
-				if (isMethod) {
+				const isArray = currentClassName.endsWith("[]");
+				if (isArray) {
+					className = currentClassName.replace("[]", "");
+				} else if (isMethod) {
 					stack.shift();
 					const method = this.findMethodHierarchically(currentClassName, memberName);
 					if (method) {
@@ -221,6 +223,11 @@ export class AcornSyntaxAnalyzer {
 							if (!className && currentClassName) {
 								className = this.getClassNameIfNodeIsParamOfArrayMethod(currentNode, currentClassName);
 							}
+
+							//get hungarian notation type
+							if (!className) {
+								className = CustomUIClass.getTypeFromHungarianNotation(currentNode.name) || "";
+							}
 						}
 					}
 				}
@@ -258,7 +265,11 @@ export class AcornSyntaxAnalyzer {
 					if (isFirstParamOfArrayMethod) {
 						const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 						className = strategy.acornGetClassName(currentClassName, node.callee.object.end + 1) || "";
-						className = className.replace("[]", "");
+						if (className.endsWith("[]")) {
+							className = className.replace("[]", "");
+						} else {
+							className = "";
+						}
 					}
 				}
 			}
@@ -531,6 +542,13 @@ export class AcornSyntaxAnalyzer {
 				className = positionBeforeCurrentStrategy.acornGetClassName(UIClass.className, declaration.end + 1) || "";
 			} else if (declaration?.type === "ArrayExpression") {
 				className = "array";
+				if (declaration.elements && declaration.elements.length > 0) {
+					const firstElement = declaration.elements[0];
+					className = this.findClassNameForStack([firstElement], UIClass.className);
+					if (className) {
+						className = `${className}[]`;
+					}
+				}
 			} else if (declaration?.type === "ObjectExpression") {
 				className = "map";
 			} else if (declaration?.type === "Literal") {
