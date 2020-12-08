@@ -1,5 +1,4 @@
 import { AbstractUIClass, UIMethod } from "./AbstractUIClass";
-import { MainLooper } from "../../JSParser/MainLooper";
 function getAllFuncs(toCheck: any) {
 	let props: string[] = [];
 	let obj = toCheck;

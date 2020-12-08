@@ -200,18 +200,26 @@ export class AcornSyntaxAnalyzer {
 						const neededDeclaration = variableDeclaration.declarations.find((declaration: any) => declaration.id.name === currentNode.name);
 						className = this.getClassNameFromAcornVariableDeclaration(neededDeclaration, UIClass);
 					} else {
+						//get class name from sap.ui.define
 						className = this.getClassNameFromUIDefineDotNotation(currentNode.name, UIClass);
 
 						if (!className) {
+							//get class name from method parameters
 							className = this.getClassNameFromMethodParams(currentNode, UIClass);
 
+							//if variable is map
 							if (className?.indexOf("__mapparam__") > -1) {
 								const fields = stack.filter(stackPart => stackPart.type === "MemberExpression").map(memberExpression => memberExpression.property.name).join(".");
 								className = `${className}__mapparam__${fields}`;
 								stack = [];
 							}
+							//if variable is the variable of current class
 							if (!className && currentNode.name === UIClass.classBodyAcornVariableName) {
 								className = UIClass.className;
+							}
+							//if variable is part of .map, .forEach etc
+							if (!className && currentClassName) {
+								className = this.getClassNameIfNodeIsParamOfArrayMethod(currentNode, currentClassName);
 							}
 						}
 					}
@@ -234,6 +242,40 @@ export class AcornSyntaxAnalyzer {
 		}
 
 		return className;
+	}
+
+	private static getClassNameIfNodeIsParamOfArrayMethod(identifierNode: any, currentClassName: string) {
+		let className = "";
+		const UIClass = UIClassFactory.getUIClass(currentClassName);
+
+		if (UIClass instanceof CustomUIClass) {
+			const acornMethod = this.findAcornNode(UIClass.acornMethodsAndFields, identifierNode.end);
+			if (acornMethod) {
+				const content = this.expandAllContent(acornMethod.value);
+				const node = this._getCallExpressionNodeWhichIsArrayMethod(content, identifierNode.end);
+				if (node) {
+					const isFirstParamOfArrayMethod = node.arguments[0]?.params[0]?.name === identifierNode.name;
+					if (isFirstParamOfArrayMethod) {
+						const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+						className = strategy.acornGetClassName(currentClassName, node.callee.object.end + 1) || "";
+						className = className.replace("[]", "");
+					}
+				}
+			}
+		}
+
+		return className;
+	}
+
+	private static _getCallExpressionNodeWhichIsArrayMethod(nodes: any[], position: number) : any | undefined {
+		const content = nodes.filter(content => content.type === "CallExpression" && this._isArrayMethod(content.callee?.property?.name));
+		return this.findAcornNode(content, position);
+	}
+
+	private static _isArrayMethod(methodName: string) {
+		const arrayMethods = ["forEach", "map", "filter", "find"];
+
+		return arrayMethods.indexOf(methodName) > -1;
 	}
 
 	private static generateClassNameFromStack(stack: any[], className: string) {
