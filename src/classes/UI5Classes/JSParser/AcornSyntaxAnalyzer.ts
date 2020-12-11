@@ -160,7 +160,7 @@ export class AcornSyntaxAnalyzer {
 				const memberName = currentNode.property.name;
 				const isMethod = stack[0]?.type === "CallExpression";
 				const isArray = currentClassName.endsWith("[]");
-				if (isArray) {
+				if (!isMethod && isArray) {
 					className = currentClassName.replace("[]", "");
 				} else if (isMethod) {
 					stack.shift();
@@ -191,6 +191,7 @@ export class AcornSyntaxAnalyzer {
 					}
 				}
 			} else if (currentNode.type === "Identifier") {
+				let temporaryCurrentClassName = currentClassName;
 				if (currentNode.name === "sap") {
 					className = this.generateSAPStandardClassNameFromStack(stack);
 				} else {
@@ -232,6 +233,11 @@ export class AcornSyntaxAnalyzer {
 					}
 				}
 
+				temporaryCurrentClassName = this.handleArrayMethods(stack, temporaryCurrentClassName, className);
+				if (temporaryCurrentClassName) {
+					className = temporaryCurrentClassName;
+				}
+
 			} else if (currentNode.type === "NewExpression") {
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				if (currentNode.callee?.type === "Identifier") {
@@ -246,6 +252,42 @@ export class AcornSyntaxAnalyzer {
 		}
 		if (className && stack.length > 0) {
 			className = this.findClassNameForStack(stack, className);
+		}
+
+		return className;
+	}
+
+	private static handleArrayMethods(stack: any[], currentClassName: string, variableClassName: string) {
+		let className = "";
+		//if it is map, filter or find
+		const arrayMethods = ["map", "filter", "find"];
+		const propertyName = stack[0]?.property?.name;
+		if (stack.length >= 2 && stack[0].type === "MemberExpression" && stack[1].type === "CallExpression" && arrayMethods.includes(propertyName)) {
+			if (propertyName === "map") {
+				const returnClass = stack[1].arguments[0];
+				let returnStatement;
+				if (returnClass?.body?.body) {
+					returnStatement = returnClass?.body?.body?.find((node: any) => node.type === "ReturnStatement")?.argument;
+				} else {
+					returnStatement = returnClass?.body;
+				}
+				if (returnStatement) {
+					// const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+					// className = strategy.acornGetClassName(className, returnStatement.end + 1) || "";
+					className = this.findClassNameForStack([returnStatement], currentClassName) || typeof returnStatement.value;
+				}
+				if (propertyName === "map") {
+					className = `${className}[]`;
+				}
+			} else if (propertyName === "filter") {
+				className = variableClassName;
+			} else if (propertyName === "find") {
+				className = variableClassName.replace("[]", "");
+			}
+			stack.splice(0, 2);
+			className = this.handleArrayMethods(stack, currentClassName, className);
+		} else {
+			className = variableClassName;
 		}
 
 		return className;
@@ -544,7 +586,7 @@ export class AcornSyntaxAnalyzer {
 				className = "array";
 				if (declaration.elements && declaration.elements.length > 0) {
 					const firstElement = declaration.elements[0];
-					className = this.findClassNameForStack([firstElement], UIClass.className);
+					className = this.findClassNameForStack([firstElement], UIClass.className) || typeof firstElement.value;
 					if (className) {
 						className = `${className}[]`;
 					}
@@ -562,7 +604,7 @@ export class AcornSyntaxAnalyzer {
 	private static getClassNameFromUIDefineDotNotation(UIDefineClassName: string, UIClass: CustomUIClass) {
 		let className = "";
 		if (UIDefineClassName) {
-			const UIDefine = UIClass.UIDefine.find(UIDefine => UIDefine.className === UIDefineClassName);
+			const UIDefine = UIClass.UIDefine?.find(UIDefine => UIDefine.className === UIDefineClassName);
 			if (UIDefine) {
 				className = UIDefine.classNameDotNotation;
 			}
