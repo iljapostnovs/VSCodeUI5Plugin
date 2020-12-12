@@ -459,26 +459,29 @@ export class CustomUIClass extends AbstractUIClass {
 
 	public static getTypeFromHungarianNotation(variable: string) : string | undefined {
 		let type;
-		const map: LooseObject = {
-			$: "dom",
-			o: "object",
-			a: "array",
-			i: "int",
-			f: "float",
-			m: "map",
-			s: "string",
-			b: "boolean",
-			p: "Promise",
-			d: "Date",
-			r: "RegExp",
-			v: "any"
-		};
 
-		variable = variable.replace("_", "").replace("this.", "");
-		const firstChar = variable[0];
-		const secondChar = variable[1];
-		if (map[firstChar] && secondChar === secondChar.toUpperCase()) {
-			type = map[firstChar];
+		if (variable.length >= 2) {
+			const map: LooseObject = {
+				$: "dom",
+				o: "object",
+				a: "array",
+				i: "int",
+				f: "float",
+				m: "map",
+				s: "string",
+				b: "boolean",
+				p: "Promise",
+				d: "Date",
+				r: "RegExp",
+				v: "any"
+			};
+
+			variable = variable.replace("_", "").replace("this.", "");
+			const firstChar = variable[0];
+			const secondChar = variable[1];
+			if (map[firstChar] && secondChar === secondChar.toUpperCase()) {
+				type = map[firstChar];
+			}
 		}
 
 		return type;

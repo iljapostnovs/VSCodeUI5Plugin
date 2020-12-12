@@ -321,7 +321,7 @@ export class AcornSyntaxAnalyzer {
 	}
 
 	private static _getCallExpressionNodeWhichIsArrayMethod(nodes: any[], position: number) : any | undefined {
-		const content = nodes.filter(content => content.type === "CallExpression" && this._isArrayMethod(content.callee?.property?.name));
+		const content = nodes.filter(content => content.type === "CallExpression" && this._isArrayMethod(content.callee?.property?.name)).reverse();
 		return this.findAcornNode(content, position);
 	}
 
