@@ -146,5 +146,16 @@
 			}
 		},
 		"type": "sap.ui.model.Model"
+	},{
+		"className": "com.test.controller.Master",
+		"methodName": "_findDialog",
+		"positionAddition": 1,
+		"node": {
+			"type": "MemberExpression",
+			"property": {
+				"name": "getTitle"
+			}
+		},
+		"type": "sap.m.Dialog"
 	}]
 }

@@ -70,6 +70,9 @@ export class AcornSyntaxAnalyzer {
 			innerNode = node.right;
 		} else if (node.type === "BinaryExpression") {
 			innerNode = node.right && this.findAcornNode([node.right], position);
+			if (!innerNode && node.left) {
+				innerNode = node.left && this.findAcornNode([node.left], position);
+			}
 		} else if (node.type === "LogicalExpression") {
 			innerNode = node.right && this.findAcornNode([node.right], position);
 
@@ -303,7 +306,7 @@ export class AcornSyntaxAnalyzer {
 				const content = this.expandAllContent(acornMethod.value);
 				const node = this._getCallExpressionNodeWhichIsArrayMethod(content, identifierNode.end);
 				if (node) {
-					const isFirstParamOfArrayMethod = node.arguments[0]?.params[0]?.name === identifierNode.name;
+					const isFirstParamOfArrayMethod = node.arguments[0]?.params && node.arguments[0]?.params[0]?.name === identifierNode.name;
 					if (isFirstParamOfArrayMethod) {
 						const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 						className = strategy.acornGetClassName(currentClassName, node.callee.object.end + 1) || "";
@@ -505,6 +508,16 @@ export class AcornSyntaxAnalyzer {
 				}
 			} else if (node.type === "MemberExpression") {
 				innerNodes.push(node.object);
+				if (node.property) {
+					innerNodes.push(node.property);
+				}
+			} else if (node.type === "BinaryExpression") {
+				if (node.right) {
+					innerNodes.push(node.right);
+				}
+				if (node.left) {
+					innerNodes.push(node.left);
+				}
 			} else if (node.type === "ExpressionStatement") {
 				innerNodes.push(node.expression);
 			} else if (node.type === "ThisExpression") {
