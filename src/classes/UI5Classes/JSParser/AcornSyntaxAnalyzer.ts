@@ -272,9 +272,9 @@ export class AcornSyntaxAnalyzer {
 					returnStatement = returnClass?.body;
 				}
 				if (returnStatement) {
-					// const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-					// className = strategy.acornGetClassName(className, returnStatement.end + 1) || "";
-					className = this.findClassNameForStack([returnStatement], currentClassName) || typeof returnStatement.value;
+					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+					const newStack = strategy.getStackOfNodesForPosition(currentClassName, returnStatement.end, true);
+					className = this.findClassNameForStack(newStack, currentClassName) || typeof returnStatement.value;
 				}
 				if (propertyName === "map") {
 					className = `${className}[]`;
@@ -586,7 +586,9 @@ export class AcornSyntaxAnalyzer {
 				className = "array";
 				if (declaration.elements && declaration.elements.length > 0) {
 					const firstElement = declaration.elements[0];
-					className = this.findClassNameForStack([firstElement], UIClass.className) || typeof firstElement.value;
+					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+					const newStack = strategy.getStackOfNodesForPosition(UIClass.className, firstElement.end, true);
+					className = this.findClassNameForStack(newStack, UIClass.className) || typeof firstElement.value;
 					if (className) {
 						className = `${className}[]`;
 					}

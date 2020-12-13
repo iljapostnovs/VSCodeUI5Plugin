@@ -19,6 +19,21 @@
 		},{
 			"name": "_getMap",
 			"returnType": "map"
+		},{
+			"name": "_mapToFilterArray",
+			"returnType": "sap.ui.model.Filter[]"
+		},{
+			"name": "_mapToDialogArray",
+			"returnType": "sap.m.Dialog[]"
+		},{
+			"name": "_filterDialogArray",
+			"returnType": "sap.m.Dialog[]"
+		},{
+			"name": "_findDialog",
+			"returnType": "sap.m.Dialog"
+		},{
+			"name": "_getStringArray",
+			"returnType": "string[]"
 		}],
 		"fields": [{
 			"name": "formatter",
