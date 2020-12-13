@@ -1,4 +1,4 @@
-import { AbstractUIClass, UIMethod } from "./AbstractUIClass";
+import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
 function getAllFuncs(toCheck: any) {
 	let props: string[] = [];
 	let obj = toCheck;
@@ -10,7 +10,7 @@ function getAllFuncs(toCheck: any) {
 		if (e!=arr[i+1] && typeof toCheck[e] == 'function') return true;
 	});
 }
-const classData: {[key: string]: {methods: UIMethod[]}} = {
+const classData: {[key: string]: {methods: UIMethod[], fields: UIField[]}} = {
 	Promise: {
 		methods: [{
 			name: "then",
@@ -32,7 +32,8 @@ const classData: {[key: string]: {methods: UIMethod[]}} = {
 			description: "Promise .finally",
 			returnType: "Promise",
 			visibility: "public"
-		}]
+		}],
+		fields: []
 	},
 	array: {
 		methods: getAllFuncs([]).reduce((accumulator: UIMethod[], key: any) => {
@@ -47,7 +48,13 @@ const classData: {[key: string]: {methods: UIMethod[]}} = {
 			}
 
 			return accumulator;
-		}, [])
+		}, []),
+		fields: [{
+			name: "length",
+			description: "Length of an array",
+			type: "number",
+			visibility: "public"
+		}]
 	},
 	Array: {
 		methods: getAllFuncs([]).reduce((accumulator: UIMethod[], key: any) => {
@@ -62,7 +69,13 @@ const classData: {[key: string]: {methods: UIMethod[]}} = {
 			}
 
 			return accumulator;
-		}, [])
+		}, []),
+		fields: [{
+			name: "length",
+			description: "Length of an array",
+			type: "number",
+			visibility: "public"
+		}]
 	},
 	string: {
 		methods: getAllFuncs("").reduce((accumulator: UIMethod[], key: any) => {
@@ -77,7 +90,8 @@ const classData: {[key: string]: {methods: UIMethod[]}} = {
 			}
 
 			return accumulator;
-		}, [])
+		}, []),
+		fields: []
 	},
 	String: {
 		methods: getAllFuncs("").reduce((accumulator: UIMethod[], key: any) => {
@@ -92,7 +106,8 @@ const classData: {[key: string]: {methods: UIMethod[]}} = {
 			}
 
 			return accumulator;
-		}, [])
+		}, []),
+		fields: []
 	}
 };
 export class JSClass extends AbstractUIClass {
@@ -100,5 +115,6 @@ export class JSClass extends AbstractUIClass {
 		super(className);
 
 		this.methods = classData[className].methods;
+		this.fields = classData[className].fields;
 	}
 }
