@@ -49,7 +49,37 @@ const classData: {[key: string]: {methods: UIMethod[]}} = {
 			return accumulator;
 		}, [])
 	},
+	Array: {
+		methods: getAllFuncs([]).reduce((accumulator: UIMethod[], key: any) => {
+			if (Array.prototype[key] instanceof Function) {
+				accumulator.push({
+					name: key,
+					params: [],
+					description: key,
+					returnType: "array",
+					visibility: "public"
+				});
+			}
+
+			return accumulator;
+		}, [])
+	},
 	string: {
+		methods: getAllFuncs("").reduce((accumulator: UIMethod[], key: any) => {
+			if (Array.prototype[key] instanceof Function) {
+				accumulator.push({
+					name: key,
+					params: [],
+					description: key,
+					returnType: "string",
+					visibility: "public"
+				});
+			}
+
+			return accumulator;
+		}, [])
+	},
+	String: {
 		methods: getAllFuncs("").reduce((accumulator: UIMethod[], key: any) => {
 			if (Array.prototype[key] instanceof Function) {
 				accumulator.push({
