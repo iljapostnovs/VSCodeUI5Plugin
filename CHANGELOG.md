@@ -1,6 +1,6 @@
-## 0.10.8 (08-12-2020)
-* JS Completion items for array methods: map, forEach, filter, find first parameter introduced
-* JS Completion items from hungary notation introduced
+## 0.10.8 (13-12-2020)
+* JS Completion items for first paramether of array methods (map, forEach, filter, find) introduced
+* Data types are now added depending on hungarian notation as well
 * Bugfixes
 
 ## 0.10.8 (06-12-2020)
