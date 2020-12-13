@@ -385,6 +385,13 @@ export class AcornSyntaxAnalyzer {
 
 			isGetViewByIdException = isGetViewByIdException && firstPart.property?.name === "getView";
 			isGetViewByIdException = isGetViewByIdException && thirdPart.property?.name === "byId";
+		} else if (stack.length >= 3) {
+			const [firstPart, secondPart, thirdPart] = stack;
+			isGetViewByIdException = isGetViewByIdException && firstPart.type === "ThisExpression";
+			isGetViewByIdException = isGetViewByIdException && secondPart.type === "MemberExpression";
+			isGetViewByIdException = isGetViewByIdException && thirdPart.type === "CallExpression";
+
+			isGetViewByIdException = isGetViewByIdException && secondPart.property?.name === "byId";
 		} else {
 			isGetViewByIdException = false;
 		}
@@ -394,9 +401,21 @@ export class AcornSyntaxAnalyzer {
 
 	private static getClassNameFromViewById(stack: any[], currentClassName: string) {
 		let className = "";
+		const isById = stack[1].property?.name === "byId";
+		const isGetViewById = stack[2].property?.name === "byId";
 
-		const callExpression = stack[3];
-		stack.splice(0, 4);
+		let callExpression;
+		let spliceQuantity;
+
+		if (isGetViewById) {
+			callExpression = stack[3];
+			spliceQuantity = 4;
+		} else if (isById) {
+			callExpression = stack[2];
+			spliceQuantity = 3;
+		}
+
+		stack.splice(0, spliceQuantity);
 		const controlId = callExpression.arguments[0]?.value;
 		if (controlId) {
 			className = FileReader.getClassNameFromView(currentClassName, controlId) || "";
