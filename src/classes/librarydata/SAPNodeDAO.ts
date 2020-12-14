@@ -1,8 +1,8 @@
-import { SAPNode } from "./SAPNode";
 import * as vscode from "vscode";
 import { FileReader } from "../utils/FileReader";
 import { URLBuilder } from "../utils/URLBuilder";
 import { HTTPHandler } from "../utils/HTTPHandler";
+import { SAPNode } from "./SAPNode";
 
 export class SAPNodeDAO {
 	private static readonly nodePath: string = URLBuilder.getInstance().getAPIIndexUrl();
@@ -30,19 +30,6 @@ export class SAPNodeDAO {
 		}
 
 		return isInstance;
-	}
-
-	public gatAllFlatNodes() {
-		let flatNodes: SAPNode[] = [];
-		SAPNodeDAO.SAPNodes.forEach(node => {
-			flatNodes.push(node);
-			if (node.nodes && node.nodes.length > 0) {
-				const childrenNodes = this.getContentOfNode(node);
-				flatNodes = flatNodes.concat(childrenNodes);
-			}
-		});
-
-		return flatNodes;
 	}
 
 	private getContentOfNode(node: SAPNode) {

@@ -1,9 +1,9 @@
-import { UI5Metadata } from "./UI5Metadata";
-import { SAPNode } from "./SAPNode";
 import { URLBuilder } from "../utils/URLBuilder";
 import { FileReader } from "../utils/FileReader";
 import { UI5Plugin } from "../../UI5Plugin";
 import { HTTPHandler } from "../utils/HTTPHandler";
+import { SAPNode } from "./SAPNode";
+import { UI5Metadata } from "./UI5Metadata";
 
 interface LooseObject {
 	[key: string]: any;

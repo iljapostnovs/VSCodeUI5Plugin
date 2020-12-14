@@ -1,3 +1,8 @@
+## 0.10.8 (13-12-2020)
+* JS Completion items for first paramether of array methods (map, forEach, filter, find) introduced
+* Data types are now added depending on hungarian notation as well
+* Bugfixes
+
 ## 0.10.8 (06-12-2020)
 * Projects that has a namespaces starting with "sap." now works fine as well
 * Bugfixes for XML completion items

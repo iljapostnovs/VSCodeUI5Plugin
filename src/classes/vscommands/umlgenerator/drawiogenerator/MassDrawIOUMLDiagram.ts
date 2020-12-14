@@ -8,7 +8,6 @@ import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUICla
 import { DependencyLine } from "./drawiouml/lines/DependencyLine";
 import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
 import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
-import { runInThisContext } from "vm";
 
 interface UsedClassMap {
 	[key: string]: {
@@ -158,9 +157,9 @@ export class MassDrawIOUMLDiagram {
 
 		const columnWidths = this.getColumnWidths(usageMap, rootUMLDiagram);
 		const usageMapEntry = usageMap[UMLDiagram.UIClass.className];
-		let widthSumm = 0;
+		let widthSum = 0;
 		for (let i = 0; i < usageMapEntry.column - previousDiagramColumnCount - 1; i++) {
-			widthSumm += columnWidths[i];
+			widthSum += columnWidths[i];
 		}
 
 		let widthTakenBeforeThisRootDiagram = 0;
@@ -172,7 +171,7 @@ export class MassDrawIOUMLDiagram {
 			}).reduce((accum, width) => accum + width, 0);
 		}
 
-		return widthTakenBeforeThisRootDiagram + widthSumm;
+		return widthTakenBeforeThisRootDiagram + widthSum;
 	}
 
 	private static getColumnWidths(usageMap: UsageMap, rootDiagram: DrawIOUMLDiagram) {
