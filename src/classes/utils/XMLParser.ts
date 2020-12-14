@@ -278,7 +278,6 @@ export class XMLParser {
 			tagPositionEnd = i + 1;
 
 			const positionIsInsideTheClassTag = currentPosition > tagPositionBegin && currentPosition < tagPositionEnd;
-			// const positionIsInsideTheClassBody = currentPosition > tagPositionEnd;
 			const tagText = XMLViewText.substring(tagPositionBegin, currentPosition);
 			const positionInTheAttributes = /\s/.test(tagText);
 
