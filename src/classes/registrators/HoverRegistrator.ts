@@ -16,6 +16,7 @@ export class HoverRegistrator {
 				let text = "";
 				let hover: vscode.Hover | undefined;
 				if (currentClassName) {
+					UIClassFactory.setNewContentForCurrentUIClass();
 					let className = strategy.acornGetClassName(currentClassName, offset) || "";
 					if (className) {
 						const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(className);
