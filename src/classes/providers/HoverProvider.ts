@@ -23,7 +23,9 @@ export class HoverProvider {
 				const markdownString = new vscode.MarkdownString();
 				const textParts = text.split("\n");
 				markdownString.appendCodeblock(`${textBefore}${textParts[0]}`);
-				markdownString.appendText(textParts[1]);
+				if (textParts[1]) {
+					markdownString.appendText(textParts[1]);
+				}
 				hover = new vscode.Hover(markdownString);
 			} else {
 				const className = this.getClassNameForOffset(offset, currentClassName, word);
@@ -38,7 +40,9 @@ export class HoverProvider {
 						const markdownString = new vscode.MarkdownString();
 						const textParts = text.split("\n");
 						markdownString.appendCodeblock(`this.${textParts[0]}`);
-						markdownString.appendText(textParts[1]);
+						if (textParts[1]) {
+							markdownString.appendText(textParts[1]);
+						}
 						hover = new vscode.Hover(markdownString);
 					}
 				}
