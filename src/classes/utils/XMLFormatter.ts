@@ -91,6 +91,9 @@ export class XMLFormatter {
 		if (tag.startsWith("/")) {
 			tag = tag.substring(1, tag.length);
 		}
+		if (tag.endsWith("/")) {
+			tag = tag.substring(0, tag.length - 1);
+		}
 
 		return tag;
 	}
