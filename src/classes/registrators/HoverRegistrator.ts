@@ -25,6 +25,9 @@ export class HoverRegistrator {
 						if (method) {
 							text = `${method.name}(${method.params.join(", ")}) : ${method.returnType}`;
 						} else if (field) {
+							if (!field.type) {
+								AcornSyntaxAnalyzer.findFieldType(field, currentClassName, true);
+							}
 							text = `${field.name} : ${field.type}`;
 						}
 						if (text) {
@@ -61,6 +64,9 @@ export class HoverRegistrator {
 								if (method) {
 									text = `${method.name}(${method.params.join(", ")}) : ${method.returnType}`;
 								} else if (field) {
+									if (!field.type) {
+										AcornSyntaxAnalyzer.findFieldType(field, currentClassName, true);
+									}
 									text = `${field.name} : ${field.type}`;
 								}
 								if (text) {
