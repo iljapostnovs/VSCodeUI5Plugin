@@ -132,9 +132,12 @@ export class AcornSyntaxAnalyzer {
 		return correctPart;
 	}
 
-	public static findClassNameForStack(stack: any[], currentClassName: string) {
+	public static findClassNameForStack(stack: any[], currentClassName: string, clearStack: boolean = false) {
 		let className: string = "";
 
+		if (clearStack) {
+			this.declarationStack = [];
+		}
 		if (stack.length === 0 || !currentClassName) {
 			return "";
 		}
@@ -566,7 +569,9 @@ export class AcornSyntaxAnalyzer {
 					innerNodes = innerNodes.concat(node.body);
 				}
 			} else if (node.type === "SwitchStatement") {
-				innerNodes = node.cases.map((body: any) => body.consequent);
+				node.cases.forEach((body: any) => {
+					innerNodes.push(body.consequent);
+				});
 			} else if (node.type === "AssignmentExpression") {
 				innerNodes.push(node.right);
 			} else if (node.type === "NewExpression") {

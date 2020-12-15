@@ -147,8 +147,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		let classNameOfTheCurrentVariable;
 		const stack = this.getStackOfNodesForPosition(className, position);
 		if (stack.length > 0) {
-			AcornSyntaxAnalyzer.declarationStack = [];
-			classNameOfTheCurrentVariable = AcornSyntaxAnalyzer.findClassNameForStack(stack, className);
+			classNameOfTheCurrentVariable = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, true);
 		}
 
 		return classNameOfTheCurrentVariable;

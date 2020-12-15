@@ -27,9 +27,10 @@ export class HoverRegistrator {
 							text = `${field.name} : ${field.type}`;
 						}
 						if (text) {
+							const textBefore = className === currentClassName ? "this." : `${className} -> `;
 							hover = new vscode.Hover({
 								language: "javascript",
-								value: `${className} -> ${text}`
+								value: `${textBefore}${text}`
 							});
 						}
 					} else {
@@ -39,8 +40,13 @@ export class HoverRegistrator {
 							const allContent = AcornSyntaxAnalyzer.expandAllContent(method.value);
 							const identifier = allContent.find(content => content.type === "Identifier" && content.name === word);
 							if (identifier) {
-								const stack = strategy.getStackOfNodesForPosition(currentClassName, identifier.end, true);
-								className = AcornSyntaxAnalyzer.findClassNameForStack(stack, currentClassName);
+								let position = identifier.end;
+								const callee = allContent.find(node => node.callee === identifier);
+								if (callee) {
+									position = callee.end;
+								}
+								const stack = strategy.getStackOfNodesForPosition(currentClassName, position, true);
+								className = AcornSyntaxAnalyzer.findClassNameForStack(stack, currentClassName, true);
 								if (className) {
 									hover = new vscode.Hover({
 										language: "javascript",
@@ -59,7 +65,7 @@ export class HoverRegistrator {
 								if (text) {
 									hover = new vscode.Hover({
 										language: "javascript",
-										value: `${currentClassName} -> this.${text}`
+										value: `this.${text}`
 									});
 								}
 							}
