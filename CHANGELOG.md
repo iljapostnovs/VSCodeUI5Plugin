@@ -1,4 +1,10 @@
-## 0.10.8 (13-12-2020)
+## 0.10.10 (15-12-2020)
+* Hover Provider introduced
+* XML formatter introduced
+* Completion items for methods now contains description
+* Bugfixes
+
+## 0.10.9 (13-12-2020)
 * JS Completion items for first paramether of array methods (map, forEach, filter, find) introduced
 * Data types are now added depending on hungarian notation as well
 * Bugfixes
