@@ -94,7 +94,7 @@ export class StandardUIClass extends AbstractUIClass {
 		classMethods = SAPNode?.getMethods().map((method: any) => {
 			return {
 				name: method.name.replace(`${this.className}.`, ""),
-				description: this.removeTags(method.code),
+				description: `${this.removeTags(method.description)}`,
 				params: method.parameters ? method.parameters.map((parameter: any) => parameter.name + (parameter.optional ? "?" : "")) : [],
 				returnType: method.returnValue ? method.returnValue.type : "void",
 				isFromParent: !isParent,

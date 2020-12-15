@@ -17,13 +17,14 @@ export class HoverProvider {
 			UIClassFactory.setNewContentForCurrentUIClass();
 
 			const className = strategy.acornGetClassName(currentClassName, offset) || "";
-			const text = className && this.getTextForClass(className, word);
+			const text = className && this.getTextIfItIsFieldOrMethodOfClass(className, word);
 			if (text) {
-				const textBefore = className === currentClassName ? "this." : `${className} -> `;
-				hover = new vscode.Hover({
-					language: "javascript",
-					value: `${textBefore}${text}`
-				});
+				const textBefore = className === currentClassName ? "this." : `${className}.`;
+				const markdownString = new vscode.MarkdownString();
+				const textParts = text.split("\n");
+				markdownString.appendCodeblock(`${textBefore}${textParts[0]}`);
+				markdownString.appendText(textParts[1]);
+				hover = new vscode.Hover(markdownString);
 			} else {
 				const className = this.getClassNameForOffset(offset, currentClassName, word);
 				if (className) {
@@ -32,12 +33,13 @@ export class HoverProvider {
 						value: `${word}: ${className}`
 					});
 				} else {
-					const text = className && this.getTextForClass(currentClassName, word);
+					const text = this.getTextIfItIsFieldOrMethodOfClass(currentClassName, word);
 					if (text) {
-						hover = new vscode.Hover({
-							language: "javascript",
-							value: `this.${text}`
-						});
+						const markdownString = new vscode.MarkdownString();
+						const textParts = text.split("\n");
+						markdownString.appendCodeblock(`this.${textParts[0]}`);
+						markdownString.appendText(textParts[1]);
+						hover = new vscode.Hover(markdownString);
 					}
 				}
 			}
@@ -45,7 +47,7 @@ export class HoverProvider {
 		return hover;
 	}
 
-	private static getTextForClass(className: string, fieldOrMethodName: string) {
+	private static getTextIfItIsFieldOrMethodOfClass(className: string, fieldOrMethodName: string) {
 		let text = "";
 
 		const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(className);
@@ -53,6 +55,7 @@ export class HoverProvider {
 		const field = fieldsAndMethods.fields.find(field => field.name === fieldOrMethodName);
 		if (method) {
 			text = `${method.name}(${method.params.join(", ")}) : ${method.returnType}`;
+			text += `\n${method.description}`;
 		} else if (field) {
 			if (!field.type) {
 				AcornSyntaxAnalyzer.findFieldType(field, className, true);
@@ -78,7 +81,11 @@ export class HoverProvider {
 				const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 				const stack = strategy.getStackOfNodesForPosition(className, position, true);
 				className = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, true);
+			} else {
+				className = "";
 			}
+		} else {
+			className = "";
 		}
 
 		return className;

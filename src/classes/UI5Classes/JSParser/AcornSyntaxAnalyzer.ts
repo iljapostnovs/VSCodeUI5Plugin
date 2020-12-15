@@ -451,9 +451,6 @@ export class AcornSyntaxAnalyzer {
 				this.findMethodReturnType(method, UIClass.parentClassNameDotNotation);
 			}
 		}
-		if (UIClass instanceof CustomUIClass) {
-			UIClass.generateDescriptionForMethod(method);
-		}
 	}
 
 	public static findFieldType(field: UIField, className: string, includeParentMethods: boolean = true) {
