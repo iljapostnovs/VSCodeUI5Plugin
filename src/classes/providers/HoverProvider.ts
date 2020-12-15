@@ -20,12 +20,7 @@ export class HoverProvider {
 			const text = className && this.getTextIfItIsFieldOrMethodOfClass(className, word);
 			if (text) {
 				const textBefore = className === currentClassName ? "this." : `${className}.`;
-				const markdownString = new vscode.MarkdownString();
-				const textParts = text.split("\n");
-				markdownString.appendCodeblock(`${textBefore}${textParts[0]}`);
-				if (textParts[1]) {
-					markdownString.appendText(textParts[1]);
-				}
+				const markdownString = this.getMarkdownFromText(textBefore + text);
 				hover = new vscode.Hover(markdownString);
 			} else {
 				const className = this.getClassNameForOffset(offset, currentClassName, word);
@@ -37,18 +32,26 @@ export class HoverProvider {
 				} else {
 					const text = this.getTextIfItIsFieldOrMethodOfClass(currentClassName, word);
 					if (text) {
-						const markdownString = new vscode.MarkdownString();
-						const textParts = text.split("\n");
-						markdownString.appendCodeblock(`this.${textParts[0]}`);
-						if (textParts[1]) {
-							markdownString.appendText(textParts[1]);
-						}
+						const markdownString = this.getMarkdownFromText(text);
 						hover = new vscode.Hover(markdownString);
 					}
 				}
 			}
 		}
 		return hover;
+	}
+
+	private static getMarkdownFromText(text: string) {
+		const markdownString = new vscode.MarkdownString();
+		const textParts = text.split("\n");
+		markdownString.appendCodeblock(`${textParts[0]}`);
+		for (let i = 1; i < textParts.length; i++) {
+			if (textParts[i]) {
+				markdownString.appendMarkdown("  \n" + textParts[i]);
+			}
+		}
+
+		return markdownString;
 	}
 
 	private static getTextIfItIsFieldOrMethodOfClass(className: string, fieldOrMethodName: string) {
@@ -58,8 +61,11 @@ export class HoverProvider {
 		const method = fieldsAndMethods.methods.find(method => method.name === fieldOrMethodName);
 		const field = fieldsAndMethods.fields.find(field => field.name === fieldOrMethodName);
 		if (method) {
-			text = `${method.name}(${method.params.join(", ")}) : ${method.returnType}`;
-			text += `\n${method.description}`;
+			text += `${method.name}(${method.params.join(", ")}) : ${method.returnType}\n`;
+			if (method.api) {
+				text += method.api;
+			}
+			text += `${method.description}`;
 		} else if (field) {
 			if (!field.type) {
 				AcornSyntaxAnalyzer.findFieldType(field, className, true);

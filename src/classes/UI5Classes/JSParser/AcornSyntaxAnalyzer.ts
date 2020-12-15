@@ -164,20 +164,26 @@ export class AcornSyntaxAnalyzer {
 
 			} else if (currentNode.type === "MemberExpression") {
 				const memberName = currentNode.property.name;
-				const isMethod = stack[0]?.type === "CallExpression";
+				const isCallOrApply = stack[0]?.type === "MemberExpression" && (stack[0]?.property.name === "call" || stack[0]?.property.name === "apply");
+				const isMethod = stack[0]?.type === "CallExpression" || isCallOrApply;
 				const isArray = currentClassName.endsWith("[]");
 				if (!isMethod && isArray) {
 					className = currentClassName.replace("[]", "");
 				} else if (isMethod) {
-					stack.shift();
-					const method = this.findMethodHierarchically(currentClassName, memberName);
-					if (method) {
-						if (!method.returnType || method.returnType === "void") {
-							this.findMethodReturnType(method, currentClassName);
-						}
-						className = method.returnType;
+					if (isCallOrApply) {
+						className = currentClassName;
+						stack.splice(0, 2);
 					} else {
-						stack = [];
+						stack.shift();
+						const method = this.findMethodHierarchically(currentClassName, memberName);
+						if (method) {
+							if (!method.returnType || method.returnType === "void") {
+								this.findMethodReturnType(method, currentClassName);
+							}
+							className = method.returnType;
+						} else {
+							stack = [];
+						}
 					}
 				} else {
 					const field = this.findFieldHierarchically(currentClassName, memberName);
@@ -631,6 +637,8 @@ export class AcornSyntaxAnalyzer {
 				className = "map";
 			} else if (declaration?.type === "Literal") {
 				className = typeof declaration.value;
+			} else if (declaration?.type === "ThisExpression") {
+				className = UIClass.className;
 			}
 		}
 

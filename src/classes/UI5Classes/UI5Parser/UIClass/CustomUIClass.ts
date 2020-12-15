@@ -353,6 +353,13 @@ export class CustomUIClass extends AbstractUIClass {
 				}
 				return accumulator;
 			}, []);
+
+			this.fields.push({
+				name: "prototype",
+				description: "Prototype of the class",
+				type: this.className,
+				visibility: "public"
+			});
 		}
 
 		this.fillMethodsFromMetadata();
