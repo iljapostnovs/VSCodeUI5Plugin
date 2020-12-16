@@ -208,6 +208,13 @@ export class XMLParser {
 			className = tagNameParts[0];
 		}
 
+		if (className.endsWith("/")) {
+			className = className.substring(0, className.length - 1);
+		}
+		if (className.startsWith("/")) {
+			className = className.substring(1, className.length);
+		}
+
 		return className;
 	}
 

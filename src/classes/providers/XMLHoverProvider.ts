@@ -30,7 +30,7 @@ export class XMLHoverProvider {
 
 				if (text) {
 					const markdownString = new vscode.MarkdownString();
-					markdownString.appendCodeblock(`${classOfTheTag}  \n`);
+					markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
 					markdownString.appendMarkdown(text);
 					hover = new vscode.Hover(markdownString);
 				}
@@ -40,7 +40,7 @@ export class XMLHoverProvider {
 				if (isClassName) {
 					//is class
 					const markdownString = new vscode.MarkdownString();
-					markdownString.appendCodeblock(`${classOfTheTag}  \n`);
+					markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
 					const UIClass = UIClassFactory.getUIClass(classOfTheTag);
 					const text = `${URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass)}`;
 					markdownString.appendMarkdown(text);
@@ -59,7 +59,7 @@ export class XMLHoverProvider {
 
 					if (text) {
 						const markdownString = new vscode.MarkdownString();
-						markdownString.appendCodeblock(`${classOfTheTag}  \n`);
+						markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
 						markdownString.appendMarkdown(text);
 						hover = new vscode.Hover(markdownString);
 					}
