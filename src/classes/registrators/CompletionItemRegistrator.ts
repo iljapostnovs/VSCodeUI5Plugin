@@ -42,11 +42,17 @@ export class CompletionItemRegistrator {
 			}
 		}, "this.getView().byId(");
 
+		let i = 65;
+		const aChars: string[] = [];
+		for (i = 65; i <= 122; i++) {
+			aChars.push(String.fromCharCode(i));
+		}
+
 		const XMLProvider = vscode.languages.registerCompletionItemProvider({language: "xml", scheme: "file"}, {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
 				return XMLCompletionItemFactory.generateXMLDynamicCompletionItems();
 			}
-		}, "<", ":");
+		}, "<", ":", "\"", "*", ...aChars);
 
 		UI5Plugin.getInstance().addDisposable(XMLProvider);
 		UI5Plugin.getInstance().addDisposable(JSMethodPropertyProvider);

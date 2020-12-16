@@ -34,10 +34,15 @@ export interface UIAggregation {
 	description: string;
 	default: boolean;
 }
+interface UIEventParam {
+	name: string;
+	type: string;
+}
 export interface UIEvent {
 	name: string;
 	visibility: string;
 	description: string;
+	params: UIEventParam[];
 }
 export interface UIAssociation {
 	name: string;

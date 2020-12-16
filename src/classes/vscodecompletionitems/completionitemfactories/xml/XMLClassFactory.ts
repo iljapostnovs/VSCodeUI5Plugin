@@ -67,7 +67,7 @@ export class XMLClassFactory {
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
 		mardownString.appendMarkdown(URLBuilder.getInstance().getMarkupUrlForClassApi(node));
-		mardownString.appendMarkdown(StandardUIClass.prototype.removeTags(metadata.description));
+		mardownString.appendMarkdown(StandardUIClass.removeTags(metadata.description));
 
 		return this.generateXMLClassCompletionItemUsing({
 			markdown: mardownString,

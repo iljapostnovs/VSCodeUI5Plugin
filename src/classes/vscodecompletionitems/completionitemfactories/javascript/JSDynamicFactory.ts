@@ -23,7 +23,7 @@ export class JSDynamicFactory {
 			const mandatoryParams = classMethod.params.filter(param => !param.endsWith("?"));
 			const paramString = mandatoryParams.map((param, index) => `\${${index + 1}:${param}}`).join(", ");
 			completionItem.insertText = new vscode.SnippetString(`${classMethod.name}(${paramString})$0`);
-			completionItem.detail = `(${classMethod.visibility}) ${classMethod.name}`;
+			completionItem.detail = `(${classMethod.visibility}) ${fieldsAndMethods.className}`;
 
 			const mardownString = new vscode.MarkdownString();
 			mardownString.isTrusted = true;
@@ -31,7 +31,8 @@ export class JSDynamicFactory {
 				//TODO: newline please, why dont you work
 				mardownString.appendMarkdown(classMethod.api);
 			}
-			mardownString.appendCodeblock(classMethod.description);
+			mardownString.appendCodeblock(`${classMethod.name}(${classMethod.params.join(", ")}): ${classMethod.returnType || "void"}`);
+			mardownString.appendMarkdown(classMethod.description);
 			completionItem.documentation = mardownString;
 
 			return completionItem;

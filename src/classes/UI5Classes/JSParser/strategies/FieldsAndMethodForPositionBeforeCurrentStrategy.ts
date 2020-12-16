@@ -131,7 +131,6 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 
 	public getClassNameOfTheVariableAtCurrentDocumentPosition() {
 		let UIClassName;
-		AcornSyntaxAnalyzer.declarationStack = [];
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 
 		const activeTextEditor = vscode.window.activeTextEditor;
@@ -148,7 +147,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		let classNameOfTheCurrentVariable;
 		const stack = this.getStackOfNodesForPosition(className, position);
 		if (stack.length > 0) {
-			classNameOfTheCurrentVariable = AcornSyntaxAnalyzer.findClassNameForStack(stack, className);
+			classNameOfTheCurrentVariable = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, undefined, true);
 		}
 
 		return classNameOfTheCurrentVariable;
@@ -164,8 +163,10 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 			})?.value;
 
 			if (methodNode) {
-				const methodBody = methodNode.body?.body;
-				const nodeWithCurrentPosition = methodBody && AcornSyntaxAnalyzer.findAcornNode(methodBody, position - 1);
+				const methodBody = methodNode.body?.body || [];
+				const methodsParams = methodNode?.params || [];
+				const method = methodBody.concat(methodsParams);
+				const nodeWithCurrentPosition = AcornSyntaxAnalyzer.findAcornNode(method, position - 1);
 
 				if (nodeWithCurrentPosition) {
 					this.generateStackOfNodes(nodeWithCurrentPosition, position, stack, checkForLastPosition);

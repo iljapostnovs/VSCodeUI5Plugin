@@ -17,7 +17,6 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 
 	private acornGetPropertiesForParamsInCurrentPosition() {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
-		AcornSyntaxAnalyzer.declarationStack = [];
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 
 		const activeTextEditor = vscode.window.activeTextEditor;

@@ -22,6 +22,7 @@ interface Comment {
 export interface CustomClassUIMethod extends UIMethod {
 	position?: number;
 	acornParams?: any;
+	acornNode?: any;
 }
 export interface CustomClassUIField extends UIField {
 	customData?: LooseObject;
@@ -112,23 +113,18 @@ export class CustomUIClass extends AbstractUIClass {
 						});
 					}
 
-					if (isPrivate || isPublic || isProtected) {
-						const UIMethod = this.methods.find(method => method.name === methodName);
-						if (UIMethod) {
+					const UIMethod = this.methods.find(method => method.name === methodName);
+					if (UIMethod) {
+						if (isPrivate || isPublic || isProtected) {
 							UIMethod.visibility = isPrivate ? "private" : isProtected ? "protected" : isPublic ? "public" : UIMethod.visibility;
 						}
-					}
-					if (asyncTag) {
-						const UIMethod = this.methods.find(method => method.name === methodName);
-						if (UIMethod) {
+						if (asyncTag) {
 							UIMethod.returnType = "Promise";
-							this.generateDescriptionForMethod(UIMethod);
-						}
-					} else if (returnTag) {
-						const UIMethod = this.methods.find(method => method.name === methodName);
-						if (UIMethod) {
+						} else if (returnTag) {
 							UIMethod.returnType = returnTag.type;
-							this.generateDescriptionForMethod(UIMethod);
+						}
+						if (comment.jsdoc) {
+							UIMethod.description = comment.jsdoc.description;
 						}
 					}
 				}
@@ -320,7 +316,8 @@ export class CustomUIClass extends AbstractUIClass {
 						position: property.start,
 						description: "",
 						visibility: property.key.name.startsWith("_") ? "private" : "public",
-						acornParams: property.value.params
+						acornParams: property.value.params,
+						acornNode: property.value
 					};
 					this.generateDescriptionForMethod(method);
 					this.methods.push(method);
@@ -356,6 +353,13 @@ export class CustomUIClass extends AbstractUIClass {
 				}
 				return accumulator;
 			}, []);
+
+			this.fields.push({
+				name: "prototype",
+				description: "Prototype of the class",
+				type: this.className,
+				visibility: "public"
+			});
 		}
 
 		this.fillMethodsFromMetadata();
@@ -428,7 +432,8 @@ export class CustomUIClass extends AbstractUIClass {
 						position: assignmentBody.start,
 						description: "",
 						visibility: name?.startsWith("_") ? "private" : "public",
-						acornParams: assignmentBody.params
+						acornParams: assignmentBody.params,
+						acornNode: assignmentBody
 					};
 					this.generateDescriptionForMethod(method);
 					this.methods.push(method);
@@ -445,8 +450,8 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	public generateDescriptionForMethod(method: UIMethod) {
-		const description = `(${method.params.map(param => param).join(", ")}) : ${(method.returnType ? method.returnType : "void")}`;
-		method.description = description;
+		// const description = `(${method.params.map(param => param).join(", ")}) : ${(method.returnType ? method.returnType : "void")}`;
+		// method.description = description;
 	}
 
 	public fillTypesFromHungarionNotation() {
@@ -523,36 +528,41 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private fillAggregationMethods(additionalMethods: CustomClassUIMethod[]) {
+		interface method {
+			name: string;
+			returnType: string;
+		}
 		this.aggregations?.forEach(aggregation => {
 			const aggregationWithFirstBigLetter = `${aggregation.singularName[0].toUpperCase()}${aggregation.singularName.substring(1, aggregation.singularName.length)}`;
 
-			let aMethods = [];
+			let aMethods: method[] = [];
 			if (aggregation.multiple) {
 				aMethods = [
-					`get${aggregationWithFirstBigLetter}s`,
-					`add${aggregationWithFirstBigLetter}`,
-					`insert${aggregationWithFirstBigLetter}`,
-					`indexOf${aggregationWithFirstBigLetter}`,
-					`remove${aggregationWithFirstBigLetter}`,
-					`destroy${aggregationWithFirstBigLetter}s`,
-					`bind${aggregationWithFirstBigLetter}s`,
-					`unbind${aggregationWithFirstBigLetter}s`
+					{name: `get${aggregationWithFirstBigLetter}s`, returnType: `${aggregation.type}[]`},
+					{name: `add${aggregationWithFirstBigLetter}`, returnType: this.className},
+					{name: `insert${aggregationWithFirstBigLetter}`, returnType: this.className},
+					{name: `indexOf${aggregationWithFirstBigLetter}`, returnType: `int`},
+					{name: `remove${aggregationWithFirstBigLetter}`, returnType: `${aggregation.type}`},
+					{name: `removeAll${aggregationWithFirstBigLetter}s`, returnType: `${aggregation.type}[]`},
+					{name: `destroy${aggregationWithFirstBigLetter}s`, returnType: this.className},
+					{name: `bind${aggregationWithFirstBigLetter}s`, returnType: this.className},
+					{name: `unbind${aggregationWithFirstBigLetter}s`, returnType: this.className}
 				];
 			} else {
 				aMethods = [
-					`get${aggregationWithFirstBigLetter}`,
-					`set${aggregationWithFirstBigLetter}`,
-					`bind${aggregationWithFirstBigLetter}`,
-					`unbind${aggregationWithFirstBigLetter}`
+					{name: `get${aggregationWithFirstBigLetter}`, returnType: `${aggregation.type}`},
+					{name: `set${aggregationWithFirstBigLetter}`, returnType: this.className},
+					{name: `bind${aggregationWithFirstBigLetter}`, returnType: this.className},
+					{name: `unbind${aggregationWithFirstBigLetter}`, returnType: this.className}
 				];
 			}
 
-			aMethods?.forEach(methodName => {
+			aMethods.forEach(method => {
 				additionalMethods.push({
-					name: methodName,
+					name: method.name,
 					description: `Generic method from ${aggregation.name} aggregation`,
 					params: [],
-					returnType: aggregation.type || "void",
+					returnType: method.returnType,
 					visibility: aggregation.visibility
 				});
 			});
@@ -708,7 +718,8 @@ export class CustomUIClass extends AbstractUIClass {
 				const UIEvent: UIEvent = {
 					name: eventNode.key.name,
 					description: "",
-					visibility: visibility
+					visibility: visibility,
+					params: []
 
 				};
 				return UIEvent;

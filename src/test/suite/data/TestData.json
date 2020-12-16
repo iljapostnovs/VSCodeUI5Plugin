@@ -37,6 +37,12 @@
 		},{
 			"name": "_getMixedArrayMethodArray",
 			"returnType": "sap.m.Dialog[]"
+		},{
+			"name": "onTableSelectionChange",
+			"returnType": "sap.m.ListItemBase"
+		},{
+			"name": "onTableSwipe",
+			"returnType": "sap.m.Table"
 		}],
 		"fields": [{
 			"name": "formatter",

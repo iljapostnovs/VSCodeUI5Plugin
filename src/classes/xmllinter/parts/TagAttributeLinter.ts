@@ -1,4 +1,4 @@
-import { Tag, Error, Linter } from "./abstraction/Linter";
+import { Error, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import { XMLParser } from "../../utils/XMLParser";
 import LineColumn = require("line-column");
@@ -18,9 +18,9 @@ export class TagAttributeLinter extends Linter {
 		const errors: Error[] = [];
 
 		//check tags
-		const tags = this.getAllTags(document);
+		const tags = XMLParser.getAllTags(document);
 		tags.forEach(tag => {
-			const tagAttributes = tag.text.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
+			const tagAttributes = XMLParser.getAttributesOfTheTag(tag);
 			if (tagAttributes) {
 
 				const tagPrefix = XMLParser.getTagPrefix(tag.text);
@@ -31,7 +31,7 @@ export class TagAttributeLinter extends Linter {
 					const classOfTheTag = [libraryPath, className].join(".");
 					tagAttributes.forEach(tagAttribute => {
 						//check tag attributes
-						const attributeValidation = this.validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes);
+						const attributeValidation = this._validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes);
 						if (!attributeValidation.valid) {
 							const indexOfTagBegining = tag.text.indexOf(tagAttribute);
 							const position = LineColumn(document).fromIndex(tag.positionBegin + indexOfTagBegining);
@@ -56,54 +56,22 @@ export class TagAttributeLinter extends Linter {
 
 		return errors;
 	}
-
-	private getAllTags(document: string) {
-		let i = 0;
-		const tags: Tag[] = [];
-
-		while (i < document.length) {
-			const thisIsTagEnd = document[i] === ">" && !XMLParser.getIfPositionIsInString(document, i);
-			if (thisIsTagEnd) {
-				const indexOfTagBegining = this.getTagBeginingIndex(document, i);
-				tags.push({
-					text: document.substring(indexOfTagBegining, i + 1),
-					positionBegin: indexOfTagBegining - 1,
-					positionEnd: i
-				});
-			}
-			i++;
-		}
-
-		return tags;
-	}
-
-	private getTagBeginingIndex(document: string, position: number) {
-		let i = position;
-
-		while(i > 0 && (document[i] !== "<" || XMLParser.getIfPositionIsInString(document, i))) {
-			i--;
-		}
-
-		return i;
-	}
-
-	private validateTagAttribute(className: string, attribute: string, attributes: string[]): AttributeValidation {
+	private _validateTagAttribute(className: string, attribute: string, attributes: string[]): AttributeValidation {
 		let attributeValidation: AttributeValidation = {
 			valid: false
 		};
 
 		const UIClass = UIClassFactory.getUIClass(className);
-		const indexOfEqualSign = attribute.indexOf("=");
-		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
+		const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
 
-		const isExclusion = attributeName.startsWith("xmlns") || this.isAttributeAlwaysValid(className, attributeName);
-		const isAttributeNameDuplicated = this.getIfAttributeNameIsDuplicated(attribute, attributes);
-		const attributeNameValid = !isAttributeNameDuplicated && (isExclusion || this.validateAttributeName(className, attribute));
-		const attributeValueValid = this.validateAttributeValue(className, attribute);
+		const isExclusion = attributeName.startsWith("xmlns") || this._isAttributeAlwaysValid(className, attributeName);
+		const isAttributeNameDuplicated = this._getIfAttributeNameIsDuplicated(attribute, attributes);
+		const attributeNameValid = !isAttributeNameDuplicated && (isExclusion || this._validateAttributeName(className, attribute));
+		const attributeValueValid = this._validateAttributeValue(className, attribute);
 		attributeValidation.valid = attributeNameValid && attributeValueValid;
 
 		if (!attributeNameValid && UIClass.parentClassNameDotNotation) {
-			attributeValidation = this.validateTagAttribute(UIClass.parentClassNameDotNotation, attribute, attributes);
+			attributeValidation = this._validateTagAttribute(UIClass.parentClassNameDotNotation, attribute, attributes);
 		} else if (!attributeValidation.valid) {
 			let message = "";
 			if (isAttributeNameDuplicated) {
@@ -119,17 +87,17 @@ export class TagAttributeLinter extends Linter {
 		return attributeValidation;
 	}
 
-	private getIfAttributeNameIsDuplicated(attribute: string, attributes: string[]) {
-		const attributeNames = attributes.map(attribute => this.getAttributeNameAndValue(attribute).attributeName);
-		const nameOfTheCurrentAttribute = this.getAttributeNameAndValue(attribute).attributeName;
+	private _getIfAttributeNameIsDuplicated(attribute: string, attributes: string[]) {
+		const attributeNames = attributes.map(attribute => XMLParser.getAttributeNameAndValue(attribute).attributeName);
+		const nameOfTheCurrentAttribute = XMLParser.getAttributeNameAndValue(attribute).attributeName;
 		const isDuplicated = attributeNames.filter(attributeName => attributeName === nameOfTheCurrentAttribute).length > 1;
 
 		return isDuplicated;
 	}
 
-	private validateAttributeValue(className: string, attribute: string) {
+	private _validateAttributeValue(className: string, attribute: string) {
 		let isValueValid = true;
-		const { attributeName, attributeValue } = this.getAttributeNameAndValue(attribute);
+		const { attributeName, attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 		const UIClass = UIClassFactory.getUIClass(className);
 		const property = UIClass.properties.find(property => property.name === attributeName);
 		const event = UIClass.events.find(event => event.name === attributeName);
@@ -153,19 +121,7 @@ export class TagAttributeLinter extends Linter {
 		return isValueValid;
 	}
 
-	private getAttributeNameAndValue(attribute: string) {
-		const indexOfEqualSign = attribute.indexOf("=");
-		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
-		let attributeValue = attribute.replace(attributeName, "").replace("=", "").trim();
-		attributeValue = attributeValue.substring(1, attributeValue.length - 1); // removes ""
-
-		return {
-			attributeName: attributeName,
-			attributeValue: attributeValue
-		};
-	}
-
-	private validateAttributeName(className: string, attribute: string) {
+	private _validateAttributeName(className: string, attribute: string) {
 		const indexOfEqualSign = attribute.indexOf("=");
 		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
 		const UIClass = UIClassFactory.getUIClass(className);
@@ -180,7 +136,7 @@ export class TagAttributeLinter extends Linter {
 		return somethingInClassWasFound;
 	}
 
-	private isAttributeAlwaysValid(className: string, attribute: string) {
+	private _isAttributeAlwaysValid(className: string, attribute: string) {
 		const exclusions: any = {
 			"*": ["id", "class"],
 			"sap.ui.core.mvc.View": ["controllerName"],
