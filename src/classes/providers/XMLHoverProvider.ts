@@ -86,15 +86,24 @@ export class XMLHoverProvider {
 		const property = UIClass.properties.find(property => property.name === attributeName);
 		let api = "";
 		if (aggregation) {
-			text = `aggregation: **${aggregation.name}**  \ntype: **${aggregation.type}**  \n\n${aggregation.description}`;
+			text = `aggregation: **${aggregation.name}**  \ntype: **${aggregation.type}**  \nmultiple: ${aggregation.multiple}  \n\n${aggregation.description}`;
 			api = URLBuilder.getInstance().getMarkupUrlForAggregationApi(UIClass);
 		}
 		if (event) {
 			text = `event: **${event.name}**  \n\n${event.description}`;
 			api = URLBuilder.getInstance().getMarkupUrlForEventsApi(UIClass, event.name);
+
+			if (event.params.length > 0) {
+				text += `  \n\nParameters:  \n${event.params.map(param => `*${param.name}*: ${param.type}`).join("  \n")}`;
+			}
 		}
 		if (property) {
 			text = `property: **${property.name}**  \ntype: **${property.type}**  \n\n${property.description}`;
+
+			const typeValues = property.typeValues.map(typeValue => `*${typeValue.text}* - ${typeValue.description}`);
+			if (typeValues.length > 0) {
+				text += `  \n\nValues:  \n${typeValues.join("  \n")}`;
+			}
 			api = URLBuilder.getInstance().getMarkupUrlForPropertiesApi(UIClass);
 		}
 
