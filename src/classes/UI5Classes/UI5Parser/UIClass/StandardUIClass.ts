@@ -120,8 +120,9 @@ export class StandardUIClass extends AbstractUIClass {
 			if (text[i] === "<") {
 				tagOpened++;
 			} else if (text[i] === ">") {
+				textWithoutTags += " ";
 				tagClosed++;
-			} else if (tagOpened - tagClosed === 0) {
+			} else if (tagOpened === tagClosed) {
 				textWithoutTags += text[i];
 			}
 
