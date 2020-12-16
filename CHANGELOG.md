@@ -1,5 +1,5 @@
-## 0.10.10 (15-12-2020)
-* Hover Provider introduced
+## 0.10.10 (16-12-2020)
+* XML and JS Hover Provider introduced
 * XML formatter introduced
 * Completion items for methods now contains description
 * Bugfixes

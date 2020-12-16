@@ -61,7 +61,7 @@ Code Actions for UI5 modules import in .js files are provided.<br/>
 ![CodeActionsProvider](/images/CodeActionsProvider.gif)
 
 ----------
-## Hover Provider
+## JS and XML Hover Provider
 Information on hover is provided.<br/>
 
 ![HoverProvider](/images/HoverProvider.gif)
