@@ -1,3 +1,6 @@
+## 0.11.1 (16-12-2020)
+* Bugfixes
+
 ## 0.11.0 (16-12-2020)
 * XML and JS Hover Provider introduced
 * XML formatter introduced
