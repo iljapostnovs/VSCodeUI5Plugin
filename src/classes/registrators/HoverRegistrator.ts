@@ -1,12 +1,20 @@
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
-import { HoverProvider } from "../providers/HoverProvider";
+import { JSHoverProvider } from "../providers/JSHoverProvider";
+import { XMLHoverProvider } from "../providers/XMLHoverProvider";
 
 export class HoverRegistrator {
 	static register() {
-		const disposable = vscode.languages.registerHoverProvider("javascript", {
+		let disposable = vscode.languages.registerHoverProvider("javascript", {
 			provideHover(document, position) {
-				return HoverProvider.getTextEdits(document, position);
+				return JSHoverProvider.getTextEdits(document, position);
+			}
+		});
+		UI5Plugin.getInstance().addDisposable(disposable);
+
+		disposable = vscode.languages.registerHoverProvider("xml", {
+			provideHover(document, position) {
+				return XMLHoverProvider.getTextEdits(document, position);
 			}
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);

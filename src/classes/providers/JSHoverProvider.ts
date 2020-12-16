@@ -4,7 +4,7 @@ import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../UI5Classes/J
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 
-export class HoverProvider {
+export class JSHoverProvider {
 	static getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();

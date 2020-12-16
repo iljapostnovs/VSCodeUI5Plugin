@@ -183,6 +183,10 @@ export class XMLParser {
 			tagPrefix = tagNameParts[0];
 		}
 
+		if (tagPrefix.startsWith("/")) {
+			tagPrefix = tagPrefix.substring(1, tagPrefix.length);
+		}
+
 		return tagPrefix;
 	}
 
