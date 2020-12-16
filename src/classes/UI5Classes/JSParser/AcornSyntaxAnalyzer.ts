@@ -171,26 +171,25 @@ export class AcornSyntaxAnalyzer {
 				if (!isMethod && isArray) {
 					className = currentClassName.replace("[]", "");
 				} else if (isMethod) {
-					const callExpression = stack.shift();
 					if (isCallOrApply) {
-						className = currentClassName;
-						stack.splice(0, 2);
-					} else {
-						const method = this.findMethodHierarchically(currentClassName, memberName);
-						if (method) {
-							if (currentClassName === "sap.ui.base.Event") {
-								stack.unshift(callExpression);
-								className = this._handleBaseEventException(currentNode, stack, primaryClassName);
-							}
-							if (!className) {
-								if (!method.returnType || method.returnType === "void") {
-									this.findMethodReturnType(method, currentClassName);
-								}
-								className = method.returnType;
-							}
-						} else {
-							stack = [];
+						stack.shift();
+					}
+
+					const callExpression = stack.shift();
+					const method = this.findMethodHierarchically(currentClassName, memberName);
+					if (method) {
+						if (currentClassName === "sap.ui.base.Event") {
+							stack.unshift(callExpression);
+							className = this._handleBaseEventException(currentNode, stack, primaryClassName);
 						}
+						if (!className) {
+							if (!method.returnType || method.returnType === "void") {
+								this.findMethodReturnType(method, currentClassName);
+							}
+							className = method.returnType;
+						}
+					} else {
+						stack = [];
 					}
 				} else {
 					const field = this._findFieldHierarchically(currentClassName, memberName);
