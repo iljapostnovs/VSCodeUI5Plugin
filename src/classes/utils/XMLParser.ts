@@ -3,6 +3,7 @@ import { FileReader } from "./FileReader";
 import { UIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { Tag } from "../xmllinter/parts/abstraction/Linter";
 
 export enum PositionType {
 	InTheTagAttributes = "1",
@@ -122,14 +123,14 @@ export class XMLParser {
 		};
 	}
 
-	private static lastDocument: string = "";
-	private static lastComments: RegExpExecArray[] = [];
+	private static _lastDocument: string = "";
+	private static _lastComments: RegExpExecArray[] = [];
 
 	public static getIfPositionIsNotInComments(document: string, position: number) {
 		let isPositionNotInComments = true;
 		let comments: RegExpExecArray[] = [];
 
-		if (this.lastDocument.length !== document.length) {
+		if (this._lastDocument.length !== document.length) {
 			const regExp = new RegExp("<!--(.|\\s)*?-->", "g");
 
 			let result = regExp.exec(document);
@@ -138,10 +139,10 @@ export class XMLParser {
 				result = regExp.exec(document);
 			}
 
-			this.lastComments = comments;
-			this.lastDocument = document;
+			this._lastComments = comments;
+			this._lastDocument = document;
 		} else {
-			comments = this.lastComments;
+			comments = this._lastComments;
 		}
 
 		const comment = comments.find(comment => comment.index <= position && comment.index + comment[0].length > position);
@@ -318,7 +319,7 @@ export class XMLParser {
 
 		const controllerName = this.getControllerNameOfTheCurrentDocument();
 		if (controllerName) {
-			classMethods = this.getClassMethodsRecursively(controllerName);
+			classMethods = this._getClassMethodsRecursively(controllerName);
 		}
 
 		return classMethods;
@@ -335,14 +336,14 @@ export class XMLParser {
 		return controllerName;
 	}
 
-	private static getClassMethodsRecursively(className: string, onlyCustomMethods: boolean = true) {
+	private static _getClassMethodsRecursively(className: string, onlyCustomMethods: boolean = true) {
 		let methods: UIMethod[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 		methods = UIClass.methods;
 
 		const isThisClassFromAProject = !!FileReader.getManifestForClass(UIClass.parentClassNameDotNotation);
 		if (UIClass.parentClassNameDotNotation && (!onlyCustomMethods || isThisClassFromAProject)) {
-			methods = methods.concat(this.getClassMethodsRecursively(UIClass.parentClassNameDotNotation));
+			methods = methods.concat(this._getClassMethodsRecursively(UIClass.parentClassNameDotNotation));
 		}
 
 		return methods;
@@ -358,4 +359,50 @@ export class XMLParser {
 
 		return prefix;
 	}
+
+	public static getAllTags(document: string) {
+		let i = 0;
+		const tags: Tag[] = [];
+
+		while (i < document.length) {
+			const thisIsTagEnd = document[i] === ">" && !XMLParser.getIfPositionIsInString(document, i);
+			if (thisIsTagEnd) {
+				const indexOfTagBegining = this._getTagBeginingIndex(document, i);
+				tags.push({
+					text: document.substring(indexOfTagBegining, i + 1),
+					positionBegin: indexOfTagBegining - 1,
+					positionEnd: i
+				});
+			}
+			i++;
+		}
+
+		return tags;
+	}
+
+	private static _getTagBeginingIndex(document: string, position: number) {
+		let i = position;
+
+		while(i > 0 && (document[i] !== "<" || XMLParser.getIfPositionIsInString(document, i))) {
+			i--;
+		}
+
+		return i;
+	}
+
+	public static getAttributesOfTheTag(tag: Tag) {
+		return tag.text.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
+	}
+	public static getAttributeNameAndValue(attribute: string) {
+		const indexOfEqualSign = attribute.indexOf("=");
+		const attributeName = attribute.substring(0, indexOfEqualSign).trim();
+		let attributeValue = attribute.replace(attributeName, "").replace("=", "").trim();
+		attributeValue = attributeValue.substring(1, attributeValue.length - 1); // removes ""
+
+		return {
+			attributeName: attributeName,
+			attributeValue: attributeValue
+		};
+	}
+
 }

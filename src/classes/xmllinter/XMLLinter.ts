@@ -17,6 +17,4 @@ export class XMLLinter {
 
 		return errors;
 	}
-
-
 }

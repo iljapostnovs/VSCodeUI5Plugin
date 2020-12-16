@@ -718,7 +718,8 @@ export class CustomUIClass extends AbstractUIClass {
 				const UIEvent: UIEvent = {
 					name: eventNode.key.name,
 					description: "",
-					visibility: visibility
+					visibility: visibility,
+					params: []
 
 				};
 				return UIEvent;

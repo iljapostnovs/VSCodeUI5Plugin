@@ -216,11 +216,17 @@ export class StandardUIClass extends AbstractUIClass {
 	private getStandardClassEvents(className: string) {
 		let classEvents: UIEvent[] = [];
 		const SAPNode = this.findSAPNode(className);
-		classEvents = SAPNode?.getEvents().reduce((accumulator: UIEvent[], event:any) => {
+		classEvents = SAPNode?.getEvents().reduce((accumulator: UIEvent[], event: any) => {
 			accumulator.push({
 				name: event.name,
 				description: this.removeTags(event.description),
-				visibility: event.visibility
+				visibility: event.visibility,
+				params: event?.parameters?.map((parameter: any) => {
+					return {
+						name: parameter.name,
+						type: parameter.type
+					};
+				})
 			});
 			return accumulator;
 		}, []) || [];

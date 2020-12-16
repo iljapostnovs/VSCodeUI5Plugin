@@ -61,6 +61,9 @@ export class HoverProvider {
 		const method = fieldsAndMethods.methods.find(method => method.name === fieldOrMethodName);
 		const field = fieldsAndMethods.fields.find(field => field.name === fieldOrMethodName);
 		if (method) {
+			if (!method.returnType || method.returnType === "void") {
+				AcornSyntaxAnalyzer.findMethodReturnType(method, className, true);
+			}
 			text += `${method.name}(${method.params.join(", ")}) : ${method.returnType}\n`;
 			if (method.api) {
 				text += method.api;
@@ -90,7 +93,10 @@ export class HoverProvider {
 				}
 				const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 				const stack = strategy.getStackOfNodesForPosition(className, position, true);
-				className = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, true);
+				if (stack.length === 0) {
+					stack.push(identifier);
+				}
+				className = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, undefined, true);
 			} else {
 				className = "";
 			}
