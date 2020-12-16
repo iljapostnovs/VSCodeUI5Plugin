@@ -94,7 +94,7 @@ export class StandardUIClass extends AbstractUIClass {
 		classMethods = SAPNode?.getMethods().map((method: any) => {
 			return {
 				name: method.name.replace(`${this.className}.`, ""),
-				description: `${this.removeTags(method.description)}`,
+				description: `${StandardUIClass.removeTags(method.description)}`,
 				params: method.parameters ? method.parameters.map((parameter: any) => parameter.name + (parameter.optional ? "?" : "")) : [],
 				returnType: method.returnValue ? method.returnValue.type : "void",
 				isFromParent: !isParent,
@@ -109,7 +109,7 @@ export class StandardUIClass extends AbstractUIClass {
 		return this.nodeDAO.findNode(className);
 	}
 
-	public removeTags(text: string = "") {
+	public static removeTags(text: string = "") {
 		let textWithoutTags = "";
 		let i = 0;
 
@@ -149,7 +149,7 @@ export class StandardUIClass extends AbstractUIClass {
 			accumulator.push({
 				name: name,
 				type: type,
-				description: `${additionalDescription}\n${this.removeTags(description)}`.trim(),
+				description: `${additionalDescription}\n${StandardUIClass.removeTags(description)}`.trim(),
 				visibility: visibility
 			});
 			return accumulator;
@@ -169,7 +169,7 @@ export class StandardUIClass extends AbstractUIClass {
 				name: name,
 				type: type,
 				typeValues: this.generateTypeValues(type),
-				description: `${additionalDescription}\n${this.removeTags(description)}`.trim(),
+				description: `${additionalDescription}\n${StandardUIClass.removeTags(description)}`.trim(),
 				visibility: visibility
 			});
 			return accumulator;
@@ -202,7 +202,7 @@ export class StandardUIClass extends AbstractUIClass {
 			typeValues = metadata?.rawMetadata?.properties?.map((property: any): TypeValue => {
 				return {
 					text: `${property.name}`.replace(`${type}.`, ""),
-					description: this.removeTags(property.description)
+					description: StandardUIClass.removeTags(property.description)
 				};
 			}) || [];
 		}
@@ -220,7 +220,7 @@ export class StandardUIClass extends AbstractUIClass {
 		classEvents = SAPNode?.getEvents().reduce((accumulator: UIEvent[], event: any) => {
 			accumulator.push({
 				name: event.name,
-				description: this.removeTags(event.description),
+				description: StandardUIClass.removeTags(event.description),
 				visibility: event.visibility,
 				params: event?.parameters?.map((parameter: any) => {
 					return {
@@ -249,7 +249,7 @@ export class StandardUIClass extends AbstractUIClass {
 				type: aggregation.type,
 				multiple: aggregation.coordinality === "0..n",
 				singularName: aggregation.singularName,
-				description: this.removeTags(aggregation.description),
+				description: StandardUIClass.removeTags(aggregation.description),
 				visibility: aggregation.visibility,
 				default: SAPNode.getMetadata()?.getUI5Metadata()?.defaultAggregation === aggregation.name
 			});
@@ -271,7 +271,7 @@ export class StandardUIClass extends AbstractUIClass {
 			accumulator.push({
 				name: association.name,
 				type: association.type,
-				description: this.removeTags(association.description),
+				description: StandardUIClass.removeTags(association.description),
 				multiple: association.multiple || association.coordinality === "0..n",
 				singularName: association.singularName,
 				visibility: association.visibility
@@ -286,14 +286,14 @@ export class StandardUIClass extends AbstractUIClass {
 		const metadata = SAPNode?.getMetadata();
 		if (metadata?.rawMetadata?.constructor?.codeExample) {
 			const constructor = metadata.rawMetadata.constructor;
-			const codeExample = this.removeTags(constructor.codeExample);
+			const codeExample = StandardUIClass.removeTags(constructor.codeExample);
 			let parameterText = MainLooper.getEndOfChar("(", ")", codeExample);
 			parameterText = parameterText.substring(1, parameterText.length - 1); //remove ()
 			const parameters = parameterText.split(", ");
 
 			this.methods.push({
 				name: "constructor",
-				description: this.removeTags(constructor.codeExample),
+				description: StandardUIClass.removeTags(constructor.codeExample),
 				params: parameters,
 				returnType: this.className,
 				isFromParent: false,
