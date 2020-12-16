@@ -37,10 +37,6 @@ export class XMLDynamicFactory {
 			}
 
 			completionItems = this.removeDuplicateCompletionItems(completionItems);
-
-			if (completionItems.length === 0) {
-				completionItems = this.getAllFileSpecificCompletionItems();
-			}
 		}
 
 		return completionItems;
