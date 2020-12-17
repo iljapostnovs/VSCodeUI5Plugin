@@ -402,17 +402,17 @@ export class XMLParser {
 	}
 
 	public static getAttributesOfTheTag(tag: Tag | string) {
-		let result: RegExpMatchArray | null = null;
 		const tagOfTagInterface = tag as Tag;
 		const tagAsString = tag as string;
 
+		let text = "";
 		if (tagOfTagInterface.text) {
-			result = tagOfTagInterface.text.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
+			text = tagOfTagInterface.text;
 		} else {
-			result = tagAsString.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
+			text = tagAsString;
 		}
 
-		return result;
+		return text.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
 	}
 	public static getAttributeNameAndValue(attribute: string) {
 		const indexOfEqualSign = attribute.indexOf("=");

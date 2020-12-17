@@ -1,6 +1,6 @@
 import { FileReader } from "../../../utils/FileReader";
 import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
-import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation } from "./AbstractUIClass";
+import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam } from "./AbstractUIClass";
 const commentParser = require("comment-parser");
 const acornLoose = require("acorn-loose");
 
@@ -709,21 +709,34 @@ export class CustomUIClass extends AbstractUIClass {
 		if (eventMetadataNode) {
 
 			const events = eventMetadataNode.value?.properties;
-			this.events = events.map((eventNode: any) => {
+			this.events = events?.map((eventNode: any) => {
 				let visibility = "public";
 				const visibilityProp = eventNode.value?.properties?.find((node: any) => node.key.name === "visibility");
 				if (visibilityProp) {
 					visibility = visibilityProp.value.value;
 				}
+
+				let eventParams: UIEventParam[] = [];
+				const params = eventNode.value?.properties?.find((node: any) => node.key.name === "parameters");
+				if (params) {
+					eventParams = params.value?.properties?.map((param: any) => {
+						const type = param.value?.properties?.find((param: any) => param.key.name === "type")?.value?.value || "";
+						const eventParam: UIEventParam = {
+							name: param.key.name,
+							type: type
+						};
+						return eventParam;
+					}) || [];
+				}
 				const UIEvent: UIEvent = {
 					name: eventNode.key.name,
 					description: "",
 					visibility: visibility,
-					params: []
+					params: eventParams
 
 				};
 				return UIEvent;
-			});
+			}) || [];
 		}
 	}
 

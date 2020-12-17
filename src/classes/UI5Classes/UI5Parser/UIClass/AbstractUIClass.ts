@@ -34,7 +34,7 @@ export interface UIAggregation {
 	description: string;
 	default: boolean;
 }
-interface UIEventParam {
+export interface UIEventParam {
 	name: string;
 	type: string;
 }
