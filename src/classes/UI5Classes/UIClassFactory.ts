@@ -56,9 +56,7 @@ export class UIClassFactory {
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 
 		if (currentClassName && documentText) {
-			// console.time(`Class parsing for ${currentClassName} took`);
 			this.setNewCodeForClass(currentClassName, documentText);
-			// console.timeEnd(`Class parsing for ${currentClassName} took`);
 		} else {
 			debugger;
 		}
