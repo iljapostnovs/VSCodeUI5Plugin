@@ -1,3 +1,6 @@
+## 0.11.4 (17-12-2020)
+* Performance improvements for large files
+
 ## 0.11.3 (17-12-2020)
 * Performance improvements for large files
 

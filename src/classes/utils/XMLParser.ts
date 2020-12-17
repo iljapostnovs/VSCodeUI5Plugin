@@ -401,8 +401,18 @@ export class XMLParser {
 		return i;
 	}
 
-	public static getAttributesOfTheTag(tag: Tag) {
-		return tag.text.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
+	public static getAttributesOfTheTag(tag: Tag | string) {
+		const tagOfTagInterface = tag as Tag;
+		const tagAsString = tag as string;
+
+		let text = "";
+		if (tagOfTagInterface.text) {
+			text = tagOfTagInterface.text;
+		} else {
+			text = tagAsString;
+		}
+
+		return text.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
 	}
 	public static getAttributeNameAndValue(attribute: string) {
 		const indexOfEqualSign = attribute.indexOf("=");
@@ -414,6 +424,18 @@ export class XMLParser {
 			attributeName: attributeName,
 			attributeValue: attributeValue
 		};
+	}
+
+	public static getPositionOfEventHandler(eventHandlerName: string, document: string) {
+		let position;
+
+		const regex = new RegExp(`"\.?${eventHandlerName}"`);
+		const result = regex.exec(document);
+		if (result) {
+			position = result.index;
+		}
+
+		return position;
 	}
 
 }

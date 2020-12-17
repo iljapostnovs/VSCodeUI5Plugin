@@ -284,45 +284,45 @@ export class AcornSyntaxAnalyzer {
 			const currentClassEventHandlerName = this._getEventHandlerName(node, primaryClassName);
 			const viewOfTheController = FileReader.getViewText(primaryClassName);
 			if (viewOfTheController && currentClassEventHandlerName) {
-				const tags = XMLParser.getAllTags(viewOfTheController);
 				let eventName = "";
-				const tag = tags.find(tag => {
-					const tagAttributes = XMLParser.getAttributesOfTheTag(tag);
-					if (tagAttributes) {
-						return tagAttributes.find(attribute => {
-							const { attributeValue, attributeName } = XMLParser.getAttributeNameAndValue(attribute);
-							if (attributeValue === currentClassEventHandlerName) {
-								eventName = attributeName;
-							}
-							return attributeValue === currentClassEventHandlerName;
-						});
-					}
-					return false;
-				});
+				const position = XMLParser.getPositionOfEventHandler(currentClassEventHandlerName, viewOfTheController);
+				if (position) {
+					const tagText = XMLParser.getTagInPosition(viewOfTheController, position);
+					const attributes = XMLParser.getAttributesOfTheTag(tagText);
+					const attribute = attributes?.find(attribute => {
+						const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 
-				if (tag && eventName) {
-					const tagPrefix = XMLParser.getTagPrefix(tag.text);
-					const classNameOfTheTag = XMLParser.getClassNameFromTag(tag.text);
+						return attributeValue === currentClassEventHandlerName;
+					});
+					if (attribute) {
+						const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
+						eventName = attributeName;
+						if (tagText && eventName) {
+							const tagPrefix = XMLParser.getTagPrefix(tagText);
+							const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
 
-					if (classNameOfTheTag) {
-						const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOfTheController, tagPrefix, tag.positionEnd);
-						const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
+							if (classNameOfTheTag) {
+								const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOfTheController, tagPrefix, position);
+								const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
 
-						if (methodName === "getSource") {
-							className = classOfTheTag;
-						} else if (methodName === "getParameter") {
-							if (callExpression && callExpression.arguments && callExpression.arguments[0]) {
-								const events = UIClassFactory.getClassEvents(classOfTheTag);
-								const parameterName = callExpression.arguments[0].value;
-								const event = events.find(event => event.name === eventName);
-								const parameter = event?.params.find(param => param.name === parameterName);
-								if (parameter) {
-									className = parameter.type;
+								if (methodName === "getSource") {
+									className = classOfTheTag;
+								} else if (methodName === "getParameter") {
+									if (callExpression && callExpression.arguments && callExpression.arguments[0]) {
+										const events = UIClassFactory.getClassEvents(classOfTheTag);
+										const parameterName = callExpression.arguments[0].value;
+										const event = events.find(event => event.name === eventName);
+										const parameter = event?.params.find(param => param.name === parameterName);
+										if (parameter) {
+											className = parameter.type;
+										}
+									}
 								}
 							}
 						}
 					}
 				}
+
 			}
 		}
 

@@ -3,20 +3,24 @@ import { FileReader } from "../utils/FileReader";
 import { URLBuilder } from "../utils/URLBuilder";
 import { HTTPHandler } from "../utils/HTTPHandler";
 import { SAPNode } from "./SAPNode";
+interface LooseNodeObject {
+	[key: string]: SAPNode;
+}
 
 export class SAPNodeDAO {
-	private static readonly nodePath: string = URLBuilder.getInstance().getAPIIndexUrl();
-	private nodes: any;
-	private static readonly SAPNodes: SAPNode[] = [];
+	private static readonly _nodePath: string = URLBuilder.getInstance().getAPIIndexUrl();
+	private _nodes: any;
+	private static readonly _SAPNodes: SAPNode[] = [];
+	private static readonly _FlatSAPNodes: LooseNodeObject = {};
 	constructor() {}
 
 	public async getAllNodes() {
-		if (SAPNodeDAO.SAPNodes.length === 0) {
-			await this.readAllNodes();
-			this.generateSAPNodes();
+		if (SAPNodeDAO._SAPNodes.length === 0) {
+			await this._readAllNodes();
+			this._generateSAPNodes();
 		}
 
-		return SAPNodeDAO.SAPNodes;
+		return SAPNodeDAO._SAPNodes;
 	}
 
 	public isInstanceOf(child: string, parent: string): boolean {
@@ -32,13 +36,13 @@ export class SAPNodeDAO {
 		return isInstance;
 	}
 
-	private getContentOfNode(node: SAPNode) {
+	private _getContentOfNode(node: SAPNode) {
 		let children: SAPNode[] = [];
 		children.push(node);
 
 		if (node.nodes) {
 			node.nodes.forEach(node => {
-				children = children.concat(this.getContentOfNode(node));
+				children = children.concat(this._getContentOfNode(node));
 			});
 		}
 
@@ -47,57 +51,57 @@ export class SAPNodeDAO {
 	}
 
 	public getAllNodesSync() {
-		return SAPNodeDAO.SAPNodes;
+		return SAPNodeDAO._SAPNodes;
 	}
 
-	private generateSAPNodes() {
+	private _generateSAPNodes() {
 		const libs: any = vscode.workspace.getConfiguration("ui5.plugin").get("libsToLoad");
 		const libMap: any = {};
 		libs.forEach((lib: any) => {
 			libMap[lib] = true;
 		});
 
-		for (const node of this.nodes.symbols) {
+		for (const node of this._nodes.symbols) {
 			if (libMap[node.lib]) {
 				const newNode = new SAPNode(node);
-				SAPNodeDAO.SAPNodes.push(newNode);
+				SAPNodeDAO._SAPNodes.push(newNode);
 			}
 		}
+
+		this._recursiveFlatNodeGeneration(SAPNodeDAO._SAPNodes);
+	}
+	private _recursiveFlatNodeGeneration(nodes: SAPNode[]) {
+		nodes.forEach(SAPNode => {
+			SAPNodeDAO._FlatSAPNodes[SAPNode.getName()] = SAPNode;
+			if (SAPNode.nodes) {
+				this._recursiveFlatNodeGeneration(SAPNode.nodes);
+			}
+		});
 	}
 
-	private async readAllNodes() {
-		this.nodes = this.getApiIndexFromCache();
-		if (!this.nodes) {
-			await this.fetchApiIndex();
-			this.cacheApiIndex();
+	private async _readAllNodes() {
+		this._nodes = this._getApiIndexFromCache();
+		if (!this._nodes) {
+			await this._fetchApiIndex();
+			this._cacheApiIndex();
 		}
 	}
 
-	private getApiIndexFromCache() {
+	private _getApiIndexFromCache() {
 		return FileReader.getCache(FileReader.CacheType.APIIndex);
 	}
 
-	private cacheApiIndex() {
-		const cache = JSON.stringify(this.nodes);
+	private _cacheApiIndex() {
+		const cache = JSON.stringify(this._nodes);
 		FileReader.setCache(FileReader.CacheType.APIIndex, cache);
 	}
 
-	private async fetchApiIndex() {
-		const data: any = await HTTPHandler.get(SAPNodeDAO.nodePath);
-		this.nodes = data;
+	private async _fetchApiIndex() {
+		const data: any = await HTTPHandler.get(SAPNodeDAO._nodePath);
+		this._nodes = data;
 	}
 
 	public findNode(name: string) {
-		let correctNode: SAPNode | undefined;
-
-		for (const node of SAPNodeDAO.SAPNodes) {
-			const theNode: SAPNode = node.findNode(name);
-			if (theNode.getName() === name) {
-				correctNode = theNode;
-				break;
-			}
-		}
-
-		return correctNode;
+		return SAPNodeDAO._FlatSAPNodes[name];
 	}
 }
