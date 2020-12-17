@@ -56,7 +56,9 @@ export class UIClassFactory {
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 
 		if (currentClassName && documentText) {
+			// console.time(`Class parsing for ${currentClassName} took`);
 			this.setNewCodeForClass(currentClassName, documentText);
+			// console.timeEnd(`Class parsing for ${currentClassName} took`);
 		} else {
 			debugger;
 		}
@@ -167,29 +169,12 @@ export class UIClassFactory {
 	private static _enrichMethodParamsWithEventType(CurrentUIClass: CustomUIClass) {
 		const viewOfTheController = FileReader.getViewText(CurrentUIClass.className);
 		if (viewOfTheController) {
-			const tags = XMLParser.getAllTags(viewOfTheController);
-			tags.forEach(tag => {
-				const tagAttributes = XMLParser.getAttributesOfTheTag(tag);
-				if (tagAttributes) {
-
-					const tagPrefix = XMLParser.getTagPrefix(tag.text);
-					const className = XMLParser.getClassNameFromTag(tag.text);
-
-					if (className) {
-						const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOfTheController, tagPrefix, tag.positionEnd);
-						const classOfTheTag = [libraryPath, className].join(".");
-
-						tagAttributes.forEach(tagAttribute => {
-							const attribute = XMLParser.getAttributeNameAndValue(tagAttribute);
-							const events = this.getClassEvents(classOfTheTag);
-							const event = events.find(event => event.name === attribute.attributeName);
-							if (event) {
-								const method = CurrentUIClass.methods.find(method => method.name === attribute.attributeValue);
-								if (method?.acornNode?.params && method?.acornNode?.params[0]) {
-									method.acornNode.params[0].jsType = "sap.ui.base.Event";
-								}
-							}
-						});
+			CurrentUIClass.methods.forEach(method => {
+				const regex = new RegExp(`"\.?${method.name}"`);
+				const isMethodMentionedInTheView = regex.test(viewOfTheController);
+				if (isMethodMentionedInTheView) {
+					if (method?.acornNode?.params && method?.acornNode?.params[0]) {
+						method.acornNode.params[0].jsType = "sap.ui.base.Event";
 					}
 				}
 			});
