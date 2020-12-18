@@ -6,16 +6,16 @@ export class XMLFormatter {
 	static formatDocument(document: vscode.TextDocument) {
 		const textEdits: vscode.TextEdit[] = [];
 		const documentText = document.getText();
-		const allTags = this.getAllTags(documentText);
+		const allTags = this._getAllTags(documentText);
 
 		let indentationLevel = 0;
 		const aTagTexts = allTags.map(currentTag => {
 			if (currentTag.text.startsWith("<!--")) {
-				const indentation = this.getIndentation(indentationLevel);
+				const indentation = this._getIndentation(indentationLevel);
 				return `${indentation}${currentTag.text}`;
 			} else {
-				const tagName = this.getTagName(currentTag.text);
-				const tagAttributes = this.getTagAttributes(currentTag.text);
+				const tagName = this._getTagName(currentTag.text);
+				const tagAttributes = this._getTagAttributes(currentTag.text);
 				let endSubstraction = 1;
 				if (currentTag.text.endsWith("/>")) {
 					endSubstraction = 2;
@@ -31,8 +31,8 @@ export class XMLFormatter {
 				}
 				const tagBegin = currentTag.text.substring(0, beginAddition);
 
-				indentationLevel = this.modifyIndentationLevel(currentTag, indentationLevel, true);
-				let indentation = this.getIndentation(indentationLevel);
+				indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, true);
+				let indentation = this._getIndentation(indentationLevel);
 
 				let newTag = `${indentation}${tagBegin}${tagName}\n`;
 
@@ -54,7 +54,7 @@ export class XMLFormatter {
 
 				newTag += `${indentation}${tagEnd}`;
 
-				indentationLevel = this.modifyIndentationLevel(currentTag, indentationLevel, false);
+				indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, false);
 
 				return newTag;
 			}
@@ -69,7 +69,7 @@ export class XMLFormatter {
 		return textEdits;
 	}
 
-	private static modifyIndentationLevel(currentTag: Tag, indentationLevel: number, beforeTagGeneration: boolean) {
+	private static _modifyIndentationLevel(currentTag: Tag, indentationLevel: number, beforeTagGeneration: boolean) {
 		if (beforeTagGeneration && currentTag.text.startsWith("</")) {
 			indentationLevel--;
 		} else if (!beforeTagGeneration && currentTag.text.startsWith("<") && !currentTag.text.endsWith("/>") && !currentTag.text.startsWith("</")) {
@@ -79,7 +79,7 @@ export class XMLFormatter {
 		return indentationLevel;
 	}
 
-	private static getIndentation(indentationLevel: number) {
+	private static _getIndentation(indentationLevel: number) {
 		const indentationChar = "\t";
 		let indentation = "";
 
@@ -90,7 +90,7 @@ export class XMLFormatter {
 		return indentation;
 	}
 
-	private static getTagName(tag: string) {
+	private static _getTagName(tag: string) {
 		let i = 1; //first char is "<", that's why we start with second char
 		while ((!tag[i].match(/(\s|>|\n)/)) && i < tag.length) {
 			i++;
@@ -106,14 +106,14 @@ export class XMLFormatter {
 		return tag;
 	}
 
-	private static getTagAttributes(tag: string) {
+	private static _getTagAttributes(tag: string) {
 		const tagAttributes = tag.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g) || [];
 
 		return tagAttributes;
 	}
 
 
-	private static getAllTags(document: string) {
+	private static _getAllTags(document: string) {
 		let i = 0;
 		const tags: Tag[] = [];
 
@@ -127,7 +127,7 @@ export class XMLFormatter {
 				)
 				;
 			if (thisIsTagEnd) {
-				const indexOfTagBegining = this.getTagBeginingIndex(document, i);
+				const indexOfTagBegining = this._getTagBeginingIndex(document, i);
 				tags.push({
 					text: document.substring(indexOfTagBegining, i + 1),
 					positionBegin: indexOfTagBegining,
@@ -140,7 +140,7 @@ export class XMLFormatter {
 		return tags;
 	}
 
-	private static getTagBeginingIndex(document: string, position: number) {
+	private static _getTagBeginingIndex(document: string, position: number) {
 		let i = position;
 		let shouldStop = i < 0;
 		let isThisTagBegining =

@@ -319,7 +319,6 @@ export class CustomUIClass extends AbstractUIClass {
 						acornParams: property.value.params,
 						acornNode: property.value
 					};
-					this.generateDescriptionForMethod(method);
 					this.methods.push(method);
 				} else if (property.value.type === "Identifier" || property.value.type === "Literal") {
 					this.fields.push({
@@ -435,7 +434,6 @@ export class CustomUIClass extends AbstractUIClass {
 						acornParams: assignmentBody.params,
 						acornNode: assignmentBody
 					};
-					this.generateDescriptionForMethod(method);
 					this.methods.push(method);
 				} else if (isField) {
 					this.fields.push({
@@ -449,9 +447,8 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	public generateDescriptionForMethod(method: UIMethod) {
-		// const description = `(${method.params.map(param => param).join(", ")}) : ${(method.returnType ? method.returnType : "void")}`;
-		// method.description = description;
+	public static generateDescriptionForMethod(method: UIMethod) {
+		return `(${method.params.map(param => param).join(", ")}) : ${(method.returnType ? method.returnType : "void")}`;
 	}
 
 	public fillTypesFromHungarionNotation() {

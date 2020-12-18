@@ -34,13 +34,13 @@ export class CompletionItemRegistrator {
 				// console.timeEnd(`Position ${document.fileName} parsing took`);
 				return itemsToReturn;
 			}
-		}, ".");
+		}, ".", "\"");
 
 		const JSViewIDProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
 				return JSCompletionItemDAO.generateViewIdCompletionItems();
 			}
-		}, "this.getView().byId(");
+		}, "\"");
 
 		let i = 65;
 		const aChars: string[] = [];

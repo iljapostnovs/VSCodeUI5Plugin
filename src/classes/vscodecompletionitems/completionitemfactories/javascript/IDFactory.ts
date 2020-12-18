@@ -18,6 +18,7 @@ export class IDFactory {
 			completionItem.insertText = viewId;
 			completionItem.detail = viewId;
 			completionItem.documentation = viewId;
+			completionItem.sortText = "z";
 
 			return completionItem;
 		});
