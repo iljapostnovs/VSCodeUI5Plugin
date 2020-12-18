@@ -281,10 +281,41 @@ export class AcornSyntaxAnalyzer {
 		const UIClass = UIClassFactory.getUIClass(primaryClassName);
 		if (UIClass instanceof CustomUIClass && node.property?.name) {
 			const methodName = node.property.name;
-			const currentClassEventHandlerName = this._getEventHandlerName(node, primaryClassName);
-			const viewOfTheController = FileReader.getViewText(primaryClassName);
+			const eventData = this.getEventHandlerData(node, primaryClassName);
+			if (eventData) {
+				if (methodName === "getSource") {
+					className = eventData.className;
+				} else if (methodName === "getParameter") {
+					if (callExpression && callExpression.arguments && callExpression.arguments[0]) {
+						const parameterName = callExpression.arguments[0].value;
+						const parameters = this.getParametersOfTheEvent(eventData.eventName, eventData.className);
+						const parameter = parameters?.find(param => param.name === parameterName);
+						if (parameter) {
+							className = parameter.type;
+						}
+					}
+				}
+			}
+
+		}
+
+		return className;
+	}
+
+	public static getParametersOfTheEvent(eventName: string, className: string) {
+		const events = UIClassFactory.getClassEvents(className);
+		const event = events.find(event => event.name === eventName);
+		return event?.params;
+	}
+
+	public static getEventHandlerData(node: any, className: string) {
+		let eventHandlerData;
+
+		const UIClass = UIClassFactory.getUIClass(className);
+		if (UIClass instanceof CustomUIClass) {
+			const currentClassEventHandlerName = this._getEventHandlerName(node, className);
+			const viewOfTheController = FileReader.getViewText(className);
 			if (viewOfTheController && currentClassEventHandlerName) {
-				let eventName = "";
 				const position = XMLParser.getPositionOfEventHandler(currentClassEventHandlerName, viewOfTheController);
 				if (position) {
 					const tagText = XMLParser.getTagInPosition(viewOfTheController, position);
@@ -296,37 +327,28 @@ export class AcornSyntaxAnalyzer {
 					});
 					if (attribute) {
 						const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
-						eventName = attributeName;
+						const eventName = attributeName;
 						if (tagText && eventName) {
 							const tagPrefix = XMLParser.getTagPrefix(tagText);
 							const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
 
 							if (classNameOfTheTag) {
+
+
 								const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOfTheController, tagPrefix, position);
 								const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
-
-								if (methodName === "getSource") {
-									className = classOfTheTag;
-								} else if (methodName === "getParameter") {
-									if (callExpression && callExpression.arguments && callExpression.arguments[0]) {
-										const events = UIClassFactory.getClassEvents(classOfTheTag);
-										const parameterName = callExpression.arguments[0].value;
-										const event = events.find(event => event.name === eventName);
-										const parameter = event?.params.find(param => param.name === parameterName);
-										if (parameter) {
-											className = parameter.type;
-										}
-									}
-								}
+								eventHandlerData = {
+									className: classOfTheTag,
+									eventName: eventName
+								};
 							}
 						}
 					}
 				}
-
 			}
 		}
 
-		return className;
+		return eventHandlerData;
 	}
 
 	private static _getEventHandlerName(node: any, className: string) {

@@ -74,7 +74,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 		if (currentClassName && position) {
 			const argument = AcornSyntaxAnalyzer.findAcornNode(objectExpression.arguments, position);
 			const indexOfArgument = objectExpression.arguments.indexOf(argument);
-			if (argument && argument.type === "ObjectExpression") {
+			if (argument?.type === "ObjectExpression") {
 				const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 				const stack = positionBeforeCurrentStrategy.getStackOfNodesForPosition(currentClassName, objectExpression.callee.end);
 				const classNameOfCurrentObjectExpression = AcornSyntaxAnalyzer.findClassNameForStack(stack, currentClassName);
@@ -101,6 +101,29 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 									})
 								};
 							}
+						}
+					}
+				}
+			} else if (argument?.type === "Literal" && indexOfArgument === 0) {
+				const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+				const className = positionBeforeCurrentStrategy.acornGetClassName(currentClassName, objectExpression.callee.end);
+				if (className === "sap.ui.base.Event" && objectExpression.callee?.property?.name === "getParameter") {
+					const eventHandlerData = AcornSyntaxAnalyzer.getEventHandlerData(objectExpression, currentClassName);
+					if (eventHandlerData) {
+						const parameters = AcornSyntaxAnalyzer.getParametersOfTheEvent(eventHandlerData.eventName, eventHandlerData.className);
+						if (parameters) {
+							fieldsAndMethods = {
+								className: className,
+								methods: [],
+								fields: parameters.map(parameter => {
+									return {
+										name: parameter.name,
+										description: `${eventHandlerData.eventName} - ${parameter.name}: ${parameter.type}`,
+										type: parameter.type,
+										visibility: "public"
+									};
+								})
+							};
 						}
 					}
 				}

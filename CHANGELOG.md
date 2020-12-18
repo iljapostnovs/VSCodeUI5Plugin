@@ -1,3 +1,6 @@
+## 0.11.5 (18-12-2020)
+* Completion items for event parameter names added
+
 ## 0.11.4 (17-12-2020)
 * Performance improvements for large files
 
