@@ -48,8 +48,6 @@ export class TagAttributeLinter extends Linter {
 							}
 						}
 					});
-
-
 				}
 			}
 		});

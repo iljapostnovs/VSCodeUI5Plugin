@@ -5,7 +5,7 @@ import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import LineColumn = require("line-column");
 
-export class CodeActionProvider {
+export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const selectedVariableName = this.getCurrentVariable(document, range);
 		const providerResult: vscode.CodeAction[] = [];
@@ -17,14 +17,14 @@ export class CodeActionProvider {
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				const UIDefine = await new UIDefineFactory().generateUIDefineCompletionItems();
 				const filteredUIDefineCompletionItems = UIDefine.filter(completionItem => completionItem.label.indexOf(selectedVariableName) > -1)
-																.filter(completionItem => !UIClass.UIDefine.find(UIDefine => `"${UIDefine.path}"` === completionItem.label))
-																.reverse();
+					.filter(completionItem => !UIClass.UIDefine.find(UIDefine => `"${UIDefine.path}"` === completionItem.label))
+					.reverse();
 
 				filteredUIDefineCompletionItems.forEach(completionItem => {
 					const UIDefineCodeAction = new vscode.CodeAction(`Import ${completionItem.label}`, vscode.CodeActionKind.QuickFix);
 					UIDefineCodeAction.isPreferred = true;
 					UIDefineCodeAction.edit = new vscode.WorkspaceEdit();
-					UIDefineCodeAction.command = {command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define"};
+					UIDefineCodeAction.command = { command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define" };
 					const position = this.getPositionOfTheLastUIDefine(document);
 					if (position) {
 						const insertText = UIClass.UIDefine.length === 0 ? `\n\t${completionItem.label}` : `,\n\t${completionItem.label}`;

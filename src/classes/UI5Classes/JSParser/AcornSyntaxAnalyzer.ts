@@ -154,7 +154,7 @@ export class AcornSyntaxAnalyzer {
 				className = currentClassName;
 			}
 		} else {
-		//the rest of the cases
+			//the rest of the cases
 			const currentNode = stack.shift();
 			if (currentNode.type === "ThisExpression") {
 				if (stack.length > 0) {
@@ -333,8 +333,6 @@ export class AcornSyntaxAnalyzer {
 							const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
 
 							if (classNameOfTheTag) {
-
-
 								const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOfTheController, tagPrefix, position);
 								const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
 								eventHandlerData = {
@@ -434,7 +432,7 @@ export class AcornSyntaxAnalyzer {
 		return className;
 	}
 
-	private static _getCallExpressionNodeWhichIsArrayMethod(nodes: any[], position: number) : any | undefined {
+	private static _getCallExpressionNodeWhichIsArrayMethod(nodes: any[], position: number): any | undefined {
 		const content = nodes.filter(content => content.type === "CallExpression" && this._isArrayMethod(content.callee?.property?.name)).reverse();
 		return this.findAcornNode(content, position);
 	}
@@ -571,7 +569,7 @@ export class AcornSyntaxAnalyzer {
 			UIClass.acornMethodsAndFields.find((property: any) => {
 				let typeFound = false;
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
-					const assignmentExpressions = this.expandAllContent(property.value.body).filter((node:any) => node.type === "AssignmentExpression");
+					const assignmentExpressions = this.expandAllContent(property.value.body).filter((node: any) => node.type === "AssignmentExpression");
 					assignmentExpressions.forEach((node: any) => {
 						if (UIClass.isAssignmentStatementForThisVariable(node) && node?.left?.property?.name === field.name) {
 							field.type = this._getClassNameFromAcornDeclaration(node.right, UIClass);
@@ -726,7 +724,7 @@ export class AcornSyntaxAnalyzer {
 		let className = "";
 		if (this.declarationStack.indexOf(declaration) > -1) {
 			this.declarationStack = [];
-		}  else {
+		} else {
 			this.declarationStack.push(declaration);
 			if (declaration?.type === "NewExpression") {
 				className = this._getClassNameFromUIDefineDotNotation(declaration.callee?.name, UIClass);
@@ -792,7 +790,7 @@ export class AcornSyntaxAnalyzer {
 		return className;
 	}
 
-	public static findMethodHierarchically(className: string, methodName: string) : UIMethod | undefined {
+	public static findMethodHierarchically(className: string, methodName: string): UIMethod | undefined {
 		let method: UIMethod | undefined;
 		const UIClass = UIClassFactory.getUIClass(className);
 
@@ -804,7 +802,7 @@ export class AcornSyntaxAnalyzer {
 		return method;
 	}
 
-	private static _findFieldHierarchically(className: string, fieldName: string) : UIField | undefined {
+	private static _findFieldHierarchically(className: string, fieldName: string): UIField | undefined {
 		let field: UIField | undefined;
 		const UIClass = UIClassFactory.getUIClass(className);
 

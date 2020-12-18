@@ -1,12 +1,21 @@
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
-import { CodeActionProvider } from "../providers/CodeActionProvider";
+import { JSCodeActionProvider } from "../providers/JSCodeActionProvider";
+import { XMLCodeActionProvider } from "../providers/XMLCodeActionProvider";
 
 export class JSCodeActionRegistrator {
 	static register() {
-		const disposable = vscode.languages.registerCodeActionsProvider({language: "javascript", scheme: "file"}, {
+		let disposable = vscode.languages.registerCodeActionsProvider({language: "javascript", scheme: "file"}, {
 			provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken) {
-				return CodeActionProvider.getCodeActions(document, range);
+				return JSCodeActionProvider.getCodeActions(document, range);
+			}
+		});
+
+		UI5Plugin.getInstance().addDisposable(disposable);
+
+		disposable = vscode.languages.registerCodeActionsProvider({language: "xml", scheme: "file"}, {
+			provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken) {
+				return XMLCodeActionProvider.getCodeActions(document, range);
 			}
 		});
 
