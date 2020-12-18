@@ -35,15 +35,23 @@ export class XMLFormatter {
 				let indentation = this.getIndentation(indentationLevel);
 
 				let newTag = `${indentation}${tagBegin}${tagName}\n`;
+
+				if (tagAttributes.length === 1) {
+					newTag = newTag.trimRight();
+				}
 				newTag += tagAttributes.reduce((accumulator, tagAttribute) => {
 					accumulator += `${indentation}\t${tagAttribute}\n`;
-
+					if (tagAttributes.length === 1) {
+						accumulator = ` ${accumulator.trimLeft()}`;
+					}
 					return accumulator;
 				}, "");
-				if (tagAttributes.length === 0) {
+
+				if (tagAttributes.length <= 1) {
 					newTag = newTag.trimRight();
 					indentation = "";
 				}
+
 				newTag += `${indentation}${tagEnd}`;
 
 				indentationLevel = this.modifyIndentationLevel(currentTag, indentationLevel, false);
@@ -64,7 +72,7 @@ export class XMLFormatter {
 	private static modifyIndentationLevel(currentTag: Tag, indentationLevel: number, beforeTagGeneration: boolean) {
 		if (beforeTagGeneration && currentTag.text.startsWith("</")) {
 			indentationLevel--;
-		} else if (!beforeTagGeneration && currentTag.text.startsWith("<" ) && !currentTag.text.endsWith("/>") && !currentTag.text.startsWith("</")) {
+		} else if (!beforeTagGeneration && currentTag.text.startsWith("<") && !currentTag.text.endsWith("/>") && !currentTag.text.startsWith("</")) {
 			indentationLevel++;
 		}
 
@@ -117,7 +125,7 @@ export class XMLFormatter {
 					XMLParser.getIfPositionIsNotInComments(document, i) ||
 					document.substring(i - 2, i + 1) === "-->"
 				)
-			;
+				;
 			if (thisIsTagEnd) {
 				const indexOfTagBegining = this.getTagBeginingIndex(document, i);
 				tags.push({
@@ -143,7 +151,7 @@ export class XMLFormatter {
 			);
 		shouldStop ||= isThisTagBegining;
 
-		while(!shouldStop) {
+		while (!shouldStop) {
 			i--;
 
 			shouldStop = i < 0;
