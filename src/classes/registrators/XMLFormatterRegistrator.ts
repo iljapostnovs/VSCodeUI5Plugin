@@ -4,8 +4,12 @@ import { XMLFormatter } from "../utils/XMLFormatter";
 export class XMLFormatterRegistrator {
 	static register() {
 		const disposable = vscode.languages.registerDocumentFormattingEditProvider({ language: "xml" }, {
-			provideDocumentFormattingEdits: (document, options) => {
-				return XMLFormatter.formatDocument(document);
+			provideDocumentFormattingEdits: (document) => {
+				if (document.uri.fsPath.endsWith(".view.xml") || document.uri.fsPath.endsWith(".fragment.xml")) {
+					return XMLFormatter.formatDocument(document);
+				} else {
+					vscode.window.showInformationMessage("UI5 XML formatter works only for views and fragments");
+				}
 			}
 		});
 

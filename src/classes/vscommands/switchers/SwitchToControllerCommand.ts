@@ -6,7 +6,7 @@ const workspace = vscode.workspace;
 export class SwitchToControllerCommand {
 	static async switchToController() {
 		try {
-			const controllerNameOfCurrentlyOpenedView: string | null = SwitchToControllerCommand.getControllerNameOfCurrentView();
+			const controllerNameOfCurrentlyOpenedView = SwitchToControllerCommand.getControllerNameOfCurrentView();
 			let controllerToSwitch: string = "";
 			if (controllerNameOfCurrentlyOpenedView) {
 				const allControllerFSPaths: string[] = await SwitchToControllerCommand.getAllControllerFSPaths();
@@ -43,7 +43,7 @@ export class SwitchToControllerCommand {
 		return workspace.findFiles(`${sSrcFolderName}/**/*.controller.js`);
 	}
 
-	private static getControllerNameOfCurrentView() {
+	public static getControllerNameOfCurrentView() {
 		const currentViewContent = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.getText() : "";
 		const result = /(?<=controllerName=").*?(?=")/.exec(currentViewContent) || [];
 		return result[0] ? result[0] : null;

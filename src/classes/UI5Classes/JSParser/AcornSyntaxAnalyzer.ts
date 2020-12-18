@@ -154,7 +154,7 @@ export class AcornSyntaxAnalyzer {
 				className = currentClassName;
 			}
 		} else {
-		//the rest of the cases
+			//the rest of the cases
 			const currentNode = stack.shift();
 			if (currentNode.type === "ThisExpression") {
 				if (stack.length > 0) {
@@ -281,10 +281,41 @@ export class AcornSyntaxAnalyzer {
 		const UIClass = UIClassFactory.getUIClass(primaryClassName);
 		if (UIClass instanceof CustomUIClass && node.property?.name) {
 			const methodName = node.property.name;
-			const currentClassEventHandlerName = this._getEventHandlerName(node, primaryClassName);
-			const viewOfTheController = FileReader.getViewText(primaryClassName);
+			const eventData = this.getEventHandlerData(node, primaryClassName);
+			if (eventData) {
+				if (methodName === "getSource") {
+					className = eventData.className;
+				} else if (methodName === "getParameter") {
+					if (callExpression && callExpression.arguments && callExpression.arguments[0]) {
+						const parameterName = callExpression.arguments[0].value;
+						const parameters = this.getParametersOfTheEvent(eventData.eventName, eventData.className);
+						const parameter = parameters?.find(param => param.name === parameterName);
+						if (parameter) {
+							className = parameter.type;
+						}
+					}
+				}
+			}
+
+		}
+
+		return className;
+	}
+
+	public static getParametersOfTheEvent(eventName: string, className: string) {
+		const events = UIClassFactory.getClassEvents(className);
+		const event = events.find(event => event.name === eventName);
+		return event?.params;
+	}
+
+	public static getEventHandlerData(node: any, className: string) {
+		let eventHandlerData;
+
+		const UIClass = UIClassFactory.getUIClass(className);
+		if (UIClass instanceof CustomUIClass) {
+			const currentClassEventHandlerName = this._getEventHandlerName(node, className);
+			const viewOfTheController = FileReader.getViewText(className);
 			if (viewOfTheController && currentClassEventHandlerName) {
-				let eventName = "";
 				const position = XMLParser.getPositionOfEventHandler(currentClassEventHandlerName, viewOfTheController);
 				if (position) {
 					const tagText = XMLParser.getTagInPosition(viewOfTheController, position);
@@ -296,7 +327,7 @@ export class AcornSyntaxAnalyzer {
 					});
 					if (attribute) {
 						const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
-						eventName = attributeName;
+						const eventName = attributeName;
 						if (tagText && eventName) {
 							const tagPrefix = XMLParser.getTagPrefix(tagText);
 							const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
@@ -304,29 +335,18 @@ export class AcornSyntaxAnalyzer {
 							if (classNameOfTheTag) {
 								const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOfTheController, tagPrefix, position);
 								const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
-
-								if (methodName === "getSource") {
-									className = classOfTheTag;
-								} else if (methodName === "getParameter") {
-									if (callExpression && callExpression.arguments && callExpression.arguments[0]) {
-										const events = UIClassFactory.getClassEvents(classOfTheTag);
-										const parameterName = callExpression.arguments[0].value;
-										const event = events.find(event => event.name === eventName);
-										const parameter = event?.params.find(param => param.name === parameterName);
-										if (parameter) {
-											className = parameter.type;
-										}
-									}
-								}
+								eventHandlerData = {
+									className: classOfTheTag,
+									eventName: eventName
+								};
 							}
 						}
 					}
 				}
-
 			}
 		}
 
-		return className;
+		return eventHandlerData;
 	}
 
 	private static _getEventHandlerName(node: any, className: string) {
@@ -412,7 +432,7 @@ export class AcornSyntaxAnalyzer {
 		return className;
 	}
 
-	private static _getCallExpressionNodeWhichIsArrayMethod(nodes: any[], position: number) : any | undefined {
+	private static _getCallExpressionNodeWhichIsArrayMethod(nodes: any[], position: number): any | undefined {
 		const content = nodes.filter(content => content.type === "CallExpression" && this._isArrayMethod(content.callee?.property?.name)).reverse();
 		return this.findAcornNode(content, position);
 	}
@@ -549,7 +569,7 @@ export class AcornSyntaxAnalyzer {
 			UIClass.acornMethodsAndFields.find((property: any) => {
 				let typeFound = false;
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
-					const assignmentExpressions = this.expandAllContent(property.value.body).filter((node:any) => node.type === "AssignmentExpression");
+					const assignmentExpressions = this.expandAllContent(property.value.body).filter((node: any) => node.type === "AssignmentExpression");
 					assignmentExpressions.forEach((node: any) => {
 						if (UIClass.isAssignmentStatementForThisVariable(node) && node?.left?.property?.name === field.name) {
 							field.type = this._getClassNameFromAcornDeclaration(node.right, UIClass);
@@ -704,7 +724,7 @@ export class AcornSyntaxAnalyzer {
 		let className = "";
 		if (this.declarationStack.indexOf(declaration) > -1) {
 			this.declarationStack = [];
-		}  else {
+		} else {
 			this.declarationStack.push(declaration);
 			if (declaration?.type === "NewExpression") {
 				className = this._getClassNameFromUIDefineDotNotation(declaration.callee?.name, UIClass);
@@ -770,7 +790,7 @@ export class AcornSyntaxAnalyzer {
 		return className;
 	}
 
-	public static findMethodHierarchically(className: string, methodName: string) : UIMethod | undefined {
+	public static findMethodHierarchically(className: string, methodName: string): UIMethod | undefined {
 		let method: UIMethod | undefined;
 		const UIClass = UIClassFactory.getUIClass(className);
 
@@ -782,7 +802,7 @@ export class AcornSyntaxAnalyzer {
 		return method;
 	}
 
-	private static _findFieldHierarchically(className: string, fieldName: string) : UIField | undefined {
+	private static _findFieldHierarchically(className: string, fieldName: string): UIField | undefined {
 		let field: UIField | undefined;
 		const UIClass = UIClassFactory.getUIClass(className);
 

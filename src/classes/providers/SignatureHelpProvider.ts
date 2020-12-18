@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 
 export class SignatureHelpProvider {
@@ -35,10 +36,12 @@ export class SignatureHelpProvider {
 						const method = AcornSyntaxAnalyzer.findMethodHierarchically(className, methodName);
 						if (method && method.params.length > 0) {
 							signatureHelp.activeParameter = callExpression?.arguments.length - 1 || 0;
-							const signature = new vscode.SignatureInformation(method.description || `${className} -> ${methodName}`);
+							const description = CustomUIClass.generateDescriptionForMethod(method);
+							const signature = new vscode.SignatureInformation(description || `${className} -> ${methodName}`);
 							signature.parameters = method.params.map(param => {
 								return new vscode.ParameterInformation(param, param/**this one is showing */);
 							});
+							signature.documentation = method.description;
 
 							signatureHelp.signatures = [signature];
 
