@@ -36,9 +36,10 @@ export class XMLCodeActionProvider {
 					if (controllerPath) {
 						const controllerUri = vscode.Uri.file(controllerPath);
 						const UIClass = <CustomUIClass>UIClassFactory.getUIClass(controllerName);
+						const thereAreNoMethods = UIClass.acornClassBody.properties.length === 0;
 						const lastMethod = UIClass.acornClassBody.properties[UIClass.acornClassBody.properties.length - 1];
-						if (lastMethod) {
-							const offset = lastMethod.end;
+						if (lastMethod || thereAreNoMethods) {
+							const offset = lastMethod?.end || UIClass.acornClassBody.start;
 							const lineColumn = LineColumn(UIClass.classText).fromIndex(offset);
 
 							if (lineColumn) {
@@ -46,7 +47,7 @@ export class XMLCodeActionProvider {
 								UIDefineCodeAction.isPreferred = true;
 								UIDefineCodeAction.edit = new vscode.WorkspaceEdit();
 								const position = new vscode.Position(lineColumn.line - 1, lineColumn.col);
-								UIDefineCodeAction.edit.insert(controllerUri, position, `,\n\n\t\t${attributeData.attributeValue}: function(oEvent) {\n\t\t\t\n\t\t}`);
+								UIDefineCodeAction.edit.insert(controllerUri, position, `${thereAreNoMethods ? "" : ",\n"}\n\t\t${attributeData.attributeValue}: function(oEvent) {\n\t\t\t\n\t\t}`);
 								UIDefineCodeAction.diagnostics = [diagnostic];
 								UIDefineCodeAction.command = {
 									command: "vscode.open",

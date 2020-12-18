@@ -1,4 +1,6 @@
 ## 0.11.5 (18-12-2020)
+* Bugfixes
+* Code Action for XML added. Now you can add missing event handler to the controller out of the view
 * Completion items for event parameter names added
 
 ## 0.11.4 (17-12-2020)
