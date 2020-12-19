@@ -222,7 +222,8 @@ export class StandardUIClass extends AbstractUIClass {
 				name: event.name,
 				description: StandardUIClass.removeTags(event.description),
 				visibility: event.visibility,
-				params: event?.parameters?.map((parameter: any) => {
+				params: event?.parameters?.filter((parameter: any) => parameter.depth === 2)
+				.map((parameter: any) => {
 					return {
 						name: parameter.name,
 						type: parameter.type
