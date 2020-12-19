@@ -187,7 +187,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 		return fieldsAndMethods;
 	}
 
-	private getStackOfNodesForInnerParamsForPosition(className: string, position: number, checkForLastPosition: boolean = false) {
+	public getStackOfNodesForInnerParamsForPosition(className: string, position: number, checkForLastPosition: boolean = false) {
 		const stack: any[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 
@@ -201,7 +201,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 				const nodeWithCurrentPosition = methodBody && AcornSyntaxAnalyzer.findAcornNode(methodBody, position);
 
 				if (nodeWithCurrentPosition) {
-					this.generateStackOfNodesForInnerPosition(nodeWithCurrentPosition, position, stack, checkForLastPosition);
+					this._generateStackOfNodesForInnerPosition(nodeWithCurrentPosition, position, stack, checkForLastPosition);
 				}
 			}
 		}
@@ -209,7 +209,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 		return stack;
 	}
 
-	private generateStackOfNodesForInnerPosition(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
+	private _generateStackOfNodesForInnerPosition(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
 		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "ThisExpression", "NewExpression", "Identifier"];
 		const positionIsCorrect = node.start < position && node.end > position;
 		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖" && node.property?.name !== "prototype") {
@@ -219,7 +219,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 		const innerNode: any = AcornSyntaxAnalyzer.findInnerNode(node, position);
 
 		if (innerNode) {
-			this.generateStackOfNodesForInnerPosition(innerNode, position, stack, checkForLastPosition);
+			this._generateStackOfNodesForInnerPosition(innerNode, position, stack, checkForLastPosition);
 		}
 	}
 }
