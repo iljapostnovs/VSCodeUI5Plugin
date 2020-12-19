@@ -626,7 +626,7 @@ export class AcornSyntaxAnalyzer {
 
 			if (node.type === "VariableDeclaration") {
 				if (node.declarations) {
-					innerNodes = node.declarations;
+					innerNodes = [...node.declarations];
 				}
 			} else if (node.type === "VariableDeclarator") {
 				if (node.init) {
@@ -636,7 +636,7 @@ export class AcornSyntaxAnalyzer {
 					innerNodes.push(node.id);
 				}
 			} else if (node.type === "CallExpression") {
-				innerNodes = node.arguments;
+				innerNodes = [...node.arguments];
 				if (node.callee) {
 					innerNodes.push(node.callee);
 				}
@@ -659,9 +659,9 @@ export class AcornSyntaxAnalyzer {
 			} else if (node.type === "AwaitExpression") {
 				innerNodes.push(node.argument);
 			} else if (node.type === "ArrayExpression") {
-				innerNodes = node.elements;
+				innerNodes = [...node.elements];
 			} else if (node.type === "TryStatement") {
-				innerNodes = node.block.body;
+				innerNodes = [...node.block.body];
 				if (node.handler?.body?.body) {
 					innerNodes = innerNodes.concat(node.handler.body.body);
 				}
@@ -669,7 +669,7 @@ export class AcornSyntaxAnalyzer {
 					innerNodes = innerNodes.concat(node.finalizer.body.body);
 				}
 			} else if (node.type === "BlockStatement") {
-				innerNodes = node.body;
+				innerNodes = [...node.body];
 			} else if (node.type === "ReturnStatement") {
 				innerNodes.push(node.argument);
 			} else if (node.type === "IfStatement") {
