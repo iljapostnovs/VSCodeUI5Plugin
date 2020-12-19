@@ -3,15 +3,15 @@ import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { IPropertyGetterStrategy } from "../interfaces/IPropertyGetterStrategy";
 
 export class SAPClassPropertyGetterStrategy implements IPropertyGetterStrategy {
-	private readonly UIClass: AbstractUIClass;
+	private readonly _UIClass: AbstractUIClass;
 	constructor(UIClass: AbstractUIClass) {
-		this.UIClass = UIClass;
+		this._UIClass = UIClass;
 	}
 
 	getParent(): IPropertyGetterStrategy | undefined {
 		let theParent: SAPClassPropertyGetterStrategy | undefined;
-		if (this.UIClass.parentClassNameDotNotation) {
-			const parentClass = UIClassFactory.getUIClass(this.UIClass.parentClassNameDotNotation);
+		if (this._UIClass.parentClassNameDotNotation) {
+			const parentClass = UIClassFactory.getUIClass(this._UIClass.parentClassNameDotNotation);
 			theParent = new SAPClassPropertyGetterStrategy(parentClass);
 		}
 
@@ -19,7 +19,7 @@ export class SAPClassPropertyGetterStrategy implements IPropertyGetterStrategy {
 	}
 
 	getProperties() : any[] {
-		return this.UIClass.properties;
+		return this._UIClass.properties;
 	}
 
 	getProperty(property: any): { name: string; defaultValue: any; } {

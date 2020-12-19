@@ -7,7 +7,7 @@ import LineColumn = require("line-column");
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
-		const selectedVariableName = this.getCurrentVariable(document, range);
+		const selectedVariableName = this._getCurrentVariable(document, range);
 		const providerResult: vscode.CodeAction[] = [];
 
 		if (selectedVariableName) {
@@ -25,7 +25,7 @@ export class JSCodeActionProvider {
 					UIDefineCodeAction.isPreferred = true;
 					UIDefineCodeAction.edit = new vscode.WorkspaceEdit();
 					UIDefineCodeAction.command = { command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define" };
-					const position = this.getPositionOfTheLastUIDefine(document);
+					const position = this._getPositionOfTheLastUIDefine(document);
 					if (position) {
 						const insertText = UIClass.UIDefine.length === 0 ? `\n\t${completionItem.label}` : `,\n\t${completionItem.label}`;
 						UIDefineCodeAction.edit.insert(document.uri, position, insertText);
@@ -38,7 +38,7 @@ export class JSCodeActionProvider {
 		return providerResult;
 	}
 
-	private static getCurrentVariable(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
+	private static _getCurrentVariable(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		let selectedVariableName = document.getText(range);
 
 		if (!selectedVariableName) {
@@ -61,7 +61,7 @@ export class JSCodeActionProvider {
 		return selectedVariableName;
 	}
 
-	private static getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
+	private static _getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
 		let position: vscode.Position | undefined;
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
 		if (currentClassName) {

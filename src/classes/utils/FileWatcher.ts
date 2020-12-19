@@ -47,7 +47,7 @@ export class FileWatcher {
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = workspace.onDidCreateFiles(event => {
-			event.files.forEach(this.handleFileCreate.bind(this));
+			event.files.forEach(this._handleFileCreate.bind(this));
 		});
 
 		UI5Plugin.getInstance().addDisposable(disposable);
@@ -55,9 +55,9 @@ export class FileWatcher {
 		disposable = workspace.onDidRenameFiles(event => {
 			event.files.forEach(file => {
 				if (file.newUri.fsPath.indexOf(".") === -1) {
-					this.handleFolderRename(file.oldUri, file.newUri);
+					this._handleFolderRename(file.oldUri, file.newUri);
 				} else {
-					this.handleFileRename(file);
+					this._handleFileRename(file);
 				}
 			});
 		});
@@ -65,7 +65,7 @@ export class FileWatcher {
 		UI5Plugin.getInstance().addDisposable(disposable);
 	}
 
-	private static handleFileRename(file: {
+	private static _handleFileRename(file: {
 		oldUri: vscode.Uri;
 		newUri: vscode.Uri;
 	}) {
@@ -105,17 +105,17 @@ export class FileWatcher {
 		UI5Plugin.getInstance().addDisposable(disposable);
 	}
 
-	private static handleFileCreate(uri: vscode.Uri) {
+	private static _handleFileCreate(uri: vscode.Uri) {
 		const changedFileText = fs.readFileSync(uri.fsPath, "utf8");
 
 		const thisFileIsEmpty = changedFileText.length === 0;
 
 		if (thisFileIsEmpty) {
-			this.insertCodeTemplate(uri);
+			this._insertCodeTemplate(uri);
 		}
 	}
 
-	private static insertCodeTemplate(uri: vscode.Uri) {
+	private static _insertCodeTemplate(uri: vscode.Uri) {
 		const templateInserter = TemplateGeneratorFactory.createInstance(uri.fsPath);
 		const textToInsert = templateInserter?.generateTemplate(uri);
 		if (textToInsert) {
@@ -123,7 +123,7 @@ export class FileWatcher {
 		}
 	}
 
-	private static handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
+	private static _handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
 		const newFilePaths = glob.sync(newUri.fsPath.replace(/\//g, fileSeparator) + "/**/*{.js,.xml}");
 		newFilePaths.forEach(filePath => {
 			const newFileUri = vscode.Uri.file(filePath);
@@ -136,7 +136,7 @@ export class FileWatcher {
 				)
 			);
 
-			this.handleFileRename({
+			this._handleFileRename({
 				newUri: newFileUri,
 				oldUri: oldFileUri
 			});

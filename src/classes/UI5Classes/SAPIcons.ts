@@ -8,15 +8,15 @@ export class SAPIcons {
 	static async preloadIcons() {
 		this.icons = FileReader.getCache(FileReader.CacheType.Icons);
 		if (!this.icons) {
-			this.icons = await this.loadIcons();
+			this.icons = await this._loadIcons();
 			FileReader.setCache(FileReader.CacheType.Icons, JSON.stringify(this.icons));
 		}
 	}
 
-	private static async loadIcons() {
+	private static async _loadIcons() {
 		const uris: string[] = URLBuilder.getInstance().getIconURIs();
 		let icons: string[] = [];
-		const aIconResponses = await Promise.all(uris.map(uri => this.requestJSONData(uri)));
+		const aIconResponses = await Promise.all(uris.map(uri => this._requestJSONData(uri)));
 		aIconResponses.forEach((iconResponse: any) => {
 			let uniqueIcons: any[] = [];
 			iconResponse.groups.forEach((group: any) => {
@@ -33,7 +33,7 @@ export class SAPIcons {
 		return icons;
 	}
 
-	private static async requestJSONData(uri: string) {
+	private static async _requestJSONData(uri: string) {
 		const data: any = await HTTPHandler.get(uri);
 
 		return data;

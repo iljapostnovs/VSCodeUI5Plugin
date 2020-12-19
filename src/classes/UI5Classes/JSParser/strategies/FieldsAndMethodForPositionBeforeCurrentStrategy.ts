@@ -10,16 +10,16 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 		const UIClassName = this.getClassNameOfTheVariableAtCurrentDocumentPosition();
 		if (UIClassName) {
-			fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
+			fieldsAndMethods = this._destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
 			if (fieldsAndMethods) {
-				this.filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods, UIClassName);
+				this._filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods, UIClassName);
 			}
 		}
 
 		return fieldsAndMethods;
 	}
 
-	private destructueFieldsAndMethodsAccordingToMapParams(className: string) {
+	private _destructueFieldsAndMethodsAccordingToMapParams(className: string) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 		const classNamePartsFromFieldMap = className.split("__map__");
 		const classNamePartsFromMapParam = className.split("__mapparam__");
@@ -32,7 +32,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 				const currentFieldName = mapFields.shift();
 				const field = UIClass.fields.find(field => field.name === currentFieldName);
 				if (field) {
-					fieldsAndMethods = this.getFieldsAndMethodsForMap(field, mapFields);
+					fieldsAndMethods = this._getFieldsAndMethodsForMap(field, mapFields);
 					fieldsAndMethods.className = className;
 				}
 			}
@@ -43,7 +43,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 				const paramStructure = JSON.parse(mapFields[0]);
 				const fieldString = mapFields[1] || "";
 				const fields = fieldString.split(".");
-				const correspondingObject = this.getCorrespondingObject(paramStructure, fields);
+				const correspondingObject = this._getCorrespondingObject(paramStructure, fields);
 				fieldsAndMethods = {
 					className: "map",
 					fields: Object.keys(correspondingObject).map(key => {
@@ -68,18 +68,18 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return fieldsAndMethods;
 	}
 
-	private getCorrespondingObject(paramStructure: any, fields: string[]): any {
+	private _getCorrespondingObject(paramStructure: any, fields: string[]): any {
 		let returnObject;
 		const field = fields.shift();
 		if (field) {
-			returnObject = this.getCorrespondingObject(paramStructure[field], fields);
+			returnObject = this._getCorrespondingObject(paramStructure[field], fields);
 		} else {
 			returnObject = paramStructure;
 		}
 
 		return returnObject;
 	}
-	private filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods: FieldsAndMethods, className: string) {
+	private _filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods: FieldsAndMethods, className: string) {
 		const ignoreAccessLevelModifiers = vscode.workspace.getConfiguration("ui5.plugin").get("ignoreAccessLevelModifiers");
 		if (!ignoreAccessLevelModifiers) {
 			const classNameOfTheCurrentDocument = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
@@ -94,17 +94,17 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		}
 	}
 
-	private getFieldsAndMethodsForMap(field: CustomClassUIField, mapFields: string[]) {
+	private _getFieldsAndMethodsForMap(field: CustomClassUIField, mapFields: string[]) {
 		const fieldsAndMethods: FieldsAndMethods = {
 			className: "",
-			fields: this.getUIFieldsForMap(field.customData, mapFields),
+			fields: this._getUIFieldsForMap(field.customData, mapFields),
 			methods: []
 		};
 
 		return fieldsAndMethods;
 	}
 
-	private getUIFieldsForMap(customData: any, mapFields: string[], fields: UIField[] = []) {
+	private _getUIFieldsForMap(customData: any, mapFields: string[], fields: UIField[] = []) {
 		const fieldName = mapFields.shift();
 		if (fieldName) {
 			customData = customData[fieldName];
@@ -123,7 +123,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 				fields.push(newField);
 			});
 		} else {
-			this.getUIFieldsForMap(customData, mapFields, fields);
+			this._getUIFieldsForMap(customData, mapFields, fields);
 		}
 
 		return fields;
@@ -169,7 +169,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 				const nodeWithCurrentPosition = AcornSyntaxAnalyzer.findAcornNode(method, position - 1);
 
 				if (nodeWithCurrentPosition) {
-					this.generateStackOfNodes(nodeWithCurrentPosition, position, stack, checkForLastPosition);
+					this._generateStackOfNodes(nodeWithCurrentPosition, position, stack, checkForLastPosition);
 				}
 			}
 		}
@@ -177,7 +177,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return stack;
 	}
 
-	private generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
+	private _generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
 		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "VariableDeclaration", "ThisExpression", "NewExpression", "Identifier"];
 		const positionIsCorrect = node.end < position || (checkForLastPosition && node.end === position);
 		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖" && node.property?.name !== "prototype") {
@@ -187,7 +187,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		const innerNode: any = AcornSyntaxAnalyzer.findInnerNode(node, position);
 
 		if (innerNode) {
-			this.generateStackOfNodes(innerNode, position, stack, checkForLastPosition);
+			this._generateStackOfNodes(innerNode, position, stack, checkForLastPosition);
 		}
 	}
 

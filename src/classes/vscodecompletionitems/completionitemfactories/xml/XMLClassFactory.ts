@@ -15,13 +15,13 @@ import { SAPClassPropertyGetterStrategy } from "../codegenerators/property/strat
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 
 export class XMLClassFactory {
-	private readonly nodeDAO = new SAPNodeDAO();
+	private readonly _nodeDAO = new SAPNodeDAO();
 
 	async generateAggregationPropertyCompletionItems() {
 		var completionItems: CustomCompletionItem[] = [];
 		let SAPNodes: SAPNode[];
 		const availableProgressLeft = 50;
-		SAPNodes = this.nodeDAO.getAllNodesSync();
+		SAPNodes = this._nodeDAO.getAllNodesSync();
 
 		console.time("Generating compl. items");
 		for (const node of SAPNodes) {
@@ -29,18 +29,18 @@ export class XMLClassFactory {
 				message: "Generating Completion Items: " + node.getDisplayName(),
 				increment: availableProgressLeft / SAPNodes.length
 			});
-			completionItems = completionItems.concat(this.generateClassCompletionItemsRecursively(node));
+			completionItems = completionItems.concat(this._generateClassCompletionItemsRecursively(node));
 		}
 		console.timeEnd("Generating compl. items");
 
 		return completionItems;
 	}
 
-	private generateClassCompletionItemsRecursively(node: SAPNode) {
+	private _generateClassCompletionItemsRecursively(node: SAPNode) {
 		var completionItems:CustomCompletionItem[] = [];
 		if (node.nodes && node.nodes.length > 0) {
 			for (const childNode of node.nodes) {
-				completionItems = completionItems.concat(this.generateClassCompletionItemsRecursively(childNode));
+				completionItems = completionItems.concat(this._generateClassCompletionItemsRecursively(childNode));
 			}
 		}
 
@@ -69,7 +69,7 @@ export class XMLClassFactory {
 		mardownString.appendMarkdown(URLBuilder.getInstance().getMarkupUrlForClassApi(node));
 		mardownString.appendMarkdown(StandardUIClass.removeTags(metadata.description));
 
-		return this.generateXMLClassCompletionItemUsing({
+		return this._generateXMLClassCompletionItemUsing({
 			markdown: mardownString,
 			insertText: this.generateClassInsertTextFromSAPNode(node, classPrefix, prefixBeforeClassName),
 			detail: metadata?.title || "",
@@ -78,7 +78,7 @@ export class XMLClassFactory {
 	}
 
 	public generateXMLClassCompletionItemFromUIClass(UIClass: AbstractUIClass, classPrefix: string = "") {
-		return this.generateXMLClassCompletionItemUsing({
+		return this._generateXMLClassCompletionItemUsing({
 			markdown: new vscode.MarkdownString("Custom class"),
 			insertText: this.generateClassInsertTextFromSAPClass(UIClass, classPrefix),
 			detail: UIClass.className,
@@ -86,7 +86,7 @@ export class XMLClassFactory {
 		});
 	}
 
-	private generateXMLClassCompletionItemUsing(data: {className: string, insertText: string, detail: string, markdown: vscode.MarkdownString}) {
+	private _generateXMLClassCompletionItemUsing(data: {className: string, insertText: string, detail: string, markdown: vscode.MarkdownString}) {
 		const className = data.className.split(".")[data.className.split(".").length - 1];
 		const completionItem:CustomCompletionItem = new CustomCompletionItem(className);
 		completionItem.kind = vscode.CompletionItemKind.Class;
@@ -108,7 +108,7 @@ export class XMLClassFactory {
 		const properties: string = propertyGenerator.generateProperties(propertyGeneratorStrategy);
 		const aggregations: string = aggregationGenerator.generateAggregations(aggregationGeneratorStrategy, classPrefix);
 
-		return this.generateInsertStringFrom(node.getDisplayName(), properties, aggregations, classPrefix, prefixBeforeClassName);
+		return this._generateInsertStringFrom(node.getDisplayName(), properties, aggregations, classPrefix, prefixBeforeClassName);
 	}
 
 	public generateClassInsertTextFromSAPClass(UIClass: AbstractUIClass, classPrefix: string) {
@@ -124,10 +124,10 @@ export class XMLClassFactory {
 		const classNameParts = className.split(".");
 		className = classNameParts[classNameParts.length - 1];
 
-		return this.generateInsertStringFrom(className, properties, aggregations, classPrefix);
+		return this._generateInsertStringFrom(className, properties, aggregations, classPrefix);
 	}
 
-	private generateInsertStringFrom(className: string, properties: string, aggregations: string, classPrefix: string, prefixBeforeClassName: string = "") {
+	private _generateInsertStringFrom(className: string, properties: string, aggregations: string, classPrefix: string, prefixBeforeClassName: string = "") {
 		let insertText: string = `${prefixBeforeClassName}${className}\n`;
 		insertText += properties;
 		insertText += ">\n";

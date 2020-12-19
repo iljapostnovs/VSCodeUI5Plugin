@@ -64,9 +64,9 @@ export class AcornSyntaxAnalyzer {
 		} else if (node.type === "ReturnStatement") {
 			innerNode = node.argument;
 		} else if (node.type === "IfStatement") {
-			innerNode = this.getIfStatementPart(node, position);
+			innerNode = this._getIfStatementPart(node, position);
 		} else if (node.type === "SwitchStatement") {
-			innerNode = this.getSwitchStatementPart(node, position);
+			innerNode = this._getSwitchStatementPart(node, position);
 		} else if (node.type === "AssignmentExpression") {
 			innerNode = node.right;
 		} else if (node.type === "BinaryExpression") {
@@ -106,7 +106,7 @@ export class AcornSyntaxAnalyzer {
 
 		return innerNode;
 	}
-	private static getSwitchStatementPart(node: any, position: number) {
+	private static _getSwitchStatementPart(node: any, position: number) {
 		let correctPart: any;
 
 		const correctSwitchStatementPart = this.findAcornNode(node.cases, position);
@@ -117,7 +117,7 @@ export class AcornSyntaxAnalyzer {
 		return correctPart;
 	}
 
-	private static getIfStatementPart(node: any, position: number) {
+	private static _getIfStatementPart(node: any, position: number) {
 		let correctPart: any;
 
 		if (node.test?.start < position && node.test?.end >= position) {
@@ -125,7 +125,7 @@ export class AcornSyntaxAnalyzer {
 		} if (node.consequent?.start < position && node.consequent?.end >= position) {
 			correctPart = this.findAcornNode(node.consequent.body, position);
 		} else if (node.alternate) {
-			correctPart = this.getIfStatementPart(node.alternate, position);
+			correctPart = this._getIfStatementPart(node.alternate, position);
 		} else if (node.start < position && node.end >= position && node.type === "BlockStatement") {
 			correctPart = this.findAcornNode(node.body, position);
 		}
@@ -215,7 +215,7 @@ export class AcornSyntaxAnalyzer {
 				} else {
 					const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 
-					const variableDeclaration = this.getAcornVariableDeclarationFromUIClass(currentClassName, currentNode.name, currentNode.end);
+					const variableDeclaration = this._getAcornVariableDeclarationFromUIClass(currentClassName, currentNode.name, currentNode.end);
 
 					if (variableDeclaration) {
 						const neededDeclaration = variableDeclaration.declarations.find((declaration: any) => declaration.id.name === currentNode.name);
@@ -591,7 +591,7 @@ export class AcornSyntaxAnalyzer {
 		}
 	}
 
-	private static getAcornVariableDeclarationFromUIClass(className: string, variableName: string, position: number) {
+	private static _getAcornVariableDeclarationFromUIClass(className: string, variableName: string, position: number) {
 		let variableDeclaration: any;
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 

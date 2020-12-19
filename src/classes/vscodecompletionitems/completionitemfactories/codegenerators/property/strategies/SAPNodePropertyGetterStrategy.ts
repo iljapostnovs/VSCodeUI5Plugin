@@ -3,17 +3,17 @@ import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
 import { IPropertyGetterStrategy } from "../interfaces/IPropertyGetterStrategy";
 
 export class SAPNodePropertyGenerationStrategy implements IPropertyGetterStrategy {
-	private static readonly nodeDAO = new SAPNodeDAO();
-	private readonly node: SAPNode;
+	private static readonly _nodeDAO = new SAPNodeDAO();
+	private readonly _node: SAPNode;
 
 	constructor(node: SAPNode) {
-		this.node = node;
+		this._node = node;
 	}
 
 	getParent(): IPropertyGetterStrategy | undefined {
 		let theParent: SAPNodePropertyGenerationStrategy | undefined;
-		if (this.node.node.extends) {
-			const parentNode = SAPNodePropertyGenerationStrategy.nodeDAO.findNode(this.node.node.extends);
+		if (this._node.node.extends) {
+			const parentNode = SAPNodePropertyGenerationStrategy._nodeDAO.findNode(this._node.node.extends);
 			if (parentNode) {
 				theParent = new SAPNodePropertyGenerationStrategy(parentNode);
 			}
@@ -23,7 +23,7 @@ export class SAPNodePropertyGenerationStrategy implements IPropertyGetterStrateg
 	}
 
 	getProperties() : any[] {
-		return this.node.getProperties();
+		return this._node.getProperties();
 	}
 
 	getProperty(property: any): { name: string; defaultValue: any; } {

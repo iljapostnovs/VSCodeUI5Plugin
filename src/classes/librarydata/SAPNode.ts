@@ -9,10 +9,10 @@ export class SAPNode {
 	constructor(node: any) {
 		this.node = node;
 
-		this.fillNodes();
+		this._fillNodes();
 	}
 
-	private fillNodes() {
+	private _fillNodes() {
 		if (this.node.nodes) {
 			for (const node of this.node.nodes) {
 				const newNode = new SAPNode(node);

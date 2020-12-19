@@ -9,11 +9,11 @@ export class SwitchToControllerCommand {
 			const controllerNameOfCurrentlyOpenedView = SwitchToControllerCommand.getControllerNameOfCurrentView();
 			let controllerToSwitch: string = "";
 			if (controllerNameOfCurrentlyOpenedView) {
-				const allControllerFSPaths: string[] = await SwitchToControllerCommand.getAllControllerFSPaths();
+				const allControllerFSPaths: string[] = await SwitchToControllerCommand._getAllControllerFSPaths();
 
 				for (const controllerFSPath of allControllerFSPaths) {
-					const controller = SwitchToControllerCommand.getControllerFileContent(controllerFSPath);
-					const controllerName = SwitchToControllerCommand.getControllerName(controller);
+					const controller = SwitchToControllerCommand._getControllerFileContent(controllerFSPath);
+					const controllerName = SwitchToControllerCommand._getControllerName(controller);
 					const thisControllerShouldBeSwitched = controllerName === controllerNameOfCurrentlyOpenedView;
 					if (thisControllerShouldBeSwitched) {
 						controllerToSwitch = controllerFSPath;
@@ -33,12 +33,12 @@ export class SwitchToControllerCommand {
 		}
 	}
 
-	private static async getAllControllerFSPaths() {
-		const allControllers = await this.findAllControllers();
+	private static async _getAllControllerFSPaths() {
+		const allControllers = await this._findAllControllers();
 		return allControllers.map(controller => controller.fsPath);
 	}
 
-	private static async findAllControllers() {
+	private static async _findAllControllers() {
 		const sSrcFolderName = FileReader.getSrcFolderName();
 		return workspace.findFiles(`${sSrcFolderName}/**/*.controller.js`);
 	}
@@ -49,11 +49,11 @@ export class SwitchToControllerCommand {
 		return result[0] ? result[0] : null;
 	}
 
-	private static getControllerFileContent(controllerFSPath: string) {
+	private static _getControllerFileContent(controllerFSPath: string) {
 		return fs.readFileSync(controllerFSPath, "utf8");
 	}
 
-	private static getControllerName(controller: string) {
+	private static _getControllerName(controller: string) {
 		const result = /(?<=.extend\(").*?(?=")/.exec(controller);
 
 		return result && result[0] ? result[0] : null;

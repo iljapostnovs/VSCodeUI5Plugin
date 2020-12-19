@@ -16,7 +16,7 @@ export class DrawIOUMLDiagram {
 	private _xAxis = 70;
 	private _yAxis = 80;
 	public width = 0;
-	private static readonly pixelsPerChar = 6;
+	private static readonly _pixelsPerChar = 6;
 	readonly classHead: ClassHead;
 	readonly header: Header;
 	constructor(UIClass: AbstractUIClass, header: Header = new Header()) {
@@ -45,7 +45,7 @@ export class DrawIOUMLDiagram {
 		this.header = header;
 		this.classHead = new ClassHead(this.UIClass, header);
 
-		this.calculateHeightAndWidth();
+		this._calculateHeightAndWidth();
 	}
 
 
@@ -64,7 +64,7 @@ export class DrawIOUMLDiagram {
 		this._yAxis = value;
 	}
 
-	private calculateHeightAndWidth() {
+	private _calculateHeightAndWidth() {
 		const properties = this.UIClass.properties.map(property => new Property(property, this.classHead));
 		const fields = this.UIClass.fields.sort((a: UIField, b: UIField) => {
 			const isFirstFieldPrivate = a.name.startsWith("_");
@@ -85,7 +85,7 @@ export class DrawIOUMLDiagram {
 		items = items.concat(this.classHead);
 
 		const longestTextLength = this.getLongestTextLength(items);
-		const pixelsPerChar = longestTextLength === this.classHead.getTextLength() ? DrawIOUMLDiagram.pixelsPerChar + 1 : DrawIOUMLDiagram.pixelsPerChar;
+		const pixelsPerChar = longestTextLength === this.classHead.getTextLength() ? DrawIOUMLDiagram._pixelsPerChar + 1 : DrawIOUMLDiagram._pixelsPerChar;
 		this.width = pixelsPerChar * longestTextLength;
 
 		this.classHead.width = this.width;

@@ -3,17 +3,17 @@ import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
 import { IAggregationGetterStrategy } from "../interfaces/IAggregationGetterStrategy";
 
 export class SAPNodeAggregationGetterStrategy implements IAggregationGetterStrategy {
-	private static readonly nodeDAO = new SAPNodeDAO();
-	private readonly node: SAPNode;
+	private static readonly _nodeDAO = new SAPNodeDAO();
+	private readonly _node: SAPNode;
 
 	constructor(node: SAPNode) {
-		this.node = node;
+		this._node = node;
 	}
 
 	getParent(): IAggregationGetterStrategy | undefined {
 		let theParent: SAPNodeAggregationGetterStrategy | undefined;
-		if (this.node.node.extends) {
-			const parentNode = SAPNodeAggregationGetterStrategy.nodeDAO.findNode(this.node.node.extends);
+		if (this._node.node.extends) {
+			const parentNode = SAPNodeAggregationGetterStrategy._nodeDAO.findNode(this._node.node.extends);
 			if (parentNode) {
 				theParent = new SAPNodeAggregationGetterStrategy(parentNode);
 			}
@@ -23,7 +23,7 @@ export class SAPNodeAggregationGetterStrategy implements IAggregationGetterStrat
 	}
 
 	getAggregations() : any[] {
-		return this.node.getAggregations();
+		return this._node.getAggregations();
 	}
 
 	getAggregation(aggregation: any): { name: string; type: string; } {

@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 export class HTTPHandler {
 	static async get(uri: string) {
 		let data = {};
-		
+
 		const rejectUnauthorized = vscode.workspace.getConfiguration("ui5.plugin").get("rejectUnauthorized");
 		const agent = new https.Agent({
 			rejectUnauthorized: !!rejectUnauthorized
@@ -17,7 +17,7 @@ export class HTTPHandler {
 		if (proxy) {
 			const parsedProxy = url.parse(proxy);
 			if (parsedProxy.hostname) {
-				const port = this.getPort(parsedProxy);
+				const port = this._getPort(parsedProxy);
 				options.proxy = {
 					host: parsedProxy.hostname,
 					port: port,
@@ -36,7 +36,7 @@ export class HTTPHandler {
 		return data;
 	}
 
-	private static getPort(uri: url.UrlWithStringQuery) {
+	private static _getPort(uri: url.UrlWithStringQuery) {
 		let port;
 
 		if (uri.port) {

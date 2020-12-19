@@ -7,10 +7,10 @@ export class MainLooper {
 		let charEndQuantity = 0;
 		let openingCharIndex = 0;
 		let index = 0;
-		const commentIndexRanges = this.getCommentRanges(text);
+		const commentIndexRanges = this._getCommentRanges(text);
 
 		while((!charOpened || (charBeginQuantity - charEndQuantity !== 0)) && index < text.length) {
-			if (!this.checkIfIndexIsInCommentRange(commentIndexRanges, index)) {
+			if (!this._checkIfIndexIsInCommentRange(commentIndexRanges, index)) {
 				if (text[index] === charBegin) {
 					if (!charOpened) {
 						charOpened = true;
@@ -32,10 +32,10 @@ export class MainLooper {
 		return body;
 	}
 
-	private static getCommentRanges(text: string) {
+	private static _getCommentRanges(text: string) {
 		const ranges: CommentRanges[] = [];
 
-		if (this.areAllOpenedCommendsClosed(text)) {
+		if (this._areAllOpenedCommendsClosed(text)) {
 			const rComments = /(\/\*(.|\s)*?\*\/)|(\/\/.*)/g;
 			let results = rComments.exec(text);
 			while (results) {
@@ -58,7 +58,7 @@ export class MainLooper {
 		return ranges;
 	}
 
-	private static areAllOpenedCommendsClosed(text: string) {
+	private static _areAllOpenedCommendsClosed(text: string) {
 		let iOpenedCommendCount = 0;
 		let iClosedCommentCount = 0;
 
@@ -76,7 +76,7 @@ export class MainLooper {
 		return (iOpenedCommendCount - iClosedCommentCount) === 0;
 	}
 
-	private static checkIfIndexIsInCommentRange(commentRanges: CommentRanges[], index: number) {
+	private static _checkIfIndexIsInCommentRange(commentRanges: CommentRanges[], index: number) {
 		return !!commentRanges.find(commentRange => {
 			return index >= commentRange.from && index < commentRange.to;
 		});

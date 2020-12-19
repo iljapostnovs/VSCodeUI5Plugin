@@ -6,10 +6,10 @@ import { XMLFileRenameHandler } from "./XMLFileRenameHandler";
 
 export class ControllerRenameHandler extends FileRenameHandler {
 	public handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
-		this.renameViewOfController(newUri);
+		this._renameViewOfController(newUri);
 	}
 
-	private renameViewOfController(newControllerUri: vscode.Uri) {
+	private _renameViewOfController(newControllerUri: vscode.Uri) {
 		const controllerNameDotNotation = FileReader.getClassNameFromPath(newControllerUri.fsPath);
 		if (controllerNameDotNotation) {
 			const controllerName = controllerNameDotNotation.split(".")[controllerNameDotNotation.split(".").length - 1];

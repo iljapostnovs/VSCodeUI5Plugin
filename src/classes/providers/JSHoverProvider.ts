@@ -17,22 +17,22 @@ export class JSHoverProvider {
 			UIClassFactory.setNewContentForCurrentUIClass();
 
 			const className = strategy.acornGetClassName(currentClassName, offset) || "";
-			const text = className && this.getTextIfItIsFieldOrMethodOfClass(className, word);
+			const text = className && this._getTextIfItIsFieldOrMethodOfClass(className, word);
 			if (text) {
 				const textBefore = className === currentClassName ? "this." : `${className}.`;
-				const markdownString = this.getMarkdownFromText(textBefore + text);
+				const markdownString = this._getMarkdownFromText(textBefore + text);
 				hover = new vscode.Hover(markdownString);
 			} else {
-				const className = this.getClassNameForOffset(offset, currentClassName, word);
+				const className = this._getClassNameForOffset(offset, currentClassName, word);
 				if (className) {
 					hover = new vscode.Hover({
 						language: "javascript",
 						value: `${word}: ${className}`
 					});
 				} else {
-					const text = this.getTextIfItIsFieldOrMethodOfClass(currentClassName, word);
+					const text = this._getTextIfItIsFieldOrMethodOfClass(currentClassName, word);
 					if (text) {
-						const markdownString = this.getMarkdownFromText(text);
+						const markdownString = this._getMarkdownFromText(text);
 						hover = new vscode.Hover(markdownString);
 					}
 				}
@@ -41,7 +41,7 @@ export class JSHoverProvider {
 		return hover;
 	}
 
-	private static getMarkdownFromText(text: string) {
+	private static _getMarkdownFromText(text: string) {
 		const markdownString = new vscode.MarkdownString();
 		const textParts = text.split("\n");
 		markdownString.appendCodeblock(`${textParts[0]}`);
@@ -54,7 +54,7 @@ export class JSHoverProvider {
 		return markdownString;
 	}
 
-	private static getTextIfItIsFieldOrMethodOfClass(className: string, fieldOrMethodName: string) {
+	private static _getTextIfItIsFieldOrMethodOfClass(className: string, fieldOrMethodName: string) {
 		let text = "";
 
 		const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(className);
@@ -79,7 +79,7 @@ export class JSHoverProvider {
 		return text;
 	}
 
-	private static getClassNameForOffset(offset: number, className: string, identifierName: string) {
+	private static _getClassNameForOffset(offset: number, className: string, identifierName: string) {
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 		const method = AcornSyntaxAnalyzer.findAcornNode(UIClass.acornMethodsAndFields, offset);
 		if (method.value) {

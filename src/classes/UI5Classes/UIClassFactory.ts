@@ -18,7 +18,7 @@ interface UIClassMap {
 }
 
 export class UIClassFactory {
-	private static readonly UIClasses: UIClassMap = {
+	private static readonly _UIClasses: UIClassMap = {
 		Promise: new JSClass("Promise"),
 		array: new JSClass("array"),
 		string: new JSClass("string")
@@ -63,9 +63,9 @@ export class UIClassFactory {
 	}
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
-		this.UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
+		this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 
-		const UIClass = this.UIClasses[classNameDotNotation];
+		const UIClass = this._UIClasses[classNameDotNotation];
 		if (UIClass instanceof CustomUIClass) {
 			this.enrichTypesInCustomClass(UIClass);
 		}
@@ -153,15 +153,15 @@ export class UIClassFactory {
 	}
 
 	public static getUIClass(className: string) {
-		if (!this.UIClasses[className]) {
-			this.UIClasses[className] = UIClassFactory._getInstance(className);
-			const UIClass = this.UIClasses[className];
+		if (!this._UIClasses[className]) {
+			this._UIClasses[className] = UIClassFactory._getInstance(className);
+			const UIClass = this._UIClasses[className];
 			if (UIClass instanceof CustomUIClass) {
 				this.enrichTypesInCustomClass(UIClass);
 			}
 		}
 
-		return this.UIClasses[className];
+		return this._UIClasses[className];
 	}
 
 	private static _enrichMethodParamsWithEventType(CurrentUIClass: CustomUIClass) {
