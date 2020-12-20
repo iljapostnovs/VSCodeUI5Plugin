@@ -7,20 +7,13 @@ export class SwitchToControllerCommand {
 	static async switchToController() {
 		try {
 			const controllerNameOfCurrentlyOpenedView = SwitchToControllerCommand.getControllerNameOfCurrentView();
-			let controllerToSwitch: string = "";
 			if (controllerNameOfCurrentlyOpenedView) {
 				const allControllerFSPaths: string[] = await SwitchToControllerCommand._getAllControllerFSPaths();
-
-				for (const controllerFSPath of allControllerFSPaths) {
+				const controllerToSwitch = allControllerFSPaths.find(controllerFSPath => {
 					const controller = SwitchToControllerCommand._getControllerFileContent(controllerFSPath);
 					const controllerName = SwitchToControllerCommand._getControllerName(controller);
-					const thisControllerShouldBeSwitched = controllerName === controllerNameOfCurrentlyOpenedView;
-					if (thisControllerShouldBeSwitched) {
-						controllerToSwitch = controllerFSPath;
-						break;
-					}
-				}
-
+					return controllerName === controllerNameOfCurrentlyOpenedView;
+				});
 
 				const editor = vscode.window.activeTextEditor;
 				if (editor && !!controllerToSwitch) {
@@ -53,8 +46,8 @@ export class SwitchToControllerCommand {
 		return fs.readFileSync(controllerFSPath, "utf8");
 	}
 
-	private static _getControllerName(controller: string) {
-		const result = /(?<=.extend\(").*?(?=")/.exec(controller);
+	private static _getControllerName(controllerName: string) {
+		const result = /(?<=.extend\(").*?(?=")/.exec(controllerName);
 
 		return result && result[0] ? result[0] : null;
 	}
