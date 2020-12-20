@@ -16,23 +16,23 @@ import { GeneratorFactory } from "./completionitemfactories/codegenerators/Gener
 import { CustomCompletionItem } from "./CustomCompletionItem";
 
 export class CompletionItemFactory {
-	private static readonly nodeDAO = new SAPNodeDAO();
+	private static readonly _nodeDAO = new SAPNodeDAO();
 	public static XMLStandardLibCompletionItems: CustomCompletionItem[] = [];
 	public static JSDefineCompletionItems: CustomCompletionItem[] = [];
-	private readonly language: GeneratorFactory.language;
+	private readonly _language: GeneratorFactory.language;
 
 	constructor(completionItemType: GeneratorFactory.language) {
-		this.language = completionItemType;
+		this._language = completionItemType;
 	}
 
 	public async getUIDefineCompletionItems() {
 		let completionItems:CustomCompletionItem[] = [];
 
-		if (this.language === GeneratorFactory.language.js) {
-			completionItems = await this.generateJSCompletionItems();
-		} else if (this.language === GeneratorFactory.language.xml) {
+		if (this._language === GeneratorFactory.language.js) {
+			completionItems = await this._generateJSCompletionItems();
+		} else if (this._language === GeneratorFactory.language.xml) {
 			if (CompletionItemFactory.XMLStandardLibCompletionItems.length === 0) {
-				completionItems = await this.generateXMLCompletionItems();
+				completionItems = await this._generateXMLCompletionItems();
 			} else {
 				completionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
 			}
@@ -41,10 +41,10 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	private async generateXMLCompletionItems() {
+	private async _generateXMLCompletionItems() {
 		let completionItems:CustomCompletionItem[] = [];
 		let SAPNodes: SAPNode[];
-		SAPNodes = await CompletionItemFactory.nodeDAO.getAllNodes();
+		SAPNodes = await CompletionItemFactory._nodeDAO.getAllNodes();
 
 		const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
 		await Promise.all([
@@ -62,7 +62,7 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	private async generateJSCompletionItems() {
+	private async _generateJSCompletionItems() {
 		let completionItems:CustomCompletionItem[] = [];
 
 		if (CompletionItemFactory.JSDefineCompletionItems.length === 0) {

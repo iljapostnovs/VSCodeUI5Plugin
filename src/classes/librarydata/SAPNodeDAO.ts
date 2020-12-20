@@ -11,7 +11,7 @@ export class SAPNodeDAO {
 	private static readonly _nodePath: string = URLBuilder.getInstance().getAPIIndexUrl();
 	private _nodes: any;
 	private static readonly _SAPNodes: SAPNode[] = [];
-	private static readonly _FlatSAPNodes: LooseNodeObject = {};
+	private static readonly _flatSAPNodes: LooseNodeObject = {};
 	constructor() {}
 
 	public async getAllNodes() {
@@ -72,7 +72,7 @@ export class SAPNodeDAO {
 	}
 	private _recursiveFlatNodeGeneration(nodes: SAPNode[]) {
 		nodes.forEach(SAPNode => {
-			SAPNodeDAO._FlatSAPNodes[SAPNode.getName()] = SAPNode;
+			SAPNodeDAO._flatSAPNodes[SAPNode.getName()] = SAPNode;
 			if (SAPNode.nodes) {
 				this._recursiveFlatNodeGeneration(SAPNode.nodes);
 			}
@@ -102,6 +102,6 @@ export class SAPNodeDAO {
 	}
 
 	public findNode(name: string) {
-		return SAPNodeDAO._FlatSAPNodes[name];
+		return SAPNodeDAO._flatSAPNodes[name];
 	}
 }

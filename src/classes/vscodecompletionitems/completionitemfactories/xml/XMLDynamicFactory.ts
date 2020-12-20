@@ -22,41 +22,41 @@ export class XMLDynamicFactory {
 			const positionType = XMLParser.getPositionType(XMLText, currentPositionOffset);
 
 			if (positionType === PositionType.InTheTagAttributes) {
-				completionItems = this.getAttributeCompletionItems();
+				completionItems = this._getAttributeCompletionItems();
 
 			} else if (positionType === PositionType.InTheString) {
-				completionItems = this.getAttributeValuesCompletionItems();
+				completionItems = this._getAttributeValuesCompletionItems();
 
 			} else if (positionType === PositionType.InTheClassName) {
 
-				completionItems = this.getTagCompletionItems();
+				completionItems = this._getTagCompletionItems();
 			} else if (positionType === PositionType.InBodyOfTheClass) {
 
-				completionItems = this.getCompletionItemsFromClassBody();
+				completionItems = this._getCompletionItemsFromClassBody();
 
 			}
 
-			completionItems = this.removeDuplicateCompletionItems(completionItems);
+			completionItems = this._removeDuplicateCompletionItems(completionItems);
 		}
 
 		return completionItems;
 	}
 
-	private getAllFileSpecificCompletionItems(addPrefix: boolean = true) {
+	private _getAllFileSpecificCompletionItems(addPrefix: boolean = true) {
 		let completionItems: CustomCompletionItem[] = [];
 		const textEditor = vscode.window.activeTextEditor;
 
 		if (textEditor) {
 			const document = textEditor.document;
 			const XMLText = document.getText();
-			completionItems = this.convertToFileSpecificCompletionItems(CompletionItemFactory.XMLStandardLibCompletionItems, XMLText, addPrefix);
+			completionItems = this._convertToFileSpecificCompletionItems(CompletionItemFactory.XMLStandardLibCompletionItems, XMLText, addPrefix);
 		}
 
 		return completionItems;
 	}
 
 
-	private getAttributeValuesCompletionItems() {
+	private _getAttributeValuesCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
 		const XMLText = vscode.window.activeTextEditor?.document.getText();
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
@@ -68,20 +68,20 @@ export class XMLDynamicFactory {
 			if (className) {
 				const UIClass = UIClassFactory.getUIClass(className);
 				const attributeName = XMLParser.getNearestAttribute(XMLText, positionBeforeString);
-				const UIProperty = this.getUIPropertyRecursively(UIClass, attributeName);
+				const UIProperty = this._getUIPropertyRecursively(UIClass, attributeName);
 				if (UIProperty && UIProperty.typeValues.length > 0) {
 
-					completionItems = this.generateCompletionItemsFromTypeValues(UIProperty.typeValues);
+					completionItems = this._generateCompletionItemsFromTypeValues(UIProperty.typeValues);
 				} else if (UIProperty?.type === "string") {
 
 					const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
 					if (currentComponentName && ResourceModelData.resourceModels[currentComponentName]) {
 						const typeValues = ResourceModelData.resourceModels[currentComponentName];
-						completionItems = this.generateCompletionItemsFromTypeValues(typeValues);
+						completionItems = this._generateCompletionItemsFromTypeValues(typeValues);
 					}
 				} else {
 
-					const UIEvent = this.getUIEventRecursively(UIClass, attributeName);
+					const UIEvent = this._getUIEventRecursively(UIClass, attributeName);
 					if (UIEvent) {
 						const methods = XMLParser.getMethodsOfTheCurrentViewsController()
 						.map(classMethod =>
@@ -90,7 +90,7 @@ export class XMLDynamicFactory {
 								description: classMethod.description
 							})
 						);
-						completionItems = this.generateCompletionItemsFromTypeValues(methods);
+						completionItems = this._generateCompletionItemsFromTypeValues(methods);
 					}
 				}
 			}
@@ -99,7 +99,7 @@ export class XMLDynamicFactory {
 		return completionItems;
 	}
 
-	private getTagCompletionItems() {
+	private _getTagCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
 		const XMLText = vscode.window.activeTextEditor?.document.getText();
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
@@ -110,17 +110,17 @@ export class XMLDynamicFactory {
 			const isTagEmpty = !currentTagText[1].match(/[a-zA-Z]/);
 			if (isTagEmpty) {
 				const { positionBegin: currentTagPositionBegin } = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset - 1);
-				completionItems = this.getParentTagCompletionItems(currentTagPositionBegin - 1);
-				completionItems = this.convertToFileSpecificCompletionItems(completionItems, XMLText);
+				completionItems = this._getParentTagCompletionItems(currentTagPositionBegin - 1);
+				completionItems = this._convertToFileSpecificCompletionItems(completionItems, XMLText);
 			} else if (libName) {
 				let tagPrefix = XMLParser.getTagPrefix(currentTagText);
 				tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
 				const isThisClassFromAProject = !!FileReader.getManifestForClass(libName + ".");
 				if (!isThisClassFromAProject) {
-					completionItems = this.getStandardCompletionItemsFilteredByLibraryName(libName);
-					completionItems = this.filterCompletionItemsByAggregationsType(completionItems);
+					completionItems = this._getStandardCompletionItemsFilteredByLibraryName(libName);
+					completionItems = this._filterCompletionItemsByAggregationsType(completionItems);
 				} else {
-					completionItems = this.getCompletionItemsForCustomClasses(libName, tagPrefix);
+					completionItems = this._getCompletionItemsForCustomClasses(libName, tagPrefix);
 				}
 			}
 		}
@@ -128,7 +128,7 @@ export class XMLDynamicFactory {
 		return completionItems;
 	}
 
-	private convertToFileSpecificCompletionItems(completionItems: CustomCompletionItem[], XMLText: string, addPrefix: boolean = true) {
+	private _convertToFileSpecificCompletionItems(completionItems: CustomCompletionItem[], XMLText: string, addPrefix: boolean = true) {
 		const nodeDAO = new SAPNodeDAO();
 		return  completionItems.reduce((accumulator: CustomCompletionItem[], completionItem: CustomCompletionItem) => {
 			const node = nodeDAO.findNode(completionItem.className);
@@ -139,7 +139,7 @@ export class XMLDynamicFactory {
 					if (addPrefix) {
 						classPrefix = tagPrefix.length > 0 ? `${tagPrefix}:` : tagPrefix;
 					}
-					const completionItem = this.getStandardCompletionItemWithPrefix(node, tagPrefix, classPrefix);
+					const completionItem = this._getStandardCompletionItemWithPrefix(node, tagPrefix, classPrefix);
 					accumulator.push(completionItem);
 				}
 			} else {
@@ -150,7 +150,7 @@ export class XMLDynamicFactory {
 		}, []);
 	}
 
-	private getCompletionItemsForCustomClasses(libName: string, tagPrefix: string) {
+	private _getCompletionItemsForCustomClasses(libName: string, tagPrefix: string) {
 		const xmlClassFactory = new XMLClassFactory();
 		const wsFolders = vscode.workspace.workspaceFolders || [];
 		const classNames = wsFolders.reduce((accumulator: string[], wsFolder: vscode.WorkspaceFolder) => {
@@ -168,14 +168,14 @@ export class XMLDynamicFactory {
 		return completionItems;
 	}
 
-	private getStandardCompletionItemsFilteredByLibraryName(libName: string) {
-		const standardCompletionItems = this.getAllFileSpecificCompletionItems(false);
+	private _getStandardCompletionItemsFilteredByLibraryName(libName: string) {
+		const standardCompletionItems = this._getAllFileSpecificCompletionItems(false);
 		const completionItems = standardCompletionItems.filter(completionItem => completionItem.className.startsWith(libName));
 
 		return completionItems;
 	}
 
-	private getStandardCompletionItemWithPrefix(node: any, tagPrefix: string, classPrefix: string = "") {
+	private _getStandardCompletionItemWithPrefix(node: any, tagPrefix: string, classPrefix: string = "") {
 		let completionItem: CustomCompletionItem | undefined;
 		const XMLClassFactoryInstance = new XMLClassFactory();
 
@@ -184,19 +184,19 @@ export class XMLDynamicFactory {
 		return completionItem;
 	}
 
-	private filterCompletionItemsByAggregationsType(completionItems: CustomCompletionItem[]) {
+	private _filterCompletionItemsByAggregationsType(completionItems: CustomCompletionItem[]) {
 		const XMLText = vscode.window.activeTextEditor?.document.getText();
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
 		if (XMLText && currentPositionOffset) {
 			const { positionBegin: currentTagPositionBegin } = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset);
-			completionItems = this.getParentTagCompletionItems(currentTagPositionBegin - 1, completionItems);
+			completionItems = this._getParentTagCompletionItems(currentTagPositionBegin - 1, completionItems);
 		}
 
 		return completionItems;
 	}
 
-	private getParentTagCompletionItems(currentPosition: number, completionItems: CustomCompletionItem[] = this.getAllFileSpecificCompletionItems()) {
+	private _getParentTagCompletionItems(currentPosition: number, completionItems: CustomCompletionItem[] = this._getAllFileSpecificCompletionItems()) {
 		const XMLText = vscode.window.activeTextEditor?.document.getText();
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
@@ -211,8 +211,8 @@ export class XMLDynamicFactory {
 				const libraryPath = XMLParser.getLibraryPathFromTagPrefix(XMLText, classTagPrefix, parentTagInfo.positionEnd);
 				const classOfTheTag = [libraryPath, className].join(".");
 				const UIClass = UIClassFactory.getUIClass(classOfTheTag);
-				const aggregations = this.getAllAggregationsRecursively(UIClass);
-				const aggregationCompletionItems = this.generateAggregationCompletionItems(aggregations, classTagPrefix);
+				const aggregations = this._getAllAggregationsRecursively(UIClass);
+				const aggregationCompletionItems = this._generateAggregationCompletionItems(aggregations, classTagPrefix);
 				//add completion items for default aggregation
 				const defaultAggregation = aggregations.find(aggregation => aggregation.default);
 				if (defaultAggregation) {
@@ -236,7 +236,7 @@ export class XMLDynamicFactory {
 				const libraryPath = XMLParser.getLibraryPathFromTagPrefix(XMLText, classTagPrefix, classTagInfo.positionEnd);
 				const classOfTheTag = [libraryPath, className].join(".");
 				const UIClass = UIClassFactory.getUIClass(classOfTheTag);
-				const UIAggregation = this.getUIAggregationRecursively(UIClass, aggregationName);
+				const UIAggregation = this._getUIAggregationRecursively(UIClass, aggregationName);
 				if (UIAggregation?.type) {
 					const aggregationType = UIAggregation.type;
 					const nodeDAO = new SAPNodeDAO();
@@ -250,13 +250,13 @@ export class XMLDynamicFactory {
 		return completionItems;
 	}
 
-	private generateAggregationCompletionItems(aggregations: UIAggregation[], classTagPrefix: string) {
+	private _generateAggregationCompletionItems(aggregations: UIAggregation[], classTagPrefix: string) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = aggregations.map(aggregation => {
 			const completionItem:CustomCompletionItem = new CustomCompletionItem(aggregation.name);
 			completionItem.kind = vscode.CompletionItemKind.Class;
-			completionItem.insertText = this.generateInsertTextForAggregation(aggregation, classTagPrefix);
+			completionItem.insertText = this._generateInsertTextForAggregation(aggregation, classTagPrefix);
 			completionItem.detail = aggregation.type || "";
 			return completionItem;
 		});
@@ -264,7 +264,7 @@ export class XMLDynamicFactory {
 		return completionItems;
 	}
 
-	private generateInsertTextForAggregation(aggregation: UIAggregation, prefix: string) {
+	private _generateInsertTextForAggregation(aggregation: UIAggregation, prefix: string) {
 		if (prefix) {
 			prefix = `${prefix}:`;
 		}
@@ -272,7 +272,7 @@ export class XMLDynamicFactory {
 		return new vscode.SnippetString(`${prefix}${aggregation.name}>\n\t$0\n</${prefix}${aggregation.name}>`);
 	}
 
-	private cloneCompletionItem(completionItem: any): CustomCompletionItem {
+	private _cloneCompletionItem(completionItem: any): CustomCompletionItem {
 		const clone: any = new CustomCompletionItem(completionItem.label, completionItem.kind);
 		for (const attribute in completionItem) {
 			clone[attribute] = completionItem[attribute];
@@ -280,15 +280,15 @@ export class XMLDynamicFactory {
 		return clone;
 	}
 
-	private getCompletionItemsFromClassBody() {
+	private _getCompletionItemsFromClassBody() {
 		let completionItems: CustomCompletionItem[] = [];
 		const XMLText = vscode.window.activeTextEditor?.document.getText();
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
 		if (XMLText && currentPositionOffset) {
-			completionItems = this.getParentTagCompletionItems(currentPositionOffset);
+			completionItems = this._getParentTagCompletionItems(currentPositionOffset);
 			completionItems = completionItems.map(completionItem => {
-				completionItem = this.cloneCompletionItem(completionItem);
+				completionItem = this._cloneCompletionItem(completionItem);
 				if (completionItem.insertText instanceof vscode.SnippetString) {
 					completionItem.insertText.value = "<" + completionItem.insertText.value;
 				} else {
@@ -302,7 +302,7 @@ export class XMLDynamicFactory {
 		return completionItems;
 	}
 
-	private getAttributeCompletionItems() {
+	private _getAttributeCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
 
 		const XMLText = vscode.window.activeTextEditor?.document.getText();
@@ -314,61 +314,61 @@ export class XMLDynamicFactory {
 				const UIClass = UIClassFactory.getUIClass(className);
 				let controllerMethods = XMLParser.getMethodsOfTheCurrentViewsController().map(method => method.name);
 				controllerMethods = [...new Set(controllerMethods)];
-				completionItems = this.getPropertyCompletionItemsFromClass(UIClass);
-				completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(UIClass, controllerMethods));
-				completionItems = completionItems.concat(this.getAggregationCompletionItemsFromClass(UIClass));
-				completionItems = completionItems.concat(this.getAssociationCompletionItemsFromClass(UIClass));
+				completionItems = this._getPropertyCompletionItemsFromClass(UIClass);
+				completionItems = completionItems.concat(this._getEventCompletionItemsFromClass(UIClass, controllerMethods));
+				completionItems = completionItems.concat(this._getAggregationCompletionItemsFromClass(UIClass));
+				completionItems = completionItems.concat(this._getAssociationCompletionItemsFromClass(UIClass));
 			}
 		}
 
 		return completionItems;
 	}
 
-	private getUIAggregationRecursively(UIClass: AbstractUIClass, aggregationName: string): UIAggregation | undefined {
+	private _getUIAggregationRecursively(UIClass: AbstractUIClass, aggregationName: string): UIAggregation | undefined {
 		let aggregation: UIAggregation | undefined;
 		aggregation = UIClass.aggregations.find(aggregation => aggregation.name === aggregationName);
 		if (!aggregation && UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
-			aggregation = this.getUIAggregationRecursively(parentClass, aggregationName);
+			aggregation = this._getUIAggregationRecursively(parentClass, aggregationName);
 		}
 
 		return aggregation;
 	}
 
-	private getAllAggregationsRecursively(UIClass: AbstractUIClass): UIAggregation[] {
+	private _getAllAggregationsRecursively(UIClass: AbstractUIClass): UIAggregation[] {
 		let aggregations = UIClass.aggregations;
 		if (UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
-			aggregations = aggregations.concat(this.getAllAggregationsRecursively(parentClass));
+			aggregations = aggregations.concat(this._getAllAggregationsRecursively(parentClass));
 		}
 
 		return aggregations;
 	}
 
-	private getUIPropertyRecursively(UIClass: AbstractUIClass, propertyName: string): UIProperty | undefined {
+	private _getUIPropertyRecursively(UIClass: AbstractUIClass, propertyName: string): UIProperty | undefined {
 		let property: UIProperty | undefined;
 		property = UIClass.properties.find(property => property.name === propertyName);
 		if (!property && UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
-			property = this.getUIPropertyRecursively(parentClass, propertyName);
+			property = this._getUIPropertyRecursively(parentClass, propertyName);
 		}
 
 		return property;
 	}
 
-	private getUIEventRecursively(UIClass: AbstractUIClass, eventName: string): UIEvent | undefined {
+	private _getUIEventRecursively(UIClass: AbstractUIClass, eventName: string): UIEvent | undefined {
 		let event: UIEvent | undefined;
 		event = UIClass.events.find(event => event.name === eventName);
 		if (!event && UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
-			event = this.getUIEventRecursively(parentClass, eventName);
+			event = this._getUIEventRecursively(parentClass, eventName);
 		}
 
 		return event;
 	}
 
-	private generateCompletionItemsFromTypeValues(typeValues: TypeValue[]) {
-		return this.removeDuplicateCompletionItems(typeValues.map(typeValue => {
+	private _generateCompletionItemsFromTypeValues(typeValues: TypeValue[]) {
+		return this._removeDuplicateCompletionItems(typeValues.map(typeValue => {
 			const completionItem =  new CustomCompletionItem(typeValue.text, vscode.CompletionItemKind.Keyword);
 			completionItem.detail = typeValue.text;
 			completionItem.documentation = typeValue.description;
@@ -377,7 +377,7 @@ export class XMLDynamicFactory {
 	}
 
 
-	private getPropertyCompletionItemsFromClass(UIClass: AbstractUIClass) {
+	private _getPropertyCompletionItemsFromClass(UIClass: AbstractUIClass) {
 		let completionItems:CustomCompletionItem[] = [];
 
 		completionItems = UIClass.properties.map(property => {
@@ -396,13 +396,13 @@ export class XMLDynamicFactory {
 
 		if (UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
-			completionItems = completionItems.concat(this.getPropertyCompletionItemsFromClass(parentClass));
+			completionItems = completionItems.concat(this._getPropertyCompletionItemsFromClass(parentClass));
 		}
 
 		return completionItems;
 	}
 
-	private getEventCompletionItemsFromClass(UIClass: AbstractUIClass, eventValues: string[] = []) {
+	private _getEventCompletionItemsFromClass(UIClass: AbstractUIClass, eventValues: string[] = []) {
 		let completionItems:CustomCompletionItem[] = [];
 
 		completionItems = UIClass.events.map(event => {
@@ -420,13 +420,13 @@ export class XMLDynamicFactory {
 
 		if (UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
-			completionItems = completionItems.concat(this.getEventCompletionItemsFromClass(parentClass, eventValues));
+			completionItems = completionItems.concat(this._getEventCompletionItemsFromClass(parentClass, eventValues));
 		}
 
 		return completionItems;
 	}
 
-	private getAggregationCompletionItemsFromClass(UIClass: AbstractUIClass) {
+	private _getAggregationCompletionItemsFromClass(UIClass: AbstractUIClass) {
 		let completionItems:CustomCompletionItem[] = [];
 
 		completionItems = UIClass.aggregations.map(aggregation => {
@@ -443,13 +443,13 @@ export class XMLDynamicFactory {
 
 		if (UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
-			completionItems = completionItems.concat(this.getAggregationCompletionItemsFromClass(parentClass));
+			completionItems = completionItems.concat(this._getAggregationCompletionItemsFromClass(parentClass));
 		}
 
 		return completionItems;
 	}
 
-	private getAssociationCompletionItemsFromClass(UIClass: AbstractUIClass) {
+	private _getAssociationCompletionItemsFromClass(UIClass: AbstractUIClass) {
 		let completionItems:CustomCompletionItem[] = [];
 
 		completionItems = UIClass.associations.map(association => {
@@ -466,13 +466,13 @@ export class XMLDynamicFactory {
 
 		if (UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
-			completionItems = completionItems.concat(this.getAssociationCompletionItemsFromClass(parentClass));
+			completionItems = completionItems.concat(this._getAssociationCompletionItemsFromClass(parentClass));
 		}
 
 		return completionItems;
 	}
 
-	private removeDuplicateCompletionItems(completionItems: CustomCompletionItem[]) {
+	private _removeDuplicateCompletionItems(completionItems: CustomCompletionItem[]) {
 		completionItems = completionItems.reduce((accumulator: CustomCompletionItem[], completionItem: CustomCompletionItem) => {
 			const methodInAccumulator = accumulator.find(accumulatedCompletionItem =>
 				accumulatedCompletionItem.label === completionItem.label

@@ -12,20 +12,20 @@ export class DiagnosticsRegistrator {
 			if (vscode.window.activeTextEditor) {
 				const fileName = vscode.window.activeTextEditor.document.fileName;
 				if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
-					this.updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
+					this._updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
 				}
 			}
 
 			const changeActiveTextEditor = vscode.window.onDidChangeActiveTextEditor(editor => {
 				const fileName = editor?.document.fileName;
 				if (editor && fileName && (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml"))) {
-					this.updateDiagnostics(editor.document, diagnosticCollection);
+					this._updateDiagnostics(editor.document, diagnosticCollection);
 				}
 			});
 
 			const textDocumentChange = vscode.workspace.onDidChangeTextDocument(event => {
 				if (event && (event.document.fileName.endsWith(".fragment.xml") || event.document.fileName.endsWith(".view.xml"))) {
-					this.updateDiagnostics(event.document, diagnosticCollection);
+					this._updateDiagnostics(event.document, diagnosticCollection);
 				}
 			});
 
@@ -35,7 +35,7 @@ export class DiagnosticsRegistrator {
 	}
 
 	private static _timeoutId: NodeJS.Timeout | null;
-	private static updateDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+	private static _updateDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
 		if (!this._timeoutId) {
 			this._timeoutId = setTimeout(() => {
 				const errors = XMLLinter.getLintingErrors(document.getText());

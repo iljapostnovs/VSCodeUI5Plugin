@@ -18,7 +18,7 @@ export class JSCodeLensProvider {
 					const rootMethods = UIClass.methods;
 					if (UIClass.parentClassNameDotNotation) {
 						const overriddenMethods: UIMethod[] = [];
-						const parentMethods = this.getAllParentMethods(UIClass.parentClassNameDotNotation);
+						const parentMethods = this._getAllParentMethods(UIClass.parentClassNameDotNotation);
 
 						rootMethods.forEach(method => {
 							const methodFromParent = parentMethods.find(methodFromparent => methodFromparent.name === method.name);
@@ -27,8 +27,8 @@ export class JSCodeLensProvider {
 							}
 						});
 
-						const i18nCodeLenses = this.generateInternalizationCodeLenses();
-						codeLenses = this.generateCodeLensesForMethods(overriddenMethods).concat(i18nCodeLenses);
+						const i18nCodeLenses = this._generateInternalizationCodeLenses();
+						codeLenses = this._generateCodeLensesForMethods(overriddenMethods).concat(i18nCodeLenses);
 
 						resolve(codeLenses);
 					}
@@ -37,7 +37,7 @@ export class JSCodeLensProvider {
 		});
 	}
 
-	private static generateInternalizationCodeLenses() {
+	private static _generateInternalizationCodeLenses() {
 		const codeLenses: vscode.CodeLens[] = [];
 		const document = vscode.window.activeTextEditor?.document;
 
@@ -78,18 +78,18 @@ export class JSCodeLensProvider {
 		return codeLenses;
 	}
 
-	private static getAllParentMethods(className: string) {
+	private static _getAllParentMethods(className: string) {
 		const UIClass = UIClassFactory.getUIClass(className);
 		let methods = UIClass.methods;
 
 		if (UIClass.parentClassNameDotNotation) {
-			methods = methods.concat(this.getAllParentMethods(UIClass.parentClassNameDotNotation));
+			methods = methods.concat(this._getAllParentMethods(UIClass.parentClassNameDotNotation));
 		}
 
 		return methods;
 	}
 
-	private static generateCodeLensesForMethods(methods: CustomClassUIMethod[]) {
+	private static _generateCodeLensesForMethods(methods: CustomClassUIMethod[]) {
 		const codeLenses: vscode.CodeLens[] = [];
 		const document = vscode.window.activeTextEditor?.document;
 

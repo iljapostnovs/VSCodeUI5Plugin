@@ -9,15 +9,15 @@ const escapedFileSeparator = "\\" + path.sep;
 const workspace = vscode.workspace;
 
 export class FileReader {
-	private static manifests: UIManifest[] = [];
-	private static readonly viewCache: LooseObject = {};
-	private static readonly UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
+	private static _manifests: UIManifest[] = [];
+	private static readonly _viewCache: LooseObject = {};
+	private static readonly _UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
 	public static globalStoragePath: string | undefined;
 
 	public static setNewViewContentToCache(viewContent: string, fsPath: string) {
 		const controllerName = this.getControllerNameFromView(viewContent);
 		if (controllerName) {
-			this.viewCache[controllerName] = {
+			this._viewCache[controllerName] = {
 				content: viewContent,
 				fsPath: fsPath
 			};
@@ -25,7 +25,7 @@ export class FileReader {
 	}
 
 	static getViewCache() {
-		return this.viewCache;
+		return this._viewCache;
 	}
 
 	public static getDocumentTextFromCustomClassName(className: string, isFragment?: boolean) {
@@ -80,30 +80,30 @@ export class FileReader {
 	}
 
 	public static getAllManifests() {
-		if (this.manifests.length === 0) {
-			this.fetchAllWorkspaceManifests();
+		if (this._manifests.length === 0) {
+			this._fetchAllWorkspaceManifests();
 		}
 
-		return this.manifests;
+		return this._manifests;
 	}
 
 	public static rereadAllManifests() {
-		this.manifests = [];
-		this.fetchAllWorkspaceManifests();
+		this._manifests = [];
+		this._fetchAllWorkspaceManifests();
 	}
 
 	public static getManifestForClass(className: string = "") {
 		let returnManifest: UIManifest | undefined;
-		if (this.manifests.length === 0) {
-			this.fetchAllWorkspaceManifests();
+		if (this._manifests.length === 0) {
+			this._fetchAllWorkspaceManifests();
 		}
 
-		returnManifest = this.manifests.find(UIManifest => className.startsWith(UIManifest.componentName + "."));
+		returnManifest = this._manifests.find(UIManifest => className.startsWith(UIManifest.componentName + "."));
 
 		return returnManifest;
 	}
 
-	private static fetchAllWorkspaceManifests() {
+	private static _fetchAllWorkspaceManifests() {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const manifests = this.getManifestsInWorkspaceFolder(wsFolder);
@@ -115,7 +115,7 @@ export class FileReader {
 					fsPath: manifestFsPath,
 					content: UI5Manifest
 				};
-				this.manifests.push(UIManifest);
+				this._manifests.push(UIManifest);
 			}
 		}
 	}
@@ -137,7 +137,7 @@ export class FileReader {
 		let className: string | undefined;
 		const documentText = this.getViewText(controllerClassName);
 		if (documentText) {
-			className = this.getClassOfControlIdFromView(documentText, controlId);
+			className = this._getClassOfControlIdFromView(documentText, controlId);
 		}
 
 		return className;
@@ -145,16 +145,16 @@ export class FileReader {
 
 	public static getViewText(controllerName: string) {
 		let viewText: string | undefined;
-		if (!this.viewCache[controllerName]) {
-			this.readAllViewsAndSaveInCache();
+		if (!this._viewCache[controllerName]) {
+			this._readAllViewsAndSaveInCache();
 		}
 
-		viewText = this.viewCache[controllerName]?.content;
+		viewText = this._viewCache[controllerName]?.content;
 
 		return viewText;
 	}
 
-	private static getClassOfControlIdFromView(documentText: string, controlId: string) {
+	private static _getClassOfControlIdFromView(documentText: string, controlId: string) {
 		let controlClass = "";
 		//TODO: move to XMLParser
 		const controlResults = new RegExp(`(?=id="${controlId}")`).exec(documentText);
@@ -166,7 +166,7 @@ export class FileReader {
 			beginIndex++;
 
 			let endIndex = beginIndex;
-			while (endIndex < documentText.length && !this.isSeparator(documentText[endIndex])) {
+			while (endIndex < documentText.length && !this._isSeparator(documentText[endIndex])) {
 				endIndex++;
 			}
 
@@ -190,7 +190,7 @@ export class FileReader {
 		return controlClass;
 	}
 
-	private static readAllViewsAndSaveInCache() {
+	private static _readAllViewsAndSaveInCache() {
 		const wsFolders = workspace.workspaceFolders || [];
 		const src = this.getSrcFolderName();
 		for (const wsFolder of wsFolders) {
@@ -201,7 +201,7 @@ export class FileReader {
 				viewContent = this.replaceFragments(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				if (controllerName) {
-					this.viewCache[controllerName] = {
+					this._viewCache[controllerName] = {
 						content: viewContent,
 						fsPath: viewPath.replace(/\//g, fileSeparator)
 					};
@@ -234,9 +234,9 @@ export class FileReader {
 	}
 
 	public static replaceFragments(documentText: string) {
-		const fragments = this.getFragments(documentText);
+		const fragments = this._getFragments(documentText);
 		fragments.forEach(fragment => {
-			const fragmentName = this.getFragmentName(fragment);
+			const fragmentName = this._getFragmentName(fragment);
 			if (fragmentName) {
 				const fragmentText = this.getDocumentTextFromCustomClassName(fragmentName, true);
 				if (fragmentText) {
@@ -248,7 +248,7 @@ export class FileReader {
 		return documentText;
 	}
 
-	private static getFragmentName(fragmentText: string) {
+	private static _getFragmentName(fragmentText: string) {
 		let fragmentName;
 		const fragmentNameResult = /(?<=fragmentName=").*?(?=")/.exec(fragmentText);
 		if (fragmentNameResult) {
@@ -257,11 +257,11 @@ export class FileReader {
 		return fragmentName;
 	}
 
-	private static getFragments(documentText: string) {
+	private static _getFragments(documentText: string) {
 		return documentText.match(/\<.*?Fragment(.|\s)*?\/>/g) || [];
 	}
 
-	private static isSeparator(char: string) {
+	private static _isSeparator(char: string) {
 		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r";
 	}
 
@@ -288,9 +288,9 @@ export class FileReader {
 	static getCache(cacheType: FileReader.CacheType) {
 		let cache;
 		const cachePath =
-			cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() :
-			cacheType === FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() :
-			cacheType === FileReader.CacheType.Icons ? this.getIconCachePath() :
+			cacheType === FileReader.CacheType.Metadata ? this._getMetadataCachePath() :
+			cacheType === FileReader.CacheType.APIIndex ? this._getAPIIndexCachePath() :
+			cacheType === FileReader.CacheType.Icons ? this._getIconCachePath() :
 			null;
 
 		if (cachePath && fs.existsSync(cachePath)) {
@@ -307,14 +307,14 @@ export class FileReader {
 
 	static setCache(cacheType: FileReader.CacheType, cache: string) {
 		const cachePath =
-			cacheType === FileReader.CacheType.Metadata ? this.getMetadataCachePath() :
-			cacheType === FileReader.CacheType.APIIndex ? this.getAPIIndexCachePath() :
-			cacheType === FileReader.CacheType.Icons ? this.getIconCachePath() :
+			cacheType === FileReader.CacheType.Metadata ? this._getMetadataCachePath() :
+			cacheType === FileReader.CacheType.APIIndex ? this._getAPIIndexCachePath() :
+			cacheType === FileReader.CacheType.Icons ? this._getIconCachePath() :
 			null;
 
 		if (cachePath) {
 			if (!fs.existsSync(cachePath)) {
-				this.ensureThatPluginCacheFolderExists();
+				this._ensureThatPluginCacheFolderExists();
 			}
 
 			fs.writeFileSync(cachePath, cache, "utf8");
@@ -335,7 +335,7 @@ export class FileReader {
 		}
 	}
 
-	private static ensureThatPluginCacheFolderExists() {
+	private static _ensureThatPluginCacheFolderExists() {
 		if (this.globalStoragePath) {
 			if (!fs.existsSync(this.globalStoragePath)) {
 				fs.mkdirSync(this.globalStoragePath);
@@ -343,16 +343,16 @@ export class FileReader {
 		}
 	}
 
-	private static getMetadataCachePath() {
-		return `${this.globalStoragePath}${fileSeparator}cache_${this.UI5Version}.json`;
+	private static _getMetadataCachePath() {
+		return `${this.globalStoragePath}${fileSeparator}cache_${this._UI5Version}.json`;
 	}
 
-	private static getAPIIndexCachePath() {
-		return `${this.globalStoragePath}${fileSeparator}cache_appindex_${this.UI5Version}.json`;
+	private static _getAPIIndexCachePath() {
+		return `${this.globalStoragePath}${fileSeparator}cache_appindex_${this._UI5Version}.json`;
 	}
 
-	private static getIconCachePath() {
-		return `${this.globalStoragePath}${fileSeparator}cache_icons_${this.UI5Version}.json`;
+	private static _getIconCachePath() {
+		return `${this.globalStoragePath}${fileSeparator}cache_icons_${this._UI5Version}.json`;
 	}
 
 	public static getResourceModelFiles() {

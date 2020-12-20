@@ -27,9 +27,9 @@ export class UIClassDefinitionFinder {
 		if (classNameDotNotation && methodName) {
 			const isThisClassFromAProject = !!FileReader.getManifestForClass(classNameDotNotation);
 			if (!isThisClassFromAProject && openInBrowserIfStandardMethod) {
-				this.openClassMethodInTheBrowser(classNameDotNotation, methodName);
+				this._openClassMethodInTheBrowser(classNameDotNotation, methodName);
 			} else {
-				location = this.getVSCodeMethodLocation(classNameDotNotation, methodName);
+				location = this._getVSCodeMethodLocation(classNameDotNotation, methodName);
 				if (!location) {
 					const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
 					if (UIClass.parentClassNameDotNotation) {
@@ -42,7 +42,7 @@ export class UIClassDefinitionFinder {
 		return location;
 	}
 
-	private static getVSCodeMethodLocation(classNameDotNotation: string, methodName: string) {
+	private static _getVSCodeMethodLocation(classNameDotNotation: string, methodName: string) {
 		let location: vscode.Location | undefined;
 		const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
 
@@ -67,20 +67,20 @@ export class UIClassDefinitionFinder {
 		return location;
 	}
 
-	private static openClassMethodInTheBrowser(classNameDotNotation: string, methodName: string) {
+	private static _openClassMethodInTheBrowser(classNameDotNotation: string, methodName: string) {
 		const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
 		if (UIClass instanceof StandardUIClass) {
 			const methodFromClass = UIClass.methods.find(method => method.name === methodName);
 			if (methodFromClass) {
 				if (methodFromClass.isFromParent) {
-					this.openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
+					this._openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
 				} else {
 					const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
 					const linkToDocumentation = URLBuilder.getInstance().getUrlForMethodApi(UIClass, methodName);
 					vscode.env.openExternal(vscode.Uri.parse(linkToDocumentation));
 				}
 			} else if (UIClass.parentClassNameDotNotation) {
-				this.openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
+				this._openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
 			}
 		}
 	}

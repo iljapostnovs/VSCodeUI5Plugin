@@ -36,22 +36,22 @@ export class CustomUIClass extends AbstractUIClass {
 	public acornClassBody: any;
 	public acornMethodsAndFields: any[] = [];
 	public fileContent: any;
-	private parentVariableName: any;
+	private _parentVariableName: any;
 	public classBodyAcornVariableName: string | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
 
-		this.readFileContainingThisClassCode(documentText); //todo: rename. not always reading anyore.
-		this.UIDefine = this.getUIDefine();
-		this.acornClassBody = this.getThisClassBodyAcorn();
-		this.findParentClassNameDotNotation();
-		this.fillUI5Metadata();
-		this.fillMethodsAndFields();
-		this.enrichMethodInfoWithJSDocs();
+		this._readFileContainingThisClassCode(documentText); //todo: rename. not always reading anyore.
+		this.UIDefine = this._getUIDefine();
+		this.acornClassBody = this._getThisClassBodyAcorn();
+		this._fillParentClassNameDotNotation();
+		this._fillUI5Metadata();
+		this._fillMethodsAndFields();
+		this._enrichMethodInfoWithJSDocs();
 	}
 
-	private enrichMethodInfoWithJSDocs() {
+	private _enrichMethodInfoWithJSDocs() {
 		if (this.acornClassBody) {
 			//instance methods
 			let methods = this.acornClassBody.properties?.filter((node: any) =>
@@ -109,7 +109,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 					if (paramTags) {
 						paramTags.forEach((tag: any) => {
-							this.fillParamJSTypesFromTag(tag, params);
+							this._fillParamJSTypesFromTag(tag, params);
 						});
 					}
 
@@ -132,7 +132,7 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private fillParamJSTypesFromTag(tag: any, params: any[]) {
+	private _fillParamJSTypesFromTag(tag: any, params: any[]) {
 		const tagNameParts = tag.name.split(".");
 		if (tagNameParts.length > 1) {
 			const paramName = tagNameParts.shift();
@@ -141,7 +141,7 @@ export class CustomUIClass extends AbstractUIClass {
 				if (!param.customData) {
 					param.customData = {};
 				}
-				this.fillFieldsRecursively(param.customData, tagNameParts, tag);
+				this._fillFieldsRecursively(param.customData, tagNameParts, tag);
 			}
 
 		} else {
@@ -152,20 +152,20 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private fillFieldsRecursively(object: any, keys: string[], tag: any) {
+	private _fillFieldsRecursively(object: any, keys: string[], tag: any) {
 		const key = keys.shift();
 		if (key) {
 			object[key] = typeof object[key] !== "object" ? {} : object[key];
 
 			if (keys.length > 0) {
-				this.fillFieldsRecursively(object[key], keys, tag);
+				this._fillFieldsRecursively(object[key], keys, tag);
 			} else {
 				object[key] = tag.type;
 			}
 		}
 	}
 
-	private readFileContainingThisClassCode(documentText?: string) {
+	private _readFileContainingThisClassCode(documentText?: string) {
 		if (!documentText) {
 			documentText = FileReader.getDocumentTextFromCustomClassName(this.className);
 		}
@@ -194,7 +194,7 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private getUIDefine() {
+	private _getUIDefine() {
 		let UIDefine: UIDefine[] = [];
 
 		if (this.fileContent) {
@@ -215,19 +215,19 @@ export class CustomUIClass extends AbstractUIClass {
 		return UIDefine;
 	}
 
-	private getThisClassBodyAcorn() {
+	private _getThisClassBodyAcorn() {
 		const body = this.fileContent;
 		let classBody: any;
 
-		const returnKeyword = this.getReturnKeywordFromBody();
+		const returnKeyword = this._getReturnKeywordFromBody();
 		if (returnKeyword && body) {
-			classBody = this.getClassBodyFromPartAcorn(returnKeyword.argument, body.body[0].expression.arguments[1].body);
+			classBody = this._getClassBodyFromPartAcorn(returnKeyword.argument, body.body[0].expression.arguments[1].body);
 		}
 
 		return classBody;
 	}
 
-	private getReturnKeywordFromBody() {
+	private _getReturnKeywordFromBody() {
 		let returnKeyword;
 		const UIDefineBody = this.getUIDefineAcornBody();
 
@@ -238,14 +238,14 @@ export class CustomUIClass extends AbstractUIClass {
 		return returnKeyword;
 	}
 
-	private getClassBodyFromPartAcorn(part: any, partParent: any) : any {
+	private _getClassBodyFromPartAcorn(part: any, partParent: any) : any {
 		let classBody: any;
 
 		if (part.type === "CallExpression") {
-			classBody = this.getClassBodyFromClassExtendAcorn(part);
+			classBody = this._getClassBodyFromClassExtendAcorn(part);
 
 			if (classBody) {
-				this.parentVariableName = part.callee.object.name;
+				this._parentVariableName = part.callee.object.name;
 			}
 		} else if (part.type === "ObjectExpression") {
 			classBody = part;
@@ -258,7 +258,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 			if (variable) {
 				const neededDeclaration = variable.declarations.find((declaration: any) => declaration.id.name === part.name);
-				classBody = this.getClassBodyFromPartAcorn(neededDeclaration.init, partParent);
+				classBody = this._getClassBodyFromPartAcorn(neededDeclaration.init, partParent);
 				this.classBodyAcornVariableName = part.name;
 			}
 		}
@@ -266,17 +266,17 @@ export class CustomUIClass extends AbstractUIClass {
 		return classBody;
 	}
 
-	private getClassBodyFromClassExtendAcorn(part: any) {
+	private _getClassBodyFromClassExtendAcorn(part: any) {
 		let classBody: any;
 
-		if (this.isThisPartAClassBodyAcorn(part)) {
+		if (this._isThisPartAClassBodyAcorn(part)) {
 			classBody = part.arguments[1];
 		}
 
 		return classBody;
 	}
 
-	private isThisPartAClassBodyAcorn(part: any) {
+	private _isThisPartAClassBodyAcorn(part: any) {
 		const propertyName = part?.callee?.property?.name;
 
 		return propertyName === "extend" || propertyName === "declareStaticClass";
@@ -289,7 +289,7 @@ export class CustomUIClass extends AbstractUIClass {
 				node.left?.property?.name &&
 				node.left?.object?.type === "ThisExpression";
 	}
-	private fillMethodsAndFields() {
+	private _fillMethodsAndFields() {
 		if (this.acornClassBody?.properties) {
 			this.acornClassBody.properties?.forEach((property: any) => {
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
@@ -311,7 +311,7 @@ export class CustomUIClass extends AbstractUIClass {
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
 					const method: CustomClassUIMethod = {
 						name: property.key.name,
-						params: this.generateParamTextForMethod(property.value.params),
+						params: this._generateParamTextForMethod(property.value.params),
 						returnType: property.returnType || property.value.async ? "Promise" : "void",
 						position: property.start,
 						description: "",
@@ -333,14 +333,14 @@ export class CustomUIClass extends AbstractUIClass {
 						name: property.key.name,
 						type: "__map__",
 						description: "map",
-						customData: this.generateCustomDataForObject(property.value),
+						customData: this._generateCustomDataForObject(property.value),
 						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
 				}
 			});
 
-			this.fillStaticMethodsAndFields();
+			this._fillStaticMethodsAndFields();
 
 			//remove duplicates
 			this.fields = this.fields.reduce((accumulator: UIField[], field: UIField) => {
@@ -361,10 +361,10 @@ export class CustomUIClass extends AbstractUIClass {
 			});
 		}
 
-		this.fillMethodsFromMetadata();
+		this._fillMethodsFromMetadata();
 	}
 
-	private generateParamTextForMethod(acornParams: any[]) {
+	private _generateParamTextForMethod(acornParams: any[]) {
 		const params: string[] = acornParams.map((param: any) => {
 			if (param.type === "Identifier") {
 				return param.name || "Unknown";
@@ -378,11 +378,11 @@ export class CustomUIClass extends AbstractUIClass {
 		return params;
 	}
 
-	private generateCustomDataForObject(node: any, looseObject: LooseObject = {}) {
+	private _generateCustomDataForObject(node: any, looseObject: LooseObject = {}) {
 		node.properties?.forEach((property: any) => {
 			looseObject[property.key.name] = {};
 			if (property.value.type === "ObjectExpression") {
-				this.generateCustomDataForObject(property.value, looseObject[property.key.name]);
+				this._generateCustomDataForObject(property.value, looseObject[property.key.name]);
 			}
 		});
 
@@ -405,7 +405,7 @@ export class CustomUIClass extends AbstractUIClass {
 		return UIDefineBody;
 	}
 
-	private fillStaticMethodsAndFields() {
+	private _fillStaticMethodsAndFields() {
 		const UIDefineBody = this.getUIDefineAcornBody();
 
 		if (UIDefineBody && this.classBodyAcornVariableName) {
@@ -489,18 +489,18 @@ export class CustomUIClass extends AbstractUIClass {
 		return type;
 	}
 
-	private fillMethodsFromMetadata() {
+	private _fillMethodsFromMetadata() {
 		const additionalMethods: CustomClassUIMethod[] = [];
 
-		this.fillPropertyMethods(additionalMethods);
-		this.fillAggregationMethods(additionalMethods);
-		this.fillEventMethods(additionalMethods);
-		this.fillAssociationMethods(additionalMethods);
+		this._fillPropertyMethods(additionalMethods);
+		this._fillAggregationMethods(additionalMethods);
+		this._fillEventMethods(additionalMethods);
+		this._fillAssociationMethods(additionalMethods);
 
 		this.methods = this.methods.concat(additionalMethods);
 	}
 
-	private fillPropertyMethods(aMethods: CustomClassUIMethod[]) {
+	private _fillPropertyMethods(aMethods: CustomClassUIMethod[]) {
 		this.properties?.forEach(property => {
 			const propertyWithFirstBigLetter = `${property.name[0].toUpperCase()}${property.name.substring(1, property.name.length)}`;
 			const getterName = `get${propertyWithFirstBigLetter}`;
@@ -524,7 +524,7 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private fillAggregationMethods(additionalMethods: CustomClassUIMethod[]) {
+	private _fillAggregationMethods(additionalMethods: CustomClassUIMethod[]) {
 		interface method {
 			name: string;
 			returnType: string;
@@ -567,7 +567,7 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private fillEventMethods(aMethods: CustomClassUIMethod[]) {
+	private _fillEventMethods(aMethods: CustomClassUIMethod[]) {
 		this.events?.forEach(event => {
 			const eventWithFirstBigLetter = `${event.name[0].toUpperCase()}${event.name.substring(1, event.name.length)}`;
 			const aEventMethods = [
@@ -588,7 +588,7 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private fillAssociationMethods(additionalMethods: CustomClassUIMethod[]) {
+	private _fillAssociationMethods(additionalMethods: CustomClassUIMethod[]) {
 		this.associations?.forEach(association => {
 			const associationWithFirstBigLetter = `${association.singularName[0].toUpperCase()}${association.singularName.substring(1, association.singularName.length)}`;
 
@@ -620,16 +620,16 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private findParentClassNameDotNotation() {
-		if (this.parentVariableName) {
-			const parentClassUIDefine = this.UIDefine.find(UIDefine => UIDefine.className === this.parentVariableName);
+	private _fillParentClassNameDotNotation() {
+		if (this._parentVariableName) {
+			const parentClassUIDefine = this.UIDefine.find(UIDefine => UIDefine.className === this._parentVariableName);
 			if (parentClassUIDefine) {
 				this.parentClassNameDotNotation = parentClassUIDefine.classNameDotNotation;
 			}
 		}
 	}
 
-	private fillUI5Metadata() {
+	private _fillUI5Metadata() {
 		if (this.acornClassBody?.properties) {
 			const metadataExists = !!this.acornClassBody.properties?.find((property: any) => property.key.name === "metadata");
 			const customMetadataExists = !!this.acornClassBody.properties?.find((property: any) => property.key.name === "customMetadata");
@@ -637,21 +637,21 @@ export class CustomUIClass extends AbstractUIClass {
 			if (metadataExists) {
 				const metadataObject = this.acornClassBody.properties?.find((property: any) => property.key.name === "metadata");
 
-				this.fillAggregations(metadataObject);
-				this.fillEvents(metadataObject);
-				this.fillProperties(metadataObject);
-				this.fillByAssociations(metadataObject);
+				this._fillAggregations(metadataObject);
+				this._fillEvents(metadataObject);
+				this._fillProperties(metadataObject);
+				this._fillByAssociations(metadataObject);
 			}
 
 			if (customMetadataExists) {
 				const customMetadataObject = this.acornClassBody.properties?.find((property: any) => property.key.name === "customMetadata");
 
-				this.fillByAssociations(customMetadataObject);
+				this._fillByAssociations(customMetadataObject);
 			}
 		}
 	}
 
-	private fillAggregations(metadata: any) {
+	private _fillAggregations(metadata: any) {
 		const aggregations = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "aggregations");
 
 		if (aggregations) {
@@ -700,7 +700,7 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private fillEvents(metadata: any) {
+	private _fillEvents(metadata: any) {
 		const eventMetadataNode = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "events");
 
 		if (eventMetadataNode) {
@@ -737,7 +737,7 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private fillProperties(metadata: any) {
+	private _fillProperties(metadata: any) {
 		const propertiesMetadataNode = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "properties");
 
 		if (propertiesMetadataNode) {
@@ -772,7 +772,7 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private fillByAssociations(metadata: any) {
+	private _fillByAssociations(metadata: any) {
 		const associationMetadataNode = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "associations");
 
 		if (associationMetadataNode) {

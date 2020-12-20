@@ -10,22 +10,22 @@ function escapeRegExp(string: string) {
 
 export class XMLFileRenameHandler extends FileRenameHandler {
 	handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri): void {
-		this.replaceViewNames(oldUri, newUri);
+		this._replaceViewNames(oldUri, newUri);
 	}
 
 
-	private replaceViewNames(oldUri: vscode.Uri, newUri: vscode.Uri) {
+	private _replaceViewNames(oldUri: vscode.Uri, newUri: vscode.Uri) {
 		const textToReplaceFromDotNotation = FileReader.getClassNameFromPath(oldUri.fsPath)?.replace(".view.xml", "");
 		const textToReplaceToDotNotation = FileReader.getClassNameFromPath(newUri.fsPath)?.replace(".view.xml", "");
 
 		if (textToReplaceFromDotNotation && textToReplaceToDotNotation) {
-			this.renameController(textToReplaceToDotNotation);
-			this.replaceViewNamesInManifests(textToReplaceFromDotNotation, textToReplaceToDotNotation);
+			this._renameController(textToReplaceToDotNotation);
+			this._replaceViewNamesInManifests(textToReplaceFromDotNotation, textToReplaceToDotNotation);
 			this.replaceAllOccurrencesInFiles(textToReplaceFromDotNotation, textToReplaceToDotNotation);
 		}
 	}
 
-	private renameController(newViewName: string) {
+	private _renameController(newViewName: string) {
 		const viewNamePart = newViewName.split(".")[newViewName.split(".").length - 1];
 		const viewPath = FileReader.convertClassNameToFSPath(newViewName, false, false, true);
 		if (viewPath) {
@@ -49,7 +49,7 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 		}
 	}
 
-	private replaceViewNamesInManifests(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string) {
+	private _replaceViewNamesInManifests(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string) {
 		const manifests = FileReader.getAllManifests();
 
 		manifests.forEach(manifest => {

@@ -11,15 +11,15 @@ export class ExportToI18NCommand {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
-			const stringRange = ExportToI18NCommand.getStringRange() || new vscode.Range(editor.selection.start, editor.selection.start);
+			const stringRange = ExportToI18NCommand._getStringRange() || new vscode.Range(editor.selection.start, editor.selection.start);
 			let stringForReplacing = editor.document.getText(stringRange);
 			stringForReplacing = stringForReplacing.substring(1, stringForReplacing.length - 1);
-			const I18nID = await ExportToI18NCommand.askUserForI18nID(stringForReplacing);
+			const I18nID = await ExportToI18NCommand._askUserForI18nID(stringForReplacing);
 			if (I18nID) {
-				const textForInsertionIntoI18N = await ExportToI18NCommand.generateStringForI18NInsert(stringForReplacing, I18nID);
-				const textForInsertionIntoCurrentFile = ExportToI18NCommand.getStringForSavingIntoi18n(I18nID);
+				const textForInsertionIntoI18N = await ExportToI18NCommand._generateStringForI18NInsert(stringForReplacing, I18nID);
+				const textForInsertionIntoCurrentFile = ExportToI18NCommand._getStringForSavingIntoI18n(I18nID);
 
-				await ExportToI18NCommand.insertIntoi18NFile(textForInsertionIntoI18N);
+				await ExportToI18NCommand._insertIntoI18NFile(textForInsertionIntoI18N);
 
 				editor.edit(editBuilder => {
 					if (editor) {
@@ -35,18 +35,18 @@ export class ExportToI18NCommand {
 		}
 	}
 
-	private static getStringRange() {
+	private static _getStringRange() {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
-			const iDeltaStart = ExportToI18NCommand.getDetlaForFirstOccuraneOf("\"", -1);
-			const iDeltaEnd = ExportToI18NCommand.getDetlaForFirstOccuraneOf("\"", 1);
+			const iDeltaStart = ExportToI18NCommand._getDeltaForFirstOccuraneOf("\"", -1);
+			const iDeltaEnd = ExportToI18NCommand._getDeltaForFirstOccuraneOf("\"", 1);
 			const range = new vscode.Range(editor.selection.start.translate(0, iDeltaStart), editor.selection.start.translate(0, iDeltaEnd));
 			return range;
 		}
 	}
 
-	private static getDetlaForFirstOccuraneOf(sChar: string, iDelta: number) {
+	private static _getDeltaForFirstOccuraneOf(sChar: string, iDelta: number) {
 		const editor = vscode.window.activeTextEditor;
 		let deltaToReturn = iDelta;
 		if (editor) {
@@ -77,8 +77,8 @@ export class ExportToI18NCommand {
 		return deltaToReturn;
 	}
 
-	private static async askUserForI18nID(text: string) {
-		const startingProposedValue = ExportToI18NCommand.generateProposedI18nID(text);
+	private static async _askUserForI18nID(text: string) {
+		const startingProposedValue = ExportToI18NCommand._generateProposedI18nID(text);
 		let i18nID = startingProposedValue;
 
 		const shouldUserConfirmI18nId = vscode.workspace.getConfiguration("ui5.plugin").get("askUserToConfirmI18nId");
@@ -93,12 +93,12 @@ export class ExportToI18NCommand {
 		return i18nID;
 	}
 
-	private static generateProposedI18nID(text: string) {
+	private static _generateProposedI18nID(text: string) {
 		text = text.trim();
-		let proposedi18NValue = "";
+		let proposedI18NValue = "";
 
 		const editor = vscode.window.activeTextEditor;
-		const openedFileType = ExportToI18NCommand.getCurrentlyOpenedFileType();
+		const openedFileType = ExportToI18NCommand._getCurrentlyOpenedFileType();
 
 		if (editor) {
 			const textTransformationStrategyType = vscode.workspace.getConfiguration("ui5.plugin").get("textTransformationStrategy");
@@ -125,19 +125,19 @@ export class ExportToI18NCommand {
 				const fileName = nameParts[nameParts.length -1];
 
 				const transofrmatedText = textTransformationStrategy.transform(text);
-				proposedi18NValue = `${fileName}${addition}.${transofrmatedText}`;
+				proposedI18NValue = `${fileName}${addition}.${transofrmatedText}`;
 
 			} else if (textTransformationStrategyType === CaseType.SnakeUpperCase) {
 
-				proposedi18NValue = textTransformationStrategy.transform(text);
+				proposedI18NValue = textTransformationStrategy.transform(text);
 			}
 
 		}
 
-		return proposedi18NValue;
+		return proposedI18NValue;
 	}
 
-	private static async generateStringForI18NInsert(selectedText: string, I18nID: string) {
+	private static async _generateStringForI18NInsert(selectedText: string, I18nID: string) {
 		const shouldUserConfirmI18nId = vscode.workspace.getConfiguration("ui5.plugin").get("askUserToConfirmI18nId");
 		let item;
 		if (shouldUserConfirmI18nId) {
@@ -162,8 +162,8 @@ export class ExportToI18NCommand {
 
 
 
-	private static getStringForSavingIntoi18n(I18nID: string) {
-		const openedFileType = ExportToI18NCommand.getCurrentlyOpenedFileType();
+	private static _getStringForSavingIntoI18n(I18nID: string) {
+		const openedFileType = ExportToI18NCommand._getCurrentlyOpenedFileType();
 		const typeMapping: any = {
 			xml: `"{i18n>${I18nID}}"`,
 			controller: `this.getBundle().getText("${I18nID}")`,
@@ -173,7 +173,7 @@ export class ExportToI18NCommand {
 		return typeMapping[openedFileType];
 	}
 
-	private static getCurrentlyOpenedFileType() {
+	private static _getCurrentlyOpenedFileType() {
 		let type = "";
 		const editor = vscode.window.activeTextEditor;
 		if (editor) {
@@ -194,7 +194,7 @@ export class ExportToI18NCommand {
 		return type;
 	}
 
-	private static async insertIntoi18NFile(stringToInsert: string) {
+	private static async _insertIntoI18NFile(stringToInsert: string) {
 		const manifest = FileReader.getCurrentWorkspaceFoldersManifest();
 		const manifestFsPath = manifest?.fsPath;
 		const i18nRelativePath = manifest?.content["sap.app"].i18n;

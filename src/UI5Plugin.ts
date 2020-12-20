@@ -10,13 +10,13 @@ import { JSCodeActionRegistrator } from "./classes/registrators/JSCodeActionRegi
 import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
 import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
 export class UI5Plugin {
-	private static instance?: UI5Plugin;
+	private static _instance?: UI5Plugin;
 	public static getInstance() {
-		if (!UI5Plugin.instance) {
-			UI5Plugin.instance = new UI5Plugin();
+		if (!UI5Plugin._instance) {
+			UI5Plugin._instance = new UI5Plugin();
 		}
 
-		return UI5Plugin.instance;
+		return UI5Plugin._instance;
 	}
 
 	public context?: vscode.ExtensionContext;
@@ -39,7 +39,7 @@ export class UI5Plugin {
 				this.initializationProgress = progress;
 
 				try {
-					await this.registerProviders();
+					await this._registerProviders();
 					resolve();
 				} catch (error) {
 					reject("Couldn't initialize plugin: " + JSON.stringify(error));
@@ -47,7 +47,7 @@ export class UI5Plugin {
 			});
 		});
 	}
-	private async registerProviders() {
+	private async _registerProviders() {
 		CommandRegistrator.register(false);
 		await CompletionItemRegistrator.register();
 		FileWatcher.register();

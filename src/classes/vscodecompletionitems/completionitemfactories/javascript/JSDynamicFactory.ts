@@ -9,13 +9,13 @@ export class JSDynamicFactory {
 		let completionItems:CustomCompletionItem[] = [];
 		const fieldsAndMethods = AcornSyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable();
 		if (fieldsAndMethods) {
-			completionItems = this.generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods);
+			completionItems = this._generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods);
 		}
 
 		return completionItems;
 	}
 
-	private generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods: FieldsAndMethods) {
+	private _generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods: FieldsAndMethods) {
 		let completionItems = fieldsAndMethods.methods.map(classMethod => {
 			const completionItem:CustomCompletionItem = new CustomCompletionItem(classMethod.name);
 			completionItem.kind = vscode.CompletionItemKind.Method;

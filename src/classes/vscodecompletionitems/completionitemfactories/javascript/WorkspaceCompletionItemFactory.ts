@@ -24,7 +24,7 @@ export class WorkspaceCompletionItemFactory {
 		const fileFsPath = textDocument.fsPath;
 		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
 		if (defineString) {
-			const newCompletionItem = WorkspaceCompletionItemFactory.generateCompletionItem(
+			const newCompletionItem = WorkspaceCompletionItemFactory._generateCompletionItem(
 				new UIDefineJSFile({
 					fsPath: fileFsPath,
 					UIDefineString: defineString
@@ -49,16 +49,16 @@ export class WorkspaceCompletionItemFactory {
 	async getCompletionItems() {
 		const completionItems: CustomCompletionItem[] = [];
 
-		const JSFilesOfAllWorkspaces = await this.getAllJSFilesOfAllWorkspaces();
+		const JSFilesOfAllWorkspaces = await this._getAllJSFilesOfAllWorkspaces();
 
 		JSFilesOfAllWorkspaces.forEach((JSFile: UIDefineJSFile) => {
-			completionItems.push(WorkspaceCompletionItemFactory.generateCompletionItem(JSFile));
+			completionItems.push(WorkspaceCompletionItemFactory._generateCompletionItem(JSFile));
 		});
 
 		return completionItems;
 	}
 
-	private async getAllJSFilesOfAllWorkspaces() {
+	private async _getAllJSFilesOfAllWorkspaces() {
 		const workspaceJSFiles:UIDefineJSFile[] = [];
 		const wsFolders = workspace.workspaceFolders || [];
 		const separator = path.sep;
@@ -70,7 +70,7 @@ export class WorkspaceCompletionItemFactory {
 				const UI5Manifest:any = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 				const manifestFsPath:string = manifestPath.replace(`${separator}manifest.json`, "");
 				const UI5ComponentName:string = UI5Manifest["sap.app"].id;
-				const projectJSFiles:any = await this.findJSFilesInWorkspaceFolder(wsFolder);
+				const projectJSFiles:any = await this._findJSFilesInWorkspaceFolder(wsFolder);
 
 				projectJSFiles.forEach((projectJSFile:any) => {
 					if (projectJSFile.fsPath.indexOf(manifestFsPath) > -1) {
@@ -96,7 +96,7 @@ export class WorkspaceCompletionItemFactory {
 		return workspaceJSFiles;
 	}
 
-	private findJSFilesInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
+	private _findJSFilesInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
 		return new Promise(resolve => {
 			const src = FileReader.getSrcFolderName();
 
@@ -106,7 +106,7 @@ export class WorkspaceCompletionItemFactory {
 		});
 	}
 
-	private static generateCompletionItem(workspaceJSFile: UIDefineJSFile) {
+	private static _generateCompletionItem(workspaceJSFile: UIDefineJSFile) {
 		const insertionText = `"${workspaceJSFile.UIDefineString}"`;
 		const completionItem:CustomCompletionItem = new CustomCompletionItem(insertionText);
 		completionItem.kind = vscode.CompletionItemKind.Class;

@@ -5,7 +5,7 @@ import { IAggregationGenerator } from "./aggregation/interfaces/IAggregationGene
 import { DefineGenerator } from "./define/UIDefineCompletionItemGenerator";
 
 export class GeneratorFactory {
-	private static readonly generatorMap = {
+	private static readonly _generatorMap = {
 		aggregation: {
 			"xml": XMLAggregationGenerator,
 			"js": XMLAggregationGenerator //TODO: add js aggregation generator
@@ -22,20 +22,20 @@ export class GeneratorFactory {
 
 	static getPropertyGenerator(language: GeneratorFactory.language) {
 		let propertyGenerator: IPropertyGenerator;
-		propertyGenerator = new GeneratorFactory.generatorMap[GeneratorFactory.type.property][language];
+		propertyGenerator = new GeneratorFactory._generatorMap[GeneratorFactory.type.property][language];
 
 		return propertyGenerator;
 	}
 
 	static getAggregationGenerator(language: GeneratorFactory.language) {
 		let aggregationGenerator: IAggregationGenerator;
-		aggregationGenerator = new GeneratorFactory.generatorMap[GeneratorFactory.type.aggregation][language];
+		aggregationGenerator = new GeneratorFactory._generatorMap[GeneratorFactory.type.aggregation][language];
 
 		return aggregationGenerator;
 	}
 
 	static getDefineGenerator() {
-		return new GeneratorFactory.generatorMap[GeneratorFactory.type.define][GeneratorFactory.language.js];
+		return new GeneratorFactory._generatorMap[GeneratorFactory.type.define][GeneratorFactory.language.js];
 	}
 }
 

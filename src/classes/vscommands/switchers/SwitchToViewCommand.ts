@@ -6,23 +6,18 @@ const workspace = vscode.workspace;
 export class SwitchToViewCommand {
 	static async switchToView() {
 		try {
-			const currentControllerName: string | null = SwitchToViewCommand.getControllerName();
-			let viewToSwitch: string = "";
-			const allViewFSPaths: string[] = await SwitchToViewCommand.getAllViewFSPaths();
+			const currentControllerName: string | null = SwitchToViewCommand._getControllerName();
+			const allViewFSPaths: string[] = await SwitchToViewCommand._getAllViewFSPaths();
 
-			for (const viewFSPath of allViewFSPaths) {
-				const view: string = SwitchToViewCommand.getViewFileContent(viewFSPath);
-				const controllerNameOfTheView = SwitchToViewCommand.getControllerNameOfTheView(view);
-				const thisViewShouldBeSwitched = controllerNameOfTheView === currentControllerName;
-				if (thisViewShouldBeSwitched) {
-					viewToSwitch = viewFSPath;
-					break;
-				}
-			}
+			const viewToSwitchFSPath = allViewFSPaths.find(viewPath => {
+				const view: string = SwitchToViewCommand._getViewFileContent(viewPath);
+				const controllerNameOfTheView = SwitchToViewCommand._getControllerNameOfTheView(view);
+				return controllerNameOfTheView === currentControllerName;
+			});
 
 			const editor = vscode.window.activeTextEditor;
-			if (editor && !!viewToSwitch) {
-				await vscode.window.showTextDocument(vscode.Uri.file(viewToSwitch));
+			if (editor && viewToSwitchFSPath) {
+				await vscode.window.showTextDocument(vscode.Uri.file(viewToSwitchFSPath));
 			}
 
 		} catch (error) {
@@ -30,27 +25,31 @@ export class SwitchToViewCommand {
 		}
 	}
 
-	private static async getAllViewFSPaths() {
-		const allViews = await this.findAllViews();
+	private static async _getAllViewFSPaths() {
+		const allViews = await this._findAllViews();
 		return allViews.map(view => view.fsPath);
 	}
 
-	private static async findAllViews() {
+	private static async _findAllViews() {
 		const sSrcFolderName = FileReader.getSrcFolderName();
 		return workspace.findFiles(`${sSrcFolderName}/**/*.view.xml`);
 	}
 
-	private static getControllerName() {
-		const currentController = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.getText() : "";
-		const result = /(?<=.extend\(").*?(?=")/.exec(currentController);
-		return result && result[0] ? result[0] : null;
+	private static _getControllerName() {
+		let controllerName: string | null = null;
+		const currentController = vscode.window.activeTextEditor?.document.getText();
+		if (currentController) {
+			const result = /(?<=.extend\(").*?(?=")/.exec(currentController);
+			controllerName = result && result[0] ? result[0] : null;
+		}
+		return controllerName;
 	}
 
-	private static getViewFileContent(controllerFSPath: string) {
+	private static _getViewFileContent(controllerFSPath: string) {
 		return fs.readFileSync(controllerFSPath, "utf8");
 	}
 
-	private static getControllerNameOfTheView(view: string) {
+	private static _getControllerNameOfTheView(view: string) {
 		return FileReader.getControllerNameFromView(view);
 	}
 }

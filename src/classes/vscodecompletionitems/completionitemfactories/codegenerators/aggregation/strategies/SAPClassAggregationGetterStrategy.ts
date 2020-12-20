@@ -3,15 +3,15 @@ import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { IAggregationGetterStrategy } from "../interfaces/IAggregationGetterStrategy";
 
 export class SAPClassAggregationGetterStrategy implements IAggregationGetterStrategy {
-	private readonly UIClass: AbstractUIClass;
+	private readonly _UIClass: AbstractUIClass;
 	constructor(UIClass: AbstractUIClass) {
-		this.UIClass = UIClass;
+		this._UIClass = UIClass;
 	}
 
 	getParent(): IAggregationGetterStrategy | undefined {
 		let theParent: SAPClassAggregationGetterStrategy | undefined;
-		if (this.UIClass.parentClassNameDotNotation) {
-			const parentClass = UIClassFactory.getUIClass(this.UIClass.parentClassNameDotNotation);
+		if (this._UIClass.parentClassNameDotNotation) {
+			const parentClass = UIClassFactory.getUIClass(this._UIClass.parentClassNameDotNotation);
 			theParent = new SAPClassAggregationGetterStrategy(parentClass);
 		}
 
@@ -19,7 +19,7 @@ export class SAPClassAggregationGetterStrategy implements IAggregationGetterStra
 	}
 
 	getAggregations() : any[] {
-		return this.UIClass.aggregations;
+		return this._UIClass.aggregations;
 	}
 
 	getAggregation(aggregation: any): { name: string; type: string; } {

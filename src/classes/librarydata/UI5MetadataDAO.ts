@@ -12,24 +12,24 @@ interface LooseObject {
 let namespaceDesignTimes: LooseObject = {};
 
 export class UI5MetadataPreloader {
-	private readonly libNames: LooseObject = {};
-	private readonly nodes: SAPNode[];
+	private readonly _libNames: LooseObject = {};
+	private readonly _nodes: SAPNode[];
 	constructor(nodes: SAPNode[]) {
-		this.nodes = nodes;
+		this._nodes = nodes;
 	}
 
 	public async preloadLibs() {
-		var cache = this.loadCache();
+		var cache = this._loadCache();
 		if (!cache) {
 			const promises = [];
 			const metadataDAO = new UI5MetadataDAO();
-			this.nodes.forEach((node: SAPNode) => {
-				this.getUniqueLibNames(node);
+			this._nodes.forEach((node: SAPNode) => {
+				this._getUniqueLibNames(node);
 			});
-			const libQuantity = Object.keys(this.libNames).length;
+			const libQuantity = Object.keys(this._libNames).length;
 			const incrementStep = 50 / libQuantity;
 
-			for (const i in this.libNames) {
+			for (const i in this._libNames) {
 				promises.push(metadataDAO.getMetadataForLib(i).then(() => {
 					UI5Plugin.getInstance().initializationProgress?.report({
 						message: i,
@@ -40,7 +40,7 @@ export class UI5MetadataPreloader {
 
 			return Promise.all(promises).then(() => {
 				cache = namespaceDesignTimes;
-				this.writeCache();
+				this._writeCache();
 			});
 		} else {
 			namespaceDesignTimes = cache;
@@ -51,19 +51,19 @@ export class UI5MetadataPreloader {
 		}
 	}
 
-	private loadCache() {
+	private _loadCache() {
 		return FileReader.getCache(FileReader.CacheType.Metadata);
 	}
 
-	private writeCache() {
+	private _writeCache() {
 		const cache = JSON.stringify(namespaceDesignTimes);
 		FileReader.setCache(FileReader.CacheType.Metadata, cache);
 	}
 
-	private getUniqueLibNames(node: SAPNode) {
-		this.libNames[node.getLib()] = "";
+	private _getUniqueLibNames(node: SAPNode) {
+		this._libNames[node.getLib()] = "";
 		if (node.nodes) {
-			node.nodes.forEach(this.getUniqueLibNames, this);
+			node.nodes.forEach(this._getUniqueLibNames, this);
 		}
 	}
 }
@@ -72,12 +72,12 @@ export class UI5MetadataDAO {
 
 	public getPreloadedMetadataForNode(node: SAPNode) {
 		const libMetadata = namespaceDesignTimes[node.getLib()];
-		const metadata = this.findNodeMetadata(node, libMetadata);
+		const metadata = this._findNodeMetadata(node, libMetadata);
 
 		return new UI5Metadata(metadata);
 	}
 
-	private findNodeMetadata(node: SAPNode, libMetadata: any) {
+	private _findNodeMetadata(node: SAPNode, libMetadata: any) {
 		return libMetadata?.symbols ? libMetadata.symbols.find(
 			(metadata: any) => metadata.name === node.getName()
 		) : {};
@@ -86,7 +86,7 @@ export class UI5MetadataDAO {
 	public async getMetadataForLib(lib: string) {
 		let metadata;
 		try {
-			metadata = await this.fetchMetadataForLib(lib);
+			metadata = await this._fetchMetadataForLib(lib);
 		} catch (error) {
 			console.log(error);
 		}
@@ -94,7 +94,7 @@ export class UI5MetadataDAO {
 		return metadata;
 	}
 
-	private fetchMetadataForLib(lib: string) {
+	private _fetchMetadataForLib(lib: string) {
 		return new Promise((resolve, reject) => {
 			if (namespaceDesignTimes[lib]) {
 				if (namespaceDesignTimes[lib].then) {

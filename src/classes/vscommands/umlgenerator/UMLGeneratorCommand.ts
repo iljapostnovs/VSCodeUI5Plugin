@@ -10,7 +10,7 @@ const fileSeparator = path.sep;
 export class UMLGeneratorCommand {
 	static generateUMLForCurrentClass() {
 		const activeFileUri = vscode.window.activeTextEditor?.document.uri;
-		const wsFolder = UMLGeneratorCommand.getWorkspaceFolderOfActiveTextEditor();
+		const wsFolder = UMLGeneratorCommand._getWorkspaceFolderOfActiveTextEditor();
 		if (activeFileUri && wsFolder) {
 			const className = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 			if (className) {
@@ -29,7 +29,7 @@ export class UMLGeneratorCommand {
 		}
 	}
 
-	private static getWorkspaceFolderOfActiveTextEditor() {
+	private static _getWorkspaceFolderOfActiveTextEditor() {
 		let wsFolder: vscode.WorkspaceFolder | undefined;
 		const wsFolders = vscode.workspace.workspaceFolders || [];
 		const activeFileUri = vscode.window.activeTextEditor?.document.uri;
