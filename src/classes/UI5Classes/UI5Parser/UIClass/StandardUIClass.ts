@@ -95,7 +95,13 @@ export class StandardUIClass extends AbstractUIClass {
 			return {
 				name: method.name.replace(`${this.className}.`, ""),
 				description: `${StandardUIClass.removeTags(method.description)}`,
-				params: method.parameters ? method.parameters.map((parameter: any) => parameter.name + (parameter.optional ? "?" : "")) : [],
+				params: method.parameters?.map((parameter: any) => {
+					return {
+						name: parameter.name + (parameter.optional ? "?" : ""),
+						description: StandardUIClass.removeTags(parameter.description),
+						type: parameter.types[0]?.value || "any"
+					};
+				}) || [],
 				returnType: method.returnValue ? method.returnValue.type : "void",
 				isFromParent: !isParent,
 				api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name),
@@ -295,7 +301,13 @@ export class StandardUIClass extends AbstractUIClass {
 			this.methods.push({
 				name: "constructor",
 				description: StandardUIClass.removeTags(constructor.codeExample),
-				params: parameters,
+				params: parameters.map(param => {
+					return {
+						name: param,
+						description: "",
+						type: "any"
+					};
+				}),
 				returnType: this.className,
 				isFromParent: false,
 				api: URLBuilder.getInstance().getUrlForClassApi(this),

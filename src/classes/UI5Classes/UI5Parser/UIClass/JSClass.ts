@@ -14,21 +14,33 @@ const classData: {[key: string]: {methods: UIMethod[], fields: UIField[]}} = {
 	Promise: {
 		methods: [{
 			name: "then",
-			params: ["fnThen"],
+			params: [{
+				name: "fnThen",
+				description: "",
+				type: "function"
+			}],
 			description: "Promise .then",
 			returnType: "Promise",
 			visibility: "public"
 		},
 		{
 			name: "catch",
-			params: ["fnCatch"],
+			params: [{
+				name: "fnCatch",
+				description: "",
+				type: "function"
+			}],
 			description: "Promise .catch",
 			returnType: "Promise",
 			visibility: "public"
 		},
 		{
 			name: "finally",
-			params: ["fnFinally"],
+			params: [{
+				name: "fnFinally",
+				description: "",
+				type: "function"
+			}],
 			description: "Promise .finally",
 			returnType: "Promise",
 			visibility: "public"
