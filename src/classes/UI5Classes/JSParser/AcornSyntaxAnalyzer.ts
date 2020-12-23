@@ -180,7 +180,7 @@ export class AcornSyntaxAnalyzer {
 						const modelName = callExpression.arguments[0].value;
 						className = this._getClassNameOfTheModelFromManifest(modelName, primaryClassName);
 					} else if (currentClassName === "sap.ui.core.UIComponent" && memberName === "getRouterFor") {
-						className = this._getClassNameOfTheRouterFromManifest();
+						className = this._getClassNameOfTheRouterFromManifest(primaryClassName);
 					} else if (memberName === "getOwnerComponent") {
 						className = this._getClassNameOfTheComponent(primaryClassName);
 					} else {
@@ -301,14 +301,22 @@ export class AcornSyntaxAnalyzer {
 		return modelClassName;
 	}
 
-	private static _getClassNameOfTheRouterFromManifest() {
+	private static _getClassNameOfTheRouterFromManifest(className: string) {
 		let routerClassName = "";
-		const manifests = FileReader.getAllManifests();
-		const manifest = manifests.find(manifest => {
-			return manifest.content["sap.ui5"]?.routing?.config?.routerClass;
-		});
-		if (manifest) {
+
+		const manifest = FileReader.getManifestForClass(className);
+		if (manifest && manifest.content["sap.ui5"]?.routing?.config?.routerClass) {
 			routerClassName = manifest.content["sap.ui5"].routing.config.routerClass;
+		}
+
+		if (!routerClassName) {
+			const manifests = FileReader.getAllManifests();
+			const manifest = manifests.find(manifest => {
+				return manifest.content["sap.ui5"]?.routing?.config?.routerClass;
+			});
+			if (manifest) {
+				routerClassName = manifest.content["sap.ui5"].routing.config.routerClass;
+			}
 		}
 
 		return routerClassName;
