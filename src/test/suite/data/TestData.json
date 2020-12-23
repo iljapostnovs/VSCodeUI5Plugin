@@ -154,7 +154,7 @@
 				"name": "getProperty"
 			}
 		},
-		"type": "sap.ui.model.Model"
+		"type": "com.test.util.TestModel"
 	},{
 		"className": "com.test.controller.Master",
 		"methodName": "_findDialog",
@@ -166,5 +166,27 @@
 			}
 		},
 		"type": "sap.m.Dialog"
+	},{
+		"className": "com.test.controller.Master",
+		"methodName": "_testMyModel",
+		"positionAddition": 0,
+		"node": {
+			"type": "MemberExpression",
+			"property": {
+				"name": "testMethod"
+			}
+		},
+		"type": "com.test.util.TestModel"
+	},{
+		"className": "com.test.controller.Master",
+		"methodName": "_testAnonymousModel",
+		"positionAddition": 0,
+		"node": {
+			"type": "MemberExpression",
+			"property": {
+				"name": "testMethod"
+			}
+		},
+		"type": "com.test.util.TestModel"
 	}]
 }

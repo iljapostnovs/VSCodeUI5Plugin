@@ -176,8 +176,8 @@ export class AcornSyntaxAnalyzer {
 					}
 
 					const callExpression = stack.shift();
-					if (memberName === "getModel" && callExpression.arguments[0]) {
-						const modelName = callExpression.arguments[0].value;
+					if (memberName === "getModel" && callExpression.arguments) {
+						const modelName = callExpression.arguments[0]?.value || "";
 						className = this._getClassNameOfTheModelFromManifest(modelName, primaryClassName);
 					} else if (currentClassName === "sap.ui.core.UIComponent" && memberName === "getRouterFor") {
 						className = this._getClassNameOfTheRouterFromManifest(primaryClassName);
@@ -295,6 +295,37 @@ export class AcornSyntaxAnalyzer {
 			const modelEntry = manifest.content["sap.ui5"].models[modelName];
 			if (modelEntry?.type) {
 				modelClassName = modelEntry.type;
+			}
+		}
+
+		if (!modelClassName) {
+			const UIClass = UIClassFactory.getUIClass(className);
+			if (UIClass instanceof CustomUIClass) {
+				const method = UIClass.methods.find(method => {
+					let methodFound = false;
+					if (method.acornNode) {
+						const content = this.expandAllContent(method.acornNode);
+						const memberExpression: any = content.find(
+							content => content.type === "CallExpression" &&
+							content.callee?.property?.name === "setModel" &&
+							(content.arguments[1] && content.arguments[1].value || "") === modelName
+						);
+						methodFound = !!memberExpression;
+					}
+
+					return methodFound;
+				});
+
+				if (method?.acornNode) {
+					const content = this.expandAllContent(method.acornNode);
+					const memberExpression = content.find(content => content.type === "CallExpression" && content.callee?.property?.name === "setModel");
+					if (memberExpression && memberExpression.arguments[0]) {
+						const model = memberExpression.arguments[0];
+						const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+						const stack = strategy.getStackOfNodesForPosition(className, model.end, true);
+						modelClassName = this.findClassNameForStack(stack, className) || "";
+					}
+				}
 			}
 		}
 
