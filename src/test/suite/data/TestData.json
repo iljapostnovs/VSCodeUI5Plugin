@@ -43,6 +43,9 @@
 		},{
 			"name": "onTableSwipe",
 			"returnType": "sap.m.Table"
+		},{
+			"name": "methodFromFormatter",
+			"returnType": "sap.m.Dialog"
 		}],
 		"fields": [{
 			"name": "formatter",

@@ -75,7 +75,8 @@ export class CustomUIClass extends AbstractUIClass {
 				.filter(node => {
 					const assignmentBody = node.expression.right;
 					return assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
-				}).map(node => ({
+				})
+				.map(node => ({
 					key: {
 						name: node.expression.left.property.name,
 						start: node.expression.left.property.start,
@@ -449,7 +450,11 @@ export class CustomUIClass extends AbstractUIClass {
 				if (isMethod) {
 					const method: CustomClassUIMethod = {
 						name: name,
-						params: assignmentBody.params.map((param: any) => param.name),
+						params: assignmentBody.params.map((param: any) => ({
+							name: param.name,
+							description: `${param.name} parameter`,
+							type: param.jsType || ""
+						})),
 						returnType: assignmentBody.returnType || assignmentBody.async ? "Promise" : "void",
 						position: assignmentBody.start,
 						description: "",
