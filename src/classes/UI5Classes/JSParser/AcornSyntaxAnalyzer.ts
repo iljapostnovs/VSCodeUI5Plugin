@@ -557,7 +557,10 @@ export class AcornSyntaxAnalyzer {
 		return className;
 	}
 
-	public static findMethodReturnType(method: UIMethod, className: string, includeParentMethods: boolean = true) {
+	public static findMethodReturnType(method: UIMethod, className: string, includeParentMethods: boolean = true, clearStack: boolean = false) {
+		if (clearStack) {
+			this.declarationStack = [];
+		}
 		const UIClass = UIClassFactory.getUIClass(className);
 		if (method.returnType === "void") {
 
@@ -572,7 +575,6 @@ export class AcornSyntaxAnalyzer {
 
 					if (returnStatement) {
 						method.returnType = this._getClassNameFromAcornDeclaration(returnStatement.argument, UIClass) || "void";
-						//this.acornGetClassName(className, returnStatement.argument.end + 1) || "void";
 					}
 				}
 			}
@@ -583,8 +585,11 @@ export class AcornSyntaxAnalyzer {
 		}
 	}
 
-	public static findFieldType(field: UIField, className: string, includeParentMethods: boolean = true) {
+	public static findFieldType(field: UIField, className: string, includeParentMethods: boolean = true, clearStack: boolean = false) {
 		const UIClass = UIClassFactory.getUIClass(className);
+		if (clearStack) {
+			this.declarationStack = [];
+		}
 
 		const innerField = UIClass.fields.find(innerfield => innerfield.name === field.name);
 		if (innerField && innerField.type) {

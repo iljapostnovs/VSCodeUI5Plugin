@@ -67,7 +67,7 @@ export class JSHoverProvider {
 			const field = fieldsAndMethods.fields.find(field => field.name === fieldOrMethodName);
 			if (method) {
 				if (!method.returnType || method.returnType === "void") {
-					AcornSyntaxAnalyzer.findMethodReturnType(method, className, true);
+					AcornSyntaxAnalyzer.findMethodReturnType(method, className, true, true);
 				}
 				text += `${method.name}(${method.params.map(param => param.name).join(", ")}) : ${method.returnType}\n`;
 				if (method.api) {

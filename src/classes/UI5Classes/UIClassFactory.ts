@@ -72,13 +72,13 @@ export class UIClassFactory {
 	}
 
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
+		this._enrichMethodParamsWithEventType(UIClass);
 		UIClass.methods.forEach(method => {
-			AcornSyntaxAnalyzer.findMethodReturnType(method, UIClass.className, false);
+			AcornSyntaxAnalyzer.findMethodReturnType(method, UIClass.className, false, true);
 		});
 		UIClass.fields.forEach(field => {
-			AcornSyntaxAnalyzer.findFieldType(field, UIClass.className, false);
+			AcornSyntaxAnalyzer.findFieldType(field, UIClass.className, false, true);
 		});
-		this._enrichMethodParamsWithEventType(UIClass);
 	}
 
 	public static getFieldsAndMethodsForClass(className: string) {

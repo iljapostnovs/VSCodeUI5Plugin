@@ -25,13 +25,13 @@ export class DrawIOUMLDiagram {
 		try {
 			this.UIClass.fields.forEach(field => {
 				if (!field.type) {
-					AcornSyntaxAnalyzer.findFieldType(field, this.UIClass.className);
+					AcornSyntaxAnalyzer.findFieldType(field, this.UIClass.className, true, true);
 				}
 			});
 
 			this.UIClass.methods.forEach(method => {
 				if (method.returnType === "void") {
-					AcornSyntaxAnalyzer.findMethodReturnType(method, this.UIClass.className);
+					AcornSyntaxAnalyzer.findMethodReturnType(method, this.UIClass.className, true, true);
 				}
 			});
 		} catch (error) {

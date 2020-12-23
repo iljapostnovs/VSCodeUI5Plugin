@@ -26,7 +26,7 @@ suite("Extension Test Suite", () => {
 				const UIClass = UIClassFactory.getUIClass(data.className);
 				const method = UIClass.methods.find(method => method.name === testMethodData.name);
 				if (method?.returnType === "void") {
-					AcornSyntaxAnalyzer.findMethodReturnType(method, data.className);
+					AcornSyntaxAnalyzer.findMethodReturnType(method, data.className, true, true);
 				}
 				assert.strictEqual(method?.returnType, testMethodData.returnType, `${data.className} -> ${testMethodData.name} return type is "${method?.returnType}" but expected "${testMethodData.returnType}"`);
 			});
@@ -40,7 +40,7 @@ suite("Extension Test Suite", () => {
 				const UIClass = UIClassFactory.getUIClass(data.className);
 				const field = UIClass.fields.find(method => method.name === testFieldData.name);
 				if (field && !field?.type) {
-					AcornSyntaxAnalyzer.findFieldType(field, data.className, true);
+					AcornSyntaxAnalyzer.findFieldType(field, data.className, true, true);
 				}
 				assert.strictEqual(field?.type, testFieldData.type, `${data.className} -> ${testFieldData.name} return type is "${field?.type}" but expected "${testFieldData.type}"`);
 			});
