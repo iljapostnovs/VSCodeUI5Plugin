@@ -807,9 +807,9 @@ export class AcornSyntaxAnalyzer {
 				className = typeof declaration.value;
 			} else if (declaration?.type === "ThisExpression") {
 				className = UIClass.className;
-			} else if (declaration?.type === "LogicalExpression") {
-				className = "boolean";
-			}
+			} //else if (declaration?.type === "LogicalExpression") {
+				// className = "boolean";
+			//}
 		}
 
 		return className;

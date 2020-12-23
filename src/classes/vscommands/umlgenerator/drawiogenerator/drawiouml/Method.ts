@@ -33,7 +33,7 @@ export class Method implements IUMLGenerator, ITextLengthGettable {
 	generateXML(): string {
 		return `
 				<mxCell id="${this.id}" value="${this.getValue()}" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="${this.parent.id}">
-					<mxGeometry y="${26 + 8 + this.parent.yAxis + this.index * 26}" width="${this.parent.width}" height="26" as="geometry" />
+					<mxGeometry y="${26 + 8 + this.index * 26}" width="${this.parent.width}" height="26" as="geometry" />
 				</mxCell>`;
 	}
 
