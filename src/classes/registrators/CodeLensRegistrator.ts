@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
-import { JSCodeLensProvider } from "../providers/JSCodeLensProvider";
+import { JSCodeLensProvider } from "../providers/jscodelens/JSCodeLensProvider";
 import { XMLCodeLensProvider } from "../providers/XMLCodeLensProvider";
 
 export class CodeLensRegistrator {

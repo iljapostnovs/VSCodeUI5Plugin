@@ -10,7 +10,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 		const UIClassName = this.getClassNameOfTheVariableAtCurrentDocumentPosition();
 		if (UIClassName) {
-			fieldsAndMethods = this._destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
+			fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
 			if (fieldsAndMethods) {
 				this._filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods, UIClassName);
 			}
@@ -19,7 +19,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return fieldsAndMethods;
 	}
 
-	private _destructueFieldsAndMethodsAccordingToMapParams(className: string) {
+	public destructueFieldsAndMethodsAccordingToMapParams(className: string) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 		const classNamePartsFromFieldMap = className.split("__map__");
 		const classNamePartsFromMapParam = className.split("__mapparam__");
@@ -36,7 +36,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 					fieldsAndMethods.className = className;
 				}
 			}
-		} if (classNamePartsFromMapParam.length > 1) {
+		} else if (classNamePartsFromMapParam.length > 1) {
 			const className = classNamePartsFromMapParam.shift();
 			if (className) {
 				const mapFields = classNamePartsFromMapParam;

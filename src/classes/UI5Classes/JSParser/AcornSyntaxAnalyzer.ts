@@ -88,7 +88,7 @@ export class AcornSyntaxAnalyzer {
 			}
 		} else if (node.type === "ObjectExpression") {
 			innerNode = this.findAcornNode(node.properties, position)?.value;
-		} else if (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
+		} else if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
 			if (node.body) {
 				innerNode = this.findAcornNode([node.body], position);
 			}
@@ -143,11 +143,11 @@ export class AcornSyntaxAnalyzer {
 			return "";
 		}
 
-		const isGetViewException = this._checkForGetViewByIdException(stack);
+		const isGetViewException = this._checkForGetViewByIdException(stack, currentClassName);
 
 		//this.getView().byId("") exception
 		if (isGetViewException) {
-			currentClassName = this._getClassNameFromViewById(stack, currentClassName);
+			currentClassName = this._getClassNameFromViewById(stack, currentClassName, primaryClassName);
 			if (stack.length > 0) {
 				className = this.findClassNameForStack(stack, currentClassName, primaryClassName, false);
 			} else {
@@ -483,51 +483,26 @@ export class AcornSyntaxAnalyzer {
 		return classNameParts.join(".");
 	}
 
-	private static _checkForGetViewByIdException(stack: any[]) {
-		let isGetViewByIdException = true;
-		if (stack.length >= 4) {
-			const [firstPart, secondPart, thirdPart, fourthPart] = stack;
-			isGetViewByIdException = isGetViewByIdException && firstPart.type === "MemberExpression";
-			isGetViewByIdException = isGetViewByIdException && secondPart.type === "CallExpression";
-			isGetViewByIdException = isGetViewByIdException && thirdPart.type === "MemberExpression";
-			isGetViewByIdException = isGetViewByIdException && fourthPart.type === "CallExpression";
-
-			isGetViewByIdException = isGetViewByIdException && firstPart.property?.name === "getView";
-			isGetViewByIdException = isGetViewByIdException && thirdPart.property?.name === "byId";
-		} else if (stack.length >= 3) {
-			const [firstPart, secondPart, thirdPart] = stack;
-			isGetViewByIdException = isGetViewByIdException && firstPart.type === "ThisExpression";
-			isGetViewByIdException = isGetViewByIdException && secondPart.type === "MemberExpression";
-			isGetViewByIdException = isGetViewByIdException && thirdPart.type === "CallExpression";
-
-			isGetViewByIdException = isGetViewByIdException && secondPart.property?.name === "byId";
-		} else {
-			isGetViewByIdException = false;
+	private static _checkForGetViewByIdException(stack: any[], className: string) {
+		let isGetViewByIdException = false;
+		if ((className === "sap.ui.core.mvc.View" || className === "sap.ui.core.Element") && stack.length > 0 && stack[0].property?.name === "byId") {
+			isGetViewByIdException = true;
 		}
 
 		return isGetViewByIdException;
 	}
 
-	private static _getClassNameFromViewById(stack: any[], currentClassName: string) {
+	private static _getClassNameFromViewById(stack: any[], currentClassName: string, currentControllerName: string) {
 		let className = "";
-		const isById = stack[1].property?.name === "byId";
-		const isGetViewById = stack[2].property?.name === "byId";
 
-		let callExpression;
-		let spliceQuantity;
+		if (stack.length > 1) {
+			const callExpression = stack[1];
 
-		if (isGetViewById) {
-			callExpression = stack[3];
-			spliceQuantity = 4;
-		} else if (isById) {
-			callExpression = stack[2];
-			spliceQuantity = 3;
-		}
-
-		stack.splice(0, spliceQuantity);
-		const controlId = callExpression.arguments[0]?.value;
-		if (controlId) {
-			className = FileReader.getClassNameFromView(currentClassName, controlId) || "";
+			stack.splice(0, 2);
+			const controlId = callExpression.arguments[0]?.value;
+			if (controlId) {
+				className = FileReader.getClassNameFromView(currentControllerName, controlId) || "";
+			}
 		}
 
 		return className;
@@ -619,99 +594,104 @@ export class AcornSyntaxAnalyzer {
 	}
 
 	public static expandAllContent(node: any, content: any[] = []) {
-		//TODO: find out recursion reason, OrderItemGroupCRUDBehavior
 		if (content.indexOf(node) === -1) {
 			content.push(node);
-			let innerNodes: any[] = [];
-
-			if (node.type === "VariableDeclaration") {
-				if (node.declarations) {
-					innerNodes = [...node.declarations];
-				}
-			} else if (node.type === "VariableDeclarator") {
-				if (node.init) {
-					innerNodes.push(node.init);
-				}
-				if (node.id) {
-					innerNodes.push(node.id);
-				}
-			} else if (node.type === "CallExpression") {
-				innerNodes = [...node.arguments];
-				if (node.callee) {
-					innerNodes.push(node.callee);
-				}
-			} else if (node.type === "MemberExpression") {
-				innerNodes.push(node.object);
-				if (node.property) {
-					innerNodes.push(node.property);
-				}
-			} else if (node.type === "BinaryExpression") {
-				if (node.right) {
-					innerNodes.push(node.right);
-				}
-				if (node.left) {
-					innerNodes.push(node.left);
-				}
-			} else if (node.type === "ExpressionStatement") {
-				innerNodes.push(node.expression);
-			} else if (node.type === "ThisExpression") {
-				//
-			} else if (node.type === "AwaitExpression") {
-				innerNodes.push(node.argument);
-			} else if (node.type === "ArrayExpression") {
-				innerNodes = [...node.elements];
-			} else if (node.type === "TryStatement") {
-				innerNodes = [...node.block.body];
-				if (node.handler?.body?.body) {
-					innerNodes = innerNodes.concat(node.handler.body.body);
-				}
-				if (node.finalizer?.body) {
-					innerNodes = innerNodes.concat(node.finalizer.body.body);
-				}
-			} else if (node.type === "BlockStatement") {
-				innerNodes = [...node.body];
-			} else if (node.type === "ReturnStatement") {
-				innerNodes.push(node.argument);
-			} else if (node.type === "IfStatement") {
-				if (node.consequent) {
-					innerNodes = innerNodes.concat(node.consequent.body);
-				} else if (node.alternate) {
-					innerNodes.push(node.alternate);
-				} else if (node.body) {
-					innerNodes = innerNodes.concat(node.body);
-				}
-			} else if (node.type === "SwitchStatement") {
-				node.cases.forEach((body: any) => {
-					innerNodes.push(body.consequent);
-				});
-			} else if (node.type === "AssignmentExpression") {
-				innerNodes.push(node.right);
-			} else if (node.type === "NewExpression") {
-				if (node.callee) {
-					innerNodes.push(node.callee);
-				}
-				innerNodes = innerNodes.concat(node.arguments);
-			} else if (node.type === "ObjectExpression") {
-				innerNodes = node.properties.map((declaration: any) => declaration.value);
-			} else if (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
-				innerNodes = [node.body].concat(node.params);
-			} else if (
-				node.type === "WhileStatement" ||
-				node.type === "DoWhileStatement" ||
-				node.type === "ForStatement" ||
-				node.type === "ForInStatement"
-			) {
-				innerNodes.push(node.body);
+		}
+		const innerNodes: any[] = this.getContent(node);
+		innerNodes.forEach((node: any) => {
+			content.push(node);
+		});
+		innerNodes.forEach((node: any) => {
+			if (node) {
+				this.expandAllContent(node, content);
 			}
+		});
+		return content;
+	}
+	public static getContent(node: any) {
+		let innerNodes: any[] = [];
 
-			innerNodes.forEach((node: any) => {
-				if (node) {
-					this.expandAllContent(node, content);
-				}
+		if (node.type === "VariableDeclaration") {
+			if (node.declarations) {
+				innerNodes = [...node.declarations];
+			}
+		} else if (node.type === "VariableDeclarator") {
+			if (node.init) {
+				innerNodes.push(node.init);
+			}
+			if (node.id) {
+				innerNodes.push(node.id);
+			}
+		} else if (node.type === "CallExpression") {
+			innerNodes = [...node.arguments];
+			if (node.callee) {
+				innerNodes.push(node.callee);
+			}
+		} else if (node.type === "MemberExpression") {
+			innerNodes.push(node.object);
+			if (node.property) {
+				innerNodes.push(node.property);
+			}
+		} else if (node.type === "BinaryExpression") {
+			if (node.right) {
+				innerNodes.push(node.right);
+			}
+			if (node.left) {
+				innerNodes.push(node.left);
+			}
+		} else if (node.type === "ExpressionStatement") {
+			innerNodes.push(node.expression);
+		} else if (node.type === "ThisExpression") {
+			//
+		} else if (node.type === "AwaitExpression") {
+			innerNodes.push(node.argument);
+		} else if (node.type === "ArrayExpression") {
+			innerNodes = [...node.elements];
+		} else if (node.type === "TryStatement") {
+			innerNodes = [...node.block.body];
+			if (node.handler?.body) {
+				innerNodes = innerNodes.concat(node.handler.body);
+			}
+			if (node.finalizer?.body) {
+				innerNodes = innerNodes.concat(node.finalizer.body);
+			}
+		} else if (node.type === "BlockStatement") {
+			innerNodes = [...node.body];
+		} else if (node.type === "ReturnStatement") {
+			innerNodes.push(node.argument);
+		} else if (node.type === "IfStatement") {
+			if (node.consequent) {
+				innerNodes = innerNodes.concat(node.consequent.body);
+			} else if (node.alternate) {
+				innerNodes.push(node.alternate);
+			} else if (node.body) {
+				innerNodes = innerNodes.concat(node.body);
+			}
+		} else if (node.type === "SwitchStatement") {
+			node.cases.forEach((body: any) => {
+				innerNodes.push(body.consequent);
 			});
+		} else if (node.type === "AssignmentExpression") {
+			innerNodes.push(node.right);
+		} else if (node.type === "NewExpression") {
+			if (node.callee) {
+				innerNodes.push(node.callee);
+			}
+			innerNodes = innerNodes.concat(node.arguments);
+		} else if (node.type === "ObjectExpression") {
+			innerNodes = node.properties.map((declaration: any) => declaration.value);
+		} else if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
+			innerNodes = [node.body].concat(node.params);
+		} else if (
+			node.type === "WhileStatement" ||
+			node.type === "DoWhileStatement" ||
+			node.type === "ForStatement" ||
+			node.type === "ForInStatement"
+		) {
+			innerNodes.push(node.body);
 		}
 
-		return content;
+		return innerNodes;
 	}
 
 	private static _getClassNameFromAcornVariableDeclaration(declaration: any, UIClass: CustomUIClass) {

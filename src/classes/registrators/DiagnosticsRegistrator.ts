@@ -1,31 +1,50 @@
 import * as vscode from "vscode";
 import { XMLLinter } from "../xmllinter/XMLLinter";
 import { UI5Plugin } from "../../UI5Plugin";
+import { JSLinter } from "../jslinter/JSLinter";
 
-let diagnosticCollection: vscode.DiagnosticCollection;
-
+let xmlDiagnosticCollection: vscode.DiagnosticCollection;
+let jsDiagnosticCollection: vscode.DiagnosticCollection;
 export class DiagnosticsRegistrator {
 	static register() {
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("xmlDiagnostics")) {
-			diagnosticCollection = vscode.languages.createDiagnosticCollection("XML");
+			xmlDiagnosticCollection = vscode.languages.createDiagnosticCollection("XML");
+			jsDiagnosticCollection = vscode.languages.createDiagnosticCollection("javascript");
 
 			if (vscode.window.activeTextEditor) {
 				const fileName = vscode.window.activeTextEditor.document.fileName;
 				if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
-					this._updateDiagnostics(vscode.window.activeTextEditor.document, diagnosticCollection);
+					this._updateXMLDiagnostics(vscode.window.activeTextEditor.document, xmlDiagnosticCollection);
+				}
+
+				if (fileName.endsWith(".js")) {
+					this._updateJSDiagnostics(vscode.window.activeTextEditor.document, jsDiagnosticCollection);
 				}
 			}
 
 			const changeActiveTextEditor = vscode.window.onDidChangeActiveTextEditor(editor => {
 				const fileName = editor?.document.fileName;
-				if (editor && fileName && (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml"))) {
-					this._updateDiagnostics(editor.document, diagnosticCollection);
+				if (editor && fileName) {
+					if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
+						this._updateXMLDiagnostics(editor.document, xmlDiagnosticCollection);
+					}
+
+					if (fileName.endsWith(".js")) {
+						this._updateJSDiagnostics(editor.document, jsDiagnosticCollection);
+					}
 				}
 			});
 
 			const textDocumentChange = vscode.workspace.onDidChangeTextDocument(event => {
-				if (event && (event.document.fileName.endsWith(".fragment.xml") || event.document.fileName.endsWith(".view.xml"))) {
-					this._updateDiagnostics(event.document, diagnosticCollection);
+				if (event) {
+					const fileName = event.document.fileName;
+					if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
+						this._updateXMLDiagnostics(event.document, xmlDiagnosticCollection);
+					}
+
+					if (fileName.endsWith(".js")) {
+						this._updateJSDiagnostics(event.document, jsDiagnosticCollection);
+					}
 				}
 			});
 
@@ -35,7 +54,7 @@ export class DiagnosticsRegistrator {
 	}
 
 	private static _timeoutId: NodeJS.Timeout | null;
-	private static _updateDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+	private static _updateXMLDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
 		if (!this._timeoutId) {
 			this._timeoutId = setTimeout(() => {
 				const errors = XMLLinter.getLintingErrors(document.getText());
@@ -47,6 +66,28 @@ export class DiagnosticsRegistrator {
 						range: error.range,
 						severity: vscode.DiagnosticSeverity.Error,
 						source: error.source,
+						relatedInformation: []
+					});
+				});
+
+				collection.set(document.uri, diagnostics);
+				this._timeoutId = null;
+			}, 100);
+		}
+	}
+
+	private static _updateJSDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+		if (!this._timeoutId) {
+			this._timeoutId = setTimeout(() => {
+				const errors = JSLinter.getLintingErrors(document.getText());
+
+				const diagnostics: vscode.Diagnostic[] = errors.map(error => {
+					return ({
+						code: error.code,
+						message: error.message,
+						range: error.range,
+						severity: vscode.DiagnosticSeverity.Error,
+						source: "",
 						relatedInformation: []
 					});
 				});
