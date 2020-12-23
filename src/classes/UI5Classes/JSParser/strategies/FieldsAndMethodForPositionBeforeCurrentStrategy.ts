@@ -143,11 +143,11 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return UIClassName;
 	}
 
-	public acornGetClassName(className: string, position: number) {
+	public acornGetClassName(className: string, position: number, clearStack: boolean = true) {
 		let classNameOfTheCurrentVariable;
 		const stack = this.getStackOfNodesForPosition(className, position);
 		if (stack.length > 0) {
-			classNameOfTheCurrentVariable = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, undefined, true);
+			classNameOfTheCurrentVariable = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, undefined, clearStack);
 		}
 
 		return classNameOfTheCurrentVariable;
@@ -163,13 +163,21 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 			})?.value;
 
 			if (methodNode) {
-				const methodBody = methodNode.body?.body || [];
+				const methodBody = methodNode.body?.body || [methodNode];
 				const methodsParams = methodNode?.params || [];
 				const method = methodBody.concat(methodsParams);
 				const nodeWithCurrentPosition = AcornSyntaxAnalyzer.findAcornNode(method, position - 1);
 
 				if (nodeWithCurrentPosition) {
 					this._generateStackOfNodes(nodeWithCurrentPosition, position, stack, checkForLastPosition);
+				}
+			} else {
+				const UIDefineBody = UIClass.getUIDefineAcornBody();
+				if (UIDefineBody) {
+					const nodeWithCurrentPosition = AcornSyntaxAnalyzer.findAcornNode(UIDefineBody, position - 1);
+					if (nodeWithCurrentPosition) {
+						this._generateStackOfNodes(nodeWithCurrentPosition, position, stack, checkForLastPosition);
+					}
 				}
 			}
 		}

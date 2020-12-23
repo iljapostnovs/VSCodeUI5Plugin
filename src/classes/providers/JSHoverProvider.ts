@@ -18,27 +18,25 @@ export class JSHoverProvider {
 			UIClassFactory.setNewContentForCurrentUIClass();
 
 			const className = strategy.acornGetClassName(currentClassName, offset) || "";
-			if (className) {
-				const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
-				const text = fieldsAndMethods?.className && this._getTextIfItIsFieldOrMethodOfClass(fieldsAndMethods.className, word);
-				if (fieldsAndMethods && text) {
-					const textBefore = className === currentClassName ? "this." : `${fieldsAndMethods.className}.`;
-					const markdownString = this._getMarkdownFromText(textBefore + text);
+			const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
+			const text = fieldsAndMethods?.className && this._getTextIfItIsFieldOrMethodOfClass(fieldsAndMethods.className, word);
+			if (fieldsAndMethods && text) {
+				const textBefore = className === currentClassName ? "this." : `${fieldsAndMethods.className}.`;
+				const markdownString = this._getMarkdownFromText(textBefore + text);
+				hover = new vscode.Hover(markdownString);
+			} else {
+				const className = this._getClassNameForOffset(offset, currentClassName, word);
+				if (className) {
+					let text = `${word}: ${className}  \n`;
+					const UIClass = UIClassFactory.getUIClass(className);
+					text += URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass);
+					const markdownString = this._getMarkdownFromText(text);
 					hover = new vscode.Hover(markdownString);
 				} else {
-					const className = this._getClassNameForOffset(offset, currentClassName, word);
-					if (className) {
-						let text = `${word}: ${className}  \n`;
-						const UIClass = UIClassFactory.getUIClass(className);
-						text += URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass);
+					const text = this._getTextIfItIsFieldOrMethodOfClass(currentClassName, word);
+					if (text) {
 						const markdownString = this._getMarkdownFromText(text);
 						hover = new vscode.Hover(markdownString);
-					} else {
-						const text = this._getTextIfItIsFieldOrMethodOfClass(currentClassName, word);
-						if (text) {
-							const markdownString = this._getMarkdownFromText(text);
-							hover = new vscode.Hover(markdownString);
-						}
 					}
 				}
 			}
@@ -90,8 +88,13 @@ export class JSHoverProvider {
 	private static _getClassNameForOffset(offset: number, className: string, identifierName: string) {
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 		const method = AcornSyntaxAnalyzer.findAcornNode(UIClass.acornMethodsAndFields, offset);
-		if (method.value) {
-			const allContent = AcornSyntaxAnalyzer.expandAllContent(method.value);
+		let node = method?.value;
+		if (!node) {
+			const UIDefineBody = UIClass.getUIDefineAcornBody();
+			node = AcornSyntaxAnalyzer.findAcornNode(UIDefineBody, offset);
+		}
+		if (node) {
+			const allContent = AcornSyntaxAnalyzer.expandAllContent(node);
 			const identifier = allContent.find(content => content.type === "Identifier" && content.name === identifierName);
 			if (identifier) {
 				let position = identifier.end;

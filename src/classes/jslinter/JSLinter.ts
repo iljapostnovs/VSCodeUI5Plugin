@@ -9,9 +9,13 @@ export class JSLinter {
 		];
 
 		let errors: Error[] = [];
-		linters.forEach(linter => {
-			errors = errors.concat(linter.getErrors(document));
-		});
+		try {
+			linters.forEach(linter => {
+				errors = errors.concat(linter.getErrors(document));
+			});
+		} catch(error) {
+			console.error(error);
+		}
 
 		return errors;
 	}

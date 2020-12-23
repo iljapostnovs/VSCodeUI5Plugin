@@ -65,19 +65,25 @@ export class DrawIOUMLDiagram {
 	}
 
 	private _calculateHeightAndWidth() {
-		const properties = this.UIClass.properties.map(property => new Property(property, this.classHead));
+		let index = 0;
+		const properties = this.UIClass.properties.map((property, i) => new Property(property, this.classHead, index + i));
+		index += properties.length;
 		const fields = this.UIClass.fields.sort((a: UIField, b: UIField) => {
 			const isFirstFieldPrivate = a.name.startsWith("_");
 			const isSecondFieldPrivate = b.name.startsWith("_");
 
 			return isFirstFieldPrivate === isSecondFieldPrivate ? 0 : isFirstFieldPrivate ? 1 : -1;
-		}).map(field => new Field(field, this.classHead));
+		})
+		.filter(field => field.name !== "prototype")
+		.map((field, i) => new Field(field, this.classHead, index + i));
+		index += fields.length;
 		const methods = this.UIClass.methods.sort((a: UIMethod, b: UIMethod) => {
 			const isFirstMethodPrivate = a.name.startsWith("_");
 			const isSecondMethodPrivate = b.name.startsWith("_");
 
 			return isFirstMethodPrivate === isSecondMethodPrivate ? 0 : isFirstMethodPrivate ? 1 : -1;
-		}).map(method => new Method(method, this.classHead));
+		})
+		.map((method, i) => new Method(method, this.classHead, index + i));
 
 		let items: ITextLengthGettable[] = properties;
 		items = items.concat(methods);
@@ -89,7 +95,7 @@ export class DrawIOUMLDiagram {
 		this.width = pixelsPerChar * longestTextLength;
 
 		this.classHead.width = this.width;
-		this.classHead.height = items.length * this.classHead.height;
+		this.classHead.height = items.length * this.classHead.height + 8;
 	}
 
 	static getUniqueId() {
@@ -105,20 +111,27 @@ export class DrawIOUMLDiagram {
 	}
 
 	generateBody() {
-		const separator = new Separator(this.classHead);
-		const properties = this.UIClass.properties.map(property => new Property(property, this.classHead));
+		let index = 0;
+		const properties = this.UIClass.properties.map((property, i) => new Property(property, this.classHead, index + i));
+		index += properties.length;
 		const fields = this.UIClass.fields.sort((a: UIField, b: UIField) => {
 			const isFirstFieldPrivate = a.name.startsWith("_");
 			const isSecondFieldPrivate = b.name.startsWith("_");
 
 			return isFirstFieldPrivate === isSecondFieldPrivate ? 0 : isFirstFieldPrivate ? 1 : -1;
-		}).map(field => new Field(field, this.classHead));
+		})
+		.filter(field => field.name !== "prototype")
+		.map((field, i) => new Field(field, this.classHead, index + i));
+		index += fields.length;
 		const methods = this.UIClass.methods.sort((a: UIMethod, b: UIMethod) => {
 			const isFirstMethodPrivate = a.name.startsWith("_");
 			const isSecondMethodPrivate = b.name.startsWith("_");
 
 			return isFirstMethodPrivate === isSecondMethodPrivate ? 0 : isFirstMethodPrivate ? 1 : -1;
-		}).map(method => new Method(method, this.classHead));
+		})
+		.map((method, i) => new Method(method, this.classHead, index + i));
+
+		const separator = new Separator(this.classHead, fields.length + properties.length);
 
 		return 	this.classHead.generateXML() +
 				properties.map(property => property.generateXML()).join("") +

@@ -86,7 +86,7 @@ export class DiagnosticsRegistrator {
 						code: error.code,
 						message: error.message,
 						range: error.range,
-						severity: vscode.DiagnosticSeverity.Error,
+						severity: vscode.DiagnosticSeverity.Warning,
 						source: "",
 						relatedInformation: []
 					});

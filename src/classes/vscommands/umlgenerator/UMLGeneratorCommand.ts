@@ -44,7 +44,7 @@ export class UMLGeneratorCommand {
 		const wsFolders = vscode.workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const diagramXML = await MassDrawIOUMLDiagram.generateUMLClassDiagrams(wsFolder);
-			fs.writeFileSync(`${wsFolder.uri.fsPath}${fileSeparator}ProjectUML.xml`, diagramXML, {
+			fs.writeFileSync(`${wsFolder.uri.fsPath}${fileSeparator}ProjectUML.drawio`, diagramXML, {
 				encoding: "utf8"
 			});
 		}
