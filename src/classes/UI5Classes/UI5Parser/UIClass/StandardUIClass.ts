@@ -78,7 +78,10 @@ export class StandardUIClass extends AbstractUIClass {
 					description: xmlnsData.value,
 					type: "string",
 					visibility: "public",
-					typeValues: [{text: xmlnsData.value, description: xmlnsData.value}]
+					typeValues: [{
+						text: xmlnsData.value,
+						description: xmlnsData.value
+					}]
 				});
 			});
 		}

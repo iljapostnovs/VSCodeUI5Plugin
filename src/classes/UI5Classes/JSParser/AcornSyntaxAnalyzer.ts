@@ -814,6 +814,8 @@ export class AcornSyntaxAnalyzer {
 			innerNodes.push(node.body);
 		}
 
+		innerNodes = innerNodes.filter(node => !!node);
+
 		return innerNodes;
 	}
 
