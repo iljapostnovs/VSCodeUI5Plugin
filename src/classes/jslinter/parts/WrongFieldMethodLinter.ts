@@ -5,21 +5,22 @@ import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyz
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
+import { FileReader } from "../../utils/FileReader";
 export class WrongFieldMethodLinter extends Linter {
-	getErrors(document: string): Error[] {
+	getErrors(document: vscode.TextDocument): Error[] {
 		// console.time("JS Lint");
 		let errors: Error[] = [];
 
-		errors = this._getLintingErrors();
+		errors = this._getLintingErrors(document);
 
 		// console.timeEnd("JS Lint");
 		return errors;
 	}
 
-	private _getLintingErrors(): Error[] {
+	private _getLintingErrors(document: vscode.TextDocument): Error[] {
 		let errors: Error[] = [];
 
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 		if (currentClassName) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 			const acornMethods = UIClass.acornMethodsAndFields.filter(fieldOrMethod => fieldOrMethod.value.type === "FunctionExpression").map((node: any) => node.value.body);
@@ -27,7 +28,7 @@ export class WrongFieldMethodLinter extends Linter {
 			acornMethods.forEach((method: any) => {
 				if (method.body) {
 					method.body.forEach((node: any) => {
-						const validationErrors = this._getErrorsForExpression(node, UIClass.classText);
+						const validationErrors = this._getErrorsForExpression(node, UIClass);
 						errors = errors.concat(validationErrors);
 					});
 				}
@@ -47,8 +48,8 @@ export class WrongFieldMethodLinter extends Linter {
 		return errors;
 	}
 
-	private _getErrorsForExpression(node: any, document: string, errors: Error[] = []) {
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument() || "";
+	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, errors: Error[] = []) {
+		const currentClassName = UIClass.className;
 
 		if (node.type === "MemberExpression") {
 			const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
@@ -76,7 +77,7 @@ export class WrongFieldMethodLinter extends Linter {
 								const method = fieldsAndMethods.methods.find(method => method.name === nextNodeName);
 								const field = fieldsAndMethods.fields.find(field => field.name === nextNodeName);
 								if (!method && !field) {
-									const position = LineColumn(document).fromIndex(nextNode.property.start - 1);
+									const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
 									if (position) {
 										errors.push({
 											message: `"${nextNodeName}" does not exist in "${className}"`,
@@ -100,7 +101,7 @@ export class WrongFieldMethodLinter extends Linter {
 
 		const innerNodes = AcornSyntaxAnalyzer.getContent(node);
 		if (innerNodes) {
-			innerNodes.forEach((node: any) => this._getErrorsForExpression(node, document, errors));
+			innerNodes.forEach((node: any) => this._getErrorsForExpression(node, UIClass, errors));
 		}
 
 		return errors;

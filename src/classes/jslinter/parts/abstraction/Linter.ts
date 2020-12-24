@@ -7,5 +7,5 @@ export interface Error {
 	acornNode: any;
 }
 export abstract class Linter {
-	abstract getErrors(document: string) : Error[];
+	abstract getErrors(document: vscode.TextDocument) : Error[];
 }

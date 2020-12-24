@@ -81,7 +81,7 @@ export class DiagnosticsRegistrator {
 
 		if (isJSDiagnosticsEnabled && !this._timeoutId) {
 			this._timeoutId = setTimeout(() => {
-				const errors = JSLinter.getLintingErrors(document.getText());
+				const errors = JSLinter.getLintingErrors(document);
 
 				const diagnostics: vscode.Diagnostic[] = errors.map(error => {
 					return ({
