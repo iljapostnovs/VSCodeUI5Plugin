@@ -57,7 +57,7 @@ export class WrongFieldMethodLinter extends Linter {
 				const nodes = [];
 				while(nodeStack.length > 0) {
 					nodes.push(nodeStack.shift());
-					const className = AcornSyntaxAnalyzer.findClassNameForStack(nodes.concat([]), currentClassName);
+					const className = AcornSyntaxAnalyzer.findClassNameForStack(nodes.concat([]), currentClassName, currentClassName, true);
 					const isException = this._checkIfClassNameIsException(className);
 					if (className && !isException) {
 						const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);

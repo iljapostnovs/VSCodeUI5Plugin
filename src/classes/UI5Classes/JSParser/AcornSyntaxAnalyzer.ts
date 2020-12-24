@@ -195,7 +195,7 @@ export class AcornSyntaxAnalyzer {
 							}
 							if (className === "sap.ui.model.Model" && memberName === "getModel" && callExpression.arguments) {
 								const modelName = callExpression.arguments[0]?.value || "";
-								className = this._getClassNameOfTheModelFromManifest(modelName, primaryClassName);
+								className = this._getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
 							}
 						} else {
 							stack = [];
@@ -323,8 +323,13 @@ export class AcornSyntaxAnalyzer {
 					if (memberExpression && memberExpression.arguments[0]) {
 						const model = memberExpression.arguments[0];
 						const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-						const stack = strategy.getStackOfNodesForPosition(className, model.end, true);
-						modelClassName = this.findClassNameForStack(stack, className) || "";
+						if (this.declarationStack.indexOf(model) === -1) {
+							this.declarationStack.push(model);
+							const stack = strategy.getStackOfNodesForPosition(className, model.end, true);
+							modelClassName = this.findClassNameForStack(stack, className) || "";
+						} else {
+							this.declarationStack = [];
+						}
 					}
 				}
 			}
