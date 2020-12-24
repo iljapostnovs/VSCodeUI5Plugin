@@ -7,12 +7,12 @@ import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass"
 import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
 export class WrongFieldMethodLinter extends Linter {
 	getErrors(document: string): Error[] {
-		console.time("JS Lint");
+		// console.time("JS Lint");
 		let errors: Error[] = [];
 
 		errors = this._getLintingErrors();
 
-		console.timeEnd("JS Lint");
+		// console.timeEnd("JS Lint");
 		return errors;
 	}
 
