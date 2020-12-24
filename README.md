@@ -51,7 +51,16 @@ Code Lens for Internalization Texts is provided<br/>
 ----------
 ## XML Diagnostics
 XML Diagnostics is provided<br/>
+> Related preference entries: *ui5.plugin.xmlDiagnostics*<br/>
+
 ![DynamicCompletionItems](/images/XMLDiagnostics.gif)
+
+----------
+## JS Diagnostics
+XML Diagnostics is provided<br/>
+> Related preference entries: *ui5.plugin.jsDiagnostics* (disabled by default)<br/>
+
+![DynamicCompletionItems](/images/JSDiagnostics.gif)
 
 ----------
 ## Code Action Provider
@@ -140,7 +149,7 @@ The generated diagram can be imported to draw.io<br/>
 
 ----------
 ## Settings
-15 settings are available for extension configuration:<br/>
+16 settings are available for extension configuration:<br/>
 ![Settings](/images/Settings.png)
 
 ----------

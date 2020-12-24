@@ -92,8 +92,12 @@ export class StandardUIClass extends AbstractUIClass {
 		let classMethods:StandardClassUIMethod[] = [];
 		const SAPNode = this._findSAPNode(className);
 		classMethods = SAPNode?.getMethods().map((method: any) => {
+			let methodName = method.name.replace(`${this.className}.`, "");
+			if (methodName.indexOf(SAPNode.getMetadata()?.getRawMetadata()?.name) > -1) {
+				methodName = methodName.replace(SAPNode.getMetadata().getRawMetadata().name + ".", "");
+			}
 			return {
-				name: method.name.replace(`${this.className}.`, ""),
+				name: methodName,
 				description: `${StandardUIClass.removeTags(method.description)}`,
 				params: method.parameters?.map((parameter: any) => {
 					return {

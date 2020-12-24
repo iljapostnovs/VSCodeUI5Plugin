@@ -90,6 +90,11 @@
 					"default": true,
 					"description": "Should UI5 XML Diagnostics be enabled"
 				},
+				"ui5.plugin.jsDiagnostics": {
+					"type": "boolean",
+					"default": false,
+					"description": "Should UI5 JS Diagnostics be enabled"
+				},
 				"ui5.plugin.moveDefineToFunctionParametersOnAutocomplete": {
 					"type": "boolean",
 					"default": true,

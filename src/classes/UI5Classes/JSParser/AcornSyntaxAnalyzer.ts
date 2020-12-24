@@ -180,6 +180,9 @@ export class AcornSyntaxAnalyzer {
 						className = this._getClassNameOfTheRouterFromManifest(primaryClassName);
 					} else if (memberName === "getOwnerComponent") {
 						className = this._getClassNameOfTheComponent(primaryClassName);
+					} else if (memberName === "getModel" && callExpression.arguments) {
+						const modelName = callExpression.arguments[0]?.value || "";
+						className = this._getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
 					} else {
 						const method = this.findMethodHierarchically(currentClassName, memberName);
 						if (method) {
@@ -192,10 +195,6 @@ export class AcornSyntaxAnalyzer {
 									this.findMethodReturnType(method, currentClassName);
 								}
 								className = method.returnType;
-							}
-							if (className === "sap.ui.model.Model" && memberName === "getModel" && callExpression.arguments) {
-								const modelName = callExpression.arguments[0]?.value || "";
-								className = this._getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
 							}
 						} else {
 							stack = [];

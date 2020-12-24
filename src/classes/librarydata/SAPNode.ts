@@ -36,7 +36,7 @@ export class SAPNode {
 	}
 
 	public getName() : string {
-		return this.node.name;
+		return this.node.name.replace("module:", "").replace(/\//g, ".");
 	}
 
 	public getLib() {

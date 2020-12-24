@@ -79,7 +79,7 @@ export class UI5MetadataDAO {
 
 	private _findNodeMetadata(node: SAPNode, libMetadata: any) {
 		return libMetadata?.symbols ? libMetadata.symbols.find(
-			(metadata: any) => metadata.name === node.getName()
+			(metadata: any) => metadata.name.replace("module:", "").replace(/\//g, ".") === node.getName()
 		) : {};
 	}
 
