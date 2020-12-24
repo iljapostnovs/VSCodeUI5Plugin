@@ -18,7 +18,7 @@ export class UMLGeneratorCommand {
 				const UMLClassDiagram = new DrawIOUMLDiagram(UIClass);
 				const diagramXML = UMLClassDiagram.generateUMLClassDiagram();
 
-				fs.writeFileSync(`${wsFolder.uri.fsPath}${fileSeparator}${UIClass.className}.xml`, diagramXML, {
+				fs.writeFileSync(`${wsFolder.uri.fsPath}${fileSeparator}${UIClass.className}.drawio`, diagramXML, {
 					encoding: "utf8"
 				});
 
