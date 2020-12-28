@@ -37,6 +37,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public acornMethodsAndFields: any[] = [];
 	public fileContent: any;
 	private _parentVariableName: any;
+	public acornReturnedClassExtendBody: any | undefined;
 	public classBodyAcornVariableName: string | undefined;
 
 	constructor(className: string, documentText?: string) {
@@ -278,6 +279,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 		if (part.type === "CallExpression") {
 			classBody = this._getClassBodyFromClassExtendAcorn(part);
+			this.acornReturnedClassExtendBody = part;
 
 			if (classBody) {
 				this._parentVariableName = part.callee.object.name;
@@ -294,6 +296,7 @@ export class CustomUIClass extends AbstractUIClass {
 			if (variable) {
 				const neededDeclaration = variable.declarations.find((declaration: any) => declaration.id.name === part.name);
 				classBody = this._getClassBodyFromPartAcorn(neededDeclaration.init, partParent);
+				this.acornReturnedClassExtendBody = neededDeclaration.init;
 				this.classBodyAcornVariableName = part.name;
 			}
 		}
