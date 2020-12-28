@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
 import { FileReader } from "../../utils/FileReader";
 import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
-import { CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
+import { CustomClassUIMethod, CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { FieldPropertyMethodGetterStrategy } from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
 import { InnerPropertiesStrategy } from "./strategies/InnerPropertiesStrategy";
@@ -183,7 +183,9 @@ export class AcornSyntaxAnalyzer {
 					} else if (memberName === "getModel" && callExpression.arguments) {
 						const modelName = callExpression.arguments[0]?.value || "";
 						className = this._getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
-					} else {
+					}
+
+					if (!className) {
 						const method = this.findMethodHierarchically(currentClassName, memberName);
 						if (method) {
 							if (currentClassName === "sap.ui.base.Event") {
@@ -299,36 +301,34 @@ export class AcornSyntaxAnalyzer {
 		}
 
 		if (!modelClassName) {
-			const UIClass = UIClassFactory.getUIClass(className);
-			if (UIClass instanceof CustomUIClass) {
-				const method = UIClass.methods.find(method => {
-					let methodFound = false;
-					if (method.acornNode) {
-						const content = this.expandAllContent(method.acornNode);
-						const memberExpression: any = content.find(
-							content => content.type === "CallExpression" &&
-							content.callee?.property?.name === "setModel" &&
-							(content.arguments[1] && content.arguments[1].value || "") === modelName
-						);
-						methodFound = !!memberExpression;
-					}
-
-					return methodFound;
-				});
-
-				if (method?.acornNode) {
+			const UIClass = UIClassFactory.getFieldsAndMethodsForClass(className);
+			const method = (<CustomClassUIMethod[]>UIClass.methods).find(method => {
+				let methodFound = false;
+				if (method.acornNode) {
 					const content = this.expandAllContent(method.acornNode);
-					const memberExpression = content.find(content => content.type === "CallExpression" && content.callee?.property?.name === "setModel");
-					if (memberExpression && memberExpression.arguments[0]) {
-						const model = memberExpression.arguments[0];
-						const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-						if (this.declarationStack.indexOf(model) === -1) {
-							this.declarationStack.push(model);
-							const stack = strategy.getStackOfNodesForPosition(className, model.end, true);
-							modelClassName = this.findClassNameForStack(stack, className) || "";
-						} else {
-							this.declarationStack = [];
-						}
+					const memberExpression: any = content.find(
+						content => content.type === "CallExpression" &&
+						content.callee?.property?.name === "setModel" &&
+						(content.arguments[1] && content.arguments[1].value || "") === modelName
+					);
+					methodFound = !!memberExpression;
+				}
+
+				return methodFound;
+			});
+
+			if (method?.acornNode) {
+				const content = this.expandAllContent(method.acornNode);
+				const memberExpression = content.find(content => content.type === "CallExpression" && content.callee?.property?.name === "setModel");
+				if (memberExpression && memberExpression.arguments[0]) {
+					const model = memberExpression.arguments[0];
+					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+					if (this.declarationStack.indexOf(model) === -1) {
+						this.declarationStack.push(model);
+						const stack = strategy.getStackOfNodesForPosition(className, model.end, true);
+						modelClassName = this.findClassNameForStack(stack, className) || "";
+					} else {
+						this.declarationStack = [];
 					}
 				}
 			}
