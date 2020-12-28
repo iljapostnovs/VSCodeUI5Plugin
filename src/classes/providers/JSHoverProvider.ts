@@ -3,12 +3,13 @@ import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer"
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { FileReader } from "../utils/FileReader";
 import { URLBuilder } from "../utils/URLBuilder";
 
 export class JSHoverProvider {
 	static getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 		const range = document.getWordRangeAtPosition(position);
 		const word = document.getText(range);
 		const offset = document.offsetAt(position);

@@ -37,6 +37,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public acornMethodsAndFields: any[] = [];
 	public fileContent: any;
 	private _parentVariableName: any;
+	public acornReturnedClassExtendBody: any | undefined;
 	public classBodyAcornVariableName: string | undefined;
 
 	constructor(className: string, documentText?: string) {
@@ -57,6 +58,11 @@ export class CustomUIClass extends AbstractUIClass {
 			let methods = this.acornClassBody.properties?.filter((node: any) =>
 				node.value.type === "FunctionExpression" ||
 				node.value.type === "ArrowFunctionExpression"
+			) || [];
+
+			let fields = this.acornClassBody.properties?.filter((node: any) =>
+				node.value.type !== "FunctionExpression" &&
+				node.value.type !== "ArrowFunctionExpression"
 			) || [];
 
 			//static methods
@@ -107,6 +113,7 @@ export class CustomUIClass extends AbstractUIClass {
 					const isPrivate = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "private");
 					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
 					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
+					const fieldType = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "type");
 
 					if (paramTags) {
 						paramTags.forEach((tag: any) => {
@@ -126,6 +133,34 @@ export class CustomUIClass extends AbstractUIClass {
 						}
 						if (comment.jsdoc) {
 							UIMethod.description = comment.jsdoc.description;
+						}
+					}
+				}
+			});
+
+			fields.forEach((field: any) => {
+				const fieldName = field.key.name;
+				const comment = this.comments.find(comment => {
+					const positionDifference = field.start - comment.end;
+					return positionDifference < 15 && positionDifference > 0;
+				});
+				if (comment) {
+					const isPrivate = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "private");
+					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
+					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
+					const fieldType = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "type");
+					const UIField = this.fields.find(field => field.name === fieldName);
+					if (UIField) {
+						if (isPrivate || isPublic || isProtected) {
+							UIField.visibility = isPrivate ? "private" : isProtected ? "protected" : isPublic ? "public" : UIField.visibility;
+						}
+
+						if (comment.jsdoc) {
+							UIField.description = comment.jsdoc.description;
+						}
+
+						if (fieldType) {
+							UIField.type = fieldType.type;
 						}
 					}
 				}
@@ -244,6 +279,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 		if (part.type === "CallExpression") {
 			classBody = this._getClassBodyFromClassExtendAcorn(part);
+			this.acornReturnedClassExtendBody = part;
 
 			if (classBody) {
 				this._parentVariableName = part.callee.object.name;
@@ -260,6 +296,7 @@ export class CustomUIClass extends AbstractUIClass {
 			if (variable) {
 				const neededDeclaration = variable.declarations.find((declaration: any) => declaration.id.name === part.name);
 				classBody = this._getClassBodyFromPartAcorn(neededDeclaration.init, partParent);
+				this.acornReturnedClassExtendBody = neededDeclaration.init;
 				this.classBodyAcornVariableName = part.name;
 			}
 		}

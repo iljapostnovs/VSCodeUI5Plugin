@@ -1,3 +1,7 @@
+## 0.11.8 (28-12-2020)
+* @type JSDoc tag support for class fields
+* Bugfixes for JS hover provider
+
 ## 0.11.7 (28-12-2020)
 * Bugfixes
 * JS Diagnostics introduced
