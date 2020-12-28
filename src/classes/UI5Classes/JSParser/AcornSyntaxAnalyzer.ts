@@ -319,7 +319,11 @@ export class AcornSyntaxAnalyzer {
 
 			if (method?.acornNode) {
 				const content = this.expandAllContent(method.acornNode);
-				const memberExpression = content.find(content => content.type === "CallExpression" && content.callee?.property?.name === "setModel");
+				const memberExpression = content.find(content =>
+					content.type === "CallExpression" &&
+					content.callee?.property?.name === "setModel" &&
+					(content.arguments[1]?.value || "") === modelName
+				);
 				if (memberExpression && memberExpression.arguments[0]) {
 					const model = memberExpression.arguments[0];
 					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
