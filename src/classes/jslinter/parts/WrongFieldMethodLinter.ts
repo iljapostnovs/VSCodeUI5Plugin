@@ -120,8 +120,8 @@ export class WrongFieldMethodLinter extends Linter {
 	}
 
 	private _checkIfMethodNameIsException(className: string = "", memberName: string = "") {
-		const exceptions = ["byId", "prototype"];
-		let isException = exceptions.includes(memberName);
+		const methodExceptions = ["byId", "prototype"];
+		let isException = methodExceptions.includes(memberName);
 		const classExceptions = [{
 			className: "sap.ui.model.Binding",
 			memberName: "filter"
@@ -131,12 +131,23 @@ export class WrongFieldMethodLinter extends Linter {
 		},{
 			className: "sap.ui.model.Model",
 			memberName: "setProperty"
+		},{
+			className: "sap.ui.core.Element",
+			memberName: "*"
+		},{
+			className: "sap.ui.base.ManagedObject",
+			memberName: "*"
+		},{
+			className: "sap.ui.core.Control",
+			memberName: "*"
 		}];
 
 		if (!isException) {
-			isException = !!classExceptions.find(classException => classException.className === className && classException.memberName === memberName);
+			isException = !!classExceptions.find(classException =>
+				classException.className === className &&
+				(classException.memberName === memberName || classException.memberName === "*")
+			);
 		}
-
 
 		return isException;
 	}
