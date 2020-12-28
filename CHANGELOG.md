@@ -1,3 +1,6 @@
+## 0.11.8 (28-12-2020)
+* ...
+
 ## 0.11.7 (28-12-2020)
 * Bugfixes
 * JS Diagnostics introduced
