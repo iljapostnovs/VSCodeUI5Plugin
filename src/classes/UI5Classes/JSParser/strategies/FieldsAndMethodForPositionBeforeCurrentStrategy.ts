@@ -10,7 +10,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 		const UIClassName = this.getClassNameOfTheVariableAtCurrentDocumentPosition();
 		if (UIClassName) {
-			fieldsAndMethods = this._destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
+			fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
 			if (fieldsAndMethods) {
 				this._filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods, UIClassName);
 			}
@@ -19,7 +19,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return fieldsAndMethods;
 	}
 
-	private _destructueFieldsAndMethodsAccordingToMapParams(className: string) {
+	public destructueFieldsAndMethodsAccordingToMapParams(className: string) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 		const classNamePartsFromFieldMap = className.split("__map__");
 		const classNamePartsFromMapParam = className.split("__mapparam__");
@@ -36,7 +36,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 					fieldsAndMethods.className = className;
 				}
 			}
-		} if (classNamePartsFromMapParam.length > 1) {
+		} else if (classNamePartsFromMapParam.length > 1) {
 			const className = classNamePartsFromMapParam.shift();
 			if (className) {
 				const mapFields = classNamePartsFromMapParam;
@@ -143,11 +143,11 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return UIClassName;
 	}
 
-	public acornGetClassName(className: string, position: number) {
+	public acornGetClassName(className: string, position: number, clearStack: boolean = true) {
 		let classNameOfTheCurrentVariable;
 		const stack = this.getStackOfNodesForPosition(className, position);
 		if (stack.length > 0) {
-			classNameOfTheCurrentVariable = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, undefined, true);
+			classNameOfTheCurrentVariable = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, undefined, clearStack);
 		}
 
 		return classNameOfTheCurrentVariable;
@@ -163,13 +163,21 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 			})?.value;
 
 			if (methodNode) {
-				const methodBody = methodNode.body?.body || [];
+				const methodBody = methodNode.body?.body || [methodNode];
 				const methodsParams = methodNode?.params || [];
 				const method = methodBody.concat(methodsParams);
 				const nodeWithCurrentPosition = AcornSyntaxAnalyzer.findAcornNode(method, position - 1);
 
 				if (nodeWithCurrentPosition) {
 					this._generateStackOfNodes(nodeWithCurrentPosition, position, stack, checkForLastPosition);
+				}
+			} else {
+				const UIDefineBody = UIClass.getUIDefineAcornBody();
+				if (UIDefineBody) {
+					const nodeWithCurrentPosition = AcornSyntaxAnalyzer.findAcornNode(UIDefineBody, position - 1);
+					if (nodeWithCurrentPosition) {
+						this._generateStackOfNodes(nodeWithCurrentPosition, position, stack, checkForLastPosition);
+					}
 				}
 			}
 		}

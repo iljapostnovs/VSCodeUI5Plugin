@@ -35,16 +35,15 @@ export class SignatureHelpProvider {
 					if (methodName && className) {
 						const method = AcornSyntaxAnalyzer.findMethodHierarchically(className, methodName);
 						if (method && method.params.length > 0) {
-							signatureHelp.activeParameter = callExpression?.arguments.length - 1 || 0;
+							const activeParameter = callExpression?.arguments.length - 1 < 0 ? 0 : callExpression?.arguments.length - 1;
+							signatureHelp.activeParameter = activeParameter;
 							const description = CustomUIClass.generateDescriptionForMethod(method);
 							const signature = new vscode.SignatureInformation(description || `${className} -> ${methodName}`);
 							signature.parameters = method.params.map(param => {
-								return new vscode.ParameterInformation(param, param/**this one is showing */);
+								return new vscode.ParameterInformation(param.name, param.description/**this one is showing */);
 							});
 							signature.documentation = method.description;
-
 							signatureHelp.signatures = [signature];
-
 
 							return signatureHelp;
 						}

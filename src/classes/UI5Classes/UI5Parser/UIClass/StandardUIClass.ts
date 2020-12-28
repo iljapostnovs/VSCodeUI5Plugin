@@ -78,7 +78,10 @@ export class StandardUIClass extends AbstractUIClass {
 					description: xmlnsData.value,
 					type: "string",
 					visibility: "public",
-					typeValues: [{text: xmlnsData.value, description: xmlnsData.value}]
+					typeValues: [{
+						text: xmlnsData.value,
+						description: xmlnsData.value
+					}]
 				});
 			});
 		}
@@ -92,10 +95,20 @@ export class StandardUIClass extends AbstractUIClass {
 		let classMethods:StandardClassUIMethod[] = [];
 		const SAPNode = this._findSAPNode(className);
 		classMethods = SAPNode?.getMethods().map((method: any) => {
+			let methodName = method.name.replace(`${this.className}.`, "");
+			if (methodName.indexOf(SAPNode.getMetadata()?.getRawMetadata()?.name) > -1) {
+				methodName = methodName.replace(SAPNode.getMetadata().getRawMetadata().name + ".", "");
+			}
 			return {
-				name: method.name.replace(`${this.className}.`, ""),
+				name: methodName,
 				description: `${StandardUIClass.removeTags(method.description)}`,
-				params: method.parameters ? method.parameters.map((parameter: any) => parameter.name + (parameter.optional ? "?" : "")) : [],
+				params: method.parameters?.map((parameter: any) => {
+					return {
+						name: parameter.name + (parameter.optional ? "?" : ""),
+						description: StandardUIClass.removeTags(parameter.description),
+						type: parameter.types[0]?.value || "any"
+					};
+				}) || [],
 				returnType: method.returnValue ? method.returnValue.type : "void",
 				isFromParent: !isParent,
 				api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name),
@@ -295,7 +308,13 @@ export class StandardUIClass extends AbstractUIClass {
 			this.methods.push({
 				name: "constructor",
 				description: StandardUIClass.removeTags(constructor.codeExample),
-				params: parameters,
+				params: parameters.map(param => {
+					return {
+						name: param,
+						description: "",
+						type: "any"
+					};
+				}),
 				returnType: this.className,
 				isFromParent: false,
 				api: URLBuilder.getInstance().getUrlForClassApi(this),

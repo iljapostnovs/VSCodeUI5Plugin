@@ -3,6 +3,7 @@ import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer"
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { URLBuilder } from "../utils/URLBuilder";
 
 export class JSHoverProvider {
 	static getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
@@ -17,18 +18,20 @@ export class JSHoverProvider {
 			UIClassFactory.setNewContentForCurrentUIClass();
 
 			const className = strategy.acornGetClassName(currentClassName, offset) || "";
-			const text = className && this._getTextIfItIsFieldOrMethodOfClass(className, word);
-			if (text) {
-				const textBefore = className === currentClassName ? "this." : `${className}.`;
+			const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
+			const text = fieldsAndMethods?.className && this._getTextIfItIsFieldOrMethodOfClass(fieldsAndMethods.className, word);
+			if (fieldsAndMethods && text) {
+				const textBefore = className === currentClassName ? "this." : `${fieldsAndMethods.className}.`;
 				const markdownString = this._getMarkdownFromText(textBefore + text);
 				hover = new vscode.Hover(markdownString);
 			} else {
 				const className = this._getClassNameForOffset(offset, currentClassName, word);
 				if (className) {
-					hover = new vscode.Hover({
-						language: "javascript",
-						value: `${word}: ${className}`
-					});
+					let text = `${word}: ${className}  \n`;
+					const UIClass = UIClassFactory.getUIClass(className);
+					text += URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass);
+					const markdownString = this._getMarkdownFromText(text);
+					hover = new vscode.Hover(markdownString);
 				} else {
 					const text = this._getTextIfItIsFieldOrMethodOfClass(currentClassName, word);
 					if (text) {
@@ -57,23 +60,26 @@ export class JSHoverProvider {
 	private static _getTextIfItIsFieldOrMethodOfClass(className: string, fieldOrMethodName: string) {
 		let text = "";
 
-		const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(className);
-		const method = fieldsAndMethods.methods.find(method => method.name === fieldOrMethodName);
-		const field = fieldsAndMethods.fields.find(field => field.name === fieldOrMethodName);
-		if (method) {
-			if (!method.returnType || method.returnType === "void") {
-				AcornSyntaxAnalyzer.findMethodReturnType(method, className, true);
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+		const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
+		if (fieldsAndMethods) {
+			const method = fieldsAndMethods.methods.find(method => method.name === fieldOrMethodName);
+			const field = fieldsAndMethods.fields.find(field => field.name === fieldOrMethodName);
+			if (method) {
+				if (!method.returnType || method.returnType === "void") {
+					AcornSyntaxAnalyzer.findMethodReturnType(method, className, true, true);
+				}
+				text += `${method.name}(${method.params.map(param => param.name).join(", ")}) : ${method.returnType}\n`;
+				if (method.api) {
+					text += method.api;
+				}
+				text += `${method.description}`;
+			} else if (field) {
+				if (!field.type) {
+					AcornSyntaxAnalyzer.findFieldType(field, className, true);
+				}
+				text = `${field.name} : ${field.type}`;
 			}
-			text += `${method.name}(${method.params.join(", ")}) : ${method.returnType}\n`;
-			if (method.api) {
-				text += method.api;
-			}
-			text += `${method.description}`;
-		} else if (field) {
-			if (!field.type) {
-				AcornSyntaxAnalyzer.findFieldType(field, className, true);
-			}
-			text = `${field.name} : ${field.type}`;
 		}
 
 		return text;
@@ -82,8 +88,13 @@ export class JSHoverProvider {
 	private static _getClassNameForOffset(offset: number, className: string, identifierName: string) {
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 		const method = AcornSyntaxAnalyzer.findAcornNode(UIClass.acornMethodsAndFields, offset);
-		if (method.value) {
-			const allContent = AcornSyntaxAnalyzer.expandAllContent(method.value);
+		let node = method?.value;
+		if (!node) {
+			const UIDefineBody = UIClass.getUIDefineAcornBody();
+			node = AcornSyntaxAnalyzer.findAcornNode(UIDefineBody, offset);
+		}
+		if (node) {
+			const allContent = AcornSyntaxAnalyzer.expandAllContent(node);
 			const identifier = allContent.find(content => content.type === "Identifier" && content.name === identifierName);
 			if (identifier) {
 				let position = identifier.end;
@@ -97,6 +108,12 @@ export class JSHoverProvider {
 					stack.push(identifier);
 				}
 				className = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, undefined, true);
+				if (className) {
+					const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
+					if (fieldsAndMethods) {
+						className = fieldsAndMethods.className;
+					}
+				}
 			} else {
 				className = "";
 			}

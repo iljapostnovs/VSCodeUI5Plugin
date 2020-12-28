@@ -42,6 +42,7 @@ export class UI5Plugin {
 					await this._registerProviders();
 					resolve();
 				} catch (error) {
+					console.error(error);
 					reject("Couldn't initialize plugin: " + JSON.stringify(error));
 				}
 			});

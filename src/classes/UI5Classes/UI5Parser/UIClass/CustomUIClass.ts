@@ -1,6 +1,6 @@
 import { FileReader } from "../../../utils/FileReader";
 import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
-import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam } from "./AbstractUIClass";
+import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam } from "./AbstractUIClass";
 const commentParser = require("comment-parser");
 const acornLoose = require("acorn-loose");
 
@@ -75,7 +75,8 @@ export class CustomUIClass extends AbstractUIClass {
 				.filter(node => {
 					const assignmentBody = node.expression.right;
 					return assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
-				}).map(node => ({
+				})
+				.map(node => ({
 					key: {
 						name: node.expression.left.property.name,
 						start: node.expression.left.property.start,
@@ -337,6 +338,22 @@ export class CustomUIClass extends AbstractUIClass {
 						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
+				} else if (property.value.type === "MemberExpression") {
+					this.fields.push({
+						name: property.key.name,
+						type: undefined,
+						description: "",
+						visibility: property.key.name.startsWith("_") ? "private" : "public"
+					});
+					this.acornMethodsAndFields.push(property);
+				} else if (property.value.type === "ArrayExpression") {
+					this.fields.push({
+						name: property.key.name,
+						type: "array",
+						description: "",
+						visibility: property.key.name.startsWith("_") ? "private" : "public"
+					});
+					this.acornMethodsAndFields.push(property);
 				}
 			});
 
@@ -365,14 +382,21 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private _generateParamTextForMethod(acornParams: any[]) {
-		const params: string[] = acornParams.map((param: any) => {
+		const params: UIMethodParam[] = acornParams.map((param: any) => {
+			let name = "";
 			if (param.type === "Identifier") {
-				return param.name || "Unknown";
+				name = param.name || "Unknown";
 			} else if (param.type === "AssignmentPattern") {
-				return param.left?.name || "Unknown";
+				name = param.left?.name || "Unknown";
 			} else {
-				return "Unknown";
+				name = "Unknown";
 			}
+
+			return {
+				name: name,
+				description: "",
+				type: param.jsType || "any"
+			};
 		});
 
 		return params;
@@ -426,7 +450,11 @@ export class CustomUIClass extends AbstractUIClass {
 				if (isMethod) {
 					const method: CustomClassUIMethod = {
 						name: name,
-						params: assignmentBody.params.map((param: any) => param.name),
+						params: assignmentBody.params.map((param: any) => ({
+							name: param.name,
+							description: `${param.name} parameter`,
+							type: param.jsType || ""
+						})),
 						returnType: assignmentBody.returnType || assignmentBody.async ? "Promise" : "void",
 						position: assignmentBody.start,
 						description: "",
@@ -448,7 +476,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	public static generateDescriptionForMethod(method: UIMethod) {
-		return `(${method.params.map(param => param).join(", ")}) : ${(method.returnType ? method.returnType : "void")}`;
+		return `(${method.params.map(param => param.name).join(", ")}) : ${(method.returnType ? method.returnType : "void")}`;
 	}
 
 	public fillTypesFromHungarionNotation() {
@@ -517,7 +545,11 @@ export class CustomUIClass extends AbstractUIClass {
 			aMethods.push({
 				name: setterName,
 				description: `Setter for property ${property.name}`,
-				params: [`v${propertyWithFirstBigLetter}`],
+				params: [{
+					name: `v${propertyWithFirstBigLetter}`,
+					type: "any",
+					description: "Property for setting its value"
+				}],
 				returnType: this.className,
 				visibility: property.visibility
 			});

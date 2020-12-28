@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
 import { FileReader } from "../../utils/FileReader";
 import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
-import { CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
+import { CustomClassUIMethod, CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { FieldPropertyMethodGetterStrategy } from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
 import { InnerPropertiesStrategy } from "./strategies/InnerPropertiesStrategy";
@@ -88,7 +88,7 @@ export class AcornSyntaxAnalyzer {
 			}
 		} else if (node.type === "ObjectExpression") {
 			innerNode = this.findAcornNode(node.properties, position)?.value;
-		} else if (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
+		} else if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
 			if (node.body) {
 				innerNode = this.findAcornNode([node.body], position);
 			}
@@ -143,11 +143,11 @@ export class AcornSyntaxAnalyzer {
 			return "";
 		}
 
-		const isGetViewException = this._checkForGetViewByIdException(stack);
+		const isGetViewException = this._checkForGetViewByIdException(stack, currentClassName);
 
 		//this.getView().byId("") exception
 		if (isGetViewException) {
-			currentClassName = this._getClassNameFromViewById(stack, currentClassName);
+			currentClassName = this._getClassNameFromViewById(stack, currentClassName, primaryClassName);
 			if (stack.length > 0) {
 				className = this.findClassNameForStack(stack, currentClassName, primaryClassName, false);
 			} else {
@@ -176,20 +176,31 @@ export class AcornSyntaxAnalyzer {
 					}
 
 					const callExpression = stack.shift();
-					const method = this.findMethodHierarchically(currentClassName, memberName);
-					if (method) {
-						if (currentClassName === "sap.ui.base.Event") {
-							stack.unshift(callExpression);
-							className = this._handleBaseEventException(currentNode, stack, primaryClassName);
-						}
-						if (!className) {
-							if (!method.returnType || method.returnType === "void") {
-								this.findMethodReturnType(method, currentClassName);
+					if (currentClassName === "sap.ui.core.UIComponent" && memberName === "getRouterFor") {
+						className = this._getClassNameOfTheRouterFromManifest(primaryClassName);
+					} else if (memberName === "getOwnerComponent") {
+						className = this._getClassNameOfTheComponent(primaryClassName);
+					} else if (memberName === "getModel" && callExpression.arguments) {
+						const modelName = callExpression.arguments[0]?.value || "";
+						className = this._getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
+					}
+
+					if (!className) {
+						const method = this.findMethodHierarchically(currentClassName, memberName);
+						if (method) {
+							if (currentClassName === "sap.ui.base.Event") {
+								stack.unshift(callExpression);
+								className = this._handleBaseEventException(currentNode, stack, primaryClassName);
 							}
-							className = method.returnType;
+							if (!className) {
+								if (!method.returnType || method.returnType === "void") {
+									this.findMethodReturnType(method, currentClassName);
+								}
+								className = method.returnType;
+							}
+						} else {
+							stack = [];
 						}
-					} else {
-						stack = [];
 					}
 				} else {
 					const field = this._findFieldHierarchically(currentClassName, memberName);
@@ -272,7 +283,89 @@ export class AcornSyntaxAnalyzer {
 			className = this.findClassNameForStack(stack, className, primaryClassName, false);
 		}
 
+		if (className && className.indexOf("|") > -1) {
+			className = className.split("|")[0];
+		}
+
 		return className;
+	}
+
+	private static _getClassNameOfTheModelFromManifest(modelName: string, className: string) {
+		let modelClassName = "";
+		const manifest = FileReader.getManifestForClass(className);
+		if (manifest && manifest.content["sap.ui5"]?.models) {
+			const modelEntry = manifest.content["sap.ui5"].models[modelName];
+			if (modelEntry?.type) {
+				modelClassName = modelEntry.type;
+			}
+		}
+
+		if (!modelClassName) {
+			const UIClass = UIClassFactory.getFieldsAndMethodsForClass(className);
+			const method = (<CustomClassUIMethod[]>UIClass.methods).find(method => {
+				let methodFound = false;
+				if (method.acornNode) {
+					const content = this.expandAllContent(method.acornNode);
+					const memberExpression: any = content.find(
+						content => content.type === "CallExpression" &&
+						content.callee?.property?.name === "setModel" &&
+						(content.arguments[1] && content.arguments[1].value || "") === modelName
+					);
+					methodFound = !!memberExpression;
+				}
+
+				return methodFound;
+			});
+
+			if (method?.acornNode) {
+				const content = this.expandAllContent(method.acornNode);
+				const memberExpression = content.find(content => content.type === "CallExpression" && content.callee?.property?.name === "setModel");
+				if (memberExpression && memberExpression.arguments[0]) {
+					const model = memberExpression.arguments[0];
+					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+					if (this.declarationStack.indexOf(model) === -1) {
+						this.declarationStack.push(model);
+						const stack = strategy.getStackOfNodesForPosition(className, model.end, true);
+						modelClassName = this.findClassNameForStack(stack, className) || "";
+					} else {
+						this.declarationStack = [];
+					}
+				}
+			}
+		}
+
+		return modelClassName;
+	}
+
+	private static _getClassNameOfTheRouterFromManifest(className: string) {
+		let routerClassName = "";
+
+		const manifest = FileReader.getManifestForClass(className);
+		if (manifest && manifest.content["sap.ui5"]?.routing?.config?.routerClass) {
+			routerClassName = manifest.content["sap.ui5"].routing.config.routerClass;
+		}
+
+		if (!routerClassName) {
+			const manifests = FileReader.getAllManifests();
+			const manifest = manifests.find(manifest => {
+				return manifest.content["sap.ui5"]?.routing?.config?.routerClass;
+			});
+			if (manifest) {
+				routerClassName = manifest.content["sap.ui5"].routing.config.routerClass;
+			}
+		}
+
+		return routerClassName;
+	}
+
+	private static _getClassNameOfTheComponent(className: string) {
+		let componentClassName = "";
+		const manifest = FileReader.getManifestForClass(className);
+		if (manifest && manifest.content["sap.app"]?.id) {
+			componentClassName = `${manifest.content["sap.app"]?.id}.Component`;
+		}
+
+		return componentClassName;
 	}
 
 	private static _handleBaseEventException(node: any, stack: any[], primaryClassName: string) {
@@ -483,57 +576,35 @@ export class AcornSyntaxAnalyzer {
 		return classNameParts.join(".");
 	}
 
-	private static _checkForGetViewByIdException(stack: any[]) {
-		let isGetViewByIdException = true;
-		if (stack.length >= 4) {
-			const [firstPart, secondPart, thirdPart, fourthPart] = stack;
-			isGetViewByIdException = isGetViewByIdException && firstPart.type === "MemberExpression";
-			isGetViewByIdException = isGetViewByIdException && secondPart.type === "CallExpression";
-			isGetViewByIdException = isGetViewByIdException && thirdPart.type === "MemberExpression";
-			isGetViewByIdException = isGetViewByIdException && fourthPart.type === "CallExpression";
-
-			isGetViewByIdException = isGetViewByIdException && firstPart.property?.name === "getView";
-			isGetViewByIdException = isGetViewByIdException && thirdPart.property?.name === "byId";
-		} else if (stack.length >= 3) {
-			const [firstPart, secondPart, thirdPart] = stack;
-			isGetViewByIdException = isGetViewByIdException && firstPart.type === "ThisExpression";
-			isGetViewByIdException = isGetViewByIdException && secondPart.type === "MemberExpression";
-			isGetViewByIdException = isGetViewByIdException && thirdPart.type === "CallExpression";
-
-			isGetViewByIdException = isGetViewByIdException && secondPart.property?.name === "byId";
-		} else {
-			isGetViewByIdException = false;
+	private static _checkForGetViewByIdException(stack: any[], className: string) {
+		let isGetViewByIdException = false;
+		if ((className === "sap.ui.core.mvc.View" || className === "sap.ui.core.Element") && stack.length > 0 && stack[0].property?.name === "byId") {
+			isGetViewByIdException = true;
 		}
 
 		return isGetViewByIdException;
 	}
 
-	private static _getClassNameFromViewById(stack: any[], currentClassName: string) {
+	private static _getClassNameFromViewById(stack: any[], currentClassName: string, currentControllerName: string) {
 		let className = "";
-		const isById = stack[1].property?.name === "byId";
-		const isGetViewById = stack[2].property?.name === "byId";
 
-		let callExpression;
-		let spliceQuantity;
+		if (stack.length > 1) {
+			const callExpression = stack[1];
 
-		if (isGetViewById) {
-			callExpression = stack[3];
-			spliceQuantity = 4;
-		} else if (isById) {
-			callExpression = stack[2];
-			spliceQuantity = 3;
-		}
-
-		stack.splice(0, spliceQuantity);
-		const controlId = callExpression.arguments[0]?.value;
-		if (controlId) {
-			className = FileReader.getClassNameFromView(currentClassName, controlId) || "";
+			stack.splice(0, 2);
+			const controlId = callExpression.arguments[0]?.value;
+			if (controlId) {
+				className = FileReader.getClassNameFromView(currentControllerName, controlId) || "";
+			}
 		}
 
 		return className;
 	}
 
-	public static findMethodReturnType(method: UIMethod, className: string, includeParentMethods: boolean = true) {
+	public static findMethodReturnType(method: UIMethod, className: string, includeParentMethods: boolean = true, clearStack: boolean = false) {
+		if (clearStack) {
+			this.declarationStack = [];
+		}
 		const UIClass = UIClassFactory.getUIClass(className);
 		if (method.returnType === "void") {
 
@@ -548,7 +619,6 @@ export class AcornSyntaxAnalyzer {
 
 					if (returnStatement) {
 						method.returnType = this._getClassNameFromAcornDeclaration(returnStatement.argument, UIClass) || "void";
-						//this.acornGetClassName(className, returnStatement.argument.end + 1) || "void";
 					}
 				}
 			}
@@ -559,8 +629,11 @@ export class AcornSyntaxAnalyzer {
 		}
 	}
 
-	public static findFieldType(field: UIField, className: string, includeParentMethods: boolean = true) {
+	public static findFieldType(field: UIField, className: string, includeParentMethods: boolean = true, clearStack: boolean = false) {
 		const UIClass = UIClassFactory.getUIClass(className);
+		if (clearStack) {
+			this.declarationStack = [];
+		}
 
 		const innerField = UIClass.fields.find(innerfield => innerfield.name === field.name);
 		if (innerField && innerField.type) {
@@ -577,6 +650,31 @@ export class AcornSyntaxAnalyzer {
 					});
 				} else if (property.value.type === "Identifier" && property.key.name === field.name) {
 					field.type = this._getClassNameFromUIDefineDotNotation(property.value.name, UIClass);
+				} else if (property.value.type === "MemberExpression" && property.key.name === field.name) {
+					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+					const stack = strategy.getStackOfNodesForPosition(className, property.value.end, true);
+					if (stack.length > 0) {
+						const lastMember = stack.pop();
+						const type = this.findClassNameForStack(stack, className);
+						if (type) {
+							const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(type);
+							const fieldFromAnotherClass = fieldsAndMethods?.fields.find(field => field.name === lastMember.property.name);
+							const methodFromAnotherClass = fieldsAndMethods?.methods.find(method => method.name === lastMember.property.name);
+							if (fieldFromAnotherClass) {
+								field.type = fieldFromAnotherClass.type;
+							} else if (methodFromAnotherClass) {
+								const UIClass = UIClassFactory.getUIClass(className);
+								UIClass.fields.splice(UIClass.fields.indexOf(field), 1);
+								UIClass.methods.push({
+									name: field.name,
+									description: field.description,
+									params: methodFromAnotherClass.params,
+									returnType: methodFromAnotherClass.returnType,
+									visibility: field.visibility
+								});
+							}
+						}
+					}
 				}
 				if (field.type) {
 					typeFound = true;
@@ -588,6 +686,9 @@ export class AcornSyntaxAnalyzer {
 
 		if (includeParentMethods && !field.type && UIClass.parentClassNameDotNotation) {
 			this.findFieldType(field, UIClass.parentClassNameDotNotation);
+		}
+		if (!field.type && UIClass instanceof CustomUIClass) {
+			field.type = CustomUIClass.getTypeFromHungarianNotation(field.name);
 		}
 	}
 
@@ -619,99 +720,103 @@ export class AcornSyntaxAnalyzer {
 	}
 
 	public static expandAllContent(node: any, content: any[] = []) {
-		//TODO: find out recursion reason, OrderItemGroupCRUDBehavior
 		if (content.indexOf(node) === -1) {
 			content.push(node);
-			let innerNodes: any[] = [];
-
-			if (node.type === "VariableDeclaration") {
-				if (node.declarations) {
-					innerNodes = [...node.declarations];
-				}
-			} else if (node.type === "VariableDeclarator") {
-				if (node.init) {
-					innerNodes.push(node.init);
-				}
-				if (node.id) {
-					innerNodes.push(node.id);
-				}
-			} else if (node.type === "CallExpression") {
-				innerNodes = [...node.arguments];
-				if (node.callee) {
-					innerNodes.push(node.callee);
-				}
-			} else if (node.type === "MemberExpression") {
-				innerNodes.push(node.object);
-				if (node.property) {
-					innerNodes.push(node.property);
-				}
-			} else if (node.type === "BinaryExpression") {
-				if (node.right) {
-					innerNodes.push(node.right);
-				}
-				if (node.left) {
-					innerNodes.push(node.left);
-				}
-			} else if (node.type === "ExpressionStatement") {
-				innerNodes.push(node.expression);
-			} else if (node.type === "ThisExpression") {
-				//
-			} else if (node.type === "AwaitExpression") {
-				innerNodes.push(node.argument);
-			} else if (node.type === "ArrayExpression") {
-				innerNodes = [...node.elements];
-			} else if (node.type === "TryStatement") {
-				innerNodes = [...node.block.body];
-				if (node.handler?.body?.body) {
-					innerNodes = innerNodes.concat(node.handler.body.body);
-				}
-				if (node.finalizer?.body) {
-					innerNodes = innerNodes.concat(node.finalizer.body.body);
-				}
-			} else if (node.type === "BlockStatement") {
-				innerNodes = [...node.body];
-			} else if (node.type === "ReturnStatement") {
-				innerNodes.push(node.argument);
-			} else if (node.type === "IfStatement") {
-				if (node.consequent) {
-					innerNodes = innerNodes.concat(node.consequent.body);
-				} else if (node.alternate) {
-					innerNodes.push(node.alternate);
-				} else if (node.body) {
-					innerNodes = innerNodes.concat(node.body);
-				}
-			} else if (node.type === "SwitchStatement") {
-				node.cases.forEach((body: any) => {
-					innerNodes.push(body.consequent);
-				});
-			} else if (node.type === "AssignmentExpression") {
-				innerNodes.push(node.right);
-			} else if (node.type === "NewExpression") {
-				if (node.callee) {
-					innerNodes.push(node.callee);
-				}
-				innerNodes = innerNodes.concat(node.arguments);
-			} else if (node.type === "ObjectExpression") {
-				innerNodes = node.properties.map((declaration: any) => declaration.value);
-			} else if (node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
-				innerNodes = [node.body].concat(node.params);
-			} else if (
-				node.type === "WhileStatement" ||
-				node.type === "DoWhileStatement" ||
-				node.type === "ForStatement" ||
-				node.type === "ForInStatement"
-			) {
-				innerNodes.push(node.body);
+		}
+		const innerNodes: any[] = this.getContent(node).filter(node => !content.includes(node));
+		innerNodes.forEach((node: any) => {
+			if (node) {
+				this.expandAllContent(node, content);
 			}
+		});
+		return content;
+	}
+	public static getContent(node: any) {
+		let innerNodes: any[] = [];
 
-			innerNodes.forEach((node: any) => {
-				if (node) {
-					this.expandAllContent(node, content);
-				}
+		if (node.type === "VariableDeclaration") {
+			if (node.declarations) {
+				innerNodes = [...node.declarations];
+			}
+		} else if (node.type === "VariableDeclarator") {
+			if (node.init) {
+				innerNodes.push(node.init);
+			}
+			if (node.id) {
+				innerNodes.push(node.id);
+			}
+		} else if (node.type === "CallExpression") {
+			innerNodes = [...node.arguments];
+			if (node.callee) {
+				innerNodes.push(node.callee);
+			}
+		} else if (node.type === "MemberExpression") {
+			innerNodes.push(node.object);
+			if (node.property) {
+				innerNodes.push(node.property);
+			}
+		} else if (node.type === "BinaryExpression") {
+			if (node.right) {
+				innerNodes.push(node.right);
+			}
+			if (node.left) {
+				innerNodes.push(node.left);
+			}
+		} else if (node.type === "ExpressionStatement") {
+			innerNodes.push(node.expression);
+		} else if (node.type === "ThisExpression") {
+			//
+		} else if (node.type === "AwaitExpression") {
+			innerNodes.push(node.argument);
+		} else if (node.type === "ArrayExpression") {
+			innerNodes = [...node.elements];
+		} else if (node.type === "TryStatement") {
+			innerNodes = [...node.block.body];
+			if (node.handler?.body) {
+				innerNodes = innerNodes.concat(node.handler.body);
+			}
+			if (node.finalizer?.body) {
+				innerNodes = innerNodes.concat(node.finalizer.body);
+			}
+		} else if (node.type === "BlockStatement") {
+			innerNodes = [...node.body];
+		} else if (node.type === "ReturnStatement") {
+			innerNodes.push(node.argument);
+		} else if (node.type === "IfStatement") {
+			if (node.consequent) {
+				innerNodes = innerNodes.concat(node.consequent.body);
+			} else if (node.alternate) {
+				innerNodes.push(node.alternate);
+			} else if (node.body) {
+				innerNodes = innerNodes.concat(node.body);
+			}
+		} else if (node.type === "SwitchStatement") {
+			node.cases.forEach((body: any) => {
+				innerNodes.push(body.consequent);
 			});
+		} else if (node.type === "AssignmentExpression") {
+			innerNodes.push(node.right);
+		} else if (node.type === "NewExpression") {
+			if (node.callee) {
+				innerNodes.push(node.callee);
+			}
+			innerNodes = innerNodes.concat(node.arguments);
+		} else if (node.type === "ObjectExpression") {
+			innerNodes = node.properties.map((declaration: any) => declaration.value);
+		} else if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
+			innerNodes = [node.body].concat(node.params);
+		} else if (
+			node.type === "WhileStatement" ||
+			node.type === "DoWhileStatement" ||
+			node.type === "ForStatement" ||
+			node.type === "ForInStatement"
+		) {
+			innerNodes.push(node.body);
 		}
 
-		return content;
+		innerNodes = innerNodes.filter(node => !!node);
+
+		return innerNodes;
 	}
 
 	private static _getClassNameFromAcornVariableDeclaration(declaration: any, UIClass: CustomUIClass) {
@@ -730,7 +835,7 @@ export class AcornSyntaxAnalyzer {
 				className = this._getClassNameFromUIDefineDotNotation(declaration.callee?.name, UIClass);
 			} else if (declaration?.type === "CallExpression" || declaration?.type === "MemberExpression" || declaration?.type === "Identifier") {
 				const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-				className = positionBeforeCurrentStrategy.acornGetClassName(UIClass.className, declaration.end + 1) || "";
+				className = positionBeforeCurrentStrategy.acornGetClassName(UIClass.className, declaration.end + 1, false) || "";
 			} else if (declaration?.type === "ArrayExpression") {
 				className = "array";
 				if (declaration.elements && declaration.elements.length > 0) {
@@ -748,7 +853,11 @@ export class AcornSyntaxAnalyzer {
 				className = typeof declaration.value;
 			} else if (declaration?.type === "ThisExpression") {
 				className = UIClass.className;
-			}
+			} else if (declaration?.type === "BinaryExpression") {
+				className = "boolean";
+			} //else if (declaration?.type === "LogicalExpression") {
+				// className = "boolean";
+			//}
 		}
 
 		return className;
