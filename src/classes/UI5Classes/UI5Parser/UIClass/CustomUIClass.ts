@@ -59,6 +59,11 @@ export class CustomUIClass extends AbstractUIClass {
 				node.value.type === "ArrowFunctionExpression"
 			) || [];
 
+			let fields = this.acornClassBody.properties?.filter((node: any) =>
+				node.value.type !== "FunctionExpression" &&
+				node.value.type !== "ArrowFunctionExpression"
+			) || [];
+
 			//static methods
 			//TODO: Move this
 			const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
@@ -107,6 +112,7 @@ export class CustomUIClass extends AbstractUIClass {
 					const isPrivate = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "private");
 					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
 					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
+					const fieldType = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "type");
 
 					if (paramTags) {
 						paramTags.forEach((tag: any) => {
@@ -126,6 +132,34 @@ export class CustomUIClass extends AbstractUIClass {
 						}
 						if (comment.jsdoc) {
 							UIMethod.description = comment.jsdoc.description;
+						}
+					}
+				}
+			});
+
+			fields.forEach((field: any) => {
+				const fieldName = field.key.name;
+				const comment = this.comments.find(comment => {
+					const positionDifference = field.start - comment.end;
+					return positionDifference < 15 && positionDifference > 0;
+				});
+				if (comment) {
+					const isPrivate = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "private");
+					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
+					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
+					const fieldType = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "type");
+					const UIField = this.fields.find(field => field.name === fieldName);
+					if (UIField) {
+						if (isPrivate || isPublic || isProtected) {
+							UIField.visibility = isPrivate ? "private" : isProtected ? "protected" : isPublic ? "public" : UIField.visibility;
+						}
+
+						if (comment.jsdoc) {
+							UIField.description = comment.jsdoc.description;
+						}
+
+						if (fieldType) {
+							UIField.type = fieldType.type;
 						}
 					}
 				}
