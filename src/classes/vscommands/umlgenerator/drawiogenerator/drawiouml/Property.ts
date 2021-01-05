@@ -24,7 +24,9 @@ export class Property implements IUMLGenerator, ITextLengthGettable {
 		const privateSign = isPrivate ? "-" : "+";
 		const value = `${privateSign} ${this.UIProperty.name}: ${this.UIProperty.type}`;
 
-		return value.replace(/\"/g, "").replace(/&/g, '&amp;')
+		return value
+		.replace(/\"/g, "")
+		.replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;')
