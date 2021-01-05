@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { CommandRegistrator } from "./classes/registrators/CommandRegistrator";
 import { CompletionItemRegistrator } from "./classes/registrators/CompletionItemRegistrator";
 import { DefinitionProviderRegistrator } from "./classes/registrators/DefinitionProviderRegistrator";
-import { FileWatcher } from "./classes/utils/FileWatcher";
+import { FileWatcherMediator } from "./classes/utils/FileWatcherMediator";
 import { SignatureHelpRegistrator } from "./classes/registrators/SignatureHelpRegistrator";
 import { DiagnosticsRegistrator } from "./classes/registrators/DiagnosticsRegistrator";
 import { CodeLensRegistrator } from "./classes/registrators/CodeLensRegistrator";
@@ -51,7 +51,7 @@ export class UI5Plugin {
 	private async _registerProviders() {
 		CommandRegistrator.register(false);
 		await CompletionItemRegistrator.register();
-		FileWatcher.register();
+		FileWatcherMediator.register();
 		CommandRegistrator.register(true);
 		DefinitionProviderRegistrator.register();
 		SignatureHelpRegistrator.register();

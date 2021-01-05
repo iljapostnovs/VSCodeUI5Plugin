@@ -3,6 +3,7 @@ import { FileReader } from "../../utils/FileReader";
 import { FileRenameHandler } from "./abstraction/FileRenameHandler";
 import * as fs from "fs";
 import * as path from "path";
+import { DiagnosticsRegistrator } from "../../registrators/DiagnosticsRegistrator";
 const fileSeparator = path.sep;
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -10,7 +11,11 @@ function escapeRegExp(string: string) {
 
 export class XMLFileRenameHandler extends FileRenameHandler {
 	handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri): void {
-		this._replaceViewNames(oldUri, newUri);
+		if (newUri.fsPath.endsWith(".view.xml")) {
+			this._replaceViewNames(oldUri, newUri);
+		}
+
+		DiagnosticsRegistrator.removeDiagnosticForUri(oldUri, "xml");
 	}
 
 

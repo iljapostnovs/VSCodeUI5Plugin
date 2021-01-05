@@ -12,10 +12,11 @@ import * as path from "path";
 import { TemplateGeneratorFactory } from "../templateinserters/TemplateGeneratorFactory";
 import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
 import { CustomCompletionItem } from "../vscodecompletionitems/CustomCompletionItem";
+import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 const fileSeparator = path.sep;
 const workspace = vscode.workspace;
 
-export class FileWatcher {
+export class FileWatcherMediator {
 	static register() {
 		let disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
 			ClearCacheCommand.reloadWindow();
@@ -63,6 +64,20 @@ export class FileWatcher {
 		});
 
 		UI5Plugin.getInstance().addDisposable(disposable);
+
+		//sync diagnostics with deleted/renamed files
+		disposable = vscode.workspace.onDidDeleteFiles(event => {
+			event.files.forEach(file => {
+				if (file.fsPath.endsWith(".js")) {
+					DiagnosticsRegistrator.removeDiagnosticForUri(file, "js");
+				}
+				if (file.fsPath.endsWith(".xml")) {
+					DiagnosticsRegistrator.removeDiagnosticForUri(file, "xml");
+				}
+			});
+		});
+
+		UI5Plugin.getInstance().addDisposable(disposable);
 	}
 
 	private static _handleFileRename(file: {
@@ -72,6 +87,7 @@ export class FileWatcher {
 		FileRenameMediator.handleFileRename(file);
 	}
 
+	//TODO: Move to js completion items
 	public static synchronizeJSDefineCompletionItems(completionItems: CustomCompletionItem[]) {
 		let disposable = workspace.onDidCreateFiles(event => {
 			event.files.forEach(file => {
