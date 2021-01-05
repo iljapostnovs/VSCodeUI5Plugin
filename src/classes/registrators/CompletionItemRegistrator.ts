@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { CompletionItemFactory } from "../vscodecompletionitems/CompletionItemFactory";
-import { FileWatcher } from "../utils/FileWatcher";
+import { FileWatcherMediator } from "../utils/FileWatcherMediator";
 import { UI5Plugin } from "../../UI5Plugin";
 import { GeneratorFactory } from "../vscodecompletionitems/completionitemfactories/codegenerators/GeneratorFactory";
 import { DefineGenerator } from "../vscodecompletionitems/completionitemfactories/codegenerators/define/UIDefineCompletionItemGenerator";
@@ -58,6 +58,6 @@ export class CompletionItemRegistrator {
 		UI5Plugin.getInstance().addDisposable(JSMethodPropertyProvider);
 		UI5Plugin.getInstance().addDisposable(JSViewIDProvider);
 
-		FileWatcher.synchronizeJSDefineCompletionItems(CompletionItemFactory.JSDefineCompletionItems);
+		FileWatcherMediator.synchronizeJSDefineCompletionItems(CompletionItemFactory.JSDefineCompletionItems);
 	}
 }

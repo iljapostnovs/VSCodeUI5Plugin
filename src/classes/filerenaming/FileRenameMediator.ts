@@ -12,7 +12,7 @@ export class FileRenameMediator {
 			jsFileRenameHandler.handleFileRename(file.oldUri, file.newUri);
 		}
 
-		if (file.newUri.fsPath.endsWith(".view.xml")) {
+		if (file.newUri.fsPath.endsWith(".xml")) {
 			const xmlFileRenameHandler = new XMLFileRenameHandler();
 			xmlFileRenameHandler.handleFileRename(file.oldUri, file.newUri);
 		}

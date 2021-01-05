@@ -51,6 +51,14 @@ export class DiagnosticsRegistrator {
 		UI5Plugin.getInstance().addDisposable(textDocumentChange);
 	}
 
+	public static removeDiagnosticForUri(uri: vscode.Uri, type: string) {
+		if (type === "js") {
+			jsDiagnosticCollection.delete(uri);
+		} else if (type === "xml") {
+			xmlDiagnosticCollection.delete(uri);
+		}
+	}
+
 	private static _timeoutId: NodeJS.Timeout | null;
 	private static _updateXMLDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
 		const isXMLDiagnosticsEnabled = vscode.workspace.getConfiguration("ui5.plugin").get("xmlDiagnostics");

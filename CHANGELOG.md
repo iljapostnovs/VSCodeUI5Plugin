@@ -1,3 +1,6 @@
+## 0.11.9 (05-01-2021)
+* Sync JS and XML diagnostics with file renaming/deletion
+
 ## 0.11.8 (28-12-2020)
 * @type JSDoc tag support for class fields
 * Bugfixes for JS hover provider
