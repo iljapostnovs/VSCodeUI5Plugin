@@ -47,6 +47,31 @@ export class DiagnosticsRegistrator {
 			}
 		});
 
+		//sync diagnostics with deleted/renamed files
+		let disposable = vscode.workspace.onDidDeleteFiles(event => {
+			event.files.forEach(file => {
+				if (file.fsPath.endsWith(".js")) {
+					jsDiagnosticCollection.delete(file);
+				}
+				if (file.fsPath.endsWith(".xml")) {
+					xmlDiagnosticCollection.delete(file);
+				}
+			});
+		});
+
+		UI5Plugin.getInstance().addDisposable(disposable);
+
+		disposable = vscode.workspace.onDidRenameFiles(event => {
+			event.files.forEach(file => {
+				if (file.oldUri.fsPath.endsWith(".js")) {
+					jsDiagnosticCollection.delete(file.oldUri);
+				}
+				if (file.oldUri.fsPath.endsWith(".xml")) {
+					xmlDiagnosticCollection.delete(file.oldUri);
+				}
+			});
+		});
+
 		UI5Plugin.getInstance().addDisposable(changeActiveTextEditor);
 		UI5Plugin.getInstance().addDisposable(textDocumentChange);
 	}
