@@ -7,46 +7,46 @@ import { FileReader } from "../../../utils/FileReader";
 const aXmlnsData = [{
 	tag: "xmlns",
 	value: "sap.m"
-},{
+}, {
 	tag: "xmlns:f",
 	value: "sap.f"
-},{
+}, {
 	tag: "xmlns:c",
 	value: "sap.ui.core"
-},{
+}, {
 	tag: "xmlns:l",
 	value: "sap.ui.layout"
-},{
+}, {
 	tag: "xmlns:tnt",
 	value: "sap.tnt"
-},{
+}, {
 	tag: "xmlns:table",
 	value: "sap.ui.table"
-},{
+}, {
 	tag: "xmlns:unified",
 	value: "sap.ui.unified"
-},{
+}, {
 	tag: "xmlns:viz",
 	value: "sap.viz"
-},{
+}, {
 	tag: "xmlns:chart",
 	value: "sap.chart"
-},{
+}, {
 	tag: "xmlns:gantt",
 	value: "sap.gantt"
-},{
+}, {
 	tag: "xmlns:ovp",
 	value: "sap.ovp"
-},{
+}, {
 	tag: "xmlns:mc",
 	value: "sap.suite.ui.microchart"
-},{
+}, {
 	tag: "xmlns:commons",
 	value: "sap.ui.commons"
-},{
+}, {
 	tag: "xmlns:comp",
 	value: "sap.ui.comp"
-},{
+}, {
 	tag: "xmlns:uxap",
 	value: "sap.uxap"
 }];
@@ -58,16 +58,20 @@ export class StandardUIClass extends AbstractUIClass {
 	constructor(className: string) {
 		super(className);
 
-		this._fillParentClassName();
-		this._fillMethods();
-		this._fillProperties();
-		this._fillFields();
-		this._fillEvents();
-		this._fillAggregations();
-		this._fullAssociations();
-		this._fillConstructor();
+		this.classExists = !!this._findSAPNode(this.className);
 
-		this._enrichWithXmlnsProperties();
+		if (this.classExists) {
+			this._fillParentClassName();
+			this._fillMethods();
+			this._fillProperties();
+			this._fillFields();
+			this._fillEvents();
+			this._fillAggregations();
+			this._fullAssociations();
+			this._fillConstructor();
+
+			this._enrichWithXmlnsProperties();
+		}
 	}
 
 	private _enrichWithXmlnsProperties() {
@@ -92,7 +96,7 @@ export class StandardUIClass extends AbstractUIClass {
 	}
 
 	private _getStandardClassMethods(className: string, isParent: boolean) {
-		let classMethods:StandardClassUIMethod[] = [];
+		let classMethods: StandardClassUIMethod[] = [];
 		const SAPNode = this._findSAPNode(className);
 		classMethods = SAPNode?.getMethods().map((method: any) => {
 			let methodName = method.name.replace(`${this.className}.`, "");
@@ -157,7 +161,7 @@ export class StandardUIClass extends AbstractUIClass {
 
 	private _fillFields() {
 		const SAPNode = this._findSAPNode(this.className);
-		this.fields = SAPNode?.getFields().reduce((accumulator: UIField[], {name, type, description, visibility}:any) => {
+		this.fields = SAPNode?.getFields().reduce((accumulator: UIField[], { name, type, description, visibility }: any) => {
 			const additionalDescription = this._generateAdditionalDescriptionFrom(type);
 			accumulator.push({
 				name: name,
@@ -176,7 +180,7 @@ export class StandardUIClass extends AbstractUIClass {
 	private _getStandardClassProperties(className: string) {
 		let classProperties: UIProperty[] = [];
 		const SAPNode = this._findSAPNode(className);
-		classProperties = SAPNode?.getProperties().reduce((accumulator: UIProperty[], {name, type, description, visibility}:any) => {
+		classProperties = SAPNode?.getProperties().reduce((accumulator: UIProperty[], { name, type, description, visibility }: any) => {
 			const additionalDescription = this._generateAdditionalDescriptionFrom(type);
 			accumulator.push({
 				name: name,
@@ -236,12 +240,12 @@ export class StandardUIClass extends AbstractUIClass {
 				description: StandardUIClass.removeTags(event.description),
 				visibility: event.visibility,
 				params: event?.parameters?.filter((parameter: any) => parameter.depth === 2)
-				.map((parameter: any) => {
-					return {
-						name: parameter.name,
-						type: parameter.type
-					};
-				})
+					.map((parameter: any) => {
+						return {
+							name: parameter.name,
+							type: parameter.type
+						};
+					})
 			});
 			return accumulator;
 		}, []) || [];
@@ -281,7 +285,7 @@ export class StandardUIClass extends AbstractUIClass {
 		let classAssociation: UIAssociation[] = [];
 		const SAPNode = this._findSAPNode(className);
 
-		classAssociation = SAPNode?.getAssociations().reduce((accumulator: UIAssociation[], association:any) => {
+		classAssociation = SAPNode?.getAssociations().reduce((accumulator: UIAssociation[], association: any) => {
 			accumulator.push({
 				name: association.name,
 				type: association.type,

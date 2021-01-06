@@ -12,7 +12,7 @@ export class SAPNodeDAO {
 	private _nodes: any;
 	private static readonly _SAPNodes: SAPNode[] = [];
 	private static readonly _flatSAPNodes: LooseNodeObject = {};
-	constructor() {}
+	constructor() { }
 
 	public async getAllNodes() {
 		if (SAPNodeDAO._SAPNodes.length === 0) {
@@ -101,7 +101,7 @@ export class SAPNodeDAO {
 		this._nodes = data;
 	}
 
-	public findNode(name: string) {
+	public findNode(name: string): SAPNode | undefined {
 		return SAPNodeDAO._flatSAPNodes[name];
 	}
 }

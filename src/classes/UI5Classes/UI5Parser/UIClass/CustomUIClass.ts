@@ -8,6 +8,9 @@ interface UIDefine {
 	path: string;
 	className: string;
 	classNameDotNotation: string;
+	start: number;
+	end: number;
+	acornNode: any;
 }
 interface LooseObject {
 	[key: string]: any;
@@ -60,7 +63,7 @@ export class CustomUIClass extends AbstractUIClass {
 				node.value.type === "ArrowFunctionExpression"
 			) || [];
 
-			let fields = this.acornClassBody.properties?.filter((node: any) =>
+			const fields = this.acornClassBody.properties?.filter((node: any) =>
 				node.value.type !== "FunctionExpression" &&
 				node.value.type !== "ArrowFunctionExpression"
 			) || [];
@@ -70,30 +73,30 @@ export class CustomUIClass extends AbstractUIClass {
 			const UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
 			if (UIDefineBody && this.classBodyAcornVariableName) {
 				const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
-					return 	node.type === "ExpressionStatement" &&
-							(
-								node.expression?.left?.object?.name === this.classBodyAcornVariableName ||
-								node.expression?.left?.object?.object?.name === this.classBodyAcornVariableName
-							);
+					return node.type === "ExpressionStatement" &&
+						(
+							node.expression?.left?.object?.name === this.classBodyAcornVariableName ||
+							node.expression?.left?.object?.object?.name === this.classBodyAcornVariableName
+						);
 				});
 
 				const staticMethods = thisClassVariableAssignments
-				.filter(node => {
-					const assignmentBody = node.expression.right;
-					return assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
-				})
-				.map(node => ({
-					key: {
-						name: node.expression.left.property.name,
-						start: node.expression.left.property.start,
-						end: node.expression.left.property.end,
-						type:'Identifier'
-					},
-					value: node.expression.right,
-					start: node.expression.left.object.start,
-					end: node.expression.right.end,
-					type: "Property"
-				}));
+					.filter(node => {
+						const assignmentBody = node.expression.right;
+						return assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
+					})
+					.map(node => ({
+						key: {
+							name: node.expression.left.property.name,
+							start: node.expression.left.property.start,
+							end: node.expression.left.property.end,
+							type: 'Identifier'
+						},
+						value: node.expression.right,
+						start: node.expression.left.object.start,
+						end: node.expression.right.end,
+						type: "Property"
+					}));
 				methods = methods.concat(staticMethods);
 			}
 
@@ -207,7 +210,6 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 		this.classText = documentText || "";
 		if (documentText) {
-
 			try {
 				this.fileContent = acornLoose.parse(documentText, {
 					ecmaVersion: 11,
@@ -227,6 +229,8 @@ export class CustomUIClass extends AbstractUIClass {
 				console.error(error);
 				this.fileContent = null;
 			}
+		} else {
+			this.classExists = false;
 		}
 	}
 
@@ -238,11 +242,14 @@ export class CustomUIClass extends AbstractUIClass {
 			if (args && args.length === 2) {
 				const UIDefinePaths: string[] = args[0].elements?.map((part: any) => part.value) || [];
 				const UIDefineClassNames: string[] = args[1].params?.map((part: any) => part.name) || [];
-				UIDefine = UIDefineClassNames.map((className, index) : UIDefine => {
+				UIDefine = UIDefineClassNames.map((className, index): UIDefine => {
 					return {
 						path: UIDefinePaths[index],
 						className: className,
-						classNameDotNotation: UIDefinePaths[index] ? UIDefinePaths[index].replace(/\//g, ".") : ""
+						classNameDotNotation: UIDefinePaths[index] ? UIDefinePaths[index].replace(/\//g, ".") : "",
+						start: args[0].elements[index].start,
+						end: args[0].elements[index].end,
+						acornNode: args[0].elements[index]
 					};
 				});
 			}
@@ -274,7 +281,7 @@ export class CustomUIClass extends AbstractUIClass {
 		return returnKeyword;
 	}
 
-	private _getClassBodyFromPartAcorn(part: any, partParent: any) : any {
+	private _getClassBodyFromPartAcorn(part: any, partParent: any): any {
 		let classBody: any;
 
 		if (part.type === "CallExpression") {
@@ -288,10 +295,10 @@ export class CustomUIClass extends AbstractUIClass {
 			classBody = part;
 		} else if (part.type === "Identifier") {
 			const variable = partParent.body
-			.filter((body: any) => body.type === "VariableDeclaration")
-			.find((variable: any) =>
-				variable.declarations.find((declaration: any) => declaration.id.name === part.name)
-			);
+				.filter((body: any) => body.type === "VariableDeclaration")
+				.find((variable: any) =>
+					variable.declarations.find((declaration: any) => declaration.id.name === part.name)
+				);
 
 			if (variable) {
 				const neededDeclaration = variable.declarations.find((declaration: any) => declaration.id.name === part.name);
@@ -321,17 +328,17 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	public isAssignmentStatementForThisVariable(node: any) {
-		return 	node.type === "AssignmentExpression" &&
-				node.operator === "=" &&
-				node.left?.type === "MemberExpression" &&
-				node.left?.property?.name &&
-				node.left?.object?.type === "ThisExpression";
+		return node.type === "AssignmentExpression" &&
+			node.operator === "=" &&
+			node.left?.type === "MemberExpression" &&
+			node.left?.property?.name &&
+			node.left?.object?.type === "ThisExpression";
 	}
 	private _fillMethodsAndFields() {
 		if (this.acornClassBody?.properties) {
 			this.acornClassBody.properties?.forEach((property: any) => {
 				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
-					const assignmentExpressions = AcornSyntaxAnalyzer.expandAllContent(property.value.body).filter((node:any) => node.type === "AssignmentExpression");
+					const assignmentExpressions = AcornSyntaxAnalyzer.expandAllContent(property.value.body).filter((node: any) => node.type === "AssignmentExpression");
 					assignmentExpressions?.forEach((node: any) => {
 						if (this.isAssignmentStatementForThisVariable(node)) {
 							this.fields.push({
@@ -471,11 +478,11 @@ export class CustomUIClass extends AbstractUIClass {
 
 		if (UIDefineBody && this.classBodyAcornVariableName) {
 			const thisClassVariableAssignments: any[] = UIDefineBody.filter((node: any) => {
-				return 	node.type === "ExpressionStatement" &&
-						(
-							node.expression?.left?.object?.name === this.classBodyAcornVariableName ||
-							node.expression?.left?.object?.object?.name === this.classBodyAcornVariableName
-						);
+				return node.type === "ExpressionStatement" &&
+					(
+						node.expression?.left?.object?.name === this.classBodyAcornVariableName ||
+						node.expression?.left?.object?.object?.name === this.classBodyAcornVariableName
+					);
 			});
 
 			thisClassVariableAssignments?.forEach(node => {
@@ -524,7 +531,7 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	public static getTypeFromHungarianNotation(variable: string) : string | undefined {
+	public static getTypeFromHungarianNotation(variable: string): string | undefined {
 		let type;
 
 		if (variable.length >= 2) {
@@ -604,22 +611,22 @@ export class CustomUIClass extends AbstractUIClass {
 			let aMethods: method[] = [];
 			if (aggregation.multiple) {
 				aMethods = [
-					{name: `get${aggregationWithFirstBigLetter}s`, returnType: `${aggregation.type}[]`},
-					{name: `add${aggregationWithFirstBigLetter}`, returnType: this.className},
-					{name: `insert${aggregationWithFirstBigLetter}`, returnType: this.className},
-					{name: `indexOf${aggregationWithFirstBigLetter}`, returnType: `int`},
-					{name: `remove${aggregationWithFirstBigLetter}`, returnType: `${aggregation.type}`},
-					{name: `removeAll${aggregationWithFirstBigLetter}s`, returnType: `${aggregation.type}[]`},
-					{name: `destroy${aggregationWithFirstBigLetter}s`, returnType: this.className},
-					{name: `bind${aggregationWithFirstBigLetter}s`, returnType: this.className},
-					{name: `unbind${aggregationWithFirstBigLetter}s`, returnType: this.className}
+					{ name: `get${aggregationWithFirstBigLetter}s`, returnType: `${aggregation.type}[]` },
+					{ name: `add${aggregationWithFirstBigLetter}`, returnType: this.className },
+					{ name: `insert${aggregationWithFirstBigLetter}`, returnType: this.className },
+					{ name: `indexOf${aggregationWithFirstBigLetter}`, returnType: `int` },
+					{ name: `remove${aggregationWithFirstBigLetter}`, returnType: `${aggregation.type}` },
+					{ name: `removeAll${aggregationWithFirstBigLetter}s`, returnType: `${aggregation.type}[]` },
+					{ name: `destroy${aggregationWithFirstBigLetter}s`, returnType: this.className },
+					{ name: `bind${aggregationWithFirstBigLetter}s`, returnType: this.className },
+					{ name: `unbind${aggregationWithFirstBigLetter}s`, returnType: this.className }
 				];
 			} else {
 				aMethods = [
-					{name: `get${aggregationWithFirstBigLetter}`, returnType: `${aggregation.type}`},
-					{name: `set${aggregationWithFirstBigLetter}`, returnType: this.className},
-					{name: `bind${aggregationWithFirstBigLetter}`, returnType: this.className},
-					{name: `unbind${aggregationWithFirstBigLetter}`, returnType: this.className}
+					{ name: `get${aggregationWithFirstBigLetter}`, returnType: `${aggregation.type}` },
+					{ name: `set${aggregationWithFirstBigLetter}`, returnType: this.className },
+					{ name: `bind${aggregationWithFirstBigLetter}`, returnType: this.className },
+					{ name: `unbind${aggregationWithFirstBigLetter}`, returnType: this.className }
 				];
 			}
 
