@@ -1,3 +1,7 @@
+## 0.11.10 (07-01-2021)
+* Wrong SAP UI Define import linting added
+* Bugfixes
+
 ## 0.11.9 (05-01-2021)
 * Sync JS and XML diagnostics with file renaming/deletion
 

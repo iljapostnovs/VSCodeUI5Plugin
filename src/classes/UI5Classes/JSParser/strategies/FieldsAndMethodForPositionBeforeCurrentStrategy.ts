@@ -60,9 +60,11 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 			}
 		} else {
 			if (className.endsWith("[]")) {
-				className = "array";
+				fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass("array");
+				fieldsAndMethods.className = className;
+			} else {
+				fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(className);
 			}
-			fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(className);
 		}
 
 		return fieldsAndMethods;

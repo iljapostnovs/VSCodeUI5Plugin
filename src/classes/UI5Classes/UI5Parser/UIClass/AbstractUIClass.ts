@@ -59,6 +59,7 @@ export interface UIAssociation {
 	singularName: string;
 }
 export abstract class AbstractUIClass {
+	public classExists: boolean;
 	public className: string;
 	public methods: UIMethod[] = [];
 	public fields: UIField[] = [];
@@ -70,6 +71,7 @@ export abstract class AbstractUIClass {
 
 	constructor(className: string, documentText?: string) {
 		this.className = className;
+		this.classExists = true;
 	}
 
 	protected generateTypeValues(type: string) {
@@ -77,11 +79,11 @@ export abstract class AbstractUIClass {
 
 		if (type === "boolean") {
 			typeValues = [
-				{text: "true", description: "boolean true"},
-				{text: "false", description: "boolean false"}
+				{ text: "true", description: "boolean true" },
+				{ text: "false", description: "boolean false" }
 			];
 		} else if (type === "sap.ui.core.URI") {
-			typeValues = SAPIcons.icons.map(icon => ({text: icon, description: icon}));
+			typeValues = SAPIcons.icons.map(icon => ({ text: icon, description: icon }));
 		} else if (type === "string") {
 			// const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
 			// if (currentComponentName) {
