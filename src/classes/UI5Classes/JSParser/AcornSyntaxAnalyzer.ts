@@ -582,7 +582,7 @@ export class AcornSyntaxAnalyzer {
 
 	private static _checkForGetViewByIdException(stack: any[], className: string) {
 		let isGetViewByIdException = false;
-		if ((className === "sap.ui.core.mvc.View" || className === "sap.ui.core.Element") && stack.length > 0 && stack[0].property?.name === "byId") {
+		if ((className === "sap.ui.core.mvc.View" || className === "sap.ui.core.Element" || UIClassFactory.isClassAExtendedByClassB(className, "sap.ui.core.mvc.Controller")) && stack.length > 0 && stack[0].property?.name === "byId") {
 			isGetViewByIdException = true;
 		}
 
