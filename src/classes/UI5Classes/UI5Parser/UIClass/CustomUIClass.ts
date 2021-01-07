@@ -242,16 +242,18 @@ export class CustomUIClass extends AbstractUIClass {
 			if (args && args.length === 2) {
 				const UIDefinePaths: string[] = args[0].elements?.map((part: any) => part.value) || [];
 				const UIDefineClassNames: string[] = args[1].params?.map((part: any) => part.name) || [];
-				UIDefine = UIDefineClassNames.map((className, index): UIDefine => {
-					return {
-						path: UIDefinePaths[index],
-						className: className,
-						classNameDotNotation: UIDefinePaths[index] ? UIDefinePaths[index].replace(/\//g, ".") : "",
-						start: args[0].elements[index].start,
-						end: args[0].elements[index].end,
-						acornNode: args[0].elements[index]
-					};
-				});
+				UIDefine = UIDefinePaths
+					.filter(path => !!path)
+					.map((classPath, index): UIDefine => {
+						return {
+							path: classPath,
+							className: UIDefineClassNames[index],
+							classNameDotNotation: classPath.replace(/\//g, "."),
+							start: args[0].elements[index].start,
+							end: args[0].elements[index].end,
+							acornNode: args[0].elements[index]
+						};
+					});
 			}
 		}
 
