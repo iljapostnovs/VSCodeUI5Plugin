@@ -1,7 +1,7 @@
 import { FileReader } from "../../../utils/FileReader";
 import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam } from "./AbstractUIClass";
-const commentParser = require("comment-parser");
+import commentParser = require("comment-parser");
 const acornLoose = require("acorn-loose");
 
 interface UIDefine {
@@ -219,7 +219,7 @@ export class CustomUIClass extends AbstractUIClass {
 								text: text,
 								start: start,
 								end: end,
-								jsdoc: commentParser(`/*${text}*/`)[0]
+								jsdoc: commentParser.parse(`/*${text}*/`)[0]
 							});
 						}
 
