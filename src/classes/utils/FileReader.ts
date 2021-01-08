@@ -118,7 +118,7 @@ export class FileReader {
 					};
 					this._manifests.push(UIManifest);
 				} catch (error) {
-					vscode.window.showErrorMessage(`Couldn't read manifest.json. Error message: ${JSON.stringify(error)}`);
+					vscode.window.showErrorMessage(`Couldn't read manifest.json. Error message: ${error?.message || ""}`);
 					throw error;
 				}
 			}
