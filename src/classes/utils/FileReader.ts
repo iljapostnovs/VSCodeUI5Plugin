@@ -108,14 +108,19 @@ export class FileReader {
 		for (const wsFolder of wsFolders) {
 			const manifests = this.getManifestsInWorkspaceFolder(wsFolder);
 			for (const manifest of manifests) {
-				const UI5Manifest: any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
-				const manifestFsPath: string = manifest.fsPath.replace(`${fileSeparator}manifest.json`, "");
-				const UIManifest = {
-					componentName: UI5Manifest["sap.app"].id,
-					fsPath: manifestFsPath,
-					content: UI5Manifest
-				};
-				this._manifests.push(UIManifest);
+				try {
+					const UI5Manifest: any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
+					const manifestFsPath: string = manifest.fsPath.replace(`${fileSeparator}manifest.json`, "");
+					const UIManifest = {
+						componentName: UI5Manifest["sap.app"].id,
+						fsPath: manifestFsPath,
+						content: UI5Manifest
+					};
+					this._manifests.push(UIManifest);
+				} catch (error) {
+					vscode.window.showErrorMessage(`Couldn't read manifest.json. Error message: ${JSON.stringify(error)}`)
+					throw error;
+				}
 			}
 		}
 	}
@@ -273,13 +278,13 @@ export class FileReader {
 		if (currentManifest) {
 			className =
 				fsPath
-				.replace(currentManifest.fsPath, currentManifest.componentName)
-				.replace(".controller", "")
-				.replace(".view.xml", "")
-				.replace("fragment.xml", "")
-				.replace(".xml", "")
-				.replace(".js","")
-				.replace(new RegExp(`${escapedFileSeparator}`, "g"), ".");
+					.replace(currentManifest.fsPath, currentManifest.componentName)
+					.replace(".controller", "")
+					.replace(".view.xml", "")
+					.replace("fragment.xml", "")
+					.replace(".xml", "")
+					.replace(".js", "")
+					.replace(new RegExp(`${escapedFileSeparator}`, "g"), ".");
 		}
 
 		return className;
@@ -289,9 +294,9 @@ export class FileReader {
 		let cache;
 		const cachePath =
 			cacheType === FileReader.CacheType.Metadata ? this._getMetadataCachePath() :
-			cacheType === FileReader.CacheType.APIIndex ? this._getAPIIndexCachePath() :
-			cacheType === FileReader.CacheType.Icons ? this._getIconCachePath() :
-			null;
+				cacheType === FileReader.CacheType.APIIndex ? this._getAPIIndexCachePath() :
+					cacheType === FileReader.CacheType.Icons ? this._getIconCachePath() :
+						null;
 
 		if (cachePath && fs.existsSync(cachePath)) {
 			const fileText = fs.readFileSync(cachePath, "utf8");
@@ -308,9 +313,9 @@ export class FileReader {
 	static setCache(cacheType: FileReader.CacheType, cache: string) {
 		const cachePath =
 			cacheType === FileReader.CacheType.Metadata ? this._getMetadataCachePath() :
-			cacheType === FileReader.CacheType.APIIndex ? this._getAPIIndexCachePath() :
-			cacheType === FileReader.CacheType.Icons ? this._getIconCachePath() :
-			null;
+				cacheType === FileReader.CacheType.APIIndex ? this._getAPIIndexCachePath() :
+					cacheType === FileReader.CacheType.Icons ? this._getIconCachePath() :
+						null;
 
 		if (cachePath) {
 			if (!fs.existsSync(cachePath)) {
