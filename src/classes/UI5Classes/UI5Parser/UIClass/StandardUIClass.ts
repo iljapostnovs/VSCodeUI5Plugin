@@ -110,7 +110,8 @@ export class StandardUIClass extends AbstractUIClass {
 					return {
 						name: parameter.name + (parameter.optional ? "?" : ""),
 						description: StandardUIClass.removeTags(parameter.description),
-						type: parameter.types[0]?.value || "any"
+						type: parameter.types[0]?.value || "any",
+						isOptional: parameter.optional || false
 					};
 				}) || [],
 				returnType: method.returnValue ? method.returnValue.type : "void",
@@ -307,7 +308,7 @@ export class StandardUIClass extends AbstractUIClass {
 			const codeExample = StandardUIClass.removeTags(constructor.codeExample);
 			let parameterText = MainLooper.getEndOfChar("(", ")", codeExample);
 			parameterText = parameterText.substring(1, parameterText.length - 1); //remove ()
-			const parameters = parameterText.split(", ");
+			const parameters = parameterText ? parameterText.split(", ") : [];
 
 			this.methods.push({
 				name: "constructor",
@@ -316,7 +317,8 @@ export class StandardUIClass extends AbstractUIClass {
 					return {
 						name: param,
 						description: "",
-						type: "any"
+						type: "any",
+						isOptional: param.endsWith("?")
 					};
 				}),
 				returnType: this.className,

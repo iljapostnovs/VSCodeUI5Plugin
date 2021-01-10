@@ -116,7 +116,8 @@ export class CustomUIClass extends AbstractUIClass {
 					const isPrivate = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "private");
 					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
 					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
-					const fieldType = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "type");
+					// const fieldType = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "type");
+
 
 					if (paramTags) {
 						paramTags.forEach((tag: any) => {
@@ -136,6 +137,15 @@ export class CustomUIClass extends AbstractUIClass {
 						}
 						if (comment.jsdoc) {
 							UIMethod.description = comment.jsdoc.description;
+						}
+
+						if (paramTags) {
+							UIMethod.params.forEach((param, i) => {
+								const jsDocParam = paramTags[i];
+								if (jsDocParam) {
+									param.isOptional = jsDocParam.optional;
+								}
+							});
 						}
 					}
 				}
@@ -441,7 +451,8 @@ export class CustomUIClass extends AbstractUIClass {
 			return {
 				name: name,
 				description: "",
-				type: param.jsType || "any"
+				type: param.jsType || "any",
+				isOptional: false
 			};
 		});
 
@@ -594,7 +605,8 @@ export class CustomUIClass extends AbstractUIClass {
 				params: [{
 					name: `v${propertyWithFirstBigLetter}`,
 					type: "any",
-					description: "Property for setting its value"
+					description: "Property for setting its value",
+					isOptional: false
 				}],
 				returnType: this.className,
 				visibility: property.visibility

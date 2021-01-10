@@ -17,7 +17,8 @@ const classData: {[key: string]: {methods: UIMethod[], fields: UIField[]}} = {
 			params: [{
 				name: "fnThen",
 				description: "",
-				type: "function"
+				type: "function",
+				isOptional: false
 			}],
 			description: "Promise .then",
 			returnType: "Promise",
@@ -28,7 +29,8 @@ const classData: {[key: string]: {methods: UIMethod[], fields: UIField[]}} = {
 			params: [{
 				name: "fnCatch",
 				description: "",
-				type: "function"
+				type: "function",
+				isOptional: false
 			}],
 			description: "Promise .catch",
 			returnType: "Promise",
@@ -39,7 +41,8 @@ const classData: {[key: string]: {methods: UIMethod[], fields: UIField[]}} = {
 			params: [{
 				name: "fnFinally",
 				description: "",
-				type: "function"
+				type: "function",
+				isOptional: false
 			}],
 			description: "Promise .finally",
 			returnType: "Promise",
@@ -50,9 +53,18 @@ const classData: {[key: string]: {methods: UIMethod[], fields: UIField[]}} = {
 	array: {
 		methods: getAllFuncs([]).reduce((accumulator: UIMethod[], key: any) => {
 			if (Array.prototype[key] instanceof Function) {
+				const params = [];
+				for (let i = 0; i < Array.prototype[key].length; i++) {
+					params.push({
+						name: `param${i}`,
+						description: "generic param for array method",
+						type: "any",
+						isOptional: false
+					});
+				}
 				accumulator.push({
 					name: key,
-					params: [],
+					params: params,
 					description: key,
 					returnType: "array",
 					visibility: "public"
