@@ -45,6 +45,32 @@ export class WrongParametersLinter extends Linter {
 												});
 											}
 										}
+
+										params.forEach((param: any, i: number) => {
+											const paramFromMethod = method.params[i];
+											if (paramFromMethod && paramFromMethod.type !== "any") {
+												let classNameOfTheParam = AcornSyntaxAnalyzer.findClassNameForStack([param], className);
+												if (!classNameOfTheParam) {
+													classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromAcornDeclaration(param, UIClass);
+												}
+												if (classNameOfTheParam && paramFromMethod.type !== classNameOfTheParam && this._additionalTypeCheck(paramFromMethod.type, classNameOfTheParam)) {
+													const positionStart = LineColumn(UIClass.classText).fromIndex(param.start);
+													const positionEnd = LineColumn(UIClass.classText).fromIndex(param.end);
+													if (positionStart && positionEnd) {
+														errors.push({
+															acornNode: param,
+															code: "",
+															message: `Param "${paramFromMethod.name}" is of type "${classNameOfTheParam}", but expected "${paramFromMethod.type}"`,
+															range: new vscode.Range(
+																new vscode.Position(positionStart.line - 1, positionStart.col - 1),
+																new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
+															),
+														});
+													}
+												}
+											}
+
+										});
 									}
 								}
 							}
@@ -55,5 +81,30 @@ export class WrongParametersLinter extends Linter {
 		}
 
 		return errors;
+	}
+
+	private _additionalTypeCheck(expectedClass: string, actualClass: string) {
+		let classesDiffers = true;
+
+		if (expectedClass.endsWith("[]")) {
+			expectedClass = "array";
+		}
+		if (actualClass.endsWith("[]")) {
+			actualClass = "array";
+		}
+
+		if (expectedClass.toLowerCase() === "object" && actualClass.toLowerCase() === "map") {
+			classesDiffers = false;
+		} else if (expectedClass.toLowerCase() === "any" || actualClass.toLowerCase() === "any") {
+			classesDiffers = false;
+		} else if (expectedClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(actualClass, "sap.ui.base.Object")) {
+			classesDiffers = false;
+		} else if (actualClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(expectedClass, "sap.ui.base.Object")) {
+			classesDiffers = false;
+		} else {
+			classesDiffers = !UIClassFactory.isClassAExtendedByClassB(expectedClass, actualClass);
+		}
+
+		return classesDiffers;
 	}
 }

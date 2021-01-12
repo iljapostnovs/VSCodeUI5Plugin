@@ -118,14 +118,13 @@ export class CustomUIClass extends AbstractUIClass {
 					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
 					// const fieldType = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "type");
 
-
-					if (paramTags) {
+					const UIMethod = this.methods.find(method => method.name === methodName);
+					if (paramTags && UIMethod) {
 						paramTags.forEach((tag: any) => {
-							this._fillParamJSTypesFromTag(tag, params);
+							this._fillParamJSTypesFromTag(tag, params, UIMethod);
 						});
 					}
 
-					const UIMethod = this.methods.find(method => method.name === methodName);
 					if (UIMethod) {
 						if (isPrivate || isPublic || isProtected) {
 							UIMethod.visibility = isPrivate ? "private" : isProtected ? "protected" : isPublic ? "public" : UIMethod.visibility;
@@ -181,7 +180,7 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private _fillParamJSTypesFromTag(tag: any, params: any[]) {
+	private _fillParamJSTypesFromTag(tag: any, params: any[], method: CustomClassUIMethod) {
 		const tagNameParts = tag.name.split(".");
 		if (tagNameParts.length > 1) {
 			const paramName = tagNameParts.shift();
@@ -197,6 +196,11 @@ export class CustomUIClass extends AbstractUIClass {
 			const param = params.find((param: any) => param.name === tag.name);
 			if (param) {
 				param.jsType = tag.type;
+			}
+
+			const UIParam = method.params.find(param => param.name = tag.name);
+			if (UIParam && param.jsType) {
+				UIParam.type = param.jsType;
 			}
 		}
 	}
