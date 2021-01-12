@@ -154,17 +154,21 @@ export class XMLParser {
 
 	static getIfPositionIsInString(XMLViewText: string, position: number) {
 		let quotionMarkCount = 0;
+		let secondTypeQuotionMarkCount = 0;
 
 		let i = 0;
 		while (i < position) {
 			if (XMLViewText[i] === "\"") {
 				quotionMarkCount++;
 			}
+			if (XMLViewText[i] === "'") {
+				secondTypeQuotionMarkCount++;
+			}
 
 			i++;
 		}
 
-		return quotionMarkCount % 2 === 1;
+		return quotionMarkCount % 2 === 1 || secondTypeQuotionMarkCount % 2 === 1;
 	}
 
 	static getTagPrefix(tagText: string) {

@@ -40,7 +40,8 @@ export class XMLFormatter {
 					newTag = newTag.trimRight();
 				}
 				newTag += tagAttributes.reduce((accumulator, tagAttribute) => {
-					accumulator += `${indentation}\t${tagAttribute}\n`;
+					const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
+					accumulator += `${indentation}\t${tagData.attributeName}="${tagData.attributeValue}"\n`;
 					if (tagAttributes.length === 1) {
 						accumulator = ` ${accumulator.trimLeft()}`;
 					}
@@ -107,7 +108,7 @@ export class XMLFormatter {
 	}
 
 	private static _getTagAttributes(tag: string) {
-		const tagAttributes = tag.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g) || [];
+		const tagAttributes = tag.match(/((?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?")|((?<=\s)(\w|:)*(\s?)=(\s?)'(\s|.)*?')/g) || [];
 
 		return tagAttributes;
 	}
