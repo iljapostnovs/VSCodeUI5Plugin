@@ -1,6 +1,5 @@
-## 0.11.11 (07-01-2021)
+## 0.11.11 (13-01-2021)
 * Bugfixes
-* Wrong method parameter JS Linter added
 
 ## 0.11.10 (07-01-2021)
 * Wrong SAP UI Define import linting added
