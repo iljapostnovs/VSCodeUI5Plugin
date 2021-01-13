@@ -279,6 +279,7 @@ export class AcornSyntaxAnalyzer {
 
 			}
 		}
+
 		if (className && stack.length > 0) {
 			className = this.findClassNameForStack(stack, className, primaryClassName, false);
 		}
@@ -622,7 +623,7 @@ export class AcornSyntaxAnalyzer {
 					const returnStatement = methodBody?.find((bodyPart: any) => bodyPart.type === "ReturnStatement");
 
 					if (returnStatement) {
-						method.returnType = this._getClassNameFromAcornDeclaration(returnStatement.argument, UIClass) || "void";
+						method.returnType = this.getClassNameFromAcornDeclaration(returnStatement.argument, UIClass) || "void";
 					}
 				}
 			}
@@ -649,7 +650,7 @@ export class AcornSyntaxAnalyzer {
 					const assignmentExpressions = this.expandAllContent(property.value.body).filter((node: any) => node.type === "AssignmentExpression");
 					assignmentExpressions.forEach((node: any) => {
 						if (UIClass.isAssignmentStatementForThisVariable(node) && node?.left?.property?.name === field.name) {
-							field.type = this._getClassNameFromAcornDeclaration(node.right, UIClass);
+							field.type = this.getClassNameFromAcornDeclaration(node.right, UIClass);
 						}
 					});
 				} else if (property.value.type === "Identifier" && property.key.name === field.name) {
@@ -824,12 +825,12 @@ export class AcornSyntaxAnalyzer {
 	}
 
 	private static _getClassNameFromAcornVariableDeclaration(declaration: any, UIClass: CustomUIClass) {
-		return this._getClassNameFromAcornDeclaration(declaration.init, UIClass);
+		return this.getClassNameFromAcornDeclaration(declaration.init, UIClass);
 	}
 
 	public static declarationStack: any[] = [];
 
-	private static _getClassNameFromAcornDeclaration(declaration: any, UIClass: CustomUIClass) {
+	public static getClassNameFromAcornDeclaration(declaration: any, UIClass: CustomUIClass) {
 		let className = "";
 		if (this.declarationStack.indexOf(declaration) > -1) {
 			this.declarationStack = [];
@@ -857,9 +858,9 @@ export class AcornSyntaxAnalyzer {
 				className = typeof declaration.value;
 			} else if (declaration?.type === "ThisExpression") {
 				className = UIClass.className;
-			} else if (declaration?.type === "BinaryExpression") {
-				className = "boolean";
-			} //else if (declaration?.type === "LogicalExpression") {
+			} //else if (declaration?.type === "BinaryExpression") {
+				//className = "boolean";
+			//} //else if (declaration?.type === "LogicalExpression") {
 				// className = "boolean";
 			//}
 		}

@@ -4,13 +4,15 @@ import { WrongFieldMethodLinter } from "./parts/WrongFieldMethodLinter";
 import * as vscode from "vscode";
 import { WrongClassNameLinter } from "./parts/WrongClassNameLinter";
 import { WrongImportLinter } from "./parts/WrongImportLinter";
+import { WrongParametersLinter } from "./parts/WrongParametersLinter";
 
 export class JSLinter {
 	static getLintingErrors(document: vscode.TextDocument): Error[] {
 		const linters: Linter[] = [
 			new WrongFieldMethodLinter(),
 			new WrongClassNameLinter(),
-			new WrongImportLinter()
+			new WrongImportLinter()//,
+			//new WrongParametersLinter()
 		];
 
 		let errors: Error[] = [];

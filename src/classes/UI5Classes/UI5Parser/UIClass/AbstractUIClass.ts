@@ -3,6 +3,7 @@ import { SAPIcons } from "../../SAPIcons";
 export interface UIMethodParam {
 	name: string;
 	description: string;
+	isOptional: boolean;
 	type: string;
 }
 
