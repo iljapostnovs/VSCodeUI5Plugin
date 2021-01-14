@@ -621,6 +621,7 @@ export class CustomUIClass extends AbstractUIClass {
 	private _fillAggregationMethods(additionalMethods: CustomClassUIMethod[]) {
 		interface method {
 			name: string;
+			params: UIMethodParam[];
 			returnType: string;
 		}
 		this.aggregations?.forEach(aggregation => {
@@ -629,22 +630,114 @@ export class CustomUIClass extends AbstractUIClass {
 			let aMethods: method[] = [];
 			if (aggregation.multiple) {
 				aMethods = [
-					{ name: `get${aggregationWithFirstBigLetter}s`, returnType: `${aggregation.type}[]` },
-					{ name: `add${aggregationWithFirstBigLetter}`, returnType: this.className },
-					{ name: `insert${aggregationWithFirstBigLetter}`, returnType: this.className },
-					{ name: `indexOf${aggregationWithFirstBigLetter}`, returnType: `int` },
-					{ name: `remove${aggregationWithFirstBigLetter}`, returnType: `${aggregation.type}` },
-					{ name: `removeAll${aggregationWithFirstBigLetter}s`, returnType: `${aggregation.type}[]` },
-					{ name: `destroy${aggregationWithFirstBigLetter}s`, returnType: this.className },
-					{ name: `bind${aggregationWithFirstBigLetter}s`, returnType: this.className },
-					{ name: `unbind${aggregationWithFirstBigLetter}s`, returnType: this.className }
+					{
+						name: `get${aggregationWithFirstBigLetter}s`,
+						returnType: `${aggregation.type}[]`,
+						params: []
+					},
+					{
+						name: `add${aggregationWithFirstBigLetter}`,
+						returnType: this.className,
+						params: [{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: aggregation.type,
+							description: aggregation.type,
+							isOptional: false
+						}]
+					},
+					{
+						name: `insert${aggregationWithFirstBigLetter}`,
+						returnType: this.className,
+						params: [{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: aggregation.type,
+							description: aggregation.type,
+							isOptional: false
+						},{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: "number",
+							description: "index the item should be inserted at",
+							isOptional: false
+						}]
+					},
+					{
+						name: `indexOf${aggregationWithFirstBigLetter}`,
+						returnType: `int`,
+						params: [{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: aggregation.type,
+							description: aggregation.type,
+							isOptional: false
+						}]
+					},
+					{
+						name: `remove${aggregationWithFirstBigLetter}`,
+						returnType: `${aggregation.type}`,
+						params: [{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: aggregation.type,
+							description: aggregation.type,
+							isOptional: false
+						}]
+					},
+					{
+						name: `removeAll${aggregationWithFirstBigLetter}s`,
+						returnType: `${aggregation.type}[]`,
+						params: []
+					},
+					{ name:
+						`destroy${aggregationWithFirstBigLetter}s`,
+						returnType: this.className,
+						params: []
+					},
+					{
+						name: `bind${aggregationWithFirstBigLetter}s`,
+						returnType: this.className,
+						params: [{
+							name: `oBindingInfo`,
+							type: "object",
+							description: "The binding information",
+							isOptional: false
+						}]
+					},
+					{
+						name: `unbind${aggregationWithFirstBigLetter}s`,
+						returnType: this.className,
+						params: []
+					}
 				];
 			} else {
 				aMethods = [
-					{ name: `get${aggregationWithFirstBigLetter}`, returnType: `${aggregation.type}` },
-					{ name: `set${aggregationWithFirstBigLetter}`, returnType: this.className },
-					{ name: `bind${aggregationWithFirstBigLetter}`, returnType: this.className },
-					{ name: `unbind${aggregationWithFirstBigLetter}`, returnType: this.className }
+					{
+						name: `get${aggregationWithFirstBigLetter}`,
+						returnType: `${aggregation.type}`,
+						params: []
+					},
+					{
+						name: `set${aggregationWithFirstBigLetter}`,
+						returnType: this.className,
+						params: [{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: aggregation.type,
+							description: aggregation.type,
+							isOptional: false
+						}]
+					},
+					{
+						name: `bind${aggregationWithFirstBigLetter}`,
+						returnType: this.className,
+						params: [{
+							name: `oBindingInfo`,
+							type: "object",
+							description: "The binding information",
+							isOptional: false
+						}]
+					},
+					{
+						name: `unbind${aggregationWithFirstBigLetter}`,
+						returnType: this.className,
+						params: []
+					}
 				];
 			}
 
@@ -652,7 +745,7 @@ export class CustomUIClass extends AbstractUIClass {
 				additionalMethods.push({
 					name: method.name,
 					description: `Generic method from ${aggregation.name} aggregation`,
-					params: [],
+					params: method.params,
 					returnType: method.returnType,
 					visibility: aggregation.visibility
 				});
@@ -814,7 +907,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 				const UIAggregations: UIAggregation = {
 					name: aggregationName,
-					type: aggregationType,
+					type: aggregationType || "any",
 					multiple: multiple,
 					singularName: singularName,
 					description: "",

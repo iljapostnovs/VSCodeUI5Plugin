@@ -34,7 +34,7 @@ export interface UIProperty {
 }
 export interface UIAggregation {
 	name: string;
-	type: string | undefined;
+	type: string;
 	multiple: boolean;
 	singularName: string;
 	visibility: string;
