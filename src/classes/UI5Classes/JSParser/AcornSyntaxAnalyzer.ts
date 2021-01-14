@@ -245,10 +245,12 @@ export class AcornSyntaxAnalyzer {
 								className = `${className}__mapparam__${fields}`;
 								stack = [];
 							}
+
 							//if variable is the variable of current class
 							if (!className && currentNode.name === UIClass.classBodyAcornVariableName) {
 								className = UIClass.className;
 							}
+
 							//if variable is part of .map, .forEach etc
 							if (!className && currentClassName) {
 								className = this._getClassNameIfNodeIsParamOfArrayMethod(currentNode, currentClassName);
@@ -309,8 +311,8 @@ export class AcornSyntaxAnalyzer {
 					const content = this.expandAllContent(method.acornNode);
 					const memberExpression: any = content.find(
 						content => content.type === "CallExpression" &&
-						content.callee?.property?.name === "setModel" &&
-						(content.arguments[1] && content.arguments[1].value || "") === modelName
+							content.callee?.property?.name === "setModel" &&
+							(content.arguments[1] && content.arguments[1].value || "") === modelName
 					);
 					methodFound = !!memberExpression;
 				}
@@ -859,9 +861,9 @@ export class AcornSyntaxAnalyzer {
 			} else if (declaration?.type === "ThisExpression") {
 				className = UIClass.className;
 			} //else if (declaration?.type === "BinaryExpression") {
-				//className = "boolean";
+			//className = "boolean";
 			//} //else if (declaration?.type === "LogicalExpression") {
-				// className = "boolean";
+			// className = "boolean";
 			//}
 		}
 

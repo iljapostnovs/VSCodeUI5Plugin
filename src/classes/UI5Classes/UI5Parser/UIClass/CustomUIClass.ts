@@ -196,7 +196,7 @@ export class CustomUIClass extends AbstractUIClass {
 			const param = params.find((param: any) => param.name === tag.name);
 			if (param) {
 				param.jsType = tag.type;
-				const UIParam = method.params.find(param => param.name = tag.name);
+				const UIParam = method.params.find(param => param.name === tag.name);
 				if (UIParam && param.jsType) {
 					UIParam.type = param.jsType;
 				}
@@ -665,16 +665,48 @@ export class CustomUIClass extends AbstractUIClass {
 		this.events?.forEach(event => {
 			const eventWithFirstBigLetter = `${event.name[0].toUpperCase()}${event.name.substring(1, event.name.length)}`;
 			const aEventMethods = [
-				`fire${eventWithFirstBigLetter}`,
-				`attach${eventWithFirstBigLetter}`,
-				`detach${eventWithFirstBigLetter}`
+				{
+					name: `fire${eventWithFirstBigLetter}`,
+					params: [{
+						name: "mEventParams",
+						type: "map",
+						isOptional: true,
+						description: "Event params"
+					}]
+				}, {
+					name: `attach${eventWithFirstBigLetter}`,
+					params: [{
+						name: "fnHandler",
+						type: "function",
+						isOptional: false,
+						description: "Event Handler"
+					}, {
+						name: "oContext",
+						type: "object",
+						isOptional: true,
+						description: "context of the event handler"
+					}]
+				}, {
+					name: `detach${eventWithFirstBigLetter}`,
+					params: [{
+						name: "fnHandler",
+						type: "function",
+						isOptional: false,
+						description: "Event Handler"
+					}, {
+						name: "oContext",
+						type: "object",
+						isOptional: true,
+						description: "context of the event handler"
+					}]
+				}
 			];
 
 			aEventMethods?.forEach(eventMethod => {
 				aMethods.push({
-					name: eventMethod,
+					name: eventMethod.name,
 					description: `Generic method for event ${event.name}`,
-					params: [],
+					params: eventMethod.params,
 					returnType: this.className,
 					visibility: event.visibility
 				});
