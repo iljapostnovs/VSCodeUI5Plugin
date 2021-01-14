@@ -102,7 +102,7 @@ export class WrongParametersLinter extends Linter {
 		} else if (actualClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(expectedClass, "sap.ui.base.Object")) {
 			classesDiffers = false;
 		} else {
-			classesDiffers = !UIClassFactory.isClassAExtendedByClassB(expectedClass, actualClass);
+			classesDiffers = !UIClassFactory.isClassAExtendedByClassB(actualClass, expectedClass);
 		}
 
 		return classesDiffers;

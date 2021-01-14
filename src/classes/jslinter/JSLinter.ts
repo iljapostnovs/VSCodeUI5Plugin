@@ -20,7 +20,7 @@ export class JSLinter {
 			linters.forEach(linter => {
 				errors = errors.concat(linter.getErrors(document));
 			});
-		} catch(error) {
+		} catch (error) {
 			console.error(error);
 		}
 
