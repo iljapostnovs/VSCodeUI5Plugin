@@ -37,7 +37,7 @@ export class WrongParametersLinter extends Linter {
 												errors.push({
 													acornNode: call,
 													code: "",
-													message: `Method "${methodName}" has ${methodParams.length} param(s), but you provided ${params.length}`,
+													message: `Method "${methodName}" has ${mandatoryMethodParams.length} mandatory param(s), but you provided ${params.length}`,
 													range: new vscode.Range(
 														new vscode.Position(positionStart.line - 1, positionStart.col - 1),
 														new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
@@ -53,19 +53,27 @@ export class WrongParametersLinter extends Linter {
 												if (!classNameOfTheParam) {
 													classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromAcornDeclaration(param, UIClass);
 												}
-												if (classNameOfTheParam && paramFromMethod.type !== classNameOfTheParam && this._additionalTypeCheck(paramFromMethod.type, classNameOfTheParam)) {
-													const positionStart = LineColumn(UIClass.classText).fromIndex(param.start);
-													const positionEnd = LineColumn(UIClass.classText).fromIndex(param.end);
-													if (positionStart && positionEnd) {
-														errors.push({
-															acornNode: param,
-															code: "",
-															message: `Param "${paramFromMethod.name}" is of type "${classNameOfTheParam}", but expected "${paramFromMethod.type}"`,
-															range: new vscode.Range(
-																new vscode.Position(positionStart.line - 1, positionStart.col - 1),
-																new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-															),
-														});
+
+												if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
+													const paramFromMethodTypes = paramFromMethod.type.split("|");
+													let typeMismatch = !paramFromMethodTypes.includes(classNameOfTheParam);
+													if (typeMismatch) {
+														typeMismatch = !!paramFromMethodTypes.find(className => this._getIfClassesDiffers(className, classNameOfTheParam));
+													}
+													if (typeMismatch) {
+														const positionStart = LineColumn(UIClass.classText).fromIndex(param.start);
+														const positionEnd = LineColumn(UIClass.classText).fromIndex(param.end);
+														if (positionStart && positionEnd) {
+															errors.push({
+																acornNode: param,
+																code: "",
+																message: `Param "${paramFromMethod.name}" is of type "${classNameOfTheParam}", but expected "${paramFromMethod.type}"`,
+																range: new vscode.Range(
+																	new vscode.Position(positionStart.line - 1, positionStart.col - 1),
+																	new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
+																),
+															});
+														}
 													}
 												}
 											}
@@ -83,7 +91,7 @@ export class WrongParametersLinter extends Linter {
 		return errors;
 	}
 
-	private _additionalTypeCheck(expectedClass: string, actualClass: string) {
+	private _getIfClassesDiffers(expectedClass: string, actualClass: string) {
 		let classesDiffers = true;
 
 		if (expectedClass.endsWith("[]")) {

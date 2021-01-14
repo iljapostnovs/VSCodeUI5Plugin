@@ -284,9 +284,9 @@ export class AcornSyntaxAnalyzer {
 			className = this.findClassNameForStack(stack, className, primaryClassName, false);
 		}
 
-		if (className && className.indexOf("|") > -1) {
-			className = className.split("|")[0];
-		}
+		// if (className && className.indexOf("|") > -1) {
+		// 	className = className.split("|")[0];
+		// }
 
 		return className;
 	}
