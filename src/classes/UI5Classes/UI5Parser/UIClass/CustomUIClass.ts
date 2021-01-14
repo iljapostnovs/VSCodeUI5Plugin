@@ -196,12 +196,12 @@ export class CustomUIClass extends AbstractUIClass {
 			const param = params.find((param: any) => param.name === tag.name);
 			if (param) {
 				param.jsType = tag.type;
+				const UIParam = method.params.find(param => param.name = tag.name);
+				if (UIParam && param.jsType) {
+					UIParam.type = param.jsType;
+				}
 			}
 
-			const UIParam = method.params.find(param => param.name = tag.name);
-			if (UIParam && param.jsType) {
-				UIParam.type = param.jsType;
-			}
 		}
 	}
 
