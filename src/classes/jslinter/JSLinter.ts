@@ -11,8 +11,8 @@ export class JSLinter {
 		const linters: Linter[] = [
 			new WrongFieldMethodLinter(),
 			new WrongClassNameLinter(),
-			new WrongImportLinter()//,
-			//new WrongParametersLinter()
+			new WrongImportLinter(),
+			new WrongParametersLinter()
 		];
 
 		let errors: Error[] = [];
@@ -20,7 +20,7 @@ export class JSLinter {
 			linters.forEach(linter => {
 				errors = errors.concat(linter.getErrors(document));
 			});
-		} catch(error) {
+		} catch (error) {
 			console.error(error);
 		}
 
