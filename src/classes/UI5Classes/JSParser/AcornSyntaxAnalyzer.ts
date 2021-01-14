@@ -154,6 +154,7 @@ export class AcornSyntaxAnalyzer {
 				className = currentClassName;
 			}
 		} else {
+			let temporaryCurrentClassName = currentClassName;
 			//the rest of the cases
 			const currentNode = stack.shift();
 			if (currentNode.type === "ThisExpression") {
@@ -220,7 +221,6 @@ export class AcornSyntaxAnalyzer {
 					}
 				}
 			} else if (currentNode.type === "Identifier") {
-				let temporaryCurrentClassName = currentClassName;
 				if (currentNode.name === "sap") {
 					className = this._generateSAPStandardClassNameFromStack(stack);
 				} else {
@@ -264,11 +264,6 @@ export class AcornSyntaxAnalyzer {
 					}
 				}
 
-				temporaryCurrentClassName = this._handleArrayMethods(stack, temporaryCurrentClassName, className);
-				if (temporaryCurrentClassName) {
-					className = temporaryCurrentClassName;
-				}
-
 			} else if (currentNode.type === "NewExpression") {
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				if (currentNode.callee?.type === "Identifier") {
@@ -279,6 +274,11 @@ export class AcornSyntaxAnalyzer {
 					className = this.findClassNameForStack(newStack, currentClassName, primaryClassName, false);
 				}
 
+			}
+
+			temporaryCurrentClassName = this._handleArrayMethods(stack, primaryClassName, className);
+			if (temporaryCurrentClassName) {
+				className = temporaryCurrentClassName;
 			}
 		}
 
