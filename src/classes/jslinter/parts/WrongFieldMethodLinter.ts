@@ -56,13 +56,12 @@ export class WrongFieldMethodLinter extends Linter {
 			let nodeStack = strategy.getStackOfNodesForPosition(currentClassName, node.end);
 			if (nodeStack.length > 0) {
 				const nodes = [];
-				while(nodeStack.length > 0) {
+				while (nodeStack.length > 0) {
 					nodes.push(nodeStack.shift());
 					const className = AcornSyntaxAnalyzer.findClassNameForStack(nodes.concat([]), currentClassName, currentClassName, true);
 					const isException = this._checkIfClassNameIsException(className);
 					if (className && !isException) {
-						const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
-
+						const classNames = className.split("|");
 						let nextNode = nodeStack[0];
 						if (nextNode?.type === "CallExpression") {
 							nextNode = nodeStack.shift();
@@ -70,28 +69,37 @@ export class WrongFieldMethodLinter extends Linter {
 						if (!nextNode) {
 							nextNode = node;
 						}
-						if (nextNode && fieldsAndMethods) {
-							const nextNodeName = nextNode.property?.name;
-							const isMethodException = this._checkIfMethodNameIsException(className, nextNodeName);
-							if (nextNodeName && !isMethodException) {
-								const method = fieldsAndMethods.methods.find(method => method.name === nextNodeName);
-								const field = fieldsAndMethods.fields.find(field => field.name === nextNodeName);
-								if (!method && !field) {
-									const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
-									if (position) {
-										errors.push({
-											message: `"${nextNodeName}" does not exist in "${className}"`,
-											code: "",
-											range: new vscode.Range(
-												new vscode.Position(position.line - 1, position.col),
-												new vscode.Position(position.line - 1, position.col + nextNodeName.length)
-											),
-											acornNode: nextNode
-										});
-										nodeStack = [];
+						const nextNodeName = nextNode.property?.name;
+						const isMethodException = this._checkIfMethodNameIsException(className, nextNodeName);
+
+						if (nextNodeName && !isMethodException) {
+							const fieldsAndMethods = classNames.map(className => strategy.destructueFieldsAndMethodsAccordingToMapParams(className));
+							const singleFieldsAndMethods = fieldsAndMethods.find(fieldsAndMethods => {
+								if (nextNode && fieldsAndMethods) {
+									if (nextNodeName) {
+										const method = fieldsAndMethods.methods.find(method => method.name === nextNodeName);
+										const field = fieldsAndMethods.fields.find(field => field.name === nextNodeName);
+										return method || field;
 									}
 								}
 
+								return false;
+							});
+
+							if (!singleFieldsAndMethods) {
+								const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
+								if (position) {
+									errors.push({
+										message: `"${nextNodeName}" does not exist in "${className}"`,
+										code: "",
+										range: new vscode.Range(
+											new vscode.Position(position.line - 1, position.col),
+											new vscode.Position(position.line - 1, position.col + nextNodeName.length)
+										),
+										acornNode: nextNode
+									});
+									nodeStack = [];
+								}
 							}
 						}
 					}
@@ -125,19 +133,19 @@ export class WrongFieldMethodLinter extends Linter {
 		const classExceptions = [{
 			className: "sap.ui.model.Binding",
 			memberName: "filter"
-		},{
+		}, {
 			className: "sap.ui.model.Model",
 			memberName: "getResourceBundle"
-		},{
+		}, {
 			className: "sap.ui.model.Model",
 			memberName: "setProperty"
-		},{
+		}, {
 			className: "sap.ui.core.Element",
 			memberName: "*"
-		},{
+		}, {
 			className: "sap.ui.base.ManagedObject",
 			memberName: "*"
-		},{
+		}, {
 			className: "sap.ui.core.Control",
 			memberName: "*"
 		}];
