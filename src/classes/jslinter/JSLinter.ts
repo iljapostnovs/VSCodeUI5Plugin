@@ -11,8 +11,8 @@ export class JSLinter {
 		const linters: Linter[] = [
 			new WrongFieldMethodLinter(),
 			new WrongClassNameLinter(),
-			new WrongImportLinter()//,
-			//new WrongParametersLinter()
+			new WrongImportLinter(),
+			new WrongParametersLinter()
 		];
 
 		let errors: Error[] = [];
