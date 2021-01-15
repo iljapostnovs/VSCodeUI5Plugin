@@ -13,7 +13,7 @@ export class WrongClassNameLinter extends Linter {
 			const UIClass = UIClassFactory.getUIClass(className);
 			if (UIClass instanceof CustomUIClass && UIClass.getUIDefineAcornBody()) {
 				if (UIClass.acornReturnedClassExtendBody) {
-					const classNameFromFile = UIClass.acornReturnedClassExtendBody?.arguments[0]?.value;
+					const classNameFromFile = UIClass.acornReturnedClassExtendBody && UIClass.acornReturnedClassExtendBody.arguments && UIClass.acornReturnedClassExtendBody.arguments[0]?.value;
 					if (classNameFromFile && className !== classNameFromFile) {
 						const position = LineColumn(UIClass.classText).fromIndex(UIClass.acornReturnedClassExtendBody?.arguments[0].start);
 						if (position) {

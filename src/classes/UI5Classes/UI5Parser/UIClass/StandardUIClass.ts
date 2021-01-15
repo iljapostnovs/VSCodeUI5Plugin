@@ -58,7 +58,7 @@ export class StandardUIClass extends AbstractUIClass {
 	constructor(className: string) {
 		super(className);
 
-		this.classExists = !!this._findSAPNode(this.className);
+		this.classExists = !!this._findSAPNode(this.className) || className.endsWith(".library");
 
 		if (this.classExists) {
 			this._fillParentClassName();
@@ -112,7 +112,7 @@ export class StandardUIClass extends AbstractUIClass {
 						return {
 							name: parameter.name + (parameter.optional ? "?" : ""),
 							description: StandardUIClass.removeTags(parameter.description),
-							type: parameter.types[0]?.value || "any",
+							type: parameter.types ? parameter.types.map((type: any) => type.value).join("|") : "any",
 							isOptional: parameter.optional || false
 						};
 					}) : [],

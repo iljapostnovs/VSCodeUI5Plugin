@@ -37,7 +37,7 @@ export class WrongParametersLinter extends Linter {
 												errors.push({
 													acornNode: call,
 													code: "",
-													message: `Method "${methodName}" has ${mandatoryMethodParams.length} mandatory param(s), but you provided ${params.length}`,
+													message: `Method "${methodName}" has ${methodParams.length} (${mandatoryMethodParams.length} mandatory) param(s), but you provided ${params.length}`,
 													range: new vscode.Range(
 														new vscode.Position(positionStart.line - 1, positionStart.col - 1),
 														new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
@@ -101,7 +101,7 @@ export class WrongParametersLinter extends Linter {
 			actualClass = "array";
 		}
 
-		if (expectedClass.toLowerCase() === "object" && actualClass.toLowerCase() === "map") {
+		if ((expectedClass.toLowerCase() === "object" && actualClass.toLowerCase() === "map") || (expectedClass.toLowerCase() === "map" && actualClass.toLowerCase() === "object")) {
 			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === "any" || actualClass.toLowerCase() === "any") {
 			classesDiffers = false;

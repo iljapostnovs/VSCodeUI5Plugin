@@ -814,23 +814,56 @@ export class CustomUIClass extends AbstractUIClass {
 			let aMethods = [];
 			if (association.multiple) {
 				aMethods = [
-					`get${associationWithFirstBigLetter}`,
-					`add${associationWithFirstBigLetter}`,
-					`remove${associationWithFirstBigLetter}`,
-					`removeAll${associationWithFirstBigLetter}s`,
+					{
+						name: `get${associationWithFirstBigLetter}`,
+						params: []
+					},
+					{
+						name: `add${associationWithFirstBigLetter}`,
+						params: [{
+							name: `v${associationWithFirstBigLetter}`,
+							type: association.type || "any",
+							isOptional: false,
+							description: `Add ${associationWithFirstBigLetter}`
+						}]
+					},
+					{
+						name: `remove${associationWithFirstBigLetter}`,
+						params: [{
+							name: `v${associationWithFirstBigLetter}`,
+							type: association.type || "any",
+							isOptional: false,
+							description: `Remove ${associationWithFirstBigLetter}`
+						}]
+					},
+					{
+						name: `removeAll${associationWithFirstBigLetter}s`,
+						params: []
+					}
 				];
 			} else {
 				aMethods = [
-					`get${associationWithFirstBigLetter}`,
-					`set${associationWithFirstBigLetter}`
+					{
+						name: `get${associationWithFirstBigLetter}`,
+						params: []
+					},
+					{
+						name: `set${associationWithFirstBigLetter}`,
+						params: [{
+							name: `v${associationWithFirstBigLetter}`,
+							type: association.type || "any",
+							isOptional: false,
+							description: `Set ${associationWithFirstBigLetter}`
+						}]
+					}
 				];
 			}
 
-			aMethods?.forEach(methodName => {
+			aMethods?.forEach(method => {
 				additionalMethods.push({
-					name: methodName,
+					name: method.name,
 					description: `Generic method from ${association.name} association`,
-					params: [],
+					params: method.params,
 					returnType: association.type || this.className,
 					visibility: association.visibility
 				});

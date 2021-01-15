@@ -57,8 +57,6 @@ export class UIClassFactory {
 
 		if (currentClassName && documentText) {
 			this.setNewCodeForClass(currentClassName, documentText);
-		} else {
-			debugger;
 		}
 	}
 
