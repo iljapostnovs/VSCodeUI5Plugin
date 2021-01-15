@@ -197,7 +197,7 @@
 		"webpack": "webpack --mode development",
 		"webpack-dev": "webpack --mode development --watch",
 		"compile": "webpack --mode none",
-		"compilets": "npm run compile",
+		"compilets": "npx tsc",
 		"lint": "tslint -p ./",
 		"test": "node ./dist/test/TestRunner.js",
 		"pretest": "npm run compilets",

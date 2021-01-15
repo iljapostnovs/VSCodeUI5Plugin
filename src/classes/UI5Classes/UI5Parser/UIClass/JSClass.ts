@@ -1,8 +1,9 @@
 import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
+import * as jsClassData from "./jsclassdata/JSClassData.json";
 
-const jsClassData = require("./jsclassdata/JSClassData.json");
+const jsClassDataCopy: any = jsClassData;
 Object.keys(jsClassData).forEach(key => {
-	jsClassData[key.toLowerCase()] = jsClassData[key];
+	jsClassDataCopy[key.toLowerCase()] = jsClassDataCopy[key];
 });
 const classData: {[key: string]: {methods: UIMethod[], fields: UIField[]}} = jsClassData;
 export class JSClass extends AbstractUIClass {
