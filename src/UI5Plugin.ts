@@ -6,7 +6,7 @@ import { FileWatcherMediator } from "./classes/utils/FileWatcherMediator";
 import { SignatureHelpRegistrator } from "./classes/registrators/SignatureHelpRegistrator";
 import { DiagnosticsRegistrator } from "./classes/registrators/DiagnosticsRegistrator";
 import { CodeLensRegistrator } from "./classes/registrators/CodeLensRegistrator";
-import { JSCodeActionRegistrator } from "./classes/registrators/JSCodeActionRegistrator";
+import { JSCodeActionRegistrator } from "./classes/registrators/CodeActionRegistrator";
 import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
 import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
 export class UI5Plugin {

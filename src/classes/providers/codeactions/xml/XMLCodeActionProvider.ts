@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { XMLParser } from "../utils/XMLParser";
-import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { SwitchToControllerCommand } from "../vscommands/switchers/SwitchToControllerCommand";
-import { FileReader } from "../utils/FileReader";
-import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { XMLParser } from "../../../utils/XMLParser";
+import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import { SwitchToControllerCommand } from "../../../vscommands/switchers/SwitchToControllerCommand";
+import { FileReader } from "../../../utils/FileReader";
+import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import LineColumn = require("line-column");
 
 export class XMLCodeActionProvider {
