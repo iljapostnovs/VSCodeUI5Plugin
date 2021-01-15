@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { UIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { CustomClassUIMethod } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { UIMethod } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { CustomClassUIMethod } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 
 export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {

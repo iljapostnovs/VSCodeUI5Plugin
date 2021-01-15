@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
-import { JSCodeLensProvider } from "../providers/jscodelens/JSCodeLensProvider";
-import { XMLCodeLensProvider } from "../providers/XMLCodeLensProvider";
+import { JSCodeLensProvider } from "../providers/codelens/jscodelens/JSCodeLensProvider";
+import { XMLCodeLensProvider } from "../providers/codelens/xmlcodelens/XMLCodeLensProvider";
 
 export class CodeLensRegistrator {
 	static register() {

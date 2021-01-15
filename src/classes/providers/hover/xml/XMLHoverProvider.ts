@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { URLBuilder } from "../utils/URLBuilder";
-import { XMLParser } from "../utils/XMLParser";
+import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import { URLBuilder } from "../../../utils/URLBuilder";
+import { XMLParser } from "../../../utils/XMLParser";
 
 export class XMLHoverProvider {
 	static getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
