@@ -22,6 +22,9 @@ export class XMLCodeActionProvider {
 		if (diagnostic?.source) {
 			const currentPositionOffset = document?.offsetAt(range.end);
 			const attributeData = XMLParser.getAttributeNameAndValue(diagnostic.source);
+			if (attributeData.attributeValue.startsWith(".")) {
+				attributeData.attributeValue = attributeData.attributeValue.replace(".", "");
+			}
 			const tagText = XMLParser.getTagInPosition(document.getText(), currentPositionOffset);
 			const tagPrefix = XMLParser.getTagPrefix(tagText);
 			const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
@@ -43,7 +46,7 @@ export class XMLCodeActionProvider {
 							const lineColumn = LineColumn(UIClass.classText).fromIndex(offset);
 
 							if (lineColumn) {
-								const UIDefineCodeAction = new vscode.CodeAction(`Create ${attributeData.attributeValue} event handler in controller`, vscode.CodeActionKind.QuickFix);
+								const UIDefineCodeAction = new vscode.CodeAction(`Create "${attributeData.attributeValue}" event handler in controller`, vscode.CodeActionKind.QuickFix);
 								UIDefineCodeAction.isPreferred = true;
 								UIDefineCodeAction.edit = new vscode.WorkspaceEdit();
 								const position = new vscode.Position(lineColumn.line - 1, lineColumn.col);
