@@ -16,6 +16,7 @@ export class UnusedNamespaceLinter extends Linter {
 						code: "UI5plugin",
 						message: "Unused namespace",
 						source: prefix,
+						tags: [vscode.DiagnosticTag.Unnecessary],
 						range: new vscode.Range(
 							new vscode.Position(position.line - 1, position.col),
 							new vscode.Position(position.line - 1, position.col + "xmlns:".length + prefix.length)

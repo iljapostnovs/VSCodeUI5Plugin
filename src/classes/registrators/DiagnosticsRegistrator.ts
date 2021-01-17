@@ -5,6 +5,17 @@ import { JSLinter } from "../jslinter/JSLinter";
 
 let xmlDiagnosticCollection: vscode.DiagnosticCollection;
 let jsDiagnosticCollection: vscode.DiagnosticCollection;
+export class CustomDiagnostics extends vscode.Diagnostic {
+	type?: CustomDiagnosticType;
+	fieldName?: string;
+	methodName?: string;
+	sourceClassName?: string;
+}
+
+export enum CustomDiagnosticType {
+	NonExistentMethod = 1,
+	NonExistentField = 2
+}
 export class DiagnosticsRegistrator {
 	static register() {
 		xmlDiagnosticCollection = vscode.languages.createDiagnosticCollection("XML");
@@ -74,7 +85,8 @@ export class DiagnosticsRegistrator {
 						range: error.range,
 						severity: vscode.DiagnosticSeverity.Error,
 						source: error.source,
-						relatedInformation: []
+						relatedInformation: [],
+						tags: error.tags || []
 					});
 				});
 
@@ -91,15 +103,17 @@ export class DiagnosticsRegistrator {
 			this._timeoutId = setTimeout(() => {
 				const errors = JSLinter.getLintingErrors(document);
 
-				const diagnostics: vscode.Diagnostic[] = errors.map(error => {
-					return ({
-						code: error.code,
-						message: error.message,
-						range: error.range,
-						severity: vscode.DiagnosticSeverity.Warning,
-						source: "",
-						relatedInformation: []
-					});
+				const diagnostics: CustomDiagnostics[] = errors.map(error => {
+					const diagnostic = new CustomDiagnostics(error.range, error.message);
+
+					diagnostic.code = error.code;
+					diagnostic.severity = vscode.DiagnosticSeverity.Warning;
+					diagnostic.type = error.type;
+					diagnostic.methodName = error.methodName;
+					diagnostic.fieldName = error.fieldName;
+					diagnostic.sourceClassName = error.sourceClassName;
+
+					return diagnostic;
 				});
 
 				collection.set(document.uri, diagnostics);

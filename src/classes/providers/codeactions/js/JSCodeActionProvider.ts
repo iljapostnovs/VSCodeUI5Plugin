@@ -4,9 +4,35 @@ import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAna
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import LineColumn = require("line-column");
+import { CustomDiagnostics, CustomDiagnosticType } from "../../../registrators/DiagnosticsRegistrator";
+import { MethodInserter } from "../util/MethodInserter";
+import { FileReader } from "../../../utils/FileReader";
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
+		let providerResult: vscode.CodeAction[] = await this._getImportClassCodeActions(document, range);
+		providerResult = providerResult.concat(this._getCreateMethodCodeActions(document));
+		return providerResult;
+	}
+
+	private static _getCreateMethodCodeActions(document: vscode.TextDocument) {
+		const jsDiagnosticCollection = vscode.languages.getDiagnostics(document.uri);
+		const customDiagnostics = <CustomDiagnostics[]>jsDiagnosticCollection.filter(diagnostic => diagnostic instanceof CustomDiagnostics);
+		const nonExistendMethodDiagnostics = customDiagnostics.filter(diagnostic => diagnostic.type === CustomDiagnosticType.NonExistentMethod);
+		const codeActions: vscode.CodeAction[] = nonExistendMethodDiagnostics.reduce((accumulator: vscode.CodeAction[], diagnostic: CustomDiagnostics) => {
+			const className = FileReader.getClassNameFromPath(document.fileName);
+			if (className && diagnostic.methodName && diagnostic.sourceClassName) {
+				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.sourceClassName, diagnostic.methodName, `function() {\n\t\t\t\n\t\t}`, false);
+				insertCodeAction && accumulator.push(insertCodeAction);
+			}
+
+			return accumulator;
+		}, []);
+
+		return codeActions;
+	}
+
+	private static async _getImportClassCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const selectedVariableName = this._getCurrentVariable(document, range);
 		const providerResult: vscode.CodeAction[] = [];
 
@@ -16,11 +42,11 @@ export class JSCodeActionProvider {
 				UIClassFactory.setNewContentForCurrentUIClass();
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				const UIDefine = await new UIDefineFactory().generateUIDefineCompletionItems();
-				const filteredUIDefineCompletionItems = UIDefine.filter(completionItem => completionItem.label.indexOf(selectedVariableName) > -1)
+				const UIDefineCompletionItemsWhichContainsCurrentSelectionText = UIDefine.filter(completionItem => completionItem.label.indexOf(selectedVariableName) > -1)
 					.filter(completionItem => !UIClass.UIDefine.find(UIDefine => `"${UIDefine.path}"` === completionItem.label))
 					.reverse();
 
-				filteredUIDefineCompletionItems.forEach(completionItem => {
+				UIDefineCompletionItemsWhichContainsCurrentSelectionText.forEach(completionItem => {
 					const UIDefineCodeAction = new vscode.CodeAction(`Import ${completionItem.label}`, vscode.CodeActionKind.QuickFix);
 					UIDefineCodeAction.isPreferred = true;
 					UIDefineCodeAction.edit = new vscode.WorkspaceEdit();

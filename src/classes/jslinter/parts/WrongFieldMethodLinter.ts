@@ -6,6 +6,7 @@ import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../UI5Classe
 import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../utils/FileReader";
+import { CustomDiagnosticType } from "../../registrators/DiagnosticsRegistrator";
 export class WrongFieldMethodLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
 		// console.time("JS Lint");
@@ -79,6 +80,7 @@ export class WrongFieldMethodLinter extends Linter {
 									if (nextNodeName) {
 										const method = fieldsAndMethods.methods.find(method => method.name === nextNodeName);
 										const field = fieldsAndMethods.fields.find(field => field.name === nextNodeName);
+
 										return method || field;
 									}
 								}
@@ -96,7 +98,10 @@ export class WrongFieldMethodLinter extends Linter {
 											new vscode.Position(position.line - 1, position.col),
 											new vscode.Position(position.line - 1, position.col + nextNodeName.length)
 										),
-										acornNode: nextNode
+										acornNode: nextNode,
+										type: CustomDiagnosticType.NonExistentMethod,
+										methodName: nextNodeName,
+										sourceClassName: className
 									});
 									nodeStack = [];
 								}

@@ -2,9 +2,7 @@ import * as vscode from "vscode";
 import { XMLParser } from "../../../utils/XMLParser";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { SwitchToControllerCommand } from "../../../vscommands/switchers/SwitchToControllerCommand";
-import { FileReader } from "../../../utils/FileReader";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import LineColumn = require("line-column");
+import { MethodInserter } from "../util/MethodInserter";
 
 export class XMLCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -35,36 +33,11 @@ export class XMLCodeActionProvider {
 			if (event) {
 				const controllerName = SwitchToControllerCommand.getControllerNameOfCurrentView();
 				if (controllerName) {
-					const controllerPath = FileReader.convertClassNameToFSPath(controllerName, true);
-					if (controllerPath) {
-						const controllerUri = vscode.Uri.file(controllerPath);
-						const UIClass = <CustomUIClass>UIClassFactory.getUIClass(controllerName);
-						const thereAreNoMethods = UIClass.acornClassBody.properties.length === 0;
-						const lastMethod = UIClass.acornClassBody.properties[UIClass.acornClassBody.properties.length - 1];
-						if (lastMethod || thereAreNoMethods) {
-							const offset = lastMethod?.end || UIClass.acornClassBody.start;
-							const lineColumn = LineColumn(UIClass.classText).fromIndex(offset);
+					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(controllerName, attributeData.attributeValue, `function(oEvent) {\n\t\t\t\n\t\t}`, true);
+					if (insertCodeAction) {
+						insertCodeAction.diagnostics = [diagnostic];
 
-							if (lineColumn) {
-								const UIDefineCodeAction = new vscode.CodeAction(`Create "${attributeData.attributeValue}" event handler in controller`, vscode.CodeActionKind.QuickFix);
-								UIDefineCodeAction.isPreferred = true;
-								UIDefineCodeAction.edit = new vscode.WorkspaceEdit();
-								const position = new vscode.Position(lineColumn.line - 1, lineColumn.col);
-								UIDefineCodeAction.edit.insert(controllerUri, position, `${thereAreNoMethods ? "" : ",\n"}\n\t\t${attributeData.attributeValue}: function(oEvent) {\n\t\t\t\n\t\t}`);
-								UIDefineCodeAction.diagnostics = [diagnostic];
-								UIDefineCodeAction.command = {
-									command: "vscode.open",
-									title: "Open file",
-									arguments: [controllerUri, {
-										selection: new vscode.Range(
-											lineColumn.line + 2, 3,
-											lineColumn.line + 2, 3
-										)
-									}]
-								};
-								providerResult.push(UIDefineCodeAction);
-							}
-						}
+						providerResult.push(insertCodeAction);
 					}
 				}
 			}

@@ -5,6 +5,7 @@ export interface Error {
 	message: string;
 	source: string;
 	range: vscode.Range;
+	tags?: vscode.DiagnosticTag[];
 }
 
 export interface Tag {
