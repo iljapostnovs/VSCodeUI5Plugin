@@ -107,7 +107,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 	}
 
 	private _getUIFieldsForMap(customData: any, mapFields: string[], fields: UIField[] = []) {
-		if (mapFields.length > 0 && customData) {
+		if (customData) {
 			const fieldName = mapFields.shift();
 			if (fieldName) {
 				customData = customData[fieldName];
