@@ -1,12 +1,12 @@
 import { Error, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../utils/FileReader";
-import { CustomDiagnosticType } from "../../registrators/DiagnosticsRegistrator";
+import { CustomDiagnosticType } from "../../../../../registrators/DiagnosticsRegistrator";
+import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import { FileReader } from "../../../../../utils/FileReader";
 export class WrongFieldMethodLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
 		let errors: Error[] = [];
