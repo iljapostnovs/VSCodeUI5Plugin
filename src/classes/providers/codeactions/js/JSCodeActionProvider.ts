@@ -10,18 +10,19 @@ import { FileReader } from "../../../utils/FileReader";
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
-		let providerResult: vscode.CodeAction[] = await this._getImportClassCodeActions(document, range);
-		providerResult = providerResult.concat(this._getCreateMethodCodeActions(document));
+		let providerResult: vscode.CodeAction[] = this._getCreateMethodCodeActions(document, range);
+		providerResult = providerResult.concat(await this._getImportClassCodeActions(document, range));
 		return providerResult;
 	}
 
-	private static _getCreateMethodCodeActions(document: vscode.TextDocument) {
+	private static _getCreateMethodCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
+		const selectedVariableName = this._getCurrentVariable(document, range);
 		const jsDiagnosticCollection = vscode.languages.getDiagnostics(document.uri);
 		const customDiagnostics = <CustomDiagnostics[]>jsDiagnosticCollection.filter(diagnostic => diagnostic instanceof CustomDiagnostics);
 		const nonExistendMethodDiagnostics = customDiagnostics.filter(diagnostic => diagnostic.type === CustomDiagnosticType.NonExistentMethod);
 		const codeActions: vscode.CodeAction[] = nonExistendMethodDiagnostics.reduce((accumulator: vscode.CodeAction[], diagnostic: CustomDiagnostics) => {
 			const className = FileReader.getClassNameFromPath(document.fileName);
-			if (className && diagnostic.methodName && diagnostic.sourceClassName) {
+			if (className && diagnostic.methodName && diagnostic.sourceClassName && selectedVariableName === diagnostic.methodName) {
 				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.sourceClassName, diagnostic.methodName, this._getInsertContentFromIdentifierName(diagnostic.methodName));
 				insertCodeAction && accumulator.push(insertCodeAction);
 			}
