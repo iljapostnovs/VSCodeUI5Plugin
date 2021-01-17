@@ -10,6 +10,7 @@ export class WrongParametersLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
+		console.time("WrongParameterLinter");
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongParametersLinter")) {
 			const className = FileReader.getClassNameFromPath(document.fileName);
 			if (className) {
@@ -50,7 +51,7 @@ export class WrongParametersLinter extends Linter {
 
 											params.forEach((param: any, i: number) => {
 												const paramFromMethod = method.params[i];
-												if (paramFromMethod && paramFromMethod.type !== "any") {
+												if (paramFromMethod && (paramFromMethod.type !== "any" && paramFromMethod.type !== "void" && paramFromMethod.type)) {
 													let classNameOfTheParam = AcornSyntaxAnalyzer.findClassNameForStack([param], className);
 													if (!classNameOfTheParam) {
 														classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromAcornDeclaration(param, UIClass);
@@ -91,6 +92,7 @@ export class WrongParametersLinter extends Linter {
 			}
 		}
 
+		console.timeEnd("WrongParameterLinter");
 		return errors;
 	}
 

@@ -12,7 +12,9 @@ export class WrongFieldMethodLinter extends Linter {
 		let errors: Error[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongFieldMethodLinter")) {
+			console.time("WrongFieldMethodLinter");
 			errors = this._getLintingErrors(document);
+			console.timeEnd("WrongFieldMethodLinter");
 		}
 
 		return errors;
@@ -36,6 +38,7 @@ export class WrongFieldMethodLinter extends Linter {
 			});
 
 		}
+		console.log(this.callTimes);
 
 		//remove duplicates
 		errors = errors.reduce((accumulator: Error[], error: Error) => {
@@ -49,18 +52,28 @@ export class WrongFieldMethodLinter extends Linter {
 		return errors;
 	}
 
-	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, errors: Error[] = []) {
+	private callTimes = 0;
+	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, errors: Error[] = [], droppedNodes: any[] = []) {
+		if (droppedNodes.includes(node)) {
+			return [];
+		}
+
+		this.callTimes++;
 		const currentClassName = UIClass.className;
 
 		if (node.type === "MemberExpression") {
 			const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-			let nodeStack = strategy.getStackOfNodesForPosition(currentClassName, node.end);
+			const nodeStack = strategy.getStackOfNodesForPosition(currentClassName, node.end);
 			if (nodeStack.length > 0) {
 				const nodes = [];
 				while (nodeStack.length > 0) {
 					nodes.push(nodeStack.shift());
 					const className = AcornSyntaxAnalyzer.findClassNameForStack(nodes.concat([]), currentClassName, currentClassName, true);
 					const isException = this._checkIfClassNameIsException(className);
+					if (!className || className === "void" || className === "any") {
+						droppedNodes.push(...nodeStack);
+						break;
+					}
 					if (className && !isException) {
 						const classNames = className.split("|");
 						let nextNode = nodeStack[0];
@@ -103,8 +116,8 @@ export class WrongFieldMethodLinter extends Linter {
 										methodName: nextNodeName,
 										sourceClassName: className
 									});
-									nodeStack = [];
 								}
+								break;
 							}
 						}
 					}
@@ -114,7 +127,7 @@ export class WrongFieldMethodLinter extends Linter {
 
 		const innerNodes = AcornSyntaxAnalyzer.getContent(node);
 		if (innerNodes) {
-			innerNodes.forEach((node: any) => this._getErrorsForExpression(node, UIClass, errors));
+			innerNodes.forEach((node: any) => this._getErrorsForExpression(node, UIClass, errors, droppedNodes));
 		}
 
 		return errors;

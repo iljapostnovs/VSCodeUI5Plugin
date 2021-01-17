@@ -147,7 +147,7 @@ export class AcornSyntaxAnalyzer {
 
 		//this.getView().byId("") exception
 		if (isGetViewException) {
-			currentClassName = this._getClassNameFromViewById(stack, currentClassName, primaryClassName);
+			currentClassName = this._getClassNameFromViewById(stack, primaryClassName);
 			if (stack.length > 0) {
 				className = this.findClassNameForStack(stack, currentClassName, primaryClassName, false);
 			} else {
@@ -592,7 +592,7 @@ export class AcornSyntaxAnalyzer {
 		return isGetViewByIdException;
 	}
 
-	private static _getClassNameFromViewById(stack: any[], currentClassName: string, currentControllerName: string) {
+	private static _getClassNameFromViewById(stack: any[], currentControllerName: string) {
 		let className = "";
 
 		if (stack.length > 1) {
@@ -727,7 +727,7 @@ export class AcornSyntaxAnalyzer {
 	}
 
 	public static expandAllContent(node: any, content: any[] = []) {
-		if (content.indexOf(node) === -1) {
+		if (!content.includes(node)) {
 			content.push(node);
 		}
 		const innerNodes: any[] = this.getContent(node).filter(node => !content.includes(node));
@@ -799,7 +799,7 @@ export class AcornSyntaxAnalyzer {
 			}
 		} else if (node.type === "SwitchStatement") {
 			node.cases.forEach((body: any) => {
-				innerNodes.push(body.consequent);
+				innerNodes.push(...body.consequent);
 			});
 		} else if (node.type === "AssignmentExpression") {
 			innerNodes.push(node.right);

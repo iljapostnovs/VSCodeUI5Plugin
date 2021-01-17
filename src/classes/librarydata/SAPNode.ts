@@ -1,3 +1,4 @@
+import { SAPNodeDAO } from "./SAPNodeDAO";
 import { UI5Metadata } from "./UI5Metadata";
 import { UI5MetadataDAO } from "./UI5MetadataDAO";
 export class SAPNode {

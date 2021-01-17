@@ -104,4 +104,8 @@ export class SAPNodeDAO {
 	public findNode(name: string): SAPNode | undefined {
 		return SAPNodeDAO._flatSAPNodes[name];
 	}
+
+	public getFlatNodes() {
+		return SAPNodeDAO._flatSAPNodes;
+	}
 }
