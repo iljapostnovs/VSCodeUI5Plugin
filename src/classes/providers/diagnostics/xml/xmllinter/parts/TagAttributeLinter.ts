@@ -28,26 +28,42 @@ export class TagAttributeLinter extends Linter {
 
 				if (className) {
 					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(document, tagPrefix, tag.positionEnd);
-					const classOfTheTag = [libraryPath, className].join(".");
-					tagAttributes.forEach(tagAttribute => {
-						//check tag attributes
-						const attributeValidation = this._validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes);
-						if (!attributeValidation.valid) {
-							const indexOfTagBegining = tag.text.indexOf(tagAttribute);
-							const position = LineColumn(document).fromIndex(tag.positionBegin + indexOfTagBegining);
-							if (position && XMLParser.getIfPositionIsNotInComments(document, tag.positionBegin)) {
-								errors.push({
-									code: "UI5plugin",
-									message: attributeValidation.message || "Invalid attribute",
-									source: tagAttribute,
-									range: new vscode.Range(
-										new vscode.Position(position.line - 1, position.col),
-										new vscode.Position(position.line - 1, position.col + tagAttribute.length)
-									)
-								});
+					if (libraryPath) {
+						const classOfTheTag = [libraryPath, className].join(".");
+						tagAttributes.forEach(tagAttribute => {
+							//check tag attributes
+							const attributeValidation = this._validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes);
+							if (!attributeValidation.valid) {
+								const indexOfTagBegining = tag.text.indexOf(tagAttribute);
+								const position = LineColumn(document).fromIndex(tag.positionBegin + indexOfTagBegining);
+								if (position && XMLParser.getIfPositionIsNotInComments(document, tag.positionBegin)) {
+									errors.push({
+										code: "UI5plugin",
+										message: attributeValidation.message || "Invalid attribute",
+										source: tagAttribute,
+										range: new vscode.Range(
+											new vscode.Position(position.line - 1, position.col),
+											new vscode.Position(position.line - 1, position.col + tagAttribute.length)
+										)
+									});
+								}
 							}
+						});
+					} else {
+						const positionBegin = LineColumn(document).fromIndex(tag.positionBegin);
+						const positionEnd = LineColumn(document).fromIndex(tag.positionEnd);
+						if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(document, tag.positionBegin)) {
+							errors.push({
+								code: "UI5plugin",
+								message: `"${tagPrefix}" prefix is not defined`,
+								source: tagPrefix,
+								range: new vscode.Range(
+									new vscode.Position(positionBegin.line - 1, positionBegin.col),
+									new vscode.Position(positionEnd.line - 1, positionEnd.col)
+								)
+							});
 						}
-					});
+					}
 				}
 			}
 		});
