@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { CustomDiagnosticType } from "../../../registrators/DiagnosticsRegistrator";
+import { CustomDiagnosticType } from "../../../../../../registrators/DiagnosticsRegistrator";
 
 export interface Error {
 	code: string;

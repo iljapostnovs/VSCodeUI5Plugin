@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Tag } from "../xmllinter/parts/abstraction/Linter";
+import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import { XMLParser } from "./XMLParser";
 
 export class XMLFormatter {
