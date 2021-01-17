@@ -13,7 +13,7 @@ export class IDFactory {
 		const position = activeTextEditor?.document.offsetAt(activeTextEditor.selection.start);
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		if (currentClassName && position) {
-			const nodes = strategy.getStackOfNodesForInnerParamsForPosition(currentClassName, position);
+			const nodes = strategy.getStackOfNodesForInnerParamsForPosition(currentClassName, position, true);
 			if (nodes.length === 1 && nodes[0].callee?.property?.name === "byId") {
 				const viewIDs = XMLParser.getAllIDsInCurrentView();
 				completionItems = this._generateCompletionItemsFromUICompletionItems(viewIDs);
@@ -24,6 +24,9 @@ export class IDFactory {
 	}
 
 	private _generateCompletionItemsFromUICompletionItems(viewIDs: string[]) {
+		const position = vscode.window.activeTextEditor?.selection.start;
+		const currentRange = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
+
 		return viewIDs.map(viewId => {
 			const completionItem:CustomCompletionItem = new CustomCompletionItem(viewId);
 			completionItem.kind = vscode.CompletionItemKind.Keyword;
@@ -31,6 +34,7 @@ export class IDFactory {
 			completionItem.detail = viewId;
 			completionItem.documentation = viewId;
 			completionItem.sortText = "z";
+			completionItem.range = currentRange;
 
 			return completionItem;
 		});

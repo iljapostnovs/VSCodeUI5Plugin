@@ -20,9 +20,11 @@ export class JSDynamicFactory {
 			const completionItem:CustomCompletionItem = new CustomCompletionItem(classMethod.name);
 			completionItem.kind = vscode.CompletionItemKind.Method;
 
-			const mandatoryParams = classMethod.params.filter(param => !param.name.endsWith("?"));
-			const paramString = mandatoryParams.map((param, index) => `\${${index + 1}:${param.name}}`).join(", ");
-			completionItem.insertText = new vscode.SnippetString(`${classMethod.name}(${paramString})$0`);
+			// const mandatoryParams = classMethod.params.filter(param => !param.name.endsWith("?"));
+			// const paramString = mandatoryParams.map((param, index) => `\${${index + 1}:${param.name}}`).join(", ");
+			// const insertString = `${classMethod.name}(${paramString})$0`;
+			const insertString = `${classMethod.name}`;
+			completionItem.insertText = new vscode.SnippetString(insertString);
 			completionItem.detail = `(${classMethod.visibility}) ${fieldsAndMethods.className}`;
 
 			const mardownString = new vscode.MarkdownString();
@@ -34,6 +36,12 @@ export class JSDynamicFactory {
 			mardownString.appendCodeblock(`${classMethod.name}(${classMethod.params.map(param => param.name).join(", ")}): ${classMethod.returnType || "void"}`);
 			mardownString.appendMarkdown(classMethod.description);
 			completionItem.documentation = mardownString;
+
+			const position = vscode.window.activeTextEditor?.selection.start;
+			const currentRange = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
+			if (currentRange) {
+				completionItem.range = currentRange;
+			}
 
 			return completionItem;
 		});

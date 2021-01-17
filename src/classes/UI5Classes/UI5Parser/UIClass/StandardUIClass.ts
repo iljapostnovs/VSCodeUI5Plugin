@@ -268,7 +268,7 @@ export class StandardUIClass extends AbstractUIClass {
 			accumulator.push({
 				name: aggregation.name,
 				type: aggregation.type,
-				multiple: aggregation.coordinality === "0..n",
+				multiple: aggregation.cardinality === "0..n",
 				singularName: aggregation.singularName,
 				description: StandardUIClass.removeTags(aggregation.description),
 				visibility: aggregation.visibility,
@@ -293,7 +293,7 @@ export class StandardUIClass extends AbstractUIClass {
 				name: association.name,
 				type: association.type,
 				description: StandardUIClass.removeTags(association.description),
-				multiple: association.multiple || association.coordinality === "0..n",
+				multiple: association.multiple || association.cardinality === "0..n",
 				singularName: association.singularName,
 				visibility: association.visibility
 			});

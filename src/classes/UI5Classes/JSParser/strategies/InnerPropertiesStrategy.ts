@@ -211,7 +211,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 
 	private _generateStackOfNodesForInnerPosition(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
 		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "ThisExpression", "NewExpression", "Identifier"];
-		const positionIsCorrect = node.start < position && node.end > position;
+		const positionIsCorrect = node.start < position && (checkForLastPosition ? node.end >= position : node.end > position);
 		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖" && node.property?.name !== "prototype") {
 			stack.unshift(node);
 		}

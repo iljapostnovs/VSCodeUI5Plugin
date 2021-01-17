@@ -9,6 +9,7 @@ import { CompletionItemFactory } from "../../CompletionItemFactory";
 import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 import { XMLClassFactory } from "./XMLClassFactory";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
+import LineColumn = require("line-column");
 
 export class XMLDynamicFactory {
 	public generateXMLDynamicCompletionItems() {
@@ -37,9 +38,45 @@ export class XMLDynamicFactory {
 			}
 
 			completionItems = this._removeDuplicateCompletionItems(completionItems);
+			const range = this._generateRangeForReplacement(positionType, XMLText, currentPositionOffset);
+			if (range) {
+				completionItems.forEach(completionItem => {
+					completionItem.range = range;
+				});
+			}
 		}
 
 		return completionItems;
+	}
+
+	private _generateRangeForReplacement(positionType: PositionType, XMLText: string, positionOffset: number) {
+		const position = vscode.window.activeTextEditor?.selection.start;
+		let range = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
+		const word = range && vscode.window.activeTextEditor?.document.getText(range);
+
+		if (positionType === PositionType.InTheTagAttributes) {
+			const tagPosition = XMLParser.getTagBeginEndPosition(XMLText, positionOffset);
+			const tag = XMLParser.getTagInPosition(XMLText, positionOffset);
+			const attributes = XMLParser.getAttributesOfTheTag(tag);
+			const attribute = attributes?.find(attribute => XMLParser.getAttributeNameAndValue(attribute).attributeName === word);
+			if (attribute) {
+				const indexOfTag = tag.indexOf(attribute);
+				const lineColumnBegin = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfTag);
+				const lineColumnEnd = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfTag + attribute.length);
+				if (lineColumnBegin && lineColumnEnd && lineColumnBegin.line === lineColumnEnd.line) {
+					range = new vscode.Range(lineColumnBegin.line - 1, lineColumnBegin.col - 1, lineColumnEnd.line - 1, lineColumnEnd.col - 1);
+				}
+			}
+		} else if (positionType === PositionType.InTheClassName) {
+			const tagPosition = XMLParser.getTagBeginEndPosition(XMLText, positionOffset);
+			const lineColumnBegin = LineColumn(XMLText).fromIndex(tagPosition.positionBegin);
+			const lineColumnEnd = LineColumn(XMLText).fromIndex(tagPosition.positionEnd);
+			if (lineColumnBegin && lineColumnEnd && lineColumnBegin.line === lineColumnEnd.line) {
+				range = new vscode.Range(lineColumnBegin.line - 1, lineColumnBegin.col - 1, lineColumnEnd.line - 1, lineColumnEnd.col - 1);
+			}
+		}
+
+		return range;
 	}
 
 	private _getAllFileSpecificCompletionItems(addPrefix: boolean = true) {
@@ -84,12 +121,12 @@ export class XMLDynamicFactory {
 					const UIEvent = this._getUIEventRecursively(UIClass, attributeName);
 					if (UIEvent) {
 						const methods = XMLParser.getMethodsOfTheCurrentViewsController()
-						.map(classMethod =>
+							.map(classMethod =>
 							({
 								text: classMethod.name,
 								description: classMethod.description
 							})
-						);
+							);
 						completionItems = this._generateCompletionItemsFromTypeValues(methods);
 					}
 				}
@@ -130,7 +167,7 @@ export class XMLDynamicFactory {
 
 	private _convertToFileSpecificCompletionItems(completionItems: CustomCompletionItem[], XMLText: string, addPrefix: boolean = true) {
 		const nodeDAO = new SAPNodeDAO();
-		return  completionItems.reduce((accumulator: CustomCompletionItem[], completionItem: CustomCompletionItem) => {
+		return completionItems.reduce((accumulator: CustomCompletionItem[], completionItem: CustomCompletionItem) => {
 			const node = nodeDAO.findNode(completionItem.className);
 			if (node) {
 				const tagPrefix = XMLParser.getPrefixForLibraryName(node.getLib(), XMLText);
@@ -155,7 +192,7 @@ export class XMLDynamicFactory {
 		const wsFolders = vscode.workspace.workspaceFolders || [];
 		const classNames = wsFolders.reduce((accumulator: string[], wsFolder: vscode.WorkspaceFolder) => {
 			const classNames = FileReader.getAllJSClassNamesFromProject(wsFolder);
-			accumulator= accumulator.concat(classNames);
+			accumulator = accumulator.concat(classNames);
 
 			return accumulator;
 		}, []);
@@ -254,7 +291,7 @@ export class XMLDynamicFactory {
 		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = aggregations.map(aggregation => {
-			const completionItem:CustomCompletionItem = new CustomCompletionItem(aggregation.name);
+			const completionItem: CustomCompletionItem = new CustomCompletionItem(aggregation.name);
 			completionItem.kind = vscode.CompletionItemKind.Class;
 			completionItem.insertText = this._generateInsertTextForAggregation(aggregation, classTagPrefix);
 			completionItem.detail = aggregation.type || "";
@@ -369,7 +406,7 @@ export class XMLDynamicFactory {
 
 	private _generateCompletionItemsFromTypeValues(typeValues: TypeValue[]) {
 		return this._removeDuplicateCompletionItems(typeValues.map(typeValue => {
-			const completionItem =  new CustomCompletionItem(typeValue.text, vscode.CompletionItemKind.Keyword);
+			const completionItem = new CustomCompletionItem(typeValue.text, vscode.CompletionItemKind.Keyword);
 			completionItem.detail = typeValue.text;
 			completionItem.documentation = typeValue.description;
 			return completionItem;
@@ -378,14 +415,14 @@ export class XMLDynamicFactory {
 
 
 	private _getPropertyCompletionItemsFromClass(UIClass: AbstractUIClass) {
-		let completionItems:CustomCompletionItem[] = [];
+		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = UIClass.properties.map(property => {
-			const completionItem:CustomCompletionItem = new CustomCompletionItem(property.name);
+			const completionItem: CustomCompletionItem = new CustomCompletionItem(property.name);
 			completionItem.kind = vscode.CompletionItemKind.Property;
 			const typeValueValues = property.typeValues.map(typeValue => typeValue.text);
 			const insertTextValues = typeValueValues.length > 0 ? `|${typeValueValues.join(",")}|` : "";
-			completionItem.insertText =  new vscode.SnippetString(`${property.name}="\${1${insertTextValues}}"$0`);
+			completionItem.insertText = new vscode.SnippetString(`${property.name}="\${1${insertTextValues}}"$0`);
 			completionItem.detail = `${property.name}: ${property.type}`;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForPropertiesApi(UIClass);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${property.description}`);
@@ -403,13 +440,13 @@ export class XMLDynamicFactory {
 	}
 
 	private _getEventCompletionItemsFromClass(UIClass: AbstractUIClass, eventValues: string[] = []) {
-		let completionItems:CustomCompletionItem[] = [];
+		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = UIClass.events.map(event => {
-			const completionItem:CustomCompletionItem = new CustomCompletionItem(event.name);
+			const completionItem: CustomCompletionItem = new CustomCompletionItem(event.name);
 			completionItem.kind = vscode.CompletionItemKind.Event;
 			const insertTextValues = eventValues.length > 0 ? `|${eventValues.join(",")}|` : "";
-			completionItem.insertText =  new vscode.SnippetString(`${event.name}="\${1${insertTextValues}}"$0`);
+			completionItem.insertText = new vscode.SnippetString(`${event.name}="\${1${insertTextValues}}"$0`);
 			completionItem.detail = event.name;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForEventsApi(UIClass, event.name);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${event.description}`);
@@ -427,10 +464,10 @@ export class XMLDynamicFactory {
 	}
 
 	private _getAggregationCompletionItemsFromClass(UIClass: AbstractUIClass) {
-		let completionItems:CustomCompletionItem[] = [];
+		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = UIClass.aggregations.map(aggregation => {
-			const completionItem:CustomCompletionItem = new CustomCompletionItem(aggregation.name);
+			const completionItem: CustomCompletionItem = new CustomCompletionItem(aggregation.name);
 			completionItem.kind = vscode.CompletionItemKind.Property;
 			completionItem.insertText = new vscode.SnippetString(`${aggregation.name}="\${1}"$0`);
 			completionItem.detail = aggregation.name;
@@ -450,10 +487,10 @@ export class XMLDynamicFactory {
 	}
 
 	private _getAssociationCompletionItemsFromClass(UIClass: AbstractUIClass) {
-		let completionItems:CustomCompletionItem[] = [];
+		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = UIClass.associations.map(association => {
-			const completionItem:CustomCompletionItem = new CustomCompletionItem(association.name);
+			const completionItem: CustomCompletionItem = new CustomCompletionItem(association.name);
 			completionItem.kind = vscode.CompletionItemKind.Property;
 			completionItem.insertText = new vscode.SnippetString(`${association.name}="\${1}"$0`);
 			completionItem.detail = association.name;

@@ -26,7 +26,7 @@ export class CompletionItemFactory {
 	}
 
 	public async getUIDefineCompletionItems() {
-		let completionItems:CustomCompletionItem[] = [];
+		let completionItems: CustomCompletionItem[] = [];
 
 		if (this._language === GeneratorFactory.language.js) {
 			completionItems = await this._generateJSCompletionItems();
@@ -42,7 +42,7 @@ export class CompletionItemFactory {
 	}
 
 	private async _generateXMLCompletionItems() {
-		let completionItems:CustomCompletionItem[] = [];
+		let completionItems: CustomCompletionItem[] = [];
 		let SAPNodes: SAPNode[];
 		SAPNodes = await CompletionItemFactory._nodeDAO.getAllNodes();
 
@@ -63,7 +63,7 @@ export class CompletionItemFactory {
 	}
 
 	private async _generateJSCompletionItems() {
-		let completionItems:CustomCompletionItem[] = [];
+		let completionItems: CustomCompletionItem[] = [];
 
 		if (CompletionItemFactory.JSDefineCompletionItems.length === 0) {
 			const UIDefineFactoy = new UIDefineFactory();
