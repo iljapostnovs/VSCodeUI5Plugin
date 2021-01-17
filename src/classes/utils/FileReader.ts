@@ -42,16 +42,11 @@ export class FileReader {
 		let classPath = this.convertClassNameToFSPath(className, false, isFragment);
 
 		if (classPath) {
-			try {
-				fs.readFileSync(classPath);
-			} catch (error) {
+			const fileExists = fs.existsSync(classPath);
+			if (!fileExists) {
 				classPath = this.convertClassNameToFSPath(className, true);
-				if (classPath) {
-					try {
-						fs.readFileSync(classPath);
-					} catch (error) {
-						classPath = undefined;
-					}
+				if (classPath && !fs.existsSync(classPath)) {
+					classPath = undefined;
 				}
 			}
 		}

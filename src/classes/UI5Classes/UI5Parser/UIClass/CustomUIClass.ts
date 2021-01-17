@@ -1,5 +1,6 @@
 import { FileReader } from "../../../utils/FileReader";
 import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
+import * as path from "path";
 import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam } from "./AbstractUIClass";
 import commentParser = require("comment-parser");
 const acornLoose = require("acorn-loose");
@@ -42,10 +43,12 @@ export class CustomUIClass extends AbstractUIClass {
 	private _parentVariableName: any;
 	public acornReturnedClassExtendBody: any | undefined;
 	public classBodyAcornVariableName: string | undefined;
+	public classFSPath: string | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
 
+		this.classFSPath = FileReader.getClassPathFromClassName(this.className);
 		this._readFileContainingThisClassCode(documentText); //todo: rename. not always reading anyore.
 		this.UIDefine = this._getUIDefine();
 		this.acornClassBody = this._getThisClassBodyAcorn();
@@ -262,7 +265,7 @@ export class CustomUIClass extends AbstractUIClass {
 						return {
 							path: classPath,
 							className: UIDefineClassNames[index],
-							classNameDotNotation: classPath.replace(/\//g, "."),
+							classNameDotNotation: this._generateClassNameDotNotationFor(classPath),
 							start: args[0].elements[index].start,
 							end: args[0].elements[index].end,
 							acornNode: args[0].elements[index]
@@ -272,6 +275,24 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 
 		return UIDefine;
+	}
+
+	private _generateClassNameDotNotationFor(classPath: string) {
+		let className = classPath.replace(/\//g, ".");
+
+		if (classPath.startsWith(".")) {
+			const manifest = FileReader.getManifestForClass(this.className);
+
+			if (manifest && this.classFSPath) {
+				const normalizedManifestPath = path.normalize(manifest.fsPath);
+				const importClassPath = path.resolve(path.dirname(this.classFSPath), classPath);
+				const relativeToManifest = path.relative(normalizedManifestPath, importClassPath);
+				const pathRelativeToManifestDotNotation = relativeToManifest.split(path.sep).join(".");
+				className = `${manifest.componentName}.${pathRelativeToManifestDotNotation}`;
+			}
+		}
+
+		return className;
 	}
 
 	private _getThisClassBodyAcorn() {

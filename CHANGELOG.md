@@ -1,5 +1,6 @@
-## 0.11.13 (14-01-2021)
+## 0.11.13 (17-01-2021)
 * Bugfixes
+* Code Actions for adding methods in custom class if they doesn't exist added
 
 ## 0.11.12 (14-01-2021)
 * Bugfixes

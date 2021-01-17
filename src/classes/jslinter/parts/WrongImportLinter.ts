@@ -8,30 +8,31 @@ export class WrongImportLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
-		const className = FileReader.getClassNameFromPath(document.fileName);
-		if (className) {
-			const UIClass = UIClassFactory.getUIClass(className);
-			if (UIClass instanceof CustomUIClass && UIClass.UIDefine) {
-				UIClass.UIDefine.forEach(UIDefine => {
-					const UIDefineClass = UIClassFactory.getUIClass(UIDefine.classNameDotNotation);
-					if (!UIDefineClass.classExists) {
-						const position = LineColumn(UIClass.classText).fromIndex(UIDefine.start);
-						if (position) {
-							errors.push({
-								acornNode: UIDefine.acornNode,
-								code: "",
-								message: `Class "${UIDefine.classNameDotNotation}" doesn't exist`,
-								range: new vscode.Range(
-									new vscode.Position(position.line - 1, position.col),
-									new vscode.Position(position.line - 1, position.col + UIDefine.path.length)
-								),
-							});
+		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongImportLinter")) {
+			const className = FileReader.getClassNameFromPath(document.fileName);
+			if (className) {
+				const UIClass = UIClassFactory.getUIClass(className);
+				if (UIClass instanceof CustomUIClass && UIClass.UIDefine) {
+					UIClass.UIDefine.forEach(UIDefine => {
+						const UIDefineClass = UIClassFactory.getUIClass(UIDefine.classNameDotNotation);
+						if (!UIDefineClass.classExists) {
+							const position = LineColumn(UIClass.classText).fromIndex(UIDefine.start);
+							if (position) {
+								errors.push({
+									acornNode: UIDefine.acornNode,
+									code: "",
+									message: `Class "${UIDefine.classNameDotNotation}" doesn't exist`,
+									range: new vscode.Range(
+										new vscode.Position(position.line - 1, position.col),
+										new vscode.Position(position.line - 1, position.col + UIDefine.path.length)
+									),
+								});
+							}
 						}
-					}
-				});
+					});
+				}
 			}
 		}
-
 		return errors;
 	}
 }

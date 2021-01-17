@@ -9,12 +9,12 @@ import { FileReader } from "../../utils/FileReader";
 import { CustomDiagnosticType } from "../../registrators/DiagnosticsRegistrator";
 export class WrongFieldMethodLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
-		// console.time("JS Lint");
 		let errors: Error[] = [];
 
-		errors = this._getLintingErrors(document);
+		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongFieldMethodLinter")) {
+			errors = this._getLintingErrors(document);
+		}
 
-		// console.timeEnd("JS Lint");
 		return errors;
 	}
 

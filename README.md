@@ -57,8 +57,13 @@ XML Diagnostics is provided<br/>
 
 ----------
 ## JS Diagnostics
-XML Diagnostics is provided<br/>
-> Related preference entries: *ui5.plugin.jsDiagnostics* (disabled by default)<br/>
+JS Diagnostics is provided<br/>
+> Related preference entries:<br/>
+> *ui5.plugin.jsDiagnostics*<br/>
+> *ui5.plugin.useWrongFieldMethodLinter*<br/>
+> *ui5.plugin.useWrongClassNameLinter*<br/>
+> *ui5.plugin.useWrongImportLinter*<br/>
+> *ui5.plugin.useWrongParametersLinter*<br/>
 
 ![DynamicCompletionItems](/images/JSDiagnostics.gif)
 
