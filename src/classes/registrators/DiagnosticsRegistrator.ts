@@ -10,6 +10,7 @@ export class CustomDiagnostics extends vscode.Diagnostic {
 	fieldName?: string;
 	methodName?: string;
 	sourceClassName?: string;
+	isController?: boolean;
 }
 
 export enum CustomDiagnosticType {
@@ -112,6 +113,7 @@ export class DiagnosticsRegistrator {
 					diagnostic.methodName = error.methodName;
 					diagnostic.fieldName = error.fieldName;
 					diagnostic.sourceClassName = error.sourceClassName;
+					diagnostic.isController = error.isController;
 
 					return diagnostic;
 				});

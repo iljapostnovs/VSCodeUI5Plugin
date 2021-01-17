@@ -22,7 +22,7 @@ export class JSCodeActionProvider {
 		const codeActions: vscode.CodeAction[] = nonExistendMethodDiagnostics.reduce((accumulator: vscode.CodeAction[], diagnostic: CustomDiagnostics) => {
 			const className = FileReader.getClassNameFromPath(document.fileName);
 			if (className && diagnostic.methodName && diagnostic.sourceClassName) {
-				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.sourceClassName, diagnostic.methodName, `function() {\n\t\t\t\n\t\t}`, false);
+				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.sourceClassName, diagnostic.methodName, this._getInsertContentFromIdentifierName(diagnostic.methodName));
 				insertCodeAction && accumulator.push(insertCodeAction);
 			}
 
@@ -30,6 +30,48 @@ export class JSCodeActionProvider {
 		}, []);
 
 		return codeActions;
+	}
+
+	private static _getInsertContentFromIdentifierName(name: string) {
+		let content = "";
+
+		const type = CustomUIClass.getTypeFromHungarianNotation(name)?.toLowerCase();
+		switch (type) {
+			case "object":
+				content = "{}";
+				break;
+			case "array":
+				content = "[]";
+				break;
+			case "int":
+				content = "0";
+				break;
+			case "float":
+				content = "0";
+				break;
+			case "number":
+				content = "0";
+				break;
+			case "map":
+				content = "{}";
+				break;
+			case "string":
+				content = `""`;
+				break;
+			case "boolean":
+				content = "true";
+				break;
+			case "any":
+				content = "null";
+				break;
+			case "function":
+				content = "function() {\n\t\t\t\n\t\t}";
+				break;
+			default:
+				content = "function() {\n\t\t\t\n\t\t}";
+		}
+
+		return content;
 	}
 
 	private static async _getImportClassCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {

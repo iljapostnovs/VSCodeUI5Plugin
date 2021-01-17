@@ -564,7 +564,8 @@ export class CustomUIClass extends AbstractUIClass {
 				p: "Promise",
 				d: "Date",
 				r: "RegExp",
-				v: "any"
+				v: "any",
+				fn: "function"
 			};
 
 			variable = variable.replace("_", "").replace("this.", "");

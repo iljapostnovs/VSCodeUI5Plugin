@@ -5,9 +5,9 @@ import * as vscode from "vscode";
 import LineColumn = require("line-column");
 
 export class MethodInserter {
-	static createInsertMethodCodeAction(className: string, methodName: string, insertContent: string, isController: boolean = false) {
+	static createInsertMethodCodeAction(className: string, methodName: string, insertContent: string) {
 		let insertMethodCodeAction: vscode.CodeAction | undefined;
-		const classPath = FileReader.convertClassNameToFSPath(className, isController);
+		const classPath = FileReader.getClassPathFromClassName(className);
 		if (classPath) {
 			const classUri = vscode.Uri.file(classPath);
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
@@ -18,7 +18,7 @@ export class MethodInserter {
 				const lineColumn = LineColumn(UIClass.classText).fromIndex(offset);
 
 				if (lineColumn) {
-					insertMethodCodeAction = new vscode.CodeAction(`Create "${methodName}" method in "${className}" class`, vscode.CodeActionKind.QuickFix);
+					insertMethodCodeAction = new vscode.CodeAction(`Create "${methodName}" in "${className}" class`, vscode.CodeActionKind.QuickFix);
 					insertMethodCodeAction.isPreferred = true;
 					insertMethodCodeAction.edit = new vscode.WorkspaceEdit();
 					const position = new vscode.Position(lineColumn.line - 1, lineColumn.col);

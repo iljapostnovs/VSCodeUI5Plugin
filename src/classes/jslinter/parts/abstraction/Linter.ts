@@ -10,6 +10,7 @@ export interface Error {
 	fieldName?: string;
 	methodName?: string;
 	sourceClassName?: string;
+	isController?: boolean;
 }
 export abstract class Linter {
 	abstract getErrors(document: vscode.TextDocument) : Error[];

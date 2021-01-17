@@ -33,7 +33,7 @@ export class XMLCodeActionProvider {
 			if (event) {
 				const controllerName = SwitchToControllerCommand.getControllerNameOfCurrentView();
 				if (controllerName) {
-					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(controllerName, attributeData.attributeValue, `function(oEvent) {\n\t\t\t\n\t\t}`, true);
+					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(controllerName, attributeData.attributeValue, `function(oEvent) {\n\t\t\t\n\t\t}`);
 					if (insertCodeAction) {
 						insertCodeAction.diagnostics = [diagnostic];
 
