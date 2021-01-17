@@ -1,6 +1,7 @@
 ## 0.11.13 (17-01-2021)
 * Bugfixes
 * Code Actions for adding methods in custom class if they doesn't exist added
+* Support for relative path import in SAP UI Define added
 
 ## 0.11.12 (14-01-2021)
 * Bugfixes

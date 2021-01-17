@@ -200,7 +200,6 @@ function() {
 * You have manifest.json in source folder
 * App ID (Component name) and i18n paths are defined in manifest.json
 * File is without syntax errors
-* All your strings in sap.ui.define are not Relative (e.g. "./BaseController")
 * Name of the class of the UI5Class is the same as file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
 * You have an access to ui5.sap.com for standard lib metadata preload
 

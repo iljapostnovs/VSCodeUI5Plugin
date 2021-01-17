@@ -460,6 +460,11 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 
 		this._fillMethodsFromMetadata();
+
+		const constructorMethod = this.methods.find(method => method.name === "constructor");
+		if (constructorMethod) {
+			constructorMethod.returnType = this.className;
+		}
 	}
 
 	private _generateParamTextForMethod(acornParams: any[]) {

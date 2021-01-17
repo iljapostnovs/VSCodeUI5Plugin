@@ -107,25 +107,27 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 	}
 
 	private _getUIFieldsForMap(customData: any, mapFields: string[], fields: UIField[] = []) {
-		const fieldName = mapFields.shift();
-		if (fieldName) {
-			customData = customData[fieldName];
-		}
+		if (mapFields.length > 0 && customData) {
+			const fieldName = mapFields.shift();
+			if (fieldName) {
+				customData = customData[fieldName];
+			}
 
-		if (mapFields.length === 0) {
-			const newFields: UIField[] = Object.keys(customData).map(key => {
-				return {
-					name: key,
-					description: "",
-					type: undefined,
-					visibility: "public"
-				};
-			});
-			newFields.forEach(newField => {
-				fields.push(newField);
-			});
-		} else {
-			this._getUIFieldsForMap(customData, mapFields, fields);
+			if (mapFields.length === 0 && customData) {
+				const newFields: UIField[] = Object.keys(customData).map(key => {
+					return {
+						name: key,
+						description: "",
+						type: undefined,
+						visibility: "public"
+					};
+				});
+				newFields.forEach(newField => {
+					fields.push(newField);
+				});
+			} else {
+				this._getUIFieldsForMap(customData, mapFields, fields);
+			}
 		}
 
 		return fields;

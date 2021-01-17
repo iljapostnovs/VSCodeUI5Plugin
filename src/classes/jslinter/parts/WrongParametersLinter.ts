@@ -108,6 +108,8 @@ export class WrongParametersLinter extends Linter {
 			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === "any" || actualClass.toLowerCase() === "any") {
 			classesDiffers = false;
+		} else if (expectedClass.toLowerCase() === "void" || actualClass.toLowerCase() === "void") {
+			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(actualClass, "sap.ui.base.Object")) {
 			classesDiffers = false;
 		} else if (actualClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(expectedClass, "sap.ui.base.Object")) {
