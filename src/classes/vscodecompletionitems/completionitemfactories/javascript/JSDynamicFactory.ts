@@ -16,14 +16,20 @@ export class JSDynamicFactory {
 	}
 
 	private _generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods: FieldsAndMethods) {
+		const position = vscode.window.activeTextEditor?.selection.start;
+		const range = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
+		const word = range && vscode.window.activeTextEditor?.document.getText(range);
+
 		let completionItems = fieldsAndMethods.methods.map(classMethod => {
 			const completionItem:CustomCompletionItem = new CustomCompletionItem(classMethod.name);
 			completionItem.kind = vscode.CompletionItemKind.Method;
 
-			// const mandatoryParams = classMethod.params.filter(param => !param.name.endsWith("?"));
-			// const paramString = mandatoryParams.map((param, index) => `\${${index + 1}:${param.name}}`).join(", ");
-			// const insertString = `${classMethod.name}(${paramString})$0`;
-			const insertString = `${classMethod.name}`;
+			let insertString = `${classMethod.name}`;
+			if (!word) {
+				const mandatoryParams = classMethod.params.filter(param => !param.name.endsWith("?"));
+				const paramString = mandatoryParams.map((param, index) => `\${${index + 1}:${param.name}}`).join(", ");
+				insertString += `(${paramString})$0`;
+			}
 			completionItem.insertText = new vscode.SnippetString(insertString);
 			completionItem.detail = `(${classMethod.visibility}) ${fieldsAndMethods.className}`;
 
