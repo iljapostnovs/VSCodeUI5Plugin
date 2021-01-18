@@ -157,7 +157,9 @@ export class AcornSyntaxAnalyzer {
 			let temporaryCurrentClassName = currentClassName;
 			//the rest of the cases
 			const currentNode = stack.shift();
-			if (currentNode.type === "ThisExpression") {
+			if (currentNode._acornSyntaxAnalyserType) {
+				className = currentNode._acornSyntaxAnalyserType;
+			} else if (currentNode.type === "ThisExpression") {
 				if (stack.length > 0) {
 					className = this.findClassNameForStack(stack, currentClassName, primaryClassName, false);
 				} else {
@@ -257,7 +259,7 @@ export class AcornSyntaxAnalyzer {
 							}
 
 							//get hungarian notation type
-							if (!className) {
+							if (!className || className === "any" || className === "void") {
 								className = CustomUIClass.getTypeFromHungarianNotation(currentNode.name) || "";
 							}
 						}
@@ -280,15 +282,13 @@ export class AcornSyntaxAnalyzer {
 			if (temporaryCurrentClassName) {
 				className = temporaryCurrentClassName;
 			}
+
+			currentNode._acornSyntaxAnalyserType = className || "any";
 		}
 
 		if (className && stack.length > 0) {
 			className = this.findClassNameForStack(stack, className, primaryClassName, false);
 		}
-
-		// if (className && className.indexOf("|") > -1) {
-		// 	className = className.split("|")[0];
-		// }
 
 		return className;
 	}
@@ -727,15 +727,22 @@ export class AcornSyntaxAnalyzer {
 	}
 
 	public static expandAllContent(node: any, content: any[] = []) {
-		if (!content.includes(node)) {
-			content.push(node);
-		}
-		const innerNodes: any[] = this.getContent(node).filter(node => !content.includes(node));
-		innerNodes.forEach((node: any) => {
-			if (node) {
-				this.expandAllContent(node, content);
+		if (node.expandedContent) {
+			content.push(...node.expandedContent);
+		} else {
+			if (!content.includes(node)) {
+				content.push(node);
 			}
-		});
+			const innerNodes: any[] = this.getContent(node).filter(node => !content.includes(node));
+			innerNodes.forEach((node: any) => {
+				if (node) {
+					this.expandAllContent(node, content);
+				}
+			});
+
+			node.expandedContent = content.concat([]);
+		}
+
 		return content;
 	}
 	public static getContent(node: any) {
@@ -827,7 +834,20 @@ export class AcornSyntaxAnalyzer {
 	}
 
 	private static _getClassNameFromAcornVariableDeclaration(declaration: any, UIClass: CustomUIClass) {
-		return this.getClassNameFromAcornDeclaration(declaration.init, UIClass);
+		let className = "";
+		if (declaration._acornSyntaxAnalyserType) {
+			className = declaration._acornSyntaxAnalyserType;
+		} else {
+			className = this.getClassNameFromAcornDeclaration(declaration.init, UIClass);
+			if (declaration.id.name && (!className || className === "any" || className === "void")) {
+				className = CustomUIClass.getTypeFromHungarianNotation(declaration.id.name) || className;
+			}
+
+			declaration._acornSyntaxAnalyserType = className;
+		}
+
+
+		return className;
 	}
 
 	public static declarationStack: any[] = [];

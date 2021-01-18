@@ -38,7 +38,6 @@ export class WrongFieldMethodLinter extends Linter {
 			});
 
 		}
-		console.log(this.callTimes);
 
 		//remove duplicates
 		errors = errors.reduce((accumulator: Error[], error: Error) => {
@@ -52,13 +51,11 @@ export class WrongFieldMethodLinter extends Linter {
 		return errors;
 	}
 
-	private callTimes = 0;
 	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, errors: Error[] = [], droppedNodes: any[] = []) {
 		if (droppedNodes.includes(node)) {
 			return [];
 		}
 
-		this.callTimes++;
 		const currentClassName = UIClass.className;
 
 		if (node.type === "MemberExpression") {
