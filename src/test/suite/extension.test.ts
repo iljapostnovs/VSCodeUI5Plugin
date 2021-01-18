@@ -20,9 +20,9 @@ suite("Extension Test Suite", () => {
 	});
 
 	test("Method Types match", async () => {
-		const testData: any[] = data.data;
-		testData.forEach((data: any) => {
-			data.methods.forEach((testMethodData: any) => {
+		const testData = data.data;
+		testData.forEach(data => {
+			data.methods.forEach(testMethodData => {
 				const UIClass = UIClassFactory.getUIClass(data.className);
 				const method = UIClass.methods.find(method => method.name === testMethodData.name);
 				if (method?.returnType === "void") {
@@ -34,9 +34,9 @@ suite("Extension Test Suite", () => {
 	});
 
 	test("Field Types match", async () => {
-		const testData: any[] = data.data;
-		testData.forEach((data: any) => {
-			data.fields.forEach((testFieldData: any) => {
+		const testData = data.data;
+		testData.forEach(data => {
+			data.fields.forEach(testFieldData => {
 				const UIClass = UIClassFactory.getUIClass(data.className);
 				const field = UIClass.fields.find(method => method.name === testFieldData.name);
 				if (field && !field?.type) {
@@ -48,8 +48,8 @@ suite("Extension Test Suite", () => {
 	});
 
 	test("Syntax Analyser finds correct types at positions", async () => {
-		const testData: any[] = data.SyntaxAnalyser;
-		testData.forEach((data: any) => {
+		const testData = data.SyntaxAnalyser;
+		testData.forEach(data => {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(data.className);
 			const method = UIClass.acornMethodsAndFields.find(methodOrField => methodOrField.key?.name === data.methodName);
 			const methodContent = AcornSyntaxAnalyzer.expandAllContent(method.value.body);
@@ -64,7 +64,7 @@ suite("Extension Test Suite", () => {
 			const position = searchedNode.property?.start || searchedNode.start + data.positionAddition;
 			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 			const classNameAtPosition = positionBeforeCurrentStrategy.acornGetClassName(data.className, position);
-			assert.strictEqual(data.type, classNameAtPosition, `${data.className} position ${position} type is ${classNameAtPosition} but expected ${data.type}`);
+			assert.strictEqual(data.type, classNameAtPosition, `"${data.className}" position ${position} method "${data.methodName}" type is "${classNameAtPosition}" but expected "${data.type}"`);
 		});
 	});
 });

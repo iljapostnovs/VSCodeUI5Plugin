@@ -4,6 +4,8 @@ import * as path from "path";
 import { FileReader } from "../../utils/FileReader";
 import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
 import { TextTransformationFactory, CaseType } from "./TextTransformationFactory";
+import * as jsClassData from "./i18nIDs.json";
+
 const workspace = vscode.workspace;
 
 export class ExportToI18NCommand {
@@ -144,7 +146,7 @@ export class ExportToI18NCommand {
 			const i18nIDs = [{
 				label: "YMSG",
 				description: "Message text (long)"
-			}].concat(require("./i18nIDs.json"));
+			}].concat(jsClassData);
 
 
 			const resourceGroups: vscode.QuickPickItem[] = i18nIDs;

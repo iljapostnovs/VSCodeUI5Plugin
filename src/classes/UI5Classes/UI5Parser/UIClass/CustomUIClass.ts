@@ -2,7 +2,7 @@ import { FileReader } from "../../../utils/FileReader";
 import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
 import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam } from "./AbstractUIClass";
-import commentParser = require("comment-parser");
+import * as commentParser from "comment-parser";
 const acornLoose = require("acorn-loose");
 
 interface UIDefine {

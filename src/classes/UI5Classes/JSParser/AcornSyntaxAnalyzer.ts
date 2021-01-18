@@ -157,15 +157,15 @@ export class AcornSyntaxAnalyzer {
 			let temporaryCurrentClassName = currentClassName;
 			//the rest of the cases
 			const currentNode = stack.shift();
-			if (currentNode._acornSyntaxAnalyserType) {
-				className = currentNode._acornSyntaxAnalyserType;
-			} else if (currentNode.type === "ThisExpression") {
+			if (currentNode.type === "ThisExpression") {
 				if (stack.length > 0) {
 					className = this.findClassNameForStack(stack, currentClassName, primaryClassName, false);
 				} else {
 					className = currentClassName;
 				}
 
+			} else if (currentNode._acornSyntaxAnalyserType) {
+				className = currentNode._acornSyntaxAnalyserType;
 			} else if (currentNode.type === "MemberExpression") {
 				const memberName = currentNode.property.name;
 				const isCallOrApply = stack[0]?.type === "MemberExpression" && (stack[0]?.property.name === "call" || stack[0]?.property.name === "apply");
@@ -278,12 +278,12 @@ export class AcornSyntaxAnalyzer {
 
 			}
 
+			currentNode._acornSyntaxAnalyserType = className || "any";
+
 			temporaryCurrentClassName = this._handleArrayMethods(stack, primaryClassName, className);
 			if (temporaryCurrentClassName) {
 				className = temporaryCurrentClassName;
 			}
-
-			currentNode._acornSyntaxAnalyserType = className || "any";
 		}
 
 		if (className && stack.length > 0) {
@@ -330,7 +330,7 @@ export class AcornSyntaxAnalyzer {
 				if (memberExpression && memberExpression.arguments[0]) {
 					const model = memberExpression.arguments[0];
 					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-					if (this.declarationStack.indexOf(model) === -1) {
+					if (!this.declarationStack.includes(model)) {
 						this.declarationStack.push(model);
 						const stack = strategy.getStackOfNodesForPosition(className, model.end, true);
 						modelClassName = this.findClassNameForStack(stack, className) || "";
@@ -340,7 +340,6 @@ export class AcornSyntaxAnalyzer {
 				}
 			}
 		}
-
 		return modelClassName;
 	}
 
@@ -521,8 +520,6 @@ export class AcornSyntaxAnalyzer {
 						className = strategy.acornGetClassName(currentClassName, node.callee.object.end + 1) || "";
 						if (className.endsWith("[]")) {
 							className = className.replace("[]", "");
-						} else {
-							className = "";
 						}
 					}
 				}
