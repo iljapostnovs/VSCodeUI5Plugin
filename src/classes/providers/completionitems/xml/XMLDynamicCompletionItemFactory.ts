@@ -12,7 +12,7 @@ import { CustomCompletionItem } from "../CustomCompletionItem";
 import LineColumn = require("line-column");
 
 export class XMLDynamicCompletionItemFactory {
-	public generateXMLDynamicCompletionItems() {
+	public createXMLDynamicCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
 		const textEditor = vscode.window.activeTextEditor;
 

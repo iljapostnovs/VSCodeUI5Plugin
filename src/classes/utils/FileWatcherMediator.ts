@@ -88,7 +88,7 @@ export class FileWatcherMediator {
 	}
 
 	//TODO: Move to js completion items
-	public static synchronizeJSDefineCompletionItems(completionItems: CustomCompletionItem[]) {
+	public static synchronizeSAPUIDefineCompletionItems(completionItems: CustomCompletionItem[]) {
 		let disposable = workspace.onDidCreateFiles(event => {
 			event.files.forEach(file => {
 				if (file.fsPath.endsWith(".js")) {

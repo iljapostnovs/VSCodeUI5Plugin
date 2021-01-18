@@ -6,14 +6,14 @@ import { URLBuilder } from "../../../../utils/URLBuilder";
 import { GeneratorFactory } from "../../codegenerators/GeneratorFactory";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 
-export class UIDefineFactory {
+export class SAPUIDefineFactory {
 	private static readonly _nodeDAO = new SAPNodeDAO();
 
 	public async generateUIDefineCompletionItems() {
 		const workspaceCompletionItemFactory = new WorkspaceCompletionItemFactory();
 		let completionItems:CustomCompletionItem[] = [];
 
-		const SAPNodes: SAPNode[] = await UIDefineFactory._nodeDAO.getAllNodes();
+		const SAPNodes: SAPNode[] = await SAPUIDefineFactory._nodeDAO.getAllNodes();
 
 		for (const node of SAPNodes) {
 			completionItems = completionItems.concat(this._recursiveUIDefineCompletionItemGeneration(node));

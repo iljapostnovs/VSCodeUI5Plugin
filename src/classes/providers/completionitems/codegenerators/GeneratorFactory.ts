@@ -2,7 +2,7 @@ import { IPropertyGenerator } from "./property/interfaces/IPropertyGenerator";
 import { XMLPropertyGenerator } from "./property/XMLPropertyGenerator";
 import { XMLAggregationGenerator } from "./aggregation/XMLAggregationGenerator";
 import { IAggregationGenerator } from "./aggregation/interfaces/IAggregationGenerator";
-import { DefineGenerator } from "./define/UIDefineCompletionItemGenerator";
+import { UIDefineCompletionItemGenerator } from "./define/UIDefineCompletionItemGenerator";
 
 export class GeneratorFactory {
 	private static readonly _generatorMap = {
@@ -16,7 +16,7 @@ export class GeneratorFactory {
 		},
 		define: {
 			"xml": undefined,
-			"js": DefineGenerator
+			"js": UIDefineCompletionItemGenerator
 		}
 	};
 

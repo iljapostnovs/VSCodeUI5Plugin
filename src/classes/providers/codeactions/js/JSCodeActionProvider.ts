@@ -6,7 +6,7 @@ import LineColumn = require("line-column");
 import { CustomDiagnostics, CustomDiagnosticType } from "../../../registrators/DiagnosticsRegistrator";
 import { MethodInserter } from "../util/MethodInserter";
 import { FileReader } from "../../../utils/FileReader";
-import { UIDefineFactory } from "../../completionitems/js/sapuidefine/SAPUIDefineFactory";
+import { SAPUIDefineFactory } from "../../completionitems/js/sapuidefine/SAPUIDefineFactory";
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -84,7 +84,7 @@ export class JSCodeActionProvider {
 			if (currentClassName) {
 				UIClassFactory.setNewContentForCurrentUIClass();
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
-				const UIDefine = await new UIDefineFactory().generateUIDefineCompletionItems();
+				const UIDefine = await new SAPUIDefineFactory().generateUIDefineCompletionItems();
 				const UIDefineCompletionItemsWhichContainsCurrentSelectionText = UIDefine.filter(completionItem => completionItem.label.indexOf(selectedVariableName) > -1)
 					.filter(completionItem => !UIClass.UIDefine.find(UIDefine => `"${UIDefine.path}"` === completionItem.label))
 					.reverse();

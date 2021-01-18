@@ -5,7 +5,7 @@ import { UI5MetadataPreloader } from "../../librarydata/UI5MetadataDAO";
 import { SAPIcons } from "../../UI5Classes/SAPIcons";
 import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
 import { StandardXMLCompletionItemFactory as StandardXMLCompletionItemFactory } from "./xml/StandardXMLCompletionItemFactory";
-import { UIDefineFactory } from "./js/sapuidefine/SAPUIDefineFactory";
+import { SAPUIDefineFactory } from "./js/sapuidefine/SAPUIDefineFactory";
 import { ViewIdCompletionItemFactory } from "./js/ViewIdCompletionItemFactory";
 import { JSDynamicCompletionItemsFactory } from "./js/JSDynamicCompletionItemsFactory";
 import { XMLDynamicCompletionItemFactory } from "./xml/XMLDynamicCompletionItemFactory";
@@ -25,14 +25,14 @@ export class CompletionItemFactory {
 		this._language = completionItemType;
 	}
 
-	public async getUIDefineCompletionItems() {
+	public async createUIDefineCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
 
 		if (this._language === GeneratorFactory.language.js) {
-			completionItems = await this._generateJSCompletionItems();
+			completionItems = await this._createJSCompletionItems();
 		} else if (this._language === GeneratorFactory.language.xml) {
 			if (CompletionItemFactory.XMLStandardLibCompletionItems.length === 0) {
-				completionItems = await this._generateXMLCompletionItems();
+				completionItems = await this._createXMLCompletionItems();
 			} else {
 				completionItems = CompletionItemFactory.XMLStandardLibCompletionItems;
 			}
@@ -41,8 +41,8 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	private async _generateXMLCompletionItems() {
-		let completionItems: CustomCompletionItem[] = [];
+	private async _createXMLCompletionItems() {
+		var completionItems: CustomCompletionItem[] = [];
 		let SAPNodes: SAPNode[];
 		SAPNodes = await CompletionItemFactory._nodeDAO.getAllNodes();
 
@@ -62,11 +62,11 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	private async _generateJSCompletionItems() {
+	private async _createJSCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
 
 		if (CompletionItemFactory.JSDefineCompletionItems.length === 0) {
-			const UIDefineFactoy = new UIDefineFactory();
+			const UIDefineFactoy = new SAPUIDefineFactory();
 			completionItems = await UIDefineFactoy.generateUIDefineCompletionItems();
 			CompletionItemFactory.JSDefineCompletionItems = completionItems;
 		} else {
@@ -107,22 +107,22 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	public generateViewIdCompletionItems() {
+	public createViewIdCompletionItems() {
 		const idCompletionItems = new ViewIdCompletionItemFactory();
 
-		return idCompletionItems.generateIdCompletionItems();
+		return idCompletionItems.createIdCompletionItems();
 	}
 
-	public generatePropertyMethodCompletionItems() {
+	public createPropertyMethodCompletionItems() {
 		const jsDynamicFactory = new JSDynamicCompletionItemsFactory();
 		UIClassFactory.setNewContentForCurrentUIClass();
 
-		return jsDynamicFactory.generateUIClassCompletionItems();
+		return jsDynamicFactory.createUIClassCompletionItems();
 	}
 
-	public generateXMLDynamicCompletionItems() {
+	public createXMLDynamicCompletionItems() {
 		const xmlDynamicFactory = new XMLDynamicCompletionItemFactory();
 
-		return xmlDynamicFactory.generateXMLDynamicCompletionItems();
+		return xmlDynamicFactory.createXMLDynamicCompletionItems();
 	}
 }

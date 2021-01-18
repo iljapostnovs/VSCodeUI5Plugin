@@ -5,7 +5,7 @@ import { XMLParser } from "../../../utils/XMLParser";
 import { CustomCompletionItem } from "../CustomCompletionItem";
 
 export class ViewIdCompletionItemFactory {
-	public generateIdCompletionItems() {
+	public createIdCompletionItems() {
 		let completionItems:CustomCompletionItem[] = [];
 
 		const strategy = new InnerPropertiesStrategy();

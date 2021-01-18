@@ -4,7 +4,7 @@ import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUI
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
 import { SAPNode } from "../../../../librarydata/SAPNode";
 
-export class DefineGenerator {
+export class UIDefineCompletionItemGenerator {
 
 	public generateDefineString(node: SAPNode) {
 		let defineString: string = "";
