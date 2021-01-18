@@ -225,7 +225,7 @@
 	},
 	"devDependencies": {
 		"@types/axios": "^0.14.0",
-		"@types/glob": "^7.1.1",
+		"@types/glob": "^7.1.3",
 		"@types/line-column": "^1.0.0",
 		"@types/mocha": "^8.2.0",
 		"@types/node": "^14.14.21",
@@ -245,7 +245,7 @@
 		"acorn-loose": "^8.0.1",
 		"axios": "^0.21.1",
 		"comment-parser": "^1.1.1",
-		"glob": "^7.1.4",
+		"glob": "^7.1.6",
 		"line-column": "^1.0.2"
 	}
 }
