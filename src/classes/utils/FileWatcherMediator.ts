@@ -4,15 +4,15 @@ import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer"
 import * as glob from "glob";
 import * as fs from "fs";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { WorkspaceCompletionItemFactory } from "../vscodecompletionitems/completionitemfactories/javascript/WorkspaceCompletionItemFactory";
 import { ResourceModelData } from "../UI5Classes/ResourceModelData";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
 import * as path from "path";
 import { TemplateGeneratorFactory } from "../templateinserters/TemplateGeneratorFactory";
 import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
-import { CustomCompletionItem } from "../vscodecompletionitems/CustomCompletionItem";
+import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
+import { WorkspaceCompletionItemFactory } from "../providers/completionitems/js/sapuidefine/WorkspaceCompletionItemFactory";
 const fileSeparator = path.sep;
 const workspace = vscode.workspace;
 

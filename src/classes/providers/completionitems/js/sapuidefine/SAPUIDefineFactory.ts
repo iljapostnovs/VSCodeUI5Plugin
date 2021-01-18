@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
-import { SAPNode } from "../../../librarydata/SAPNode";
-import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
-import { URLBuilder } from "../../../utils/URLBuilder";
-import { GeneratorFactory } from "../codegenerators/GeneratorFactory";
+import { SAPNode } from "../../../../librarydata/SAPNode";
+import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
+import { URLBuilder } from "../../../../utils/URLBuilder";
+import { GeneratorFactory } from "../../codegenerators/GeneratorFactory";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 
 export class UIDefineFactory {

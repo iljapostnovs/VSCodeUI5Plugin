@@ -1,19 +1,19 @@
-import { SAPNodeDAO } from "../librarydata/SAPNodeDAO";
-import { SAPNode } from "../librarydata/SAPNode";
+import { SAPNodeDAO } from "../../librarydata/SAPNodeDAO";
+import { SAPNode } from "../../librarydata/SAPNode";
 import * as vscode from "vscode";
-import { UI5MetadataPreloader } from "../librarydata/UI5MetadataDAO";
-import { SAPIcons } from "../UI5Classes/SAPIcons";
-import { ResourceModelData } from "../UI5Classes/ResourceModelData";
-import { XMLClassFactory as XMLClassFactory } from "./completionitemfactories/xml/XMLClassFactory";
-import { UIDefineFactory } from "./completionitemfactories/javascript/UIDefineFactory";
-import { IDFactory } from "./completionitemfactories/javascript/IDFactory";
-import { JSDynamicFactory } from "./completionitemfactories/javascript/JSDynamicFactory";
-import { XMLDynamicFactory } from "./completionitemfactories/xml/XMLDynamicFactory";
-import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { GeneratorFactory } from "./completionitemfactories/codegenerators/GeneratorFactory";
+import { UI5MetadataPreloader } from "../../librarydata/UI5MetadataDAO";
+import { SAPIcons } from "../../UI5Classes/SAPIcons";
+import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
+import { StandardXMLCompletionItemFactory as StandardXMLCompletionItemFactory } from "./xml/StandardXMLCompletionItemFactory";
+import { UIDefineFactory } from "./js/sapuidefine/SAPUIDefineFactory";
+import { ViewIdCompletionItemFactory } from "./js/ViewIdCompletionItemFactory";
+import { JSDynamicCompletionItemsFactory } from "./js/JSDynamicCompletionItemsFactory";
+import { XMLDynamicCompletionItemFactory } from "./xml/XMLDynamicCompletionItemFactory";
+import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
+import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { CustomCompletionItem } from "./CustomCompletionItem";
+import { GeneratorFactory } from "./codegenerators/GeneratorFactory";
 
 export class CompletionItemFactory {
 	private static readonly _nodeDAO = new SAPNodeDAO();
@@ -54,7 +54,7 @@ export class CompletionItemFactory {
 		]);
 		console.log("Libs are preloaded");
 
-		const xmlClassFactoy = new XMLClassFactory();
+		const xmlClassFactoy = new StandardXMLCompletionItemFactory();
 		completionItems = await xmlClassFactoy.generateAggregationPropertyCompletionItems();
 		CompletionItemFactory.XMLStandardLibCompletionItems = completionItems;
 		console.log("After the preload XML Completion Items are generated successfully");
@@ -108,20 +108,20 @@ export class CompletionItemFactory {
 	}
 
 	public generateViewIdCompletionItems() {
-		const idCompletionItems = new IDFactory();
+		const idCompletionItems = new ViewIdCompletionItemFactory();
 
 		return idCompletionItems.generateIdCompletionItems();
 	}
 
 	public generatePropertyMethodCompletionItems() {
-		const jsDynamicFactory = new JSDynamicFactory();
+		const jsDynamicFactory = new JSDynamicCompletionItemsFactory();
 		UIClassFactory.setNewContentForCurrentUIClass();
 
 		return jsDynamicFactory.generateUIClassCompletionItems();
 	}
 
 	public generateXMLDynamicCompletionItems() {
-		const xmlDynamicFactory = new XMLDynamicFactory();
+		const xmlDynamicFactory = new XMLDynamicCompletionItemFactory();
 
 		return xmlDynamicFactory.generateXMLDynamicCompletionItems();
 	}

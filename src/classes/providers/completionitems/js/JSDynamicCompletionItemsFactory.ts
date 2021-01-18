@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethods } from "../../../UI5Classes/UIClassFactory";
-import { CustomCompletionItem } from "../../CustomCompletionItem";
+import { CustomCompletionItem } from "../CustomCompletionItem";
 
-export class JSDynamicFactory {
+export class JSDynamicCompletionItemsFactory {
 
 	public generateUIClassCompletionItems() {
 		let completionItems:CustomCompletionItem[] = [];
@@ -36,7 +36,6 @@ export class JSDynamicFactory {
 			const mardownString = new vscode.MarkdownString();
 			mardownString.isTrusted = true;
 			if (classMethod.api) {
-				//TODO: newline please, why dont you work
 				mardownString.appendMarkdown(classMethod.api);
 			}
 			mardownString.appendCodeblock(`${classMethod.name}(${classMethod.params.map(param => param.name).join(", ")}): ${classMethod.returnType || "void"}`);

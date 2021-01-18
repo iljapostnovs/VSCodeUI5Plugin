@@ -12,9 +12,9 @@ import { SAPNodePropertyGenerationStrategy } from "../codegenerators/property/st
 import { SAPClassAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
 import { SAPNodeAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
 import { SAPClassPropertyGetterStrategy } from "../codegenerators/property/strategies/SAPClassPropertyGetterStrategy";
-import { CustomCompletionItem } from "../../CustomCompletionItem";
+import { CustomCompletionItem } from "../CustomCompletionItem";
 
-export class XMLClassFactory {
+export class StandardXMLCompletionItemFactory {
 	private readonly _nodeDAO = new SAPNodeDAO();
 
 	async generateAggregationPropertyCompletionItems() {

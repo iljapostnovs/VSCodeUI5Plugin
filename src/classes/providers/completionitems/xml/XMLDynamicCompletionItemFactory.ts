@@ -5,13 +5,13 @@ import { URLBuilder } from "../../../utils/URLBuilder";
 import { XMLParser, PositionType } from "../../../utils/XMLParser";
 import { ResourceModelData } from "../../../UI5Classes/ResourceModelData";
 import { FileReader } from "../../../utils/FileReader";
-import { CompletionItemFactory } from "../../CompletionItemFactory";
+import { CompletionItemFactory } from "../CompletionItemFactory";
 import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
-import { XMLClassFactory } from "./XMLClassFactory";
-import { CustomCompletionItem } from "../../CustomCompletionItem";
+import { StandardXMLCompletionItemFactory } from "./StandardXMLCompletionItemFactory";
+import { CustomCompletionItem } from "../CustomCompletionItem";
 import LineColumn = require("line-column");
 
-export class XMLDynamicFactory {
+export class XMLDynamicCompletionItemFactory {
 	public generateXMLDynamicCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
 		const textEditor = vscode.window.activeTextEditor;
@@ -188,7 +188,7 @@ export class XMLDynamicFactory {
 	}
 
 	private _getCompletionItemsForCustomClasses(libName: string, tagPrefix: string) {
-		const xmlClassFactory = new XMLClassFactory();
+		const xmlClassFactory = new StandardXMLCompletionItemFactory();
 		const wsFolders = vscode.workspace.workspaceFolders || [];
 		const classNames = wsFolders.reduce((accumulator: string[], wsFolder: vscode.WorkspaceFolder) => {
 			const classNames = FileReader.getAllJSClassNamesFromProject(wsFolder);
@@ -214,7 +214,7 @@ export class XMLDynamicFactory {
 
 	private _getStandardCompletionItemWithPrefix(node: any, tagPrefix: string, classPrefix: string = "") {
 		let completionItem: CustomCompletionItem | undefined;
-		const XMLClassFactoryInstance = new XMLClassFactory();
+		const XMLClassFactoryInstance = new StandardXMLCompletionItemFactory();
 
 		completionItem = XMLClassFactoryInstance.generateXMLClassCompletionItemFromSAPNode(node, tagPrefix, classPrefix);
 

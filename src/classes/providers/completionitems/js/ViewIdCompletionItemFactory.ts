@@ -2,9 +2,9 @@ import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { InnerPropertiesStrategy } from "../../../UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
 import { XMLParser } from "../../../utils/XMLParser";
-import { CustomCompletionItem } from "../../CustomCompletionItem";
+import { CustomCompletionItem } from "../CustomCompletionItem";
 
-export class IDFactory {
+export class ViewIdCompletionItemFactory {
 	public generateIdCompletionItems() {
 		let completionItems:CustomCompletionItem[] = [];
 

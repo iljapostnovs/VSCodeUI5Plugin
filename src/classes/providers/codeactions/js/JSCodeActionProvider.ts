@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { UIDefineFactory } from "../../../vscodecompletionitems/completionitemfactories/javascript/UIDefineFactory";
 import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
@@ -7,6 +6,7 @@ import LineColumn = require("line-column");
 import { CustomDiagnostics, CustomDiagnosticType } from "../../../registrators/DiagnosticsRegistrator";
 import { MethodInserter } from "../util/MethodInserter";
 import { FileReader } from "../../../utils/FileReader";
+import { UIDefineFactory } from "../../completionitems/js/sapuidefine/SAPUIDefineFactory";
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
