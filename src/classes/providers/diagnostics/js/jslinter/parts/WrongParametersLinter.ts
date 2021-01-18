@@ -60,7 +60,7 @@ export class WrongParametersLinter extends Linter {
 														const paramFromMethodTypes = paramFromMethod.type.split("|");
 														let typeMismatch = !paramFromMethodTypes.includes(classNameOfTheParam);
 														if (typeMismatch) {
-															typeMismatch = !!paramFromMethodTypes.find(className => this._getIfClassesDiffers(className, classNameOfTheParam));
+															typeMismatch = !paramFromMethodTypes.find(className => !this._getIfClassesDiffers(className, classNameOfTheParam));
 														}
 														if (typeMismatch) {
 															const positionStart = LineColumn(UIClass.classText).fromIndex(param.start);
