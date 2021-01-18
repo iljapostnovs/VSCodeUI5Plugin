@@ -69,7 +69,7 @@ JS Diagnostics is provided<br/>
 
 ----------
 ## Code Action Provider
-Code Actions for UI5 modules import in .js files are provided.<br/>
+Code Actions for UI5 modules import and inserting non-existent methods in .js files are provided.<br/>
 Code Actions for creating event handlers in controllers from xml views are provided.<br/>
 > Hotkey: Alt + Enter<br/>
 
