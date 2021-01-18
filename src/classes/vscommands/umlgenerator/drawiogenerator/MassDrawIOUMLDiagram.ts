@@ -302,7 +302,7 @@ export class MassDrawIOUMLDiagram {
 		return treeDepth;
 	}
 
-	private static _setTreeLevels(UMLDiagrams: DrawIOUMLDiagram[], usageMap: UsageMap, currentLevel: number = 1) {
+	private static _setTreeLevels(UMLDiagrams: DrawIOUMLDiagram[], usageMap: UsageMap, currentLevel = 1) {
 		UMLDiagrams.forEach(UMLDiagram => {
 			const usageMapEntry = usageMap[UMLDiagram.UIClass.className];
 			if (usageMapEntry.level === 0) {

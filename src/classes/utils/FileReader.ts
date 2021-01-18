@@ -54,7 +54,7 @@ export class FileReader {
 		return classPath;
 	}
 
-	public static convertClassNameToFSPath(className: string, isController: boolean = false, isFragment: boolean = false, isView: boolean = false) {
+	public static convertClassNameToFSPath(className: string, isController = false, isFragment = false, isView = false) {
 		let FSPath;
 		let extension = ".js";
 		const manifest = this.getManifestForClass(className);
@@ -67,7 +67,7 @@ export class FileReader {
 				extension = ".view.xml";
 			}
 
-			const separator = require("path").sep;
+			const separator = path.sep;
 			FSPath = `${manifest.fsPath}${className.replace(manifest.componentName, "").replace(/\./g, separator).trim()}${extension}`;
 		}
 
@@ -87,13 +87,12 @@ export class FileReader {
 		this._fetchAllWorkspaceManifests();
 	}
 
-	public static getManifestForClass(className: string = "") {
-		let returnManifest: UIManifest | undefined;
+	public static getManifestForClass(className = "") {
 		if (this._manifests.length === 0) {
 			this._fetchAllWorkspaceManifests();
 		}
 
-		returnManifest = this._manifests.find(UIManifest => className.startsWith(UIManifest.componentName + "."));
+		const returnManifest = this._manifests.find(UIManifest => className.startsWith(UIManifest.componentName + "."));
 
 		return returnManifest;
 	}
@@ -144,12 +143,11 @@ export class FileReader {
 	}
 
 	public static getViewText(controllerName: string) {
-		let viewText: string | undefined;
 		if (!this._viewCache[controllerName]) {
 			this._readAllViewsAndSaveInCache();
 		}
 
-		viewText = this._viewCache[controllerName]?.content;
+		const viewText = this._viewCache[controllerName]?.content;
 
 		return viewText;
 	}
@@ -258,7 +256,7 @@ export class FileReader {
 	}
 
 	private static _getFragments(documentText: string) {
-		return documentText.match(/\<.*?Fragment(.|\s)*?\/>/g) || [];
+		return documentText.match(/<.*?Fragment(.|\s)*?\/>/g) || [];
 	}
 
 	private static _isSeparator(char: string) {
@@ -324,7 +322,6 @@ export class FileReader {
 	static clearCache() {
 		if (this.globalStoragePath) {
 			if (fs.existsSync(this.globalStoragePath)) {
-				const path = require("path");
 				const directory = this.globalStoragePath;
 				fs.readdir(directory, (err, files) => {
 					for (const file of files) {
@@ -411,7 +408,7 @@ export class FileReader {
 	}
 }
 
-export module FileReader {
+export namespace FileReader {
 	export enum CacheType {
 		Metadata = "1",
 		APIIndex = "2",

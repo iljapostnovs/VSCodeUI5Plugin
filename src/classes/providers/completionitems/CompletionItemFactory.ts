@@ -1,5 +1,4 @@
 import { SAPNodeDAO } from "../../librarydata/SAPNodeDAO";
-import { SAPNode } from "../../librarydata/SAPNode";
 import * as vscode from "vscode";
 import { UI5MetadataPreloader } from "../../librarydata/UI5MetadataDAO";
 import { SAPIcons } from "../../UI5Classes/SAPIcons";
@@ -42,9 +41,8 @@ export class CompletionItemFactory {
 	}
 
 	private async _createXMLCompletionItems() {
-		var completionItems: CustomCompletionItem[] = [];
-		let SAPNodes: SAPNode[];
-		SAPNodes = await CompletionItemFactory._nodeDAO.getAllNodes();
+		let completionItems: CustomCompletionItem[] = [];
+		const SAPNodes = await CompletionItemFactory._nodeDAO.getAllNodes();
 
 		const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
 		await Promise.all([

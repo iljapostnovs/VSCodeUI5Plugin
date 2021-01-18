@@ -7,7 +7,7 @@ import { SAPNode } from "../../../../librarydata/SAPNode";
 export class UIDefineCompletionItemGenerator {
 
 	public generateDefineString(node: SAPNode) {
-		let defineString: string = "";
+		let defineString = "";
 
 		if (node.node.visibility === "public" && (node.getKind() === "class" || node.getKind() === "enum" || node.getKind() === "namespace")) {
 			defineString = `"${node.getName().replace(/\./g, "/")}"`;

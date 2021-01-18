@@ -1,4 +1,3 @@
-import { SAPNodeDAO } from "./SAPNodeDAO";
 import { UI5Metadata } from "./UI5Metadata";
 import { UI5MetadataDAO } from "./UI5MetadataDAO";
 export class SAPNode {
@@ -20,20 +19,6 @@ export class SAPNode {
 				this.nodes.push(newNode);
 			}
 		}
-	}
-
-	public findNode(name: string) {
-		let node: SAPNode = this;
-		if (this.getName() !== name) {
-			for (const myNode of this.nodes) {
-				node = myNode.findNode(name);
-				if (node.getName() === name) {
-					break;
-				}
-			}
-		}
-
-		return node;
 	}
 
 	public getName() : string {

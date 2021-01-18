@@ -18,12 +18,11 @@ export class StandardXMLCompletionItemFactory {
 	private readonly _nodeDAO = new SAPNodeDAO();
 
 	async generateAggregationPropertyCompletionItems() {
-		var completionItems: CustomCompletionItem[] = [];
-		let SAPNodes: SAPNode[];
 		const availableProgressLeft = 50;
-		SAPNodes = this._nodeDAO.getAllNodesSync();
+		let completionItems: CustomCompletionItem[] = [];
+		const SAPNodes = this._nodeDAO.getAllNodesSync();
 
-		console.time("Generating compl. items");
+		console.time("Generating completion items");
 		for (const node of SAPNodes) {
 			UI5Plugin.getInstance().initializationProgress?.report({
 				message: "Generating Completion Items: " + node.getDisplayName(),
@@ -31,13 +30,13 @@ export class StandardXMLCompletionItemFactory {
 			});
 			completionItems = completionItems.concat(this._generateClassCompletionItemsRecursively(node));
 		}
-		console.timeEnd("Generating compl. items");
+		console.timeEnd("Generating completion items");
 
 		return completionItems;
 	}
 
 	private _generateClassCompletionItemsRecursively(node: SAPNode) {
-		var completionItems:CustomCompletionItem[] = [];
+		let completionItems: CustomCompletionItem[] = [];
 		if (node.nodes && node.nodes.length > 0) {
 			for (const childNode of node.nodes) {
 				completionItems = completionItems.concat(this._generateClassCompletionItemsRecursively(childNode));
@@ -57,7 +56,7 @@ export class StandardXMLCompletionItemFactory {
 		return completionItems;
 	}
 
-	public generateXMLClassCompletionItemFromSAPNode(node: SAPNode, classPrefix: string = "", prefixBeforeClassName: string = "") {
+	public generateXMLClassCompletionItemFromSAPNode(node: SAPNode, classPrefix = "", prefixBeforeClassName = "") {
 		const metadata = node.getMetadata()?.getRawMetadata();
 
 		if (classPrefix && !classPrefix.endsWith(":")) {
@@ -77,7 +76,7 @@ export class StandardXMLCompletionItemFactory {
 		});
 	}
 
-	public generateXMLClassCompletionItemFromUIClass(UIClass: AbstractUIClass, classPrefix: string = "") {
+	public generateXMLClassCompletionItemFromUIClass(UIClass: AbstractUIClass, classPrefix = "") {
 		return this._generateXMLClassCompletionItemUsing({
 			markdown: new vscode.MarkdownString("Custom class"),
 			insertText: this.generateClassInsertTextFromSAPClass(UIClass, classPrefix),
@@ -99,7 +98,7 @@ export class StandardXMLCompletionItemFactory {
 		return completionItem;
 	}
 
-	public generateClassInsertTextFromSAPNode(node: SAPNode, classPrefix: string, prefixBeforeClassName: string = "") {
+	public generateClassInsertTextFromSAPNode(node: SAPNode, classPrefix: string, prefixBeforeClassName = "") {
 		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(GeneratorFactory.language.xml);
 		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(GeneratorFactory.language.xml);
 
@@ -127,8 +126,8 @@ export class StandardXMLCompletionItemFactory {
 		return this._generateInsertStringFrom(className, properties, aggregations, classPrefix);
 	}
 
-	private _generateInsertStringFrom(className: string, properties: string, aggregations: string, classPrefix: string, prefixBeforeClassName: string = "") {
-		let insertText: string = `${prefixBeforeClassName}${className}\n`;
+	private _generateInsertStringFrom(className: string, properties: string, aggregations: string, classPrefix: string, prefixBeforeClassName = "") {
+		let insertText = `${prefixBeforeClassName}${className}\n`;
 		insertText += properties;
 		insertText += ">\n";
 		insertText += aggregations;

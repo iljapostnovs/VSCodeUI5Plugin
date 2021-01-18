@@ -1,4 +1,3 @@
-import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../UIClassFactory";
 import { CustomUIClass } from "./CustomUIClass";

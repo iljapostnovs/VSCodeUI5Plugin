@@ -24,7 +24,7 @@ export class Method implements IUMLGenerator, ITextLengthGettable {
 		const privateSign = isPrivate ? "-" : "+";
 		const value = `${privateSign} ${this.UIMethod.name}(${this.UIMethod.params.map(param => param.name).join(", ")}): ${this.UIMethod.returnType}`;
 		return value
-			.replace(/\"/g, "")
+			.replace(/"/g, "")
 			.replace(/&/g, '&amp;')
 			.replace(/</g, '&lt;')
 			.replace(/>/g, '&gt;')

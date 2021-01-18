@@ -24,7 +24,7 @@ export class UI5Plugin {
 		message?: string | undefined;
 		increment?: number | undefined;
 	}>;
-	private constructor() {}
+
 	public addDisposable(disposable: vscode.Disposable) {
 		this.context?.subscriptions.push(disposable);
 	}

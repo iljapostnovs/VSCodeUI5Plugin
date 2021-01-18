@@ -55,7 +55,7 @@ export class URLBuilder {
 		return this._wrapInMarkup(this._geUrlForAssociationApi(SAPClass));
 	}
 
-	getMarkupUrlForEventsApi(SAPClass: AbstractUIClass, eventName: string = "Events") {
+	getMarkupUrlForEventsApi(SAPClass: AbstractUIClass, eventName = "Events") {
 		if (FileReader.getManifestForClass(SAPClass.className) || this._isStandardClass(SAPClass.className)) {
 			return "";
 		}

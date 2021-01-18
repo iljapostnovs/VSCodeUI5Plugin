@@ -24,7 +24,7 @@ export class Field implements IUMLGenerator, ITextLengthGettable {
 		const privateSign = isPrivate ? "-" : "+";
 		const value = `${privateSign} ${this.UIField.name}: ${this.UIField.type?.replace("__map__", "map") || "any"}`;
 
-		return value.replace(/\"/g, "").replace(/&/g, '&amp;')
+		return value.replace(/"/g, "").replace(/&/g, '&amp;')
 		.replace(/</g, '&lt;')
 		.replace(/>/g, '&gt;')
 		.replace(/"/g, '&quot;')

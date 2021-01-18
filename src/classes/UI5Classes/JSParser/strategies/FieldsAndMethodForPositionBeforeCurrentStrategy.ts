@@ -147,7 +147,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return UIClassName;
 	}
 
-	public acornGetClassName(className: string, position: number, clearStack: boolean = true) {
+	public acornGetClassName(className: string, position: number, clearStack = true) {
 		let classNameOfTheCurrentVariable;
 		const stack = this.getStackOfNodesForPosition(className, position);
 		if (stack.length > 0) {
@@ -157,7 +157,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return classNameOfTheCurrentVariable;
 	}
 
-	public getStackOfNodesForPosition(className: string, position: number, checkForLastPosition: boolean = false) {
+	public getStackOfNodesForPosition(className: string, position: number, checkForLastPosition = false) {
 		const stack: any[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 
@@ -189,7 +189,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return stack;
 	}
 
-	private _generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
+	private _generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition = false) {
 		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "VariableDeclaration", "ThisExpression", "NewExpression", "Identifier"];
 		const positionIsCorrect = node.end < position || (checkForLastPosition && node.end === position);
 		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖" && node.property?.name !== "prototype") {

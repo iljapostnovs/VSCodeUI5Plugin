@@ -214,12 +214,10 @@ export class ExportToI18NCommand {
 			.then(resolve);
 		});
 	}
-}
 
-export namespace ExportToI18NCommand {
-	export enum fileType {
-		xml = "xml",
-		controller = "controller",
-		js = "js"
+	static fileType = {
+		xml: "xml",
+		controller: "controller",
+		js: "js"
 	}
 }

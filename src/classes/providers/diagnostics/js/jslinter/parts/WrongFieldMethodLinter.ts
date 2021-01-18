@@ -130,7 +130,7 @@ export class WrongFieldMethodLinter extends Linter {
 		return errors;
 	}
 
-	private _checkIfClassNameIsException(className: string = "") {
+	private _checkIfClassNameIsException(className = "") {
 		let isException = false;
 		if (className.split(".").length === 1) {
 			isException = true;
@@ -142,7 +142,7 @@ export class WrongFieldMethodLinter extends Linter {
 		return isException;
 	}
 
-	private _checkIfMethodNameIsException(className: string = "", memberName: string = "") {
+	private _checkIfMethodNameIsException(className = "", memberName = "") {
 		const methodExceptions = ["byId", "prototype"];
 		let isException = methodExceptions.includes(memberName);
 		const classExceptions = [{

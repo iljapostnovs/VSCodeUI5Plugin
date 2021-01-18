@@ -6,7 +6,7 @@ import { XMLCodeActionProvider } from "../providers/codeactions/xml/XMLCodeActio
 export class JSCodeActionRegistrator {
 	static register() {
 		let disposable = vscode.languages.registerCodeActionsProvider({language: "javascript", scheme: "file"}, {
-			provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken) {
+			provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 				return JSCodeActionProvider.getCodeActions(document, range);
 			}
 		});
@@ -14,7 +14,7 @@ export class JSCodeActionRegistrator {
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = vscode.languages.registerCodeActionsProvider({language: "xml", scheme: "file"}, {
-			provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection, context: vscode.CodeActionContext, token: vscode.CancellationToken) {
+			provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 				return XMLCodeActionProvider.getCodeActions(document, range);
 			}
 		});

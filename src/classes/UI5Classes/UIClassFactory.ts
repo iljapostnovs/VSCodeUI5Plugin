@@ -5,7 +5,6 @@ import { JSClass } from "./UI5Parser/UIClass/JSClass";
 import { AcornSyntaxAnalyzer } from "./JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
 import { FileReader } from "../utils/FileReader";
-import { XMLParser } from "../utils/XMLParser";
 
 export interface FieldsAndMethods {
 	className: string;
@@ -166,7 +165,7 @@ export class UIClassFactory {
 		const viewOfTheController = FileReader.getViewText(CurrentUIClass.className);
 		if (viewOfTheController) {
 			CurrentUIClass.methods.forEach(method => {
-				const regex = new RegExp(`"\.?${method.name}"`);
+				const regex = new RegExp(`".?${method.name}"`);
 				const isMethodMentionedInTheView = regex.test(viewOfTheController);
 				if (isMethodMentionedInTheView) {
 					if (method?.acornNode?.params && method?.acornNode?.params[0]) {

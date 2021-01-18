@@ -1,7 +1,7 @@
 export class MainLooper {
 	//TODO: Remove
 	static getEndOfChar(charBegin: string, charEnd: string, text: string) {
-		let body: string = "";
+		let body = "";
 		let charOpened = false;
 		let charBeginQuantity = 0;
 		let charEndQuantity = 0;

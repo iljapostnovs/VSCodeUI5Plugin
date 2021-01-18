@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { CodeLensGenerator } from "./strategies/abstraction/CodeLensGenerator";
 import { InternalizationTextCodeLenseGenerator } from "./strategies/InternalizationTextCodeLenseGenerator";
 import { OverridenMethodCodeLensGenerator } from "./strategies/OverridenMethodCodeLensGenerator";
 

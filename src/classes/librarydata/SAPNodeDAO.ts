@@ -12,7 +12,6 @@ export class SAPNodeDAO {
 	private _nodes: any;
 	private static readonly _SAPNodes: SAPNode[] = [];
 	private static readonly _flatSAPNodes: LooseNodeObject = {};
-	constructor() { }
 
 	public async getAllNodes() {
 		if (SAPNodeDAO._SAPNodes.length === 0) {

@@ -8,9 +8,7 @@ import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./FieldsAndMeth
 
 export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 	getFieldsAndMethods() {
-		let fieldsAndMethods: FieldsAndMethods | undefined;
-
-		fieldsAndMethods = this._acornGetPropertiesForParamsInCurrentPosition();
+		const fieldsAndMethods: FieldsAndMethods | undefined = this._acornGetPropertiesForParamsInCurrentPosition();
 
 		return fieldsAndMethods;
 	}
@@ -187,7 +185,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 		return fieldsAndMethods;
 	}
 
-	public getStackOfNodesForInnerParamsForPosition(className: string, position: number, checkForLastPosition: boolean = false) {
+	public getStackOfNodesForInnerParamsForPosition(className: string, position: number, checkForLastPosition = false) {
 		const stack: any[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 
@@ -209,7 +207,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 		return stack;
 	}
 
-	private _generateStackOfNodesForInnerPosition(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
+	private _generateStackOfNodesForInnerPosition(node: any, position: number, stack: any[], checkForLastPosition = false) {
 		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "ThisExpression", "NewExpression", "Identifier"];
 		const positionIsCorrect = node.start < position && (checkForLastPosition ? node.end >= position : node.end > position);
 		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖" && node.property?.name !== "prototype") {

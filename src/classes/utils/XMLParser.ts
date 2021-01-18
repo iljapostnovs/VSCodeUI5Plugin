@@ -123,7 +123,7 @@ export class XMLParser {
 		};
 	}
 
-	private static _lastDocument: string = "";
+	private static _lastDocument = "";
 	private static _lastComments: RegExpExecArray[] = [];
 
 	public static getIfPositionIsNotInComments(document: string, position: number) {
@@ -176,7 +176,7 @@ export class XMLParser {
 
 		let i = 0;
 
-		while (i < tagText.length && !/\s|\>/.test(tagText[i])) {
+		while (i < tagText.length && !/\s|>/.test(tagText[i])) {
 			i++;
 		}
 
@@ -199,7 +199,7 @@ export class XMLParser {
 
 		let i = 0;
 
-		while (i < tagText.length && !/\s|\>/.test(tagText[i])) {
+		while (i < tagText.length && !/\s|>/.test(tagText[i])) {
 			i++;
 		}
 
@@ -351,7 +351,7 @@ export class XMLParser {
 		return controllerName;
 	}
 
-	private static _getClassMethodsRecursively(className: string, onlyCustomMethods: boolean = true) {
+	private static _getClassMethodsRecursively(className: string, onlyCustomMethods = true) {
 		let methods: UIMethod[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 		methods = UIClass.methods;
@@ -433,7 +433,7 @@ export class XMLParser {
 	public static getPositionOfEventHandler(eventHandlerName: string, document: string) {
 		let position;
 
-		const regex = new RegExp(`"\.?${eventHandlerName}"`);
+		const regex = new RegExp(`".?${eventHandlerName}"`);
 		const result = regex.exec(document);
 		if (result) {
 			position = result.index;

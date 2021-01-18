@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { FileReader } from "../../../utils/FileReader";
 import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
@@ -34,7 +35,7 @@ export interface CustomClassUIField extends UIField {
 export class CustomUIClass extends AbstractUIClass {
 	public methods: CustomClassUIMethod[] = [];
 	public fields: CustomClassUIField[] = [];
-	public classText: string = "";
+	public classText = "";
 	public UIDefine: UIDefine[] = [];
 	public comments: Comment[] = [];
 	public acornClassBody: any;

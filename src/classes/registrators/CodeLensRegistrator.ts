@@ -7,7 +7,7 @@ export class CodeLensRegistrator {
 	static register() {
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("xmlCodeLens")) {
 			const XMLCodeLens = vscode.languages.registerCodeLensProvider({language: "xml", scheme: "file"}, {
-				provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken) {
+				provideCodeLenses(document: vscode.TextDocument) {
 					return XMLCodeLensProvider.getCodeLenses(document);
 				}
 			});
@@ -24,7 +24,7 @@ export class CodeLensRegistrator {
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("jsCodeLens")) {
 			const JSCodeLens = vscode.languages.registerCodeLensProvider({language: "javascript", scheme: "file"}, {
-				provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken) {
+				provideCodeLenses() {
 					return JSCodeLensProvider.getCodeLenses();
 				}
 			});

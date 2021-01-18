@@ -6,7 +6,7 @@ export class SignatureHelpRegistrator {
 	static async register() {
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("signatureHelp")) {
 			const signatureHelpProvider = vscode.languages.registerSignatureHelpProvider({language: "javascript", scheme: "file"}, {
-				provideSignatureHelp(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.SignatureHelpContext) {
+				provideSignatureHelp(document: vscode.TextDocument) {
 					return SignatureHelpProvider.getSignature(document);
 				}
 			});

@@ -138,7 +138,7 @@ export class JSCodeActionProvider {
 			const mainFunction = UIClass.fileContent?.body[0]?.expression;
 			const definePaths: any[] = mainFunction?.arguments[0]?.elements;
 
-			let insertPosition: number = 0;
+			let insertPosition = 0;
 			if (definePaths?.length) {
 				const lastDefinePath = definePaths[definePaths.length - 1];
 				insertPosition = lastDefinePath.end;

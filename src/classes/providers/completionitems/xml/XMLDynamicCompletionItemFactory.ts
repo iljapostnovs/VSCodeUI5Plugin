@@ -79,7 +79,7 @@ export class XMLDynamicCompletionItemFactory {
 		return range;
 	}
 
-	private _getAllFileSpecificCompletionItems(addPrefix: boolean = true) {
+	private _getAllFileSpecificCompletionItems(addPrefix = true) {
 		let completionItems: CustomCompletionItem[] = [];
 		const textEditor = vscode.window.activeTextEditor;
 
@@ -165,7 +165,7 @@ export class XMLDynamicCompletionItemFactory {
 		return completionItems;
 	}
 
-	private _convertToFileSpecificCompletionItems(completionItems: CustomCompletionItem[], XMLText: string, addPrefix: boolean = true) {
+	private _convertToFileSpecificCompletionItems(completionItems: CustomCompletionItem[], XMLText: string, addPrefix = true) {
 		const nodeDAO = new SAPNodeDAO();
 		return completionItems.reduce((accumulator: CustomCompletionItem[], completionItem: CustomCompletionItem) => {
 			const node = nodeDAO.findNode(completionItem.className);
@@ -212,11 +212,9 @@ export class XMLDynamicCompletionItemFactory {
 		return completionItems;
 	}
 
-	private _getStandardCompletionItemWithPrefix(node: any, tagPrefix: string, classPrefix: string = "") {
-		let completionItem: CustomCompletionItem | undefined;
+	private _getStandardCompletionItemWithPrefix(node: any, tagPrefix: string, classPrefix = "") {
 		const XMLClassFactoryInstance = new StandardXMLCompletionItemFactory();
-
-		completionItem = XMLClassFactoryInstance.generateXMLClassCompletionItemFromSAPNode(node, tagPrefix, classPrefix);
+		const completionItem = XMLClassFactoryInstance.generateXMLClassCompletionItemFromSAPNode(node, tagPrefix, classPrefix);
 
 		return completionItem;
 	}

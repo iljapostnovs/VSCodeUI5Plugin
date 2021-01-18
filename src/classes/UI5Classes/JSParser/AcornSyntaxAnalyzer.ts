@@ -133,8 +133,8 @@ export class AcornSyntaxAnalyzer {
 		return correctPart;
 	}
 
-	public static findClassNameForStack(stack: any[], currentClassName: string, primaryClassName: string = currentClassName, clearStack: boolean = false) {
-		let className: string = "";
+	public static findClassNameForStack(stack: any[], currentClassName: string, primaryClassName: string = currentClassName, clearStack = false) {
+		let className = "";
 
 		if (clearStack) {
 			this.declarationStack = [];
@@ -605,7 +605,7 @@ export class AcornSyntaxAnalyzer {
 		return className;
 	}
 
-	public static findMethodReturnType(method: UIMethod, className: string, includeParentMethods: boolean = true, clearStack: boolean = false) {
+	public static findMethodReturnType(method: UIMethod, className: string, includeParentMethods = true, clearStack = false) {
 		if (clearStack) {
 			this.declarationStack = [];
 		}
@@ -633,7 +633,7 @@ export class AcornSyntaxAnalyzer {
 		}
 	}
 
-	public static findFieldType(field: UIField, className: string, includeParentMethods: boolean = true, clearStack: boolean = false) {
+	public static findFieldType(field: UIField, className: string, includeParentMethods = true, clearStack = false) {
 		const UIClass = UIClassFactory.getUIClass(className);
 		if (clearStack) {
 			this.declarationStack = [];

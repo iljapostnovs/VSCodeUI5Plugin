@@ -11,7 +11,7 @@ export class JSTemplateGenerator extends TemplateGenerator {
 		const UIDefineClassNameParts = standardUIDefineClassForExtension.split("/");
 		const controlName = UIDefineClassNameParts[UIDefineClassNameParts.length - 1];
 
-		const template = `sap.ui.define([\r\n\t\"${standardUIDefineClassForExtension}\"\r\n], function(\r\n\t${controlName}\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ${controlName}.extend(\"${classNameDotNotation}\", {\r\n\t});\r\n});`;
+		const template = `sap.ui.define([\r\n\t"${standardUIDefineClassForExtension}"\r\n], function(\r\n\t${controlName}\r\n) {\r\n\t"use strict";\r\n\r\n\treturn ${controlName}.extend("${classNameDotNotation}", {\r\n\t});\r\n});`;
 
 		return template;
 	}

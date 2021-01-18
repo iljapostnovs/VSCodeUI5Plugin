@@ -21,15 +21,13 @@ export class GeneratorFactory {
 	};
 
 	static getPropertyGenerator(language: GeneratorFactory.language) {
-		let propertyGenerator: IPropertyGenerator;
-		propertyGenerator = new GeneratorFactory._generatorMap[GeneratorFactory.type.property][language];
+		const propertyGenerator: IPropertyGenerator = new GeneratorFactory._generatorMap[GeneratorFactory.type.property][language];
 
 		return propertyGenerator;
 	}
 
 	static getAggregationGenerator(language: GeneratorFactory.language) {
-		let aggregationGenerator: IAggregationGenerator;
-		aggregationGenerator = new GeneratorFactory._generatorMap[GeneratorFactory.type.aggregation][language];
+		const aggregationGenerator: IAggregationGenerator = new GeneratorFactory._generatorMap[GeneratorFactory.type.aggregation][language];
 
 		return aggregationGenerator;
 	}

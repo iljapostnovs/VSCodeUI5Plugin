@@ -18,7 +18,7 @@ export class CompletionItemRegistrator {
 		console.log("JS Completion Items generated");
 
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
-			async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
+			async provideCompletionItems() {
 				let itemsToReturn:CustomCompletionItem[] = [];
 				try {
 					if (UIDefineCompletionItemGenerator.getIfCurrentPositionIsInDefine()) {
@@ -35,7 +35,7 @@ export class CompletionItemRegistrator {
 		}, ".", "\"");
 
 		const JSViewIDProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
-			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
+			provideCompletionItems() {
 				return JSCompletionItemFactory.createViewIdCompletionItems();
 			}
 		}, "\"");
@@ -47,7 +47,7 @@ export class CompletionItemRegistrator {
 		}
 
 		const XMLProvider = vscode.languages.registerCompletionItemProvider({language: "xml", scheme: "file"}, {
-			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
+			provideCompletionItems() {
 				return XMLCompletionItemFactory.createXMLDynamicCompletionItems();
 			}
 		}, "<", ":", "\"", "*", ...aChars);
