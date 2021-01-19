@@ -52,7 +52,8 @@ export class WrongParametersLinter extends Linter {
 											params.forEach((param: any, i: number) => {
 												const paramFromMethod = method.params[i];
 												if (paramFromMethod && (paramFromMethod.type !== "any" && paramFromMethod.type !== "void" && paramFromMethod.type)) {
-													let classNameOfTheParam = AcornSyntaxAnalyzer.findClassNameForStack([param], className);
+													const stack = strategy.getStackOfNodesForPosition(className, param.end, true);
+													let classNameOfTheParam = AcornSyntaxAnalyzer.findClassNameForStack(stack, className);
 													if (!classNameOfTheParam) {
 														classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(param, UIClass);
 													}
@@ -106,7 +107,10 @@ export class WrongParametersLinter extends Linter {
 			actualClass = "array";
 		}
 
-		if ((expectedClass.toLowerCase() === "object" && actualClass.toLowerCase() === "map") || (expectedClass.toLowerCase() === "map" && actualClass.toLowerCase() === "object")) {
+		if (
+			(expectedClass.toLowerCase() === "object" && actualClass.toLowerCase() === "map") ||
+			(expectedClass.toLowerCase() === "map" && actualClass.toLowerCase() === "object")
+		) {
 			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === "any" || actualClass.toLowerCase() === "any") {
 			classesDiffers = false;
@@ -115,6 +119,11 @@ export class WrongParametersLinter extends Linter {
 		} else if (expectedClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(actualClass, "sap.ui.base.Object")) {
 			classesDiffers = false;
 		} else if (actualClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(expectedClass, "sap.ui.base.Object")) {
+			classesDiffers = false;
+		} else if (
+			(expectedClass.toLowerCase() === "sap.ui.core.CSSSize" && actualClass.toLowerCase() === "string") ||
+			(expectedClass.toLowerCase() === "string" && actualClass.toLowerCase() === "sap.ui.core.CSSSize")
+		) {
 			classesDiffers = false;
 		} else {
 			classesDiffers = !UIClassFactory.isClassAExtendedByClassB(actualClass, expectedClass);
