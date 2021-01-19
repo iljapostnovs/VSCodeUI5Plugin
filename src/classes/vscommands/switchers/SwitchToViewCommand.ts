@@ -6,33 +6,20 @@ const workspace = vscode.workspace;
 export class SwitchToViewCommand {
 	static async switchToView() {
 		try {
-			const currentControllerName: string | null = SwitchToViewCommand._getControllerName();
-			const allViewFSPaths: string[] = await SwitchToViewCommand._getAllViewFSPaths();
+			const currentControllerName = SwitchToViewCommand._getControllerName();
 
-			const viewToSwitchFSPath = allViewFSPaths.find(viewPath => {
-				const view: string = SwitchToViewCommand._getViewFileContent(viewPath);
-				const controllerNameOfTheView = SwitchToViewCommand._getControllerNameOfTheView(view);
-				return controllerNameOfTheView === currentControllerName;
-			});
+			if (currentControllerName) {
+				const view = FileReader.getView(currentControllerName);
 
-			const editor = vscode.window.activeTextEditor;
-			if (editor && viewToSwitchFSPath) {
-				await vscode.window.showTextDocument(vscode.Uri.file(viewToSwitchFSPath));
+				const editor = vscode.window.activeTextEditor;
+				if (editor && view) {
+					await vscode.window.showTextDocument(vscode.Uri.file(view.fsPath));
+				}
 			}
 
 		} catch (error) {
 			console.log(error);
 		}
-	}
-
-	private static async _getAllViewFSPaths() {
-		const allViews = await this._findAllViews();
-		return allViews.map(view => view.fsPath);
-	}
-
-	private static async _findAllViews() {
-		const sSrcFolderName = FileReader.getSrcFolderName();
-		return workspace.findFiles(`${sSrcFolderName}/**/*.view.xml`);
 	}
 
 	private static _getControllerName() {

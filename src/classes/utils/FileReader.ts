@@ -142,14 +142,18 @@ export class FileReader {
 		return className;
 	}
 
-	public static getViewText(controllerName: string) {
+	public static getView(controllerName: string) {
 		if (!this._viewCache[controllerName]) {
 			this._readAllViewsAndSaveInCache();
 		}
 
-		const viewText = this._viewCache[controllerName]?.content;
+		const viewText = this._viewCache[controllerName];
 
 		return viewText;
+	}
+
+	public static getViewText(controllerName: string) {
+		return this.getView(controllerName)?.content;
 	}
 
 	private static _getClassOfControlIdFromView(documentText: string, controlId: string) {
