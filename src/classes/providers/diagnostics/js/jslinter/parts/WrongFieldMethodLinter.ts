@@ -64,58 +64,58 @@ export class WrongFieldMethodLinter extends Linter {
 			if (nodeStack.length > 0) {
 				const nodes = [];
 				while (nodeStack.length > 0) {
-					nodes.push(nodeStack.shift());
+					let nextNode = nodeStack.shift();
+					nodes.push(nextNode);
 					const className = AcornSyntaxAnalyzer.findClassNameForStack(nodes.concat([]), currentClassName, currentClassName, true);
 					const isException = this._checkIfClassNameIsException(className);
-					if (!className || className === "void" || className === "any") {
+					if (!className || isException || (nextNode.type === "Identifier" && nextNode.name === "sap")) {
 						droppedNodes.push(...nodeStack);
 						break;
 					}
-					if (className && !isException) {
-						const classNames = className.split("|");
-						let nextNode = nodeStack[0];
-						if (nextNode?.type === "CallExpression") {
-							nextNode = nodeStack.shift();
-						}
-						if (!nextNode) {
-							nextNode = node;
-						}
-						const nextNodeName = nextNode.property?.name;
-						const isMethodException = this._checkIfMethodNameIsException(className, nextNodeName);
 
-						if (nextNodeName && !isMethodException) {
-							const fieldsAndMethods = classNames.map(className => strategy.destructueFieldsAndMethodsAccordingToMapParams(className));
-							const singleFieldsAndMethods = fieldsAndMethods.find(fieldsAndMethods => {
-								if (nextNode && fieldsAndMethods) {
-									if (nextNodeName) {
-										const method = fieldsAndMethods.methods.find(method => method.name === nextNodeName);
-										const field = fieldsAndMethods.fields.find(field => field.name === nextNodeName);
+					const classNames = className.split("|");
+					nextNode = nodeStack[0];
+					if (nextNode?.type === "CallExpression") {
+						nextNode = nodeStack.shift();
+					}
+					if (!nextNode) {
+						nextNode = node;
+					}
+					const nextNodeName = nextNode.property?.name;
+					const isMethodException = this._checkIfMethodNameIsException(className, nextNodeName);
 
-										return method || field;
-									}
+					if (nextNodeName && !isMethodException) {
+						const fieldsAndMethods = classNames.map(className => strategy.destructueFieldsAndMethodsAccordingToMapParams(className));
+						const singleFieldsAndMethods = fieldsAndMethods.find(fieldsAndMethods => {
+							if (nextNode && fieldsAndMethods) {
+								if (nextNodeName) {
+									const method = fieldsAndMethods.methods.find(method => method.name === nextNodeName);
+									const field = fieldsAndMethods.fields.find(field => field.name === nextNodeName);
+
+									return method || field;
 								}
-
-								return false;
-							});
-
-							if (!singleFieldsAndMethods) {
-								const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
-								if (position) {
-									errors.push({
-										message: `"${nextNodeName}" does not exist in "${className}"`,
-										code: "",
-										range: new vscode.Range(
-											new vscode.Position(position.line - 1, position.col),
-											new vscode.Position(position.line - 1, position.col + nextNodeName.length)
-										),
-										acornNode: nextNode,
-										type: CustomDiagnosticType.NonExistentMethod,
-										methodName: nextNodeName,
-										sourceClassName: className
-									});
-								}
-								break;
 							}
+
+							return false;
+						});
+
+						if (!singleFieldsAndMethods) {
+							const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
+							if (position) {
+								errors.push({
+									message: `"${nextNodeName}" does not exist in "${className}"`,
+									code: "",
+									range: new vscode.Range(
+										new vscode.Position(position.line - 1, position.col),
+										new vscode.Position(position.line - 1, position.col + nextNodeName.length)
+									),
+									acornNode: nextNode,
+									type: CustomDiagnosticType.NonExistentMethod,
+									methodName: nextNodeName,
+									sourceClassName: className
+								});
+							}
+							break;
 						}
 					}
 				}
@@ -132,10 +132,10 @@ export class WrongFieldMethodLinter extends Linter {
 
 	private _checkIfClassNameIsException(className = "") {
 		let isException = false;
+		const exceptions = ["void", "any", "array"];
 		if (className.split(".").length === 1) {
 			isException = true;
-		}
-		if (className === "array") {
+		} else if (exceptions.includes(className)) {
 			isException = true;
 		}
 

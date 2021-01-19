@@ -54,7 +54,7 @@ export class WrongParametersLinter extends Linter {
 												if (paramFromMethod && (paramFromMethod.type !== "any" && paramFromMethod.type !== "void" && paramFromMethod.type)) {
 													let classNameOfTheParam = AcornSyntaxAnalyzer.findClassNameForStack([param], className);
 													if (!classNameOfTheParam) {
-														classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromAcornDeclaration(param, UIClass);
+														classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(param, UIClass);
 													}
 
 													if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
