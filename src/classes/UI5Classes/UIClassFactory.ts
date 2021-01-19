@@ -29,9 +29,7 @@ export class UIClassFactory {
 		if (!isThisClassFromAProject) {
 			returnClass = new StandardUIClass(className);
 		} else {
-			// console.time(`Class parsing for ${className} took`);
 			returnClass = new CustomUIClass(className, documentText);
-			// console.timeEnd(`Class parsing for ${className} took`);
 		}
 
 		return returnClass;
@@ -60,12 +58,14 @@ export class UIClassFactory {
 	}
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
+		// console.time(`Class parsing for ${classNameDotNotation} took`);
 		this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 
 		const UIClass = this._UIClasses[classNameDotNotation];
 		if (UIClass instanceof CustomUIClass) {
 			this.enrichTypesInCustomClass(UIClass);
 		}
+		// console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
 	}
 
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {

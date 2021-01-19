@@ -166,13 +166,16 @@ export class AcornSyntaxAnalyzer {
 
 			} else if (currentNode._acornSyntaxAnalyserType) {
 				className = currentNode._acornSyntaxAnalyserType;
+				if (stack[0]?.type === "CallExpression") {
+					stack.shift();
+				}
 			} else if (currentNode.type === "MemberExpression") {
 				const memberName = currentNode.property.name;
 				const isCallOrApply = stack[0]?.type === "MemberExpression" && (stack[0]?.property.name === "call" || stack[0]?.property.name === "apply");
 				const isMethod = stack[0]?.type === "CallExpression" || isCallOrApply;
 				const isArray = currentClassName.endsWith("[]");
 				if (!isMethod && isArray) {
-					className = currentClassName.replace("[]", "");
+					// className = currentClassName.replace("[]", "");
 				} else if (isMethod) {
 					if (isCallOrApply) {
 						stack.shift();
@@ -285,7 +288,9 @@ export class AcornSyntaxAnalyzer {
 
 			}
 
-			currentNode._acornSyntaxAnalyserType = className || "any";
+			if (!currentNode._acornSyntaxAnalyserType) {
+				currentNode._acornSyntaxAnalyserType = className || "any";
+			}
 
 			temporaryCurrentClassName = this._handleArrayMethods(stack, primaryClassName, className);
 			if (temporaryCurrentClassName) {
@@ -589,7 +594,12 @@ export class AcornSyntaxAnalyzer {
 
 	private static _checkForGetViewByIdException(stack: any[], className: string) {
 		let isGetViewByIdException = false;
-		if ((className === "sap.ui.core.mvc.View" || className === "sap.ui.core.Element" || UIClassFactory.isClassAExtendedByClassB(className, "sap.ui.core.mvc.Controller")) && stack.length > 0 && stack[0].property?.name === "byId") {
+		if (
+			(className === "sap.ui.core.mvc.View" || className === "sap.ui.core.Element" || UIClassFactory.isClassAExtendedByClassB(className, "sap.ui.core.mvc.Controller"))
+			&& stack.length > 1 &&
+			stack[0].property?.name === "byId" &&
+			stack[1].arguments?.length === 1
+		) {
 			isGetViewByIdException = true;
 		}
 
@@ -895,7 +905,7 @@ export class AcornSyntaxAnalyzer {
 				}
 			} else if (node?.type === "CallExpression" || node?.type === "MemberExpression" || node?.type === "Identifier") {
 				const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-				className = positionBeforeCurrentStrategy.acornGetClassName(UIClass.className, node.end + 1, false) || "";
+				className = positionBeforeCurrentStrategy.acornGetClassName(UIClass.className, node.end, false, true) || "";
 			} else if (node?.type === "ArrayExpression") {
 				className = "array";
 				if (node.elements && node.elements.length > 0) {
@@ -910,7 +920,11 @@ export class AcornSyntaxAnalyzer {
 			} else if (node?.type === "ObjectExpression") {
 				className = "map";
 			} else if (node?.type === "Literal") {
-				className = typeof node.value;
+				if (node?.value === null) {
+					className = "any";
+				} else {
+					className = typeof node.value;
+				}
 			} else if (node?.type === "ThisExpression") {
 				className = UIClass.className;
 			} //else if (declaration?.type === "BinaryExpression") {

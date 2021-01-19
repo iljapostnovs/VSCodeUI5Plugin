@@ -66,18 +66,20 @@ export class WrongFieldMethodLinter extends Linter {
 				while (nodeStack.length > 0) {
 					let nextNode = nodeStack.shift();
 					nodes.push(nextNode);
+					nextNode = nodeStack[0];
+					if (nextNode?.type === "CallExpression") {
+						nextNode = nodeStack.shift();
+						nodes.push(nextNode);
+					}
 					const className = AcornSyntaxAnalyzer.findClassNameForStack(nodes.concat([]), currentClassName, currentClassName, true);
 					const isException = this._checkIfClassNameIsException(className);
-					if (!className || isException || (nextNode.type === "Identifier" && nextNode.name === "sap")) {
+					if (!className || isException || (nextNode?.type === "Identifier" && nextNode?.name === "sap")) {
 						droppedNodes.push(...nodeStack);
 						break;
 					}
 
 					const classNames = className.split("|");
 					nextNode = nodeStack[0];
-					if (nextNode?.type === "CallExpression") {
-						nextNode = nodeStack.shift();
-					}
 					if (!nextNode) {
 						nextNode = node;
 					}

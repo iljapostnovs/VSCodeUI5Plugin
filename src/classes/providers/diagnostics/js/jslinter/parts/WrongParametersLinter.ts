@@ -22,7 +22,7 @@ export class WrongParametersLinter extends Linter {
 						calls.forEach(call => {
 							const params = call.arguments;
 							const methodName = call.callee?.property?.name;
-							const endPosition = call.callee?.property?.end;
+							const endPosition = call. callee?.property?.end;
 							if (methodName && endPosition) {
 								const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 								const classNameOfTheMethodCallee = strategy.acornGetClassName(className, endPosition);
@@ -52,11 +52,7 @@ export class WrongParametersLinter extends Linter {
 											params.forEach((param: any, i: number) => {
 												const paramFromMethod = method.params[i];
 												if (paramFromMethod && (paramFromMethod.type !== "any" && paramFromMethod.type !== "void" && paramFromMethod.type)) {
-													const stack = strategy.getStackOfNodesForPosition(className, param.end, true);
-													let classNameOfTheParam = AcornSyntaxAnalyzer.findClassNameForStack(stack, className);
-													if (!classNameOfTheParam) {
-														classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(param, UIClass);
-													}
+													const classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(param, UIClass);
 
 													if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
 														const paramFromMethodTypes = paramFromMethod.type.split("|");
@@ -71,7 +67,7 @@ export class WrongParametersLinter extends Linter {
 																errors.push({
 																	acornNode: param,
 																	code: "",
-																	message: `Param "${paramFromMethod.name}" is of type "${classNameOfTheParam}", but expected "${paramFromMethod.type}"`,
+																	message: `"${paramFromMethod.name}" parameter is of type "${classNameOfTheParam}", but expected "${paramFromMethod.type}"`,
 																	range: new vscode.Range(
 																		new vscode.Position(positionStart.line - 1, positionStart.col - 1),
 																		new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
@@ -99,6 +95,7 @@ export class WrongParametersLinter extends Linter {
 
 	private _getIfClassesDiffers(expectedClass: string, actualClass: string) {
 		let classesDiffers = true;
+		const numbers = ["number", "float", "int"];
 
 		if (expectedClass.endsWith("[]")) {
 			expectedClass = "array";
@@ -114,6 +111,10 @@ export class WrongParametersLinter extends Linter {
 			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === "any" || actualClass.toLowerCase() === "any") {
 			classesDiffers = false;
+		} else if (expectedClass.toLowerCase() === actualClass.toLowerCase()) {
+			classesDiffers = false;
+		} else if (numbers.includes(expectedClass.toLowerCase()) && numbers.includes(actualClass.toLowerCase())) {
+			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === "void" || actualClass.toLowerCase() === "void") {
 			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(actualClass, "sap.ui.base.Object")) {
@@ -121,8 +122,8 @@ export class WrongParametersLinter extends Linter {
 		} else if (actualClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(expectedClass, "sap.ui.base.Object")) {
 			classesDiffers = false;
 		} else if (
-			(expectedClass.toLowerCase() === "sap.ui.core.CSSSize" && actualClass.toLowerCase() === "string") ||
-			(expectedClass.toLowerCase() === "string" && actualClass.toLowerCase() === "sap.ui.core.CSSSize")
+			(expectedClass === "sap.ui.core.CSSSize" && actualClass.toLowerCase() === "string") ||
+			(expectedClass.toLowerCase() === "string" && actualClass === "sap.ui.core.CSSSize")
 		) {
 			classesDiffers = false;
 		} else {
