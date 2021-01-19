@@ -52,7 +52,8 @@ export class WrongParametersLinter extends Linter {
 											params.forEach((param: any, i: number) => {
 												const paramFromMethod = method.params[i];
 												if (paramFromMethod && (paramFromMethod.type !== "any" && paramFromMethod.type !== "void" && paramFromMethod.type)) {
-													let classNameOfTheParam = AcornSyntaxAnalyzer.findClassNameForStack([param], className);
+													const stack = strategy.getStackOfNodesForPosition(className, param.end, true);
+													let classNameOfTheParam = AcornSyntaxAnalyzer.findClassNameForStack(stack, className);
 													if (!classNameOfTheParam) {
 														classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromAcornDeclaration(param, UIClass);
 													}
