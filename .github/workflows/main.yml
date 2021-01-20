@@ -17,7 +17,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Checkout and npm install
+      - name: npm install and build
         run: |
           npm install
           npm install -g vsce
