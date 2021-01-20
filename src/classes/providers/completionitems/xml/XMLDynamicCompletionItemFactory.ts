@@ -201,7 +201,7 @@ export class XMLDynamicCompletionItemFactory {
 
 		const classNamesForLibName = classNames.filter(className => className.startsWith(libName));
 		const UIClassesForLibName = classNamesForLibName.map(className => UIClassFactory.getUIClass(className));
-		const UIClassesThatExtendsUIControl = UIClassesForLibName.filter(UIClass => UIClassFactory.isClassAExtendedByClassB(UIClass.className, "sap.ui.core.Control"));
+		const UIClassesThatExtendsUIControl = UIClassesForLibName.filter(UIClass => UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.Control"));
 		const completionItems: CustomCompletionItem[] = UIClassesThatExtendsUIControl.map(UIClass => xmlClassFactory.generateXMLClassCompletionItemFromUIClass(UIClass, tagPrefix));
 
 		return completionItems;

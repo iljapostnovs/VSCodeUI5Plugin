@@ -13,7 +13,6 @@ export class WrongFieldMethodLinter extends Linter {
 		let errors: Error[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongFieldMethodLinter")) {
-			WrongFieldMethodLinter.nodesAnalysed = 0;
 			console.time("WrongFieldMethodLinter");
 			const start = new Date().getTime();
 			errors = this._getLintingErrors(document);
@@ -56,8 +55,6 @@ export class WrongFieldMethodLinter extends Linter {
 		return errors;
 	}
 
-	private static nodesAnalysed = 0;
-
 	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, errors: Error[] = [], droppedNodes: any[] = []) {
 		if (droppedNodes.includes(node)) {
 			return [];
@@ -91,45 +88,47 @@ export class WrongFieldMethodLinter extends Linter {
 						nextNode = node;
 					}
 					const nextNodeName = nextNode.property?.name;
-					const isMethodException = this._checkIfMethodNameIsException(className, nextNodeName);
+					const nodeText = UIClass.classText.substring(nextNode.start, nextNode.end);
+					if (!nodeText.endsWith("]")) {
+						const isMethodException = this._checkIfMethodNameIsException(className, nextNodeName);
 
-					if (nextNodeName && !isMethodException) {
-						const fieldsAndMethods = classNames.map(className => strategy.destructueFieldsAndMethodsAccordingToMapParams(className));
-						const singleFieldsAndMethods = fieldsAndMethods.find(fieldsAndMethods => {
-							if (nextNode && fieldsAndMethods) {
-								if (nextNodeName) {
-									const method = fieldsAndMethods.methods.find(method => method.name === nextNodeName);
-									const field = fieldsAndMethods.fields.find(field => field.name === nextNodeName);
+						if (nextNodeName && !isMethodException) {
+							const fieldsAndMethods = classNames.map(className => strategy.destructueFieldsAndMethodsAccordingToMapParams(className));
+							const singleFieldsAndMethods = fieldsAndMethods.find(fieldsAndMethods => {
+								if (nextNode && fieldsAndMethods) {
+									if (nextNodeName) {
+										const method = fieldsAndMethods.methods.find(method => method.name === nextNodeName);
+										const field = fieldsAndMethods.fields.find(field => field.name === nextNodeName);
 
-									return method || field;
+										return method || field;
+									}
 								}
-							}
 
-							return false;
-						});
+								return false;
+							});
 
-						if (!singleFieldsAndMethods) {
-							const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
-							if (position) {
-								errors.push({
-									message: `"${nextNodeName}" does not exist in "${className}"`,
-									code: "",
-									range: new vscode.Range(
-										new vscode.Position(position.line - 1, position.col),
-										new vscode.Position(position.line - 1, position.col + nextNodeName.length)
-									),
-									acornNode: nextNode,
-									type: CustomDiagnosticType.NonExistentMethod,
-									methodName: nextNodeName,
-									sourceClassName: className
-								});
+							if (!singleFieldsAndMethods) {
+								const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
+								if (position) {
+									errors.push({
+										message: `"${nextNodeName}" does not exist in "${className}"`,
+										code: "",
+										range: new vscode.Range(
+											new vscode.Position(position.line - 1, position.col),
+											new vscode.Position(position.line - 1, position.col + nextNodeName.length)
+										),
+										acornNode: nextNode,
+										type: CustomDiagnosticType.NonExistentMethod,
+										methodName: nextNodeName,
+										sourceClassName: className
+									});
+								}
+								break;
 							}
-							break;
 						}
 					}
 				}
 			}
-			WrongFieldMethodLinter.nodesAnalysed++;
 		}
 
 		const innerNodes = AcornSyntaxAnalyzer.getContent(node);

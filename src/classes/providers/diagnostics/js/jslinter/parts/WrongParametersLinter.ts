@@ -24,7 +24,7 @@ export class WrongParametersLinter extends Linter {
 						calls.forEach(call => {
 							const params = call.arguments;
 							const methodName = call.callee?.property?.name;
-							const endPosition = call. callee?.property?.end;
+							const endPosition = call.callee?.property?.end;
 							if (methodName && endPosition) {
 								const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 								const classNameOfTheMethodCallee = strategy.acornGetClassName(className, endPosition);
@@ -101,17 +101,10 @@ export class WrongParametersLinter extends Linter {
 		let classesDiffers = true;
 		const numbers = ["number", "float", "int"];
 
-		if (expectedClass.endsWith("[]")) {
-			expectedClass = "array";
-		}
-		if (actualClass.endsWith("[]")) {
-			actualClass = "array";
-		}
+		expectedClass = this._swapClassNames(expectedClass);
+		actualClass = this._swapClassNames(actualClass);
 
-		if (
-			(expectedClass.toLowerCase() === "object" && actualClass.toLowerCase() === "map") ||
-			(expectedClass.toLowerCase() === "map" && actualClass.toLowerCase() === "object")
-		) {
+		if (this._checkIfClassesAreEqual(expectedClass, actualClass, "map", "object")) {
 			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === "any" || actualClass.toLowerCase() === "any") {
 			classesDiffers = false;
@@ -119,21 +112,35 @@ export class WrongParametersLinter extends Linter {
 			classesDiffers = false;
 		} else if (numbers.includes(expectedClass.toLowerCase()) && numbers.includes(actualClass.toLowerCase())) {
 			classesDiffers = false;
-		} else if (expectedClass.toLowerCase() === "void" || actualClass.toLowerCase() === "void") {
+		} else if (expectedClass.toLowerCase() === "object" && UIClassFactory.isClassAChildOfClassB(actualClass, "sap.ui.base.Object")) {
 			classesDiffers = false;
-		} else if (expectedClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(actualClass, "sap.ui.base.Object")) {
+		} else if (actualClass.toLowerCase() === "object" && UIClassFactory.isClassAChildOfClassB(expectedClass, "sap.ui.base.Object")) {
 			classesDiffers = false;
-		} else if (actualClass.toLowerCase() === "object" && UIClassFactory.isClassAExtendedByClassB(expectedClass, "sap.ui.base.Object")) {
-			classesDiffers = false;
-		} else if (
-			(expectedClass === "sap.ui.core.CSSSize" && actualClass.toLowerCase() === "string") ||
-			(expectedClass.toLowerCase() === "string" && actualClass === "sap.ui.core.CSSSize")
-		) {
+		} else if (this._checkIfClassesAreEqual(expectedClass, actualClass, "string", "sap.ui.core.CSSSize")) {
 			classesDiffers = false;
 		} else {
-			classesDiffers = !UIClassFactory.isClassAExtendedByClassB(actualClass, expectedClass);
+			classesDiffers = !UIClassFactory.isClassAChildOfClassB(actualClass, expectedClass);
 		}
 
 		return classesDiffers;
+	}
+
+	private _checkIfClassesAreEqual(class1: string, class2: string, substitute1: string, substitute2: string) {
+		return (class1.toLowerCase() === substitute1 && class2.toLowerCase() === substitute2) ||
+			(class1.toLowerCase() === substitute2 && class2.toLowerCase() === substitute1);
+	}
+
+	private _swapClassNames(className: string) {
+		if (className.endsWith("[]")) {
+			className = "array";
+		}
+		if (className.includes("__map__") || className.includes("__mapparam__")) {
+			className = "map";
+		}
+		if (className === "void" || !className) {
+			className = "any";
+		}
+
+		return className;
 	}
 }
