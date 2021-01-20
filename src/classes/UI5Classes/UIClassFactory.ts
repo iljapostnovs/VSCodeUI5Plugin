@@ -39,7 +39,7 @@ export class UIClassFactory {
 		let isExtendedBy = false;
 		const UIClass = this.getUIClass(classA);
 
-		if (classA === classB) {
+		if (classA === classB || UIClass.interfaces.includes(classB)) {
 			isExtendedBy = true;
 		} else if (UIClass.parentClassNameDotNotation) {
 			isExtendedBy = this.isClassAChildOfClassB(UIClass.parentClassNameDotNotation, classB);

@@ -69,6 +69,7 @@ export class StandardUIClass extends AbstractUIClass {
 			this._fillAggregations();
 			this._fullAssociations();
 			this._fillConstructor();
+			this._fillInterfaces();
 
 			this._enrichWithXmlnsProperties();
 		}
@@ -328,6 +329,14 @@ export class StandardUIClass extends AbstractUIClass {
 				api: URLBuilder.getInstance().getUrlForClassApi(this),
 				visibility: "public"
 			});
+		}
+	}
+
+	private _fillInterfaces() {
+		const SAPNode = this._findSAPNode(this.className);
+		const metadata = SAPNode?.getMetadata();
+		if (metadata?.getRawMetadata()?.implements) {
+			this.interfaces = metadata?.getRawMetadata()?.implements;
 		}
 	}
 }

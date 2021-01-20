@@ -68,6 +68,7 @@ export abstract class AbstractUIClass {
 	public aggregations: UIAggregation[] = [];
 	public events: UIEvent[] = [];
 	public associations: UIAssociation[] = [];
+	public interfaces: string[] = [];
 	public parentClassNameDotNotation = "";
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars

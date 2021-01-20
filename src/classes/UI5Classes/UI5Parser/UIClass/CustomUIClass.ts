@@ -921,13 +921,41 @@ export class CustomUIClass extends AbstractUIClass {
 				this._fillEvents(metadataObject);
 				this._fillProperties(metadataObject);
 				this._fillByAssociations(metadataObject);
+				this._fillInterfaces(metadataObject);
 			}
 
 			if (customMetadataExists) {
 				const customMetadataObject = this.acornClassBody.properties?.find((property: any) => property.key.name === "customMetadata");
 
 				this._fillByAssociations(customMetadataObject);
+				this._fillCustomInterfaces(customMetadataObject);
 			}
+		}
+	}
+
+	private _fillInterfaces(metadata: any) {
+		const interfaces = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "interfaces");
+		if (interfaces) {
+			const interfaceNamesDotNotation = interfaces.value?.elements?.map((element: any) => element.value) || [];
+			this.interfaces.push(...interfaceNamesDotNotation);
+		}
+	}
+
+	private _fillCustomInterfaces(customMetadata: any) {
+		const interfaces = customMetadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "interfaces");
+		if (interfaces) {
+			const interfaceNames: string[] = interfaces.value?.elements?.map((element: any) => element.name) || [];
+			const interfaceNamesDotNotation =
+			interfaceNames
+			.filter((interfaceName) => {
+				return !!this.UIDefine.find(UIDefine => UIDefine.className === interfaceName);
+
+			})
+			.map((interfaceName) => {
+				return this.UIDefine.find(UIDefine => UIDefine.className === interfaceName)?.classNameDotNotation || "";
+
+			});
+			this.interfaces.push(...interfaceNamesDotNotation);
 		}
 	}
 
