@@ -25,3 +25,11 @@ jobs:
           move VSCodeUI5PluginUsageExampleApp ../VSCodeUI5PluginUsageExampleApp
           npm install
           npm test
+          npm install -g vsce
+          vsce package
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2.2.2
+        with:
+          name: ui5plugin
+          path: |
+            *.vsix
