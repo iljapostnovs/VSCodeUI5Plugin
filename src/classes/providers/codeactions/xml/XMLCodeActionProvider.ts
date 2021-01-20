@@ -18,6 +18,7 @@ export class XMLCodeActionProvider {
 			return diagnostic.range.contains(range);
 		});
 		if (diagnostic?.source) {
+			XMLParser.setCurrentDocument(document.getText());
 			const currentPositionOffset = document?.offsetAt(range.end);
 			const attributeData = XMLParser.getAttributeNameAndValue(diagnostic.source);
 			if (attributeData.attributeValue.startsWith(".")) {
@@ -41,6 +42,7 @@ export class XMLCodeActionProvider {
 					}
 				}
 			}
+			XMLParser.setCurrentDocument(undefined);
 		}
 
 		return providerResult;

@@ -18,6 +18,9 @@ export class TagAttributeLinter extends Linter {
 		const errors: Error[] = [];
 
 		//check tags
+		console.time("Tag attribute linter");
+		XMLParser.setCurrentDocument(document);
+
 		const tags = XMLParser.getAllTags(document);
 		tags.forEach(tag => {
 			const tagAttributes = XMLParser.getAttributesOfTheTag(tag);
@@ -29,6 +32,7 @@ export class TagAttributeLinter extends Linter {
 				if (className) {
 					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(document, tagPrefix, tag.positionEnd);
 					if (libraryPath) {
+						//check if tag class exists
 						const classOfTheTag = [libraryPath, className].join(".");
 						const UIClass = UIClassFactory.getUIClass(classOfTheTag);
 						if (!UIClass.classExists) {
@@ -67,6 +71,7 @@ export class TagAttributeLinter extends Linter {
 							});
 						}
 					} else {
+						//check if prefix exists
 						const positionBegin = LineColumn(document).fromIndex(tag.positionBegin);
 						const positionEnd = LineColumn(document).fromIndex(tag.positionEnd);
 						if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(document, tag.positionBegin)) {
@@ -84,6 +89,9 @@ export class TagAttributeLinter extends Linter {
 				}
 			}
 		});
+
+		XMLParser.setCurrentDocument(undefined);
+		console.timeEnd("Tag attribute linter");
 
 		return errors;
 	}

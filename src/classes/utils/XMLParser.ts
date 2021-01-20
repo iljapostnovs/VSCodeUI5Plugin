@@ -14,6 +14,15 @@ export enum PositionType {
 	InBodyOfTheClass = "6"
 }
 
+interface Range {
+	from: number;
+	to: number;
+}
+
+interface XMLDocumentData {
+	document: string;
+	strings: boolean[];
+}
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -153,22 +162,29 @@ export class XMLParser {
 	}
 
 	static getIfPositionIsInString(XMLViewText: string, position: number) {
-		let quotionMarkCount = 0;
-		let secondTypeQuotionMarkCount = 0;
+		let isInString = false;
+		if (this._currentDocument.document) {
+			isInString = !!this._currentDocument.strings[position];
+		} else {
+			let quotionMarkCount = 0;
+			let secondTypeQuotionMarkCount = 0;
 
-		let i = 0;
-		while (i < position) {
-			if (XMLViewText[i] === "\"") {
-				quotionMarkCount++;
-			}
-			if (XMLViewText[i] === "'") {
-				secondTypeQuotionMarkCount++;
+			let i = 0;
+			while (i < position) {
+				if (XMLViewText[i] === "\"") {
+					quotionMarkCount++;
+				}
+				if (XMLViewText[i] === "'") {
+					secondTypeQuotionMarkCount++;
+				}
+
+				i++;
 			}
 
-			i++;
+			isInString = quotionMarkCount % 2 === 1 || secondTypeQuotionMarkCount % 2 === 1;
 		}
 
-		return quotionMarkCount % 2 === 1 || secondTypeQuotionMarkCount % 2 === 1;
+		return isInString;
 	}
 
 	static getTagPrefix(tagText: string) {
@@ -279,6 +295,7 @@ export class XMLParser {
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 		let positionType: PositionType = PositionType.Content;
+		// let positionInString = false; TODO: this
 
 		if (this.getIfPositionIsInString(XMLViewText, currentPosition)) {
 			positionType = PositionType.InTheString;
@@ -308,6 +325,8 @@ export class XMLParser {
 
 		return positionType;
 	}
+
+	private static _stringChars = ["\"", "'"];
 
 	static getPositionBeforeStringBegining(XMLViewText: string, currentPosition: number) {
 		let i = currentPosition - 1;
@@ -375,7 +394,17 @@ export class XMLParser {
 		return prefix;
 	}
 
+	private static _currentDocument: XMLDocumentData = {
+		document: "",
+		strings: []
+	}
+
 	public static getAllTags(document: string) {
+		const documentShouldBeSet = !this._currentDocument.document;
+		if (documentShouldBeSet) {
+			this.setCurrentDocument(document);
+		}
+
 		let i = 0;
 		const tags: Tag[] = [];
 
@@ -392,7 +421,43 @@ export class XMLParser {
 			i++;
 		}
 
+		if (documentShouldBeSet) {
+			this.setCurrentDocument(undefined);
+		}
+
 		return tags;
+	}
+
+	public static setCurrentDocument(document: string | undefined) {
+		if (!document) {
+			this._currentDocument.document = "";
+			this._currentDocument.strings = [];
+		} else {
+			this._currentDocument.strings = this._getStringPositionMapping(document);
+			this._currentDocument.document = document;
+		}
+	}
+
+	private static _getStringPositionMapping(document: string) {
+		const positionMapping: boolean[] = [];
+		let quotionMarkCount = 0;
+		let secondTypeQuotionMarkCount = 0;
+
+		let i = 0;
+		while (i < document.length) {
+			const isInString = quotionMarkCount % 2 === 1 || secondTypeQuotionMarkCount % 2 === 1;
+			positionMapping.push(isInString);
+			if (document[i] === "\"") {
+				quotionMarkCount++;
+			}
+			if (document[i] === "'") {
+				secondTypeQuotionMarkCount++;
+			}
+			i++;
+		}
+
+
+		return positionMapping;
 	}
 
 	private static _getTagBeginingIndex(document: string, position: number) {

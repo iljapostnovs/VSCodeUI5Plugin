@@ -11,6 +11,8 @@ export class XMLHoverProvider {
 		const documentText = document.getText();
 		let hover: vscode.Hover | undefined;
 
+		XMLParser.setCurrentDocument(documentText);
+
 		const allTags = XMLParser.getAllTags(documentText);
 		const tag = allTags.find(tag => tag.positionBegin < offset && tag.positionEnd >= offset);
 		if (tag) {
@@ -66,6 +68,8 @@ export class XMLHoverProvider {
 				}
 			}
 		}
+
+		XMLParser.setCurrentDocument(undefined);
 
 		return hover;
 	}

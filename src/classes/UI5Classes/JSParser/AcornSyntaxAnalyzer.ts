@@ -429,6 +429,7 @@ export class AcornSyntaxAnalyzer {
 			if (viewOfTheController && currentClassEventHandlerName) {
 				const position = XMLParser.getPositionOfEventHandler(currentClassEventHandlerName, viewOfTheController);
 				if (position) {
+					XMLParser.setCurrentDocument(viewOfTheController);
 					const tagText = XMLParser.getTagInPosition(viewOfTheController, position);
 					const attributes = XMLParser.getAttributesOfTheTag(tagText);
 					const attribute = attributes?.find(attribute => {
@@ -453,6 +454,8 @@ export class AcornSyntaxAnalyzer {
 							}
 						}
 					}
+
+					XMLParser.setCurrentDocument(undefined);
 				}
 			}
 		}

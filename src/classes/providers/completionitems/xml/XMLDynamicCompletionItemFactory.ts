@@ -20,6 +20,7 @@ export class XMLDynamicCompletionItemFactory {
 			const document = textEditor.document;
 			const currentPositionOffset = document.offsetAt(textEditor.selection.start);
 			const XMLText = document.getText();
+			XMLParser.setCurrentDocument(XMLText);
 			const positionType = XMLParser.getPositionType(XMLText, currentPositionOffset);
 
 			if (positionType === PositionType.InTheTagAttributes) {
@@ -44,6 +45,7 @@ export class XMLDynamicCompletionItemFactory {
 					completionItem.range = range;
 				});
 			}
+			XMLParser.setCurrentDocument(undefined);
 		}
 
 		return completionItems;
