@@ -43,19 +43,10 @@ export class WrongFieldMethodLinter extends Linter {
 
 		}
 
-		//remove duplicates
-		errors = errors.reduce((accumulator: Error[], error: Error) => {
-			const sameError = accumulator.find(accumError => accumError.acornNode === error.acornNode);
-			if (!sameError) {
-				accumulator.push(error);
-			}
-			return accumulator;
-		}, []);
-
 		return errors;
 	}
 
-	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, errors: Error[] = [], droppedNodes: any[] = []) {
+	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, errors: Error[] = [], droppedNodes: any[] = [], errorNodes: any[] = []) {
 		if (droppedNodes.includes(node)) {
 			return [];
 		}
@@ -89,7 +80,7 @@ export class WrongFieldMethodLinter extends Linter {
 					}
 					const nextNodeName = nextNode.property?.name;
 					const nodeText = UIClass.classText.substring(nextNode.start, nextNode.end);
-					if (!nodeText.endsWith("]")) {
+					if (!nodeText.endsWith("]") && !errorNodes.includes(nextNode)) {
 						const isMethodException = this._checkIfMethodNameIsException(className, nextNodeName);
 
 						if (nextNodeName && !isMethodException) {
@@ -110,6 +101,7 @@ export class WrongFieldMethodLinter extends Linter {
 							if (!singleFieldsAndMethods) {
 								const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
 								if (position) {
+									errorNodes.push(nextNode);
 									errors.push({
 										message: `"${nextNodeName}" does not exist in "${className}"`,
 										code: "",
@@ -133,7 +125,7 @@ export class WrongFieldMethodLinter extends Linter {
 
 		const innerNodes = AcornSyntaxAnalyzer.getContent(node);
 		if (innerNodes) {
-			innerNodes.forEach((node: any) => this._getErrorsForExpression(node, UIClass, errors, droppedNodes));
+			innerNodes.forEach((node: any) => this._getErrorsForExpression(node, UIClass, errors, droppedNodes, errorNodes));
 		}
 
 		return errors;
