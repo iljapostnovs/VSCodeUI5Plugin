@@ -14,11 +14,6 @@ export enum PositionType {
 	InBodyOfTheClass = "6"
 }
 
-interface Range {
-	from: number;
-	to: number;
-}
-
 interface XMLDocumentData {
 	document: string;
 	strings: boolean[];

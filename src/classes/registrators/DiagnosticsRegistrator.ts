@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { JSLinter } from "../providers/diagnostics/js/jslinter/JSLinter";
+import { WrongFieldMethodLinter } from "../providers/diagnostics/js/jslinter/parts/WrongFieldMethodLinter";
+import { WrongParametersLinter } from "../providers/diagnostics/js/jslinter/parts/WrongParametersLinter";
 import { XMLLinter } from "../providers/diagnostics/xml/xmllinter/XMLLinter";
 
 let xmlDiagnosticCollection: vscode.DiagnosticCollection;
@@ -101,26 +103,47 @@ export class DiagnosticsRegistrator {
 		const isJSDiagnosticsEnabled = vscode.workspace.getConfiguration("ui5.plugin").get("jsDiagnostics");
 
 		if (isJSDiagnosticsEnabled && !this._timeoutId) {
-			this._timeoutId = setTimeout(() => {
-				const errors = JSLinter.getLintingErrors(document);
-
-				const diagnostics: CustomDiagnostics[] = errors.map(error => {
-					const diagnostic = new CustomDiagnostics(error.range, error.message);
-
-					diagnostic.code = error.code;
-					diagnostic.severity = vscode.DiagnosticSeverity.Warning;
-					diagnostic.type = error.type;
-					diagnostic.methodName = error.methodName;
-					diagnostic.fieldName = error.fieldName;
-					diagnostic.sourceClassName = error.sourceClassName;
-					diagnostic.isController = error.isController;
-
-					return diagnostic;
-				});
-
-				collection.set(document.uri, diagnostics);
-				this._timeoutId = null;
-			}, 100);
+			const timeout = this._getTimeoutForDocument(document);
+			// if (timeout) {
+				this._timeoutId = setTimeout(() => {
+					this._updateDiagnosticCollection(document, collection);
+					this._timeoutId = null;
+				}, timeout);
+			// } else {
+				// this._updateDiagnosticCollection(document, collection);
+			// }
 		}
+	}
+
+	private static _updateDiagnosticCollection(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+		const errors = JSLinter.getLintingErrors(document);
+
+		const diagnostics: CustomDiagnostics[] = errors.map(error => {
+			const diagnostic = new CustomDiagnostics(error.range, error.message);
+
+			diagnostic.code = error.code;
+			diagnostic.severity = vscode.DiagnosticSeverity.Warning;
+			diagnostic.type = error.type;
+			diagnostic.methodName = error.methodName;
+			diagnostic.fieldName = error.fieldName;
+			diagnostic.sourceClassName = error.sourceClassName;
+			diagnostic.isController = error.isController;
+
+			return diagnostic;
+		});
+
+		collection.set(document.uri, diagnostics);
+	}
+
+	private static _getTimeoutForDocument(document: vscode.TextDocument) {
+		let timeout = 0;
+		const approximateTime = WrongFieldMethodLinter.timePerChar * document.getText().length + WrongParametersLinter.timePerChar * document.getText().length;
+		if (approximateTime < 75) {
+			timeout = 0;
+		} else {
+			timeout = 100;
+		}
+
+		return timeout;
 	}
 }

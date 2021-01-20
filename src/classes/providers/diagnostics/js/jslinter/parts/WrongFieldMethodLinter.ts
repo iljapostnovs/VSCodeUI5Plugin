@@ -8,12 +8,17 @@ import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/Custo
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 export class WrongFieldMethodLinter extends Linter {
+	public static timePerChar = 0;
 	getErrors(document: vscode.TextDocument): Error[] {
 		let errors: Error[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongFieldMethodLinter")) {
+			WrongFieldMethodLinter.nodesAnalysed = 0;
 			console.time("WrongFieldMethodLinter");
+			const start = new Date().getTime();
 			errors = this._getLintingErrors(document);
+			const end = new Date().getTime();
+			WrongFieldMethodLinter.timePerChar = (end - start) / document.getText().length;
 			console.timeEnd("WrongFieldMethodLinter");
 		}
 
@@ -50,6 +55,8 @@ export class WrongFieldMethodLinter extends Linter {
 
 		return errors;
 	}
+
+	private static nodesAnalysed = 0;
 
 	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, errors: Error[] = [], droppedNodes: any[] = []) {
 		if (droppedNodes.includes(node)) {
@@ -122,6 +129,7 @@ export class WrongFieldMethodLinter extends Linter {
 					}
 				}
 			}
+			WrongFieldMethodLinter.nodesAnalysed++;
 		}
 
 		const innerNodes = AcornSyntaxAnalyzer.getContent(node);

@@ -7,10 +7,12 @@ import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/Custo
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 export class WrongParametersLinter extends Linter {
+	public static timePerChar = 0;
 	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
 		console.time("WrongParameterLinter");
+		const start = new Date().getTime();
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongParametersLinter")) {
 			const className = FileReader.getClassNameFromPath(document.fileName);
 			if (className) {
@@ -89,6 +91,8 @@ export class WrongParametersLinter extends Linter {
 			}
 		}
 
+		const end = new Date().getTime();
+		WrongParametersLinter.timePerChar = (end - start) / document.getText().length;
 		console.timeEnd("WrongParameterLinter");
 		return errors;
 	}
