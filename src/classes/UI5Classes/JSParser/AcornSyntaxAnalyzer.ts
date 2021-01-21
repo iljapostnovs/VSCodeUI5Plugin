@@ -302,6 +302,11 @@ export class AcornSyntaxAnalyzer {
 			className = this.findClassNameForStack(stack, className, primaryClassName, false);
 		}
 
+		if (className?.includes("module:")) {
+			className = className.replace(/module:/g, "");
+			className = className.replace(/\//g, ".");
+		}
+
 		return className;
 	}
 
@@ -577,8 +582,10 @@ export class AcornSyntaxAnalyzer {
 		while (node && node.type === "MemberExpression") {
 			if (node.object.type === "Identifier") {
 				classNameParts.push(node.object.name);
+				node.object._acornSyntaxAnalyserType = classNameParts.join(".");
 			}
 			classNameParts.push(node.property.name);
+			node._acornSyntaxAnalyserType = classNameParts.join(".");
 
 			usedNodeCount++;
 			node = stack[usedNodeCount];
