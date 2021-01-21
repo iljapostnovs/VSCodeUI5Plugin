@@ -116,7 +116,7 @@ export class WrongParametersLinter extends Linter {
 			classesDiffers = false;
 		} else if (actualClass.toLowerCase() === "object" && UIClassFactory.isClassAChildOfClassB(expectedClass, "sap.ui.base.Object")) {
 			classesDiffers = false;
-		} else if (this._checkIfClassesAreEqual(expectedClass, actualClass, "string", "sap.ui.core.CSSSize")) {
+		} else if (this._checkIfClassesAreEqual(expectedClass, actualClass, "string", "sap.ui.core.csssize")) {
 			classesDiffers = false;
 		} else {
 			classesDiffers = !UIClassFactory.isClassAChildOfClassB(actualClass, expectedClass);
