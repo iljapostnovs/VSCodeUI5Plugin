@@ -36,7 +36,7 @@ export class XMLParser {
 		return IdsResult;
 	}
 	static getLibraryNameInPosition(XMLViewText: string, currentPosition: number) {
-		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition);
+		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition).text;
 		const tagPrefix = this.getTagPrefix(currentTagText);
 		const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix, currentPosition);
 
@@ -44,7 +44,7 @@ export class XMLParser {
 	}
 	static getClassNameInPosition(XMLViewText: string, currentPosition: number) {
 		let currentPositionClass = "";
-		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition);
+		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition).text;
 		const tagPrefix = this.getTagPrefix(currentTagText);
 		const className = this.getClassNameFromTag(currentTagText);
 		if (className) {
@@ -71,7 +71,7 @@ export class XMLParser {
 		if (XMLText && position) {
 			const {positionBegin, positionEnd} = this.getTagBeginEndPosition(XMLText, position);
 			const tag = this.getTagInPosition(XMLText, position);
-			const croppedTag = tag.substring(1, tag.length - 1); // remove < >
+			const croppedTag = tag.text.substring(1, tag.text.length - 1); // remove < >
 			const tagIsSelfClosed = croppedTag.endsWith("/");
 			const itIsClosureTag = croppedTag.startsWith("/");
 			if (tagIsSelfClosed) {
@@ -83,14 +83,14 @@ export class XMLParser {
 				closedTags.pop();
 				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
 			} else {
-				const className = this.getClassNameFromTag(tag);
+				const className = this.getClassNameFromTag(tag.text);
 				if (closedTags.includes(className)) {
 					closedTags.splice(closedTags.indexOf(className), 1);
 					parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
 				} else {
 					parentTag.positionBegin = positionBegin;
 					parentTag.positionEnd = positionEnd;
-					parentTag.tag = tag;
+					parentTag.tag = tag.text;
 				}
 
 			}
@@ -102,8 +102,13 @@ export class XMLParser {
 	public static getTagInPosition(XMLViewText: string, position: number) {
 		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLViewText, position);
 		const tagText = XMLViewText.substring(positionBegin, positionEnd);
+		const tag: Tag = {
+			text: tagText,
+			positionBegin: positionBegin,
+			positionEnd: positionEnd
+		};
 
-		return tagText;
+		return tag;
 	}
 
 	public static getTagBeginEndPosition(XMLViewText: string, position: number) {

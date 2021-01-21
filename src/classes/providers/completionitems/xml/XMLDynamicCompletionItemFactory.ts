@@ -62,7 +62,7 @@ export class XMLDynamicCompletionItemFactory {
 			const attributes = XMLParser.getAttributesOfTheTag(tag);
 			const attribute = attributes?.find(attribute => XMLParser.getAttributeNameAndValue(attribute).attributeName === word);
 			if (attribute) {
-				const indexOfTag = tag.indexOf(attribute);
+				const indexOfTag = tag.text.indexOf(attribute);
 				const lineColumnBegin = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfTag);
 				const lineColumnEnd = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfTag + attribute.length);
 				if (lineColumnBegin && lineColumnEnd && lineColumnBegin.line === lineColumnEnd.line) {
@@ -145,7 +145,7 @@ export class XMLDynamicCompletionItemFactory {
 
 		if (XMLText && currentPositionOffset) {
 			const libName = XMLParser.getLibraryNameInPosition(XMLText, currentPositionOffset);
-			const currentTagText = XMLParser.getTagInPosition(XMLText, currentPositionOffset);
+			const currentTagText = XMLParser.getTagInPosition(XMLText, currentPositionOffset).text;
 			const isTagEmpty = !currentTagText[1].match(/[a-zA-Z]/);
 			if (isTagEmpty) {
 				const { positionBegin: currentTagPositionBegin } = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset - 1);

@@ -430,7 +430,7 @@ export class AcornSyntaxAnalyzer {
 				const position = XMLParser.getPositionOfEventHandler(currentClassEventHandlerName, viewOfTheController);
 				if (position) {
 					XMLParser.setCurrentDocument(viewOfTheController);
-					const tagText = XMLParser.getTagInPosition(viewOfTheController, position);
+					const tagText = XMLParser.getTagInPosition(viewOfTheController, position).text;
 					const attributes = XMLParser.getAttributesOfTheTag(tagText);
 					const attribute = attributes?.find(attribute => {
 						const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);

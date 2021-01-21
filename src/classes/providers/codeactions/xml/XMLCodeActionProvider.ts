@@ -24,7 +24,7 @@ export class XMLCodeActionProvider {
 			if (attributeData.attributeValue.startsWith(".")) {
 				attributeData.attributeValue = attributeData.attributeValue.replace(".", "");
 			}
-			const tagText = XMLParser.getTagInPosition(document.getText(), currentPositionOffset);
+			const tagText = XMLParser.getTagInPosition(document.getText(), currentPositionOffset).text;
 			const tagPrefix = XMLParser.getTagPrefix(tagText);
 			const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
 			const libraryPath = XMLParser.getLibraryPathFromTagPrefix(document.getText(), tagPrefix, currentPositionOffset);
