@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
-import { UIClassFactory } from "../../UIClassFactory";
-import { CustomUIClass } from "./CustomUIClass";
-import { FileReader } from "../../../utils/FileReader";
-import { StandardUIClass } from "./StandardUIClass";
-import { URLBuilder } from "../../../utils/URLBuilder";
+import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
+import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { FileReader } from "../../utils/FileReader";
+import { StandardUIClass } from "../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
+import { URLBuilder } from "../../utils/URLBuilder";
 import LineColumn = require("line-column");
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 export class UIClassDefinitionFinder {
 	public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {
 		let location: vscode.Location | undefined;
