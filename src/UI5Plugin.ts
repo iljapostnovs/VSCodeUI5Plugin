@@ -61,7 +61,7 @@ export class UI5Plugin {
 		JSCodeActionRegistrator.register();
 		HoverRegistrator.register();
 		XMLFormatterRegistrator.register();
-		FileReader.readAllViews();
+		FileReader.readAllViewsAndFragments();
 	}
 
 	static registerFallbackCommands() {

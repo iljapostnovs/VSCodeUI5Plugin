@@ -12,9 +12,13 @@ export interface Fragment {
 	fsPath: string;
 	name: string;
 }
+interface Fragments {
+	[key: string]: Fragment;
+}
 export class FileReader {
 	private static _manifests: UIManifest[] = [];
 	private static readonly _viewCache: Views = {};
+	private static readonly _fragmentCache: Fragments = {};
 	private static readonly _UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
 	public static globalStoragePath: string | undefined;
 
@@ -25,6 +29,17 @@ export class FileReader {
 				content: viewContent,
 				fsPath: fsPath,
 				fragments: this.getFragments(viewContent)
+			};
+		}
+	}
+
+	public static setNewFragmentContentToCache(document: vscode.TextDocument) {
+		const fragmentName = this.getClassNameFromPath(document.fileName);
+		if (fragmentName) {
+			this._fragmentCache[fragmentName] = {
+				content: document.getText(),
+				fsPath: document.fileName,
+				name: fragmentName
 			};
 		}
 	}
@@ -197,8 +212,9 @@ export class FileReader {
 		return controlClass;
 	}
 
-	static readAllViews() {
+	static readAllViewsAndFragments() {
 		this._readAllViewsAndSaveInCache();
+		this._readAllFragmentsAndSaveInCache();
 	}
 
 	private static _readAllViewsAndSaveInCache() {
@@ -216,6 +232,27 @@ export class FileReader {
 						content: viewContent,
 						fsPath: viewPath.replace(/\//g, fileSeparator),
 						fragments: fragments
+					};
+				}
+			});
+		}
+	}
+
+	private static _readAllFragmentsAndSaveInCache() {
+		const wsFolders = workspace.workspaceFolders || [];
+		const src = this.getSrcFolderName();
+		for (const wsFolder of wsFolders) {
+			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+			const fragmentPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.fragment.xml`);
+			fragmentPaths.forEach(fragmentPath => {
+				const fragmentContent = fs.readFileSync(fragmentPath, "utf8");
+				const fragmentFSPath = fragmentPath.replace(/\//g, fileSeparator);
+				const fragmentName = this.getClassNameFromPath(fragmentFSPath);
+				if (fragmentName) {
+					this._fragmentCache[fragmentName] = {
+						content: fragmentContent,
+						fsPath: fragmentFSPath,
+						name: fragmentName
 					};
 				}
 			});
@@ -269,24 +306,32 @@ export class FileReader {
 
 	public static getFragments(documentText: string) {
 		const fragments: Fragment[] = [];
-		const fragmentTags = this._getFragments(documentText);
+		const fragmentTags = this._getFragmentTags(documentText);
 		fragmentTags.forEach(fragmentTag => {
 			const fragmentName = this._getFragmentNameFromTag(fragmentTag);
 			if (fragmentName) {
 				const fragmentPath = this.getClassPathFromClassName(fragmentName, true);
-				const fragmentText = this.getDocumentTextFromCustomClassName(fragmentName, true);
-				if (fragmentText && fragmentPath) {
-					documentText = documentText.replace(fragmentTag, fragmentText);
+				const fragment = this._getFragment(fragmentName);
+				if (fragment && fragmentPath) {
+					documentText = documentText.replace(fragmentTag, fragment.content);
 					fragments.push({
-						content: fragmentText,
+						content: fragment.content,
 						name: fragmentName,
 						fsPath: fragmentPath
-					})
+					});
 				}
 			}
 		});
 
 		return fragments;
+	}
+
+	private static _getFragment(fragmentName: string): Fragment | undefined {
+		if (!this._fragmentCache[fragmentName]) {
+			this._readAllFragmentsAndSaveInCache();
+		}
+
+		return this._fragmentCache[fragmentName];
 	}
 
 	private static _getFragmentNameFromTag(fragmentTag: string) {
@@ -298,7 +343,7 @@ export class FileReader {
 		return fragmentName;
 	}
 
-	private static _getFragments(documentText: string) {
+	private static _getFragmentTags(documentText: string) {
 		return documentText.match(/<.*?Fragment(.|\s)*?\/>/g) || [];
 	}
 
