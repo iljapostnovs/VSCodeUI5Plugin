@@ -361,7 +361,7 @@ export class XMLParser {
 	static getControllerNameOfTheCurrentDocument() {
 		let controllerName;
 		const currentDocument = vscode.window.activeTextEditor?.document;
-		if (currentDocument && currentDocument.fileName.endsWith("view.xml")) {
+		if (currentDocument && currentDocument.fileName.endsWith(".view.xml")) {
 			const currentDocumentText = currentDocument.getText();
 			controllerName = FileReader.getControllerNameFromView(currentDocumentText);
 		}

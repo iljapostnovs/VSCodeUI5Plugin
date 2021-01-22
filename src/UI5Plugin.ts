@@ -9,6 +9,7 @@ import { CodeLensRegistrator } from "./classes/registrators/CodeLensRegistrator"
 import { JSCodeActionRegistrator } from "./classes/registrators/CodeActionRegistrator";
 import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
 import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
+import { FileReader } from "./classes/utils/FileReader";
 export class UI5Plugin {
 	private static _instance?: UI5Plugin;
 	public static getInstance() {
@@ -60,6 +61,7 @@ export class UI5Plugin {
 		JSCodeActionRegistrator.register();
 		HoverRegistrator.register();
 		XMLFormatterRegistrator.register();
+		FileReader.readAllViews();
 	}
 
 	static registerFallbackCommands() {

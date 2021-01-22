@@ -19,8 +19,9 @@ export class SwitchToControllerCommand {
 	}
 
 	public static getControllerNameOfCurrentView() {
-		const currentViewContent = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.getText() : "";
-		const result = /(?<=controllerName=").*?(?=")/.exec(currentViewContent) || [];
-		return result[0] ? result[0] : null;
+		const document = vscode.window.activeTextEditor?.document;
+		const currentViewController = document && FileReader.getResponsibleClassForXMLDocument(document);
+
+		return currentViewController;
 	}
 }

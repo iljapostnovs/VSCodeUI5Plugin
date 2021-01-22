@@ -14,10 +14,11 @@ export class ViewControllerSwitcher {
 	}
 
 	static getIfViewIsOpened() {
-		return vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.fileName.indexOf(".view.xml") > -1 : false;
+		const fileName = vscode.window.activeTextEditor?.document.fileName;
+		return fileName && (fileName.endsWith(".view.xml") || fileName.endsWith(".fragment.xml"));
 	}
 
 	static getIfControllerIsOpened() {
-		return vscode.window.activeTextEditor ? vscode.window.activeTextEditor.document.fileName.indexOf(".controller.js") > -1 : false;
+		return vscode.window.activeTextEditor?.document.fileName.endsWith(".controller.js") || false;
 	}
 }

@@ -197,6 +197,10 @@ export class FileReader {
 		return controlClass;
 	}
 
+	static readAllViews() {
+		this._readAllViewsAndSaveInCache();
+	}
+
 	private static _readAllViewsAndSaveInCache() {
 		const wsFolders = workspace.workspaceFolders || [];
 		const src = this.getSrcFolderName();
