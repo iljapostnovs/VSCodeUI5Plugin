@@ -3,6 +3,8 @@ import * as vscode from "vscode";
 import * as glob from "glob";
 import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
+import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
@@ -298,8 +300,27 @@ export class FileReader {
 			if (responsibleViewKey) {
 				const responsibleView = this._viewCache[responsibleViewKey];
 				responsibleClassName = this.getControllerNameFromView(responsibleView.content);
+			} else {
+				responsibleClassName = this._getResponsibleClassNameForFragmentFromCustomUIClasses(document);
 			}
 		}
+
+		return responsibleClassName;
+	}
+
+	private static _getResponsibleClassNameForFragmentFromCustomUIClasses(document: vscode.TextDocument) {
+		const allUIClasses = UIClassFactory.getAllExistentUIClasses();
+		const fragmentName = this.getClassNameFromPath(document.fileName);
+		const responsibleClassName = Object.keys(allUIClasses).find(key => {
+			let classFound = false;
+			const UIClass = allUIClasses[key];
+			if (UIClass instanceof CustomUIClass) {
+				if (UIClass.classText.indexOf(`${fragmentName}`) > -1) {
+					classFound = true;
+				}
+			}
+			return classFound;
+		});
 
 		return responsibleClassName;
 	}

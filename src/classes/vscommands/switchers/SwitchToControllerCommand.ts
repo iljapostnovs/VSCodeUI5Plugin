@@ -6,10 +6,10 @@ export class SwitchToControllerCommand {
 		try {
 			const controllerNameOfCurrentlyOpenedView = SwitchToControllerCommand.getControllerNameOfCurrentView();
 			if (controllerNameOfCurrentlyOpenedView) {
-				const controllerFSPath = FileReader.convertClassNameToFSPath(controllerNameOfCurrentlyOpenedView, true);
+				const controlFSPath = FileReader.getClassPathFromClassName(controllerNameOfCurrentlyOpenedView);
 				const editor = vscode.window.activeTextEditor;
-				if (editor && controllerFSPath) {
-					await vscode.window.showTextDocument(vscode.Uri.file(controllerFSPath));
+				if (editor && controlFSPath) {
+					await vscode.window.showTextDocument(vscode.Uri.file(controlFSPath));
 				}
 			}
 

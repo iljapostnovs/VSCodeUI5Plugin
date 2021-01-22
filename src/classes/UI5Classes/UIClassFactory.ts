@@ -188,4 +188,8 @@ export class UIClassFactory {
 			});
 		}
 	}
+
+	public static getAllExistentUIClasses() {
+		return this._UIClasses;
+	}
 }
