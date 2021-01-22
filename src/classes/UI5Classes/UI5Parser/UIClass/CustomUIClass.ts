@@ -28,6 +28,7 @@ export interface CustomClassUIMethod extends UIMethod {
 	position?: number;
 	acornParams?: any;
 	acornNode?: any;
+	isEventHandler: boolean;
 }
 export interface CustomClassUIField extends UIField {
 	customData?: LooseObject;
@@ -400,7 +401,8 @@ export class CustomUIClass extends AbstractUIClass {
 						description: "",
 						visibility: property.key.name.startsWith("_") ? "private" : "public",
 						acornParams: property.value.params,
-						acornNode: property.value
+						acornNode: property.value,
+						isEventHandler: false
 					};
 					this.methods.push(method);
 				} else if (property.value.type === "Identifier" || property.value.type === "Literal") {
@@ -548,7 +550,8 @@ export class CustomUIClass extends AbstractUIClass {
 						description: "",
 						visibility: name?.startsWith("_") ? "private" : "public",
 						acornParams: assignmentBody.params,
-						acornNode: assignmentBody
+						acornNode: assignmentBody,
+						isEventHandler: false
 					};
 					this.methods.push(method);
 				} else if (isField) {
@@ -628,7 +631,8 @@ export class CustomUIClass extends AbstractUIClass {
 				description: `Getter for property ${property.name}`,
 				params: [],
 				returnType: property.type || "void",
-				visibility: property.visibility
+				visibility: property.visibility,
+				isEventHandler: false
 			});
 
 			aMethods.push({
@@ -641,7 +645,8 @@ export class CustomUIClass extends AbstractUIClass {
 					isOptional: false
 				}],
 				returnType: this.className,
-				visibility: property.visibility
+				visibility: property.visibility,
+				isEventHandler: false
 			});
 		});
 	}
@@ -775,7 +780,8 @@ export class CustomUIClass extends AbstractUIClass {
 					description: `Generic method from ${aggregation.name} aggregation`,
 					params: method.params,
 					returnType: method.returnType,
-					visibility: aggregation.visibility
+					visibility: aggregation.visibility,
+					isEventHandler: false
 				});
 			});
 
@@ -829,7 +835,8 @@ export class CustomUIClass extends AbstractUIClass {
 					description: `Generic method for event ${event.name}`,
 					params: eventMethod.params,
 					returnType: this.className,
-					visibility: event.visibility
+					visibility: event.visibility,
+					isEventHandler: false
 				});
 			});
 		});
@@ -893,7 +900,8 @@ export class CustomUIClass extends AbstractUIClass {
 					description: `Generic method from ${association.name} association`,
 					params: method.params,
 					returnType: association.type || this.className,
-					visibility: association.visibility
+					visibility: association.visibility,
+					isEventHandler: false
 				});
 			});
 

@@ -7,32 +7,34 @@ import { URLBuilder } from "../../../utils/URLBuilder";
 import LineColumn = require("line-column");
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 export class UIClassDefinitionFinder {
-	public static getPositionAndUriOfCurrentVariableDefinition(classNameDotNotation?: string, methodName?: string, openInBrowserIfStandardMethod?: boolean) : vscode.Location | undefined {
+	public static getPositionAndUriOfCurrentVariableDefinition(document: vscode.TextDocument, position: vscode.Position, openInBrowserIfStandardMethod = false) : vscode.Location | undefined {
 		let location: vscode.Location | undefined;
-
-		if (!classNameDotNotation) {
-			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-			classNameDotNotation = positionBeforeCurrentStrategy.getClassNameOfTheVariableAtCurrentDocumentPosition();
+		const methodName = document.getText(document.getWordRangeAtPosition(position));
+		const className = FileReader.getClassNameFromPath(document.fileName);
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+		const classNameAtCurrentPosition = strategy.getClassNameOfTheVariableAtPosition(className, document.offsetAt(position));
+		if (classNameAtCurrentPosition) {
+			location = this._getMethodLocation(classNameAtCurrentPosition, methodName, openInBrowserIfStandardMethod);
 		}
 
-		const textEditor = vscode.window.activeTextEditor;
-		if (textEditor && !methodName) {
+		return location;
+	}
 
-			const document = textEditor.document;
-			const position = textEditor.selection.start;
-			methodName = document.getText(document.getWordRangeAtPosition(position));
-		}
-
-		if (classNameDotNotation && methodName) {
-			const isThisClassFromAProject = !!FileReader.getManifestForClass(classNameDotNotation);
-			if (!isThisClassFromAProject && openInBrowserIfStandardMethod) {
-				this._openClassMethodInTheBrowser(classNameDotNotation, methodName);
-			} else {
-				location = this._getVSCodeMethodLocation(classNameDotNotation, methodName);
-				if (!location) {
-					const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
-					if (UIClass.parentClassNameDotNotation) {
-						location = this.getPositionAndUriOfCurrentVariableDefinition(UIClass.parentClassNameDotNotation, methodName, openInBrowserIfStandardMethod);
+	private static _getMethodLocation(className: string, methodName: string, openInBrowserIfStandardMethod: boolean) {
+		let location: vscode.Location | undefined;
+		if (className) {
+			const UIClass = UIClassFactory.getUIClass(className);
+			const method = UIClass.methods.find(method => method.name === methodName);
+			if (method) {
+				const isThisClassFromAProject = !!FileReader.getManifestForClass(className);
+				if (!isThisClassFromAProject && openInBrowserIfStandardMethod) {
+					this._openClassMethodInTheBrowser(className, methodName);
+				} else {
+					location = this._getVSCodeMethodLocation(className, methodName);
+					if (!location) {
+						if (UIClass.parentClassNameDotNotation) {
+							location = this._getMethodLocation(UIClass.parentClassNameDotNotation, methodName, openInBrowserIfStandardMethod);
+						}
 					}
 				}
 			}

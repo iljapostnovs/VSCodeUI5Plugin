@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { CustomClassUIMethod, CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FileReader } from "../../../utils/FileReader";
 import LineColumn = require("line-column");
 import { XMLParser } from "../../../utils/XMLParser";

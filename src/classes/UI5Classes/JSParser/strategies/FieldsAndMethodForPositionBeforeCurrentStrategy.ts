@@ -8,7 +8,7 @@ import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
 export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethodGetterStrategy {
 	getFieldsAndMethods() {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
-		const UIClassName = this.getClassNameOfTheVariableAtCurrentDocumentPosition();
+		const UIClassName = this.getClassNameOfTheVariableAtPosition();
 		if (UIClassName) {
 			fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
 			if (fieldsAndMethods) {
@@ -133,15 +133,19 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return fields;
 	}
 
-	public getClassNameOfTheVariableAtCurrentDocumentPosition() {
+	public getClassNameOfTheVariableAtPosition(className?: string, position?: number) {
 		let UIClassName;
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		if (!className) {
+			className = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		}
 
 		const activeTextEditor = vscode.window.activeTextEditor;
-		if (currentClassName && activeTextEditor) {
-			const position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
+		if (className && activeTextEditor) {
+			if (!position) {
+				position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
+			}
 
-			UIClassName = this.acornGetClassName(currentClassName, position);
+			UIClassName = this.acornGetClassName(className, position);
 		}
 
 		return UIClassName;

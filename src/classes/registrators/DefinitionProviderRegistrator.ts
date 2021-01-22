@@ -7,13 +7,13 @@ export class DefinitionProviderRegistrator {
 	static register() {
 		/* Definition provider */
 		const definitionProviderDisposable = vscode.languages.registerDefinitionProvider({language: "javascript", scheme: "file"}, {
-			provideDefinition() {
-				return UIClassDefinitionFinder.getPositionAndUriOfCurrentVariableDefinition("", "", false);
+			provideDefinition(document: vscode.TextDocument, position: vscode.Position) {
+				return UIClassDefinitionFinder.getPositionAndUriOfCurrentVariableDefinition(document, position, false);
 			}
 		});
 		const typeDefinitionProviderDisposable = vscode.languages.registerTypeDefinitionProvider({language: "javascript", scheme: "file"}, {
-			provideTypeDefinition() {
-				return UIClassDefinitionFinder.getPositionAndUriOfCurrentVariableDefinition("", "", true);
+			provideTypeDefinition(document: vscode.TextDocument, position: vscode.Position) {
+				return UIClassDefinitionFinder.getPositionAndUriOfCurrentVariableDefinition(document, position, true);
 			}
 		});
 		const XMLDefinitionProviderDisposable = vscode.languages.registerDefinitionProvider({language: "xml", scheme: "file"}, {

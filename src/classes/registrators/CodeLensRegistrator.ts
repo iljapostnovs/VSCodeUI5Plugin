@@ -24,8 +24,8 @@ export class CodeLensRegistrator {
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("jsCodeLens")) {
 			const JSCodeLens = vscode.languages.registerCodeLensProvider({language: "javascript", scheme: "file"}, {
-				provideCodeLenses() {
-					return JSCodeLensProvider.getCodeLenses();
+				provideCodeLenses(document: vscode.TextDocument) {
+					return JSCodeLensProvider.getCodeLenses(document);
 				}
 			});
 

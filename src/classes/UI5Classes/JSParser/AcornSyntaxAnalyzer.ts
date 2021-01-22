@@ -430,40 +430,54 @@ export class AcornSyntaxAnalyzer {
 		const UIClass = UIClassFactory.getUIClass(className);
 		if (UIClass instanceof CustomUIClass) {
 			const currentClassEventHandlerName = this._getEventHandlerName(node, className);
-			const viewOfTheController = FileReader.getViewText(className);
+			const viewOfTheController = FileReader.getView(className);
 			if (viewOfTheController && currentClassEventHandlerName) {
-				const position = XMLParser.getPositionOfEventHandler(currentClassEventHandlerName, viewOfTheController);
-				if (position) {
-					XMLParser.setCurrentDocument(viewOfTheController);
-					const tagText = XMLParser.getTagInPosition(viewOfTheController, position).text;
-					const attributes = XMLParser.getAttributesOfTheTag(tagText);
-					const attribute = attributes?.find(attribute => {
-						const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+				eventHandlerData = this._getEventHandlerDataFromXMLText(viewOfTheController.content, currentClassEventHandlerName);
+				if (!eventHandlerData) {
+					viewOfTheController.fragments.find(fragment => {
+						eventHandlerData = this._getEventHandlerDataFromXMLText(fragment.content, currentClassEventHandlerName);
 
-						return attributeValue === currentClassEventHandlerName;
+						return !!eventHandlerData;
 					});
-					if (attribute) {
-						const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
-						const eventName = attributeName;
-						if (tagText && eventName) {
-							const tagPrefix = XMLParser.getTagPrefix(tagText);
-							const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
-
-							if (classNameOfTheTag) {
-								const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOfTheController, tagPrefix, position);
-								const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
-								eventHandlerData = {
-									className: classOfTheTag,
-									eventName: eventName
-								};
-							}
-						}
-					}
-
-					XMLParser.setCurrentDocument(undefined);
 				}
 			}
 		}
+
+		return eventHandlerData;
+	}
+
+	private static _getEventHandlerDataFromXMLText(viewOfTheController: string, currentClassEventHandlerName: string) {
+		let eventHandlerData;
+
+		XMLParser.setCurrentDocument(viewOfTheController);
+		const position = XMLParser.getPositionOfEventHandler(currentClassEventHandlerName, viewOfTheController);
+		if (position) {
+			const tagText = XMLParser.getTagInPosition(viewOfTheController, position).text;
+			const attributes = XMLParser.getAttributesOfTheTag(tagText);
+			const attribute = attributes?.find(attribute => {
+				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+
+				return attributeValue === currentClassEventHandlerName;
+			});
+			if (attribute) {
+				const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
+				const eventName = attributeName;
+				if (tagText && eventName) {
+					const tagPrefix = XMLParser.getTagPrefix(tagText);
+					const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
+
+					if (classNameOfTheTag) {
+						const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOfTheController, tagPrefix, position);
+						const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
+						eventHandlerData = {
+							className: classOfTheTag,
+							eventName: eventName
+						};
+					}
+				}
+			}
+		}
+		XMLParser.setCurrentDocument(undefined);
 
 		return eventHandlerData;
 	}

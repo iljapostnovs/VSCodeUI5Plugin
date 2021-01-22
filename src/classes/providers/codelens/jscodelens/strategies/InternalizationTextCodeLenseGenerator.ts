@@ -4,13 +4,12 @@ import { FileReader } from "../../../../utils/FileReader";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 
 export class InternalizationTextCodeLenseGenerator extends CodeLensGenerator {
-	getCodeLenses(): vscode.CodeLens[] {
-		return this._generateInternalizationCodeLenses();
+	getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
+		return this._generateInternalizationCodeLenses(document);
 	}
 
-	private _generateInternalizationCodeLenses() {
+	private _generateInternalizationCodeLenses(document: vscode.TextDocument) {
 		const codeLenses: vscode.CodeLens[] = [];
-		const document = vscode.window.activeTextEditor?.document;
 
 		const componentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
 		if (componentName && document) {

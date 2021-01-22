@@ -33,8 +33,7 @@ export class FileWatcherMediator {
 				}
 			} else if (document.fileName.endsWith(".view.xml")) {
 
-				let viewContent = document.getText();
-				viewContent = FileReader.replaceFragments(viewContent);
+				const viewContent = document.getText();
 				FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath);
 			} else if (document.fileName.endsWith(".properties")) {
 

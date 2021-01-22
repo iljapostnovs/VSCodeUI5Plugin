@@ -7,10 +7,14 @@ const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
 const workspace = vscode.workspace;
-
+export interface Fragment {
+	content: string;
+	fsPath: string;
+	name: string;
+}
 export class FileReader {
 	private static _manifests: UIManifest[] = [];
-	private static readonly _viewCache: LooseObject = {};
+	private static readonly _viewCache: Views = {};
 	private static readonly _UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
 	public static globalStoragePath: string | undefined;
 
@@ -19,7 +23,8 @@ export class FileReader {
 		if (controllerName) {
 			this._viewCache[controllerName] = {
 				content: viewContent,
-				fsPath: fsPath
+				fsPath: fsPath,
+				fragments: this.getFragments(viewContent)
 			};
 		}
 	}
@@ -147,9 +152,9 @@ export class FileReader {
 			this._readAllViewsAndSaveInCache();
 		}
 
-		const viewText = this._viewCache[controllerName];
+		const view = this._viewCache[controllerName];
 
-		return viewText;
+		return view;
 	}
 
 	public static getViewText(controllerName: string) {
@@ -199,13 +204,14 @@ export class FileReader {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
 			const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.view.xml`);
 			viewPaths.forEach(viewPath => {
-				let viewContent = fs.readFileSync(viewPath, "utf8");
-				viewContent = this.replaceFragments(viewContent);
+				const viewContent = fs.readFileSync(viewPath, "utf8");
+				const fragments = this.getFragments(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				if (controllerName) {
 					this._viewCache[controllerName] = {
 						content: viewContent,
-						fsPath: viewPath.replace(/\//g, fileSeparator)
+						fsPath: viewPath.replace(/\//g, fileSeparator),
+						fragments: fragments
 					};
 				}
 			});
@@ -235,24 +241,31 @@ export class FileReader {
 		return controllerNameResult ? controllerNameResult[0] : undefined;
 	}
 
-	public static replaceFragments(documentText: string) {
-		const fragments = this._getFragments(documentText);
-		fragments.forEach(fragment => {
-			const fragmentName = this._getFragmentName(fragment);
+	public static getFragments(documentText: string) {
+		const fragments: Fragment[] = [];
+		const fragmentTags = this._getFragments(documentText);
+		fragmentTags.forEach(fragmentTag => {
+			const fragmentName = this._getFragmentNameFromTag(fragmentTag);
 			if (fragmentName) {
+				const fragmentPath = this.getClassPathFromClassName(fragmentName, true);
 				const fragmentText = this.getDocumentTextFromCustomClassName(fragmentName, true);
-				if (fragmentText) {
-					documentText = documentText.replace(fragment, fragmentText);
+				if (fragmentText && fragmentPath) {
+					documentText = documentText.replace(fragmentTag, fragmentText);
+					fragments.push({
+						content: fragmentText,
+						name: fragmentName,
+						fsPath: fragmentPath
+					})
 				}
 			}
 		});
 
-		return documentText;
+		return fragments;
 	}
 
-	private static _getFragmentName(fragmentText: string) {
+	private static _getFragmentNameFromTag(fragmentTag: string) {
 		let fragmentName;
-		const fragmentNameResult = /(?<=fragmentName=").*?(?=")/.exec(fragmentText);
+		const fragmentNameResult = /(?<=fragmentName=").*?(?=")/.exec(fragmentTag);
 		if (fragmentNameResult) {
 			fragmentName = fragmentNameResult[0];
 		}
@@ -430,9 +443,13 @@ interface manifestPaths {
 	fsPath: string;
 }
 
-interface LooseObject {
-	[key: string]: {
-		fsPath: string;
-		content: string;
-	};
+export interface Views {
+	[key: string]: View;
 }
+
+export interface View {
+	fsPath: string;
+	content: string;
+	fragments: Fragment[];
+}
+

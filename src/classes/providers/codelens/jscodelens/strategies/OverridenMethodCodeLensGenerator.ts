@@ -1,19 +1,18 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { UIMethod } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { CustomClassUIMethod } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
+import { FileReader } from "../../../../utils/FileReader";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 
 export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {
-	getCodeLenses(): vscode.CodeLens[] {
+	getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
 		let codeLens: vscode.CodeLens[] = [];
-		const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		const currentClass = FileReader.getClassNameFromPath(document.fileName);
 		if (currentClass) {
 			const UIClass = UIClassFactory.getUIClass(currentClass);
-			const rootMethods = UIClass.methods;
-			if (UIClass.parentClassNameDotNotation) {
-				const overriddenMethods: UIMethod[] = [];
+			if (UIClass instanceof CustomUIClass && UIClass.parentClassNameDotNotation) {
+				const rootMethods = UIClass.methods;
+				const overriddenMethods: CustomClassUIMethod[] = [];
 				const parentMethods = this._getAllParentMethods(UIClass.parentClassNameDotNotation);
 
 				rootMethods.forEach(method => {
@@ -22,7 +21,7 @@ export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {
 						overriddenMethods.push(method);
 					}
 				});
-				codeLens = this._generateCodeLensesForMethods(overriddenMethods);
+				codeLens = this._generateCodeLensesForMethods(document, overriddenMethods);
 			}
 		}
 
@@ -39,9 +38,8 @@ export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {
 		return methods;
 	}
 
-	private _generateCodeLensesForMethods(methods: CustomClassUIMethod[]) {
+	private _generateCodeLensesForMethods(document: vscode.TextDocument, methods: CustomClassUIMethod[]) {
 		const codeLenses: vscode.CodeLens[] = [];
-		const document = vscode.window.activeTextEditor?.document;
 
 		if (document) {
 			methods.forEach(method => {
