@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { CustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
-import { FileReader, Fragment, View, Views } from "../../../../utils/FileReader";
+import { FileReader, Fragment, View } from "../../../../utils/FileReader";
 import { XMLParser } from "../../../../utils/XMLParser";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 import LineColumn = require("line-column");
@@ -56,7 +56,7 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 				if (positionInViewStart && positionInViewEnd) {
 					const classUri = vscode.Uri.file(XMLText.fsPath);
 					const controlIdText = eventHandlerXMLData.controlId ? ` (${eventHandlerXMLData.controlId})` : "";
-					const description = `Event handler of "${eventHandlerXMLData.className}"${controlIdText} :: ${eventHandlerXMLData.name}`;
+					const description = `Event handler of "${eventHandlerXMLData.className}${controlIdText}~${eventHandlerXMLData.name}"`;
 					const codeLens = new vscode.CodeLens(range, {
 						tooltip: description,
 						title: description,

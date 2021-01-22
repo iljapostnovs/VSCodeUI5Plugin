@@ -348,10 +348,9 @@ export class XMLParser {
 		return XMLViewText.substring(i + 1, currentPosition).replace("=", "");
 	}
 
-	static getMethodsOfTheCurrentViewsController() {
+	static getMethodsOfTheCurrentViewsController(controllerName = this.getControllerNameOfTheCurrentDocument()) {
 		let classMethods: UIMethod[] = [];
 
-		const controllerName = this.getControllerNameOfTheCurrentDocument();
 		if (controllerName) {
 			classMethods = this._getClassMethodsRecursively(controllerName);
 		}

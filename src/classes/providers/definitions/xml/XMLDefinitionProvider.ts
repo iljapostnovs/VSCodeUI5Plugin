@@ -17,22 +17,29 @@ export class XMLDefinitionProvider {
 		const attribute = attributes?.find(attribute => XMLParser.getAttributeNameAndValue(attribute).attributeValue.replace(".", "") === word);
 		if (attribute) {
 			const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
-			let controllerName = FileReader.getControllerNameFromView(XMLText);
-			if (controllerName) {
-				controllerName = this._findClassNameOfEventHandler(controllerName, attributeValue)
-				if (controllerName) {
-					const controllerUIClass = UIClassFactory.getUIClass(controllerName);
-					if (controllerUIClass instanceof CustomUIClass) {
-						const classPath = FileReader.getClassPathFromClassName(controllerName);
-						const method = controllerUIClass.methods.find(method => method.name === attributeValue.replace(".", ""));
-						if (method?.position && classPath) {
-							const classUri = vscode.Uri.file(classPath);
-							const methodPosition = LineColumn(controllerUIClass.classText).fromIndex(method.position);
-							if (methodPosition) {
-								const vscodePosition = new vscode.Position(methodPosition.line - 1, methodPosition.col - 1);
-								location = new vscode.Location(classUri, vscodePosition);
-							}
-						}
+			const responsibleClassName = FileReader.getResponsibleClassForXMLDocument(document);
+			if (responsibleClassName) {
+				location = this._getLocationFor(responsibleClassName, attributeValue);
+			}
+		}
+
+		return location;
+	}
+
+	private static _getLocationFor(jsUIClassName: string, eventHandlerName: string) {
+		let location: vscode.Location | undefined;
+		const responsibleClassName = this._findClassNameOfEventHandler(jsUIClassName, eventHandlerName)
+		if (responsibleClassName) {
+			const controllerUIClass = UIClassFactory.getUIClass(responsibleClassName);
+			if (controllerUIClass instanceof CustomUIClass) {
+				const classPath = FileReader.getClassPathFromClassName(responsibleClassName);
+				const method = controllerUIClass.methods.find(method => method.name === eventHandlerName.replace(".", ""));
+				if (method?.position && classPath) {
+					const classUri = vscode.Uri.file(classPath);
+					const methodPosition = LineColumn(controllerUIClass.classText).fromIndex(method.position);
+					if (methodPosition) {
+						const vscodePosition = new vscode.Position(methodPosition.line - 1, methodPosition.col - 1);
+						location = new vscode.Location(classUri, vscodePosition);
 					}
 				}
 			}

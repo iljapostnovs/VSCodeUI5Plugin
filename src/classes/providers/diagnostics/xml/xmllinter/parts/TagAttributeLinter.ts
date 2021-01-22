@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
+import { FileReader, Fragment, View } from "../../../../../utils/FileReader";
 
 interface AttributeValidation {
 	valid: boolean;
@@ -14,14 +15,15 @@ function isNumeric(value: string) {
 }
 
 export class TagAttributeLinter extends Linter {
-	getErrors(document: string): Error[] {
+	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
+		const documentText = document.getText();
 
 		//check tags
 		console.time("Tag attribute linter");
-		XMLParser.setCurrentDocument(document);
+		XMLParser.setCurrentDocument(documentText);
 
-		const tags = XMLParser.getAllTags(document);
+		const tags = XMLParser.getAllTags(documentText);
 		tags.forEach(tag => {
 			const tagAttributes = XMLParser.getAttributesOfTheTag(tag);
 			if (tagAttributes) {
@@ -30,15 +32,15 @@ export class TagAttributeLinter extends Linter {
 				const className = XMLParser.getClassNameFromTag(tag.text);
 
 				if (className) {
-					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(document, tagPrefix, tag.positionEnd);
+					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(documentText, tagPrefix, tag.positionEnd);
 					if (libraryPath) {
 						//check if tag class exists
 						const classOfTheTag = [libraryPath, className].join(".");
 						const UIClass = UIClassFactory.getUIClass(classOfTheTag);
 						if (!UIClass.classExists) {
-							const positionBegin = LineColumn(document).fromIndex(tag.positionBegin);
-							const positionEnd = LineColumn(document).fromIndex(tag.positionEnd);
-							if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(document, tag.positionBegin)) {
+							const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
+							const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
+							if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
 								errors.push({
 									code: "UI5plugin",
 									message: `"${classOfTheTag}" class doesn't exist`,
@@ -52,11 +54,11 @@ export class TagAttributeLinter extends Linter {
 						} else {
 							tagAttributes.forEach(tagAttribute => {
 								//check tag attributes
-								const attributeValidation = this._validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes);
+								const attributeValidation = this._validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes, document);
 								if (!attributeValidation.valid) {
 									const indexOfTagBegining = tag.text.indexOf(tagAttribute);
-									const position = LineColumn(document).fromIndex(tag.positionBegin + indexOfTagBegining);
-									if (position && XMLParser.getIfPositionIsNotInComments(document, tag.positionBegin)) {
+									const position = LineColumn(documentText).fromIndex(tag.positionBegin + indexOfTagBegining);
+									if (position && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
 										errors.push({
 											code: "UI5plugin",
 											message: attributeValidation.message || "Invalid attribute",
@@ -72,9 +74,9 @@ export class TagAttributeLinter extends Linter {
 						}
 					} else {
 						//check if prefix exists
-						const positionBegin = LineColumn(document).fromIndex(tag.positionBegin);
-						const positionEnd = LineColumn(document).fromIndex(tag.positionEnd);
-						if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(document, tag.positionBegin)) {
+						const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
+						const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
+						if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
 							errors.push({
 								code: "UI5plugin",
 								message: `"${tagPrefix}" prefix is not defined`,
@@ -95,7 +97,7 @@ export class TagAttributeLinter extends Linter {
 
 		return errors;
 	}
-	private _validateTagAttribute(className: string, attribute: string, attributes: string[]): AttributeValidation {
+	private _validateTagAttribute(className: string, attribute: string, attributes: string[], document: vscode.TextDocument): AttributeValidation {
 		let attributeValidation: AttributeValidation = {
 			valid: false
 		};
@@ -106,11 +108,11 @@ export class TagAttributeLinter extends Linter {
 		const isExclusion = attributeName.startsWith("xmlns") || this._isAttributeAlwaysValid(className, attributeName);
 		const isAttributeNameDuplicated = this._getIfAttributeNameIsDuplicated(attribute, attributes);
 		const attributeNameValid = !isAttributeNameDuplicated && (isExclusion || this._validateAttributeName(className, attribute));
-		const attributeValueValid = this._validateAttributeValue(className, attribute);
+		const attributeValueValid = this._validateAttributeValue(className, attribute, document);
 		attributeValidation.valid = attributeNameValid && attributeValueValid;
 
 		if (!attributeNameValid && UIClass.parentClassNameDotNotation) {
-			attributeValidation = this._validateTagAttribute(UIClass.parentClassNameDotNotation, attribute, attributes);
+			attributeValidation = this._validateTagAttribute(UIClass.parentClassNameDotNotation, attribute, attributes, document);
 		} else if (!attributeValidation.valid) {
 			let message = "";
 			if (isAttributeNameDuplicated) {
@@ -134,12 +136,17 @@ export class TagAttributeLinter extends Linter {
 		return isDuplicated;
 	}
 
-	private _validateAttributeValue(className: string, attribute: string) {
+	private _validateAttributeValue(className: string, attribute: string, document: vscode.TextDocument) {
 		let isValueValid = true;
 		const { attributeName, attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 		const UIClass = UIClassFactory.getUIClass(className);
 		const property = UIClass.properties.find(property => property.name === attributeName);
 		const event = UIClass.events.find(event => event.name === attributeName);
+
+		let responsibleControlName;
+		if (event) {
+			responsibleControlName = FileReader.getResponsibleClassForXMLDocument(document);
+		}
 		const isAttributeBinded = attributeValue.startsWith("{") && attributeValue.endsWith("}");
 
 		if (isAttributeBinded || property?.type === "string") {
@@ -152,9 +159,9 @@ export class TagAttributeLinter extends Linter {
 			isValueValid = ["true", "false"].indexOf(attributeValue) > -1;
 		} else if (property?.type === "int") {
 			isValueValid = isNumeric(attributeValue);
-		} else if (event && XMLParser.getControllerNameOfTheCurrentDocument()) {
+		} else if (event && responsibleControlName) {
 			const attributeValueWithoutDot = attributeValue.replace(".", "");
-			isValueValid = !!XMLParser.getMethodsOfTheCurrentViewsController().find(method => method.name === attributeValueWithoutDot);
+			isValueValid = !!XMLParser.getMethodsOfTheCurrentViewsController(responsibleControlName).find(method => method.name === attributeValueWithoutDot);
 		}
 
 		return isValueValid;

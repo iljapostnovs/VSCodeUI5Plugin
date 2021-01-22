@@ -79,7 +79,7 @@ export class DiagnosticsRegistrator {
 
 		if (isXMLDiagnosticsEnabled && !this._timeoutId) {
 			this._timeoutId = setTimeout(() => {
-				const errors = XMLLinter.getLintingErrors(document.getText());
+				const errors = XMLLinter.getLintingErrors(document);
 
 				const diagnostics: vscode.Diagnostic[] = errors.map(error => {
 					return ({

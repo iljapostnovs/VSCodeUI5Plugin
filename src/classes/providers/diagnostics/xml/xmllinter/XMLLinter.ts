@@ -2,9 +2,10 @@ import { Linter } from "./parts/abstraction/Linter";
 import { TagAttributeLinter } from "./parts/TagAttributeLinter";
 import { UnusedNamespaceLinter } from "./parts/UnusedNamespaceLinter";
 import { Error } from "./parts/abstraction/Linter";
+import * as vscode from "vscode";
 
 export class XMLLinter {
-	static getLintingErrors(document: string): Error[] {
+	static getLintingErrors(document: vscode.TextDocument): Error[] {
 		const linters: Linter[] = [
 			new TagAttributeLinter(),
 			new UnusedNamespaceLinter()

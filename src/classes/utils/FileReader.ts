@@ -237,8 +237,30 @@ export class FileReader {
 
 	static getControllerNameFromView(viewContent: string) {
 		const controllerNameResult = /(?<=controllerName=").*?(?=")/.exec(viewContent);
+		const controllerName = controllerNameResult ? controllerNameResult[0] : undefined;
 
-		return controllerNameResult ? controllerNameResult[0] : undefined;
+		return controllerName;
+	}
+
+	static getResponsibleClassForXMLDocument(document: vscode.TextDocument) {
+		const isFragment = document.fileName.endsWith(".fragment.xml");
+		const isView = document.fileName.endsWith(".view.xml");
+		let responsibleClassName;
+
+		if (isView) {
+			responsibleClassName = this.getControllerNameFromView(document.getText());
+		} else if (isFragment) {
+			const fragmentName = this.getClassNameFromPath(document.fileName);
+			const responsibleViewKey = Object.keys(this._viewCache).find(key => {
+				return !!this._viewCache[key].fragments.find(fragmentFromView => fragmentFromView.name === fragmentName);
+			});
+			if (responsibleViewKey) {
+				const responsibleView = this._viewCache[responsibleViewKey];
+				responsibleClassName = this.getControllerNameFromView(responsibleView.content);
+			}
+		}
+
+		return responsibleClassName;
 	}
 
 	public static getFragments(documentText: string) {
@@ -291,7 +313,7 @@ export class FileReader {
 					.replace(currentManifest.fsPath, currentManifest.componentName)
 					.replace(".controller", "")
 					.replace(".view.xml", "")
-					.replace("fragment.xml", "")
+					.replace(".fragment.xml", "")
 					.replace(".xml", "")
 					.replace(".js", "")
 					.replace(new RegExp(`${escapedFileSeparator}`, "g"), ".");
