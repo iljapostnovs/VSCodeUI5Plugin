@@ -27,9 +27,23 @@ export class XMLParser {
 		let IdsResult: string[] = [];
 		const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		if (currentClass) {
-			const viewText = FileReader.getViewText(currentClass);
-			if (viewText) {
-				IdsResult = viewText.match(/(?<=\sid=").*?(?="\s)/g) || [];
+			const idRegExp = /(?<=\sid=").*?(?="\s)/g;
+			const view = FileReader.getViewForController(currentClass);
+			if (view) {
+				IdsResult = view.content.match(idRegExp) || [];
+				view.fragments.forEach(fragment => {
+					const IdsFragmentResult = fragment.content.match(idRegExp) || [];
+					if (IdsFragmentResult) {
+						IdsResult.push(...IdsFragmentResult);
+					}
+				});
+			}
+			const fragment = FileReader.getFragmentForClass(currentClass);
+			if (fragment) {
+				const IdsFragmentResult = fragment.content.match(idRegExp) || [];
+				if (IdsFragmentResult) {
+					IdsResult.push(...IdsFragmentResult);
+				}
 			}
 		}
 
@@ -348,7 +362,7 @@ export class XMLParser {
 		return XMLViewText.substring(i + 1, currentPosition).replace("=", "");
 	}
 
-	static getMethodsOfTheCurrentViewsController(controllerName = this.getControllerNameOfTheCurrentDocument()) {
+	static getMethodsOfTheControl(controllerName = this.getControllerNameOfTheCurrentDocument()) {
 		let classMethods: UIMethod[] = [];
 
 		if (controllerName) {

@@ -19,6 +19,6 @@ export class ViewControllerSwitcher {
 	}
 
 	static getIfControllerIsOpened() {
-		return vscode.window.activeTextEditor?.document.fileName.endsWith(".controller.js") || false;
+		return vscode.window.activeTextEditor?.document.fileName.endsWith(".js") || false;
 	}
 }

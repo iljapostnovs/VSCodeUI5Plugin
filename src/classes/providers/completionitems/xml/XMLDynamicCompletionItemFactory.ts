@@ -97,10 +97,11 @@ export class XMLDynamicCompletionItemFactory {
 
 	private _getAttributeValuesCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
-		const XMLText = vscode.window.activeTextEditor?.document.getText();
+		const document = vscode.window.activeTextEditor?.document;
+		const XMLText = document?.getText();
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
-		if (XMLText && currentPositionOffset) {
+		if (document && XMLText && currentPositionOffset) {
 			const positionBeforeString = XMLParser.getPositionBeforeStringBegining(XMLText, currentPositionOffset);
 
 			const className = XMLParser.getClassNameInPosition(XMLText, positionBeforeString);
@@ -122,14 +123,21 @@ export class XMLDynamicCompletionItemFactory {
 
 					const UIEvent = this._getUIEventRecursively(UIClass, attributeName);
 					if (UIEvent) {
-						const methods = XMLParser.getMethodsOfTheCurrentViewsController()
-							.map(classMethod =>
+						let methods = XMLParser.getMethodsOfTheControl();
+						if (methods.length === 0) {
+							const className = FileReader.getResponsibleClassForXMLDocument(document);
+							if (className) {
+								methods = XMLParser.getMethodsOfTheControl(className);
+							}
+						}
+						const mappedMethods = methods.map(classMethod =>
 							({
 								text: classMethod.name,
 								description: classMethod.description
 							})
-							);
-						completionItems = this._generateCompletionItemsFromTypeValues(methods);
+						);
+
+						completionItems = this._generateCompletionItemsFromTypeValues(mappedMethods);
 					}
 				}
 			}
@@ -349,7 +357,7 @@ export class XMLDynamicCompletionItemFactory {
 			const className = XMLParser.getClassNameInPosition(XMLText, currentPositionOffset);
 			if (className) {
 				const UIClass = UIClassFactory.getUIClass(className);
-				let controllerMethods = XMLParser.getMethodsOfTheCurrentViewsController().map(method => method.name);
+				let controllerMethods = XMLParser.getMethodsOfTheControl().map(method => method.name);
 				controllerMethods = [...new Set(controllerMethods)];
 				completionItems = this._getPropertyCompletionItemsFromClass(UIClass);
 				completionItems = completionItems.concat(this._getEventCompletionItemsFromClass(UIClass, controllerMethods));

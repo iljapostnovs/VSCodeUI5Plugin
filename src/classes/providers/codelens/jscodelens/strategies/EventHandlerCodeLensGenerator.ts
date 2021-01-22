@@ -27,7 +27,8 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		if (className) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 			const eventHandlers = UIClass.methods.filter(method => method.isEventHandler);
-			const XMLView = FileReader.getView(className);
+			const XMLView = FileReader.getViewForController(className);
+			const fragment = FileReader.getFragmentForClass(className);
 			if (XMLView) {
 				codeLenses.push(...this._getCodeLensesForXMLText(XMLView, eventHandlers, document));
 
@@ -35,6 +36,9 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 					codeLenses.push(...this._getCodeLensesForXMLText(fragment, eventHandlers, document));
 				});
 
+			}
+			if (fragment) {
+				codeLenses.push(...this._getCodeLensesForXMLText(fragment, eventHandlers, document));
 			}
 		}
 

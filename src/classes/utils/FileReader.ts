@@ -164,18 +164,39 @@ export class FileReader {
 		return className;
 	}
 
-	public static getView(controllerName: string) {
+	public static getViewForController(controllerName: string) {
 		if (!this._viewCache[controllerName]) {
 			this._readAllViewsAndSaveInCache();
 		}
 
-		const view = this._viewCache[controllerName];
+		let view: View | undefined;
+
+		if (this._viewCache[controllerName]) {
+			view = this._viewCache[controllerName];
+		}
 
 		return view;
 	}
 
+	public static getFragmentForClass(className: string) {
+		let fragment: Fragment | undefined;
+		const UIClass = UIClassFactory.getUIClass(className);
+
+		if (UIClass instanceof CustomUIClass) {
+			const fragmentKey = Object.keys(this._fragmentCache).find(key => {
+				return UIClass.classText.indexOf(`"${this._fragmentCache[key].name}"`) > -1;
+			});
+			if (fragmentKey) {
+				fragment = this._fragmentCache[fragmentKey];
+			}
+
+		}
+
+		return fragment;
+	}
+
 	public static getViewText(controllerName: string) {
-		return this.getView(controllerName)?.content;
+		return this.getViewForController(controllerName)?.content;
 	}
 
 	private static _getClassOfControlIdFromView(documentText: string, controlId: string) {
@@ -217,6 +238,22 @@ export class FileReader {
 	static readAllViewsAndFragments() {
 		this._readAllViewsAndSaveInCache();
 		this._readAllFragmentsAndSaveInCache();
+		this._readAllJSFiles();
+	}
+
+	private static _readAllJSFiles() {
+		const wsFolders = workspace.workspaceFolders || [];
+		const src = this.getSrcFolderName();
+		for (const wsFolder of wsFolders) {
+			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+			const classPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.js`);
+			classPaths.forEach(classPath => {
+				const className = FileReader.getClassNameFromPath(classPath);
+				if (className) {
+					UIClassFactory.setNewCodeForClass(className, "");
+				}
+			});
+		}
 	}
 
 	private static _readAllViewsAndSaveInCache() {

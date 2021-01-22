@@ -7,10 +7,13 @@ export class SwitchToViewCommand {
 			const currentControllerName = SwitchToViewCommand._getControllerName();
 
 			if (currentControllerName) {
-				const view = FileReader.getView(currentControllerName);
-
-				const editor = vscode.window.activeTextEditor;
-				if (editor && view) {
+				const view = FileReader.getViewForController(currentControllerName);
+				if (!view) {
+					const fragment = FileReader.getFragmentForClass(currentControllerName);
+					if (fragment) {
+						await vscode.window.showTextDocument(vscode.Uri.file(fragment.fsPath));
+					}
+				} else {
 					await vscode.window.showTextDocument(vscode.Uri.file(view.fsPath));
 				}
 			}
@@ -21,11 +24,10 @@ export class SwitchToViewCommand {
 	}
 
 	private static _getControllerName() {
-		let controllerName: string | null = null;
-		const currentController = vscode.window.activeTextEditor?.document.getText();
-		if (currentController) {
-			const result = /(?<=.extend\(").*?(?=")/.exec(currentController);
-			controllerName = result && result[0] ? result[0] : null;
+		let controllerName: string | undefined;
+		const document = vscode.window.activeTextEditor?.document;
+		if (document) {
+			controllerName = FileReader.getClassNameFromPath(document.fileName);
 		}
 		return controllerName;
 	}

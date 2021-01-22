@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
-import { FileReader } from "../../utils/FileReader";
+import { FileReader, Fragment, View } from "../../utils/FileReader";
 import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
 import { CustomClassUIMethod, CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
@@ -430,7 +430,7 @@ export class AcornSyntaxAnalyzer {
 		const UIClass = UIClassFactory.getUIClass(className);
 		if (UIClass instanceof CustomUIClass) {
 			const currentClassEventHandlerName = this._getEventHandlerName(node, className);
-			const viewOfTheController = FileReader.getView(className);
+			const viewOfTheController = FileReader.getViewForController(className);
 			if (viewOfTheController && currentClassEventHandlerName) {
 				eventHandlerData = this._getEventHandlerDataFromXMLText(viewOfTheController.content, currentClassEventHandlerName);
 				if (!eventHandlerData) {
@@ -439,6 +439,12 @@ export class AcornSyntaxAnalyzer {
 
 						return !!eventHandlerData;
 					});
+				}
+			}
+			if (currentClassEventHandlerName) {
+				const fragmentOfTheController = FileReader.getFragmentForClass(className);
+				if (fragmentOfTheController) {
+					eventHandlerData = this._getEventHandlerDataFromXMLText(fragmentOfTheController.content, currentClassEventHandlerName);
 				}
 			}
 		}

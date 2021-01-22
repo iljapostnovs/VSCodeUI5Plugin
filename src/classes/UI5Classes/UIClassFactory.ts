@@ -162,18 +162,34 @@ export class UIClassFactory {
 	}
 
 	private static _enrichMethodParamsWithEventType(CurrentUIClass: CustomUIClass) {
-		const viewOfTheController = FileReader.getView(CurrentUIClass.className);
-		if (viewOfTheController) {
+		const viewOfTheController = FileReader.getViewForController(CurrentUIClass.className);
+		const fragment = FileReader.getFragmentForClass(CurrentUIClass.className);
+		if (viewOfTheController || fragment) {
 			CurrentUIClass.methods.forEach(method => {
 				const regex = new RegExp(`".?${method.name}"`);
-				const isMethodMentionedInTheView = regex.test(viewOfTheController.content);
-				if (isMethodMentionedInTheView) {
-					method.isEventHandler = true;
-					if (method?.acornNode?.params && method?.acornNode?.params[0]) {
-						method.acornNode.params[0].jsType = "sap.ui.base.Event";
+				if (viewOfTheController) {
+					const isMethodMentionedInTheView = regex.test(viewOfTheController.content);
+					if (isMethodMentionedInTheView) {
+						method.isEventHandler = true;
+						if (method?.acornNode?.params && method?.acornNode?.params[0]) {
+							method.acornNode.params[0].jsType = "sap.ui.base.Event";
+						}
+					} else {
+						viewOfTheController.fragments.find(fragment => {
+							const isMethodMentionedInTheFragment = regex.test(fragment.content);
+							if (isMethodMentionedInTheFragment) {
+								method.isEventHandler = true;
+								if (method?.acornNode?.params && method?.acornNode?.params[0]) {
+									method.acornNode.params[0].jsType = "sap.ui.base.Event";
+								}
+							}
+
+							return isMethodMentionedInTheFragment;
+						});
 					}
-				} else {
-					viewOfTheController.fragments.find(fragment => {
+				}
+				if (!method.isEventHandler) {
+					if (fragment) {
 						const isMethodMentionedInTheFragment = regex.test(fragment.content);
 						if (isMethodMentionedInTheFragment) {
 							method.isEventHandler = true;
@@ -181,12 +197,12 @@ export class UIClassFactory {
 								method.acornNode.params[0].jsType = "sap.ui.base.Event";
 							}
 						}
-
-						return isMethodMentionedInTheFragment;
-					});
+					}
 				}
 			});
 		}
+
+
 	}
 
 	public static getAllExistentUIClasses() {
