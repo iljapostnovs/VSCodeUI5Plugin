@@ -22,8 +22,8 @@ export class JSCodeActionProvider {
 		const nonExistendMethodDiagnostics = customDiagnostics.filter(diagnostic => diagnostic.type === CustomDiagnosticType.NonExistentMethod);
 		const codeActions: vscode.CodeAction[] = nonExistendMethodDiagnostics.reduce((accumulator: vscode.CodeAction[], diagnostic: CustomDiagnostics) => {
 			const className = FileReader.getClassNameFromPath(document.fileName);
-			if (className && diagnostic.methodName && diagnostic.sourceClassName && selectedVariableName === diagnostic.methodName) {
-				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.sourceClassName, diagnostic.methodName, this._getInsertContentFromIdentifierName(diagnostic.methodName));
+			if (className && diagnostic.methodName && diagnostic.attribute && selectedVariableName === diagnostic.methodName) {
+				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.attribute, diagnostic.methodName, this._getInsertContentFromIdentifierName(diagnostic.methodName));
 				insertCodeAction && accumulator.push(insertCodeAction);
 			}
 

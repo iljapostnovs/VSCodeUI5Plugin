@@ -341,6 +341,15 @@
 					"text": "Invalid attribute name (wrongAttribute)"
 				}
 			]
+		},
+
+		{
+			"className": "com.test.view.fragments.SecondFragment",
+			"errors": [
+				{
+					"text": "Invalid attribute value (onUnexistantDelete)"
+				}
+			]
 		}
 	]
 }

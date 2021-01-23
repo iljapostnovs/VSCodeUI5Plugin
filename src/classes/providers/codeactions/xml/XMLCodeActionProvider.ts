@@ -3,6 +3,7 @@ import { XMLParser } from "../../../utils/XMLParser";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { SwitchToControllerCommand } from "../../../vscommands/switchers/SwitchToControllerCommand";
 import { MethodInserter } from "../util/MethodInserter";
+import { CustomDiagnostics } from "../../../registrators/DiagnosticsRegistrator";
 
 export class XMLCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -14,13 +15,13 @@ export class XMLCodeActionProvider {
 	private static _getEventAutofillCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const providerResult: vscode.CodeAction[] = [];
 		const diagnostics = vscode.languages.getDiagnostics(document.uri);
-		const diagnostic = diagnostics.find(diagnostic => {
+		const diagnostic: CustomDiagnostics | undefined = diagnostics.filter(diagnostic => diagnostic instanceof CustomDiagnostics).find(diagnostic => {
 			return diagnostic.range.contains(range);
 		});
-		if (diagnostic?.source) {
+		if (diagnostic?.attribute) {
 			XMLParser.setCurrentDocument(document.getText());
 			const currentPositionOffset = document?.offsetAt(range.end);
-			const attributeData = XMLParser.getAttributeNameAndValue(diagnostic.source);
+			const attributeData = XMLParser.getAttributeNameAndValue(diagnostic.attribute);
 			if (attributeData.attributeValue.startsWith(".")) {
 				attributeData.attributeValue = attributeData.attributeValue.replace(".", "");
 			}

@@ -47,6 +47,7 @@ export class TagAttributeLinter extends Linter {
 										code: "UI5plugin",
 										message: attributeValidation.message || "Invalid attribute",
 										source: "Tag Attribute linter",
+										attribute: tagAttribute,
 										range: new vscode.Range(
 											new vscode.Position(position.line - 1, position.col),
 											new vscode.Position(position.line - 1, position.col + tagAttribute.length)

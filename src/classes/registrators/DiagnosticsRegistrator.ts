@@ -11,7 +11,7 @@ export class CustomDiagnostics extends vscode.Diagnostic {
 	type?: CustomDiagnosticType;
 	fieldName?: string;
 	methodName?: string;
-	sourceClassName?: string;
+	attribute?: string;
 	isController?: boolean;
 }
 
@@ -81,16 +81,19 @@ export class DiagnosticsRegistrator {
 			this._timeoutId = setTimeout(() => {
 				const errors = XMLLinter.getLintingErrors(document);
 
-				const diagnostics: vscode.Diagnostic[] = errors.map(error => {
-					return ({
-						code: error.code,
-						message: error.message,
-						range: error.range,
-						severity: vscode.DiagnosticSeverity.Error,
-						source: error.source,
-						relatedInformation: [],
-						tags: error.tags || []
-					});
+				const diagnostics: CustomDiagnostics[] = errors.map(error => {
+					const diagnostic = new CustomDiagnostics(error.range, error.message);
+
+					diagnostic.code = error.code;
+					diagnostic.message = error.message;
+					diagnostic.range = error.range;
+					diagnostic.severity = vscode.DiagnosticSeverity.Error;
+					diagnostic.source = error.source;
+					diagnostic.relatedInformation = [];
+					diagnostic.tags = error.tags || [];
+					diagnostic.attribute = error.attribute;
+
+					return diagnostic;
 				});
 
 				collection.set(document.uri, diagnostics);
@@ -126,7 +129,7 @@ export class DiagnosticsRegistrator {
 			diagnostic.type = error.type;
 			diagnostic.methodName = error.methodName;
 			diagnostic.fieldName = error.fieldName;
-			diagnostic.sourceClassName = error.sourceClassName;
+			diagnostic.attribute = error.sourceClassName;
 			diagnostic.source = error.source;
 			diagnostic.isController = error.isController;
 
