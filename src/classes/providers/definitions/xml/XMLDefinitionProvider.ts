@@ -11,6 +11,8 @@ export class XMLDefinitionProvider {
 		const offset = document.offsetAt(position);
 		const range = document.getWordRangeAtPosition(position);
 		const word = document.getText(range);
+
+		XMLParser.setCurrentDocument(XMLText);
 		const tag = XMLParser.getTagInPosition(XMLText, offset);
 		const attributes = XMLParser.getAttributesOfTheTag(tag);
 
@@ -22,6 +24,7 @@ export class XMLDefinitionProvider {
 				location = this._getLocationFor(responsibleClassName, attributeValue);
 			}
 		}
+		XMLParser.setCurrentDocument(undefined);
 
 		return location;
 	}

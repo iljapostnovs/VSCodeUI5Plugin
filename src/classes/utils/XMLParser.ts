@@ -22,6 +22,7 @@ interface XMLDocumentData {
 	strings: boolean[];
 	tags: Tag[];
 	prefixResults: PrefixResults;
+	isMarkedAsUndefined: boolean;
 }
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -190,8 +191,9 @@ export class XMLParser {
 
 	static getIfPositionIsInString(XMLViewText: string, position: number) {
 		let isInString = false;
-		if (this._currentDocument.document) {
-			isInString = !!this._currentDocument.strings[position];
+		const currentDocument = this._getCurrentDocument();
+		if (currentDocument) {
+			isInString = !!currentDocument.strings[position];
 		} else {
 			let quotionMarkCount = 0;
 			let secondTypeQuotionMarkCount = 0;
@@ -282,7 +284,8 @@ export class XMLParser {
 		let libraryPath;
 		let regExpBase;
 		let delta = 0;
-		const results = this._currentDocument.prefixResults[tagPrefix] || [];
+		const currentDocument = this._getCurrentDocument();
+		const results = currentDocument?.prefixResults[tagPrefix] || [];
 		const tagPositionEnd = this.getTagBeginEndPosition(XMLViewText, position).positionEnd;
 
 		if (results.length === 0) {
@@ -306,8 +309,9 @@ export class XMLParser {
 					classNameResult = null;
 				}
 			}
-
-			this._currentDocument.prefixResults[tagPrefix] = results;
+			if (currentDocument) {
+				currentDocument.prefixResults[tagPrefix] = results;
+			}
 		}
 
 		if (results.length > 0) {
@@ -441,12 +445,14 @@ export class XMLParser {
 		document: "",
 		strings: [],
 		tags: [],
-		prefixResults: {}
+		prefixResults: {},
+		isMarkedAsUndefined: true
 	}
 
 	public static getAllTags(document: string) {
-		if (this._currentDocument.document && this._currentDocument.tags.length > 0) {
-			return this._currentDocument.tags;
+		const currentDocument = this._getCurrentDocument();
+		if (currentDocument && currentDocument.tags.length > 0) {
+			return currentDocument.tags;
 		}
 
 		let i = 0;
@@ -465,24 +471,29 @@ export class XMLParser {
 			i++;
 		}
 
-		if (this._currentDocument.document) {
-			this._currentDocument.tags = tags;
+		if (currentDocument) {
+			currentDocument.tags = tags;
 		}
 
 		return tags;
 	}
 
+	private static _getCurrentDocument() {
+		let currentDocument = this._currentDocument.isMarkedAsUndefined ? undefined : this._currentDocument;
+		return currentDocument;
+	}
+
 	public static setCurrentDocument(document: string | undefined) {
 		if (!document) {
-			this._currentDocument.document = "";
-			this._currentDocument.strings = [];
-			this._currentDocument.tags = [];
-			this._currentDocument.prefixResults = {};
+			this._currentDocument.isMarkedAsUndefined = true;
 		} else {
-			this._currentDocument.document = document;
-			this._currentDocument.strings = this._getStringPositionMapping(document);
-			this._currentDocument.tags = [];
-			this._currentDocument.prefixResults = {};
+			if (document !== this._currentDocument.document) {
+				this._currentDocument.document = document;
+				this._currentDocument.strings = this._getStringPositionMapping(document);
+				this._currentDocument.tags = [];
+				this._currentDocument.prefixResults = {};
+			}
+			this._currentDocument.isMarkedAsUndefined = false;
 		}
 	}
 
