@@ -1,24 +1,37 @@
 import { SwitchToControllerCommand } from "./SwitchToControllerCommand";
 import { SwitchToViewCommand } from "./SwitchToViewCommand";
 import * as vscode from "vscode";
+import { SwitchToModelCommand } from "./SwitchToModelCommand";
 
-export class ViewControllerSwitcher {
-	static async switchBetweenViewController() {
+export class ControllerModelViewSwitcher {
+	static async switchBetweenControllerModelView() {
 
-		if (ViewControllerSwitcher.getIfViewIsOpened()) {
-			SwitchToControllerCommand.switchToController();
+		if (ControllerModelViewSwitcher._getIfViewIsOpened()) {
 
-		} else if (ViewControllerSwitcher.getIfControllerIsOpened()) {
-			SwitchToViewCommand.switchToView();
+			await SwitchToControllerCommand.switchToController();
+		} else if (ControllerModelViewSwitcher._getIfControllerIsOpened()) {
+
+			try {
+				await SwitchToModelCommand.switchToModel();
+			} catch(error) {
+				await SwitchToViewCommand.switchToView();
+			}
+		} else if (ControllerModelViewSwitcher._getIfJSClassIsOpened()) {
+
+			await SwitchToViewCommand.switchToView();
 		}
 	}
 
-	static getIfViewIsOpened() {
+	private static _getIfViewIsOpened() {
 		const fileName = vscode.window.activeTextEditor?.document.fileName;
-		return fileName && (fileName.endsWith(".view.xml") || fileName.endsWith(".fragment.xml"));
+		return fileName?.endsWith(".view.xml") || fileName?.endsWith(".fragment.xml") || false;
 	}
 
-	static getIfControllerIsOpened() {
+	private static _getIfControllerIsOpened() {
+		return vscode.window.activeTextEditor?.document.fileName.endsWith(".controller.js") || false;
+	}
+
+	private static _getIfJSClassIsOpened() {
 		return vscode.window.activeTextEditor?.document.fileName.endsWith(".js") || false;
 	}
 }

@@ -5,7 +5,7 @@ import { FallbackCommand } from "../vscommands/FallbackCommand";
 import { ExportToI18NCommand } from "../vscommands/i18ncommand/ExportToI18NCommand";
 import { InsertCustomClassNameCommand } from "../vscommands/InsertCustomClassNameCommand";
 import { SAPUIDefineCommand } from "../vscommands/SAPUIDefineCommand";
-import { ViewControllerSwitcher } from "../vscommands/switchers/ViewControllerSwitcher";
+import { ControllerModelViewSwitcher } from "../vscommands/switchers/ViewControllerSwitcher";
 import { UMLGeneratorCommand } from "../vscommands/umlgenerator/UMLGeneratorCommand";
 
 export class CommandRegistrator {
@@ -13,7 +13,7 @@ export class CommandRegistrator {
 		/* Commands */
 		if (metadataLoaded) {
 			const insertUIDefineCommand = vscode.commands.registerCommand("ui5plugin.moveDefineToFunctionParameters", SAPUIDefineCommand.insertUIDefine);
-			const switcherCommand = vscode.commands.registerCommand("ui5plugin.switchBetweenVC", ViewControllerSwitcher.switchBetweenViewController);
+			const switcherCommand = vscode.commands.registerCommand("ui5plugin.switchBetweenVC", ControllerModelViewSwitcher.switchBetweenControllerModelView);
 			const exportToI18NCommand = vscode.commands.registerCommand("ui5plugin.exportToi18n", ExportToI18NCommand.export);
 			const insertCustomClassNameCommand = vscode.commands.registerCommand("ui5plugin.insertCustomClassName", InsertCustomClassNameCommand.insertCustomClassName);
 			const generateUMLClassDiagramCommand = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagram", UMLGeneratorCommand.generateUMLForCurrentClass);

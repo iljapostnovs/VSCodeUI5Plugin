@@ -235,7 +235,7 @@ export class FileReader {
 		return controlClass;
 	}
 
-	static readAllViewsAndFragments() {
+	static async readAllViewsAndFragments() {
 		this._readAllViewsAndSaveInCache();
 		this._readAllFragmentsAndSaveInCache();
 		this._readAllJSFiles();
@@ -244,14 +244,18 @@ export class FileReader {
 	private static _readAllJSFiles() {
 		const wsFolders = workspace.workspaceFolders || [];
 		const src = this.getSrcFolderName();
+		let i = 0;
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
 			const classPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.js`);
 			classPaths.forEach(classPath => {
-				const className = FileReader.getClassNameFromPath(classPath);
-				if (className) {
-					UIClassFactory.setNewCodeForClass(className, "");
-				}
+				i++;
+				setTimeout(function(classPath: string) {
+					const className = FileReader.getClassNameFromPath(classPath);
+					if (className) {
+						UIClassFactory.getUIClass(className);
+					}
+				}.bind(this, classPath), i * 50);
 			});
 		}
 	}

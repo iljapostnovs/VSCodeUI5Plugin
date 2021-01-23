@@ -11,7 +11,7 @@ export class WrongParametersLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
-		console.time("WrongParameterLinter");
+		// console.time("WrongParameterLinter");
 		const start = new Date().getTime();
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongParametersLinter")) {
 			const className = FileReader.getClassNameFromPath(document.fileName);
@@ -93,7 +93,7 @@ export class WrongParametersLinter extends Linter {
 
 		const end = new Date().getTime();
 		WrongParametersLinter.timePerChar = (end - start) / document.getText().length;
-		console.timeEnd("WrongParameterLinter");
+		// console.timeEnd("WrongParameterLinter");
 		return errors;
 	}
 

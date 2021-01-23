@@ -52,6 +52,7 @@ export class UI5Plugin {
 	private async _registerProviders() {
 		CommandRegistrator.register(false);
 		await CompletionItemRegistrator.register();
+		FileReader.readAllViewsAndFragments();
 		FileWatcherMediator.register();
 		CommandRegistrator.register(true);
 		DefinitionProviderRegistrator.register();
@@ -61,7 +62,6 @@ export class UI5Plugin {
 		JSCodeActionRegistrator.register();
 		HoverRegistrator.register();
 		XMLFormatterRegistrator.register();
-		FileReader.readAllViewsAndFragments();
 	}
 
 	static registerFallbackCommands() {

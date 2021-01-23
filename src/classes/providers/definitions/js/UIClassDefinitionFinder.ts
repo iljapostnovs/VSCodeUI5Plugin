@@ -31,11 +31,10 @@ export class UIClassDefinitionFinder {
 					this._openClassMethodInTheBrowser(className, methodName);
 				} else {
 					location = this._getVSCodeMethodLocation(className, methodName);
-					if (!location) {
-						if (UIClass.parentClassNameDotNotation) {
-							location = this._getMethodLocation(UIClass.parentClassNameDotNotation, methodName, openInBrowserIfStandardMethod);
-						}
-					}
+				}
+			} else {
+				if (UIClass.parentClassNameDotNotation) {
+					location = this._getMethodLocation(UIClass.parentClassNameDotNotation, methodName, openInBrowserIfStandardMethod);
 				}
 			}
 		}

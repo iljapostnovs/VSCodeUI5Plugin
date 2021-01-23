@@ -32,7 +32,7 @@ export class XMLCodeActionProvider {
 			const events = UIClassFactory.getClassEvents(classOfTheTag);
 			const event = events.find(event => event.name === attributeData.attributeName);
 			if (event) {
-				const controllerName = SwitchToControllerCommand.getControllerNameOfCurrentView();
+				const controllerName = SwitchToControllerCommand.getResponsibleClassForCurrentView();
 				if (controllerName) {
 					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(controllerName, attributeData.attributeValue, `function(oEvent) {\n\t\t\t\n\t\t}`);
 					if (insertCodeAction) {

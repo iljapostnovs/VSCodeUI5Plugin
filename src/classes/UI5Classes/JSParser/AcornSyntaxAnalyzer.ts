@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
-import { FileReader, Fragment, View } from "../../utils/FileReader";
+import { FileReader } from "../../utils/FileReader";
 import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
 import { CustomClassUIMethod, CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
@@ -188,7 +188,7 @@ export class AcornSyntaxAnalyzer {
 						className = this._getClassNameOfTheComponent(primaryClassName);
 					} else if (memberName === "getModel" && callExpression.arguments) {
 						const modelName = callExpression.arguments[0]?.value || "";
-						className = this._getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
+						className = this.getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
 					}
 
 					if (!className) {
@@ -298,19 +298,22 @@ export class AcornSyntaxAnalyzer {
 			}
 		}
 
-		if (className && stack.length > 0) {
-			className = this.findClassNameForStack(stack, className, primaryClassName, false);
-		}
-
 		if (className?.includes("module:")) {
 			className = className.replace(/module:/g, "");
 			className = className.replace(/\//g, ".");
 		}
 
+		if (className && stack.length > 0) {
+			className = this.findClassNameForStack(stack, className, primaryClassName, false);
+		}
+
 		return className;
 	}
 
-	private static _getClassNameOfTheModelFromManifest(modelName: string, className: string) {
+	public static getClassNameOfTheModelFromManifest(modelName: string, className: string, clearStack = false) {
+		if (clearStack) {
+			this.declarationStack = [];
+		}
 		let modelClassName = "";
 		const manifest = FileReader.getManifestForClass(className);
 		if (manifest && manifest.content["sap.ui5"]?.models) {
@@ -525,7 +528,7 @@ export class AcornSyntaxAnalyzer {
 				if (returnStatement) {
 					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 					const newStack = strategy.getStackOfNodesForPosition(currentClassName, returnStatement.end, true);
-					className = this.findClassNameForStack(newStack, currentClassName) || typeof returnStatement.value;
+					className = this.findClassNameForStack(newStack, currentClassName) || typeof returnStatement.value === "undefined" ? "any" : typeof returnStatement.value;
 				}
 				if (propertyName === "map") {
 					className = `${className}[]`;
@@ -560,6 +563,8 @@ export class AcornSyntaxAnalyzer {
 						className = strategy.acornGetClassName(currentClassName, node.callee.object.end + 1) || "";
 						if (className.endsWith("[]")) {
 							className = className.replace("[]", "");
+						} else if (className.toLowerCase() === "array") {
+							className = "any";
 						}
 					}
 				}

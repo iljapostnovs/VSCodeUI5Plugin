@@ -20,7 +20,9 @@ export class UIClassFactory {
 	private static readonly _UIClasses: UIClassMap = {
 		Promise: new JSClass("Promise"),
 		array: new JSClass("array"),
-		string: new JSClass("string")
+		string: new JSClass("string"),
+		Array: new JSClass("Array"),
+		String: new JSClass("String")
 	};
 
 	private static _getInstance(className: string, documentText?: string) {
@@ -207,5 +209,23 @@ export class UIClassFactory {
 
 	public static getAllExistentUIClasses() {
 		return this._UIClasses;
+	}
+
+	public static getDefaultModelForClass(className: string): string | undefined {
+		let defaultModel;
+		const UIClass = this.getUIClass(className);
+		if (UIClass instanceof CustomUIClass) {
+			const defaultModelOfClass = AcornSyntaxAnalyzer.getClassNameOfTheModelFromManifest("", className, true);
+			if (defaultModelOfClass) {
+				const modelUIClass = this.getUIClass(defaultModelOfClass);
+				if (modelUIClass instanceof CustomUIClass) {
+					defaultModel = defaultModelOfClass;
+				}
+			} else if (UIClass.parentClassNameDotNotation) {
+				defaultModel = this.getDefaultModelForClass(UIClass.parentClassNameDotNotation);
+			}
+		}
+
+		return defaultModel;
 	}
 }

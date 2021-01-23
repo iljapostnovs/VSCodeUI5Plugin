@@ -13,12 +13,12 @@ export class WrongFieldMethodLinter extends Linter {
 		let errors: Error[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongFieldMethodLinter")) {
-			console.time("WrongFieldMethodLinter");
+			// console.time("WrongFieldMethodLinter");
 			const start = new Date().getTime();
 			errors = this._getLintingErrors(document);
 			const end = new Date().getTime();
 			WrongFieldMethodLinter.timePerChar = (end - start) / document.getText().length;
-			console.timeEnd("WrongFieldMethodLinter");
+			// console.timeEnd("WrongFieldMethodLinter");
 		}
 
 		return errors;
