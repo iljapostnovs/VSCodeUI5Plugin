@@ -45,18 +45,20 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 				const fields = fieldString.split(".");
 				const correspondingObject = this._getCorrespondingObject(paramStructure, fields);
 				fieldsAndMethods = {
-					className: "map",
-					fields: Object.keys(correspondingObject).map(key => {
+					className: typeof correspondingObject === "object" ? "map" : correspondingObject,
+					fields: typeof correspondingObject === "object" ? Object.keys(correspondingObject).map(key => {
 						return {
 							description: key,
 							name: key,
 							visibility: "public",
 							type: typeof paramStructure[key] === "string" ? paramStructure[key] : typeof paramStructure[key]
 						};
-					}),
+					}) : [],
 					methods: []
 				};
-				fieldsAndMethods.className = className;
+				if (typeof correspondingObject !== "object") {
+					fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(correspondingObject);
+				}
 			}
 		} else {
 			if (className.endsWith("[]")) {
