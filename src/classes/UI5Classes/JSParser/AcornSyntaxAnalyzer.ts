@@ -445,10 +445,12 @@ export class AcornSyntaxAnalyzer {
 				}
 			}
 			if (currentClassEventHandlerName) {
-				const fragmentOfTheController = FileReader.getFragmentForClass(className);
-				if (fragmentOfTheController) {
+				const fragmentsOfTheController = FileReader.getFragmentsForClass(className);
+				fragmentsOfTheController.find(fragmentOfTheController => {
 					eventHandlerData = this._getEventHandlerDataFromXMLText(fragmentOfTheController.content, currentClassEventHandlerName);
-				}
+
+					return !!eventHandlerData;
+				});
 			}
 		}
 

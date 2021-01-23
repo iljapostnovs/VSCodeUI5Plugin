@@ -44,13 +44,13 @@ export class XMLParser {
 					}
 				});
 			}
-			const fragment = FileReader.getFragmentForClass(currentClass);
-			if (fragment) {
+			const fragments = FileReader.getFragmentsForClass(currentClass);
+			fragments.forEach(fragment => {
 				const IdsFragmentResult = fragment.content.match(idRegExp) || [];
 				if (IdsFragmentResult) {
 					IdsResult.push(...IdsFragmentResult);
 				}
-			}
+			});
 		}
 
 		return IdsResult;

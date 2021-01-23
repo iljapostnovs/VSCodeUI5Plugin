@@ -187,19 +187,25 @@ export class FileReader {
 		return view;
 	}
 
-	public static getFragmentForClass(className: string) {
-		let fragment: Fragment | undefined;
+	public static getFragmentsForClass(className: string) {
+		let fragments: Fragment[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 
 		if (UIClass instanceof CustomUIClass) {
-			const fragmentKey = Object.keys(this._fragmentCache).find(key => {
+			const fragmentKeys = Object.keys(this._fragmentCache).filter(key => {
 				return UIClass.classText.indexOf(`"${this._fragmentCache[key].name}"`) > -1;
 			});
-			if (fragmentKey) {
-				fragment = this._fragmentCache[fragmentKey];
+			if (fragmentKeys) {
+				fragments = fragmentKeys.map(fragmentKey => this._fragmentCache[fragmentKey]);
 			}
 
 		}
+
+		return fragments;
+	}
+
+	public static getFirstFragmentForClass(className: string): Fragment | undefined {
+		const fragment = this.getFragmentsForClass(className)[0];
 
 		return fragment;
 	}

@@ -165,8 +165,8 @@ export class UIClassFactory {
 
 	private static _enrichMethodParamsWithEventType(CurrentUIClass: CustomUIClass) {
 		const viewOfTheController = FileReader.getViewForController(CurrentUIClass.className);
-		const fragment = FileReader.getFragmentForClass(CurrentUIClass.className);
-		if (viewOfTheController || fragment) {
+		const fragments = FileReader.getFragmentsForClass(CurrentUIClass.className);
+		if (viewOfTheController || fragments) {
 			CurrentUIClass.methods.forEach(method => {
 				const regex = new RegExp(`".?${method.name}"`);
 				if (viewOfTheController) {
@@ -191,7 +191,7 @@ export class UIClassFactory {
 					}
 				}
 				if (!method.isEventHandler) {
-					if (fragment) {
+					fragments.find(fragment => {
 						const isMethodMentionedInTheFragment = regex.test(fragment.content);
 						if (isMethodMentionedInTheFragment) {
 							method.isEventHandler = true;
@@ -199,7 +199,9 @@ export class UIClassFactory {
 								method.acornNode.params[0].jsType = "sap.ui.base.Event";
 							}
 						}
-					}
+
+						return isMethodMentionedInTheFragment;
+					})
 				}
 			});
 		}

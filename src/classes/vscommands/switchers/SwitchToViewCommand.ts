@@ -36,7 +36,7 @@ export class SwitchToViewCommand {
 	private static async _switchToViewOrFragmentFromUIClass(currentClassName: string) {
 		const view = FileReader.getViewForController(currentClassName);
 		if (!view) {
-			const fragment = FileReader.getFragmentForClass(currentClassName);
+			const fragment = FileReader.getFirstFragmentForClass(currentClassName);
 			if (fragment) {
 				await vscode.window.showTextDocument(vscode.Uri.file(fragment.fsPath));
 			}

@@ -12,7 +12,7 @@ export class TagLinter extends Linter {
 		const documentText = document.getText();
 
 		//check tags
-		console.time("Tag linter");
+		// console.time("Tag linter");
 		XMLParser.setCurrentDocument(documentText);
 
 		const tags = XMLParser.getAllTags(documentText);
@@ -21,7 +21,7 @@ export class TagLinter extends Linter {
 		});
 
 		XMLParser.setCurrentDocument(undefined);
-		console.timeEnd("Tag linter");
+		// console.timeEnd("Tag linter");
 
 		return errors;
 	}
