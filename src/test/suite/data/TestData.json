@@ -252,7 +252,13 @@
 					"text": "\"wrongMethod\" does not exist in \"sap.m.Dialog\""
 				},
 				{
+					"text": "\"wrongField\" does not exist in \"sap.m.Dialog\""
+				},
+				{
 					"text": "\"aThirdParam\" parameter is of type \"number[]\", but expected \"string[]\""
+				},
+				{
+					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
 				},
 				{
 					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
