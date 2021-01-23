@@ -17,7 +17,7 @@ export class UnusedNamespaceLinter extends Linter {
 					errors.push({
 						code: "UI5plugin",
 						message: "Unused namespace",
-						source: prefix,
+						source: "Unused namespace linter",
 						tags: [vscode.DiagnosticTag.Unnecessary],
 						range: new vscode.Range(
 							new vscode.Position(position.line - 1, position.col),

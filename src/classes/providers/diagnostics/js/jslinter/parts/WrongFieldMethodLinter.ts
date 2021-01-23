@@ -104,7 +104,8 @@ export class WrongFieldMethodLinter extends Linter {
 									errorNodes.push(nextNode);
 									errors.push({
 										message: `"${nextNodeName}" does not exist in "${className}"`,
-										code: "",
+										code: "UI5Plugin",
+										source: "Field/Method Linter",
 										range: new vscode.Range(
 											new vscode.Position(position.line - 1, position.col),
 											new vscode.Position(position.line - 1, position.col + nextNodeName.length)

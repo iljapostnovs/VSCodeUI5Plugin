@@ -54,6 +54,12 @@ export class XMLParser {
 		const tagPrefix = this.getTagPrefix(currentTagText);
 		const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix, currentPosition);
 
+		if (!libraryPath) {
+			const error = new Error(`xmlns:${tagPrefix} is not defined`);
+			error.name = "LibraryPathException";
+			throw error;
+		}
+
 		return libraryPath;
 	}
 	static getClassNameInPosition(XMLViewText: string, currentPosition: number) {
@@ -63,17 +69,19 @@ export class XMLParser {
 		const className = this.getClassNameFromTag(currentTagText);
 		if (className) {
 			const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix, currentPosition);
-			currentPositionClass = [libraryPath, className].join(".");
+			if (libraryPath) {
+				currentPositionClass = [libraryPath, className].join(".");
+			}
 		}
 
 		return currentPositionClass;
 	}
 
 	static getParentTagAtPosition(XMLText?: string, position?: number, closedTags: string[] = []) {
-		let parentTag = {
+		let parentTag: Tag = {
 			positionBegin: 0,
 			positionEnd: 0,
-			tag: ""
+			text: ""
 		};
 		if (!XMLText) {
 			XMLText = vscode.window.activeTextEditor?.document.getText();
@@ -104,7 +112,7 @@ export class XMLParser {
 				} else {
 					parentTag.positionBegin = positionBegin;
 					parentTag.positionEnd = positionEnd;
-					parentTag.tag = tag.text;
+					parentTag.text = tag.text;
 				}
 
 			}
@@ -224,6 +232,19 @@ export class XMLParser {
 		return tagPrefix;
 	}
 
+	static getFullClassNameFromTag(tag: Tag, XMLText: string) {
+		let className = this.getClassNameFromTag(tag.text);
+		const classTagPrefix = this.getTagPrefix(tag.text);
+		const libraryPath = this.getLibraryPathFromTagPrefix(XMLText, classTagPrefix, tag.positionEnd);
+		if (libraryPath) {
+			className = [libraryPath, className].join(".");
+		} else {
+			className = "";
+		}
+
+		return className;
+	}
+
 	static getClassNameFromTag(tagText: string) {
 		let className = "";
 
@@ -253,7 +274,7 @@ export class XMLParser {
 	}
 
 	static getLibraryPathFromTagPrefix(XMLViewText: string, tagPrefix: string, position: number) {
-		let libraryPath = "";
+		let libraryPath;
 		let regExpBase;
 		let delta = 0;
 		const results = [];

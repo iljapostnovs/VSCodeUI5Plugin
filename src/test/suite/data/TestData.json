@@ -12,7 +12,7 @@
 			"returnType": "sap.m.Table"
 		},{
 			"name": "_getArray",
-			"returnType": "array"
+			"returnType": "any[]"
 		},{
 			"name": "_getString",
 			"returnType": "string"

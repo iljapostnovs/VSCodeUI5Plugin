@@ -19,8 +19,9 @@ export class WrongClassNameLinter extends Linter {
 							const position = LineColumn(UIClass.classText).fromIndex(UIClass.acornReturnedClassExtendBody?.arguments[0].start);
 							if (position) {
 								errors.push({
+									source: "Class Name Linter",
 									acornNode: UIClass.acornReturnedClassExtendBody.arguments[0],
-									code: "",
+									code: "UI5Plugin",
 									message: `Invalid class name. Expected: "${className}", actual: "${classNameFromFile}"`,
 									range: new vscode.Range(
 										new vscode.Position(position.line - 1, position.col),

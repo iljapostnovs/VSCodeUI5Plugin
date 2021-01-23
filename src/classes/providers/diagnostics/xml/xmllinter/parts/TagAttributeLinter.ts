@@ -20,7 +20,7 @@ export class TagAttributeLinter extends Linter {
 		const documentText = document.getText();
 
 		//check tags
-		// console.time("Tag attribute linter");
+		console.time("Tag attribute linter");
 		XMLParser.setCurrentDocument(documentText);
 
 		const tags = XMLParser.getAllTags(documentText);
@@ -36,64 +36,32 @@ export class TagAttributeLinter extends Linter {
 					if (libraryPath) {
 						//check if tag class exists
 						const classOfTheTag = [libraryPath, className].join(".");
-						const UIClass = UIClassFactory.getUIClass(classOfTheTag);
-						if (!UIClass.classExists) {
-							const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
-							const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
-							if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
-								errors.push({
-									code: "UI5plugin",
-									message: `"${classOfTheTag}" class doesn't exist`,
-									source: tagPrefix,
-									range: new vscode.Range(
-										new vscode.Position(positionBegin.line - 1, positionBegin.col),
-										new vscode.Position(positionEnd.line - 1, positionEnd.col)
-									)
-								});
-							}
-						} else {
-							tagAttributes.forEach(tagAttribute => {
-								//check tag attributes
-								const attributeValidation = this._validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes, document);
-								if (!attributeValidation.valid) {
-									const indexOfTagBegining = tag.text.indexOf(tagAttribute);
-									const position = LineColumn(documentText).fromIndex(tag.positionBegin + indexOfTagBegining);
-									if (position && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
-										errors.push({
-											code: "UI5plugin",
-											message: attributeValidation.message || "Invalid attribute",
-											source: tagAttribute,
-											range: new vscode.Range(
-												new vscode.Position(position.line - 1, position.col),
-												new vscode.Position(position.line - 1, position.col + tagAttribute.length)
-											)
-										});
-									}
+						tagAttributes.forEach(tagAttribute => {
+							//check tag attributes
+							const attributeValidation = this._validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes, document);
+							if (!attributeValidation.valid) {
+								const indexOfTagBegining = tag.text.indexOf(tagAttribute);
+								const position = LineColumn(documentText).fromIndex(tag.positionBegin + indexOfTagBegining);
+								if (position && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
+									errors.push({
+										code: "UI5plugin",
+										message: attributeValidation.message || "Invalid attribute",
+										source: "Tag Attribute linter",
+										range: new vscode.Range(
+											new vscode.Position(position.line - 1, position.col),
+											new vscode.Position(position.line - 1, position.col + tagAttribute.length)
+										)
+									});
 								}
-							});
-						}
-					} else {
-						//check if prefix exists
-						const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
-						const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
-						if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
-							errors.push({
-								code: "UI5plugin",
-								message: `"${tagPrefix}" prefix is not defined`,
-								source: tagPrefix,
-								range: new vscode.Range(
-									new vscode.Position(positionBegin.line - 1, positionBegin.col),
-									new vscode.Position(positionEnd.line - 1, positionEnd.col)
-								)
-							});
-						}
+							}
+						});
 					}
 				}
 			}
 		});
 
 		XMLParser.setCurrentDocument(undefined);
-		// console.timeEnd("Tag attribute linter");
+		console.timeEnd("Tag attribute linter");
 
 		return errors;
 	}

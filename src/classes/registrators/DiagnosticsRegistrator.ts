@@ -127,6 +127,7 @@ export class DiagnosticsRegistrator {
 			diagnostic.methodName = error.methodName;
 			diagnostic.fieldName = error.fieldName;
 			diagnostic.sourceClassName = error.sourceClassName;
+			diagnostic.source = error.source;
 			diagnostic.isController = error.isController;
 
 			return diagnostic;

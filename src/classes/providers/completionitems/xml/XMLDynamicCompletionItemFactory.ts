@@ -152,22 +152,28 @@ export class XMLDynamicCompletionItemFactory {
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
 		if (XMLText && currentPositionOffset) {
-			const libName = XMLParser.getLibraryNameInPosition(XMLText, currentPositionOffset);
-			const currentTagText = XMLParser.getTagInPosition(XMLText, currentPositionOffset).text;
-			const isTagEmpty = !currentTagText[1].match(/[a-zA-Z]/);
-			if (isTagEmpty) {
-				const { positionBegin: currentTagPositionBegin } = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset - 1);
-				completionItems = this._getParentTagCompletionItems(currentTagPositionBegin - 1);
-				completionItems = this._convertToFileSpecificCompletionItems(completionItems, XMLText);
-			} else if (libName) {
-				let tagPrefix = XMLParser.getTagPrefix(currentTagText);
-				tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
-				const isThisClassFromAProject = !!FileReader.getManifestForClass(libName + ".");
-				if (!isThisClassFromAProject) {
-					completionItems = this._getStandardCompletionItemsFilteredByLibraryName(libName);
-					completionItems = this._filterCompletionItemsByAggregationsType(completionItems);
-				} else {
-					completionItems = this._getCompletionItemsForCustomClasses(libName, tagPrefix);
+			try {
+				const libName = XMLParser.getLibraryNameInPosition(XMLText, currentPositionOffset);
+				const currentTagText = XMLParser.getTagInPosition(XMLText, currentPositionOffset).text;
+				const isTagEmpty = !currentTagText[1].match(/[a-zA-Z]/);
+				if (isTagEmpty) {
+					const { positionBegin: currentTagPositionBegin } = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset - 1);
+					completionItems = this._getParentTagCompletionItems(currentTagPositionBegin - 1);
+					completionItems = this._convertToFileSpecificCompletionItems(completionItems, XMLText);
+				} else if (libName) {
+					let tagPrefix = XMLParser.getTagPrefix(currentTagText);
+					tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
+					const isThisClassFromAProject = !!FileReader.getManifestForClass(libName + ".");
+					if (!isThisClassFromAProject) {
+						completionItems = this._getStandardCompletionItemsFilteredByLibraryName(libName);
+						completionItems = this._filterCompletionItemsByAggregationsType(completionItems);
+					} else {
+						completionItems = this._getCompletionItemsForCustomClasses(libName, tagPrefix);
+					}
+				}
+			} catch (error) {
+				if (error.name === "LibraryPathException") {
+					completionItems = [];
 				}
 			}
 		}
@@ -247,12 +253,12 @@ export class XMLDynamicCompletionItemFactory {
 
 		if (XMLText && currentPositionOffset) {
 			const parentTagInfo = XMLParser.getParentTagAtPosition(XMLText, currentPosition);
-			const parentTagName = XMLParser.getClassNameFromTag(parentTagInfo.tag);
+			const parentTagName = XMLParser.getClassNameFromTag(parentTagInfo.text);
 			const parentTagIsAClass = parentTagName[0] === parentTagName[0].toUpperCase();
 
 			if (parentTagIsAClass) {
-				const classTagPrefix = XMLParser.getTagPrefix(parentTagInfo.tag);
-				const className = XMLParser.getClassNameFromTag(parentTagInfo.tag);
+				const classTagPrefix = XMLParser.getTagPrefix(parentTagInfo.text);
+				const className = XMLParser.getClassNameFromTag(parentTagInfo.text);
 				const libraryPath = XMLParser.getLibraryPathFromTagPrefix(XMLText, classTagPrefix, parentTagInfo.positionEnd);
 				const classOfTheTag = [libraryPath, className].join(".");
 				const UIClass = UIClassFactory.getUIClass(classOfTheTag);
@@ -274,10 +280,10 @@ export class XMLDynamicCompletionItemFactory {
 			} else {
 
 				// previous tag is an aggregation
-				const aggregationName = XMLParser.getClassNameFromTag(parentTagInfo.tag);
+				const aggregationName = XMLParser.getClassNameFromTag(parentTagInfo.text);
 				const classTagInfo = XMLParser.getParentTagAtPosition(XMLText, parentTagInfo.positionBegin - 1);
-				const classTagPrefix = XMLParser.getTagPrefix(classTagInfo.tag);
-				const className = XMLParser.getClassNameFromTag(classTagInfo.tag);
+				const classTagPrefix = XMLParser.getTagPrefix(classTagInfo.text);
+				const className = XMLParser.getClassNameFromTag(classTagInfo.text);
 				const libraryPath = XMLParser.getLibraryPathFromTagPrefix(XMLText, classTagPrefix, classTagInfo.positionEnd);
 				const classOfTheTag = [libraryPath, className].join(".");
 				const UIClass = UIClassFactory.getUIClass(classOfTheTag);

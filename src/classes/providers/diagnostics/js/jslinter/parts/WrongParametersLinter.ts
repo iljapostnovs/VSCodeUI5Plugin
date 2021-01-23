@@ -41,7 +41,8 @@ export class WrongParametersLinter extends Linter {
 												if (positionStart && positionEnd) {
 													errors.push({
 														acornNode: call,
-														code: "",
+														code: "UI5Plugin",
+														source: "Parameter Linter",
 														message: `Method "${methodName}" has ${methodParams.length} (${mandatoryMethodParams.length} mandatory) param(s), but you provided ${params.length}`,
 														range: new vscode.Range(
 															new vscode.Position(positionStart.line - 1, positionStart.col - 1),
@@ -68,7 +69,8 @@ export class WrongParametersLinter extends Linter {
 															if (positionStart && positionEnd) {
 																errors.push({
 																	acornNode: param,
-																	code: "",
+																	code: "UI5Plugin",
+																	source: "Parameter Linter",
 																	message: `"${paramFromMethod.name}" parameter is of type "${classNameOfTheParam}", but expected "${paramFromMethod.type}"`,
 																	range: new vscode.Range(
 																		new vscode.Position(positionStart.line - 1, positionStart.col - 1),

@@ -20,7 +20,8 @@ export class WrongImportLinter extends Linter {
 							if (position) {
 								errors.push({
 									acornNode: UIDefine.acornNode,
-									code: "",
+									code: "UI5Plugin",
+									source: "Import path Linter",
 									message: `Class "${UIDefine.classNameDotNotation}" doesn't exist`,
 									range: new vscode.Range(
 										new vscode.Position(position.line - 1, position.col),
