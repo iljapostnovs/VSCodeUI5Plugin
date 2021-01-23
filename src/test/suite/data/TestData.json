@@ -342,9 +342,16 @@
 				}
 			]
 		},
-
 		{
 			"className": "com.test.view.fragments.SecondFragment",
+			"errors": [
+				{
+					"text": "Invalid attribute value (onUnexistantDelete)"
+				}
+			]
+		},
+		{
+			"className": "com.test.view.fragments.ThirdFragment",
 			"errors": [
 				{
 					"text": "Invalid attribute value (onUnexistantDelete)"
