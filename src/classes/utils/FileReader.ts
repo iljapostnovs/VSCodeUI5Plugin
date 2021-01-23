@@ -43,6 +43,15 @@ export class FileReader {
 				fsPath: document.fileName,
 				name: fragmentName
 			};
+
+			Object.keys(this._viewCache).forEach(key => {
+				const view = this._viewCache[key];
+				view.fragments.forEach((fragment, index) => {
+					if (fragment.name === fragmentName) {
+						view.fragments[index] = this._fragmentCache[fragmentName];
+					}
+				})
+			})
 		}
 	}
 

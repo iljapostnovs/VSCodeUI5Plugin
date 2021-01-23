@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
-import { FileReader, Fragment, View } from "../../../../../utils/FileReader";
+import { FileReader } from "../../../../../utils/FileReader";
 
 interface AttributeValidation {
 	valid: boolean;

@@ -528,7 +528,7 @@ export class AcornSyntaxAnalyzer {
 				if (returnStatement) {
 					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 					const newStack = strategy.getStackOfNodesForPosition(currentClassName, returnStatement.end, true);
-					className = this.findClassNameForStack(newStack, currentClassName) || typeof returnStatement.value === "undefined" ? "any" : typeof returnStatement.value;
+					className = this.findClassNameForStack(newStack, currentClassName) || (typeof returnStatement.value === "undefined" ? "any" : typeof returnStatement.value);
 				}
 				if (propertyName === "map") {
 					className = `${className}[]`;
@@ -942,12 +942,12 @@ export class AcornSyntaxAnalyzer {
 				const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 				className = positionBeforeCurrentStrategy.acornGetClassName(UIClass.className, node.end, false, true) || "";
 			} else if (node?.type === "ArrayExpression") {
-				className = "array";
+				className = "any[]";
 				if (node.elements && node.elements.length > 0) {
 					const firstElement = node.elements[0];
 					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 					const newStack = strategy.getStackOfNodesForPosition(UIClass.className, firstElement.end, true);
-					className = this.findClassNameForStack(newStack, UIClass.className) || typeof firstElement.value;
+					className = this.findClassNameForStack(newStack, UIClass.className) || (typeof firstElement.value === "undefined" ? "any" : typeof firstElement.value);
 					if (className) {
 						className = `${className}[]`;
 					}

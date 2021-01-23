@@ -56,7 +56,7 @@ export class WrongParametersLinter extends Linter {
 												if (paramFromMethod && (paramFromMethod.type !== "any" && paramFromMethod.type !== "void" && paramFromMethod.type)) {
 													const classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(param, UIClass);
 
-													if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
+												if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
 														const paramFromMethodTypes = paramFromMethod.type.split("|");
 														let typeMismatch = !paramFromMethodTypes.includes(classNameOfTheParam);
 														if (typeMismatch) {
@@ -103,6 +103,10 @@ export class WrongParametersLinter extends Linter {
 
 		expectedClass = this._swapClassNames(expectedClass);
 		actualClass = this._swapClassNames(actualClass);
+		if (expectedClass.endsWith("[]") && actualClass.endsWith("[]")) {
+			expectedClass = expectedClass.replace("[]", "");
+			actualClass = actualClass.replace("[]", "");
+		}
 
 		if (this._checkIfClassesAreEqual(expectedClass, actualClass, "map", "object")) {
 			classesDiffers = false;
@@ -131,8 +135,8 @@ export class WrongParametersLinter extends Linter {
 	}
 
 	private _swapClassNames(className: string) {
-		if (className.endsWith("[]")) {
-			className = "array";
+		if (className.endsWith("array")) {
+			className = "any[]";
 		}
 		if (className.includes("__map__") || className.includes("__mapparam__")) {
 			className = "map";
