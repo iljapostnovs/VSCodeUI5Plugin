@@ -58,7 +58,7 @@ export class TagLinter extends Linter {
 
 			if (!isAggregation) {
 				const UIClass = UIClassFactory.getUIClass(tagClass);
-				if (!UIClass.classExists) {
+				if (!UIClass.classExists && !this._isClassException(tagClass)) {
 					const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
 					const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
 					if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
@@ -114,5 +114,11 @@ export class TagLinter extends Linter {
 		}
 
 		return aggregation;
+	}
+
+	private _isClassException(className: string) {
+		const exceptions = ["sap.ui.core.FragmentDefinition"];
+
+		return exceptions.includes(className);
 	}
 }

@@ -6,6 +6,9 @@ import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
 import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { FileReader } from "../../classes/utils/FileReader";
+import { JSLinter } from "../../classes/providers/diagnostics/js/jslinter/JSLinter";
+import { XMLLinter } from "../../classes/providers/diagnostics/xml/xmllinter/XMLLinter";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -66,6 +69,63 @@ suite("Extension Test Suite", () => {
 			const classNameAtPosition = positionBeforeCurrentStrategy.acornGetClassName(data.className, position);
 			assert.strictEqual(data.type, classNameAtPosition, `"${data.className}" position ${position} method "${data.methodName}" type is "${classNameAtPosition}" but expected "${data.type}"`);
 		});
+	});
+
+	test("JS Linter working properly", async () => {
+		const testData = data.JSLinter;
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const errors = JSLinter.getLintingErrors(document);
+				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
+
+				data.errors.forEach(dataError => {
+					const errorInDocument = errors.find(error => error.message === dataError.text);
+					assert.ok(!!errorInDocument, `"${data.className}" class should have ${dataError.text} error, but it doesn't`);
+				});
+			}
+
+		}
+	});
+
+	test("XML View Linter working properly", async () => {
+		const testData = data.XMLLinter;
+
+		for (const data of testData) {
+			const filePath = FileReader.convertClassNameToFSPath(data.className, false, false, true);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const errors = XMLLinter.getLintingErrors(document);
+				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
+
+				data.errors.forEach(dataError => {
+					const errorInDocument = errors.find(error => error.message === dataError.text);
+					assert.ok(!!errorInDocument, `"${data.className}" class should have ${dataError.text} error, but it doesn't`);
+				});
+			}
+
+		}
+	});
+
+	test("XML Fragment Linter working properly", async () => {
+		const testData = data.FragmentLinter;
+
+		for (const data of testData) {
+			const filePath = FileReader.convertClassNameToFSPath(data.className, false, true);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const errors = XMLLinter.getLintingErrors(document);
+				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
+
+				data.errors.forEach(dataError => {
+					const errorInDocument = errors.find(error => error.message === dataError.text);
+					assert.ok(!!errorInDocument, `"${data.className}" class should have ${dataError.text} error, but it doesn't`);
+				});
+			}
+
+		}
 	});
 });
 

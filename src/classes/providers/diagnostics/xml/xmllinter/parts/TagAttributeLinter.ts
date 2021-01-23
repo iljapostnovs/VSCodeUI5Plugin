@@ -71,7 +71,7 @@ export class TagAttributeLinter extends Linter {
 		};
 
 		const UIClass = UIClassFactory.getUIClass(className);
-		const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
+		const { attributeName, attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 
 		const isExclusion = attributeName.startsWith("xmlns") || this._isAttributeAlwaysValid(className, attributeName);
 		const isAttributeNameDuplicated = this._getIfAttributeNameIsDuplicated(attribute, attributes);
@@ -84,11 +84,11 @@ export class TagAttributeLinter extends Linter {
 		} else if (!attributeValidation.valid) {
 			let message = "";
 			if (isAttributeNameDuplicated) {
-				message = "Duplicated attribute";
+				message = `Duplicated attribute ${attributeName}`;
 			} else if (!attributeNameValid) {
-				message = "Invalid attribute name";
+				message = `Invalid attribute name (${attributeName})`;
 			} else if (!attributeValueValid) {
-				message = "Invalid attribute value";
+				message = `Invalid attribute value (${attributeValue})`;
 			}
 			attributeValidation.message = message;
 		}
