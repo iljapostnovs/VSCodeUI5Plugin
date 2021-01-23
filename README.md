@@ -44,6 +44,13 @@ Definitions for custom methods are provided.<br/>
 ![Definition](/images/Definition.gif)
 
 ----------
+## XML Event Handler Definitions
+Definitions for event handlers are provided.<br/>
+> Hotkey: Ctrl + Left Click<br/>
+
+![Definition](/images/XMLDefinition.gif)
+
+----------
 ## Code Lens
 Code Lens for Internalization Texts is provided<br/>
 ![DynamicCompletionItems](/images/XMLResourceModel.gif)
@@ -51,6 +58,10 @@ Code Lens for Internalization Texts is provided<br/>
 ----------
 ## XML Diagnostics
 XML Diagnostics is provided<br/>
+There are two linters available:<br/>
+* Attribute linter, which checks for property existence, value, prefix existence, event handler existence, class existence<br/>
+* Unused namespace linter<br/>
+
 > Related preference entries: *ui5.plugin.xmlDiagnostics*<br/>
 
 ![DynamicCompletionItems](/images/XMLDiagnostics.gif)
@@ -58,6 +69,19 @@ XML Diagnostics is provided<br/>
 ----------
 ## JS Diagnostics
 JS Diagnostics is provided<br/>
+There are four linters available:<br/>
+* Wrong field/method usage linter<br/>
+* Wrong custom class name linter<br/>
+* Wrong import path linter<br/>
+* Wrong parameter usage in the methods linter, which checks for parameter quantity and data type<br/>
+	> Use jsdoc to make your parameters optional, e.g.
+	```javascript
+	/**
+	 *@param {string} [sOptionalString] - optional string param
+	 *@param {string} sMandatoryString - mandatory string param
+	 */
+	```
+
 > Related preference entries:<br/>
 > *ui5.plugin.jsDiagnostics*<br/>
 > *ui5.plugin.useWrongFieldMethodLinter*<br/>
@@ -74,6 +98,7 @@ Code Actions for creating event handlers in controllers from xml views are provi
 > Hotkey: Alt + Enter<br/>
 
 ![CodeActionsProvider](/images/CodeActionsProvider.gif)
+![CreateMethodCodeActionsProvider](/images/CreateMethodCodeActionsProvider.gif)
 
 ----------
 ## JS and XML Hover Provider

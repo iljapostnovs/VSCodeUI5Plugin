@@ -1,7 +1,11 @@
-## 0.11.13 (17-01-2021)
+## 0.12.0 (23-01-2021)
 * Bugfixes
 * Code Actions for adding methods in custom class if they doesn't exist added
 * Support for relative path import in SAP UI Define added
+* JS Code lens for event handlers added
+* Switch view controller now works for fragments and classes with first file where the fragment name was used
+* XML Definition provider for event handlers added
+* New preference entries added
 
 ## 0.11.12 (14-01-2021)
 * Bugfixes
