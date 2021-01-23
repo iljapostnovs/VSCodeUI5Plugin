@@ -8,22 +8,20 @@ export class SwitchToViewCommand {
 		try {
 			const currentClassName = this._getCurrentClassName();
 			if (currentClassName) {
-				const isController = UIClassFactory.isClassAChildOfClassB(currentClassName, "sap.ui.core.mvc.Controller");
-				if (isController) {
-					await this._switchToViewOrFragmentFromUIClass(currentClassName);
-				} else {
-					const isModel = UIClassFactory.isClassAChildOfClassB(currentClassName, "sap.ui.model.Model");
-					if (isModel) {
-						const allUIClasses = UIClassFactory.getAllExistentUIClasses();
-						const controllers = Object.keys(allUIClasses)
-						.filter(key => allUIClasses[key] instanceof CustomUIClass)
-						.map(key => <CustomUIClass>allUIClasses[key])
-						.filter(UIClass => FileReader.getClassPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
-						const controllerOfThisModel = controllers.find(controller => UIClassFactory.getDefaultModelForClass(controller.className) === currentClassName);
-						if (controllerOfThisModel) {
-							await this._switchToViewOrFragmentFromUIClass(controllerOfThisModel.className);
-						}
+
+				const isModel = UIClassFactory.isClassAChildOfClassB(currentClassName, "sap.ui.model.Model");
+				if (isModel) {
+					const allUIClasses = UIClassFactory.getAllExistentUIClasses();
+					const controllers = Object.keys(allUIClasses)
+					.filter(key => allUIClasses[key] instanceof CustomUIClass)
+					.map(key => <CustomUIClass>allUIClasses[key])
+					.filter(UIClass => FileReader.getClassPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
+					const controllerOfThisModel = controllers.find(controller => UIClassFactory.getDefaultModelForClass(controller.className) === currentClassName);
+					if (controllerOfThisModel) {
+						await this._switchToViewOrFragmentFromUIClass(controllerOfThisModel.className);
 					}
+				} else {
+					await this._switchToViewOrFragmentFromUIClass(currentClassName);
 				}
 
 			}

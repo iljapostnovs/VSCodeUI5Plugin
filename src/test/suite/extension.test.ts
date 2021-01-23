@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../classes/UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
-import { CustomClassUIMethod, CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { FileReader } from "../../classes/utils/FileReader";
 import { JSLinter } from "../../classes/providers/diagnostics/js/jslinter/JSLinter";
