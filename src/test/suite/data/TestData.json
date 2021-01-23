@@ -358,5 +358,9 @@
 				}
 			]
 		}
-	]
+	],
+	"EventHandlers": [{
+		"className": "com.test.controller.LinterTest",
+		"eventHandlers": ["_onDelete", "onFragmentButtonPress", "onSecondFragmentSelectionChange", "onThirdFragmentSelectionChange"]
+	}]
 }

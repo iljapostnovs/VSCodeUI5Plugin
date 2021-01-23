@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../classes/UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
-import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomClassUIMethod, CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { FileReader } from "../../classes/utils/FileReader";
 import { JSLinter } from "../../classes/providers/diagnostics/js/jslinter/JSLinter";
@@ -124,6 +124,21 @@ suite("Extension Test Suite", () => {
 					assert.ok(!!errorInDocument, `"${data.className}" class should have ${dataError.text} error, but it doesn't`);
 				});
 			}
+
+		}
+	});
+
+	test("All event handlers are found", async () => {
+		const testData = data.EventHandlers;
+
+		for (const data of testData) {
+			const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
+			data.eventHandlers.forEach(eventHandlerName => {
+				const eventHandlerMethod: any = fieldsAndMethods.methods.find((method: any)=> {
+					return method.name === eventHandlerName;
+				});
+				assert.ok(!!eventHandlerMethod.isEventHandler, `"${data.className}" class should have "${eventHandlerName}" method recognized as event handler, but it doesn't`);
+			});
 
 		}
 	});
