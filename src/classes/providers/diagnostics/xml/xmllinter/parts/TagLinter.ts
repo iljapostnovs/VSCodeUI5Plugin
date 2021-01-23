@@ -3,13 +3,8 @@ import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
-import { FileReader } from "../../../../../utils/FileReader";
 import { UIAggregation } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 
-interface TagValidation {
-	valid: boolean;
-	message?: string;
-}
 
 export class TagLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
@@ -17,7 +12,6 @@ export class TagLinter extends Linter {
 		const documentText = document.getText();
 
 		//check tags
-		console.time("Tag linter");
 		XMLParser.setCurrentDocument(documentText);
 
 		const tags = XMLParser.getAllTags(documentText);
@@ -26,7 +20,6 @@ export class TagLinter extends Linter {
 		});
 
 		XMLParser.setCurrentDocument(undefined);
-		console.timeEnd("Tag linter");
 
 		return errors;
 	}
@@ -34,7 +27,6 @@ export class TagLinter extends Linter {
 	private _getClassNameErrors(tag: Tag, document: vscode.TextDocument) {
 		const documentText = document.getText();
 		const errors: Error[] = [];
-
 		const tagClass = XMLParser.getFullClassNameFromTag(tag, documentText);
 		if (!tagClass) {
 			const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);

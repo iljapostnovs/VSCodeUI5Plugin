@@ -14,9 +14,14 @@ export enum PositionType {
 	InBodyOfTheClass = "6"
 }
 
+interface PrefixResults {
+	[key: string] : any[]
+}
 interface XMLDocumentData {
 	document: string;
 	strings: boolean[];
+	tags: Tag[];
+	prefixResults: PrefixResults;
 }
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -277,28 +282,32 @@ export class XMLParser {
 		let libraryPath;
 		let regExpBase;
 		let delta = 0;
-		const results = [];
+		const results = this._currentDocument.prefixResults[tagPrefix] || [];
 		const tagPositionEnd = this.getTagBeginEndPosition(XMLViewText, position).positionEnd;
 
-		if (!tagPrefix) {
-			regExpBase = `(?<=xmlns\\s?=\\s?").*?(?=")`;
-		} else {
-			regExpBase = `(?<=xmlns(:${tagPrefix})\\s?=\\s?").*?(?=")`;
-		}
-		const rClassName = new RegExp(regExpBase, "g");
-
-		let classNameResult = rClassName.exec(XMLViewText);
-
-		while (classNameResult) {
-			results.push({
-				result: classNameResult[0],
-				position: classNameResult.index
-			});
-
-			classNameResult = rClassName.exec(XMLViewText);
-			if (results.find(result => result.position === classNameResult?.index)) {
-				classNameResult = null;
+		if (results.length === 0) {
+			if (!tagPrefix) {
+				regExpBase = `(?<=xmlns\\s?=\\s?").*?(?=")`;
+			} else {
+				regExpBase = `(?<=xmlns(:${tagPrefix})\\s?=\\s?").*?(?=")`;
 			}
+			const rClassName = new RegExp(regExpBase, "g");
+
+			let classNameResult = rClassName.exec(XMLViewText);
+
+			while (classNameResult) {
+				results.push({
+					result: classNameResult[0],
+					position: classNameResult.index
+				});
+
+				classNameResult = rClassName.exec(XMLViewText);
+				if (results.find(result => result.position === classNameResult?.index)) {
+					classNameResult = null;
+				}
+			}
+
+			this._currentDocument.prefixResults[tagPrefix] = results;
 		}
 
 		if (results.length > 0) {
@@ -430,13 +439,14 @@ export class XMLParser {
 
 	private static _currentDocument: XMLDocumentData = {
 		document: "",
-		strings: []
+		strings: [],
+		tags: [],
+		prefixResults: {}
 	}
 
 	public static getAllTags(document: string) {
-		const documentShouldBeSet = !this._currentDocument.document;
-		if (documentShouldBeSet) {
-			this.setCurrentDocument(document);
+		if (this._currentDocument.document && this._currentDocument.tags.length > 0) {
+			return this._currentDocument.tags;
 		}
 
 		let i = 0;
@@ -455,8 +465,8 @@ export class XMLParser {
 			i++;
 		}
 
-		if (documentShouldBeSet) {
-			this.setCurrentDocument(undefined);
+		if (this._currentDocument.document) {
+			this._currentDocument.tags = tags;
 		}
 
 		return tags;
@@ -466,9 +476,13 @@ export class XMLParser {
 		if (!document) {
 			this._currentDocument.document = "";
 			this._currentDocument.strings = [];
+			this._currentDocument.tags = [];
+			this._currentDocument.prefixResults = {};
 		} else {
-			this._currentDocument.strings = this._getStringPositionMapping(document);
 			this._currentDocument.document = document;
+			this._currentDocument.strings = this._getStringPositionMapping(document);
+			this._currentDocument.tags = [];
+			this._currentDocument.prefixResults = {};
 		}
 	}
 
