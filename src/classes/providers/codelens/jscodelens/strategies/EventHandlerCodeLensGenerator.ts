@@ -72,7 +72,7 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 						arguments: [classUri, {
 							selection: new vscode.Range(
 								positionInViewStart.line - 1, positionInViewStart.col - 1,
-								positionInViewEnd.line - 1, positionInViewEnd.col,
+								positionInViewEnd.line - 1, positionInViewEnd.col - 1,
 							)
 						}]
 					});
