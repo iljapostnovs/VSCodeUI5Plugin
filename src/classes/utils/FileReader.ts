@@ -168,6 +168,13 @@ export class FileReader {
 		const documentText = this.getViewText(controllerClassName);
 		if (documentText) {
 			className = this._getClassOfControlIdFromView(documentText, controlId);
+			if (!className) {
+				const view = this.getViewForController(controllerClassName);
+				view?.fragments.find(fragment => {
+					className = this._getClassOfControlIdFromView(fragment.content, controlId);
+					return !!className;
+				});
+			}
 		}
 
 		return className;

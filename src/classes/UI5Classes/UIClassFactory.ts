@@ -164,6 +164,11 @@ export class UIClassFactory {
 	}
 
 	private static _enrichMethodParamsWithEventType(CurrentUIClass: CustomUIClass) {
+		this._enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass);
+		this._enrichMethodParamsWithEventTypeFromAttachEvents(CurrentUIClass);
+	}
+
+	private static _enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass: CustomUIClass) {
 		const viewOfTheController = FileReader.getViewForController(CurrentUIClass.className);
 		const fragments = FileReader.getFragmentsForClass(CurrentUIClass.className);
 		if (viewOfTheController || fragments) {
@@ -205,8 +210,18 @@ export class UIClassFactory {
 				}
 			});
 		}
+	}
 
-
+	private static _enrichMethodParamsWithEventTypeFromAttachEvents(UIClass: CustomUIClass) {
+		UIClass.methods.forEach(method => {
+			const eventData = AcornSyntaxAnalyzer.getEventHandlerDataFromJSClass(UIClass.className, method.name);
+			if (eventData) {
+				method.isEventHandler = true;
+				if (method?.acornNode?.params && method?.acornNode?.params[0]) {
+					method.acornNode.params[0].jsType = "sap.ui.base.Event";
+				}
+			}
+		});
 	}
 
 	public static getAllExistentUIClasses() {

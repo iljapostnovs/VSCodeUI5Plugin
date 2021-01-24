@@ -451,7 +451,75 @@ export class AcornSyntaxAnalyzer {
 
 					return !!eventHandlerData;
 				});
+
+				if (!eventHandlerData) {
+					eventHandlerData = this.getEventHandlerDataFromJSClass(className, currentClassEventHandlerName);
+				}
 			}
+		}
+
+		return eventHandlerData;
+	}
+
+	static getEventHandlerDataFromJSClass(className: string, eventHandlerName: string): {className: string, eventName: string, node: any} | undefined {
+		let eventHandlerData;
+		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+		const eventHandler = UIClass.methods.find(method => method.name === eventHandlerName);
+		if (eventHandler) {
+			let eventHandlerNode: any = null;
+			UIClass.methods.find(method => {
+				if (method.acornNode) {
+					const callExpressions = AcornSyntaxAnalyzer.expandAllContent(method.acornNode).filter((node: any) => node.type === "CallExpression");
+					callExpressions.find((callExpression: any) => {
+						if (
+							callExpression.arguments &&
+							callExpression.arguments.length > 0 &&
+							callExpression.callee?.property
+						) {
+							const attachMethodName = callExpression.callee.property.name;
+							const eventMethodNameCapital = attachMethodName.replace("attach", "");
+							let eventName = `${eventMethodNameCapital[0].toLowerCase()}${eventMethodNameCapital.substring(1, eventMethodNameCapital.length)}`;
+							let firstArgument, secondArgument;
+
+							if (eventName === "event") {
+								eventName = callExpression.arguments[0].value;
+								firstArgument = callExpression.arguments[1];
+								secondArgument = callExpression.arguments[2];
+							} else {
+								firstArgument = callExpression.arguments[0];
+								secondArgument = callExpression.arguments[1];
+							}
+							if (firstArgument?.type === "MemberExpression" && firstArgument?.object?.type === "ThisExpression") {
+								eventHandlerNode = firstArgument;
+							} else if (secondArgument?.type === "MemberExpression" && secondArgument?.object?.type === "ThisExpression") {
+								eventHandlerNode = secondArgument;
+							}
+
+							if (eventHandlerNode && eventHandlerNode.property?.name === eventHandler.name) {
+								const className = strategy.acornGetClassName(UIClass.className, callExpression.callee.property.start, true);
+								if (className) {
+									const events = UIClassFactory.getClassEvents(className);
+									if (events.find(event => event.name === eventName)) {
+										eventHandlerData = {
+											className: className,
+											eventName: eventName,
+											node: eventHandlerNode
+										};
+									}
+
+								} else {
+									eventHandlerNode = null;
+								}
+							} else {
+								eventHandlerNode = null;
+							}
+						}
+						return !!eventHandlerNode;
+					});
+				}
+				return !!eventHandlerNode;
+			});
 		}
 
 		return eventHandlerData;

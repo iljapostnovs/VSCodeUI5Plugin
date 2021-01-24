@@ -5,6 +5,7 @@ import { FileReader, Fragment, View } from "../../../../utils/FileReader";
 import { XMLParser } from "../../../../utils/XMLParser";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 import LineColumn = require("line-column");
+import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 
 interface EventHandlerData {
 	name: string;
@@ -30,23 +31,26 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 			const XMLView = FileReader.getViewForController(className);
 			const fragments = FileReader.getFragmentsForClass(className);
 			if (XMLView) {
-				codeLenses.push(...this._getCodeLensesForXMLText(XMLView, eventHandlers, document));
+				codeLenses.push(...this._getCodeLensesForEventsFromXMLText(XMLView, eventHandlers, document));
 
 				XMLView.fragments.forEach(fragment => {
-					codeLenses.push(...this._getCodeLensesForXMLText(fragment, eventHandlers, document));
+					codeLenses.push(...this._getCodeLensesForEventsFromXMLText(fragment, eventHandlers, document));
 				});
 
 			}
 			fragments.forEach(fragment => {
-				codeLenses.push(...this._getCodeLensesForXMLText(fragment, eventHandlers, document));
+				codeLenses.push(...this._getCodeLensesForEventsFromXMLText(fragment, eventHandlers, document));
 			});
+
+			codeLenses.push(...this._getCodeLensesForEventsFromJSClass(eventHandlers, document));
 		}
 
 		return codeLenses;
 	}
 
-	private _getCodeLensesForXMLText(XMLText: View | Fragment, eventHandlers: CustomClassUIMethod[], document: vscode.TextDocument) {
+	private _getCodeLensesForEventsFromXMLText(XMLText: View | Fragment, eventHandlers: CustomClassUIMethod[], document: vscode.TextDocument) {
 		const codeLenses: vscode.CodeLens[] = [];
+		const solvedEventHandlers: CustomClassUIMethod[] = [];
 		XMLParser.setCurrentDocument(XMLText.content);
 		eventHandlers.forEach(eventHandler => {
 			const eventHandlerXMLData = this._getEventHandlerData(XMLText.content, eventHandler.name);
@@ -73,8 +77,12 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 						}]
 					});
 					codeLenses.push(codeLens);
+					solvedEventHandlers.push(eventHandler);
 				}
 			}
+		});
+		solvedEventHandlers.forEach(solvedEventHandler => {
+			eventHandlers.splice(eventHandlers.indexOf(solvedEventHandler), 1);
 		});
 
 		return codeLenses;
@@ -114,5 +122,48 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		}
 
 		return eventHandlerData;
+	}
+
+	private _getCodeLensesForEventsFromJSClass(eventHandlers: CustomClassUIMethod[], document: vscode.TextDocument) {
+		const solvedEventHandlers: CustomClassUIMethod[] = [];
+		const codeLenses: vscode.CodeLens[] = [];
+		const className = FileReader.getClassNameFromPath(document.fileName);
+		if (className) {
+			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+			eventHandlers.forEach(eventHandler => {
+				const eventData = AcornSyntaxAnalyzer.getEventHandlerDataFromJSClass(className, eventHandler.name);
+				if (eventData && eventHandler.position) {
+					const positionBegin = document.positionAt(eventHandler.position);
+					const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
+					const range = new vscode.Range(positionBegin, positionEnd);
+					const positionInViewStart = LineColumn(UIClass.classText).fromIndex(eventData.node.start);
+					const positionInViewEnd = LineColumn(UIClass.classText).fromIndex(eventData.node.end);
+
+					if (positionInViewStart && positionInViewEnd) {
+						const classUri = document.uri;
+						const description = `Event handler of "${eventData.className}~${eventData.eventName}"`;
+						const codeLens = new vscode.CodeLens(range, {
+							tooltip: description,
+							title: description,
+							command: "vscode.open",
+							arguments: [classUri, {
+								selection: new vscode.Range(
+									positionInViewStart.line - 1, positionInViewStart.col - 1,
+									positionInViewEnd.line - 1, positionInViewEnd.col - 1,
+								)
+							}]
+						});
+						codeLenses.push(codeLens);
+						solvedEventHandlers.push(eventHandler);
+					}
+				}
+			});
+		}
+
+		solvedEventHandlers.forEach(solvedEventHandler => {
+			eventHandlers.splice(eventHandlers.indexOf(solvedEventHandler), 1);
+		});
+
+		return codeLenses;
 	}
 }
