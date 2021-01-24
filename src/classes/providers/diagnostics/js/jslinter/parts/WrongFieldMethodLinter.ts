@@ -145,7 +145,7 @@ export class WrongFieldMethodLinter extends Linter {
 	}
 
 	private _checkIfMethodNameIsException(className = "", memberName = "") {
-		const methodExceptions = ["byId", "prototype"];
+		const methodExceptions = ["byId", "prototype", "call", "apply", "bind"];
 		let isException = methodExceptions.includes(memberName);
 		const classExceptions = [{
 			className: "sap.ui.model.Binding",
@@ -164,6 +164,9 @@ export class WrongFieldMethodLinter extends Linter {
 			memberName: "*"
 		}, {
 			className: "sap.ui.core.Control",
+			memberName: "*"
+		}, {
+			className: "sap.ui.xmlfragment",
 			memberName: "*"
 		}];
 
