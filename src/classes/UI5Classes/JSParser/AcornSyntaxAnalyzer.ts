@@ -7,6 +7,7 @@ import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/Fi
 import { FieldPropertyMethodGetterStrategy } from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
 import { InnerPropertiesStrategy } from "./strategies/InnerPropertiesStrategy";
 import { XMLParser } from "../../utils/XMLParser";
+import { SAPNodeDAO } from "../../librarydata/SAPNodeDAO";
 export class AcornSyntaxAnalyzer {
 	static getFieldsAndMethodsOfTheCurrentVariable() {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
@@ -689,6 +690,15 @@ export class AcornSyntaxAnalyzer {
 
 			usedNodeCount++;
 			node = stack[usedNodeCount];
+
+			const UIClass = UIClassFactory.getUIClass(classNameParts.join("."));
+			if (UIClass.classExists) {
+				const nodeDAO = new SAPNodeDAO();
+				const node = nodeDAO.findNode(UIClass.className);
+				if (node?.getMetadata()?.getRawMetadata()?.kind !== "namespace") {
+					break;
+				}
+			}
 		}
 
 		if (stack[usedNodeCount]?.type === "CallExpression") {
