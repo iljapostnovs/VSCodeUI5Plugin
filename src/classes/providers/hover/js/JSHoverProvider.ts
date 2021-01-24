@@ -33,13 +33,13 @@ export class JSHoverProvider {
 					text += URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass);
 					const markdownString = this._getMarkdownFromText(text);
 					hover = new vscode.Hover(markdownString);
-				} else {
-					const text = this._getTextIfItIsFieldOrMethodOfClass(currentClassName, word);
-					if (text) {
-						const markdownString = this._getMarkdownFromText(text);
-						hover = new vscode.Hover(markdownString);
-					}
-				}
+				}// else {
+					// const text = this._getTextIfItIsFieldOrMethodOfClass(currentClassName, word);
+					// if (text) {
+					// 	const markdownString = this._getMarkdownFromText(text);
+					// 	hover = new vscode.Hover(markdownString);
+					// }
+				//}
 			}
 		}
 		return hover;
