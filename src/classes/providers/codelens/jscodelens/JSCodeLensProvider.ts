@@ -6,23 +6,21 @@ import { OverridenMethodCodeLensGenerator } from "./strategies/OverridenMethodCo
 export class JSCodeLensProvider {
 	static getCodeLenses(document: vscode.TextDocument) : Promise<vscode.CodeLens[]> {
 		return new Promise(resolve => {
-			let codeLenses: vscode.CodeLens[] = [];
-
-			const aStrategies = [
-				InternalizationTextCodeLenseGenerator,
-				OverridenMethodCodeLensGenerator,
-				EventHandlerCodeLensGenerator
-			];
 			setTimeout(() => {
+				let codeLenses: vscode.CodeLens[] = [];
+
+				const aStrategies = [
+					InternalizationTextCodeLenseGenerator,
+					OverridenMethodCodeLensGenerator,
+					EventHandlerCodeLensGenerator
+				];
 				aStrategies.forEach(Strategy => {
 					const strategy = new Strategy();
 					codeLenses = strategy.getCodeLenses(document).concat(codeLenses);
 				});
 
 				resolve(codeLenses);
-			}, 200);
+			}, 0);
 		});
 	}
-
-
 }
