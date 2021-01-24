@@ -182,7 +182,7 @@ export class FileReader {
 
 	public static getViewForController(controllerName: string) {
 		if (!this._viewCache[controllerName]) {
-			this._readAllViewsAndSaveInCache();
+			// this._readAllViewsAndSaveInCache();
 		}
 
 		let view: View | undefined;
@@ -257,27 +257,40 @@ export class FileReader {
 		return controlClass;
 	}
 
-	static async readAllViewsAndFragments() {
-		this._readAllViewsAndSaveInCache();
-		this._readAllFragmentsAndSaveInCache();
-		this._readAllJSFiles();
+	static readAllViewsAndFragments() {
+		return vscode.window.withProgress({
+			location: vscode.ProgressLocation.Window,
+			title: "Parsing project files",
+			cancellable: false
+		}, async progress => {
+			progress.report({
+				message: "Reading Fragments",
+				increment: 33
+			});
+			this._readAllFragmentsAndSaveInCache();
+			progress.report({
+				message: "Reading Views"
+			});
+			this._readAllViewsAndSaveInCache();
+			progress.report({
+				message: "Reading JS Files",
+				increment: 33
+			});
+			this._readAllJSFiles();
+		});
 	}
 
 	private static _readAllJSFiles() {
 		const wsFolders = workspace.workspaceFolders || [];
 		const src = this.getSrcFolderName();
-		let i = 0;
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
 			const classPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.js`);
 			classPaths.forEach(classPath => {
-				i++;
-				setTimeout(function(classPath: string) {
-					const className = FileReader.getClassNameFromPath(classPath);
-					if (className) {
-						UIClassFactory.getUIClass(className);
-					}
-				}.bind(this, classPath), i * 50);
+				const className = FileReader.getClassNameFromPath(classPath);
+				if (className) {
+					UIClassFactory.getUIClass(className);
+				}
 			});
 		}
 	}
@@ -412,7 +425,7 @@ export class FileReader {
 
 	private static _getFragment(fragmentName: string): Fragment | undefined {
 		if (!this._fragmentCache[fragmentName]) {
-			this._readAllFragmentsAndSaveInCache();
+			// this._readAllFragmentsAndSaveInCache();
 		}
 
 		return this._fragmentCache[fragmentName];

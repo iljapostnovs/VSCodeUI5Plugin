@@ -82,7 +82,7 @@ export class JSCodeActionProvider {
 		if (selectedVariableName) {
 			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
 			if (currentClassName) {
-				UIClassFactory.setNewContentForCurrentUIClass();
+				UIClassFactory.setNewContentForCurrentUIClass(document);
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				const UIDefine = await new SAPUIDefineFactory().generateUIDefineCompletionItems();
 				const UIDefineCompletionItemsWhichContainsCurrentSelectionText = UIDefine.filter(completionItem => completionItem.label.indexOf(selectedVariableName) > -1)

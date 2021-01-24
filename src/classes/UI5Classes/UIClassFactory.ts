@@ -4,12 +4,17 @@ import { StandardUIClass } from "./UI5Parser/UIClass/StandardUIClass";
 import { JSClass } from "./UI5Parser/UIClass/JSClass";
 import { AcornSyntaxAnalyzer } from "./JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
-import { FileReader } from "../utils/FileReader";
+import { FileReader, Fragment, View } from "../utils/FileReader";
 
 export interface FieldsAndMethods {
 	className: string;
 	fields: UIField[];
 	methods: UIMethod[];
+}
+
+interface ViewsAndFragments {
+	views: View[];
+	fragments: Fragment[];
 }
 
 interface UIClassMap {
@@ -50,9 +55,9 @@ export class UIClassFactory {
 		return isExtendedBy;
 	}
 
-	public static setNewContentForCurrentUIClass() {
-		const documentText = vscode.window.activeTextEditor?.document.getText();
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+	public static setNewContentForCurrentUIClass(document: vscode.TextDocument) {
+		const documentText = document.getText();
+		const currentClassName = FileReader.getClassNameFromPath(document.getText());
 
 		if (currentClassName && documentText) {
 			this.setNewCodeForClass(currentClassName, documentText);
@@ -169,47 +174,72 @@ export class UIClassFactory {
 	}
 
 	private static _enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass: CustomUIClass) {
-		const viewOfTheController = FileReader.getViewForController(CurrentUIClass.className);
-		const fragments = FileReader.getFragmentsForClass(CurrentUIClass.className);
-		if (viewOfTheController || fragments) {
+		const viewsAndFragments = this._getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
+		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.methods.forEach(method => {
-				const regex = new RegExp(`".?${method.name}"`);
-				if (viewOfTheController) {
-					const isMethodMentionedInTheView = regex.test(viewOfTheController.content);
-					if (isMethodMentionedInTheView) {
-						method.isEventHandler = true;
-						if (method?.acornNode?.params && method?.acornNode?.params[0]) {
-							method.acornNode.params[0].jsType = "sap.ui.base.Event";
-						}
-					} else {
-						viewOfTheController.fragments.find(fragment => {
-							const isMethodMentionedInTheFragment = regex.test(fragment.content);
-							if (isMethodMentionedInTheFragment) {
-								method.isEventHandler = true;
-								if (method?.acornNode?.params && method?.acornNode?.params[0]) {
-									method.acornNode.params[0].jsType = "sap.ui.base.Event";
-								}
-							}
-
-							return isMethodMentionedInTheFragment;
-						});
-					}
-				}
 				if (!method.isEventHandler) {
-					fragments.find(fragment => {
-						const isMethodMentionedInTheFragment = regex.test(fragment.content);
-						if (isMethodMentionedInTheFragment) {
+					const regex = new RegExp(`".?${method.name}"`);
+					if (viewOfTheControl) {
+						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
+						if (isMethodMentionedInTheView) {
 							method.isEventHandler = true;
 							if (method?.acornNode?.params && method?.acornNode?.params[0]) {
 								method.acornNode.params[0].jsType = "sap.ui.base.Event";
 							}
-						}
+						} else {
+							viewOfTheControl.fragments.find(fragment => {
+								const isMethodMentionedInTheFragment = regex.test(fragment.content);
+								if (isMethodMentionedInTheFragment) {
+									method.isEventHandler = true;
+									if (method?.acornNode?.params && method?.acornNode?.params[0]) {
+										method.acornNode.params[0].jsType = "sap.ui.base.Event";
+									}
+								}
 
-						return isMethodMentionedInTheFragment;
-					})
+								return isMethodMentionedInTheFragment;
+							});
+						}
+					}
 				}
 			});
-		}
+		});
+
+		viewsAndFragments.fragments.forEach(fragment => {
+			CurrentUIClass.methods.forEach(method => {
+				if (!method.isEventHandler) {
+					const regex = new RegExp(`".?${method.name}"`);
+					const isMethodMentionedInTheFragment = regex.test(fragment.content);
+					if (isMethodMentionedInTheFragment) {
+						method.isEventHandler = true;
+						if (method?.acornNode?.params && method?.acornNode?.params[0]) {
+							method.acornNode.params[0].jsType = "sap.ui.base.Event";
+						}
+					}
+
+					return isMethodMentionedInTheFragment;
+				}
+			});
+		});
+	}
+
+	private static _getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass) {
+		const viewsAndFragments: ViewsAndFragments = {
+			views: [],
+			fragments: []
+		};
+
+		const allUIClasses = Object.keys(this.getAllExistentUIClasses()).map(key => this.getAllExistentUIClasses()[key]);
+		const customUIClasses = allUIClasses.filter(UIClass => UIClass instanceof CustomUIClass) as CustomUIClass[];
+		const childrenUIClasses = customUIClasses.filter(UIClass => this.isClassAChildOfClassB(UIClass.className, CurrentUIClass.className));
+		childrenUIClasses.forEach(childUIClass => {
+			const view = FileReader.getViewForController(childUIClass.className);
+			if (view) {
+				viewsAndFragments.views.push(view);
+			}
+			viewsAndFragments.fragments.push(...FileReader.getFragmentsForClass(CurrentUIClass.className));
+		});
+
+		return viewsAndFragments;
 	}
 
 	private static _enrichMethodParamsWithEventTypeFromAttachEvents(UIClass: CustomUIClass) {

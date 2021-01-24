@@ -479,7 +479,7 @@ export class XMLParser {
 	}
 
 	private static _getCurrentDocument() {
-		let currentDocument = this._currentDocument.isMarkedAsUndefined ? undefined : this._currentDocument;
+		const currentDocument = this._currentDocument.isMarkedAsUndefined ? undefined : this._currentDocument;
 		return currentDocument;
 	}
 

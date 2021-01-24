@@ -695,7 +695,7 @@ export class AcornSyntaxAnalyzer {
 			if (UIClass.classExists) {
 				const nodeDAO = new SAPNodeDAO();
 				const node = nodeDAO.findNode(UIClass.className);
-				if (node?.getMetadata()?.getRawMetadata()?.kind !== "namespace") {
+				if (node?.getMetadata()?.getRawMetadata()?.kind === "class") {
 					break;
 				}
 			}

@@ -24,11 +24,11 @@ export class CompletionItemFactory {
 		this._language = completionItemType;
 	}
 
-	public async createUIDefineCompletionItems() {
+	public async createUIDefineCompletionItems(document?: vscode.TextDocument) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		if (this._language === GeneratorFactory.language.js) {
-			completionItems = await this._createJSCompletionItems();
+			completionItems = await this._createJSCompletionItems(document);
 		} else if (this._language === GeneratorFactory.language.xml) {
 			if (CompletionItemFactory.XMLStandardLibCompletionItems.length === 0) {
 				completionItems = await this._createXMLCompletionItems();
@@ -60,7 +60,7 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	private async _createJSCompletionItems() {
+	private async _createJSCompletionItems(document?: vscode.TextDocument) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		if (CompletionItemFactory.JSDefineCompletionItems.length === 0) {
@@ -70,7 +70,9 @@ export class CompletionItemFactory {
 		} else {
 			completionItems = CompletionItemFactory.JSDefineCompletionItems;
 
-			UIClassFactory.setNewContentForCurrentUIClass();
+			if (document) {
+				UIClassFactory.setNewContentForCurrentUIClass(document);
+			}
 			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 			if (currentClassName) {
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
@@ -111,9 +113,9 @@ export class CompletionItemFactory {
 		return idCompletionItems.createIdCompletionItems();
 	}
 
-	public createPropertyMethodCompletionItems() {
+	public createPropertyMethodCompletionItems(document: vscode.TextDocument) {
 		const jsDynamicFactory = new JSDynamicCompletionItemsFactory();
-		UIClassFactory.setNewContentForCurrentUIClass();
+		UIClassFactory.setNewContentForCurrentUIClass(document);
 
 		return jsDynamicFactory.createUIClassCompletionItems();
 	}
