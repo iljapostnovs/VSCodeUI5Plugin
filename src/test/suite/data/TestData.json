@@ -288,6 +288,12 @@
 					"text": "\"sText\" parameter is of type \"number\", but expected \"string\""
 				},
 				{
+					"text": "\"fnFunction\" parameter is of type \"com.test.controller.LinterTest\", but expected \"function\""
+				},
+				{
+					"text": "\"fnFunction\" parameter is of type \"com.test.controller.LinterTest\", but expected \"function\""
+				},
+				{
 					"text": "\"vWhatIsThat\" parameter is of type \"any[]\", but expected \"sap.m.Dialog|sap.m.Text\""
 				}
 			]
@@ -359,8 +365,18 @@
 			]
 		}
 	],
-	"EventHandlers": [{
-		"className": "com.test.controller.LinterTest",
-		"eventHandlers": ["_onDelete", "onFragmentButtonPress", "onSecondFragmentSelectionChange", "onThirdFragmentSelectionChange"]
-	}]
+	"EventHandlers": [
+		{
+			"className": "com.test.controller.LinterTest",
+			"eventHandlers": [
+				"_onRouteMatched",
+				"_onRouteMatched2",
+				"_onRouteMatched3",
+				"_onDelete",
+				"onFragmentButtonPress",
+				"onSecondFragmentSelectionChange",
+				"onThirdFragmentSelectionChange"
+			]
+		}
+	]
 }
