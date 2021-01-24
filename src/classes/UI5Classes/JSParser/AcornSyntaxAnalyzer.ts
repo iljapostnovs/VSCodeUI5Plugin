@@ -72,8 +72,10 @@ export class AcornSyntaxAnalyzer {
 		} else if (node.type === "BinaryExpression") {
 			innerNode = node.right && this.findAcornNode([node.right], position);
 			if (!innerNode && node.left) {
-				innerNode = node.left && this.findAcornNode([node.left], position);
+				innerNode = this.findAcornNode([node.left], position);
 			}
+		} else if (node.type === "ConditionalExpression") {
+			innerNode = this._getIfStatementPart(node, position);
 		} else if (node.type === "LogicalExpression") {
 			innerNode = node.right && this.findAcornNode([node.right], position);
 
@@ -123,11 +125,13 @@ export class AcornSyntaxAnalyzer {
 		if (node.test?.start < position && node.test?.end >= position) {
 			correctPart = node.test;
 		} if (node.consequent?.start < position && node.consequent?.end >= position) {
-			correctPart = this.findAcornNode(node.consequent.body, position);
+			correctPart = this.findAcornNode(node.consequent.body || [node.consequent], position);
 		} else if (node.alternate) {
 			correctPart = this._getIfStatementPart(node.alternate, position);
 		} else if (node.start < position && node.end >= position && node.type === "BlockStatement") {
 			correctPart = this.findAcornNode(node.body, position);
+		} else if (node.start < position && node.end >= position && node.type !== "IfStatement") {
+			correctPart = node;
 		}
 
 		return correctPart;
@@ -475,7 +479,8 @@ export class AcornSyntaxAnalyzer {
 						if (
 							callExpression.arguments &&
 							callExpression.arguments.length > 0 &&
-							callExpression.callee?.property
+							callExpression.callee?.property &&
+							callExpression.callee?.property.name
 						) {
 							const attachMethodName = callExpression.callee.property.name;
 							const eventMethodNameCapital = attachMethodName.replace("attach", "");
@@ -942,11 +947,26 @@ export class AcornSyntaxAnalyzer {
 			innerNodes.push(node.argument);
 		} else if (node.type === "IfStatement") {
 			if (node.consequent) {
-				innerNodes = innerNodes.concat(node.consequent.body);
-			} else if (node.alternate) {
+				innerNodes.push(node.consequent);
+			}
+			if (node.alternate) {
 				innerNodes.push(node.alternate);
-			} else if (node.body) {
+			}
+			if (node.body) {
 				innerNodes = innerNodes.concat(node.body);
+			}
+			if (node.test) {
+				innerNodes.push(node.test);
+			}
+		} else if (node.type === "ConditionalExpression") {
+			if (node.consequent) {
+				innerNodes.push(node.consequent);
+			}
+			if (node.alternate) {
+				innerNodes.push(node.alternate);
+			}
+			if (node.test) {
+				innerNodes.push(node.test);
 			}
 		} else if (node.type === "SwitchStatement") {
 			node.cases.forEach((body: any) => {
@@ -954,11 +974,21 @@ export class AcornSyntaxAnalyzer {
 			});
 		} else if (node.type === "AssignmentExpression") {
 			innerNodes.push(node.right);
+			if (node.left) {
+				innerNodes.push(node.left);
+			}
 		} else if (node.type === "NewExpression") {
 			if (node.callee) {
 				innerNodes.push(node.callee);
 			}
 			innerNodes = innerNodes.concat(node.arguments);
+		} else if (node.type === "LogicalExpression") {
+			if (node.right) {
+				innerNodes.push(node.right);
+			}
+			if (node.left) {
+				innerNodes.push(node.left);
+			}
 		} else if (node.type === "ObjectExpression") {
 			innerNodes = node.properties.map((declaration: any) => declaration.value);
 		} else if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {

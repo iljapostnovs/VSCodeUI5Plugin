@@ -115,6 +115,11 @@
 					"default": true,
 					"description": "JS Linter: Should Wrong method parameters validator be used"
 				},
+				"ui5.plugin.useUnusedMethodLinter": {
+					"type": "boolean",
+					"default": true,
+					"description": "JS Linter: Should unused method validator be used"
+				},
 				"ui5.plugin.moveDefineToFunctionParametersOnAutocomplete": {
 					"type": "boolean",
 					"default": true,

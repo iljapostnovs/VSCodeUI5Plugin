@@ -132,6 +132,7 @@ export class DiagnosticsRegistrator {
 			diagnostic.attribute = error.sourceClassName;
 			diagnostic.source = error.source;
 			diagnostic.isController = error.isController;
+			diagnostic.tags = error.tags;
 
 			return diagnostic;
 		});
