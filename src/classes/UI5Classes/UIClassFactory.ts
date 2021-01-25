@@ -169,8 +169,10 @@ export class UIClassFactory {
 	}
 
 	private static _enrichMethodParamsWithEventType(CurrentUIClass: CustomUIClass) {
+		console.time(`Enriching types ${CurrentUIClass.className}`);
 		this._enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass);
 		this._enrichMethodParamsWithEventTypeFromAttachEvents(CurrentUIClass);
+		console.timeEnd(`Enriching types ${CurrentUIClass.className}`);
 	}
 
 	private static _enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass: CustomUIClass) {
@@ -202,7 +204,7 @@ export class UIClassFactory {
 					}
 
 					if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
-						const regex = new RegExp(`\\.?${method.name}'`);
+						const regex = new RegExp(`\\.?${method.name}("|')`);
 						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isMethodMentionedInTheView) {
 							method.mentionedInTheXMLDocument = true;
