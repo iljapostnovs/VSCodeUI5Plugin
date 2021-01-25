@@ -69,7 +69,10 @@ export class AcornSyntaxAnalyzer {
 		} else if (node.type === "SwitchStatement") {
 			innerNode = this._getSwitchStatementPart(node, position);
 		} else if (node.type === "AssignmentExpression") {
-			innerNode = node.right;
+			innerNode = this.findAcornNode([node.right], position);
+			if (!innerNode) {
+				innerNode = this.findAcornNode([node.left], position);
+			}
 		} else if (node.type === "BinaryExpression") {
 			innerNode = node.right && this.findAcornNode([node.right], position);
 			if (!innerNode && node.left) {
@@ -449,7 +452,7 @@ export class AcornSyntaxAnalyzer {
 					});
 				}
 			}
-			if (currentClassEventHandlerName) {
+			if (currentClassEventHandlerName && !eventHandlerData) {
 				const fragmentsOfTheController = FileReader.getFragmentsForClass(className);
 				fragmentsOfTheController.find(fragmentOfTheController => {
 					eventHandlerData = this._getEventHandlerDataFromXMLText(fragmentOfTheController.content, currentClassEventHandlerName);

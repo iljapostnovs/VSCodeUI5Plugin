@@ -285,7 +285,7 @@ export class FileReader {
 		const src = this.getSrcFolderName();
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const classPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.js`);
+			const classPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.js`);
 			classPaths.forEach(classPath => {
 				const className = FileReader.getClassNameFromPath(classPath);
 				if (className) {
@@ -300,7 +300,7 @@ export class FileReader {
 		const src = this.getSrcFolderName();
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.view.xml`);
+			const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.view.xml`);
 			viewPaths.forEach(viewPath => {
 				const viewContent = fs.readFileSync(viewPath, "utf8");
 				const fragments = this.getFragments(viewContent);
@@ -321,7 +321,7 @@ export class FileReader {
 		const src = this.getSrcFolderName();
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const fragmentPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.fragment.xml`);
+			const fragmentPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.fragment.xml`);
 			fragmentPaths.forEach(fragmentPath => {
 				const fragmentContent = fs.readFileSync(fragmentPath, "utf8");
 				const fragmentFSPath = fragmentPath.replace(/\//g, fileSeparator);
@@ -341,7 +341,7 @@ export class FileReader {
 		let classNames: string[] = [];
 		const src = this.getSrcFolderName();
 		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-		const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.js`);
+		const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.js`);
 		classNames = viewPaths.reduce((accumulator: string[], viewPath) => {
 			const path = this.getClassNameFromPath(viewPath);
 			if (path) {
