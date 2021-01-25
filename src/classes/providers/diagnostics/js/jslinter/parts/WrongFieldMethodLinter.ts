@@ -119,6 +119,12 @@ export class WrongFieldMethodLinter extends Linter {
 								break;
 							}
 						}
+					} else if (nodeText.endsWith("]")) {
+						droppedNodes.push(nextNode);
+						if (nextNode.property) {
+							droppedNodes.push(nextNode.property);
+						}
+						break;
 					}
 				}
 			}
