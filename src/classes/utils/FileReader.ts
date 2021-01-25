@@ -59,6 +59,10 @@ export class FileReader {
 		return this._viewCache;
 	}
 
+	static getAllViews() {
+		return Object.keys(this._viewCache).map(key => this._viewCache[key]);
+	}
+
 	public static getDocumentTextFromCustomClassName(className: string, isFragment?: boolean) {
 		let documentText;
 		const classPath = this.getClassPathFromClassName(className, isFragment);
@@ -429,6 +433,10 @@ export class FileReader {
 		}
 
 		return this._fragmentCache[fragmentName];
+	}
+
+	static getAllFragments() {
+		return Object.keys(this._fragmentCache).map(key => this._fragmentCache[key]);
 	}
 
 	private static _getFragmentNameFromTag(fragmentTag: string) {

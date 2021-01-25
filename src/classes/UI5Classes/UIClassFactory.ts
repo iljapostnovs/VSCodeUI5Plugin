@@ -246,21 +246,29 @@ export class UIClassFactory {
 	}
 
 	private static _getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass) {
+		const isController = FileReader.getClassPathFromClassName(CurrentUIClass.className)?.endsWith(".controller.js") || false;
 		const viewsAndFragments: ViewsAndFragments = {
 			views: [],
 			fragments: []
 		};
+		if (isController) {
+			const allUIClasses = Object.keys(this.getAllExistentUIClasses()).map(key => this.getAllExistentUIClasses()[key]);
+			const customUIClasses = allUIClasses.filter(UIClass => UIClass instanceof CustomUIClass) as CustomUIClass[];
+			const childrenUIClasses = customUIClasses.filter(UIClass => this.isClassAChildOfClassB(UIClass.className, CurrentUIClass.className));
+			childrenUIClasses.forEach(childUIClass => {
+				const view = FileReader.getViewForController(childUIClass.className);
+				if (view) {
+					viewsAndFragments.views.push(view);
+				}
+				viewsAndFragments.fragments.push(...FileReader.getFragmentsForClass(CurrentUIClass.className));
+			});
+		} else {
+			const fragments = FileReader.getAllFragments();
+			viewsAndFragments.fragments = fragments;
+			const views = FileReader.getAllViews();
+			viewsAndFragments.views = views;
+		}
 
-		const allUIClasses = Object.keys(this.getAllExistentUIClasses()).map(key => this.getAllExistentUIClasses()[key]);
-		const customUIClasses = allUIClasses.filter(UIClass => UIClass instanceof CustomUIClass) as CustomUIClass[];
-		const childrenUIClasses = customUIClasses.filter(UIClass => this.isClassAChildOfClassB(UIClass.className, CurrentUIClass.className));
-		childrenUIClasses.forEach(childUIClass => {
-			const view = FileReader.getViewForController(childUIClass.className);
-			if (view) {
-				viewsAndFragments.views.push(view);
-			}
-			viewsAndFragments.fragments.push(...FileReader.getFragmentsForClass(CurrentUIClass.className));
-		});
 
 		return viewsAndFragments;
 	}
