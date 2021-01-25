@@ -72,7 +72,7 @@ export class TagLinter extends Linter {
 				if (tag.text.startsWith("</")) {
 					position = tag.positionEnd;
 				}
-				const parentTag = XMLParser.getParentTagAtPosition(documentText, position);
+				const parentTag = XMLParser.getParentTagAtPosition(documentText, position - 1);
 				if (parentTag.text) {
 					const tagClass = XMLParser.getFullClassNameFromTag(parentTag, documentText);
 					if (tagClass) {
@@ -86,8 +86,8 @@ export class TagLinter extends Linter {
 									message: `"${tagName}" aggregation doesn't exist in "${tagClass}"`,
 									source: "Tag Linter",
 									range: new vscode.Range(
-										new vscode.Position(positionBegin.line - 1, positionBegin.col),
-										new vscode.Position(positionEnd.line - 1, positionEnd.col)
+										new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
+										new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
 									)
 								});
 							}
@@ -102,7 +102,7 @@ export class TagLinter extends Linter {
 
 	private _findAggregation(className: string, aggregationName: string): UIAggregation | undefined {
 		const UIClass = UIClassFactory.getUIClass(className);
-		let aggregation = UIClass.aggregations.find(aggregation => aggregation.name ===  aggregationName);
+		let aggregation = UIClass.aggregations.find(aggregation => aggregation.name === aggregationName);
 		if (!aggregation && UIClass.parentClassNameDotNotation) {
 			aggregation = this._findAggregation(UIClass.parentClassNameDotNotation, aggregationName);
 		}

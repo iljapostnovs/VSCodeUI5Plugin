@@ -15,7 +15,7 @@ export enum PositionType {
 }
 
 interface PrefixResults {
-	[key: string] : any[]
+	[key: string]: any[]
 }
 interface XMLDocumentData {
 	document: string;
@@ -97,7 +97,7 @@ export class XMLParser {
 		}
 
 		if (XMLText && position) {
-			const {positionBegin, positionEnd} = this.getTagBeginEndPosition(XMLText, position);
+			const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLText, position);
 			const tag = this.getTagInPosition(XMLText, position);
 			const croppedTag = tag.text.substring(1, tag.text.length - 1); // remove < >
 			const tagIsSelfClosed = croppedTag.endsWith("/");
@@ -464,7 +464,7 @@ export class XMLParser {
 				const indexOfTagBegining = this._getTagBeginingIndex(document, i);
 				tags.push({
 					text: document.substring(indexOfTagBegining, i + 1),
-					positionBegin: indexOfTagBegining - 1,
+					positionBegin: indexOfTagBegining,
 					positionEnd: i
 				});
 			}
@@ -522,7 +522,7 @@ export class XMLParser {
 	private static _getTagBeginingIndex(document: string, position: number) {
 		let i = position;
 
-		while(i > 0 && (document[i] !== "<" || XMLParser.getIfPositionIsInString(document, i))) {
+		while (i > 0 && (document[i] !== "<" || XMLParser.getIfPositionIsInString(document, i))) {
 			i--;
 		}
 
