@@ -60,7 +60,7 @@ export class UnusedMethodLinter extends Linter {
 			isMethodOverriden = !!sameMethod;
 		}
 
-		if (method.isEventHandler || isMethodOverriden) {
+		if (method.isEventHandler || method.mentionedInTheXMLDocument || isMethodOverriden) {
 			methodIsUsed = true;
 		} else if (!isException) {
 			const classOfTheMethod = UIClass.className;

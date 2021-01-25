@@ -29,6 +29,7 @@ export interface CustomClassUIMethod extends UIMethod {
 	acornParams?: any;
 	acornNode?: any;
 	isEventHandler: boolean;
+	mentionedInTheXMLDocument?: boolean;
 }
 export interface CustomClassUIField extends UIField {
 	customData?: LooseObject;

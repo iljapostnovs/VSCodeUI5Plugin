@@ -177,8 +177,8 @@ export class UIClassFactory {
 		const viewsAndFragments = this._getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.methods.forEach(method => {
-				if (!method.isEventHandler) {
-					const regex = new RegExp(`".?${method.name}"`);
+				if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
+					const regex = new RegExp(`"\\.?${method.name}"`);
 					if (viewOfTheControl) {
 						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isMethodMentionedInTheView) {
@@ -200,6 +200,24 @@ export class UIClassFactory {
 							});
 						}
 					}
+
+					if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
+						const regex = new RegExp(`\\.?${method.name}'`);
+						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
+						if (isMethodMentionedInTheView) {
+							method.mentionedInTheXMLDocument = true;
+
+						} else {
+							viewOfTheControl.fragments.find(fragment => {
+								const isMethodMentionedInTheFragment = regex.test(fragment.content);
+								if (isMethodMentionedInTheFragment) {
+									method.mentionedInTheXMLDocument = true;
+								}
+
+								return isMethodMentionedInTheFragment;
+							});
+						}
+					}
 				}
 			});
 		});
@@ -215,8 +233,13 @@ export class UIClassFactory {
 							method.acornNode.params[0].jsType = "sap.ui.base.Event";
 						}
 					}
-
-					return isMethodMentionedInTheFragment;
+				}
+				if (!method.isEventHandler) {
+					const regex = new RegExp(`\\.?${method.name}'`);
+					const isMethodMentionedInTheFragment = regex.test(fragment.content);
+					if (isMethodMentionedInTheFragment) {
+						method.mentionedInTheXMLDocument = true;
+					}
 				}
 			});
 		});
