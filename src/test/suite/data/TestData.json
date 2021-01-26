@@ -267,7 +267,7 @@
 					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
 				},
 				{
-					"text": "Method \"allowTextSelection\" has 1 (1 mandatory) param(s), but you provided 2"
+					"text": "Method \"allowTextSelection\" has 1 (0 mandatory) param(s), but you provided 2"
 				},
 				{
 					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
