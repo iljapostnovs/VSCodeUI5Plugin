@@ -295,6 +295,9 @@
 				},
 				{
 					"text": "\"vWhatIsThat\" parameter is of type \"any[]\", but expected \"sap.m.Dialog|sap.m.Text\""
+				},
+				{
+					"text": "No references found for \"unusedMethod\" class member"
 				}
 			]
 		}
