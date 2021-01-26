@@ -584,7 +584,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 		if (variable.length >= 2) {
 			const map: LooseObject = {
-				$: "dom",
+				$: "Element",
 				o: "object",
 				a: "array",
 				i: "int",
@@ -687,7 +687,7 @@ export class CustomUIClass extends AbstractUIClass {
 							type: aggregation.type,
 							description: aggregation.type,
 							isOptional: false
-						},{
+						}, {
 							name: `v${aggregationWithFirstBigLetter}`,
 							type: "number",
 							description: "index the item should be inserted at",
@@ -719,8 +719,9 @@ export class CustomUIClass extends AbstractUIClass {
 						returnType: `${aggregation.type}[]`,
 						params: []
 					},
-					{ name:
-						`destroy${aggregationWithFirstBigLetter}s`,
+					{
+						name:
+							`destroy${aggregationWithFirstBigLetter}s`,
 						returnType: this.className,
 						params: []
 					},
@@ -955,15 +956,15 @@ export class CustomUIClass extends AbstractUIClass {
 		if (interfaces) {
 			const interfaceNames: string[] = interfaces.value?.elements?.map((element: any) => element.name) || [];
 			const interfaceNamesDotNotation =
-			interfaceNames
-			.filter((interfaceName) => {
-				return !!this.UIDefine.find(UIDefine => UIDefine.className === interfaceName);
+				interfaceNames
+					.filter((interfaceName) => {
+						return !!this.UIDefine.find(UIDefine => UIDefine.className === interfaceName);
 
-			})
-			.map((interfaceName) => {
-				return this.UIDefine.find(UIDefine => UIDefine.className === interfaceName)?.classNameDotNotation || "";
+					})
+					.map((interfaceName) => {
+						return this.UIDefine.find(UIDefine => UIDefine.className === interfaceName)?.classNameDotNotation || "";
 
-			});
+					});
 			this.interfaces.push(...interfaceNamesDotNotation);
 		}
 	}
