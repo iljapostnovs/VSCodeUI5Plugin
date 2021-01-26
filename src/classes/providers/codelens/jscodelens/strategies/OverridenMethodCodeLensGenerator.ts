@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { CustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../../utils/FileReader";
-import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
+import {CustomClassUIMethod, CustomUIClass} from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {UIClassFactory} from "../../../../UI5Classes/UIClassFactory";
+import {FileReader} from "../../../../utils/FileReader";
+import {CodeLensGenerator} from "./abstraction/CodeLensGenerator";
 
 export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {
 	getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {

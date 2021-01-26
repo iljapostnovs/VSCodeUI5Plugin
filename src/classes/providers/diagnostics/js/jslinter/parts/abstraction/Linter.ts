@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { CustomDiagnosticType } from "../../../../../../registrators/DiagnosticsRegistrator";
+import {CustomDiagnosticType} from "../../../../../../registrators/DiagnosticsRegistrator";
 
 export interface Error {
 	code: string;
@@ -15,5 +15,5 @@ export interface Error {
 	tags?: vscode.DiagnosticTag[];
 }
 export abstract class Linter {
-	abstract getErrors(document: vscode.TextDocument) : Error[];
+	abstract getErrors(document: vscode.TextDocument): Error[];
 }

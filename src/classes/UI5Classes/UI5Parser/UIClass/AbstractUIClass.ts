@@ -1,4 +1,4 @@
-import { SAPIcons } from "../../SAPIcons";
+import {SAPIcons} from "../../SAPIcons";
 
 export interface UIMethodParam {
 	name: string;
@@ -82,11 +82,11 @@ export abstract class AbstractUIClass {
 
 		if (type === "boolean") {
 			typeValues = [
-				{ text: "true", description: "boolean true" },
-				{ text: "false", description: "boolean false" }
+				{text: "true", description: "boolean true"},
+				{text: "false", description: "boolean false"}
 			];
 		} else if (type === "sap.ui.core.URI") {
-			typeValues = SAPIcons.icons.map(icon => ({ text: icon, description: icon }));
+			typeValues = SAPIcons.icons.map(icon => ({text: icon, description: icon}));
 		} else if (type === "string") {
 			// const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
 			// if (currentComponentName) {

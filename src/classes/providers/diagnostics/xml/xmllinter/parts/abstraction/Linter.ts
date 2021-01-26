@@ -16,5 +16,5 @@ export interface Tag {
 }
 
 export abstract class Linter {
-	abstract getErrors(document: vscode.TextDocument) : Error[];
+	abstract getErrors(document: vscode.TextDocument): Error[];
 }

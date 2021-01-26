@@ -1,13 +1,13 @@
-import { FileReader } from "../../../utils/FileReader";
+import {FileReader} from "../../../utils/FileReader";
 import * as vscode from "vscode";
 import * as glob from "glob";
 import * as fs from "fs";
 import * as path from "path";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import {UIClassFactory} from "../../../UI5Classes/UIClassFactory";
 const fileSeparator = path.sep;
 
 export abstract class FileRenameHandler {
-	abstract handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri) : void;
+	abstract handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri): void;
 
 	protected replaceCurrentClassNameWithNewOne(oldUri: vscode.Uri, newUri: vscode.Uri) {
 		const oldClassNameDotNotation = FileReader.getClassNameFromPath(oldUri.fsPath);
@@ -35,8 +35,8 @@ export abstract class FileRenameHandler {
 			workspaceFilePaths.forEach(filePath => {
 				let fileContent = fs.readFileSync(filePath, "utf8");
 				if (fileContent.indexOf(textToReplaceFromDotNotation) > -1 || fileContent.indexOf(textToReplaceFromSlashNotation) > -1) {
-					fileContent = fileContent.replace(new RegExp('\\"' + textToReplaceFromDotNotation.replace(/\./g, "\\.") + '\\"', "g"), '"' + textToReplaceToDotNotation + '"');
-					fileContent = fileContent.replace(new RegExp('\\"' + textToReplaceFromSlashNotation.replace(/\./g, "\\.") + '\\"', "g"), '"' + textToReplaceToSlashNotation + '"');
+					fileContent = fileContent.replace(new RegExp("\\\"" + textToReplaceFromDotNotation.replace(/\./g, "\\.") + "\\\"", "g"), "\"" + textToReplaceToDotNotation + "\"");
+					fileContent = fileContent.replace(new RegExp("\\\"" + textToReplaceFromSlashNotation.replace(/\./g, "\\.") + "\\\"", "g"), "\"" + textToReplaceToSlashNotation + "\"");
 					//TODO: Think how to do it async. Sync currently needed for folder rename, where mass file change is fired and
 					//there might be multiple changes for the same file
 					fs.writeFileSync(filePath, fileContent);

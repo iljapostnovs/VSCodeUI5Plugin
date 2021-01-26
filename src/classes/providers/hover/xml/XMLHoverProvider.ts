@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { URLBuilder } from "../../../utils/URLBuilder";
-import { XMLParser } from "../../../utils/XMLParser";
+import {UIClassFactory} from "../../../UI5Classes/UIClassFactory";
+import {URLBuilder} from "../../../utils/URLBuilder";
+import {XMLParser} from "../../../utils/XMLParser";
 
 export class XMLHoverProvider {
 	static getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
@@ -20,13 +20,13 @@ export class XMLHoverProvider {
 			const classOfTheTag = XMLParser.getClassNameInPosition(documentText, offset);
 			const attributes = XMLParser.getAttributesOfTheTag(tag);
 			const attribute = attributes?.find(attribute => {
-				const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
+				const {attributeName} = XMLParser.getAttributeNameAndValue(attribute);
 				return attributeName === word;
 			});
 
 			if (attribute) {
 				//highlighted text is attribute
-				const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
+				const {attributeName} = XMLParser.getAttributeNameAndValue(attribute);
 
 				const text = this._getTextIfItIsFieldOrMethodOfClass(classOfTheTag, attributeName);
 

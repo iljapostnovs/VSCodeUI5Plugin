@@ -1,11 +1,11 @@
-import { Linter } from "./parts/abstraction/Linter";
-import { Error } from "./parts/abstraction/Linter";
-import { WrongFieldMethodLinter } from "./parts/WrongFieldMethodLinter";
+import {Linter} from "./parts/abstraction/Linter";
+import {Error} from "./parts/abstraction/Linter";
+import {WrongFieldMethodLinter} from "./parts/WrongFieldMethodLinter";
 import * as vscode from "vscode";
-import { WrongClassNameLinter } from "./parts/WrongClassNameLinter";
-import { WrongImportLinter } from "./parts/WrongImportLinter";
-import { WrongParametersLinter } from "./parts/WrongParametersLinter";
-import { UnusedMethodLinter } from "./parts/UnusedMethodLinter";
+import {WrongClassNameLinter} from "./parts/WrongClassNameLinter";
+import {WrongImportLinter} from "./parts/WrongImportLinter";
+import {WrongParametersLinter} from "./parts/WrongParametersLinter";
+import {UnusedMethodLinter} from "./parts/UnusedMethodLinter";
 
 export class JSLinter {
 	static getLintingErrors(document: vscode.TextDocument): Error[] {

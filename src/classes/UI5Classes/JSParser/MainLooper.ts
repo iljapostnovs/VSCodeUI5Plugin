@@ -9,7 +9,7 @@ export class MainLooper {
 		let index = 0;
 		const commentIndexRanges = this._getCommentRanges(text);
 
-		while((!charOpened || (charBeginQuantity - charEndQuantity !== 0)) && index < text.length) {
+		while((!charOpened || charBeginQuantity - charEndQuantity !== 0) && index < text.length) {
 			if (!this._checkIfIndexIsInCommentRange(commentIndexRanges, index)) {
 				if (text[index] === charBegin) {
 					if (!charOpened) {
@@ -73,7 +73,7 @@ export class MainLooper {
 			}
 		}
 
-		return (iOpenedCommendCount - iClosedCommentCount) === 0;
+		return iOpenedCommendCount - iClosedCommentCount === 0;
 	}
 
 	private static _checkIfIndexIsInCommentRange(commentRanges: CommentRanges[], index: number) {

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { FileReader } from "../utils/FileReader";
-import { UI5Plugin } from "../../UI5Plugin";
+import {FileReader} from "../utils/FileReader";
+import {UI5Plugin} from "../../UI5Plugin";
 
 export class ClearCacheCommand {
 	static subscribeToPropertyChange() {
@@ -34,11 +34,11 @@ export class ClearCacheCommand {
 	public static reloadWindow() {
 		const action = "Reload";
 		vscode.window
-		.showInformationMessage( `Reload window in order for change in extension ui5.plugin configuration to take effect.`, action)
-		.then(selectedAction => {
-			if (selectedAction === action) {
-				vscode.commands.executeCommand("workbench.action.reloadWindow");
-			}
-		});
+			.showInformationMessage( "Reload window in order for change in extension ui5.plugin configuration to take effect.", action)
+			.then(selectedAction => {
+				if (selectedAction === action) {
+					vscode.commands.executeCommand("workbench.action.reloadWindow");
+				}
+			});
 	}
 }

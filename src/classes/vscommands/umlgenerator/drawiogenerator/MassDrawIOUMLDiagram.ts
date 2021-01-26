@@ -1,13 +1,13 @@
-import { Header } from "./drawiouml/Header";
-import { Footer } from "./drawiouml/Footer";
-import { FileReader } from "../../../utils/FileReader";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { DrawIOUMLDiagram } from "./DrawIOUMLDiagram";
+import {Header} from "./drawiouml/Header";
+import {Footer} from "./drawiouml/Footer";
+import {FileReader} from "../../../utils/FileReader";
+import {UIClassFactory} from "../../../UI5Classes/UIClassFactory";
+import {DrawIOUMLDiagram} from "./DrawIOUMLDiagram";
 import * as vscode from "vscode";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { DependencyLine } from "./drawiouml/lines/DependencyLine";
-import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
-import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
+import {CustomUIClass} from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {DependencyLine} from "./drawiouml/lines/DependencyLine";
+import {IUMLGenerator} from "./drawiouml/interfaces/IUMLGenerator";
+import {ImplementationLine} from "./drawiouml/lines/ImplementationLIne";
 
 interface UsedClassMap {
 	[key: string]: {

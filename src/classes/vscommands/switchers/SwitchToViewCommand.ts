@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../utils/FileReader";
+import {CustomUIClass} from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {UIClassFactory} from "../../UI5Classes/UIClassFactory";
+import {FileReader} from "../../utils/FileReader";
 
 export class SwitchToViewCommand {
 	static async switchToView() {
@@ -13,9 +13,9 @@ export class SwitchToViewCommand {
 				if (isModel) {
 					const allUIClasses = UIClassFactory.getAllExistentUIClasses();
 					const controllers = Object.keys(allUIClasses)
-					.filter(key => allUIClasses[key] instanceof CustomUIClass)
-					.map(key => <CustomUIClass>allUIClasses[key])
-					.filter(UIClass => FileReader.getClassPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
+						.filter(key => allUIClasses[key] instanceof CustomUIClass)
+						.map(key => <CustomUIClass>allUIClasses[key])
+						.filter(UIClass => FileReader.getClassPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
 					const controllerOfThisModel = controllers.find(controller => UIClassFactory.getDefaultModelForClass(controller.className) === currentClassName);
 					if (controllerOfThisModel) {
 						await this._switchToViewOrFragmentFromUIClass(controllerOfThisModel.className);

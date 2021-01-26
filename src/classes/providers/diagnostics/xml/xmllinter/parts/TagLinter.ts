@@ -1,9 +1,9 @@
-import { Error, Linter, Tag } from "./abstraction/Linter";
+import {Error, Linter, Tag} from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
-import { XMLParser } from "../../../../../utils/XMLParser";
-import { UIAggregation } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
+import {XMLParser} from "../../../../../utils/XMLParser";
+import {UIAggregation} from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 
 
 export class TagLinter extends Linter {

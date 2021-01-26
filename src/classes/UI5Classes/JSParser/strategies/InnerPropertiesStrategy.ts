@@ -1,10 +1,10 @@
-import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
-import { CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
-import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
-import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
-import { FieldPropertyMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
+import {SAPNodeDAO} from "../../../librarydata/SAPNodeDAO";
+import {CustomUIClass} from "../../UI5Parser/UIClass/CustomUIClass";
+import {FieldsAndMethods, UIClassFactory} from "../../UIClassFactory";
+import {AcornSyntaxAnalyzer} from "../AcornSyntaxAnalyzer";
+import {FieldPropertyMethodGetterStrategy} from "./abstraction/FieldPropertyMethodGetterStrategy";
 import * as vscode from "vscode";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./FieldsAndMethodForPositionBeforeCurrentStrategy";
+import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "./FieldsAndMethodForPositionBeforeCurrentStrategy";
 
 export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 	getFieldsAndMethods() {

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
-import { XMLParser } from "./XMLParser";
+import {Tag} from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import {XMLParser} from "./XMLParser";
 
 export class XMLFormatter {
 	static formatDocument(document: vscode.TextDocument) {
@@ -93,7 +93,7 @@ export class XMLFormatter {
 
 	private static _getTagName(tag: string) {
 		let i = 1; //first char is "<", that's why we start with second char
-		while ((!tag[i].match(/(\s|>|\n)/)) && i < tag.length) {
+		while (!tag[i].match(/(\s|>|\n)/) && i < tag.length) {
 			i++;
 		}
 		tag = tag.substring(1, i);

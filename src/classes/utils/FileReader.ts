@@ -1,10 +1,10 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as glob from "glob";
-import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {AcornSyntaxAnalyzer} from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
-import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {UIClassFactory} from "../UI5Classes/UIClassFactory";
+import {CustomUIClass} from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
@@ -246,7 +246,7 @@ export class FileReader {
 			const classTagParts = classTag.split(":");
 			let className;
 			if (classTagParts.length === 1) {
-				regExpBase = `(?<=xmlns=").*?(?=")`;
+				regExpBase = "(?<=xmlns=\").*?(?=\")";
 				className = classTagParts[0];
 			} else {
 				regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*?(?=")`;

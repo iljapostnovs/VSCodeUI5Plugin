@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
-import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
-import { FileReader } from "../../utils/FileReader";
-import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
-import { CustomClassUIMethod, CustomUIClass } from "../UI5Parser/UIClass/CustomUIClass";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { FieldPropertyMethodGetterStrategy } from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
-import { InnerPropertiesStrategy } from "./strategies/InnerPropertiesStrategy";
-import { XMLParser } from "../../utils/XMLParser";
-import { SAPNodeDAO } from "../../librarydata/SAPNodeDAO";
+import {UIClassFactory, FieldsAndMethods} from "../UIClassFactory";
+import {FileReader} from "../../utils/FileReader";
+import {UIField, UIMethod} from "../UI5Parser/UIClass/AbstractUIClass";
+import {CustomClassUIMethod, CustomUIClass} from "../UI5Parser/UIClass/CustomUIClass";
+import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import {FieldPropertyMethodGetterStrategy} from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
+import {InnerPropertiesStrategy} from "./strategies/InnerPropertiesStrategy";
+import {XMLParser} from "../../utils/XMLParser";
+import {SAPNodeDAO} from "../../librarydata/SAPNodeDAO";
 export class AcornSyntaxAnalyzer {
 	static getFieldsAndMethodsOfTheCurrentVariable() {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
@@ -543,12 +543,12 @@ export class AcornSyntaxAnalyzer {
 			const tagText = XMLParser.getTagInPosition(viewOfTheController, position).text;
 			const attributes = XMLParser.getAttributesOfTheTag(tagText);
 			const attribute = attributes?.find(attribute => {
-				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+				const {attributeValue} = XMLParser.getAttributeNameAndValue(attribute);
 
 				return attributeValue === currentClassEventHandlerName;
 			});
 			if (attribute) {
-				const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
+				const {attributeName} = XMLParser.getAttributeNameAndValue(attribute);
 				const eventName = attributeName;
 				if (tagText && eventName) {
 					const tagPrefix = XMLParser.getTagPrefix(tagText);

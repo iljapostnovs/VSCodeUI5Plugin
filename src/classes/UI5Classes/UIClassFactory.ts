@@ -1,10 +1,10 @@
-import { AbstractUIClass, UIEvent, UIField, UIMethod } from "./UI5Parser/UIClass/AbstractUIClass";
-import { CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
-import { StandardUIClass } from "./UI5Parser/UIClass/StandardUIClass";
-import { JSClass } from "./UI5Parser/UIClass/JSClass";
-import { AcornSyntaxAnalyzer } from "./JSParser/AcornSyntaxAnalyzer";
+import {AbstractUIClass, UIEvent, UIField, UIMethod} from "./UI5Parser/UIClass/AbstractUIClass";
+import {CustomUIClass} from "./UI5Parser/UIClass/CustomUIClass";
+import {StandardUIClass} from "./UI5Parser/UIClass/StandardUIClass";
+import {JSClass} from "./UI5Parser/UIClass/JSClass";
+import {AcornSyntaxAnalyzer} from "./JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
-import { FileReader, Fragment, View } from "../utils/FileReader";
+import {FileReader, Fragment, View} from "../utils/FileReader";
 
 export interface FieldsAndMethods {
 	className: string;

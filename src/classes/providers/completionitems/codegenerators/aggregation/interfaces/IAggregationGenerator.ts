@@ -1,5 +1,5 @@
-import { IAggregationGetterStrategy } from "./IAggregationGetterStrategy";
+import {IAggregationGetterStrategy} from "./IAggregationGetterStrategy";
 
 export interface IAggregationGenerator {
-	generateAggregations(strategy: IAggregationGetterStrategy, classPrefix: string) : string;
+	generateAggregations(strategy: IAggregationGetterStrategy, classPrefix: string): string;
 }

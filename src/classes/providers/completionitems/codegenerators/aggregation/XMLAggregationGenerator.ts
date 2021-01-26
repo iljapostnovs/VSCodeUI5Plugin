@@ -1,5 +1,5 @@
-import { IAggregationGenerator } from "./interfaces/IAggregationGenerator";
-import { IAggregationGetterStrategy } from "./interfaces/IAggregationGetterStrategy";
+import {IAggregationGenerator} from "./interfaces/IAggregationGenerator";
+import {IAggregationGetterStrategy} from "./interfaces/IAggregationGetterStrategy";
 import * as vscode from "vscode";
 
 export class XMLAggregationGenerator implements IAggregationGenerator {

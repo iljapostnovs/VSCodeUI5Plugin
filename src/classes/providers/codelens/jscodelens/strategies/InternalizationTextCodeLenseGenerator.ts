@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { ResourceModelData } from "../../../../UI5Classes/ResourceModelData";
-import { FileReader } from "../../../../utils/FileReader";
-import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
+import {ResourceModelData} from "../../../../UI5Classes/ResourceModelData";
+import {FileReader} from "../../../../utils/FileReader";
+import {CodeLensGenerator} from "./abstraction/CodeLensGenerator";
 
 export class InternalizationTextCodeLenseGenerator extends CodeLensGenerator {
 	getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {

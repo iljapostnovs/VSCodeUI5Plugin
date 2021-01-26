@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { ResourceModelData } from "../../../UI5Classes/ResourceModelData";
-import { FileReader } from "../../../utils/FileReader";
+import {ResourceModelData} from "../../../UI5Classes/ResourceModelData";
+import {FileReader} from "../../../utils/FileReader";
 
 function escapeRegExp(string: string) {
-	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export class XMLCodeLensProvider {
@@ -55,12 +55,12 @@ export class XMLCodeLensProvider {
 
 				const uri = vscode.Uri.file(resourceModelFSPath);
 				vscode.window.showTextDocument(uri)
-				.then(textEditor => {
-					const positionBegin = textEditor.document.positionAt(result.index);
-					const positionEnd = textEditor.document.positionAt(result.index + result[0].length);
-					textEditor.selection = new vscode.Selection(positionBegin, positionEnd);
-					textEditor.revealRange(new vscode.Range(positionBegin, positionEnd), vscode.TextEditorRevealType.InCenter);
-				});
+					.then(textEditor => {
+						const positionBegin = textEditor.document.positionAt(result.index);
+						const positionEnd = textEditor.document.positionAt(result.index + result[0].length);
+						textEditor.selection = new vscode.Selection(positionBegin, positionEnd);
+						textEditor.revealRange(new vscode.Range(positionBegin, positionEnd), vscode.TextEditorRevealType.InCenter);
+					});
 			}
 		}
 	}

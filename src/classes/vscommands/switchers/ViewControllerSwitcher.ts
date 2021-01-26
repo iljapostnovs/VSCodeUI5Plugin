@@ -1,7 +1,7 @@
-import { SwitchToControllerCommand } from "./SwitchToControllerCommand";
-import { SwitchToViewCommand } from "./SwitchToViewCommand";
+import {SwitchToControllerCommand} from "./SwitchToControllerCommand";
+import {SwitchToViewCommand} from "./SwitchToViewCommand";
 import * as vscode from "vscode";
-import { SwitchToModelCommand } from "./SwitchToModelCommand";
+import {SwitchToModelCommand} from "./SwitchToModelCommand";
 
 export class ControllerModelViewSwitcher {
 	static async switchBetweenControllerModelView() {

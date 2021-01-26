@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../UI5Plugin";
-import { JSCodeActionProvider } from "../providers/codeactions/js/JSCodeActionProvider";
-import { XMLCodeActionProvider } from "../providers/codeactions/xml/XMLCodeActionProvider";
+import {UI5Plugin} from "../../UI5Plugin";
+import {JSCodeActionProvider} from "../providers/codeactions/js/JSCodeActionProvider";
+import {XMLCodeActionProvider} from "../providers/codeactions/xml/XMLCodeActionProvider";
 
 export class JSCodeActionRegistrator {
 	static register() {

@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../UI5Plugin";
-import { JSLinter } from "../providers/diagnostics/js/jslinter/JSLinter";
-import { WrongFieldMethodLinter } from "../providers/diagnostics/js/jslinter/parts/WrongFieldMethodLinter";
-import { WrongParametersLinter } from "../providers/diagnostics/js/jslinter/parts/WrongParametersLinter";
-import { XMLLinter } from "../providers/diagnostics/xml/xmllinter/XMLLinter";
+import {UI5Plugin} from "../../UI5Plugin";
+import {JSLinter} from "../providers/diagnostics/js/jslinter/JSLinter";
+import {WrongFieldMethodLinter} from "../providers/diagnostics/js/jslinter/parts/WrongFieldMethodLinter";
+import {WrongParametersLinter} from "../providers/diagnostics/js/jslinter/parts/WrongParametersLinter";
+import {XMLLinter} from "../providers/diagnostics/xml/xmllinter/XMLLinter";
 
 let xmlDiagnosticCollection: vscode.DiagnosticCollection;
 let jsDiagnosticCollection: vscode.DiagnosticCollection;
@@ -108,12 +108,12 @@ export class DiagnosticsRegistrator {
 		if (isJSDiagnosticsEnabled && !this._timeoutId) {
 			const timeout = this._getTimeoutForDocument(document);
 			// if (timeout) {
-				this._timeoutId = setTimeout(() => {
-					this._updateDiagnosticCollection(document, collection);
-					this._timeoutId = null;
-				}, timeout);
+			this._timeoutId = setTimeout(() => {
+				this._updateDiagnosticCollection(document, collection);
+				this._timeoutId = null;
+			}, timeout);
 			// } else {
-				// this._updateDiagnosticCollection(document, collection);
+			// this._updateDiagnosticCollection(document, collection);
 			// }
 		}
 	}

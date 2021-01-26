@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
-import { CompletionItemFactory } from "../providers/completionitems/CompletionItemFactory";
-import { FileWatcherMediator } from "../utils/FileWatcherMediator";
-import { UI5Plugin } from "../../UI5Plugin";
-import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
-import { UIDefineCompletionItemGenerator } from "../providers/completionitems/codegenerators/define/UIDefineCompletionItemGenerator";
-import { GeneratorFactory } from "../providers/completionitems/codegenerators/GeneratorFactory";
+import {CompletionItemFactory} from "../providers/completionitems/CompletionItemFactory";
+import {FileWatcherMediator} from "../utils/FileWatcherMediator";
+import {UI5Plugin} from "../../UI5Plugin";
+import {CustomCompletionItem} from "../providers/completionitems/CustomCompletionItem";
+import {UIDefineCompletionItemGenerator} from "../providers/completionitems/codegenerators/define/UIDefineCompletionItemGenerator";
+import {GeneratorFactory} from "../providers/completionitems/codegenerators/GeneratorFactory";
 
 export class CompletionItemRegistrator {
 	static async register() {

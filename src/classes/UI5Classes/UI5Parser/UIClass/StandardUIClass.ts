@@ -1,8 +1,8 @@
-import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssociation, TypeValue, UIField } from "./AbstractUIClass";
-import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
-import { MainLooper } from "../../JSParser/MainLooper";
-import { URLBuilder } from "../../../utils/URLBuilder";
-import { FileReader } from "../../../utils/FileReader";
+import {AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssociation, TypeValue, UIField} from "./AbstractUIClass";
+import {SAPNodeDAO} from "../../../librarydata/SAPNodeDAO";
+import {MainLooper} from "../../JSParser/MainLooper";
+import {URLBuilder} from "../../../utils/URLBuilder";
+import {FileReader} from "../../../utils/FileReader";
 
 const aXmlnsData = [{
 	tag: "xmlns",
@@ -165,7 +165,7 @@ export class StandardUIClass extends AbstractUIClass {
 
 	private _fillFields() {
 		const SAPNode = this._findSAPNode(this.className);
-		this.fields = SAPNode?.getFields().reduce((accumulator: UIField[], { name, type, description, visibility }: any) => {
+		this.fields = SAPNode?.getFields().reduce((accumulator: UIField[], {name, type, description, visibility}: any) => {
 			const additionalDescription = this._generateAdditionalDescriptionFrom(type);
 			accumulator.push({
 				name: name,
@@ -184,7 +184,7 @@ export class StandardUIClass extends AbstractUIClass {
 	private _getStandardClassProperties(className: string) {
 		let classProperties: UIProperty[] = [];
 		const SAPNode = this._findSAPNode(className);
-		classProperties = SAPNode?.getProperties().reduce((accumulator: UIProperty[], { name, type, description, visibility }: any) => {
+		classProperties = SAPNode?.getProperties().reduce((accumulator: UIProperty[], {name, type, description, visibility}: any) => {
 			const additionalDescription = this._generateAdditionalDescriptionFrom(type);
 			accumulator.push({
 				name: name,

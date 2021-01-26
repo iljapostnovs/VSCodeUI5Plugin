@@ -1,9 +1,9 @@
-import { Error, Linter } from "./abstraction/Linter";
+import {Error, Linter} from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
-import { XMLParser } from "../../../../../utils/XMLParser";
-import { FileReader } from "../../../../../utils/FileReader";
+import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
+import {XMLParser} from "../../../../../utils/XMLParser";
+import {FileReader} from "../../../../../utils/FileReader";
 
 interface AttributeValidation {
 	valid: boolean;
@@ -72,7 +72,7 @@ export class TagAttributeLinter extends Linter {
 		};
 
 		const UIClass = UIClassFactory.getUIClass(className);
-		const { attributeName, attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+		const {attributeName, attributeValue} = XMLParser.getAttributeNameAndValue(attribute);
 
 		const isExclusion = attributeName.startsWith("xmlns") || this._isAttributeAlwaysValid(className, attributeName);
 		const isAttributeNameDuplicated = this._getIfAttributeNameIsDuplicated(attribute, attributes);
@@ -107,7 +107,7 @@ export class TagAttributeLinter extends Linter {
 
 	private _validateAttributeValue(className: string, attribute: string, document: vscode.TextDocument) {
 		let isValueValid = true;
-		const { attributeName, attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+		const {attributeName, attributeValue} = XMLParser.getAttributeNameAndValue(attribute);
 		const UIClass = UIClassFactory.getUIClass(className);
 		const property = UIClass.properties.find(property => property.name === attributeName);
 		const event = UIClass.events.find(event => event.name === attributeName);

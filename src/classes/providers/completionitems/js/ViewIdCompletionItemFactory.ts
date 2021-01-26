@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { InnerPropertiesStrategy } from "../../../UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
-import { XMLParser } from "../../../utils/XMLParser";
-import { CustomCompletionItem } from "../CustomCompletionItem";
+import {AcornSyntaxAnalyzer} from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {InnerPropertiesStrategy} from "../../../UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
+import {XMLParser} from "../../../utils/XMLParser";
+import {CustomCompletionItem} from "../CustomCompletionItem";
 
 export class ViewIdCompletionItemFactory {
 	public createIdCompletionItems() {
-		let completionItems:CustomCompletionItem[] = [];
+		let completionItems: CustomCompletionItem[] = [];
 
 		const strategy = new InnerPropertiesStrategy();
 		const activeTextEditor = vscode.window.activeTextEditor;
@@ -28,7 +28,7 @@ export class ViewIdCompletionItemFactory {
 		const currentRange = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
 
 		return viewIDs.map(viewId => {
-			const completionItem:CustomCompletionItem = new CustomCompletionItem(viewId);
+			const completionItem: CustomCompletionItem = new CustomCompletionItem(viewId);
 			completionItem.kind = vscode.CompletionItemKind.Keyword;
 			completionItem.insertText = viewId;
 			completionItem.detail = viewId;

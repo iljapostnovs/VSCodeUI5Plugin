@@ -1,15 +1,15 @@
-import { Error, Linter } from "./abstraction/Linter";
+import {Error, Linter} from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../../../utils/FileReader";
-import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
+import {AcornSyntaxAnalyzer} from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import {CustomUIClass} from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
+import {FileReader} from "../../../../../utils/FileReader";
+import {SAPNodeDAO} from "../../../../../librarydata/SAPNodeDAO";
 export class WrongParametersLinter extends Linter {
 	public static timePerChar = 0;
-	private static _sapNodeDAO = new SAPNodeDAO();
+	private static readonly _sapNodeDAO = new SAPNodeDAO();
 	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
@@ -49,7 +49,7 @@ export class WrongParametersLinter extends Linter {
 														range: new vscode.Range(
 															new vscode.Position(positionStart.line - 1, positionStart.col - 1),
 															new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-														),
+														)
 													});
 												}
 											}
@@ -59,7 +59,7 @@ export class WrongParametersLinter extends Linter {
 												if (paramFromMethod && (paramFromMethod.type !== "any" && paramFromMethod.type !== "void" && paramFromMethod.type)) {
 													const classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(param, UIClass);
 
-												if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
+													if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
 														const paramFromMethodTypes = paramFromMethod.type.split("|");
 														let typeMismatch = !paramFromMethodTypes.includes(classNameOfTheParam);
 														if (typeMismatch) {
@@ -77,7 +77,7 @@ export class WrongParametersLinter extends Linter {
 																	range: new vscode.Range(
 																		new vscode.Position(positionStart.line - 1, positionStart.col - 1),
 																		new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-																	),
+																	)
 																});
 															}
 														}
@@ -136,8 +136,8 @@ export class WrongParametersLinter extends Linter {
 	}
 
 	private _checkIfClassesAreEqual(class1: string, class2: string, substitute1: string, substitute2: string) {
-		return (class1.toLowerCase() === substitute1 && class2.toLowerCase() === substitute2) ||
-			(class1.toLowerCase() === substitute2 && class2.toLowerCase() === substitute1);
+		return class1.toLowerCase() === substitute1 && class2.toLowerCase() === substitute2 ||
+			class1.toLowerCase() === substitute2 && class2.toLowerCase() === substitute1;
 	}
 
 	private _swapClassNames(className: string) {

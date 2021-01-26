@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../UI5Plugin";
-import { UIClassDefinitionFinder } from "../providers/definitions/js/UIClassDefinitionFinder";
-import { XMLDefinitionProvider } from "../providers/definitions/xml/XMLDefinitionProvider";
+import {UI5Plugin} from "../../UI5Plugin";
+import {UIClassDefinitionFinder} from "../providers/definitions/js/UIClassDefinitionFinder";
+import {XMLDefinitionProvider} from "../providers/definitions/xml/XMLDefinitionProvider";
 
 export class DefinitionProviderRegistrator {
 	static register() {

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { TemplateGenerator } from "./abstraction/TemplateGenerator";
+import {TemplateGenerator} from "./abstraction/TemplateGenerator";
 
 const viewTemplate =
 `<mvc:View

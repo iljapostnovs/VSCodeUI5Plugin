@@ -1,6 +1,6 @@
-import { SAPNode } from "../../../../../librarydata/SAPNode";
-import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
-import { IAggregationGetterStrategy } from "../interfaces/IAggregationGetterStrategy";
+import {SAPNode} from "../../../../../librarydata/SAPNode";
+import {SAPNodeDAO} from "../../../../../librarydata/SAPNodeDAO";
+import {IAggregationGetterStrategy} from "../interfaces/IAggregationGetterStrategy";
 
 export class SAPNodeAggregationGetterStrategy implements IAggregationGetterStrategy {
 	private static readonly _nodeDAO = new SAPNodeDAO();
@@ -22,11 +22,11 @@ export class SAPNodeAggregationGetterStrategy implements IAggregationGetterStrat
 		return theParent;
 	}
 
-	getAggregations() : any[] {
+	getAggregations(): any[] {
 		return this._node.getAggregations();
 	}
 
-	getAggregation(aggregation: any): { name: string; type: string; } {
+	getAggregation(aggregation: any): {name: string; type: string;} {
 		return {
 			name: aggregation.name,
 			type: aggregation.type

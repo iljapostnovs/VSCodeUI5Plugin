@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { FieldsAndMethods } from "../../../UI5Classes/UIClassFactory";
-import { CustomCompletionItem } from "../CustomCompletionItem";
+import {AcornSyntaxAnalyzer} from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {FieldsAndMethods} from "../../../UI5Classes/UIClassFactory";
+import {CustomCompletionItem} from "../CustomCompletionItem";
 
 export class JSDynamicCompletionItemsFactory {
 
@@ -21,7 +21,7 @@ export class JSDynamicCompletionItemsFactory {
 		const word = range && vscode.window.activeTextEditor?.document.getText(range);
 
 		let completionItems = fieldsAndMethods.methods.map(classMethod => {
-			const completionItem:CustomCompletionItem = new CustomCompletionItem(classMethod.name);
+			const completionItem: CustomCompletionItem = new CustomCompletionItem(classMethod.name);
 			completionItem.kind = vscode.CompletionItemKind.Method;
 
 			let insertString = `${classMethod.name}`;
@@ -52,7 +52,7 @@ export class JSDynamicCompletionItemsFactory {
 		});
 
 		completionItems = completionItems.concat(fieldsAndMethods.fields.map(classField => {
-			const completionItem:CustomCompletionItem = new CustomCompletionItem(classField.name);
+			const completionItem: CustomCompletionItem = new CustomCompletionItem(classField.name);
 			completionItem.kind = vscode.CompletionItemKind.Field;
 			completionItem.insertText = classField.name;
 			completionItem.detail = `(${classField.visibility}) ${classField.name}: ${classField.type ? classField.type : "any"}`;

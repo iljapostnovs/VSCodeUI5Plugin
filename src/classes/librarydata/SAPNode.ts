@@ -1,5 +1,5 @@
-import { UI5Metadata } from "./UI5Metadata";
-import { UI5MetadataDAO } from "./UI5MetadataDAO";
+import {UI5Metadata} from "./UI5Metadata";
+import {UI5MetadataDAO} from "./UI5MetadataDAO";
 export class SAPNode {
 	public node: any;
 	public metadata: UI5Metadata | undefined;
@@ -21,7 +21,7 @@ export class SAPNode {
 		}
 	}
 
-	public getName() : string {
+	public getName(): string {
 		return this.node.name.replace("module:", "").replace(/\//g, ".");
 	}
 

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { FileReader } from "../../utils/FileReader";
+import {FileReader} from "../../utils/FileReader";
 
 export class SwitchToControllerCommand {
 	static async switchToController() {

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import { FileReader } from "../../../utils/FileReader";
-import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
+import {FileReader} from "../../../utils/FileReader";
+import {AcornSyntaxAnalyzer} from "../../JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
-import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam } from "./AbstractUIClass";
+import {AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam} from "./AbstractUIClass";
 import * as commentParser from "comment-parser";
 const acornLoose = require("acorn-loose");
 
@@ -96,7 +96,7 @@ export class CustomUIClass extends AbstractUIClass {
 							name: node.expression.left.property.name,
 							start: node.expression.left.property.start,
 							end: node.expression.left.property.end,
-							type: 'Identifier'
+							type: "Identifier"
 						},
 						value: node.expression.right,
 						start: node.expression.left.object.start,
@@ -568,7 +568,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	public static generateDescriptionForMethod(method: UIMethod) {
-		return `(${method.params.map(param => param.name).join(", ")}) : ${(method.returnType ? method.returnType : "void")}`;
+		return `(${method.params.map(param => param.name).join(", ")}) : ${method.returnType ? method.returnType : "void"}`;
 	}
 
 	public fillTypesFromHungarionNotation() {
@@ -696,7 +696,7 @@ export class CustomUIClass extends AbstractUIClass {
 					},
 					{
 						name: `indexOf${aggregationWithFirstBigLetter}`,
-						returnType: `int`,
+						returnType: "int",
 						params: [{
 							name: `v${aggregationWithFirstBigLetter}`,
 							type: aggregation.type,
@@ -729,7 +729,7 @@ export class CustomUIClass extends AbstractUIClass {
 						name: `bind${aggregationWithFirstBigLetter}s`,
 						returnType: this.className,
 						params: [{
-							name: `oBindingInfo`,
+							name: "oBindingInfo",
 							type: "object",
 							description: "The binding information",
 							isOptional: false
@@ -762,7 +762,7 @@ export class CustomUIClass extends AbstractUIClass {
 						name: `bind${aggregationWithFirstBigLetter}`,
 						returnType: this.className,
 						params: [{
-							name: `oBindingInfo`,
+							name: "oBindingInfo",
 							type: "object",
 							description: "The binding information",
 							isOptional: false

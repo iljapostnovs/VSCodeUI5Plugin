@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { FileReader } from "../utils/FileReader";
-import { URLBuilder } from "../utils/URLBuilder";
-import { HTTPHandler } from "../utils/HTTPHandler";
-import { SAPNode } from "./SAPNode";
+import {FileReader} from "../utils/FileReader";
+import {URLBuilder} from "../utils/URLBuilder";
+import {HTTPHandler} from "../utils/HTTPHandler";
+import {SAPNode} from "./SAPNode";
 interface LooseNodeObject {
 	[key: string]: SAPNode;
 }

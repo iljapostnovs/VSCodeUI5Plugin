@@ -1,12 +1,12 @@
-import { Error, Linter } from "./abstraction/Linter";
+import {Error, Linter} from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import { CustomDiagnosticType } from "../../../../../registrators/DiagnosticsRegistrator";
-import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../../../utils/FileReader";
+import {CustomDiagnosticType} from "../../../../../registrators/DiagnosticsRegistrator";
+import {AcornSyntaxAnalyzer} from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import {CustomUIClass} from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
+import {FileReader} from "../../../../../utils/FileReader";
 export class WrongFieldMethodLinter extends Linter {
 	public static timePerChar = 0;
 	getErrors(document: vscode.TextDocument): Error[] {
@@ -68,7 +68,7 @@ export class WrongFieldMethodLinter extends Linter {
 					}
 					const className = AcornSyntaxAnalyzer.findClassNameForStack(nodes.concat([]), currentClassName, currentClassName, true);
 					const isException = this._checkIfClassNameIsException(className);
-					if (!className || isException || (nextNode?.type === "Identifier" && nextNode?.name === "sap")) {
+					if (!className || isException || nextNode?.type === "Identifier" && nextNode?.name === "sap") {
 						droppedNodes.push(...nodeStack);
 						break;
 					}

@@ -1,9 +1,9 @@
-import { Error, Linter } from "./abstraction/Linter";
+import {Error, Linter} from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import { FileReader } from "../../../../../utils/FileReader";
-import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import {FileReader} from "../../../../../utils/FileReader";
+import {CustomUIClass} from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
 export class WrongClassNameLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
@@ -26,7 +26,7 @@ export class WrongClassNameLinter extends Linter {
 									range: new vscode.Range(
 										new vscode.Position(position.line - 1, position.col),
 										new vscode.Position(position.line - 1, position.col + classNameFromFile.length)
-									),
+									)
 								});
 							}
 						}

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../utils/FileReader";
+import {CustomUIClass} from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {UIClassFactory} from "../../UI5Classes/UIClassFactory";
+import {FileReader} from "../../utils/FileReader";
 
 export class SwitchToModelCommand {
 	static async switchToModel() {

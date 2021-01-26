@@ -1,14 +1,14 @@
 import * as vscode from "vscode";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { AbstractUIClass, TypeValue, UIProperty, UIEvent, UIAggregation } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { URLBuilder } from "../../../utils/URLBuilder";
-import { XMLParser, PositionType } from "../../../utils/XMLParser";
-import { ResourceModelData } from "../../../UI5Classes/ResourceModelData";
-import { FileReader } from "../../../utils/FileReader";
-import { CompletionItemFactory } from "../CompletionItemFactory";
-import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
-import { StandardXMLCompletionItemFactory } from "./StandardXMLCompletionItemFactory";
-import { CustomCompletionItem } from "../CustomCompletionItem";
+import {UIClassFactory} from "../../../UI5Classes/UIClassFactory";
+import {AbstractUIClass, TypeValue, UIProperty, UIEvent, UIAggregation} from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import {URLBuilder} from "../../../utils/URLBuilder";
+import {XMLParser, PositionType} from "../../../utils/XMLParser";
+import {ResourceModelData} from "../../../UI5Classes/ResourceModelData";
+import {FileReader} from "../../../utils/FileReader";
+import {CompletionItemFactory} from "../CompletionItemFactory";
+import {SAPNodeDAO} from "../../../librarydata/SAPNodeDAO";
+import {StandardXMLCompletionItemFactory} from "./StandardXMLCompletionItemFactory";
+import {CustomCompletionItem} from "../CustomCompletionItem";
 import LineColumn = require("line-column");
 
 export class XMLDynamicCompletionItemFactory {
@@ -157,7 +157,7 @@ export class XMLDynamicCompletionItemFactory {
 				const currentTagText = XMLParser.getTagInPosition(XMLText, currentPositionOffset).text;
 				const isTagEmpty = !currentTagText[1].match(/[a-zA-Z]/);
 				if (isTagEmpty) {
-					const { positionBegin: currentTagPositionBegin } = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset - 1);
+					const {positionBegin: currentTagPositionBegin} = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset - 1);
 					completionItems = this._getParentTagCompletionItems(currentTagPositionBegin - 1);
 					completionItems = this._convertToFileSpecificCompletionItems(completionItems, XMLText);
 				} else if (libName) {
@@ -240,7 +240,7 @@ export class XMLDynamicCompletionItemFactory {
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
 		if (XMLText && currentPositionOffset) {
-			const { positionBegin: currentTagPositionBegin } = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset);
+			const {positionBegin: currentTagPositionBegin} = XMLParser.getTagBeginEndPosition(XMLText, currentPositionOffset);
 			completionItems = this._getParentTagCompletionItems(currentTagPositionBegin - 1, completionItems);
 		}
 

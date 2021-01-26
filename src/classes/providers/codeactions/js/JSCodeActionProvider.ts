@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import {AcornSyntaxAnalyzer} from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {CustomUIClass} from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {UIClassFactory} from "../../../UI5Classes/UIClassFactory";
 import LineColumn = require("line-column");
-import { CustomDiagnostics, CustomDiagnosticType } from "../../../registrators/DiagnosticsRegistrator";
-import { MethodInserter } from "../util/MethodInserter";
-import { FileReader } from "../../../utils/FileReader";
-import { SAPUIDefineFactory } from "../../completionitems/js/sapuidefine/SAPUIDefineFactory";
+import {CustomDiagnostics, CustomDiagnosticType} from "../../../registrators/DiagnosticsRegistrator";
+import {MethodInserter} from "../util/MethodInserter";
+import {FileReader} from "../../../utils/FileReader";
+import {SAPUIDefineFactory} from "../../completionitems/js/sapuidefine/SAPUIDefineFactory";
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -24,7 +24,9 @@ export class JSCodeActionProvider {
 			const className = FileReader.getClassNameFromPath(document.fileName);
 			if (className && diagnostic.methodName && diagnostic.attribute && selectedVariableName === diagnostic.methodName) {
 				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.attribute, diagnostic.methodName, this._getInsertContentFromIdentifierName(diagnostic.methodName));
-				insertCodeAction && accumulator.push(insertCodeAction);
+				if (insertCodeAction) {
+					accumulator.push(insertCodeAction);
+				}
 			}
 
 			return accumulator;
@@ -57,7 +59,7 @@ export class JSCodeActionProvider {
 				content = "{}";
 				break;
 			case "string":
-				content = `""`;
+				content = "\"\"";
 				break;
 			case "boolean":
 				content = "true";
@@ -93,7 +95,7 @@ export class JSCodeActionProvider {
 					const UIDefineCodeAction = new vscode.CodeAction(`Import ${completionItem.label}`, vscode.CodeActionKind.QuickFix);
 					UIDefineCodeAction.isPreferred = true;
 					UIDefineCodeAction.edit = new vscode.WorkspaceEdit();
-					UIDefineCodeAction.command = { command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define" };
+					UIDefineCodeAction.command = {command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define"};
 					const position = this._getPositionOfTheLastUIDefine(document);
 					if (position) {
 						const insertText = UIClass.UIDefine.length === 0 ? `\n\t${completionItem.label}` : `,\n\t${completionItem.label}`;

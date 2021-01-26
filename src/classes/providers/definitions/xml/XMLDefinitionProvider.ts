@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { FileReader } from "../../../utils/FileReader";
+import {UIClassFactory} from "../../../UI5Classes/UIClassFactory";
+import {CustomUIClass} from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {FileReader} from "../../../utils/FileReader";
 import LineColumn = require("line-column");
-import { XMLParser } from "../../../utils/XMLParser";
+import {XMLParser} from "../../../utils/XMLParser";
 export class XMLDefinitionProvider {
-	public static provideDefinitionsFor(document: vscode.TextDocument, position: vscode.Position) : vscode.Location | undefined {
+	public static provideDefinitionsFor(document: vscode.TextDocument, position: vscode.Position): vscode.Location | undefined {
 		let location: vscode.Location | undefined;
 		const XMLText = document.getText();
 		const offset = document.offsetAt(position);
@@ -18,7 +18,7 @@ export class XMLDefinitionProvider {
 
 		const attribute = attributes?.find(attribute => XMLParser.getAttributeNameAndValue(attribute).attributeValue.replace(".", "") === word);
 		if (attribute) {
-			const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+			const {attributeValue} = XMLParser.getAttributeNameAndValue(attribute);
 			const responsibleClassName = FileReader.getResponsibleClassForXMLDocument(document);
 			if (responsibleClassName) {
 				location = this._getLocationFor(responsibleClassName, attributeValue);

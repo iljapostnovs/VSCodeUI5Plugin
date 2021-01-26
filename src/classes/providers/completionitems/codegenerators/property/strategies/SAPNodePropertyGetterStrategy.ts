@@ -1,6 +1,6 @@
-import { SAPNode } from "../../../../../librarydata/SAPNode";
-import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
-import { IPropertyGetterStrategy } from "../interfaces/IPropertyGetterStrategy";
+import {SAPNode} from "../../../../../librarydata/SAPNode";
+import {SAPNodeDAO} from "../../../../../librarydata/SAPNodeDAO";
+import {IPropertyGetterStrategy} from "../interfaces/IPropertyGetterStrategy";
 
 export class SAPNodePropertyGenerationStrategy implements IPropertyGetterStrategy {
 	private static readonly _nodeDAO = new SAPNodeDAO();
@@ -22,11 +22,11 @@ export class SAPNodePropertyGenerationStrategy implements IPropertyGetterStrateg
 		return theParent;
 	}
 
-	getProperties() : any[] {
+	getProperties(): any[] {
 		return this._node.getProperties();
 	}
 
-	getProperty(property: any): { name: string; defaultValue: any; } {
+	getProperty(property: any): {name: string; defaultValue: any;} {
 		return {
 			name: property.name,
 			defaultValue: property.defaultValue

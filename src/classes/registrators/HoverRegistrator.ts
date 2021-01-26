@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../UI5Plugin";
-import { JSHoverProvider } from "../providers/hover/js/JSHoverProvider";
-import { XMLHoverProvider } from "../providers/hover/xml/XMLHoverProvider";
+import {UI5Plugin} from "../../UI5Plugin";
+import {JSHoverProvider} from "../providers/hover/js/JSHoverProvider";
+import {XMLHoverProvider} from "../providers/hover/xml/XMLHoverProvider";
 
 export class HoverRegistrator {
 	static register() {

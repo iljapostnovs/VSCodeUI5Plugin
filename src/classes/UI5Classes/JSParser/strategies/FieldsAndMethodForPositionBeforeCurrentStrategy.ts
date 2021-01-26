@@ -1,9 +1,9 @@
-import { CustomClassUIField, CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
-import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
-import { FieldPropertyMethodGetterStrategy as FieldMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
+import {CustomClassUIField, CustomUIClass} from "../../UI5Parser/UIClass/CustomUIClass";
+import {FieldsAndMethods, UIClassFactory} from "../../UIClassFactory";
+import {FieldPropertyMethodGetterStrategy as FieldMethodGetterStrategy} from "./abstraction/FieldPropertyMethodGetterStrategy";
 import * as vscode from "vscode";
-import { UIField } from "../../UI5Parser/UIClass/AbstractUIClass";
-import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
+import {UIField} from "../../UI5Parser/UIClass/AbstractUIClass";
+import {AcornSyntaxAnalyzer} from "../AcornSyntaxAnalyzer";
 
 export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethodGetterStrategy {
 	getFieldsAndMethods() {
@@ -197,7 +197,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 
 	private _generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition = false) {
 		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "VariableDeclaration", "ThisExpression", "NewExpression", "Identifier"];
-		const positionIsCorrect = node.end < position || (checkForLastPosition && node.end === position);
+		const positionIsCorrect = node.end < position || checkForLastPosition && node.end === position;
 		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖" && node.property?.name !== "prototype") {
 			stack.unshift(node);
 		}

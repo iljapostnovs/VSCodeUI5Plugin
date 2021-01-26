@@ -1,4 +1,4 @@
-import { AbstractUIClass, UIField, UIMethod } from "./AbstractUIClass";
+import {AbstractUIClass, UIField, UIMethod} from "./AbstractUIClass";
 import * as jsClassData from "./jsclassdata/JSClassData.json";
 
 const jsClassDataCopy: any = jsClassData;
