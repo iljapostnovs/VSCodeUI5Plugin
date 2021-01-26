@@ -28,12 +28,13 @@ export class UnusedMethodLinter extends Linter {
 									source: "Unused method Linter",
 									acornNode: method.acornNode,
 									code: "UI5Plugin",
-									message: `Method "${method.name}" is never used`,
+									message: `No references found for "${method.name}" class member`,
 									range: new vscode.Range(
 										new vscode.Position(position.line - 1, position.col - 1),
 										new vscode.Position(position.line - 1, position.col + method.name.length - 1)
 									),
-									tags: [vscode.DiagnosticTag.Unnecessary]
+									tags: [vscode.DiagnosticTag.Unnecessary],
+									severity: vscode.DiagnosticSeverity.Hint
 								});
 							}
 						}
@@ -106,6 +107,12 @@ export class UnusedMethodLinter extends Linter {
 		const exceptions = [{
 			className: "*",
 			methodName: "constructor"
+		}, {
+			className: "*",
+			methodName: "init"
+		}, {
+			className: "*",
+			methodName: "exit"
 		}];
 
 		return !!exceptions.find(exception => {
@@ -113,6 +120,36 @@ export class UnusedMethodLinter extends Linter {
 			const sameMethod = exception.methodName === "*" || exception.methodName === methodName;
 
 			return sameClass && sameMethod;
+		}) || this._checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className, methodName);
+	}
+
+	private _checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className: string, methodName: string) {
+		const startsWith = ["set", "get", "add", "remove", "removeAll", "insert", "indexOf", "destroy", "bind", "unbind"];
+
+		const isStandartMethod = !!startsWith.find(standartMethodStartsWith => {
+			let isStandartMethod = false;
+			if (methodName.startsWith(standartMethodStartsWith)) {
+				const memberNameCapital = methodName.replace(standartMethodStartsWith, "");
+				const memberName = `${memberNameCapital[0].toLowerCase()}${memberNameCapital.substring(1, memberNameCapital.length)}`
+				const events = UIClassFactory.getClassEvents(className);
+				isStandartMethod = !!events.find(event => event.name === memberName);
+				if (!isStandartMethod) {
+					const properties = UIClassFactory.getClassProperties(className);
+					isStandartMethod = !!properties.find(property => property.name === memberName);
+				}
+				if (!isStandartMethod) {
+					const aggregations = UIClassFactory.getClassAggregations(className);
+					isStandartMethod = !!aggregations.find(aggregation => aggregation.name === memberName);
+				}
+				if (!isStandartMethod) {
+					const associations = UIClassFactory.getClassAssociations(className);
+					isStandartMethod = !!associations.find(association => association.name === memberName);
+				}
+			}
+
+			return isStandartMethod;
 		});
+
+		return isStandartMethod;
 	}
 }

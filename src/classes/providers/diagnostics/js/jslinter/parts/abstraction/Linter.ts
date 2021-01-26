@@ -13,6 +13,7 @@ export interface Error {
 	source: string;
 	isController?: boolean;
 	tags?: vscode.DiagnosticTag[];
+	severity?: vscode.DiagnosticSeverity;
 }
 export abstract class Linter {
 	abstract getErrors(document: vscode.TextDocument): Error[];

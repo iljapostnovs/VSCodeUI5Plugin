@@ -125,7 +125,7 @@ export class DiagnosticsRegistrator {
 			const diagnostic = new CustomDiagnostics(error.range, error.message);
 
 			diagnostic.code = error.code;
-			diagnostic.severity = vscode.DiagnosticSeverity.Warning;
+			diagnostic.severity = vscode.DiagnosticSeverity.Hint;
 			diagnostic.type = error.type;
 			diagnostic.methodName = error.methodName;
 			diagnostic.fieldName = error.fieldName;
@@ -133,6 +133,7 @@ export class DiagnosticsRegistrator {
 			diagnostic.source = error.source;
 			diagnostic.isController = error.isController;
 			diagnostic.tags = error.tags;
+			diagnostic.severity = error.severity || vscode.DiagnosticSeverity.Warning;
 
 			return diagnostic;
 		});

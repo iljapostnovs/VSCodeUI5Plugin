@@ -1,4 +1,4 @@
-import {AbstractUIClass, UIEvent, UIField, UIMethod} from "./UI5Parser/UIClass/AbstractUIClass";
+import {AbstractUIClass, UIAggregation, UIAssociation, UIEvent, UIField, UIMethod, UIProperty} from "./UI5Parser/UIClass/AbstractUIClass";
 import {CustomUIClass} from "./UI5Parser/UIClass/CustomUIClass";
 import {StandardUIClass} from "./UI5Parser/UIClass/StandardUIClass";
 import {JSClass} from "./UI5Parser/UIClass/JSClass";
@@ -154,6 +154,60 @@ export class UIClassFactory {
 			return accumulator;
 		}, []);
 		return events;
+	}
+
+	public static getClassAggregations(className: string) {
+		const UIClass = this.getUIClass(className);
+		let aggregations: UIAggregation[] = UIClass.aggregations;
+		if (UIClass.parentClassNameDotNotation) {
+			aggregations = aggregations.concat(this.getClassAggregations(UIClass.parentClassNameDotNotation));
+		}
+
+		//remove duplicates
+		aggregations = aggregations.reduce((accumulator: UIAggregation[], aggregation: UIAggregation) => {
+			const aggregationInAccumulator = accumulator.find(accumulatorAggregation => accumulatorAggregation.name === aggregation.name);
+			if (!aggregationInAccumulator) {
+				accumulator.push(aggregation);
+			}
+			return accumulator;
+		}, []);
+		return aggregations;
+	}
+
+	public static getClassAssociations(className: string) {
+		const UIClass = this.getUIClass(className);
+		let associations: UIAssociation[] = UIClass.associations;
+		if (UIClass.parentClassNameDotNotation) {
+			associations = associations.concat(this.getClassAssociations(UIClass.parentClassNameDotNotation));
+		}
+
+		//remove duplicates
+		associations = associations.reduce((accumulator: UIAssociation[], association: UIAssociation) => {
+			const associationInAccumulator = accumulator.find(accumulatorAssociation => accumulatorAssociation.name === association.name);
+			if (!associationInAccumulator) {
+				accumulator.push(association);
+			}
+			return accumulator;
+		}, []);
+		return associations;
+	}
+
+	public static getClassProperties(className: string) {
+		const UIClass = this.getUIClass(className);
+		let properties: UIProperty[] = UIClass.properties;
+		if (UIClass.parentClassNameDotNotation) {
+			properties = properties.concat(this.getClassProperties(UIClass.parentClassNameDotNotation));
+		}
+
+		//remove duplicates
+		properties = properties.reduce((accumulator: UIProperty[], property: UIProperty) => {
+			const propertyInAccumulator = accumulator.find(accumulatorProperty => accumulatorProperty.name === property.name);
+			if (!propertyInAccumulator) {
+				accumulator.push(property);
+			}
+			return accumulator;
+		}, []);
+		return properties;
 	}
 
 	public static getUIClass(className: string) {
