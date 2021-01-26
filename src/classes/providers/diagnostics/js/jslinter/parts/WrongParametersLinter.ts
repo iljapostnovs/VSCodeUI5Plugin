@@ -6,8 +6,10 @@ import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
+import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
 export class WrongParametersLinter extends Linter {
 	public static timePerChar = 0;
+	private static _sapNodeDAO = new SAPNodeDAO();
 	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
@@ -34,7 +36,7 @@ export class WrongParametersLinter extends Linter {
 										const method = fieldsAndMethods.methods.find(method => method.name === methodName);
 										if (method) {
 											const methodParams = method.params;
-											const mandatoryMethodParams = methodParams.filter(param => !param.isOptional);
+											const mandatoryMethodParams = methodParams.filter(param => !param.isOptional && param.type !== "boolean");
 											if (params.length < mandatoryMethodParams.length || params.length > methodParams.length) {
 												const positionStart = LineColumn(UIClass.classText).fromIndex(call.callee.property.start);
 												const positionEnd = LineColumn(UIClass.classText).fromIndex(call.callee.property.end);
@@ -123,6 +125,8 @@ export class WrongParametersLinter extends Linter {
 		} else if (actualClass.toLowerCase() === "object" && UIClassFactory.isClassAChildOfClassB(expectedClass, "sap.ui.base.Object")) {
 			classesDiffers = false;
 		} else if (this._checkIfClassesAreEqual(expectedClass, actualClass, "string", "sap.ui.core.csssize")) {
+			classesDiffers = false;
+		} else if (WrongParametersLinter._sapNodeDAO.findNode(expectedClass)?.getKind() === "enum" && actualClass === "string") {
 			classesDiffers = false;
 		} else {
 			classesDiffers = !UIClassFactory.isClassAChildOfClassB(actualClass, expectedClass);

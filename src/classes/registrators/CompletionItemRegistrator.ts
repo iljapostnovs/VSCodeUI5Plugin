@@ -19,7 +19,7 @@ export class CompletionItemRegistrator {
 
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
 			async provideCompletionItems(document: vscode.TextDocument) {
-				let itemsToReturn:CustomCompletionItem[] = [];
+				let itemsToReturn: CustomCompletionItem[] = [];
 				try {
 					if (UIDefineCompletionItemGenerator.getIfCurrentPositionIsInDefine()) {
 						itemsToReturn = await JSCompletionItemFactory.createUIDefineCompletionItems(document);

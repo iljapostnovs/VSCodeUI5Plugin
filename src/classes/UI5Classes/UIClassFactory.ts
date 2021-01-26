@@ -57,7 +57,7 @@ export class UIClassFactory {
 
 	public static setNewContentForCurrentUIClass(document: vscode.TextDocument) {
 		const documentText = document.getText();
-		const currentClassName = FileReader.getClassNameFromPath(document.getText());
+		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 
 		if (currentClassName && documentText) {
 			this.setNewCodeForClass(currentClassName, documentText);

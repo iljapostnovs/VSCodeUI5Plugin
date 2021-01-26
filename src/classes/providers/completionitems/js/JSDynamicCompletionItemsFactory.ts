@@ -6,7 +6,7 @@ import { CustomCompletionItem } from "../CustomCompletionItem";
 export class JSDynamicCompletionItemsFactory {
 
 	public createUIClassCompletionItems() {
-		let completionItems:CustomCompletionItem[] = [];
+		let completionItems: CustomCompletionItem[] = [];
 		const fieldsAndMethods = AcornSyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable();
 		if (fieldsAndMethods) {
 			completionItems = this._generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods);
