@@ -49,8 +49,8 @@ export class TagAttributeLinter extends Linter {
 										source: "Tag Attribute linter",
 										attribute: tagAttribute,
 										range: new vscode.Range(
-											new vscode.Position(position.line - 1, position.col),
-											new vscode.Position(position.line - 1, position.col + tagAttribute.length)
+											new vscode.Position(position.line - 1, position.col - 1),
+											new vscode.Position(position.line - 1, position.col + tagAttribute.length - 1)
 										)
 									});
 								}
