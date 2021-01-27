@@ -79,7 +79,7 @@ export class JSCodeActionProvider {
 
 	private static async _getImportClassCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const selectedVariableName = this._getCurrentVariable(document, range);
-		const providerResult: vscode.CodeAction[] = [];
+		let providerResult: vscode.CodeAction[] = [];
 
 		if (selectedVariableName) {
 			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
@@ -106,7 +106,30 @@ export class JSCodeActionProvider {
 			}
 		}
 
+		providerResult = providerResult.sort((a, b) => {
+			const firstItemPriority = this._calculatePriority(a);
+			const secondItemPriority = this._calculatePriority(b);
+
+			return secondItemPriority - firstItemPriority;
+		});
+
 		return providerResult;
+	}
+
+	private static _calculatePriority(codeAction: vscode.CodeAction) {
+		const priorities = ["sap/ui/model/", "sap/m/", "sap/ui/"];
+		let priority = 1;
+		priorities.find((priorityString, index) => {
+			if (codeAction.title.includes(priorityString)) {
+				priority = priorities.length + 1 - index;
+
+				return true;
+			}
+
+			return false;
+		});
+
+		return priority;
 	}
 
 	private static _getCurrentVariable(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
