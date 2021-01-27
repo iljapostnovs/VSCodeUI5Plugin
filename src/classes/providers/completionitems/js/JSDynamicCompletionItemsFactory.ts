@@ -5,9 +5,9 @@ import {CustomCompletionItem} from "../CustomCompletionItem";
 
 export class JSDynamicCompletionItemsFactory {
 
-	public createUIClassCompletionItems() {
+	public createUIClassCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
-		const fieldsAndMethods = AcornSyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable();
+		const fieldsAndMethods = AcornSyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable(document, position);
 		if (fieldsAndMethods) {
 			completionItems = this._generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods);
 		}

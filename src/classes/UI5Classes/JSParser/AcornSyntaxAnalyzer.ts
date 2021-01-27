@@ -2,14 +2,14 @@ import * as vscode from "vscode";
 import {UIClassFactory, FieldsAndMethods} from "../UIClassFactory";
 import {FileReader} from "../../utils/FileReader";
 import {UIField, UIMethod} from "../UI5Parser/UIClass/AbstractUIClass";
-import {CustomClassUIMethod, CustomUIClass} from "../UI5Parser/UIClass/CustomUIClass";
+import {CustomClassUIMethod, CustomUIClass, CustomClassUIField} from "../UI5Parser/UIClass/CustomUIClass";
 import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import {FieldPropertyMethodGetterStrategy} from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
 import {InnerPropertiesStrategy} from "./strategies/InnerPropertiesStrategy";
 import {XMLParser} from "../../utils/XMLParser";
 import {SAPNodeDAO} from "../../librarydata/SAPNodeDAO";
 export class AcornSyntaxAnalyzer {
-	static getFieldsAndMethodsOfTheCurrentVariable() {
+	static getFieldsAndMethodsOfTheCurrentVariable(document: vscode.TextDocument, position: vscode.Position) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
 
 		const aStrategies: FieldPropertyMethodGetterStrategy[] = [
@@ -18,7 +18,7 @@ export class AcornSyntaxAnalyzer {
 		];
 
 		aStrategies.find(strategy => {
-			fieldsAndMethods = strategy.getFieldsAndMethods();
+			fieldsAndMethods = strategy.getFieldsAndMethods(document, position);
 
 			return !!fieldsAndMethods;
 		});
@@ -172,7 +172,7 @@ export class AcornSyntaxAnalyzer {
 					className = currentClassName;
 				}
 
-			} else if (currentNode._acornSyntaxAnalyserType) {
+			} else if (currentNode._acornSyntaxAnalyserType && currentNode._acornSyntaxAnalyserType !== "map") {
 				className = currentNode._acornSyntaxAnalyserType;
 				if (stack[0]?.type === "CallExpression") {
 					stack.shift();
@@ -212,6 +212,20 @@ export class AcornSyntaxAnalyzer {
 								}
 								className = method.returnType;
 							}
+
+							if (className === "map" && (<CustomClassUIMethod>method).acornNode) {
+								currentNode._acornSyntaxAnalyserType = "map";
+								const UIClass = UIClassFactory.getUIClass(currentClassName);
+								if (UIClass instanceof CustomUIClass) {
+									const body = (method as CustomClassUIMethod).acornNode.body?.body;
+									if (body) {
+										const returnStatement = body.find((node: any) => node.type === "ReturnStatement");
+										if (returnStatement?.argument) {
+											className = this.getClassNameFromSingleAcornNode(returnStatement.argument, UIClass, stack);
+										}
+									}
+								}
+							}
 						} else {
 							stack = [];
 						}
@@ -222,14 +236,27 @@ export class AcornSyntaxAnalyzer {
 						if (!field.type) {
 							this.findFieldType(field, currentClassName);
 							className = field.type || "";
-						} else if (field.type === "__map__") {
-							className = `${currentClassName}__map__${memberName}`;
-							className = this._generateClassNameFromStack(stack, className);
-							stack = [];
 						} else {
 							className = field.type;
 						}
-					} else {
+
+						if (className === "map" && (<CustomClassUIField>field).acornNode?.value) {
+							currentNode._acornSyntaxAnalyserType = "map";
+							const UIClass = UIClassFactory.getUIClass(primaryClassName);
+							if (UIClass instanceof CustomUIClass) {
+								className = this.getClassNameFromSingleAcornNode((field as CustomClassUIField).acornNode.value, UIClass, stack);
+							}
+						}
+					}
+
+					if (!className && currentClassName === "map") {
+						const UIClass = UIClassFactory.getUIClass(primaryClassName);
+						if (UIClass instanceof CustomUIClass) {
+							className = this.getClassNameFromSingleAcornNode(currentNode, UIClass, stack);
+						}
+					}
+
+					if (!className) {
 						stack = [];
 					}
 				}
@@ -243,11 +270,11 @@ export class AcornSyntaxAnalyzer {
 
 					if (variableDeclaration) {
 						const neededDeclaration = variableDeclaration.declarations.find((declaration: any) => declaration.id.name === currentNode.name);
-						className = this._getClassNameFromAcornVariableDeclaration(neededDeclaration, UIClass);
+						className = this._getClassNameFromAcornVariableDeclaration(neededDeclaration, UIClass, stack);
 					} else {
 						const neededAssignment = this._getAcornAssignmentsFromUIClass(currentClassName, currentNode.name, currentNode.end);
 						if (neededAssignment) {
-							className = this.getClassNameFromSingleAcornNode(neededAssignment.right, UIClass);
+							className = this.getClassNameFromSingleAcornNode(neededAssignment.right, UIClass, stack);
 						}
 					}
 
@@ -296,7 +323,7 @@ export class AcornSyntaxAnalyzer {
 
 			}
 
-			if (!currentNode._acornSyntaxAnalyserType) {
+			if (!currentNode._acornSyntaxAnalyserType && !className?.includes("__map__")) {
 				currentNode._acornSyntaxAnalyserType = className || "any";
 			}
 
@@ -664,19 +691,6 @@ export class AcornSyntaxAnalyzer {
 		return arrayMethods.indexOf(methodName) > -1;
 	}
 
-	private static _generateClassNameFromStack(stack: any[], className: string) {
-		const nextProperty = stack.shift();
-		if (nextProperty && nextProperty.type === "MemberExpression") {
-			className += `__map__${nextProperty.property.name}`;
-		}
-
-		if (stack.length > 0) {
-			className = this._generateClassNameFromStack(stack, className);
-		}
-
-		return className;
-	}
-
 	private static _generateSAPStandardClassNameFromStack(stack: any[]) {
 		const classNameParts: string[] = [];
 		let usedNodeCount = 0;
@@ -771,6 +785,10 @@ export class AcornSyntaxAnalyzer {
 				this.findMethodReturnType(method, UIClass.parentClassNameDotNotation);
 			}
 		}
+
+		if (method.returnType?.includes("__map__")) {
+			method.returnType = "map";
+		}
 	}
 
 	public static findFieldType(field: UIField, className: string, includeParentMethods = true, clearStack = false) {
@@ -833,6 +851,10 @@ export class AcornSyntaxAnalyzer {
 		}
 		if (!field.type && UIClass instanceof CustomUIClass) {
 			field.type = CustomUIClass.getTypeFromHungarianNotation(field.name);
+		}
+
+		if (field.type?.includes("__map__")) {
+			field.type = "map";
 		}
 	}
 
@@ -1020,17 +1042,19 @@ export class AcornSyntaxAnalyzer {
 		return innerNodes;
 	}
 
-	private static _getClassNameFromAcornVariableDeclaration(declaration: any, UIClass: CustomUIClass) {
+	private static _getClassNameFromAcornVariableDeclaration(declaration: any, UIClass: CustomUIClass, stack: any[] = []) {
 		let className = "";
 		if (declaration._acornSyntaxAnalyserType) {
 			className = declaration._acornSyntaxAnalyserType;
 		} else {
-			className = this.getClassNameFromSingleAcornNode(declaration.init, UIClass);
+			className = this.getClassNameFromSingleAcornNode(declaration.init, UIClass, stack);
 			if (declaration.id.name && (!className || className === "any" || className === "void")) {
 				className = CustomUIClass.getTypeFromHungarianNotation(declaration.id.name) || className;
 			}
 
-			declaration._acornSyntaxAnalyserType = className;
+			if (className && !className.includes("__map__")) {
+				declaration._acornSyntaxAnalyserType = className;
+			}
 		}
 
 
@@ -1039,7 +1063,7 @@ export class AcornSyntaxAnalyzer {
 
 	public static declarationStack: any[] = [];
 
-	public static getClassNameFromSingleAcornNode(node: any, UIClass: CustomUIClass) {
+	public static getClassNameFromSingleAcornNode(node: any, UIClass: CustomUIClass, stack: any[] = []) {
 		let className = "";
 		if (this.declarationStack.indexOf(node) > -1) {
 			this.declarationStack = [];
@@ -1067,6 +1091,12 @@ export class AcornSyntaxAnalyzer {
 				}
 			} else if (node?.type === "ObjectExpression") {
 				className = "map";
+				if (stack.length > 0) {
+					className = this._getClassNameForMap(node, stack, UIClass);
+				} else {
+					const fields = node.properties.map((property: any) => property.key.name);
+					className = fields.join("__map__");
+				}
 			} else if (node?.type === "Literal") {
 				if (node?.value === null) {
 					className = "any";
@@ -1080,6 +1110,19 @@ export class AcornSyntaxAnalyzer {
 			//} //else if (declaration?.type === "LogicalExpression") {
 			// className = "boolean";
 			//}
+		}
+
+		return className;
+	}
+
+	private static _getClassNameForMap(objectExpression: any, stack: any[], UIClass: CustomUIClass) {
+		let className = "any";
+		const nextNode = stack.shift();
+		if (nextNode) {
+			const field = objectExpression.properties.find((property: any) => property.key.name === nextNode.property.name);
+			if (field && field.value) {
+				className = this.getClassNameFromSingleAcornNode(field.value, UIClass, stack);
+			}
 		}
 
 		return className;
@@ -1125,7 +1168,7 @@ export class AcornSyntaxAnalyzer {
 					className = param.jsType;
 					if (param.customData) {
 						const stringifiedCustomData = JSON.stringify(param.customData);
-						className = `${className}__mapparam__${stringifiedCustomData}`;
+						className = `${className} __mapparam__${stringifiedCustomData} `;
 					}
 				}
 			}

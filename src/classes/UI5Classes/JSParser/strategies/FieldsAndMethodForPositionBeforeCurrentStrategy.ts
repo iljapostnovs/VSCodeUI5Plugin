@@ -4,11 +4,14 @@ import {FieldPropertyMethodGetterStrategy as FieldMethodGetterStrategy} from "./
 import * as vscode from "vscode";
 import {UIField} from "../../UI5Parser/UIClass/AbstractUIClass";
 import {AcornSyntaxAnalyzer} from "../AcornSyntaxAnalyzer";
+import {FileReader} from "../../../utils/FileReader";
 
 export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethodGetterStrategy {
-	getFieldsAndMethods() {
+	getFieldsAndMethods(document: vscode.TextDocument, position: vscode.Position) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
-		const UIClassName = this.getClassNameOfTheVariableAtPosition();
+		const className = FileReader.getClassNameFromPath(document.fileName);
+		const offset = document.offsetAt(position);
+		const UIClassName = this.getClassNameOfTheVariableAtPosition(className, offset);
 		if (UIClassName) {
 			fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
 			if (fieldsAndMethods) {
@@ -18,23 +21,22 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 
 		return fieldsAndMethods;
 	}
-
-	public destructueFieldsAndMethodsAccordingToMapParams(className: string) {
+	public destructueFieldsAndMethodsAccordingToMapParams(className: string): FieldsAndMethods | undefined {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
-		const classNamePartsFromFieldMap = className.split("__map__");
+		const isMap = className.includes("__map__");
 		const classNamePartsFromMapParam = className.split("__mapparam__");
 
-		if (classNamePartsFromFieldMap.length > 1) {
-			const className = classNamePartsFromFieldMap.shift();
-			if (className) {
-				const mapFields = classNamePartsFromFieldMap;
-				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
-				const currentFieldName = mapFields.shift();
-				const field = UIClass.fields.find(field => field.name === currentFieldName);
-				if (field) {
-					fieldsAndMethods = this._getFieldsAndMethodsForMap(field, mapFields);
-					fieldsAndMethods.className = className;
-				}
+		if (isMap) {
+			const mapFields = className.split("__map__");
+			fieldsAndMethods = {
+				className: "map",
+				methods: [],
+				fields: mapFields.map(field => ({
+					name: field,
+					description: field,
+					type: "any",
+					visibility: "public"
+				}))
 			}
 		} else if (classNamePartsFromMapParam.length > 1) {
 			const className = classNamePartsFromMapParam.shift();

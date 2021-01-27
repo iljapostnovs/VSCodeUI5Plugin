@@ -113,11 +113,11 @@ export class CompletionItemFactory {
 		return idCompletionItems.createIdCompletionItems();
 	}
 
-	public createPropertyMethodCompletionItems(document: vscode.TextDocument) {
+	public createPropertyMethodCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		const jsDynamicFactory = new JSDynamicCompletionItemsFactory();
 		UIClassFactory.setNewContentForCurrentUIClass(document);
 
-		return jsDynamicFactory.createUIClassCompletionItems();
+		return jsDynamicFactory.createUIClassCompletionItems(document, position);
 	}
 
 	public createXMLDynamicCompletionItems() {

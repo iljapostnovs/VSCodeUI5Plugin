@@ -33,6 +33,7 @@ export interface CustomClassUIMethod extends UIMethod {
 }
 export interface CustomClassUIField extends UIField {
 	customData?: LooseObject;
+	acornNode?: any;
 }
 export class CustomUIClass extends AbstractUIClass {
 	public methods: CustomClassUIMethod[] = [];
@@ -410,6 +411,7 @@ export class CustomUIClass extends AbstractUIClass {
 					this.fields.push({
 						name: property.key.name,
 						type: property.jsType,
+						acornNode: property,
 						description: property.jsType || "",
 						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
@@ -417,8 +419,9 @@ export class CustomUIClass extends AbstractUIClass {
 				} else if (property.value.type === "ObjectExpression") {
 					this.fields.push({
 						name: property.key.name,
-						type: "__map__",
+						type: "map",
 						description: "map",
+						acornNode: property,
 						customData: this._generateCustomDataForObject(property.value),
 						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
@@ -428,6 +431,7 @@ export class CustomUIClass extends AbstractUIClass {
 						name: property.key.name,
 						type: undefined,
 						description: "",
+						acornNode: property,
 						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
@@ -436,6 +440,7 @@ export class CustomUIClass extends AbstractUIClass {
 						name: property.key.name,
 						type: "array",
 						description: "",
+						acornNode: property,
 						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);

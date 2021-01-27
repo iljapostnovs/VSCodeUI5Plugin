@@ -18,13 +18,13 @@ export class CompletionItemRegistrator {
 		console.log("JS Completion Items generated");
 
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
-			async provideCompletionItems(document: vscode.TextDocument) {
+			async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 				let itemsToReturn: CustomCompletionItem[] = [];
 				try {
 					if (UIDefineCompletionItemGenerator.getIfCurrentPositionIsInDefine()) {
 						itemsToReturn = await JSCompletionItemFactory.createUIDefineCompletionItems(document);
 					} else {
-						itemsToReturn = JSCompletionItemFactory.createPropertyMethodCompletionItems(document);
+						itemsToReturn = JSCompletionItemFactory.createPropertyMethodCompletionItems(document, position);
 					}
 
 				} catch (error) {
