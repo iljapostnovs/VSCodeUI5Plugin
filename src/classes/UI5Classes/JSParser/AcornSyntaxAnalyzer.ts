@@ -1096,6 +1096,9 @@ export class AcornSyntaxAnalyzer {
 				} else {
 					const fields = node.properties.map((property: any) => property.key.name);
 					className = fields.join("__map__");
+					if (!className) {
+						className = "map"
+					}
 				}
 			} else if (node?.type === "Literal") {
 				if (node?.value === null) {
