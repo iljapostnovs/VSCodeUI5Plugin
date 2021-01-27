@@ -6,6 +6,7 @@ import {CustomClassUIMethod, CustomUIClass} from "../../../../../UI5Classes/UI5P
 import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
 import {AcornSyntaxAnalyzer} from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import {ConfigHandler} from "./config/ConfigHandler";
 export class UnusedMethodLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
@@ -104,20 +105,11 @@ export class UnusedMethodLinter extends Linter {
 	}
 
 	private _checkIfMethodIsException(className: string, methodName: string) {
-		const exceptions = [{
-			className: "*",
-			methodName: "constructor"
-		}, {
-			className: "*",
-			methodName: "init"
-		}, {
-			className: "*",
-			methodName: "exit"
-		}];
+		const exceptions = ConfigHandler.getJSLinterExceptions();
 
 		return !!exceptions.find(exception => {
 			const sameClass = exception.className === "*" || exception.className === className;
-			const sameMethod = exception.methodName === "*" || exception.methodName === methodName;
+			const sameMethod = exception.memberName === "*" || exception.memberName === methodName;
 
 			return sameClass && sameMethod;
 		}) || this._checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className, methodName);

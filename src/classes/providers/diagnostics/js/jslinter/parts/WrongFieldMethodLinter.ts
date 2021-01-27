@@ -7,6 +7,7 @@ import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "../../../../../UI
 import {CustomUIClass} from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
 import {FileReader} from "../../../../../utils/FileReader";
+import {ConfigHandler} from "./config/ConfigHandler";
 export class WrongFieldMethodLinter extends Linter {
 	public static timePerChar = 0;
 	getErrors(document: vscode.TextDocument): Error[] {
@@ -151,37 +152,11 @@ export class WrongFieldMethodLinter extends Linter {
 	}
 
 	private _checkIfMethodNameIsException(className = "", memberName = "") {
-		const methodExceptions = ["byId", "prototype", "call", "apply", "bind"];
-		let isException = methodExceptions.includes(memberName);
-		const classExceptions = [{
-			className: "sap.ui.model.Binding",
-			memberName: "filter"
-		}, {
-			className: "sap.ui.model.Model",
-			memberName: "getResourceBundle"
-		}, {
-			className: "sap.ui.model.Model",
-			memberName: "setProperty"
-		}, {
-			className: "sap.ui.core.Element",
-			memberName: "*"
-		}, {
-			className: "sap.ui.base.ManagedObject",
-			memberName: "*"
-		}, {
-			className: "sap.ui.core.Control",
-			memberName: "*"
-		}, {
-			className: "sap.ui.xmlfragment",
-			memberName: "*"
-		}];
-
-		if (!isException) {
-			isException = !!classExceptions.find(classException =>
-				classException.className === className &&
-				(classException.memberName === memberName || classException.memberName === "*")
-			);
-		}
+		const classExceptions = ConfigHandler.getJSLinterExceptions();
+		const isException = !!classExceptions.find(classException =>
+			(classException.className === className || classException.className === "*") &&
+			(classException.memberName === memberName || classException.memberName === "*")
+		);
 
 		return isException;
 	}

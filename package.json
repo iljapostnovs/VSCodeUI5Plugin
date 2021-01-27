@@ -182,6 +182,86 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Data source related property. If true, the server certificate is verified against the list of supplied CAs. Verification happens at the connection level, before the HTTP request is sent."
+				},
+				"ui5.plugin.JSLinterExceptions": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"title": "Class name and method name. \"*\" for wild card",
+						"properties": {
+							"className": {
+								"type": "string",
+								"description": "Name of the class. Use \"*\" for wild card"
+							},
+							"memberName": {
+								"type": "string",
+								"description": "Name of the method/field. Use \"*\" for wild card"
+							}
+						}
+					},
+					"default": [
+						{
+							"className": "sap.ui.model.Binding",
+							"memberName": "filter"
+						},
+						{
+							"className": "sap.ui.model.Model",
+							"memberName": "getResourceBundle"
+						},
+						{
+							"className": "sap.ui.model.Model",
+							"memberName": "setProperty"
+						},
+						{
+							"className": "sap.ui.core.Element",
+							"memberName": "*"
+						},
+						{
+							"className": "sap.ui.base.ManagedObject",
+							"memberName": "*"
+						},
+						{
+							"className": "sap.ui.core.Control",
+							"memberName": "*"
+						},
+						{
+							"className": "sap.ui.xmlfragment",
+							"memberName": "*"
+						},
+						{
+							"className": "*",
+							"memberName": "byId"
+						},
+						{
+							"className": "*",
+							"memberName": "prototype"
+						},
+						{
+							"className": "*",
+							"memberName": "call"
+						},
+						{
+							"className": "*",
+							"memberName": "apply"
+						},
+						{
+							"className": "*",
+							"memberName": "bind"
+						},
+						{
+							"className": "*",
+							"memberName": "constructor"
+						},
+						{
+							"className": "*",
+							"memberName": "init"
+						},
+						{
+							"className": "*",
+							"memberName": "exit"
+						}
+					],
+					"description": "Array of objects of exceptions for JS Linter. Added exceptions will not be checked by Unused Method Linter and Wrong Field/Method Linter."
 				}
 			}
 		},
