@@ -37,6 +37,9 @@ export class ConfigHandler {
 		}, {
 			className: "*",
 			memberName: "bind"
+		}, {
+			className: "map",
+			memberName: "*"
 		}];
 	}
 }

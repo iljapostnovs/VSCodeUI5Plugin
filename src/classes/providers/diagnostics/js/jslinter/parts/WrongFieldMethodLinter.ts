@@ -1,13 +1,13 @@
-import { Error, Linter } from "./abstraction/Linter";
+import {Error, Linter} from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import { CustomDiagnosticType } from "../../../../../registrators/DiagnosticsRegistrator";
-import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../../../utils/FileReader";
-import { ConfigHandler } from "./config/ConfigHandler";
+import {CustomDiagnosticType} from "../../../../../registrators/DiagnosticsRegistrator";
+import {AcornSyntaxAnalyzer} from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import {CustomUIClass} from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
+import {FileReader} from "../../../../../utils/FileReader";
+import {ConfigHandler} from "./config/ConfigHandler";
 export class WrongFieldMethodLinter extends Linter {
 	public static timePerChar = 0;
 	getErrors(document: vscode.TextDocument): Error[] {
@@ -100,27 +100,30 @@ export class WrongFieldMethodLinter extends Linter {
 							});
 
 							if (!singleFieldsAndMethods) {
-								const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
-								if (position) {
-									if (className.includes("__map__")) {
-										className = "map";
-									}
-									errorNodes.push(nextNode);
-									errors.push({
-										message: `"${nextNodeName}" does not exist in "${className}"`,
-										code: "UI5Plugin",
-										source: "Field/Method Linter",
-										range: new vscode.Range(
-											new vscode.Position(position.line - 1, position.col),
-											new vscode.Position(position.line - 1, position.col + nextNodeName.length)
-										),
-										acornNode: nextNode,
-										type: CustomDiagnosticType.NonExistentMethod,
-										methodName: nextNodeName,
-										sourceClassName: className
-									});
+								if (className.includes("__map__")) {
+									className = "map";
 								}
-								break;
+								const isMethodException = this._checkIfMethodNameIsException(className, nextNodeName);
+								if (!isMethodException) {
+									const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
+									if (position) {
+										errorNodes.push(nextNode);
+										errors.push({
+											message: `"${nextNodeName}" does not exist in "${className}"`,
+											code: "UI5Plugin",
+											source: "Field/Method Linter",
+											range: new vscode.Range(
+												new vscode.Position(position.line - 1, position.col),
+												new vscode.Position(position.line - 1, position.col + nextNodeName.length)
+											),
+											acornNode: nextNode,
+											type: CustomDiagnosticType.NonExistentMethod,
+											methodName: nextNodeName,
+											sourceClassName: className
+										});
+									}
+									break;
+								}
 							}
 						}
 					} else if (nodeText.endsWith("]")) {

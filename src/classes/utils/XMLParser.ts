@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { FileReader } from "./FileReader";
-import { UIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import {FileReader} from "./FileReader";
+import {UIMethod} from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import {UIClassFactory} from "../UI5Classes/UIClassFactory";
+import {AcornSyntaxAnalyzer} from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {Tag} from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 
 export enum PositionType {
 	InTheTagAttributes = "1",
@@ -97,7 +97,7 @@ export class XMLParser {
 		}
 
 		if (XMLText && position) {
-			const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLText, position);
+			const {positionBegin, positionEnd} = this.getTagBeginEndPosition(XMLText, position);
 			const tag = this.getTagInPosition(XMLText, position);
 			const croppedTag = tag.text.substring(1, tag.text.length - 1); // remove < >
 			const tagIsSelfClosed = croppedTag.endsWith("/");
@@ -128,7 +128,7 @@ export class XMLParser {
 	}
 
 	public static getTagInPosition(XMLViewText: string, position: number) {
-		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLViewText, position);
+		const {positionBegin, positionEnd} = this.getTagBeginEndPosition(XMLViewText, position);
 		const tagText = XMLViewText.substring(positionBegin, positionEnd);
 		const tag: Tag = {
 			text: tagText,
