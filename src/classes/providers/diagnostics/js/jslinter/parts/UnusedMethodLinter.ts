@@ -122,20 +122,22 @@ export class UnusedMethodLinter extends Linter {
 			let isStandartMethod = false;
 			if (methodName.startsWith(standartMethodStartsWith)) {
 				const memberNameCapital = methodName.replace(standartMethodStartsWith, "");
-				const memberName = `${memberNameCapital[0].toLowerCase()}${memberNameCapital.substring(1, memberNameCapital.length)}`
-				const events = UIClassFactory.getClassEvents(className);
-				isStandartMethod = !!events.find(event => event.name === memberName);
-				if (!isStandartMethod) {
-					const properties = UIClassFactory.getClassProperties(className);
-					isStandartMethod = !!properties.find(property => property.name === memberName);
-				}
-				if (!isStandartMethod) {
-					const aggregations = UIClassFactory.getClassAggregations(className);
-					isStandartMethod = !!aggregations.find(aggregation => aggregation.name === memberName);
-				}
-				if (!isStandartMethod) {
-					const associations = UIClassFactory.getClassAssociations(className);
-					isStandartMethod = !!associations.find(association => association.name === memberName);
+				if (memberNameCapital) {
+					const memberName = `${memberNameCapital[0].toLowerCase()}${memberNameCapital.substring(1, memberNameCapital.length)}`
+					const events = UIClassFactory.getClassEvents(className);
+					isStandartMethod = !!events.find(event => event.name === memberName);
+					if (!isStandartMethod) {
+						const properties = UIClassFactory.getClassProperties(className);
+						isStandartMethod = !!properties.find(property => property.name === memberName);
+					}
+					if (!isStandartMethod) {
+						const aggregations = UIClassFactory.getClassAggregations(className);
+						isStandartMethod = !!aggregations.find(aggregation => aggregation.name === memberName);
+					}
+					if (!isStandartMethod) {
+						const associations = UIClassFactory.getClassAssociations(className);
+						isStandartMethod = !!associations.find(association => association.name === memberName);
+					}
 				}
 			}
 

@@ -104,7 +104,8 @@ export class StandardUIClass extends AbstractUIClass {
 			if (methodName.indexOf(SAPNode.getMetadata()?.getRawMetadata()?.name) > -1) {
 				methodName = methodName.replace(SAPNode.getMetadata().getRawMetadata().name + ".", "");
 			}
-			return {
+
+			const classMethod: StandardClassUIMethod = {
 				name: methodName,
 				description: `${StandardUIClass.removeTags(method.description)}`,
 				params: method.parameters ? method.parameters
@@ -122,8 +123,46 @@ export class StandardUIClass extends AbstractUIClass {
 				api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name),
 				visibility: method.visibility
 			};
+
+			this._removeFirstArgumentIfItIsEvent(classMethod);
+			this._addParametersForDataMethod(classMethod);
+			return classMethod;
 		}) || [];
 		return classMethods;
+	}
+
+	private _removeFirstArgumentIfItIsEvent(method: StandardClassUIMethod) {
+		if (method.name.startsWith("attach")) {
+			if (method.params?.length > 0) {
+				const param = method.params.find(param => param.name === "oData?");
+				if (param) {
+					method.params.splice(method.params.indexOf(param), 1);
+				}
+			}
+		}
+	}
+
+	private _addParametersForDataMethod(method: StandardClassUIMethod) {
+		if (method.name === "data" && method.params.length === 0) {
+			method.params.push({
+				type: "string",
+				name: "sCustomDataKey?",
+				description: "Unique custom data key",
+				isOptional: true
+			});
+			method.params.push({
+				type: "any",
+				name: "vData?",
+				description: "data for Custom Data",
+				isOptional: true
+			});
+			method.params.push({
+				type: "boolean",
+				name: "bWriteToDom?",
+				description: "Custom data key",
+				isOptional: true
+			});
+		}
 	}
 
 	private _findSAPNode(className: string) {
