@@ -1,10 +1,10 @@
-import {CustomClassUIField, CustomUIClass} from "../../UI5Parser/UIClass/CustomUIClass";
-import {FieldsAndMethods, UIClassFactory} from "../../UIClassFactory";
-import {FieldPropertyMethodGetterStrategy as FieldMethodGetterStrategy} from "./abstraction/FieldPropertyMethodGetterStrategy";
+import { CustomClassUIField, CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
+import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
+import { FieldPropertyMethodGetterStrategy as FieldMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
 import * as vscode from "vscode";
-import {UIField} from "../../UI5Parser/UIClass/AbstractUIClass";
-import {AcornSyntaxAnalyzer} from "../AcornSyntaxAnalyzer";
-import {FileReader} from "../../../utils/FileReader";
+import { UIField } from "../../UI5Parser/UIClass/AbstractUIClass";
+import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
+import { FileReader } from "../../../utils/FileReader";
 
 export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethodGetterStrategy {
 	getFieldsAndMethods(document: vscode.TextDocument, position: vscode.Position) {
@@ -28,6 +28,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 
 		if (isMap) {
 			const mapFields = className.split("__map__");
+			mapFields.shift(); //remove class name
 			fieldsAndMethods = {
 				className: "map",
 				methods: [],

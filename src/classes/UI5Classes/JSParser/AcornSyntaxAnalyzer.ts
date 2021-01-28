@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
-import {UIClassFactory, FieldsAndMethods} from "../UIClassFactory";
-import {FileReader} from "../../utils/FileReader";
-import {UIField, UIMethod} from "../UI5Parser/UIClass/AbstractUIClass";
-import {CustomClassUIMethod, CustomUIClass, CustomClassUIField} from "../UI5Parser/UIClass/CustomUIClass";
-import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import {FieldPropertyMethodGetterStrategy} from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
-import {InnerPropertiesStrategy} from "./strategies/InnerPropertiesStrategy";
-import {XMLParser} from "../../utils/XMLParser";
-import {SAPNodeDAO} from "../../librarydata/SAPNodeDAO";
+import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
+import { FileReader } from "../../utils/FileReader";
+import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
+import { CustomClassUIMethod, CustomUIClass, CustomClassUIField } from "../UI5Parser/UIClass/CustomUIClass";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { FieldPropertyMethodGetterStrategy } from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
+import { InnerPropertiesStrategy } from "./strategies/InnerPropertiesStrategy";
+import { XMLParser } from "../../utils/XMLParser";
+import { SAPNodeDAO } from "../../librarydata/SAPNodeDAO";
 export class AcornSyntaxAnalyzer {
 	static getFieldsAndMethodsOfTheCurrentVariable(document: vscode.TextDocument, position: vscode.Position) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
@@ -496,7 +496,7 @@ export class AcornSyntaxAnalyzer {
 		return eventHandlerData;
 	}
 
-	static getEventHandlerDataFromJSClass(className: string, eventHandlerName: string): {className: string, eventName: string, node: any} | undefined {
+	static getEventHandlerDataFromJSClass(className: string, eventHandlerName: string): { className: string, eventName: string, node: any } | undefined {
 		let eventHandlerData;
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
@@ -570,12 +570,12 @@ export class AcornSyntaxAnalyzer {
 			const tagText = XMLParser.getTagInPosition(viewOfTheController, position).text;
 			const attributes = XMLParser.getAttributesOfTheTag(tagText);
 			const attribute = attributes?.find(attribute => {
-				const {attributeValue} = XMLParser.getAttributeNameAndValue(attribute);
+				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 
 				return attributeValue === currentClassEventHandlerName;
 			});
 			if (attribute) {
-				const {attributeName} = XMLParser.getAttributeNameAndValue(attribute);
+				const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
 				const eventName = attributeName;
 				if (tagText && eventName) {
 					const tagPrefix = XMLParser.getTagPrefix(tagText);
@@ -1095,7 +1095,7 @@ export class AcornSyntaxAnalyzer {
 					className = this._getClassNameForMap(node, stack, UIClass);
 				} else {
 					const fields = node.properties.map((property: any) => property.key.name);
-					className = fields.join("__map__");
+					className = `${UIClass.className}__map__${fields.join(`__map__`)}`;
 					if (!className) {
 						className = "map"
 					}
