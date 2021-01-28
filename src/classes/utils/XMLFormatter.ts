@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import {Tag} from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
-import {XMLParser} from "./XMLParser";
+import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { XMLParser } from "./XMLParser";
 
 export class XMLFormatter {
 	static formatDocument(document: vscode.TextDocument) {
@@ -108,7 +108,7 @@ export class XMLFormatter {
 	}
 
 	private static _getTagAttributes(tag: string) {
-		const tagAttributes = tag.match(/((?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?")|((?<=\s)(\w|:)*(\s?)=(\s?)'(\s|.)*?')/g) || [];
+		const tagAttributes = tag.match(/((?<=\s)(\w|:|\.)*(\s?)=(\s?)"(\s|.)*?")|((?<=\s)(\w|:|\.)*(\s?)=(\s?)'(\s|.)*?')/g) || [];
 
 		return tagAttributes;
 	}

@@ -666,7 +666,7 @@ export class AcornSyntaxAnalyzer {
 					const isFirstParamOfArrayMethod = node.arguments[0]?.params && node.arguments[0]?.params[0]?.name === identifierNode.name;
 					if (isFirstParamOfArrayMethod) {
 						const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-						className = strategy.acornGetClassName(currentClassName, node.callee.object.end + 1) || "";
+						className = strategy.acornGetClassName(currentClassName, node.callee.object.end + 1, false) || "";
 						if (className.endsWith("[]")) {
 							className = className.replace("[]", "");
 						} else if (className.toLowerCase() === "array") {

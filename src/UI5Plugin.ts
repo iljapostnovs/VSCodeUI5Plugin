@@ -1,15 +1,15 @@
 import * as vscode from "vscode";
-import {CommandRegistrator} from "./classes/registrators/CommandRegistrator";
-import {CompletionItemRegistrator} from "./classes/registrators/CompletionItemRegistrator";
-import {DefinitionProviderRegistrator} from "./classes/registrators/DefinitionProviderRegistrator";
-import {FileWatcherMediator} from "./classes/utils/FileWatcherMediator";
-import {SignatureHelpRegistrator} from "./classes/registrators/SignatureHelpRegistrator";
-import {DiagnosticsRegistrator} from "./classes/registrators/DiagnosticsRegistrator";
-import {CodeLensRegistrator} from "./classes/registrators/CodeLensRegistrator";
-import {JSCodeActionRegistrator} from "./classes/registrators/CodeActionRegistrator";
-import {HoverRegistrator} from "./classes/registrators/HoverRegistrator";
-import {XMLFormatterRegistrator} from "./classes/registrators/XMLFormatterRegistrator";
-import {FileReader} from "./classes/utils/FileReader";
+import { CommandRegistrator } from "./classes/registrators/CommandRegistrator";
+import { CompletionItemRegistrator } from "./classes/registrators/CompletionItemRegistrator";
+import { DefinitionProviderRegistrator } from "./classes/registrators/DefinitionProviderRegistrator";
+import { FileWatcherMediator } from "./classes/utils/FileWatcherMediator";
+import { SignatureHelpRegistrator } from "./classes/registrators/SignatureHelpRegistrator";
+import { DiagnosticsRegistrator } from "./classes/registrators/DiagnosticsRegistrator";
+import { CodeLensRegistrator } from "./classes/registrators/CodeLensRegistrator";
+import { JSCodeActionRegistrator } from "./classes/registrators/CodeActionRegistrator";
+import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
+import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
+import { FileReader } from "./classes/utils/FileReader";
 export class UI5Plugin {
 	private static _instance?: UI5Plugin;
 	public static getInstance() {
@@ -44,7 +44,7 @@ export class UI5Plugin {
 					resolve();
 				} catch (error) {
 					console.error(error);
-					reject("Couldn't initialize plugin: " + JSON.stringify(error));
+					reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
 				}
 			});
 		});
