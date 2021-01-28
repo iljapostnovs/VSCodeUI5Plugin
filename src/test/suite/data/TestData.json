@@ -288,10 +288,7 @@
 					"text": "\"sText\" parameter is of type \"number\", but expected \"string\""
 				},
 				{
-					"text": "\"fnFunction\" parameter is of type \"com.test.controller.LinterTest\", but expected \"function\""
-				},
-				{
-					"text": "\"fnFunction\" parameter is of type \"com.test.controller.LinterTest\", but expected \"function\""
+					"text": "Method \"attachMatched\" has 2 (1 mandatory) param(s), but you provided 3"
 				},
 				{
 					"text": "\"vWhatIsThat\" parameter is of type \"any[]\", but expected \"sap.m.Dialog|sap.m.Text\""
