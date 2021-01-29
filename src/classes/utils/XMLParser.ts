@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import {FileReader} from "./FileReader";
-import {UIMethod} from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import {UIClassFactory} from "../UI5Classes/UIClassFactory";
-import {AcornSyntaxAnalyzer} from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import {Tag} from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { FileReader } from "./FileReader";
+import { UIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 
 export enum PositionType {
 	InTheTagAttributes = "1",
@@ -23,6 +23,7 @@ interface XMLDocumentData {
 	tags: Tag[];
 	prefixResults: PrefixResults;
 	isMarkedAsUndefined: boolean;
+	areAllStringsClosed: boolean;
 }
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -97,7 +98,7 @@ export class XMLParser {
 		}
 
 		if (XMLText && position) {
-			const {positionBegin, positionEnd} = this.getTagBeginEndPosition(XMLText, position);
+			const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLText, position);
 			const tag = this.getTagInPosition(XMLText, position);
 			const croppedTag = tag.text.substring(1, tag.text.length - 1); // remove < >
 			const tagIsSelfClosed = croppedTag.endsWith("/");
@@ -128,7 +129,7 @@ export class XMLParser {
 	}
 
 	public static getTagInPosition(XMLViewText: string, position: number) {
-		const {positionBegin, positionEnd} = this.getTagBeginEndPosition(XMLViewText, position);
+		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLViewText, position);
 		const tagText = XMLViewText.substring(positionBegin, positionEnd);
 		const tag: Tag = {
 			text: tagText,
@@ -444,13 +445,16 @@ export class XMLParser {
 		strings: [],
 		tags: [],
 		prefixResults: {},
-		isMarkedAsUndefined: true
+		isMarkedAsUndefined: true,
+		areAllStringsClosed: true
 	}
 
 	public static getAllTags(document: string) {
 		const currentDocument = this._getCurrentDocument();
 		if (currentDocument && currentDocument.tags.length > 0) {
 			return currentDocument.tags;
+		} else if (currentDocument && !currentDocument.areAllStringsClosed) {
+			return [];
 		}
 
 		let i = 0;
@@ -487,7 +491,9 @@ export class XMLParser {
 		} else {
 			if (document !== this._currentDocument.document) {
 				this._currentDocument.document = document;
-				this._currentDocument.strings = this._getStringPositionMapping(document);
+				const stringData = this._getStringPositionMapping(document);
+				this._currentDocument.strings = stringData.positionMapping;
+				this._currentDocument.areAllStringsClosed = stringData.areAllStringsClosed;
 				this._currentDocument.tags = [];
 				this._currentDocument.prefixResults = {};
 			}
@@ -513,8 +519,10 @@ export class XMLParser {
 			i++;
 		}
 
-
-		return positionMapping;
+		return {
+			positionMapping: positionMapping,
+			areAllStringsClosed: quotionMarkCount % 2 === 0 && secondTypeQuotionMarkCount % 2 === 0
+		};
 	}
 
 	private static _getTagBeginingIndex(document: string, position: number) {
