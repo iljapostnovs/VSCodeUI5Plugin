@@ -1,7 +1,9 @@
-import { FileReader } from "../../../utils/FileReader";
-import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
-import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam } from "./AbstractUIClass";
-import commentParser = require("comment-parser");
+/* eslint-disable @typescript-eslint/no-var-requires */
+import {FileReader} from "../../../utils/FileReader";
+import {AcornSyntaxAnalyzer} from "../../JSParser/AcornSyntaxAnalyzer";
+import * as path from "path";
+import {AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam} from "./AbstractUIClass";
+import * as commentParser from "comment-parser";
 const acornLoose = require("acorn-loose");
 
 interface UIDefine {
@@ -26,14 +28,17 @@ export interface CustomClassUIMethod extends UIMethod {
 	position?: number;
 	acornParams?: any;
 	acornNode?: any;
+	isEventHandler: boolean;
+	mentionedInTheXMLDocument?: boolean;
 }
 export interface CustomClassUIField extends UIField {
 	customData?: LooseObject;
+	acornNode?: any;
 }
 export class CustomUIClass extends AbstractUIClass {
 	public methods: CustomClassUIMethod[] = [];
 	public fields: CustomClassUIField[] = [];
-	public classText: string = "";
+	public classText = "";
 	public UIDefine: UIDefine[] = [];
 	public comments: Comment[] = [];
 	public acornClassBody: any;
@@ -42,10 +47,12 @@ export class CustomUIClass extends AbstractUIClass {
 	private _parentVariableName: any;
 	public acornReturnedClassExtendBody: any | undefined;
 	public classBodyAcornVariableName: string | undefined;
+	public classFSPath: string | undefined;
 
 	constructor(className: string, documentText?: string) {
 		super(className);
 
+		this.classFSPath = FileReader.getClassPathFromClassName(this.className);
 		this._readFileContainingThisClassCode(documentText); //todo: rename. not always reading anyore.
 		this.UIDefine = this._getUIDefine();
 		this.acornClassBody = this._getThisClassBodyAcorn();
@@ -90,7 +97,7 @@ export class CustomUIClass extends AbstractUIClass {
 							name: node.expression.left.property.name,
 							start: node.expression.left.property.start,
 							end: node.expression.left.property.end,
-							type: 'Identifier'
+							type: "Identifier"
 						},
 						value: node.expression.right,
 						start: node.expression.left.object.start,
@@ -196,7 +203,7 @@ export class CustomUIClass extends AbstractUIClass {
 			const param = params.find((param: any) => param.name === tag.name);
 			if (param) {
 				param.jsType = tag.type;
-				const UIParam = method.params.find(param => param.name = tag.name);
+				const UIParam = method.params.find(param => param.name === tag.name);
 				if (UIParam && param.jsType) {
 					UIParam.type = param.jsType;
 				}
@@ -262,7 +269,7 @@ export class CustomUIClass extends AbstractUIClass {
 						return {
 							path: classPath,
 							className: UIDefineClassNames[index],
-							classNameDotNotation: classPath.replace(/\//g, "."),
+							classNameDotNotation: this._generateClassNameDotNotationFor(classPath),
 							start: args[0].elements[index].start,
 							end: args[0].elements[index].end,
 							acornNode: args[0].elements[index]
@@ -272,6 +279,24 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 
 		return UIDefine;
+	}
+
+	private _generateClassNameDotNotationFor(classPath: string) {
+		let className = classPath.replace(/\//g, ".");
+
+		if (classPath.startsWith(".")) {
+			const manifest = FileReader.getManifestForClass(this.className);
+
+			if (manifest && this.classFSPath) {
+				const normalizedManifestPath = path.normalize(manifest.fsPath);
+				const importClassPath = path.resolve(path.dirname(this.classFSPath), classPath);
+				const relativeToManifest = path.relative(normalizedManifestPath, importClassPath);
+				const pathRelativeToManifestDotNotation = relativeToManifest.split(path.sep).join(".");
+				className = `${manifest.componentName}.${pathRelativeToManifestDotNotation}`;
+			}
+		}
+
+		return className;
 	}
 
 	private _getThisClassBodyAcorn() {
@@ -378,13 +403,15 @@ export class CustomUIClass extends AbstractUIClass {
 						description: "",
 						visibility: property.key.name.startsWith("_") ? "private" : "public",
 						acornParams: property.value.params,
-						acornNode: property.value
+						acornNode: property.value,
+						isEventHandler: false
 					};
 					this.methods.push(method);
 				} else if (property.value.type === "Identifier" || property.value.type === "Literal") {
 					this.fields.push({
 						name: property.key.name,
 						type: property.jsType,
+						acornNode: property,
 						description: property.jsType || "",
 						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
@@ -392,8 +419,9 @@ export class CustomUIClass extends AbstractUIClass {
 				} else if (property.value.type === "ObjectExpression") {
 					this.fields.push({
 						name: property.key.name,
-						type: "__map__",
+						type: "map",
 						description: "map",
+						acornNode: property,
 						customData: this._generateCustomDataForObject(property.value),
 						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
@@ -403,6 +431,7 @@ export class CustomUIClass extends AbstractUIClass {
 						name: property.key.name,
 						type: undefined,
 						description: "",
+						acornNode: property,
 						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
@@ -411,6 +440,7 @@ export class CustomUIClass extends AbstractUIClass {
 						name: property.key.name,
 						type: "array",
 						description: "",
+						acornNode: property,
 						visibility: property.key.name.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
@@ -439,6 +469,11 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 
 		this._fillMethodsFromMetadata();
+
+		const constructorMethod = this.methods.find(method => method.name === "constructor");
+		if (constructorMethod) {
+			constructorMethod.returnType = this.className;
+		}
 	}
 
 	private _generateParamTextForMethod(acornParams: any[]) {
@@ -521,7 +556,8 @@ export class CustomUIClass extends AbstractUIClass {
 						description: "",
 						visibility: name?.startsWith("_") ? "private" : "public",
 						acornParams: assignmentBody.params,
-						acornNode: assignmentBody
+						acornNode: assignmentBody,
+						isEventHandler: false
 					};
 					this.methods.push(method);
 				} else if (isField) {
@@ -537,7 +573,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	public static generateDescriptionForMethod(method: UIMethod) {
-		return `(${method.params.map(param => param.name).join(", ")}) : ${(method.returnType ? method.returnType : "void")}`;
+		return `(${method.params.map(param => param.name).join(", ")}) : ${method.returnType ? method.returnType : "void"}`;
 	}
 
 	public fillTypesFromHungarionNotation() {
@@ -553,7 +589,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 		if (variable.length >= 2) {
 			const map: LooseObject = {
-				$: "dom",
+				$: "Element",
 				o: "object",
 				a: "array",
 				i: "int",
@@ -564,7 +600,8 @@ export class CustomUIClass extends AbstractUIClass {
 				p: "Promise",
 				d: "Date",
 				r: "RegExp",
-				v: "any"
+				v: "any",
+				fn: "function"
 			};
 
 			variable = variable.replace("_", "").replace("this.", "");
@@ -600,7 +637,8 @@ export class CustomUIClass extends AbstractUIClass {
 				description: `Getter for property ${property.name}`,
 				params: [],
 				returnType: property.type || "void",
-				visibility: property.visibility
+				visibility: property.visibility,
+				isEventHandler: false
 			});
 
 			aMethods.push({
@@ -613,7 +651,8 @@ export class CustomUIClass extends AbstractUIClass {
 					isOptional: false
 				}],
 				returnType: this.className,
-				visibility: property.visibility
+				visibility: property.visibility,
+				isEventHandler: false
 			});
 		});
 	}
@@ -621,6 +660,7 @@ export class CustomUIClass extends AbstractUIClass {
 	private _fillAggregationMethods(additionalMethods: CustomClassUIMethod[]) {
 		interface method {
 			name: string;
+			params: UIMethodParam[];
 			returnType: string;
 		}
 		this.aggregations?.forEach(aggregation => {
@@ -629,22 +669,115 @@ export class CustomUIClass extends AbstractUIClass {
 			let aMethods: method[] = [];
 			if (aggregation.multiple) {
 				aMethods = [
-					{ name: `get${aggregationWithFirstBigLetter}s`, returnType: `${aggregation.type}[]` },
-					{ name: `add${aggregationWithFirstBigLetter}`, returnType: this.className },
-					{ name: `insert${aggregationWithFirstBigLetter}`, returnType: this.className },
-					{ name: `indexOf${aggregationWithFirstBigLetter}`, returnType: `int` },
-					{ name: `remove${aggregationWithFirstBigLetter}`, returnType: `${aggregation.type}` },
-					{ name: `removeAll${aggregationWithFirstBigLetter}s`, returnType: `${aggregation.type}[]` },
-					{ name: `destroy${aggregationWithFirstBigLetter}s`, returnType: this.className },
-					{ name: `bind${aggregationWithFirstBigLetter}s`, returnType: this.className },
-					{ name: `unbind${aggregationWithFirstBigLetter}s`, returnType: this.className }
+					{
+						name: `get${aggregationWithFirstBigLetter}s`,
+						returnType: `${aggregation.type}[]`,
+						params: []
+					},
+					{
+						name: `add${aggregationWithFirstBigLetter}`,
+						returnType: this.className,
+						params: [{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: aggregation.type,
+							description: aggregation.type,
+							isOptional: false
+						}]
+					},
+					{
+						name: `insert${aggregationWithFirstBigLetter}`,
+						returnType: this.className,
+						params: [{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: aggregation.type,
+							description: aggregation.type,
+							isOptional: false
+						}, {
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: "number",
+							description: "index the item should be inserted at",
+							isOptional: false
+						}]
+					},
+					{
+						name: `indexOf${aggregationWithFirstBigLetter}`,
+						returnType: "int",
+						params: [{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: aggregation.type,
+							description: aggregation.type,
+							isOptional: false
+						}]
+					},
+					{
+						name: `remove${aggregationWithFirstBigLetter}`,
+						returnType: `${aggregation.type}`,
+						params: [{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: aggregation.type,
+							description: aggregation.type,
+							isOptional: false
+						}]
+					},
+					{
+						name: `removeAll${aggregationWithFirstBigLetter}s`,
+						returnType: `${aggregation.type}[]`,
+						params: []
+					},
+					{
+						name:
+							`destroy${aggregationWithFirstBigLetter}s`,
+						returnType: this.className,
+						params: []
+					},
+					{
+						name: `bind${aggregationWithFirstBigLetter}s`,
+						returnType: this.className,
+						params: [{
+							name: "oBindingInfo",
+							type: "object",
+							description: "The binding information",
+							isOptional: false
+						}]
+					},
+					{
+						name: `unbind${aggregationWithFirstBigLetter}s`,
+						returnType: this.className,
+						params: []
+					}
 				];
 			} else {
 				aMethods = [
-					{ name: `get${aggregationWithFirstBigLetter}`, returnType: `${aggregation.type}` },
-					{ name: `set${aggregationWithFirstBigLetter}`, returnType: this.className },
-					{ name: `bind${aggregationWithFirstBigLetter}`, returnType: this.className },
-					{ name: `unbind${aggregationWithFirstBigLetter}`, returnType: this.className }
+					{
+						name: `get${aggregationWithFirstBigLetter}`,
+						returnType: `${aggregation.type}`,
+						params: []
+					},
+					{
+						name: `set${aggregationWithFirstBigLetter}`,
+						returnType: this.className,
+						params: [{
+							name: `v${aggregationWithFirstBigLetter}`,
+							type: aggregation.type,
+							description: aggregation.type,
+							isOptional: false
+						}]
+					},
+					{
+						name: `bind${aggregationWithFirstBigLetter}`,
+						returnType: this.className,
+						params: [{
+							name: "oBindingInfo",
+							type: "object",
+							description: "The binding information",
+							isOptional: false
+						}]
+					},
+					{
+						name: `unbind${aggregationWithFirstBigLetter}`,
+						returnType: this.className,
+						params: []
+					}
 				];
 			}
 
@@ -652,9 +785,10 @@ export class CustomUIClass extends AbstractUIClass {
 				additionalMethods.push({
 					name: method.name,
 					description: `Generic method from ${aggregation.name} aggregation`,
-					params: [],
+					params: method.params,
 					returnType: method.returnType,
-					visibility: aggregation.visibility
+					visibility: aggregation.visibility,
+					isEventHandler: false
 				});
 			});
 
@@ -665,18 +799,51 @@ export class CustomUIClass extends AbstractUIClass {
 		this.events?.forEach(event => {
 			const eventWithFirstBigLetter = `${event.name[0].toUpperCase()}${event.name.substring(1, event.name.length)}`;
 			const aEventMethods = [
-				`fire${eventWithFirstBigLetter}`,
-				`attach${eventWithFirstBigLetter}`,
-				`detach${eventWithFirstBigLetter}`
+				{
+					name: `fire${eventWithFirstBigLetter}`,
+					params: [{
+						name: "mEventParams",
+						type: "map",
+						isOptional: true,
+						description: "Event params"
+					}]
+				}, {
+					name: `attach${eventWithFirstBigLetter}`,
+					params: [{
+						name: "fnHandler",
+						type: "function",
+						isOptional: false,
+						description: "Event Handler"
+					}, {
+						name: "oContext",
+						type: "object",
+						isOptional: true,
+						description: "context of the event handler"
+					}]
+				}, {
+					name: `detach${eventWithFirstBigLetter}`,
+					params: [{
+						name: "fnHandler",
+						type: "function",
+						isOptional: false,
+						description: "Event Handler"
+					}, {
+						name: "oContext",
+						type: "object",
+						isOptional: true,
+						description: "context of the event handler"
+					}]
+				}
 			];
 
 			aEventMethods?.forEach(eventMethod => {
 				aMethods.push({
-					name: eventMethod,
+					name: eventMethod.name,
 					description: `Generic method for event ${event.name}`,
-					params: [],
+					params: eventMethod.params,
 					returnType: this.className,
-					visibility: event.visibility
+					visibility: event.visibility,
+					isEventHandler: false
 				});
 			});
 		});
@@ -689,25 +856,59 @@ export class CustomUIClass extends AbstractUIClass {
 			let aMethods = [];
 			if (association.multiple) {
 				aMethods = [
-					`get${associationWithFirstBigLetter}`,
-					`add${associationWithFirstBigLetter}`,
-					`remove${associationWithFirstBigLetter}`,
-					`removeAll${associationWithFirstBigLetter}s`,
+					{
+						name: `get${associationWithFirstBigLetter}`,
+						params: []
+					},
+					{
+						name: `add${associationWithFirstBigLetter}`,
+						params: [{
+							name: `v${associationWithFirstBigLetter}`,
+							type: association.type || "any",
+							isOptional: false,
+							description: `Add ${associationWithFirstBigLetter}`
+						}]
+					},
+					{
+						name: `remove${associationWithFirstBigLetter}`,
+						params: [{
+							name: `v${associationWithFirstBigLetter}`,
+							type: association.type || "any",
+							isOptional: false,
+							description: `Remove ${associationWithFirstBigLetter}`
+						}]
+					},
+					{
+						name: `removeAll${associationWithFirstBigLetter}s`,
+						params: []
+					}
 				];
 			} else {
 				aMethods = [
-					`get${associationWithFirstBigLetter}`,
-					`set${associationWithFirstBigLetter}`
+					{
+						name: `get${associationWithFirstBigLetter}`,
+						params: []
+					},
+					{
+						name: `set${associationWithFirstBigLetter}`,
+						params: [{
+							name: `v${associationWithFirstBigLetter}`,
+							type: association.type || "any",
+							isOptional: false,
+							description: `Set ${associationWithFirstBigLetter}`
+						}]
+					}
 				];
 			}
 
-			aMethods?.forEach(methodName => {
+			aMethods?.forEach(method => {
 				additionalMethods.push({
-					name: methodName,
+					name: method.name,
 					description: `Generic method from ${association.name} association`,
-					params: [],
+					params: method.params,
 					returnType: association.type || this.className,
-					visibility: association.visibility
+					visibility: association.visibility,
+					isEventHandler: false
 				});
 			});
 
@@ -735,13 +936,41 @@ export class CustomUIClass extends AbstractUIClass {
 				this._fillEvents(metadataObject);
 				this._fillProperties(metadataObject);
 				this._fillByAssociations(metadataObject);
+				this._fillInterfaces(metadataObject);
 			}
 
 			if (customMetadataExists) {
 				const customMetadataObject = this.acornClassBody.properties?.find((property: any) => property.key.name === "customMetadata");
 
 				this._fillByAssociations(customMetadataObject);
+				this._fillCustomInterfaces(customMetadataObject);
 			}
+		}
+	}
+
+	private _fillInterfaces(metadata: any) {
+		const interfaces = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "interfaces");
+		if (interfaces) {
+			const interfaceNamesDotNotation = interfaces.value?.elements?.map((element: any) => element.value) || [];
+			this.interfaces.push(...interfaceNamesDotNotation);
+		}
+	}
+
+	private _fillCustomInterfaces(customMetadata: any) {
+		const interfaces = customMetadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "interfaces");
+		if (interfaces) {
+			const interfaceNames: string[] = interfaces.value?.elements?.map((element: any) => element.name) || [];
+			const interfaceNamesDotNotation =
+				interfaceNames
+					.filter((interfaceName) => {
+						return !!this.UIDefine.find(UIDefine => UIDefine.className === interfaceName);
+
+					})
+					.map((interfaceName) => {
+						return this.UIDefine.find(UIDefine => UIDefine.className === interfaceName)?.classNameDotNotation || "";
+
+					});
+			this.interfaces.push(...interfaceNamesDotNotation);
 		}
 	}
 
@@ -782,7 +1011,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 				const UIAggregations: UIAggregation = {
 					name: aggregationName,
-					type: aggregationType,
+					type: aggregationType || "any",
 					multiple: multiple,
 					singularName: singularName,
 					description: "",
@@ -835,7 +1064,7 @@ export class CustomUIClass extends AbstractUIClass {
 		const propertiesMetadataNode = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "properties");
 
 		if (propertiesMetadataNode) {
-			const properties = propertiesMetadataNode.value.properties;
+			const properties = propertiesMetadataNode.value.properties || [];
 			this.properties = properties.map((propertyNode: any) => {
 
 				const propertyName = propertyNode.key.name;

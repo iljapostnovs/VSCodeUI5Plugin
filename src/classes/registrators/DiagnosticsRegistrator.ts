@@ -1,10 +1,24 @@
 import * as vscode from "vscode";
-import { XMLLinter } from "../xmllinter/XMLLinter";
-import { UI5Plugin } from "../../UI5Plugin";
-import { JSLinter } from "../jslinter/JSLinter";
+import {UI5Plugin} from "../../UI5Plugin";
+import {JSLinter} from "../providers/diagnostics/js/jslinter/JSLinter";
+import {WrongFieldMethodLinter} from "../providers/diagnostics/js/jslinter/parts/WrongFieldMethodLinter";
+import {WrongParametersLinter} from "../providers/diagnostics/js/jslinter/parts/WrongParametersLinter";
+import {XMLLinter} from "../providers/diagnostics/xml/xmllinter/XMLLinter";
 
 let xmlDiagnosticCollection: vscode.DiagnosticCollection;
 let jsDiagnosticCollection: vscode.DiagnosticCollection;
+export class CustomDiagnostics extends vscode.Diagnostic {
+	type?: CustomDiagnosticType;
+	fieldName?: string;
+	methodName?: string;
+	attribute?: string;
+	isController?: boolean;
+}
+
+export enum CustomDiagnosticType {
+	NonExistentMethod = 1,
+	NonExistentField = 2
+}
 export class DiagnosticsRegistrator {
 	static register() {
 		xmlDiagnosticCollection = vscode.languages.createDiagnosticCollection("XML");
@@ -65,17 +79,21 @@ export class DiagnosticsRegistrator {
 
 		if (isXMLDiagnosticsEnabled && !this._timeoutId) {
 			this._timeoutId = setTimeout(() => {
-				const errors = XMLLinter.getLintingErrors(document.getText());
+				const errors = XMLLinter.getLintingErrors(document);
 
-				const diagnostics: vscode.Diagnostic[] = errors.map(error => {
-					return ({
-						code: error.code,
-						message: error.message,
-						range: error.range,
-						severity: vscode.DiagnosticSeverity.Error,
-						source: error.source,
-						relatedInformation: []
-					});
+				const diagnostics: CustomDiagnostics[] = errors.map(error => {
+					const diagnostic = new CustomDiagnostics(error.range, error.message);
+
+					diagnostic.code = error.code;
+					diagnostic.message = error.message;
+					diagnostic.range = error.range;
+					diagnostic.severity = vscode.DiagnosticSeverity.Error;
+					diagnostic.source = error.source;
+					diagnostic.relatedInformation = [];
+					diagnostic.tags = error.tags || [];
+					diagnostic.attribute = error.attribute;
+
+					return diagnostic;
 				});
 
 				collection.set(document.uri, diagnostics);
@@ -88,23 +106,50 @@ export class DiagnosticsRegistrator {
 		const isJSDiagnosticsEnabled = vscode.workspace.getConfiguration("ui5.plugin").get("jsDiagnostics");
 
 		if (isJSDiagnosticsEnabled && !this._timeoutId) {
+			const timeout = this._getTimeoutForDocument(document);
+			// if (timeout) {
 			this._timeoutId = setTimeout(() => {
-				const errors = JSLinter.getLintingErrors(document);
-
-				const diagnostics: vscode.Diagnostic[] = errors.map(error => {
-					return ({
-						code: error.code,
-						message: error.message,
-						range: error.range,
-						severity: vscode.DiagnosticSeverity.Warning,
-						source: "",
-						relatedInformation: []
-					});
-				});
-
-				collection.set(document.uri, diagnostics);
+				this._updateDiagnosticCollection(document, collection);
 				this._timeoutId = null;
-			}, 100);
+			}, timeout);
+			// } else {
+			// this._updateDiagnosticCollection(document, collection);
+			// }
 		}
+	}
+
+	private static _updateDiagnosticCollection(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+		const errors = JSLinter.getLintingErrors(document);
+
+		const diagnostics: CustomDiagnostics[] = errors.map(error => {
+			const diagnostic = new CustomDiagnostics(error.range, error.message);
+
+			diagnostic.code = error.code;
+			diagnostic.severity = vscode.DiagnosticSeverity.Hint;
+			diagnostic.type = error.type;
+			diagnostic.methodName = error.methodName;
+			diagnostic.fieldName = error.fieldName;
+			diagnostic.attribute = error.sourceClassName;
+			diagnostic.source = error.source;
+			diagnostic.isController = error.isController;
+			diagnostic.tags = error.tags;
+			diagnostic.severity = error.severity || vscode.DiagnosticSeverity.Warning;
+
+			return diagnostic;
+		});
+
+		collection.set(document.uri, diagnostics);
+	}
+
+	private static _getTimeoutForDocument(document: vscode.TextDocument) {
+		let timeout = 0;
+		const approximateTime = WrongFieldMethodLinter.timePerChar * document.getText().length + WrongParametersLinter.timePerChar * document.getText().length;
+		if (approximateTime < 75) {
+			timeout = 0;
+		} else {
+			timeout = 100;
+		}
+
+		return timeout;
 	}
 }

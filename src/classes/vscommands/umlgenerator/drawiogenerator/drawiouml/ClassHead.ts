@@ -1,16 +1,16 @@
-import { IUMLGenerator } from "./interfaces/IUMLGenerator";
-import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
-import { AbstractUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { Header } from "./Header";
-import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
+import {IUMLGenerator} from "./interfaces/IUMLGenerator";
+import {DrawIOUMLDiagram} from "../DrawIOUMLDiagram";
+import {AbstractUIClass} from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import {Header} from "./Header";
+import {ITextLengthGettable} from "./interfaces/ITextLengthGettable";
 
 export class ClassHead implements IUMLGenerator, ITextLengthGettable {
 	id: number;
 	parent: Header;
-	width: number = 160;
-	height: number = 26;
-	xAxis: number = 0;
-	yAxis: number = 0;
+	width = 160;
+	height = 26;
+	xAxis = 0;
+	yAxis = 0;
 	UIClass: AbstractUIClass;
 	constructor(UIClass: AbstractUIClass, parent: Header) {
 		this.id = DrawIOUMLDiagram.getUniqueId();

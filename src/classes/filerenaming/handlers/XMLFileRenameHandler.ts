@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { FileReader } from "../../utils/FileReader";
-import { FileRenameHandler } from "./abstraction/FileRenameHandler";
+import {FileReader} from "../../utils/FileReader";
+import {FileRenameHandler} from "./abstraction/FileRenameHandler";
 import * as fs from "fs";
 import * as path from "path";
-import { DiagnosticsRegistrator } from "../../registrators/DiagnosticsRegistrator";
+import {DiagnosticsRegistrator} from "../../registrators/DiagnosticsRegistrator";
 const fileSeparator = path.sep;
 function escapeRegExp(string: string) {
-	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export class XMLFileRenameHandler extends FileRenameHandler {

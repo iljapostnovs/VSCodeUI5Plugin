@@ -1,18 +1,18 @@
 import * as vscode from "vscode";
-import { FileReader } from "./FileReader";
-import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {FileReader} from "./FileReader";
+import {AcornSyntaxAnalyzer} from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import * as glob from "glob";
 import * as fs from "fs";
-import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { WorkspaceCompletionItemFactory } from "../vscodecompletionitems/completionitemfactories/javascript/WorkspaceCompletionItemFactory";
-import { ResourceModelData } from "../UI5Classes/ResourceModelData";
-import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
-import { UI5Plugin } from "../../UI5Plugin";
+import {UIClassFactory} from "../UI5Classes/UIClassFactory";
+import {ResourceModelData} from "../UI5Classes/ResourceModelData";
+import {ClearCacheCommand} from "../vscommands/ClearCacheCommand";
+import {UI5Plugin} from "../../UI5Plugin";
 import * as path from "path";
-import { TemplateGeneratorFactory } from "../templateinserters/TemplateGeneratorFactory";
-import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
-import { CustomCompletionItem } from "../vscodecompletionitems/CustomCompletionItem";
-import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
+import {TemplateGeneratorFactory} from "../templateinserters/TemplateGeneratorFactory";
+import {FileRenameMediator} from "../filerenaming/FileRenameMediator";
+import {CustomCompletionItem} from "../providers/completionitems/CustomCompletionItem";
+import {DiagnosticsRegistrator} from "../registrators/DiagnosticsRegistrator";
+import {WorkspaceCompletionItemFactory} from "../providers/completionitems/js/sapuidefine/WorkspaceCompletionItemFactory";
 const fileSeparator = path.sep;
 const workspace = vscode.workspace;
 
@@ -33,9 +33,11 @@ export class FileWatcherMediator {
 				}
 			} else if (document.fileName.endsWith(".view.xml")) {
 
-				let viewContent = document.getText();
-				viewContent = FileReader.replaceFragments(viewContent);
+				const viewContent = document.getText();
 				FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath);
+			} else if (document.fileName.endsWith(".fragment.xml")) {
+
+				FileReader.setNewFragmentContentToCache(document);
 			} else if (document.fileName.endsWith(".properties")) {
 
 				ResourceModelData.readTexts();
@@ -88,7 +90,7 @@ export class FileWatcherMediator {
 	}
 
 	//TODO: Move to js completion items
-	public static synchronizeJSDefineCompletionItems(completionItems: CustomCompletionItem[]) {
+	public static synchronizeSAPUIDefineCompletionItems(completionItems: CustomCompletionItem[]) {
 		let disposable = workspace.onDidCreateFiles(event => {
 			event.files.forEach(file => {
 				if (file.fsPath.endsWith(".js")) {
@@ -145,11 +147,11 @@ export class FileWatcherMediator {
 			const newFileUri = vscode.Uri.file(filePath);
 			const oldFileUri = vscode.Uri.file(
 				filePath
-				.replace(/\//g, fileSeparator)
-				.replace(
-					newUri.fsPath.replace(/\//g, fileSeparator),
-					oldUri.fsPath.replace(/\//g, fileSeparator)
-				)
+					.replace(/\//g, fileSeparator)
+					.replace(
+						newUri.fsPath.replace(/\//g, fileSeparator),
+						oldUri.fsPath.replace(/\//g, fileSeparator)
+					)
 			);
 
 			this._handleFileRename({

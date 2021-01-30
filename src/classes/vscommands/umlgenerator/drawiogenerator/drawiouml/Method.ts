@@ -1,9 +1,8 @@
-import { IUMLGenerator } from "./interfaces/IUMLGenerator";
-import { UIMethod } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
-import { ClassHead } from "./ClassHead";
-import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
+import {IUMLGenerator} from "./interfaces/IUMLGenerator";
+import {UIMethod} from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import {DrawIOUMLDiagram} from "../DrawIOUMLDiagram";
+import {ClassHead} from "./ClassHead";
+import {ITextLengthGettable} from "./interfaces/ITextLengthGettable";
 
 export class Method implements IUMLGenerator, ITextLengthGettable {
 	id: number;
@@ -25,12 +24,12 @@ export class Method implements IUMLGenerator, ITextLengthGettable {
 		const privateSign = isPrivate ? "-" : "+";
 		const value = `${privateSign} ${this.UIMethod.name}(${this.UIMethod.params.map(param => param.name).join(", ")}): ${this.UIMethod.returnType}`;
 		return value
-		.replace(/\"/g, "")
-		.replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&apos;');
+			.replace(/"/g, "")
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&apos;");
 	}
 	generateXML(): string {
 		return `

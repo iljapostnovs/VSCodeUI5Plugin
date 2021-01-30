@@ -1,4 +1,4 @@
-import { SAPIcons } from "../../SAPIcons";
+import {SAPIcons} from "../../SAPIcons";
 
 export interface UIMethodParam {
 	name: string;
@@ -34,7 +34,7 @@ export interface UIProperty {
 }
 export interface UIAggregation {
 	name: string;
-	type: string | undefined;
+	type: string;
 	multiple: boolean;
 	singularName: string;
 	visibility: string;
@@ -68,8 +68,10 @@ export abstract class AbstractUIClass {
 	public aggregations: UIAggregation[] = [];
 	public events: UIEvent[] = [];
 	public associations: UIAssociation[] = [];
-	public parentClassNameDotNotation: string = "";
+	public interfaces: string[] = [];
+	public parentClassNameDotNotation = "";
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	constructor(className: string, documentText?: string) {
 		this.className = className;
 		this.classExists = true;
@@ -80,11 +82,11 @@ export abstract class AbstractUIClass {
 
 		if (type === "boolean") {
 			typeValues = [
-				{ text: "true", description: "boolean true" },
-				{ text: "false", description: "boolean false" }
+				{text: "true", description: "boolean true"},
+				{text: "false", description: "boolean false"}
 			];
 		} else if (type === "sap.ui.core.URI") {
-			typeValues = SAPIcons.icons.map(icon => ({ text: icon, description: icon }));
+			typeValues = SAPIcons.icons.map(icon => ({text: icon, description: icon}));
 		} else if (type === "string") {
 			// const currentComponentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
 			// if (currentComponentName) {

@@ -1,14 +1,17 @@
-import { CustomClassUIField, CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
-import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
-import { FieldPropertyMethodGetterStrategy as FieldMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
+import {CustomClassUIField, CustomUIClass} from "../../UI5Parser/UIClass/CustomUIClass";
+import {FieldsAndMethods, UIClassFactory} from "../../UIClassFactory";
+import {FieldPropertyMethodGetterStrategy as FieldMethodGetterStrategy} from "./abstraction/FieldPropertyMethodGetterStrategy";
 import * as vscode from "vscode";
-import { UIField } from "../../UI5Parser/UIClass/AbstractUIClass";
-import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
+import {UIField} from "../../UI5Parser/UIClass/AbstractUIClass";
+import {AcornSyntaxAnalyzer} from "../AcornSyntaxAnalyzer";
+import {FileReader} from "../../../utils/FileReader";
 
 export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethodGetterStrategy {
-	getFieldsAndMethods() {
+	getFieldsAndMethods(document: vscode.TextDocument, position: vscode.Position) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
-		const UIClassName = this.getClassNameOfTheVariableAtCurrentDocumentPosition();
+		const className = FileReader.getClassNameFromPath(document.fileName);
+		const offset = document.offsetAt(position);
+		const UIClassName = this.getClassNameOfTheVariableAtPosition(className, offset);
 		if (UIClassName) {
 			fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
 			if (fieldsAndMethods) {
@@ -18,23 +21,23 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 
 		return fieldsAndMethods;
 	}
-
-	public destructueFieldsAndMethodsAccordingToMapParams(className: string) {
+	public destructueFieldsAndMethodsAccordingToMapParams(className: string): FieldsAndMethods | undefined {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
-		const classNamePartsFromFieldMap = className.split("__map__");
+		const isMap = className.includes("__map__");
 		const classNamePartsFromMapParam = className.split("__mapparam__");
 
-		if (classNamePartsFromFieldMap.length > 1) {
-			const className = classNamePartsFromFieldMap.shift();
-			if (className) {
-				const mapFields = classNamePartsFromFieldMap;
-				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
-				const currentFieldName = mapFields.shift();
-				const field = UIClass.fields.find(field => field.name === currentFieldName);
-				if (field) {
-					fieldsAndMethods = this._getFieldsAndMethodsForMap(field, mapFields);
-					fieldsAndMethods.className = className;
-				}
+		if (isMap) {
+			const mapFields = className.split("__map__");
+			mapFields.shift(); //remove class name
+			fieldsAndMethods = {
+				className: "map",
+				methods: [],
+				fields: mapFields.map(field => ({
+					name: field,
+					description: field,
+					type: "any",
+					visibility: "public"
+				}))
 			}
 		} else if (classNamePartsFromMapParam.length > 1) {
 			const className = classNamePartsFromMapParam.shift();
@@ -45,18 +48,20 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 				const fields = fieldString.split(".");
 				const correspondingObject = this._getCorrespondingObject(paramStructure, fields);
 				fieldsAndMethods = {
-					className: "map",
-					fields: Object.keys(correspondingObject).map(key => {
+					className: typeof correspondingObject === "object" ? "map" : correspondingObject,
+					fields: typeof correspondingObject === "object" ? Object.keys(correspondingObject).map(key => {
 						return {
 							description: key,
 							name: key,
 							visibility: "public",
 							type: typeof paramStructure[key] === "string" ? paramStructure[key] : typeof paramStructure[key]
 						};
-					}),
+					}) : [],
 					methods: []
 				};
-				fieldsAndMethods.className = className;
+				if (typeof correspondingObject !== "object") {
+					fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(correspondingObject);
+				}
 			}
 		} else {
 			if (className.endsWith("[]")) {
@@ -107,47 +112,53 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 	}
 
 	private _getUIFieldsForMap(customData: any, mapFields: string[], fields: UIField[] = []) {
-		const fieldName = mapFields.shift();
-		if (fieldName) {
-			customData = customData[fieldName];
-		}
+		if (customData) {
+			const fieldName = mapFields.shift();
+			if (fieldName) {
+				customData = customData[fieldName];
+			}
 
-		if (mapFields.length === 0) {
-			const newFields: UIField[] = Object.keys(customData).map(key => {
-				return {
-					name: key,
-					description: "",
-					type: undefined,
-					visibility: "public"
-				};
-			});
-			newFields.forEach(newField => {
-				fields.push(newField);
-			});
-		} else {
-			this._getUIFieldsForMap(customData, mapFields, fields);
+			if (mapFields.length === 0 && customData) {
+				const newFields: UIField[] = Object.keys(customData).map(key => {
+					return {
+						name: key,
+						description: "",
+						type: undefined,
+						visibility: "public"
+					};
+				});
+				newFields.forEach(newField => {
+					fields.push(newField);
+				});
+			} else {
+				this._getUIFieldsForMap(customData, mapFields, fields);
+			}
 		}
 
 		return fields;
 	}
 
-	public getClassNameOfTheVariableAtCurrentDocumentPosition() {
+	public getClassNameOfTheVariableAtPosition(className?: string, position?: number) {
 		let UIClassName;
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		if (!className) {
+			className = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		}
 
 		const activeTextEditor = vscode.window.activeTextEditor;
-		if (currentClassName && activeTextEditor) {
-			const position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
+		if (className && activeTextEditor) {
+			if (!position) {
+				position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
+			}
 
-			UIClassName = this.acornGetClassName(currentClassName, position);
+			UIClassName = this.acornGetClassName(className, position);
 		}
 
 		return UIClassName;
 	}
 
-	public acornGetClassName(className: string, position: number, clearStack: boolean = true) {
+	public acornGetClassName(className: string, position: number, clearStack = true, checkForLastPosition = false) {
 		let classNameOfTheCurrentVariable;
-		const stack = this.getStackOfNodesForPosition(className, position);
+		const stack = this.getStackOfNodesForPosition(className, position, checkForLastPosition);
 		if (stack.length > 0) {
 			classNameOfTheCurrentVariable = AcornSyntaxAnalyzer.findClassNameForStack(stack, className, undefined, clearStack);
 		}
@@ -155,7 +166,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return classNameOfTheCurrentVariable;
 	}
 
-	public getStackOfNodesForPosition(className: string, position: number, checkForLastPosition: boolean = false) {
+	public getStackOfNodesForPosition(className: string, position: number, checkForLastPosition = false) {
 		const stack: any[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 
@@ -187,9 +198,9 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return stack;
 	}
 
-	private _generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition: boolean = false) {
+	private _generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition = false) {
 		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "VariableDeclaration", "ThisExpression", "NewExpression", "Identifier"];
-		const positionIsCorrect = node.end < position || (checkForLastPosition && node.end === position);
+		const positionIsCorrect = node.end < position || checkForLastPosition && node.end === position;
 		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖" && node.property?.name !== "prototype") {
 			stack.unshift(node);
 		}

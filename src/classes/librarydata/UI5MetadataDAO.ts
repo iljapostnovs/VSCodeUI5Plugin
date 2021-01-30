@@ -1,9 +1,9 @@
-import { URLBuilder } from "../utils/URLBuilder";
-import { FileReader } from "../utils/FileReader";
-import { UI5Plugin } from "../../UI5Plugin";
-import { HTTPHandler } from "../utils/HTTPHandler";
-import { SAPNode } from "./SAPNode";
-import { UI5Metadata } from "./UI5Metadata";
+import {URLBuilder} from "../utils/URLBuilder";
+import {FileReader} from "../utils/FileReader";
+import {UI5Plugin} from "../../UI5Plugin";
+import {HTTPHandler} from "../utils/HTTPHandler";
+import {SAPNode} from "./SAPNode";
+import {UI5Metadata} from "./UI5Metadata";
 
 interface LooseObject {
 	[key: string]: any;
@@ -19,7 +19,7 @@ export class UI5MetadataPreloader {
 	}
 
 	public async preloadLibs() {
-		var cache = this._loadCache();
+		let cache = this._loadCache();
 		if (!cache) {
 			const promises = [];
 			const metadataDAO = new UI5MetadataDAO();
@@ -68,8 +68,6 @@ export class UI5MetadataPreloader {
 	}
 }
 export class UI5MetadataDAO {
-	constructor() {}
-
 	public getPreloadedMetadataForNode(node: SAPNode) {
 		const libMetadata = namespaceDesignTimes[node.getLib()];
 		const metadata = this._findNodeMetadata(node, libMetadata);

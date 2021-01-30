@@ -1,14 +1,14 @@
-import { AbstractUIClass, UIField, UIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { Property } from "./drawiouml/Property";
-import { Method } from "./drawiouml/Method";
-import { Field } from "./drawiouml/Field";
-import { ClassHead } from "./drawiouml/ClassHead";
-import { Header } from "./drawiouml/Header";
-import { Footer } from "./drawiouml/Footer";
-import { Separator } from "./drawiouml/Separator";
-import { ITextLengthGettable } from "./drawiouml/interfaces/ITextLengthGettable";
-import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {AbstractUIClass, UIField, UIMethod} from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import {Property} from "./drawiouml/Property";
+import {Method} from "./drawiouml/Method";
+import {Field} from "./drawiouml/Field";
+import {ClassHead} from "./drawiouml/ClassHead";
+import {Header} from "./drawiouml/Header";
+import {Footer} from "./drawiouml/Footer";
+import {Separator} from "./drawiouml/Separator";
+import {ITextLengthGettable} from "./drawiouml/interfaces/ITextLengthGettable";
+import {AcornSyntaxAnalyzer} from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {CustomUIClass} from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 export class DrawIOUMLDiagram {
 	readonly UIClass: AbstractUIClass;
@@ -74,8 +74,8 @@ export class DrawIOUMLDiagram {
 
 			return isFirstFieldPrivate === isSecondFieldPrivate ? 0 : isFirstFieldPrivate ? 1 : -1;
 		})
-		.filter(field => field.name !== "prototype")
-		.map((field, i) => new Field(field, this.classHead, index + i));
+			.filter(field => field.name !== "prototype")
+			.map((field, i) => new Field(field, this.classHead, index + i));
 		index += fields.length;
 		const methods = this.UIClass.methods.sort((a: UIMethod, b: UIMethod) => {
 			const isFirstMethodPrivate = a.name.startsWith("_");
@@ -83,7 +83,7 @@ export class DrawIOUMLDiagram {
 
 			return isFirstMethodPrivate === isSecondMethodPrivate ? 0 : isFirstMethodPrivate ? 1 : -1;
 		})
-		.map((method, i) => new Method(method, this.classHead, index + i));
+			.map((method, i) => new Method(method, this.classHead, index + i));
 
 		let items: ITextLengthGettable[] = properties;
 		items = items.concat(methods);
@@ -120,8 +120,8 @@ export class DrawIOUMLDiagram {
 
 			return isFirstFieldPrivate === isSecondFieldPrivate ? 0 : isFirstFieldPrivate ? 1 : -1;
 		})
-		.filter(field => field.name !== "prototype")
-		.map((field, i) => new Field(field, this.classHead, index + i));
+			.filter(field => field.name !== "prototype")
+			.map((field, i) => new Field(field, this.classHead, index + i));
 		index += fields.length;
 		const methods = this.UIClass.methods.sort((a: UIMethod, b: UIMethod) => {
 			const isFirstMethodPrivate = a.name.startsWith("_");
@@ -129,7 +129,7 @@ export class DrawIOUMLDiagram {
 
 			return isFirstMethodPrivate === isSecondMethodPrivate ? 0 : isFirstMethodPrivate ? 1 : -1;
 		})
-		.map((method, i) => new Method(method, this.classHead, index + i));
+			.map((method, i) => new Method(method, this.classHead, index + i));
 
 		const separator = new Separator(this.classHead, fields.length + properties.length);
 

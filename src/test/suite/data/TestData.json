@@ -1,192 +1,382 @@
 {
-	"data": [{
-		"className": "com.test.controller.Master",
-		"methods": [{
-			"name": "onShowHello",
-			"returnType": "sap.m.Dialog"
-		},{
-			"name": "onOpenDialog",
-			"returnType": "Promise"
-		},{
-			"name": "_getTable",
-			"returnType": "sap.m.Table"
-		},{
-			"name": "_getArray",
-			"returnType": "array"
-		},{
-			"name": "_getString",
-			"returnType": "string"
-		},{
-			"name": "_getMap",
-			"returnType": "map"
-		},{
-			"name": "_mapToFilterArray",
-			"returnType": "sap.ui.model.Filter[]"
-		},{
-			"name": "_mapToDialogArray",
-			"returnType": "sap.m.Dialog[]"
-		},{
-			"name": "_filterDialogArray",
-			"returnType": "sap.m.Dialog[]"
-		},{
-			"name": "_findDialog",
-			"returnType": "sap.m.Dialog"
-		},{
-			"name": "_getStringArray",
-			"returnType": "string[]"
-		},{
-			"name": "_getMixedArrayMethodArray",
-			"returnType": "sap.m.Dialog[]"
-		},{
-			"name": "onTableSelectionChange",
-			"returnType": "sap.m.ListItemBase"
-		},{
-			"name": "onTableSwipe",
-			"returnType": "sap.m.Table"
-		},{
-			"name": "methodFromFormatter",
-			"returnType": "sap.m.Dialog"
-		}],
-		"fields": [{
-			"name": "formatter",
-			"type": "com.test.util.Formatter"
-		},{
-			"name": "_test2",
-			"type": "com.test.util.Formatter"
-		},{
-			"name": "_test",
-			"type": "com.test.util.Formatter"
-		},{
-			"name": "_customClassExtend",
+	"data": [
+		{
+			"className": "com.test.controller.Master",
+			"methods": [
+				{
+					"name": "onShowHello",
+					"returnType": "sap.m.Dialog"
+				},
+				{
+					"name": "onOpenDialog",
+					"returnType": "Promise"
+				},
+				{
+					"name": "_getTable",
+					"returnType": "sap.m.Table"
+				},
+				{
+					"name": "_getArray",
+					"returnType": "any[]"
+				},
+				{
+					"name": "_getString",
+					"returnType": "string"
+				},
+				{
+					"name": "_getMap",
+					"returnType": "map"
+				},
+				{
+					"name": "_mapToFilterArray",
+					"returnType": "sap.ui.model.Filter[]"
+				},
+				{
+					"name": "_mapToDialogArray",
+					"returnType": "sap.m.Dialog[]"
+				},
+				{
+					"name": "_filterDialogArray",
+					"returnType": "sap.m.Dialog[]"
+				},
+				{
+					"name": "_findDialog",
+					"returnType": "sap.m.Dialog"
+				},
+				{
+					"name": "_getStringArray",
+					"returnType": "string[]"
+				},
+				{
+					"name": "_getMixedArrayMethodArray",
+					"returnType": "sap.m.Dialog[]"
+				},
+				{
+					"name": "onTableSelectionChange",
+					"returnType": "sap.m.ListItemBase"
+				},
+				{
+					"name": "onTableSwipe",
+					"returnType": "sap.m.Table"
+				},
+				{
+					"name": "methodFromFormatter",
+					"returnType": "sap.m.Dialog"
+				}
+			],
+			"fields": [
+				{
+					"name": "formatter",
+					"type": "com.test.util.Formatter"
+				},
+				{
+					"name": "_test2",
+					"type": "com.test.util.Formatter"
+				},
+				{
+					"name": "_test",
+					"type": "com.test.util.Formatter"
+				},
+				{
+					"name": "_customClassExtend",
+					"type": "com.test.util.CustomClassExtend"
+				},
+				{
+					"name": "_oMessageBox",
+					"type": "sap.m.MessageBox"
+				},
+				{
+					"name": "_oText",
+					"type": "sap.m.Text"
+				},
+				{
+					"name": "_oTable",
+					"type": "sap.m.Table"
+				}
+			]
+		},
+		{
+			"className": "com.test.util.Formatter",
+			"methods": [
+				{
+					"name": "customMethod",
+					"returnType": "sap.m.Dialog"
+				},
+				{
+					"name": "asyncCustomMethod",
+					"returnType": "Promise"
+				},
+				{
+					"name": "anotherCustomMethod",
+					"returnType": "sap.m.Label"
+				}
+			],
+			"fields": []
+		},
+		{
+			"className": "com.test.util.CustomClassExtend",
+			"methods": [
+				{
+					"name": "customMethodExtended",
+					"returnType": "sap.m.Dialog"
+				},
+				{
+					"name": "staticTest",
+					"returnType": "sap.m.Dialog"
+				},
+				{
+					"name": "instanceTest",
+					"returnType": "sap.m.Text"
+				}
+			],
+			"fields": [
+				{
+					"name": "staticTest2",
+					"type": "string"
+				},
+				{
+					"name": "_customField"
+				}
+			]
+		},
+		{
+			"className": "com.test.util.CustomClass",
+			"methods": [
+				{
+					"name": "customMethod",
+					"returnType": "sap.m.Text"
+				}
+			],
+			"fields": [
+				{
+					"name": "_customField",
+					"type": "sap.m.Text"
+				}
+			]
+		}
+	],
+	"SyntaxAnalyser": [
+		{
+			"className": "com.test.controller.Master",
+			"methodName": "onShowHello",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "customMethod"
+				}
+			},
 			"type": "com.test.util.CustomClassExtend"
-		},{
-			"name": "_oMessageBox",
-			"type": "sap.m.MessageBox"
-		},{
-			"name": "_oText",
+		},
+		{
+			"className": "com.test.controller.Master",
+			"methodName": "onShowHello",
+			"positionAddition": 1,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "customMethod"
+				}
+			},
+			"type": "com.test.util.CustomClassExtend"
+		},
+		{
+			"className": "com.test.controller.Master",
+			"methodName": "onShowHello",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "getBinding"
+				}
+			},
 			"type": "sap.m.Text"
-		},{
-			"name": "_oTable",
-			"type": "sap.m.Table"
-		}]
-	},{
-		"className": "com.test.util.Formatter",
-		"methods": [{
-			"name": "customMethod",
-			"returnType": "sap.m.Dialog"
-		},{
-			"name": "asyncCustomMethod",
-			"returnType": "Promise"
-		},{
-			"name": "anotherCustomMethod",
-			"returnType": "sap.m.Label"
-		}],
-		"fields": []
-	},{
-		"className": "com.test.util.CustomClassExtend",
-		"methods": [{
-			"name": "customMethodExtended",
-			"returnType": "sap.m.Dialog"
-		},{
-			"name": "staticTest",
-			"returnType": "sap.m.Dialog"
-		},{
-			"name": "instanceTest",
-			"returnType": "sap.m.Text"
-		}],
-		"fields": [{
-			"name": "staticTest2",
-			"type": "string"
-		},{
-			"name": "_customField"
-		}]
-	},{
-		"className": "com.test.util.CustomClass",
-		"methods": [{
-			"name": "customMethod",
-			"returnType": "sap.m.Text"
-		}],
-		"fields": [{
-			"name": "_customField",
-			"type": "sap.m.Text"
-		}]
-	}],
-	"SyntaxAnalyser": [{
-		"className": "com.test.controller.Master",
-		"methodName": "onShowHello",
-		"positionAddition": 0,
-		"node": {
-			"type": "MemberExpression",
-			"property": {
-				"name": "customMethod"
-			}
 		},
-		"type": "com.test.util.CustomClassExtend"
-	},{
-		"className": "com.test.controller.Master",
-		"methodName": "onShowHello",
-		"positionAddition": 1,
-		"node": {
-			"type": "MemberExpression",
-			"property": {
-				"name": "customMethod"
-			}
+		{
+			"className": "com.test.controller.Master",
+			"methodName": "onShowHello",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "getProperty"
+				}
+			},
+			"type": "com.test.util.TestModel"
 		},
-		"type": "com.test.util.CustomClassExtend"
-	},{
-		"className": "com.test.controller.Master",
-		"methodName": "onShowHello",
-		"positionAddition": 0,
-		"node": {
-			"type": "MemberExpression",
-			"property": {
-				"name": "getBinding"
-			}
+		{
+			"className": "com.test.controller.Master",
+			"methodName": "_findDialog",
+			"positionAddition": 1,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "getTitle"
+				}
+			},
+			"type": "sap.m.Dialog"
 		},
-		"type": "sap.m.Text"
-	},{
-		"className": "com.test.controller.Master",
-		"methodName": "onShowHello",
-		"positionAddition": 0,
-		"node": {
-			"type": "MemberExpression",
-			"property": {
-				"name": "getProperty"
-			}
+		{
+			"className": "com.test.controller.Master",
+			"methodName": "_testMyModel",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "testMethod"
+				}
+			},
+			"type": "com.test.util.TestModel"
 		},
-		"type": "com.test.util.TestModel"
-	},{
-		"className": "com.test.controller.Master",
-		"methodName": "_findDialog",
-		"positionAddition": 1,
-		"node": {
-			"type": "MemberExpression",
-			"property": {
-				"name": "getTitle"
-			}
+		{
+			"className": "com.test.controller.Master",
+			"methodName": "_testAnonymousModel",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "testMethod"
+				}
+			},
+			"type": "com.test.util.TestModel"
+		}
+	],
+	"JSLinter": [
+		{
+			"className": "com.test.controller.LinterTest",
+			"errors": [
+				{
+					"text": "\"_nonExistentMethod\" does not exist in \"com.test.controller.LinterTest\""
+				},
+				{
+					"text": "\"wrongMethod\" does not exist in \"sap.m.Dialog\""
+				},
+				{
+					"text": "\"wrongField\" does not exist in \"sap.m.Dialog\""
+				},
+				{
+					"text": "\"aThirdParam\" parameter is of type \"number[]\", but expected \"string[]\""
+				},
+				{
+					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
+				},
+				{
+					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
+				},
+				{
+					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
+				},
+				{
+					"text": "Method \"allowTextSelection\" has 1 (0 mandatory) param(s), but you provided 2"
+				},
+				{
+					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
+				},
+				{
+					"text": "\"bAllow\" parameter is of type \"number\", but expected \"boolean\""
+				},
+				{
+					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
+				},
+				{
+					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 1"
+				},
+				{
+					"text": "\"oSecondParam\" parameter is of type \"sap.m.Dialog\", but expected \"sap.m.Text\""
+				},
+				{
+					"text": "\"sText\" parameter is of type \"number\", but expected \"string\""
+				},
+				{
+					"text": "Method \"attachMatched\" has 2 (1 mandatory) param(s), but you provided 3"
+				},
+				{
+					"text": "\"vWhatIsThat\" parameter is of type \"any[]\", but expected \"sap.m.Dialog|sap.m.Text\""
+				},
+				{
+					"text": "No references found for \"unusedMethod\" class member"
+				}
+			]
+		}
+	],
+	"XMLLinter": [
+		{
+			"className": "com.test.view.LinterTest",
+			"errors": [
+				{
+					"text": "Invalid attribute value (wrong value)"
+				},
+				{
+					"text": "Invalid attribute name (wrongProperty)"
+				},
+				{
+					"text": "Invalid attribute value (nonExistantEventHandler)"
+				},
+				{
+					"text": "Unused namespace"
+				},
+				{
+					"text": "\"nonExistantAggregation\" aggregation doesn't exist in \"sap.m.Page\""
+				},
+				{
+					"text": "\"nonExistantAggregation\" aggregation doesn't exist in \"sap.m.Page\""
+				},
+				{
+					"text": "\"s\" prefix is not defined"
+				},
+				{
+					"text": "\"sap.m.NonExistantClass\" class doesn't exist"
+				}
+			]
+		}
+	],
+	"FragmentLinter": [
+		{
+			"className": "com.test.view.fragments.LinterTest",
+			"errors": [
+				{
+					"text": "Invalid attribute value (onWrongEventHandler)"
+				},
+				{
+					"text": "Invalid attribute value (nonExistantHandler)"
+				},
+				{
+					"text": "Invalid attribute value (wrong value)"
+				},
+				{
+					"text": "Invalid attribute name (wrongAttribute)"
+				}
+			]
 		},
-		"type": "sap.m.Dialog"
-	},{
-		"className": "com.test.controller.Master",
-		"methodName": "_testMyModel",
-		"positionAddition": 0,
-		"node": {
-			"type": "MemberExpression",
-			"property": {
-				"name": "testMethod"
-			}
+		{
+			"className": "com.test.view.fragments.SecondFragment",
+			"errors": [
+				{
+					"text": "Invalid attribute value (onUnexistantDelete)"
+				}
+			]
 		},
-		"type": "com.test.util.TestModel"
-	},{
-		"className": "com.test.controller.Master",
-		"methodName": "_testAnonymousModel",
-		"positionAddition": 0,
-		"node": {
-			"type": "MemberExpression",
-			"property": {
-				"name": "testMethod"
-			}
-		},
-		"type": "com.test.util.TestModel"
-	}]
+		{
+			"className": "com.test.view.fragments.ThirdFragment",
+			"errors": [
+				{
+					"text": "Invalid attribute value (onUnexistantDelete)"
+				}
+			]
+		}
+	],
+	"EventHandlers": [
+		{
+			"className": "com.test.controller.LinterTest",
+			"eventHandlers": [
+				"_onRouteMatched",
+				"_onRouteMatched2",
+				"_onRouteMatched3",
+				"_onDelete",
+				"onFragmentButtonPress",
+				"onSecondFragmentSelectionChange",
+				"onThirdFragmentSelectionChange"
+			]
+		}
+	]
 }

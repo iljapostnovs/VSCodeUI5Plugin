@@ -44,6 +44,13 @@ Definitions for custom methods are provided.<br/>
 ![Definition](/images/Definition.gif)
 
 ----------
+## XML Event Handler Definitions
+Definitions for event handlers are provided.<br/>
+> Hotkey: Ctrl + Left Click<br/>
+
+![Definition](/images/XMLDefinition.gif)
+
+----------
 ## Code Lens
 Code Lens for Internalization Texts is provided<br/>
 ![DynamicCompletionItems](/images/XMLResourceModel.gif)
@@ -51,24 +58,51 @@ Code Lens for Internalization Texts is provided<br/>
 ----------
 ## XML Diagnostics
 XML Diagnostics is provided<br/>
+There are two linters available:<br/>
+* Attribute linter, which checks for property existence, value, prefix existence, event handler existence, class existence<br/>
+* Unused namespace linter<br/>
+
 > Related preference entries: *ui5.plugin.xmlDiagnostics*<br/>
 
 ![DynamicCompletionItems](/images/XMLDiagnostics.gif)
 
 ----------
 ## JS Diagnostics
-XML Diagnostics is provided<br/>
-> Related preference entries: *ui5.plugin.jsDiagnostics* (disabled by default)<br/>
+> You can define diagnostic exceptions using *ui5.plugin.JSLinterExceptions* preference entry.
+
+JS Diagnostics is provided<br/>
+There are five linters available:<br/>
+* Wrong field/method usage linter<br/>
+* Wrong custom class name linter<br/>
+* Wrong import path linter<br/>
+* Unused method linter<br/>
+* Wrong parameter usage in the methods linter, which checks for parameter quantity and data type<br/>
+	> Use jsdoc to make your parameters optional, e.g.
+	```javascript
+	/**
+	 *@param {string} [sOptionalString] - optional string param
+	 *@param {string} sMandatoryString - mandatory string param
+	 */
+	```
+
+> Related preference entries:<br/>
+> *ui5.plugin.jsDiagnostics*<br/>
+> *ui5.plugin.useWrongFieldMethodLinter*<br/>
+> *ui5.plugin.useWrongClassNameLinter*<br/>
+> *ui5.plugin.useWrongImportLinter*<br/>
+> *ui5.plugin.useWrongParametersLinter*<br/>
+> *ui5.plugin.JSLinterExceptions*<br/>
 
 ![DynamicCompletionItems](/images/JSDiagnostics.gif)
 
 ----------
 ## Code Action Provider
-Code Actions for UI5 modules import in .js files are provided.<br/>
+Code Actions for UI5 modules import and inserting non-existent methods in .js files are provided.<br/>
 Code Actions for creating event handlers in controllers from xml views are provided.<br/>
 > Hotkey: Alt + Enter<br/>
 
 ![CodeActionsProvider](/images/CodeActionsProvider.gif)
+![CreateMethodCodeActionsProvider](/images/CreateMethodCodeActionsProvider.gif)
 
 ----------
 ## JS and XML Hover Provider
@@ -195,7 +229,6 @@ function() {
 * You have manifest.json in source folder
 * App ID (Component name) and i18n paths are defined in manifest.json
 * File is without syntax errors
-* All your strings in sap.ui.define are not Relative (e.g. "./BaseController")
 * Name of the class of the UI5Class is the same as file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
 * You have an access to ui5.sap.com for standard lib metadata preload
 

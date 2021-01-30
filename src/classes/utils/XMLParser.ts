@@ -3,7 +3,7 @@ import { FileReader } from "./FileReader";
 import { UIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { Tag } from "../xmllinter/parts/abstraction/Linter";
+import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 
 export enum PositionType {
 	InTheTagAttributes = "1",
@@ -14,8 +14,19 @@ export enum PositionType {
 	InBodyOfTheClass = "6"
 }
 
+interface PrefixResults {
+	[key: string]: any[]
+}
+interface XMLDocumentData {
+	document: string;
+	strings: boolean[];
+	tags: Tag[];
+	prefixResults: PrefixResults;
+	isMarkedAsUndefined: boolean;
+	areAllStringsClosed: boolean;
+}
 function escapeRegExp(string: string) {
-	return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export class XMLParser {
@@ -23,39 +34,61 @@ export class XMLParser {
 		let IdsResult: string[] = [];
 		const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		if (currentClass) {
-			const viewText = FileReader.getViewText(currentClass);
-			if (viewText) {
-				IdsResult = viewText.match(/(?<=\sid=").*?(?="\s)/g) || [];
+			const idRegExp = /(?<=\sid=").*?(?="\s)/g;
+			const view = FileReader.getViewForController(currentClass);
+			if (view) {
+				IdsResult = view.content.match(idRegExp) || [];
+				view.fragments.forEach(fragment => {
+					const IdsFragmentResult = fragment.content.match(idRegExp) || [];
+					if (IdsFragmentResult) {
+						IdsResult.push(...IdsFragmentResult);
+					}
+				});
 			}
+			const fragments = FileReader.getFragmentsForClass(currentClass);
+			fragments.forEach(fragment => {
+				const IdsFragmentResult = fragment.content.match(idRegExp) || [];
+				if (IdsFragmentResult) {
+					IdsResult.push(...IdsFragmentResult);
+				}
+			});
 		}
 
 		return IdsResult;
 	}
 	static getLibraryNameInPosition(XMLViewText: string, currentPosition: number) {
-		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition);
+		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition).text;
 		const tagPrefix = this.getTagPrefix(currentTagText);
 		const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix, currentPosition);
+
+		if (!libraryPath) {
+			const error = new Error(`xmlns:${tagPrefix} is not defined`);
+			error.name = "LibraryPathException";
+			throw error;
+		}
 
 		return libraryPath;
 	}
 	static getClassNameInPosition(XMLViewText: string, currentPosition: number) {
 		let currentPositionClass = "";
-		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition);
+		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition).text;
 		const tagPrefix = this.getTagPrefix(currentTagText);
 		const className = this.getClassNameFromTag(currentTagText);
 		if (className) {
 			const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix, currentPosition);
-			currentPositionClass = [libraryPath, className].join(".");
+			if (libraryPath) {
+				currentPositionClass = [libraryPath, className].join(".");
+			}
 		}
 
 		return currentPositionClass;
 	}
 
 	static getParentTagAtPosition(XMLText?: string, position?: number, closedTags: string[] = []) {
-		let parentTag = {
+		let parentTag: Tag = {
 			positionBegin: 0,
 			positionEnd: 0,
-			tag: ""
+			text: ""
 		};
 		if (!XMLText) {
 			XMLText = vscode.window.activeTextEditor?.document.getText();
@@ -65,9 +98,9 @@ export class XMLParser {
 		}
 
 		if (XMLText && position) {
-			const {positionBegin, positionEnd} = this.getTagBeginEndPosition(XMLText, position);
+			const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLText, position);
 			const tag = this.getTagInPosition(XMLText, position);
-			const croppedTag = tag.substring(1, tag.length - 1); // remove < >
+			const croppedTag = tag.text.substring(1, tag.text.length - 1); // remove < >
 			const tagIsSelfClosed = croppedTag.endsWith("/");
 			const itIsClosureTag = croppedTag.startsWith("/");
 			if (tagIsSelfClosed) {
@@ -79,14 +112,14 @@ export class XMLParser {
 				closedTags.pop();
 				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
 			} else {
-				const className = this.getClassNameFromTag(tag);
+				const className = this.getClassNameFromTag(tag.text);
 				if (closedTags.includes(className)) {
 					closedTags.splice(closedTags.indexOf(className), 1);
 					parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
 				} else {
 					parentTag.positionBegin = positionBegin;
 					parentTag.positionEnd = positionEnd;
-					parentTag.tag = tag;
+					parentTag.text = tag.text;
 				}
 
 			}
@@ -98,8 +131,13 @@ export class XMLParser {
 	public static getTagInPosition(XMLViewText: string, position: number) {
 		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLViewText, position);
 		const tagText = XMLViewText.substring(positionBegin, positionEnd);
+		const tag: Tag = {
+			text: tagText,
+			positionBegin: positionBegin,
+			positionEnd: positionEnd
+		};
 
-		return tagText;
+		return tag;
 	}
 
 	public static getTagBeginEndPosition(XMLViewText: string, position: number) {
@@ -123,7 +161,7 @@ export class XMLParser {
 		};
 	}
 
-	private static _lastDocument: string = "";
+	private static _lastDocument = "";
 	private static _lastComments: RegExpExecArray[] = [];
 
 	public static getIfPositionIsNotInComments(document: string, position: number) {
@@ -153,22 +191,30 @@ export class XMLParser {
 	}
 
 	static getIfPositionIsInString(XMLViewText: string, position: number) {
-		let quotionMarkCount = 0;
-		let secondTypeQuotionMarkCount = 0;
+		let isInString = false;
+		const currentDocument = this._getCurrentDocument();
+		if (currentDocument) {
+			isInString = !!currentDocument.strings[position];
+		} else {
+			let quotionMarkCount = 0;
+			let secondTypeQuotionMarkCount = 0;
 
-		let i = 0;
-		while (i < position) {
-			if (XMLViewText[i] === "\"") {
-				quotionMarkCount++;
-			}
-			if (XMLViewText[i] === "'") {
-				secondTypeQuotionMarkCount++;
+			let i = 0;
+			while (i < position) {
+				if (XMLViewText[i] === "\"") {
+					quotionMarkCount++;
+				}
+				if (XMLViewText[i] === "'") {
+					secondTypeQuotionMarkCount++;
+				}
+
+				i++;
 			}
 
-			i++;
+			isInString = quotionMarkCount % 2 === 1 || secondTypeQuotionMarkCount % 2 === 1;
 		}
 
-		return quotionMarkCount % 2 === 1 || secondTypeQuotionMarkCount % 2 === 1;
+		return isInString;
 	}
 
 	static getTagPrefix(tagText: string) {
@@ -176,7 +222,7 @@ export class XMLParser {
 
 		let i = 0;
 
-		while (i < tagText.length && !/\s|\>/.test(tagText[i])) {
+		while (i < tagText.length && !/\s|>/.test(tagText[i])) {
 			i++;
 		}
 
@@ -194,12 +240,25 @@ export class XMLParser {
 		return tagPrefix;
 	}
 
+	static getFullClassNameFromTag(tag: Tag, XMLText: string) {
+		let className = this.getClassNameFromTag(tag.text);
+		const classTagPrefix = this.getTagPrefix(tag.text);
+		const libraryPath = this.getLibraryPathFromTagPrefix(XMLText, classTagPrefix, tag.positionEnd);
+		if (libraryPath) {
+			className = [libraryPath, className].join(".");
+		} else {
+			className = "";
+		}
+
+		return className;
+	}
+
 	static getClassNameFromTag(tagText: string) {
 		let className = "";
 
 		let i = 0;
 
-		while (i < tagText.length && !/\s|\>/.test(tagText[i])) {
+		while (i < tagText.length && !/\s|>/.test(tagText[i])) {
 			i++;
 		}
 
@@ -223,30 +282,36 @@ export class XMLParser {
 	}
 
 	static getLibraryPathFromTagPrefix(XMLViewText: string, tagPrefix: string, position: number) {
-		let libraryPath = "";
+		let libraryPath;
 		let regExpBase;
 		let delta = 0;
-		const results = [];
+		const currentDocument = this._getCurrentDocument();
+		const results = currentDocument?.prefixResults[tagPrefix] || [];
 		const tagPositionEnd = this.getTagBeginEndPosition(XMLViewText, position).positionEnd;
 
-		if (!tagPrefix) {
-			regExpBase = `(?<=xmlns\\s?=\\s?").*?(?=")`;
-		} else {
-			regExpBase = `(?<=xmlns(:${tagPrefix})\\s?=\\s?").*?(?=")`;
-		}
-		const rClassName = new RegExp(regExpBase, "g");
+		if (results.length === 0) {
+			if (!tagPrefix) {
+				regExpBase = "(?<=xmlns\\s?=\\s?\").*?(?=\")";
+			} else {
+				regExpBase = `(?<=xmlns(:${tagPrefix})\\s?=\\s?").*?(?=")`;
+			}
+			const rClassName = new RegExp(regExpBase, "g");
 
-		let classNameResult = rClassName.exec(XMLViewText);
+			let classNameResult = rClassName.exec(XMLViewText);
 
-		while (classNameResult) {
-			results.push({
-				result: classNameResult[0],
-				position: classNameResult.index
-			});
+			while (classNameResult) {
+				results.push({
+					result: classNameResult[0],
+					position: classNameResult.index
+				});
 
-			classNameResult = rClassName.exec(XMLViewText);
-			if (results.find(result => result.position === classNameResult?.index)) {
-				classNameResult = null;
+				classNameResult = rClassName.exec(XMLViewText);
+				if (results.find(result => result.position === classNameResult?.index)) {
+					classNameResult = null;
+				}
+			}
+			if (currentDocument) {
+				currentDocument.prefixResults[tagPrefix] = results;
 			}
 		}
 
@@ -279,6 +344,7 @@ export class XMLParser {
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 		let positionType: PositionType = PositionType.Content;
+		// let positionInString = false; TODO: this
 
 		if (this.getIfPositionIsInString(XMLViewText, currentPosition)) {
 			positionType = PositionType.InTheString;
@@ -329,10 +395,9 @@ export class XMLParser {
 		return XMLViewText.substring(i + 1, currentPosition).replace("=", "");
 	}
 
-	static getMethodsOfTheCurrentViewsController() {
+	static getMethodsOfTheControl(controllerName = this.getControllerNameOfTheCurrentDocument()) {
 		let classMethods: UIMethod[] = [];
 
-		const controllerName = this.getControllerNameOfTheCurrentDocument();
 		if (controllerName) {
 			classMethods = this._getClassMethodsRecursively(controllerName);
 		}
@@ -343,7 +408,7 @@ export class XMLParser {
 	static getControllerNameOfTheCurrentDocument() {
 		let controllerName;
 		const currentDocument = vscode.window.activeTextEditor?.document;
-		if (currentDocument && currentDocument.fileName.endsWith("view.xml")) {
+		if (currentDocument && currentDocument.fileName.endsWith(".view.xml")) {
 			const currentDocumentText = currentDocument.getText();
 			controllerName = FileReader.getControllerNameFromView(currentDocumentText);
 		}
@@ -351,7 +416,7 @@ export class XMLParser {
 		return controllerName;
 	}
 
-	private static _getClassMethodsRecursively(className: string, onlyCustomMethods: boolean = true) {
+	private static _getClassMethodsRecursively(className: string, onlyCustomMethods = true) {
 		let methods: UIMethod[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 		methods = UIClass.methods;
@@ -375,7 +440,23 @@ export class XMLParser {
 		return prefix;
 	}
 
+	private static _currentDocument: XMLDocumentData = {
+		document: "",
+		strings: [],
+		tags: [],
+		prefixResults: {},
+		isMarkedAsUndefined: true,
+		areAllStringsClosed: true
+	}
+
 	public static getAllTags(document: string) {
+		const currentDocument = this._getCurrentDocument();
+		if (currentDocument && currentDocument.tags.length > 0) {
+			return currentDocument.tags;
+		} else if (currentDocument && !currentDocument.areAllStringsClosed) {
+			return [];
+		}
+
 		let i = 0;
 		const tags: Tag[] = [];
 
@@ -385,20 +466,69 @@ export class XMLParser {
 				const indexOfTagBegining = this._getTagBeginingIndex(document, i);
 				tags.push({
 					text: document.substring(indexOfTagBegining, i + 1),
-					positionBegin: indexOfTagBegining - 1,
+					positionBegin: indexOfTagBegining,
 					positionEnd: i
 				});
 			}
 			i++;
 		}
 
+		if (currentDocument) {
+			currentDocument.tags = tags;
+		}
+
 		return tags;
+	}
+
+	private static _getCurrentDocument() {
+		const currentDocument = this._currentDocument.isMarkedAsUndefined ? undefined : this._currentDocument;
+		return currentDocument;
+	}
+
+	public static setCurrentDocument(document: string | undefined) {
+		if (!document) {
+			this._currentDocument.isMarkedAsUndefined = true;
+		} else {
+			if (document !== this._currentDocument.document) {
+				this._currentDocument.document = document;
+				const stringData = this._getStringPositionMapping(document);
+				this._currentDocument.strings = stringData.positionMapping;
+				this._currentDocument.areAllStringsClosed = stringData.areAllStringsClosed;
+				this._currentDocument.tags = [];
+				this._currentDocument.prefixResults = {};
+			}
+			this._currentDocument.isMarkedAsUndefined = false;
+		}
+	}
+
+	private static _getStringPositionMapping(document: string) {
+		const positionMapping: boolean[] = [];
+		let quotionMarkCount = 0;
+		let secondTypeQuotionMarkCount = 0;
+
+		let i = 0;
+		while (i < document.length) {
+			const isInString = quotionMarkCount % 2 === 1 || secondTypeQuotionMarkCount % 2 === 1;
+			positionMapping.push(isInString);
+			if (document[i] === "\"") {
+				quotionMarkCount++;
+			}
+			if (document[i] === "'") {
+				secondTypeQuotionMarkCount++;
+			}
+			i++;
+		}
+
+		return {
+			positionMapping: positionMapping,
+			areAllStringsClosed: quotionMarkCount % 2 === 0 && secondTypeQuotionMarkCount % 2 === 0
+		};
 	}
 
 	private static _getTagBeginingIndex(document: string, position: number) {
 		let i = position;
 
-		while(i > 0 && (document[i] !== "<" || XMLParser.getIfPositionIsInString(document, i))) {
+		while (i > 0 && (document[i] !== "<" || XMLParser.getIfPositionIsInString(document, i))) {
 			i--;
 		}
 
@@ -433,7 +563,7 @@ export class XMLParser {
 	public static getPositionOfEventHandler(eventHandlerName: string, document: string) {
 		let position;
 
-		const regex = new RegExp(`"\.?${eventHandlerName}"`);
+		const regex = new RegExp(`".?${eventHandlerName}"`);
 		const result = regex.exec(document);
 		if (result) {
 			position = result.index;

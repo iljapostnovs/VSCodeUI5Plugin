@@ -1,3 +1,3 @@
 export interface ITextTransformationStrategy {
-	transform(text: string) : string;
+	transform(text: string): string;
 }

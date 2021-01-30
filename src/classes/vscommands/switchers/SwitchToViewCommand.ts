@@ -1,23 +1,29 @@
 import * as vscode from "vscode";
-import * as fs from "fs";
-import { FileReader } from "../../utils/FileReader";
-const workspace = vscode.workspace;
+import {CustomUIClass} from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import {UIClassFactory} from "../../UI5Classes/UIClassFactory";
+import {FileReader} from "../../utils/FileReader";
 
 export class SwitchToViewCommand {
 	static async switchToView() {
 		try {
-			const currentControllerName: string | null = SwitchToViewCommand._getControllerName();
-			const allViewFSPaths: string[] = await SwitchToViewCommand._getAllViewFSPaths();
+			const currentClassName = this._getCurrentClassName();
+			if (currentClassName) {
 
-			const viewToSwitchFSPath = allViewFSPaths.find(viewPath => {
-				const view: string = SwitchToViewCommand._getViewFileContent(viewPath);
-				const controllerNameOfTheView = SwitchToViewCommand._getControllerNameOfTheView(view);
-				return controllerNameOfTheView === currentControllerName;
-			});
+				const isModel = UIClassFactory.isClassAChildOfClassB(currentClassName, "sap.ui.model.Model");
+				if (isModel) {
+					const allUIClasses = UIClassFactory.getAllExistentUIClasses();
+					const controllers = Object.keys(allUIClasses)
+						.filter(key => allUIClasses[key] instanceof CustomUIClass)
+						.map(key => <CustomUIClass>allUIClasses[key])
+						.filter(UIClass => FileReader.getClassPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
+					const controllerOfThisModel = controllers.find(controller => UIClassFactory.getDefaultModelForClass(controller.className) === currentClassName);
+					if (controllerOfThisModel) {
+						await this._switchToViewOrFragmentFromUIClass(controllerOfThisModel.className);
+					}
+				} else {
+					await this._switchToViewOrFragmentFromUIClass(currentClassName);
+				}
 
-			const editor = vscode.window.activeTextEditor;
-			if (editor && viewToSwitchFSPath) {
-				await vscode.window.showTextDocument(vscode.Uri.file(viewToSwitchFSPath));
 			}
 
 		} catch (error) {
@@ -25,31 +31,24 @@ export class SwitchToViewCommand {
 		}
 	}
 
-	private static async _getAllViewFSPaths() {
-		const allViews = await this._findAllViews();
-		return allViews.map(view => view.fsPath);
+	private static async _switchToViewOrFragmentFromUIClass(currentClassName: string) {
+		const view = FileReader.getViewForController(currentClassName);
+		if (!view) {
+			const fragment = FileReader.getFirstFragmentForClass(currentClassName);
+			if (fragment) {
+				await vscode.window.showTextDocument(vscode.Uri.file(fragment.fsPath));
+			}
+		} else {
+			await vscode.window.showTextDocument(vscode.Uri.file(view.fsPath));
+		}
 	}
 
-	private static async _findAllViews() {
-		const sSrcFolderName = FileReader.getSrcFolderName();
-		return workspace.findFiles(`${sSrcFolderName}/**/*.view.xml`);
-	}
-
-	private static _getControllerName() {
-		let controllerName: string | null = null;
-		const currentController = vscode.window.activeTextEditor?.document.getText();
-		if (currentController) {
-			const result = /(?<=.extend\(").*?(?=")/.exec(currentController);
-			controllerName = result && result[0] ? result[0] : null;
+	private static _getCurrentClassName() {
+		let controllerName: string | undefined;
+		const document = vscode.window.activeTextEditor?.document;
+		if (document) {
+			controllerName = FileReader.getClassNameFromPath(document.fileName);
 		}
 		return controllerName;
-	}
-
-	private static _getViewFileContent(controllerFSPath: string) {
-		return fs.readFileSync(controllerFSPath, "utf8");
-	}
-
-	private static _getControllerNameOfTheView(view: string) {
-		return FileReader.getControllerNameFromView(view);
 	}
 }

@@ -1,16 +1,26 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import * as glob from "glob";
-import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import {AcornSyntaxAnalyzer} from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
+import {UIClassFactory} from "../UI5Classes/UIClassFactory";
+import {CustomUIClass} from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
 const workspace = vscode.workspace;
-
+export interface Fragment {
+	content: string;
+	fsPath: string;
+	name: string;
+}
+interface Fragments {
+	[key: string]: Fragment;
+}
 export class FileReader {
 	private static _manifests: UIManifest[] = [];
-	private static readonly _viewCache: LooseObject = {};
+	private static readonly _viewCache: Views = {};
+	private static readonly _fragmentCache: Fragments = {};
 	private static readonly _UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
 	public static globalStoragePath: string | undefined;
 
@@ -19,13 +29,38 @@ export class FileReader {
 		if (controllerName) {
 			this._viewCache[controllerName] = {
 				content: viewContent,
-				fsPath: fsPath
+				fsPath: fsPath,
+				fragments: this.getFragments(viewContent)
 			};
+		}
+	}
+
+	public static setNewFragmentContentToCache(document: vscode.TextDocument) {
+		const fragmentName = this.getClassNameFromPath(document.fileName);
+		if (fragmentName) {
+			this._fragmentCache[fragmentName] = {
+				content: document.getText(),
+				fsPath: document.fileName,
+				name: fragmentName
+			};
+
+			Object.keys(this._viewCache).forEach(key => {
+				const view = this._viewCache[key];
+				view.fragments.forEach((fragment, index) => {
+					if (fragment.name === fragmentName) {
+						view.fragments[index] = this._fragmentCache[fragmentName];
+					}
+				})
+			})
 		}
 	}
 
 	static getViewCache() {
 		return this._viewCache;
+	}
+
+	static getAllViews() {
+		return Object.keys(this._viewCache).map(key => this._viewCache[key]);
 	}
 
 	public static getDocumentTextFromCustomClassName(className: string, isFragment?: boolean) {
@@ -42,16 +77,11 @@ export class FileReader {
 		let classPath = this.convertClassNameToFSPath(className, false, isFragment);
 
 		if (classPath) {
-			try {
-				fs.readFileSync(classPath);
-			} catch (error) {
+			const fileExists = fs.existsSync(classPath);
+			if (!fileExists) {
 				classPath = this.convertClassNameToFSPath(className, true);
-				if (classPath) {
-					try {
-						fs.readFileSync(classPath);
-					} catch (error) {
-						classPath = undefined;
-					}
+				if (classPath && !fs.existsSync(classPath)) {
+					classPath = undefined;
 				}
 			}
 		}
@@ -59,7 +89,7 @@ export class FileReader {
 		return classPath;
 	}
 
-	public static convertClassNameToFSPath(className: string, isController: boolean = false, isFragment: boolean = false, isView: boolean = false) {
+	public static convertClassNameToFSPath(className: string, isController = false, isFragment = false, isView = false) {
 		let FSPath;
 		let extension = ".js";
 		const manifest = this.getManifestForClass(className);
@@ -72,7 +102,7 @@ export class FileReader {
 				extension = ".view.xml";
 			}
 
-			const separator = require("path").sep;
+			const separator = path.sep;
 			FSPath = `${manifest.fsPath}${className.replace(manifest.componentName, "").replace(/\./g, separator).trim()}${extension}`;
 		}
 
@@ -92,13 +122,12 @@ export class FileReader {
 		this._fetchAllWorkspaceManifests();
 	}
 
-	public static getManifestForClass(className: string = "") {
-		let returnManifest: UIManifest | undefined;
+	public static getManifestForClass(className = "") {
 		if (this._manifests.length === 0) {
 			this._fetchAllWorkspaceManifests();
 		}
 
-		returnManifest = this._manifests.find(UIManifest => className.startsWith(UIManifest.componentName + "."));
+		const returnManifest = this._manifests.find(UIManifest => className.startsWith(UIManifest.componentName + "."));
 
 		return returnManifest;
 	}
@@ -143,20 +172,57 @@ export class FileReader {
 		const documentText = this.getViewText(controllerClassName);
 		if (documentText) {
 			className = this._getClassOfControlIdFromView(documentText, controlId);
+			if (!className) {
+				const view = this.getViewForController(controllerClassName);
+				view?.fragments.find(fragment => {
+					className = this._getClassOfControlIdFromView(fragment.content, controlId);
+					return !!className;
+				});
+			}
 		}
 
 		return className;
 	}
 
-	public static getViewText(controllerName: string) {
-		let viewText: string | undefined;
+	public static getViewForController(controllerName: string) {
 		if (!this._viewCache[controllerName]) {
-			this._readAllViewsAndSaveInCache();
+			// this._readAllViewsAndSaveInCache();
 		}
 
-		viewText = this._viewCache[controllerName]?.content;
+		let view: View | undefined;
 
-		return viewText;
+		if (this._viewCache[controllerName]) {
+			view = this._viewCache[controllerName];
+		}
+
+		return view;
+	}
+
+	public static getFragmentsForClass(className: string) {
+		let fragments: Fragment[] = [];
+		const UIClass = UIClassFactory.getUIClass(className);
+
+		if (UIClass instanceof CustomUIClass) {
+			const fragmentKeys = Object.keys(this._fragmentCache).filter(key => {
+				return UIClass.classText.indexOf(`"${this._fragmentCache[key].name}"`) > -1;
+			});
+			if (fragmentKeys) {
+				fragments = fragmentKeys.map(fragmentKey => this._fragmentCache[fragmentKey]);
+			}
+
+		}
+
+		return fragments;
+	}
+
+	public static getFirstFragmentForClass(className: string): Fragment | undefined {
+		const fragment = this.getFragmentsForClass(className)[0];
+
+		return fragment;
+	}
+
+	public static getViewText(controllerName: string) {
+		return this.getViewForController(controllerName)?.content;
 	}
 
 	private static _getClassOfControlIdFromView(documentText: string, controlId: string) {
@@ -180,7 +246,7 @@ export class FileReader {
 			const classTagParts = classTag.split(":");
 			let className;
 			if (classTagParts.length === 1) {
-				regExpBase = `(?<=xmlns=").*?(?=")`;
+				regExpBase = "(?<=xmlns=\").*?(?=\")";
 				className = classTagParts[0];
 			} else {
 				regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*?(?=")`;
@@ -195,20 +261,80 @@ export class FileReader {
 		return controlClass;
 	}
 
+	static readAllViewsAndFragments() {
+		return vscode.window.withProgress({
+			location: vscode.ProgressLocation.Window,
+			title: "Parsing project files",
+			cancellable: false
+		}, async progress => {
+			progress.report({
+				message: "Reading Fragments",
+				increment: 33
+			});
+			this._readAllFragmentsAndSaveInCache();
+			progress.report({
+				message: "Reading Views"
+			});
+			this._readAllViewsAndSaveInCache();
+			progress.report({
+				message: "Reading JS Files",
+				increment: 33
+			});
+			this._readAllJSFiles();
+		});
+	}
+
+	private static _readAllJSFiles() {
+		const wsFolders = workspace.workspaceFolders || [];
+		const src = this.getSrcFolderName();
+		for (const wsFolder of wsFolders) {
+			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+			const classPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.js`);
+			classPaths.forEach(classPath => {
+				const className = FileReader.getClassNameFromPath(classPath);
+				if (className) {
+					UIClassFactory.getUIClass(className);
+				}
+			});
+		}
+	}
+
 	private static _readAllViewsAndSaveInCache() {
 		const wsFolders = workspace.workspaceFolders || [];
 		const src = this.getSrcFolderName();
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.view.xml`);
+			const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.view.xml`);
 			viewPaths.forEach(viewPath => {
-				let viewContent = fs.readFileSync(viewPath, "utf8");
-				viewContent = this.replaceFragments(viewContent);
+				const viewContent = fs.readFileSync(viewPath, "utf8");
+				const fragments = this.getFragments(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				if (controllerName) {
 					this._viewCache[controllerName] = {
 						content: viewContent,
-						fsPath: viewPath.replace(/\//g, fileSeparator)
+						fsPath: viewPath.replace(/\//g, fileSeparator),
+						fragments: fragments
+					};
+				}
+			});
+		}
+	}
+
+	private static _readAllFragmentsAndSaveInCache() {
+		const wsFolders = workspace.workspaceFolders || [];
+		const src = this.getSrcFolderName();
+		for (const wsFolder of wsFolders) {
+			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+			const fragmentPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.fragment.xml`);
+			fragmentPaths.forEach(fragmentPath => {
+				const fragmentContent = fs.readFileSync(fragmentPath, "utf8");
+				const fragmentFSPath = fragmentPath.replace(/\//g, fileSeparator);
+				const fragmentName = this.getClassNameFromPath(fragmentFSPath);
+				if (fragmentName) {
+					this._fragmentCache[fragmentName] = {
+						content: fragmentContent,
+						fsPath: fragmentFSPath,
+						name: fragmentName
 					};
 				}
 			});
@@ -219,7 +345,7 @@ export class FileReader {
 		let classNames: string[] = [];
 		const src = this.getSrcFolderName();
 		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-		const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*/*.js`);
+		const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.js`);
 		classNames = viewPaths.reduce((accumulator: string[], viewPath) => {
 			const path = this.getClassNameFromPath(viewPath);
 			if (path) {
@@ -234,36 +360,96 @@ export class FileReader {
 
 	static getControllerNameFromView(viewContent: string) {
 		const controllerNameResult = /(?<=controllerName=").*?(?=")/.exec(viewContent);
+		const controllerName = controllerNameResult ? controllerNameResult[0] : undefined;
 
-		return controllerNameResult ? controllerNameResult[0] : undefined;
+		return controllerName;
 	}
 
-	public static replaceFragments(documentText: string) {
-		const fragments = this._getFragments(documentText);
-		fragments.forEach(fragment => {
-			const fragmentName = this._getFragmentName(fragment);
+	static getResponsibleClassForXMLDocument(document: vscode.TextDocument) {
+		const isFragment = document.fileName.endsWith(".fragment.xml");
+		const isView = document.fileName.endsWith(".view.xml");
+		let responsibleClassName;
+
+		if (isView) {
+			responsibleClassName = this.getControllerNameFromView(document.getText());
+		} else if (isFragment) {
+			const fragmentName = this.getClassNameFromPath(document.fileName);
+			const responsibleViewKey = Object.keys(this._viewCache).find(key => {
+				return !!this._viewCache[key].fragments.find(fragmentFromView => fragmentFromView.name === fragmentName);
+			});
+			if (responsibleViewKey) {
+				const responsibleView = this._viewCache[responsibleViewKey];
+				responsibleClassName = this.getControllerNameFromView(responsibleView.content);
+			} else {
+				responsibleClassName = this._getResponsibleClassNameForFragmentFromCustomUIClasses(document);
+			}
+		}
+
+		return responsibleClassName;
+	}
+
+	private static _getResponsibleClassNameForFragmentFromCustomUIClasses(document: vscode.TextDocument) {
+		const allUIClasses = UIClassFactory.getAllExistentUIClasses();
+		const fragmentName = this.getClassNameFromPath(document.fileName);
+		const responsibleClassName = Object.keys(allUIClasses).find(key => {
+			let classFound = false;
+			const UIClass = allUIClasses[key];
+			if (UIClass instanceof CustomUIClass) {
+				if (UIClass.classText.indexOf(`${fragmentName}`) > -1) {
+					classFound = true;
+				}
+			}
+			return classFound;
+		});
+
+		return responsibleClassName;
+	}
+
+	public static getFragments(documentText: string) {
+		const fragments: Fragment[] = [];
+		const fragmentTags = this._getFragmentTags(documentText);
+		fragmentTags.forEach(fragmentTag => {
+			const fragmentName = this._getFragmentNameFromTag(fragmentTag);
 			if (fragmentName) {
-				const fragmentText = this.getDocumentTextFromCustomClassName(fragmentName, true);
-				if (fragmentText) {
-					documentText = documentText.replace(fragment, fragmentText);
+				const fragmentPath = this.getClassPathFromClassName(fragmentName, true);
+				const fragment = this._getFragment(fragmentName);
+				if (fragment && fragmentPath) {
+					documentText = documentText.replace(fragmentTag, fragment.content);
+					fragments.push({
+						content: fragment.content,
+						name: fragmentName,
+						fsPath: fragmentPath
+					});
 				}
 			}
 		});
 
-		return documentText;
+		return fragments;
 	}
 
-	private static _getFragmentName(fragmentText: string) {
+	private static _getFragment(fragmentName: string): Fragment | undefined {
+		if (!this._fragmentCache[fragmentName]) {
+			// this._readAllFragmentsAndSaveInCache();
+		}
+
+		return this._fragmentCache[fragmentName];
+	}
+
+	static getAllFragments() {
+		return Object.keys(this._fragmentCache).map(key => this._fragmentCache[key]);
+	}
+
+	private static _getFragmentNameFromTag(fragmentTag: string) {
 		let fragmentName;
-		const fragmentNameResult = /(?<=fragmentName=").*?(?=")/.exec(fragmentText);
+		const fragmentNameResult = /(?<=fragmentName=").*?(?=")/.exec(fragmentTag);
 		if (fragmentNameResult) {
 			fragmentName = fragmentNameResult[0];
 		}
 		return fragmentName;
 	}
 
-	private static _getFragments(documentText: string) {
-		return documentText.match(/\<.*?Fragment(.|\s)*?\/>/g) || [];
+	private static _getFragmentTags(documentText: string) {
+		return documentText.match(/<.*?Fragment(.|\s)*?\/>/g) || [];
 	}
 
 	private static _isSeparator(char: string) {
@@ -281,7 +467,7 @@ export class FileReader {
 					.replace(currentManifest.fsPath, currentManifest.componentName)
 					.replace(".controller", "")
 					.replace(".view.xml", "")
-					.replace("fragment.xml", "")
+					.replace(".fragment.xml", "")
 					.replace(".xml", "")
 					.replace(".js", "")
 					.replace(new RegExp(`${escapedFileSeparator}`, "g"), ".");
@@ -329,7 +515,6 @@ export class FileReader {
 	static clearCache() {
 		if (this.globalStoragePath) {
 			if (fs.existsSync(this.globalStoragePath)) {
-				const path = require("path");
 				const directory = this.globalStoragePath;
 				fs.readdir(directory, (err, files) => {
 					for (const file of files) {
@@ -416,7 +601,7 @@ export class FileReader {
 	}
 }
 
-export module FileReader {
+export namespace FileReader {
 	export enum CacheType {
 		Metadata = "1",
 		APIIndex = "2",
@@ -434,9 +619,13 @@ interface manifestPaths {
 	fsPath: string;
 }
 
-interface LooseObject {
-	[key: string]: {
-		fsPath: string;
-		content: string;
-	};
+export interface Views {
+	[key: string]: View;
 }
+
+export interface View {
+	fsPath: string;
+	content: string;
+	fragments: Fragment[];
+}
+

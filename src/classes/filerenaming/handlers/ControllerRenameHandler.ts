@@ -1,8 +1,8 @@
-import { FileRenameHandler } from "./abstraction/FileRenameHandler";
+import {FileRenameHandler} from "./abstraction/FileRenameHandler";
 import * as vscode from "vscode";
-import { FileReader } from "../../utils/FileReader";
+import {FileReader} from "../../utils/FileReader";
 import * as fs from "fs";
-import { XMLFileRenameHandler } from "./XMLFileRenameHandler";
+import {XMLFileRenameHandler} from "./XMLFileRenameHandler";
 
 export class ControllerRenameHandler extends FileRenameHandler {
 	public handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri) {

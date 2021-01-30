@@ -1,9 +1,11 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { FileReader } from "../../utils/FileReader";
-import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
-import { TextTransformationFactory, CaseType } from "./TextTransformationFactory";
+import {FileReader} from "../../utils/FileReader";
+import {ResourceModelData} from "../../UI5Classes/ResourceModelData";
+import {TextTransformationFactory, CaseType} from "./TextTransformationFactory";
+import * as jsClassData from "./i18nIDs.json";
+
 const workspace = vscode.workspace;
 
 export class ExportToI18NCommand {
@@ -144,12 +146,12 @@ export class ExportToI18NCommand {
 			const i18nIDs = [{
 				label: "YMSG",
 				description: "Message text (long)"
-			}].concat(require("./i18nIDs.json"));
+			}].concat(jsClassData);
 
 
 			const resourceGroups: vscode.QuickPickItem[] = i18nIDs;
 			item = await vscode.window.showQuickPick(resourceGroups, {
-				matchOnDescription: true,
+				matchOnDescription: true
 			});
 		}
 
@@ -209,15 +211,13 @@ export class ExportToI18NCommand {
 	public static findManifestsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
 		return new Promise((resolve) => {
 			workspace.findFiles(new vscode.RelativePattern(wsFolder || "", "**/manifest.json"))
-			.then(resolve);
+				.then(resolve);
 		});
 	}
-}
 
-export namespace ExportToI18NCommand {
-	export enum fileType {
-		xml = "xml",
-		controller = "controller",
-		js = "js"
+	static fileType = {
+		xml: "xml",
+		controller: "controller",
+		js: "js"
 	}
 }

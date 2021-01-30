@@ -1,8 +1,8 @@
-import { IUMLGenerator } from "./interfaces/IUMLGenerator";
-import { UIField } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
-import { ClassHead } from "./ClassHead";
-import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
+import {IUMLGenerator} from "./interfaces/IUMLGenerator";
+import {UIField} from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import {DrawIOUMLDiagram} from "../DrawIOUMLDiagram";
+import {ClassHead} from "./ClassHead";
+import {ITextLengthGettable} from "./interfaces/ITextLengthGettable";
 
 export class Field implements IUMLGenerator, ITextLengthGettable {
 	id: number;
@@ -24,11 +24,11 @@ export class Field implements IUMLGenerator, ITextLengthGettable {
 		const privateSign = isPrivate ? "-" : "+";
 		const value = `${privateSign} ${this.UIField.name}: ${this.UIField.type?.replace("__map__", "map") || "any"}`;
 
-		return value.replace(/\"/g, "").replace(/&/g, '&amp;')
-		.replace(/</g, '&lt;')
-		.replace(/>/g, '&gt;')
-		.replace(/"/g, '&quot;')
-		.replace(/'/g, '&apos;');
+		return value.replace(/"/g, "").replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&apos;");
 	}
 	generateXML(): string {
 		return `

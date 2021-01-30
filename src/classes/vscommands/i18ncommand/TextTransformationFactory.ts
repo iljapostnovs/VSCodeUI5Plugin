@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { PascalCaseStrategy } from "./strategies/PascalCaseStrategy";
-import { ITextTransformationStrategy } from "./strategies/ITextTransformationStrategy";
-import { SnakeUpperCase } from "./strategies/SnakeUpperCase";
+import {PascalCaseStrategy} from "./strategies/PascalCaseStrategy";
+import {ITextTransformationStrategy} from "./strategies/ITextTransformationStrategy";
+import {SnakeUpperCase} from "./strategies/SnakeUpperCase";
 
 export enum CaseType {
 	PascalCase = "Pascal Case",
@@ -9,7 +9,7 @@ export enum CaseType {
 }
 export class TextTransformationFactory {
 	static createTextTransformationStrategy() {
-		let strategy : ITextTransformationStrategy;
+		let strategy: ITextTransformationStrategy;
 		const textTransformationStrategy = vscode.workspace.getConfiguration("ui5.plugin").get("textTransformationStrategy");
 		if (textTransformationStrategy === CaseType.PascalCase) {
 			strategy = new PascalCaseStrategy();

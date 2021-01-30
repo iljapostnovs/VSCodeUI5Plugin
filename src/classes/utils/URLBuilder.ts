@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { SAPNode } from "../librarydata/SAPNode";
-import { AbstractUIClass } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { FileReader } from "./FileReader";
+import {SAPNode} from "../librarydata/SAPNode";
+import {AbstractUIClass} from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import {FileReader} from "./FileReader";
 
 export class URLBuilder {
 	private static _URLBuilderInstance?: URLBuilder;
@@ -55,7 +55,7 @@ export class URLBuilder {
 		return this._wrapInMarkup(this._geUrlForAssociationApi(SAPClass));
 	}
 
-	getMarkupUrlForEventsApi(SAPClass: AbstractUIClass, eventName: string = "Events") {
+	getMarkupUrlForEventsApi(SAPClass: AbstractUIClass, eventName = "Events") {
 		if (FileReader.getManifestForClass(SAPClass.className) || this._isStandardClass(SAPClass.className)) {
 			return "";
 		}
