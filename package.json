@@ -206,11 +206,7 @@
 						},
 						{
 							"className": "sap.ui.model.Model",
-							"memberName": "getResourceBundle"
-						},
-						{
-							"className": "sap.ui.model.Model",
-							"memberName": "setProperty"
+							"memberName": "*"
 						},
 						{
 							"className": "sap.ui.core.Element",
