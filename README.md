@@ -68,6 +68,8 @@ There are two linters available:<br/>
 
 ----------
 ## JS Diagnostics
+> You can define diagnostic exceptions using *ui5.plugin.JSLinterExceptions* preference entry.
+
 JS Diagnostics is provided<br/>
 There are five linters available:<br/>
 * Wrong field/method usage linter<br/>
@@ -89,6 +91,7 @@ There are five linters available:<br/>
 > *ui5.plugin.useWrongClassNameLinter*<br/>
 > *ui5.plugin.useWrongImportLinter*<br/>
 > *ui5.plugin.useWrongParametersLinter*<br/>
+> *ui5.plugin.JSLinterExceptions*<br/>
 
 ![DynamicCompletionItems](/images/JSDiagnostics.gif)
 

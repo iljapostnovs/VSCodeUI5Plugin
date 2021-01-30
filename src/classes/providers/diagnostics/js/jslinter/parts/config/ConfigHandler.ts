@@ -42,4 +42,14 @@ export class ConfigHandler {
 			memberName: "*"
 		}];
 	}
+
+	static checkIfMethodNameIsException(className = "", memberName = "") {
+		const classExceptions = ConfigHandler.getJSLinterExceptions();
+		const isException = !!classExceptions.find(classException =>
+			(classException.className === className || classException.className === "*") &&
+			(classException.memberName === memberName || classException.memberName === "*")
+		);
+
+		return isException;
+	}
 }

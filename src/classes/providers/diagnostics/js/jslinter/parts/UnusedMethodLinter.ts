@@ -105,14 +105,8 @@ export class UnusedMethodLinter extends Linter {
 	}
 
 	private _checkIfMethodIsException(className: string, methodName: string) {
-		const exceptions = ConfigHandler.getJSLinterExceptions();
-
-		return !!exceptions.find(exception => {
-			const sameClass = exception.className === "*" || exception.className === className;
-			const sameMethod = exception.memberName === "*" || exception.memberName === methodName;
-
-			return sameClass && sameMethod;
-		}) || this._checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className, methodName);
+		return ConfigHandler.checkIfMethodNameIsException(className, methodName) ||
+			this._checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className, methodName);
 	}
 
 	private _checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className: string, methodName: string) {

@@ -7,6 +7,7 @@ import {CustomUIClass} from "../../../../../UI5Classes/UI5Parser/UIClass/CustomU
 import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
 import {FileReader} from "../../../../../utils/FileReader";
 import {SAPNodeDAO} from "../../../../../librarydata/SAPNodeDAO";
+import {ConfigHandler} from "./config/ConfigHandler";
 export class WrongParametersLinter extends Linter {
 	public static timePerChar = 0;
 	private static readonly _sapNodeDAO = new SAPNodeDAO();
@@ -64,6 +65,9 @@ export class WrongParametersLinter extends Linter {
 														let typeMismatch = !paramFromMethodTypes.includes(classNameOfTheParam);
 														if (typeMismatch) {
 															typeMismatch = !paramFromMethodTypes.find(className => !this._getIfClassesDiffers(className, classNameOfTheParam));
+														}
+														if (typeMismatch) {
+															typeMismatch = !ConfigHandler.checkIfMethodNameIsException(classNameOfTheParam, method.name);
 														}
 														if (typeMismatch) {
 															const positionStart = LineColumn(UIClass.classText).fromIndex(param.start);

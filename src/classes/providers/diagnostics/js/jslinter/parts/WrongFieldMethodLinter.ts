@@ -82,7 +82,7 @@ export class WrongFieldMethodLinter extends Linter {
 					const nextNodeName = nextNode.property?.name;
 					const nodeText = UIClass.classText.substring(nextNode.start, nextNode.end);
 					if (!nodeText.endsWith("]") && !errorNodes.includes(nextNode)) {
-						const isMethodException = this._checkIfMethodNameIsException(className, nextNodeName);
+						const isMethodException = ConfigHandler.checkIfMethodNameIsException(className, nextNodeName);
 
 						if (nextNodeName && !isMethodException) {
 							const fieldsAndMethods = classNames.map(className => strategy.destructueFieldsAndMethodsAccordingToMapParams(className));
@@ -103,7 +103,7 @@ export class WrongFieldMethodLinter extends Linter {
 								if (className.includes("__map__")) {
 									className = "map";
 								}
-								const isMethodException = this._checkIfMethodNameIsException(className, nextNodeName);
+								const isMethodException = ConfigHandler.checkIfMethodNameIsException(className, nextNodeName);
 								if (!isMethodException) {
 									const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
 									if (position) {
@@ -153,16 +153,6 @@ export class WrongFieldMethodLinter extends Linter {
 		} else if (exceptions.includes(className)) {
 			isException = true;
 		}
-
-		return isException;
-	}
-
-	private _checkIfMethodNameIsException(className = "", memberName = "") {
-		const classExceptions = ConfigHandler.getJSLinterExceptions();
-		const isException = !!classExceptions.find(classException =>
-			(classException.className === className || classException.className === "*") &&
-			(classException.memberName === memberName || classException.memberName === "*")
-		);
 
 		return isException;
 	}

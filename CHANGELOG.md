@@ -1,6 +1,6 @@
-## 0.12.0 (23-01-2021)
+## 0.12.0 (30-01-2021)
 * Bugfixes
-* Performance improvments for XML and JS linting
+* Performance improvements for XML and JS linting
 * Code Actions for adding methods in custom class if they doesn't exist added
 * Support for relative path import in SAP UI Define added
 * JS Code lens for event handlers added
