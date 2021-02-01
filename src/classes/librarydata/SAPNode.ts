@@ -69,7 +69,7 @@ export class SAPNode {
 		const properties: any[] = [];
 		const nodeProperties = metadata?.getUI5Metadata()?.properties?.filter((property: any) => !property.deprecatedText && (property.visibility === "public" || property.visibility === "protected"));
 		if (nodeProperties) {
-			nodeProperties.push(...nodeProperties)
+			properties.push(...nodeProperties)
 		}
 		return properties;
 	}

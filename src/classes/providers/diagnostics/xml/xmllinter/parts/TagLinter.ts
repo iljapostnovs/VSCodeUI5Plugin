@@ -41,8 +41,8 @@ export class TagLinter extends Linter {
 					message: `"${prefix}" prefix is not defined`,
 					source: "Tag Linter",
 					range: new vscode.Range(
-						new vscode.Position(positionBegin.line - 1, positionBegin.col),
-						new vscode.Position(positionEnd.line - 1, positionEnd.col)
+						new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
+						new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
 					)
 				});
 			}
@@ -61,8 +61,8 @@ export class TagLinter extends Linter {
 							message: `"${tagClass}" class doesn't exist`,
 							source: "Tag Linter",
 							range: new vscode.Range(
-								new vscode.Position(positionBegin.line - 1, positionBegin.col),
-								new vscode.Position(positionEnd.line - 1, positionEnd.col)
+								new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
+								new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
 							)
 						});
 					}
