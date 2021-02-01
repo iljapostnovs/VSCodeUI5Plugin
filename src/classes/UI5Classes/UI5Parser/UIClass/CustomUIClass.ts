@@ -1067,7 +1067,7 @@ export class CustomUIClass extends AbstractUIClass {
 			const properties = propertiesMetadataNode.value.properties || [];
 			this.properties = properties.map((propertyNode: any) => {
 
-				const propertyName = propertyNode.key.name;
+				const propertyName = propertyNode.key.name || propertyNode.key.value;
 				const propertyProps = propertyNode.value.properties;
 
 				let propertyType: undefined | string = undefined;
