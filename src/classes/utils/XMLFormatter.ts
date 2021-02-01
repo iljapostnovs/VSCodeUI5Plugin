@@ -8,64 +8,66 @@ export class XMLFormatter {
 		const documentText = document.getText();
 		const allTags = this._getAllTags(documentText);
 
-		let indentationLevel = 0;
-		const aTagTexts = allTags.map(currentTag => {
-			if (currentTag.text.startsWith("<!--")) {
-				const indentation = this._getIndentation(indentationLevel);
-				return `${indentation}${currentTag.text}`;
-			} else {
-				const tagName = this._getTagName(currentTag.text);
-				const tagAttributes = this._getTagAttributes(currentTag.text);
-				let endSubstraction = 1;
-				if (currentTag.text.endsWith("/>")) {
-					endSubstraction = 2;
-				}
-				const tagEnd = currentTag.text.substring(
-					currentTag.text.length - endSubstraction,
-					currentTag.text.length
-				);
-
-				let beginAddition = 1;
-				if (currentTag.text.startsWith("</")) {
-					beginAddition = 2;
-				}
-				const tagBegin = currentTag.text.substring(0, beginAddition);
-
-				indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, true);
-				let indentation = this._getIndentation(indentationLevel);
-
-				let newTag = `${indentation}${tagBegin}${tagName}\n`;
-
-				if (tagAttributes.length === 1) {
-					newTag = newTag.trimRight();
-				}
-				newTag += tagAttributes.reduce((accumulator, tagAttribute) => {
-					const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
-					accumulator += `${indentation}\t${tagData.attributeName}="${tagData.attributeValue}"\n`;
-					if (tagAttributes.length === 1) {
-						accumulator = ` ${accumulator.trimLeft()}`;
+		if (allTags.length > 0) {
+			let indentationLevel = 0;
+			const aTagTexts = allTags.map(currentTag => {
+				if (currentTag.text.startsWith("<!--")) {
+					const indentation = this._getIndentation(indentationLevel);
+					return `${indentation}${currentTag.text}`;
+				} else {
+					const tagName = this._getTagName(currentTag.text);
+					const tagAttributes = this._getTagAttributes(currentTag.text);
+					let endSubstraction = 1;
+					if (currentTag.text.endsWith("/>")) {
+						endSubstraction = 2;
 					}
-					return accumulator;
-				}, "");
+					const tagEnd = currentTag.text.substring(
+						currentTag.text.length - endSubstraction,
+						currentTag.text.length
+					);
 
-				if (tagAttributes.length <= 1) {
-					newTag = newTag.trimRight();
-					indentation = "";
+					let beginAddition = 1;
+					if (currentTag.text.startsWith("</")) {
+						beginAddition = 2;
+					}
+					const tagBegin = currentTag.text.substring(0, beginAddition);
+
+					indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, true);
+					let indentation = this._getIndentation(indentationLevel);
+
+					let newTag = `${indentation}${tagBegin}${tagName}\n`;
+
+					if (tagAttributes.length === 1) {
+						newTag = newTag.trimRight();
+					}
+					newTag += tagAttributes.reduce((accumulator, tagAttribute) => {
+						const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
+						accumulator += `${indentation}\t${tagData.attributeName}="${tagData.attributeValue}"\n`;
+						if (tagAttributes.length === 1) {
+							accumulator = ` ${accumulator.trimLeft()}`;
+						}
+						return accumulator;
+					}, "");
+
+					if (tagAttributes.length <= 1) {
+						newTag = newTag.trimRight();
+						indentation = "";
+					}
+
+					newTag += `${indentation}${tagEnd}`;
+
+					indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, false);
+
+					return newTag;
 				}
+			});
 
-				newTag += `${indentation}${tagEnd}`;
-
-				indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, false);
-
-				return newTag;
-			}
-		});
-
-		const positionBegin = document.positionAt(0);
-		const positionEnd = document.positionAt(documentText.length);
-		const range = new vscode.Range(positionBegin, positionEnd);
-		const textEdit = new vscode.TextEdit(range, aTagTexts.join("\n"));
-		textEdits.push(textEdit);
+			const positionBegin = document.positionAt(0);
+			const positionEnd = document.positionAt(documentText.length);
+			const range = new vscode.Range(positionBegin, positionEnd);
+			const textEdit = new vscode.TextEdit(range, aTagTexts.join("\n"));
+			textEdits.push(textEdit);
+		}
 
 		return textEdits;
 	}
@@ -117,28 +119,49 @@ export class XMLFormatter {
 	private static _getAllTags(document: string) {
 		let i = 0;
 		const tags: Tag[] = [];
+		const allStringsAreClosed = this._getIfAllStringsAreClosed(document);
 
+		if (allStringsAreClosed) {
+			while (i < document.length) {
+				const thisIsTagEnd =
+					document[i] === ">" &&
+					!XMLParser.getIfPositionIsInString(document, i) &&
+					(
+						XMLParser.getIfPositionIsNotInComments(document, i) ||
+						document.substring(i - 2, i + 1) === "-->"
+					)
+					;
+				if (thisIsTagEnd) {
+					const indexOfTagBegining = this._getTagBeginingIndex(document, i);
+					tags.push({
+						text: document.substring(indexOfTagBegining, i + 1),
+						positionBegin: indexOfTagBegining,
+						positionEnd: i
+					});
+				}
+				i++;
+			}
+		}
+
+		return tags;
+	}
+
+	private static _getIfAllStringsAreClosed(document: string) {
+		let quotionMarkCount = 0;
+		let secondTypeQuotionMarkCount = 0;
+
+		let i = 0;
 		while (i < document.length) {
-			const thisIsTagEnd =
-				document[i] === ">" &&
-				!XMLParser.getIfPositionIsInString(document, i) &&
-				(
-					XMLParser.getIfPositionIsNotInComments(document, i) ||
-					document.substring(i - 2, i + 1) === "-->"
-				)
-				;
-			if (thisIsTagEnd) {
-				const indexOfTagBegining = this._getTagBeginingIndex(document, i);
-				tags.push({
-					text: document.substring(indexOfTagBegining, i + 1),
-					positionBegin: indexOfTagBegining,
-					positionEnd: i
-				});
+			if (document[i] === "\"") {
+				quotionMarkCount++;
+			}
+			if (document[i] === "'") {
+				secondTypeQuotionMarkCount++;
 			}
 			i++;
 		}
 
-		return tags;
+		return quotionMarkCount % 2 === 0 && secondTypeQuotionMarkCount % 2 === 0;
 	}
 
 	private static _getTagBeginingIndex(document: string, position: number) {
