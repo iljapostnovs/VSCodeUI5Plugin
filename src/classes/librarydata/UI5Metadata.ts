@@ -4,8 +4,8 @@ export class UI5Metadata {
 		this.rawMetadata = metadata;
 	}
 
-	public getUI5Metadata() {
-		return this.rawMetadata["ui5-metadata"];
+	public getUI5Metadata(): any | undefined {
+		return this.rawMetadata && this.rawMetadata["ui5-metadata"];
 	}
 
 	public getRawMetadata() {

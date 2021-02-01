@@ -1,3 +1,6 @@
+## 0.12.1 (01-02-2021)
+* Bugfixes
+
 ## 0.12.0 (30-01-2021)
 * Bugfixes
 * Performance improvements for XML and JS linting

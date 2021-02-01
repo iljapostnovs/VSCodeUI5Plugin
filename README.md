@@ -1,4 +1,6 @@
 # SAPUI5 Extension
+![asd](https://github.com/iljapostnovs/VSCodeUI5Plugin/workflows/Test%20vscode%20plugin%20and%20build%20artifact/badge.svg?branch=development)
+
 This plugin contains perks for UI5 developers.
 
 Before you start working with the plugin, it will be useful to set formatOnSave setting in VSCode preferences:

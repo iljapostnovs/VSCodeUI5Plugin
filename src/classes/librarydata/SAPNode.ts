@@ -44,18 +44,40 @@ export class SAPNode {
 	public getFields() {
 		const metadata = this.getMetadata();
 		const rawMetadata = metadata?.getRawMetadata();
-		const fields = rawMetadata?.properties?.filter((field: any) => !field.deprecatedText && (field.visibility === "public" || field.visibility === "protected"));
-		fields?.forEach((field: any) => {
+		const fields = rawMetadata?.properties?.filter((field: any) =>
+			!field.deprecatedText &&
+			(
+				field.visibility === "public" ||
+				field.visibility === "protected"
+			)
+		) || [];
+		fields.forEach((field: any) => {
 			field.name = field.name.replace(rawMetadata?.name + "." || "", "");
 		});
 
-		return fields || [];
+		const nodes = this.node.nodes;
+		if (nodes) {
+			const nodeFields = nodes.map((node: any) => {
+				const field = {...node};
+				field.type = node.name || "string";
+				field.name = node.name.replace(`${this.node.type || this.node.name}.`, "");
+				field.description = node.description || ""
+				return field;
+			});
+			fields.push(...nodeFields);
+		}
+
+		return fields;
 	}
 
 	public getProperties(): any[] {
 		const metadata = this.getMetadata();
-		const properties = metadata?.getUI5Metadata()?.properties?.filter((property: any) => !property.deprecatedText && (property.visibility === "public" || property.visibility === "protected"));
-		return properties || [];
+		const properties: any[] = [];
+		const nodeProperties = metadata?.getUI5Metadata()?.properties?.filter((property: any) => !property.deprecatedText && (property.visibility === "public" || property.visibility === "protected"));
+		if (nodeProperties) {
+			properties.push(...nodeProperties)
+		}
+		return properties;
 	}
 
 	public getAggregations(): any[] {
