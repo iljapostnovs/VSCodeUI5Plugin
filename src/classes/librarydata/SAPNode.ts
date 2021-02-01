@@ -44,7 +44,13 @@ export class SAPNode {
 	public getFields() {
 		const metadata = this.getMetadata();
 		const rawMetadata = metadata?.getRawMetadata();
-		const fields = rawMetadata?.properties?.filter((field: any) => !field.deprecatedText && (field.visibility === "public" || field.visibility === "protected")) || [];
+		const fields = rawMetadata?.properties?.filter((field: any) =>
+			!field.deprecatedText &&
+			(
+				field.visibility === "public" ||
+				field.visibility === "protected"
+			)
+		) || [];
 		fields.forEach((field: any) => {
 			field.name = field.name.replace(rawMetadata?.name + "." || "", "");
 		});

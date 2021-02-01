@@ -14,6 +14,10 @@ let namespaceDesignTimes: LooseObject = {};
 export class UI5MetadataPreloader {
 	private readonly _libNames: LooseObject = {};
 	private readonly _nodes: SAPNode[];
+	private static _resolveLibPreload: Function;
+	public static libsPreloaded = new Promise((resolve) => {
+		UI5MetadataPreloader._resolveLibPreload = resolve;
+	});
 	constructor(nodes: SAPNode[]) {
 		this._nodes = nodes;
 	}
@@ -41,12 +45,14 @@ export class UI5MetadataPreloader {
 			return Promise.all(promises).then(() => {
 				cache = namespaceDesignTimes;
 				this._writeCache();
+				UI5MetadataPreloader._resolveLibPreload();
 			});
 		} else {
 			namespaceDesignTimes = cache;
 			UI5Plugin.getInstance().initializationProgress?.report({
 				increment: 50
 			});
+			UI5MetadataPreloader._resolveLibPreload();
 			return new Promise(resolve => resolve(cache));
 		}
 	}

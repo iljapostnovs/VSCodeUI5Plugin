@@ -3,6 +3,7 @@ import {FileReader} from "../utils/FileReader";
 import {URLBuilder} from "../utils/URLBuilder";
 import {HTTPHandler} from "../utils/HTTPHandler";
 import {SAPNode} from "./SAPNode";
+import {UI5MetadataPreloader} from "./UI5MetadataDAO";
 interface LooseNodeObject {
 	[key: string]: SAPNode;
 }
@@ -68,7 +69,37 @@ export class SAPNodeDAO {
 		}
 
 		this._recursiveFlatNodeGeneration(SAPNodeDAO._SAPNodes);
+
+		UI5MetadataPreloader.libsPreloaded.then(this._recursiveModuleAssignment.bind(this));
 	}
+
+	private _recursiveModuleAssignment() {
+		const nodes = SAPNodeDAO._SAPNodes;
+		nodes.forEach(node => {
+			if (node.getMetadata()?.getRawMetadata()) {
+				const moduleName = node.getMetadata()?.getRawMetadata().module.replace(/\//g, ".");
+				if (moduleName !== node.getName()) {
+					const moduleNode = this.findNode(moduleName);
+					const nodeMetadata = node.getMetadata().getRawMetadata();
+					if (moduleNode && nodeMetadata) {
+
+						const rawMetadata = moduleNode.getMetadata().getRawMetadata();
+						if (!rawMetadata.properties) {
+							rawMetadata.properties = [];
+						}
+						const property = {
+							name: nodeMetadata.name,
+							visibility: nodeMetadata.visibility,
+							description: nodeMetadata.description,
+							type: node.getName()
+						}
+						rawMetadata.properties.push(property);
+					}
+				}
+			}
+		});
+	}
+
 	private _recursiveFlatNodeGeneration(nodes: SAPNode[]) {
 		nodes.forEach(SAPNode => {
 			SAPNodeDAO._flatSAPNodes[SAPNode.getName()] = SAPNode;
