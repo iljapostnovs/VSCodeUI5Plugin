@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 export class ConfigHandler {
-	static getJSLinterExceptions(): Array<{className: string; memberName: string}> {
+	static getJSLinterExceptions(): Array<{ className: string; memberName: string }> {
 		return vscode.workspace.getConfiguration("ui5.plugin").get("JSLinterExceptions") || [];
 	}
 

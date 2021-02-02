@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import {FileReader} from "../utils/FileReader";
-import {UI5Plugin} from "../../UI5Plugin";
+import { FileReader } from "../utils/FileReader";
+import { UI5Plugin } from "../../UI5Plugin";
 
 export class ClearCacheCommand {
 	static subscribeToPropertyChange() {

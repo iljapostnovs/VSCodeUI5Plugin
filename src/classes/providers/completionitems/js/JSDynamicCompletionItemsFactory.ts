@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import {AcornSyntaxAnalyzer} from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import {FieldsAndMethods} from "../../../UI5Classes/UIClassFactory";
-import {CustomCompletionItem} from "../CustomCompletionItem";
+import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { FieldsAndMethods } from "../../../UI5Classes/UIClassFactory";
+import { CustomCompletionItem } from "../CustomCompletionItem";
 
 export class JSDynamicCompletionItemsFactory {
 

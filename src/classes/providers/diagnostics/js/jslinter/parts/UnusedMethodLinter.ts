@@ -1,12 +1,12 @@
-import {Error, Linter} from "./abstraction/Linter";
+import { Error, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import {FileReader} from "../../../../../utils/FileReader";
-import {CustomClassUIMethod, CustomUIClass} from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
-import {AcornSyntaxAnalyzer} from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import {ConfigHandler} from "./config/ConfigHandler";
+import { FileReader } from "../../../../../utils/FileReader";
+import { CustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { ConfigHandler } from "./config/ConfigHandler";
 export class UnusedMethodLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];

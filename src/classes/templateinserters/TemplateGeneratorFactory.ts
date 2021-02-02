@@ -1,6 +1,6 @@
-import {TemplateGenerator} from "./abstraction/TemplateGenerator";
-import {JSTemplateGenerator} from "./JSTemplateGenerator";
-import {XMLTemplateGenerator} from "./XMLTemplateGenerator";
+import { TemplateGenerator } from "./abstraction/TemplateGenerator";
+import { JSTemplateGenerator } from "./JSTemplateGenerator";
+import { XMLTemplateGenerator } from "./XMLTemplateGenerator";
 
 export class TemplateGeneratorFactory {
 	static createInstance(filePath: string): TemplateGenerator | undefined {

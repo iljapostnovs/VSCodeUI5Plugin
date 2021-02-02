@@ -1,6 +1,6 @@
-import {FileReader} from "../utils/FileReader";
-import {HTTPHandler} from "../utils/HTTPHandler";
-import {URLBuilder} from "../utils/URLBuilder";
+import { FileReader } from "../utils/FileReader";
+import { HTTPHandler } from "../utils/HTTPHandler";
+import { URLBuilder } from "../utils/URLBuilder";
 
 export class SAPIcons {
 	public static icons: string[] = [];

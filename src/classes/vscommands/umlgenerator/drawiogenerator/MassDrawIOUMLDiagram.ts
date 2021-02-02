@@ -1,13 +1,13 @@
-import {Header} from "./drawiouml/Header";
-import {Footer} from "./drawiouml/Footer";
-import {FileReader} from "../../../utils/FileReader";
-import {UIClassFactory} from "../../../UI5Classes/UIClassFactory";
-import {DrawIOUMLDiagram} from "./DrawIOUMLDiagram";
+import { Header } from "./drawiouml/Header";
+import { Footer } from "./drawiouml/Footer";
+import { FileReader } from "../../../utils/FileReader";
+import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import { DrawIOUMLDiagram } from "./DrawIOUMLDiagram";
 import * as vscode from "vscode";
-import {CustomUIClass} from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import {DependencyLine} from "./drawiouml/lines/DependencyLine";
-import {IUMLGenerator} from "./drawiouml/interfaces/IUMLGenerator";
-import {ImplementationLine} from "./drawiouml/lines/ImplementationLIne";
+import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { DependencyLine } from "./drawiouml/lines/DependencyLine";
+import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
+import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
 
 interface UsedClassMap {
 	[key: string]: {
@@ -52,7 +52,7 @@ export class MassDrawIOUMLDiagram {
 
 								// xAxis += UMLDiagram.width + 10;
 
-								progress.report({message: `${className} generated`, increment: Math.round(100 / classQuantity)});
+								progress.report({ message: `${className} generated`, increment: Math.round(100 / classQuantity) });
 							} catch (error) {
 								console.log(`Failed to generate UML Diagram for ${className}`);
 							}
@@ -84,7 +84,7 @@ export class MassDrawIOUMLDiagram {
 		//build used class map
 		const usedClassMap: UsedClassMap = {};
 		Object.keys(usageMap).forEach(key => {
-			usedClassMap[key] = {isUsed: false};
+			usedClassMap[key] = { isUsed: false };
 		});
 
 		let allDiagramsAreUsed = false;
@@ -339,9 +339,9 @@ export class MassDrawIOUMLDiagram {
 					if (accordingUMLDiagram) {
 						let line: IUMLGenerator;
 						if (accordingUMLDiagram.UIClass.className === UMLDiagram.UIClass.parentClassNameDotNotation) {
-							line = new ImplementationLine(header, {source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead});
+							line = new ImplementationLine(header, { source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead });
 						} else {
-							line = new DependencyLine(header, {source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead});
+							line = new DependencyLine(header, { source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead });
 						}
 						lines += line.generateXML();
 					}

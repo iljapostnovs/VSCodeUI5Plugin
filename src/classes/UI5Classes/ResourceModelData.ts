@@ -1,5 +1,5 @@
-import {FileReader} from "../utils/FileReader";
-import {TypeValue} from "./UI5Parser/UIClass/AbstractUIClass";
+import { FileReader } from "../utils/FileReader";
+import { TypeValue } from "./UI5Parser/UIClass/AbstractUIClass";
 
 interface ResourceModel {
 	[key: string]: TypeValue[];

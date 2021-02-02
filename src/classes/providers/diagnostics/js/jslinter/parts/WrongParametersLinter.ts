@@ -1,13 +1,13 @@
-import {Error, Linter} from "./abstraction/Linter";
+import { Error, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import {AcornSyntaxAnalyzer} from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import {CustomUIClass} from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
-import {FileReader} from "../../../../../utils/FileReader";
-import {SAPNodeDAO} from "../../../../../librarydata/SAPNodeDAO";
-import {ConfigHandler} from "./config/ConfigHandler";
+import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import { FileReader } from "../../../../../utils/FileReader";
+import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
+import { ConfigHandler } from "./config/ConfigHandler";
 export class WrongParametersLinter extends Linter {
 	public static timePerChar = 0;
 	private static readonly _sapNodeDAO = new SAPNodeDAO();

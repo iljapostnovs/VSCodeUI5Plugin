@@ -1,6 +1,6 @@
 import * as path from "path";
 
-import {runTests} from "vscode-test";
+import { runTests } from "vscode-test";
 
 async function main() {
 	try {
@@ -14,7 +14,7 @@ async function main() {
 		const testWorkspace = path.resolve(__dirname, "../../../VSCodeUI5PluginUsageExampleApp");
 
 		// Download VS Code, unzip it and run the integration test
-		await runTests({extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace]});
+		await runTests({ extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace] });
 	} catch (err) {
 		console.error("Failed to run tests");
 		process.exit(1);

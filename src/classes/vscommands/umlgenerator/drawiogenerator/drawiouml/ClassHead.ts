@@ -1,8 +1,8 @@
-import {IUMLGenerator} from "./interfaces/IUMLGenerator";
-import {DrawIOUMLDiagram} from "../DrawIOUMLDiagram";
-import {AbstractUIClass} from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import {Header} from "./Header";
-import {ITextLengthGettable} from "./interfaces/ITextLengthGettable";
+import { IUMLGenerator } from "./interfaces/IUMLGenerator";
+import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
+import { AbstractUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { Header } from "./Header";
+import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
 
 export class ClassHead implements IUMLGenerator, ITextLengthGettable {
 	id: number;

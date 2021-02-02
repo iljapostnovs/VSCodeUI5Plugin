@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import {FileReader} from "../utils/FileReader";
-import {TemplateGenerator} from "./abstraction/TemplateGenerator";
+import { FileReader } from "../utils/FileReader";
+import { TemplateGenerator } from "./abstraction/TemplateGenerator";
 
 export class JSTemplateGenerator extends TemplateGenerator {
 	public generateTemplate(uri: vscode.Uri): string | undefined {

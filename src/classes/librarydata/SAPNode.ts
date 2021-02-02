@@ -1,5 +1,5 @@
-import {UI5Metadata} from "./UI5Metadata";
-import {UI5MetadataDAO} from "./UI5MetadataDAO";
+import { UI5Metadata } from "./UI5Metadata";
+import { UI5MetadataDAO } from "./UI5MetadataDAO";
 export class SAPNode {
 	public node: any;
 	public metadata: UI5Metadata | undefined;
@@ -58,7 +58,7 @@ export class SAPNode {
 		const nodes = this.node.nodes;
 		if (nodes) {
 			const nodeFields = nodes.map((node: any) => {
-				const field = {...node};
+				const field = { ...node };
 				field.type = node.name || "string";
 				field.name = node.name.replace(`${this.node.type || this.node.name}.`, "");
 				field.description = node.description || ""

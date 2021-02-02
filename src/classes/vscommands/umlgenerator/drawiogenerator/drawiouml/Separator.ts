@@ -1,6 +1,6 @@
-import {IUMLGenerator} from "./interfaces/IUMLGenerator";
-import {DrawIOUMLDiagram} from "../DrawIOUMLDiagram";
-import {ClassHead} from "./ClassHead";
+import { IUMLGenerator } from "./interfaces/IUMLGenerator";
+import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
+import { ClassHead } from "./ClassHead";
 
 export class Separator implements IUMLGenerator {
 	id: number;

@@ -1,11 +1,11 @@
-import {SAPNodeDAO} from "../../../librarydata/SAPNodeDAO";
-import {CustomUIClass} from "../../UI5Parser/UIClass/CustomUIClass";
-import {FieldsAndMethods, UIClassFactory} from "../../UIClassFactory";
-import {AcornSyntaxAnalyzer} from "../AcornSyntaxAnalyzer";
-import {FieldPropertyMethodGetterStrategy} from "./abstraction/FieldPropertyMethodGetterStrategy";
+import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
+import { CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
+import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
+import { FieldPropertyMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
 import * as vscode from "vscode";
-import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "./FieldsAndMethodForPositionBeforeCurrentStrategy";
-import {FileReader} from "../../../utils/FileReader";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { FileReader } from "../../../utils/FileReader";
 
 export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 	getFieldsAndMethods() {
@@ -129,7 +129,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 					let models = this._getManifestModels();
 					const classModels = this._getCurrentClassModels(currentClassName);
 					models.push(...classModels);
-					models = models.reduce((accumulator: {type: string, name: string}[], model) => {
+					models = models.reduce((accumulator: { type: string, name: string }[], model) => {
 						const modelAlreadyAdded = !!accumulator.find(modelInArray => modelInArray.name === model.name);
 						if (!modelAlreadyAdded) {
 							accumulator.push(model);
@@ -158,7 +158,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 	}
 
 	private _getManifestModels() {
-		let models: {type: string, name: string}[] = [];
+		let models: { type: string, name: string }[] = [];
 		const fileName = vscode.window.activeTextEditor?.document.fileName;
 		const currentClassName = fileName && FileReader.getClassNameFromPath(fileName);
 		if (currentClassName) {
@@ -175,7 +175,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 	}
 
 	private _getCurrentClassModels(currentClassName: string) {
-		let models: {type: string, name: string}[] = [];
+		let models: { type: string, name: string }[] = [];
 		if (currentClassName) {
 			const UIClass = UIClassFactory.getUIClass(currentClassName);
 			if (UIClass instanceof CustomUIClass) {

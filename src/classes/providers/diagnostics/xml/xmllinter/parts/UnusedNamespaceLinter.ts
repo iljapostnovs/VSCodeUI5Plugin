@@ -1,4 +1,4 @@
-import {Error, Linter} from "./abstraction/Linter";
+import { Error, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 export class UnusedNamespaceLinter extends Linter {

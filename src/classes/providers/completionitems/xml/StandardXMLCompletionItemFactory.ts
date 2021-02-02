@@ -1,18 +1,18 @@
 import * as vscode from "vscode";
-import {SAPNode} from "../../../librarydata/SAPNode";
-import {URLBuilder} from "../../../utils/URLBuilder";
-import {SAPNodeDAO} from "../../../librarydata/SAPNodeDAO";
-import {UI5Plugin} from "../../../../UI5Plugin";
-import {AbstractUIClass} from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import {StandardUIClass} from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
-import {IPropertyGenerator} from "../codegenerators/property/interfaces/IPropertyGenerator";
-import {GeneratorFactory} from "../codegenerators/GeneratorFactory";
-import {IAggregationGenerator} from "../codegenerators/aggregation/interfaces/IAggregationGenerator";
-import {SAPNodePropertyGenerationStrategy} from "../codegenerators/property/strategies/SAPNodePropertyGetterStrategy";
-import {SAPClassAggregationGetterStrategy} from "../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
-import {SAPNodeAggregationGetterStrategy} from "../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
-import {SAPClassPropertyGetterStrategy} from "../codegenerators/property/strategies/SAPClassPropertyGetterStrategy";
-import {CustomCompletionItem} from "../CustomCompletionItem";
+import { SAPNode } from "../../../librarydata/SAPNode";
+import { URLBuilder } from "../../../utils/URLBuilder";
+import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
+import { UI5Plugin } from "../../../../UI5Plugin";
+import { AbstractUIClass } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
+import { IPropertyGenerator } from "../codegenerators/property/interfaces/IPropertyGenerator";
+import { GeneratorFactory } from "../codegenerators/GeneratorFactory";
+import { IAggregationGenerator } from "../codegenerators/aggregation/interfaces/IAggregationGenerator";
+import { SAPNodePropertyGenerationStrategy } from "../codegenerators/property/strategies/SAPNodePropertyGetterStrategy";
+import { SAPClassAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
+import { SAPNodeAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
+import { SAPClassPropertyGetterStrategy } from "../codegenerators/property/strategies/SAPClassPropertyGetterStrategy";
+import { CustomCompletionItem } from "../CustomCompletionItem";
 
 export class StandardXMLCompletionItemFactory {
 	private readonly _nodeDAO = new SAPNodeDAO();
@@ -85,7 +85,7 @@ export class StandardXMLCompletionItemFactory {
 		});
 	}
 
-	private _generateXMLClassCompletionItemUsing(data: {className: string, insertText: string, detail: string, markdown: vscode.MarkdownString}) {
+	private _generateXMLClassCompletionItemUsing(data: { className: string, insertText: string, detail: string, markdown: vscode.MarkdownString }) {
 		const className = data.className.split(".")[data.className.split(".").length - 1];
 		const completionItem: CustomCompletionItem = new CustomCompletionItem(className);
 		completionItem.kind = vscode.CompletionItemKind.Class;

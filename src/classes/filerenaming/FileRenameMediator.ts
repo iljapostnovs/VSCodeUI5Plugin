@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import {JSFileRenameHandler} from "./handlers/JSFileRenameHandler";
-import {XMLFileRenameHandler} from "./handlers/XMLFileRenameHandler";
-import {ControllerRenameHandler} from "./handlers/ControllerRenameHandler";
+import { JSFileRenameHandler } from "./handlers/JSFileRenameHandler";
+import { XMLFileRenameHandler } from "./handlers/XMLFileRenameHandler";
+import { ControllerRenameHandler } from "./handlers/ControllerRenameHandler";
 export class FileRenameMediator {
 	static handleFileRename(file: {
 		oldUri: vscode.Uri;

@@ -1,4 +1,4 @@
-import {ITextTransformationStrategy} from "./ITextTransformationStrategy";
+import { ITextTransformationStrategy } from "./ITextTransformationStrategy";
 
 export class SnakeUpperCase implements ITextTransformationStrategy {
 	transform(text: string): string {

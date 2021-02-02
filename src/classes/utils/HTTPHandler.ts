@@ -1,4 +1,4 @@
-import axios, {AxiosRequestConfig} from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import * as https from "https";
 import * as url from "url";
 import * as vscode from "vscode";

@@ -1,14 +1,14 @@
-import {AbstractUIClass, UIField, UIMethod} from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import {Property} from "./drawiouml/Property";
-import {Method} from "./drawiouml/Method";
-import {Field} from "./drawiouml/Field";
-import {ClassHead} from "./drawiouml/ClassHead";
-import {Header} from "./drawiouml/Header";
-import {Footer} from "./drawiouml/Footer";
-import {Separator} from "./drawiouml/Separator";
-import {ITextLengthGettable} from "./drawiouml/interfaces/ITextLengthGettable";
-import {AcornSyntaxAnalyzer} from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import {CustomUIClass} from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { AbstractUIClass, UIField, UIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { Property } from "./drawiouml/Property";
+import { Method } from "./drawiouml/Method";
+import { Field } from "./drawiouml/Field";
+import { ClassHead } from "./drawiouml/ClassHead";
+import { Header } from "./drawiouml/Header";
+import { Footer } from "./drawiouml/Footer";
+import { Separator } from "./drawiouml/Separator";
+import { ITextLengthGettable } from "./drawiouml/interfaces/ITextLengthGettable";
+import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 export class DrawIOUMLDiagram {
 	readonly UIClass: AbstractUIClass;

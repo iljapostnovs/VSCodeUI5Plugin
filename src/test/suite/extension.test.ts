@@ -1,14 +1,14 @@
 import assert = require("assert");
-import {after, test} from "mocha";
+import { after, test } from "mocha";
 import * as vscode from "vscode";
-import {AcornSyntaxAnalyzer} from "../../classes/UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import {UIClassFactory} from "../../classes/UI5Classes/UIClassFactory";
+import { AcornSyntaxAnalyzer } from "../../classes/UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
-import {CustomUIClass} from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import {FileReader} from "../../classes/utils/FileReader";
-import {JSLinter} from "../../classes/providers/diagnostics/js/jslinter/JSLinter";
-import {XMLLinter} from "../../classes/providers/diagnostics/xml/xmllinter/XMLLinter";
+import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { FileReader } from "../../classes/utils/FileReader";
+import { JSLinter } from "../../classes/providers/diagnostics/js/jslinter/JSLinter";
+import { XMLLinter } from "../../classes/providers/diagnostics/xml/xmllinter/XMLLinter";
 
 suite("Extension Test Suite", () => {
 	after(() => {

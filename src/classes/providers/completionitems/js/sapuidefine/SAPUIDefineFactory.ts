@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
-import {WorkspaceCompletionItemFactory} from "./WorkspaceCompletionItemFactory";
-import {SAPNode} from "../../../../librarydata/SAPNode";
-import {SAPNodeDAO} from "../../../../librarydata/SAPNodeDAO";
-import {URLBuilder} from "../../../../utils/URLBuilder";
-import {GeneratorFactory} from "../../codegenerators/GeneratorFactory";
-import {CustomCompletionItem} from "../../CustomCompletionItem";
+import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
+import { SAPNode } from "../../../../librarydata/SAPNode";
+import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
+import { URLBuilder } from "../../../../utils/URLBuilder";
+import { GeneratorFactory } from "../../codegenerators/GeneratorFactory";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
 
 export class SAPUIDefineFactory {
 	private static readonly _nodeDAO = new SAPNodeDAO();
@@ -45,7 +45,7 @@ export class SAPUIDefineFactory {
 			completionItem.documentation = mardownString;
 
 			if (vscode.workspace.getConfiguration("ui5.plugin").get("moveDefineToFunctionParametersOnAutocomplete")) {
-				completionItem.command = {command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define"};
+				completionItem.command = { command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define" };
 			}
 
 			completionItems.push(completionItem);

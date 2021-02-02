@@ -1,18 +1,18 @@
-import {SAPNodeDAO} from "../../librarydata/SAPNodeDAO";
+import { SAPNodeDAO } from "../../librarydata/SAPNodeDAO";
 import * as vscode from "vscode";
-import {UI5MetadataPreloader} from "../../librarydata/UI5MetadataDAO";
-import {SAPIcons} from "../../UI5Classes/SAPIcons";
-import {ResourceModelData} from "../../UI5Classes/ResourceModelData";
-import {StandardXMLCompletionItemFactory as StandardXMLCompletionItemFactory} from "./xml/StandardXMLCompletionItemFactory";
-import {SAPUIDefineFactory} from "./js/sapuidefine/SAPUIDefineFactory";
-import {ViewIdCompletionItemFactory} from "./js/ViewIdCompletionItemFactory";
-import {JSDynamicCompletionItemsFactory} from "./js/JSDynamicCompletionItemsFactory";
-import {XMLDynamicCompletionItemFactory} from "./xml/XMLDynamicCompletionItemFactory";
-import {AcornSyntaxAnalyzer} from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import {UIClassFactory} from "../../UI5Classes/UIClassFactory";
-import {CustomUIClass} from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import {CustomCompletionItem} from "./CustomCompletionItem";
-import {GeneratorFactory} from "./codegenerators/GeneratorFactory";
+import { UI5MetadataPreloader } from "../../librarydata/UI5MetadataDAO";
+import { SAPIcons } from "../../UI5Classes/SAPIcons";
+import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
+import { StandardXMLCompletionItemFactory as StandardXMLCompletionItemFactory } from "./xml/StandardXMLCompletionItemFactory";
+import { SAPUIDefineFactory } from "./js/sapuidefine/SAPUIDefineFactory";
+import { ViewIdCompletionItemFactory } from "./js/ViewIdCompletionItemFactory";
+import { JSDynamicCompletionItemsFactory } from "./js/JSDynamicCompletionItemsFactory";
+import { XMLDynamicCompletionItemFactory } from "./xml/XMLDynamicCompletionItemFactory";
+import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
+import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomCompletionItem } from "./CustomCompletionItem";
+import { GeneratorFactory } from "./codegenerators/GeneratorFactory";
 
 export class CompletionItemFactory {
 	private static readonly _nodeDAO = new SAPNodeDAO();
