@@ -1130,10 +1130,6 @@ export class AcornSyntaxAnalyzer {
 		return className;
 	}
 
-	private static _getClassNameForMap(objectExpression: any, stack: any[], UIClass: CustomUIClass) {
-		// return className;
-	}
-
 	private static _getObjectNameFromMemberExpressionRecursively(node: any, names: string[] = []) {
 		if (node.type === "MemberExpression") {
 			names.unshift(node.property.name);
