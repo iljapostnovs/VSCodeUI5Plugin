@@ -32,13 +32,13 @@ export class CompletionItemRegistrator {
 				}
 				return itemsToReturn;
 			}
-		}, ".", "\"");
+		}, ".", "\"", "'");
 
 		const JSViewIDProvider = vscode.languages.registerCompletionItemProvider({ language: "javascript", scheme: "file" }, {
 			provideCompletionItems() {
 				return JSCompletionItemFactory.createViewIdCompletionItems();
 			}
-		}, "\"");
+		}, "\"", "'");
 
 		let i = 65;
 		const aChars: string[] = [];
