@@ -143,6 +143,7 @@ export class AcornSyntaxAnalyzer {
 
 	public static findClassNameForStack(stack: any[], currentClassName: string, primaryClassName: string = currentClassName, clearStack = false) {
 		let className = "";
+		let stackWasModified = false;
 
 		if (clearStack) {
 			this.declarationStack = [];
@@ -270,7 +271,9 @@ export class AcornSyntaxAnalyzer {
 
 					if (variableDeclaration) {
 						const neededDeclaration = variableDeclaration.declarations.find((declaration: any) => declaration.id.name === currentNode.name);
+						const stackBeforeDeclaration = stack.length;
 						className = this._getClassNameFromAcornVariableDeclaration(neededDeclaration, UIClass, stack);
+						stackWasModified = stackBeforeDeclaration !== stack.length;
 					} else {
 						const neededAssignment = this._getAcornAssignmentsFromUIClass(currentClassName, currentNode.name, currentNode.end);
 						if (neededAssignment) {
@@ -323,7 +326,7 @@ export class AcornSyntaxAnalyzer {
 
 			}
 
-			if (!currentNode._acornSyntaxAnalyserType && !className?.includes("__map__")) {
+			if (!currentNode._acornSyntaxAnalyserType && !stackWasModified && !className?.includes("__map__")) {
 				currentNode._acornSyntaxAnalyserType = className || "any";
 			}
 
@@ -1047,12 +1050,13 @@ export class AcornSyntaxAnalyzer {
 		if (declaration._acornSyntaxAnalyserType) {
 			className = declaration._acornSyntaxAnalyserType;
 		} else {
+			const stackWasEmpty = stack.length === 0;
 			className = this.getClassNameFromSingleAcornNode(declaration.init, UIClass, stack);
 			if (declaration.id.name && (!className || className === "any" || className === "void")) {
 				className = CustomUIClass.getTypeFromHungarianNotation(declaration.id.name) || className;
 			}
 
-			if (className && !className.includes("__map__")) {
+			if (className && !className.includes("__map__") && stackWasEmpty) {
 				declaration._acornSyntaxAnalyserType = className;
 			}
 		}
@@ -1092,13 +1096,21 @@ export class AcornSyntaxAnalyzer {
 			} else if (node?.type === "ObjectExpression") {
 				className = "map";
 				if (stack.length > 0) {
-					className = this._getClassNameForMap(node, stack, UIClass);
+					const nextNode = stack.shift();
+					if (nextNode) {
+						const field = node.properties.find((property: any) => property.key.name === nextNode.property.name);
+						if (field && field.value) {
+							className = this.getClassNameFromSingleAcornNode(field.value, UIClass, stack);
+						}
+					}
+
 				} else {
 					const fields = node.properties.map((property: any) => property.key.name);
 					className = `${UIClass.className}__map__${fields.join("__map__")}`;
 					if (!className) {
 						className = "map"
 					}
+					node._acornSyntaxAnalyserType = className;
 				}
 			} else if (node?.type === "Literal") {
 				if (node?.value === null) {
@@ -1119,16 +1131,7 @@ export class AcornSyntaxAnalyzer {
 	}
 
 	private static _getClassNameForMap(objectExpression: any, stack: any[], UIClass: CustomUIClass) {
-		let className = "any";
-		const nextNode = stack.shift();
-		if (nextNode) {
-			const field = objectExpression.properties.find((property: any) => property.key.name === nextNode.property.name);
-			if (field && field.value) {
-				className = this.getClassNameFromSingleAcornNode(field.value, UIClass, stack);
-			}
-		}
-
-		return className;
+		// return className;
 	}
 
 	private static _getObjectNameFromMemberExpressionRecursively(node: any, names: string[] = []) {

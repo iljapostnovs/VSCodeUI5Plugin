@@ -66,7 +66,11 @@ suite("Extension Test Suite", () => {
 
 			const position = searchedNode.property?.start || searchedNode.start + data.positionAddition;
 			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-			const classNameAtPosition = positionBeforeCurrentStrategy.acornGetClassName(data.className, position);
+			let classNameAtPosition = positionBeforeCurrentStrategy.acornGetClassName(data.className, position);
+			if (classNameAtPosition) {
+				const fieldsAndMethods = positionBeforeCurrentStrategy.destructueFieldsAndMethodsAccordingToMapParams(classNameAtPosition);
+				classNameAtPosition = fieldsAndMethods?.className;
+			}
 			assert.strictEqual(data.type, classNameAtPosition, `"${data.className}" position ${position} method "${data.methodName}" type is "${classNameAtPosition}" but expected "${data.type}"`);
 		});
 	});
