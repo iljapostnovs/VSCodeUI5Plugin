@@ -1,5 +1,5 @@
-import {IPropertyGenerator} from "./interfaces/IPropertyGenerator";
-import {IPropertyGetterStrategy} from "./interfaces/IPropertyGetterStrategy";
+import { IPropertyGenerator } from "./interfaces/IPropertyGenerator";
+import { IPropertyGetterStrategy } from "./interfaces/IPropertyGetterStrategy";
 import * as vscode from "vscode";
 export class XMLPropertyGenerator implements IPropertyGenerator {
 	public generateProperties(strategy: IPropertyGetterStrategy) {

@@ -1,9 +1,9 @@
-import {AcornSyntaxAnalyzer} from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import {UIClassFactory} from "../../UI5Classes/UIClassFactory";
-import {DrawIOUMLDiagram} from "./drawiogenerator/DrawIOUMLDiagram";
+import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
+import { DrawIOUMLDiagram } from "./drawiogenerator/DrawIOUMLDiagram";
 import * as vscode from "vscode";
 import * as fs from "fs";
-import {MassDrawIOUMLDiagram} from "./drawiogenerator/MassDrawIOUMLDiagram";
+import { MassDrawIOUMLDiagram } from "./drawiogenerator/MassDrawIOUMLDiagram";
 import * as path from "path";
 const fileSeparator = path.sep;
 

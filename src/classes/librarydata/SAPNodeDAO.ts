@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import {FileReader} from "../utils/FileReader";
-import {URLBuilder} from "../utils/URLBuilder";
-import {HTTPHandler} from "../utils/HTTPHandler";
-import {SAPNode} from "./SAPNode";
-import {UI5MetadataPreloader} from "./UI5MetadataDAO";
+import { FileReader } from "../utils/FileReader";
+import { URLBuilder } from "../utils/URLBuilder";
+import { HTTPHandler } from "../utils/HTTPHandler";
+import { SAPNode } from "./SAPNode";
+import { UI5MetadataPreloader } from "./UI5MetadataDAO";
 interface LooseNodeObject {
 	[key: string]: SAPNode;
 }

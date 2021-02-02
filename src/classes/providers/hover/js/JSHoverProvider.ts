@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
-import {AcornSyntaxAnalyzer} from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import {CustomUIClass} from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import {UIClassFactory} from "../../../UI5Classes/UIClassFactory";
-import {FileReader} from "../../../utils/FileReader";
-import {URLBuilder} from "../../../utils/URLBuilder";
+import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import { FileReader } from "../../../utils/FileReader";
+import { URLBuilder } from "../../../utils/URLBuilder";
 
 export class JSHoverProvider {
 	static getTextEdits(document: vscode.TextDocument, position: vscode.Position) {

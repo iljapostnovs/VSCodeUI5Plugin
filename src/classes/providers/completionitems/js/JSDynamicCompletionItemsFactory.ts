@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import {AcornSyntaxAnalyzer} from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import {FieldsAndMethods} from "../../../UI5Classes/UIClassFactory";
-import {CustomCompletionItem} from "../CustomCompletionItem";
+import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { FieldsAndMethods } from "../../../UI5Classes/UIClassFactory";
+import { CustomCompletionItem } from "../CustomCompletionItem";
 
 export class JSDynamicCompletionItemsFactory {
 
@@ -47,7 +47,7 @@ export class JSDynamicCompletionItemsFactory {
 			if (currentRange) {
 				completionItem.range = currentRange;
 			}
-
+			completionItem.sortText = "0";
 			return completionItem;
 		});
 
@@ -57,6 +57,7 @@ export class JSDynamicCompletionItemsFactory {
 			completionItem.insertText = classField.name;
 			completionItem.detail = `(${classField.visibility}) ${classField.name}: ${classField.type ? classField.type : "any"}`;
 			completionItem.documentation = classField.description;
+			completionItem.sortText = "0";
 
 			return completionItem;
 		}));

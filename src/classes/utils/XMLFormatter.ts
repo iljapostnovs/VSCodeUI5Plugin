@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import {Tag} from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
-import {XMLParser} from "./XMLParser";
+import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { XMLParser } from "./XMLParser";
 
 export class XMLFormatter {
 	static formatDocument(document: vscode.TextDocument) {

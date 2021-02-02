@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import {FileReader} from "../../utils/FileReader";
-import {ResourceModelData} from "../../UI5Classes/ResourceModelData";
-import {TextTransformationFactory, CaseType} from "./TextTransformationFactory";
+import { FileReader } from "../../utils/FileReader";
+import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
+import { TextTransformationFactory, CaseType } from "./TextTransformationFactory";
 import * as jsClassData from "./i18nIDs.json";
 
 const workspace = vscode.workspace;

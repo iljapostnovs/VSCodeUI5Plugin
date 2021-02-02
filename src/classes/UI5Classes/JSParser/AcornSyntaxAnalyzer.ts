@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
-import {UIClassFactory, FieldsAndMethods} from "../UIClassFactory";
-import {FileReader} from "../../utils/FileReader";
-import {UIField, UIMethod} from "../UI5Parser/UIClass/AbstractUIClass";
-import {CustomClassUIMethod, CustomUIClass, CustomClassUIField} from "../UI5Parser/UIClass/CustomUIClass";
-import {FieldsAndMethodForPositionBeforeCurrentStrategy} from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import {FieldPropertyMethodGetterStrategy} from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
-import {InnerPropertiesStrategy} from "./strategies/InnerPropertiesStrategy";
-import {XMLParser} from "../../utils/XMLParser";
-import {SAPNodeDAO} from "../../librarydata/SAPNodeDAO";
+import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
+import { FileReader } from "../../utils/FileReader";
+import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
+import { CustomClassUIMethod, CustomUIClass, CustomClassUIField } from "../UI5Parser/UIClass/CustomUIClass";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { FieldPropertyMethodGetterStrategy } from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
+import { InnerPropertiesStrategy } from "./strategies/InnerPropertiesStrategy";
+import { XMLParser } from "../../utils/XMLParser";
+import { SAPNodeDAO } from "../../librarydata/SAPNodeDAO";
 export class AcornSyntaxAnalyzer {
 	static getFieldsAndMethodsOfTheCurrentVariable(document: vscode.TextDocument, position: vscode.Position) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
@@ -143,6 +143,7 @@ export class AcornSyntaxAnalyzer {
 
 	public static findClassNameForStack(stack: any[], currentClassName: string, primaryClassName: string = currentClassName, clearStack = false) {
 		let className = "";
+		let stackWasModified = false;
 
 		if (clearStack) {
 			this.declarationStack = [];
@@ -270,7 +271,9 @@ export class AcornSyntaxAnalyzer {
 
 					if (variableDeclaration) {
 						const neededDeclaration = variableDeclaration.declarations.find((declaration: any) => declaration.id.name === currentNode.name);
+						const stackBeforeDeclaration = stack.length;
 						className = this._getClassNameFromAcornVariableDeclaration(neededDeclaration, UIClass, stack);
+						stackWasModified = stackBeforeDeclaration !== stack.length;
 					} else {
 						const neededAssignment = this._getAcornAssignmentsFromUIClass(currentClassName, currentNode.name, currentNode.end);
 						if (neededAssignment) {
@@ -323,7 +326,7 @@ export class AcornSyntaxAnalyzer {
 
 			}
 
-			if (!currentNode._acornSyntaxAnalyserType && !className?.includes("__map__")) {
+			if (!currentNode._acornSyntaxAnalyserType && !stackWasModified && !className?.includes("__map__")) {
 				currentNode._acornSyntaxAnalyserType = className || "any";
 			}
 
@@ -496,7 +499,7 @@ export class AcornSyntaxAnalyzer {
 		return eventHandlerData;
 	}
 
-	static getEventHandlerDataFromJSClass(className: string, eventHandlerName: string): {className: string, eventName: string, node: any} | undefined {
+	static getEventHandlerDataFromJSClass(className: string, eventHandlerName: string): { className: string, eventName: string, node: any } | undefined {
 		let eventHandlerData;
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
@@ -570,12 +573,12 @@ export class AcornSyntaxAnalyzer {
 			const tagText = XMLParser.getTagInPosition(viewOfTheController, position).text;
 			const attributes = XMLParser.getAttributesOfTheTag(tagText);
 			const attribute = attributes?.find(attribute => {
-				const {attributeValue} = XMLParser.getAttributeNameAndValue(attribute);
+				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 
 				return attributeValue === currentClassEventHandlerName;
 			});
 			if (attribute) {
-				const {attributeName} = XMLParser.getAttributeNameAndValue(attribute);
+				const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
 				const eventName = attributeName;
 				if (tagText && eventName) {
 					const tagPrefix = XMLParser.getTagPrefix(tagText);
@@ -1047,12 +1050,13 @@ export class AcornSyntaxAnalyzer {
 		if (declaration._acornSyntaxAnalyserType) {
 			className = declaration._acornSyntaxAnalyserType;
 		} else {
+			const stackWasEmpty = stack.length === 0;
 			className = this.getClassNameFromSingleAcornNode(declaration.init, UIClass, stack);
 			if (declaration.id.name && (!className || className === "any" || className === "void")) {
 				className = CustomUIClass.getTypeFromHungarianNotation(declaration.id.name) || className;
 			}
 
-			if (className && !className.includes("__map__")) {
+			if (className && !className.includes("__map__") && stackWasEmpty) {
 				declaration._acornSyntaxAnalyserType = className;
 			}
 		}
@@ -1092,13 +1096,21 @@ export class AcornSyntaxAnalyzer {
 			} else if (node?.type === "ObjectExpression") {
 				className = "map";
 				if (stack.length > 0) {
-					className = this._getClassNameForMap(node, stack, UIClass);
+					const nextNode = stack.shift();
+					if (nextNode) {
+						const field = node.properties.find((property: any) => property.key.name === nextNode.property.name);
+						if (field && field.value) {
+							className = this.getClassNameFromSingleAcornNode(field.value, UIClass, stack);
+						}
+					}
+
 				} else {
 					const fields = node.properties.map((property: any) => property.key.name);
 					className = `${UIClass.className}__map__${fields.join("__map__")}`;
 					if (!className) {
 						className = "map"
 					}
+					node._acornSyntaxAnalyserType = className;
 				}
 			} else if (node?.type === "Literal") {
 				if (node?.value === null) {
@@ -1113,19 +1125,6 @@ export class AcornSyntaxAnalyzer {
 			//} //else if (declaration?.type === "LogicalExpression") {
 			// className = "boolean";
 			//}
-		}
-
-		return className;
-	}
-
-	private static _getClassNameForMap(objectExpression: any, stack: any[], UIClass: CustomUIClass) {
-		let className = "any";
-		const nextNode = stack.shift();
-		if (nextNode) {
-			const field = objectExpression.properties.find((property: any) => property.key.name === nextNode.property.name);
-			if (field && field.value) {
-				className = this.getClassNameFromSingleAcornNode(field.value, UIClass, stack);
-			}
 		}
 
 		return className;

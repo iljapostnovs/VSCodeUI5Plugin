@@ -1,4 +1,4 @@
-import {IUMLGenerator} from "./interfaces/IUMLGenerator";
+import { IUMLGenerator } from "./interfaces/IUMLGenerator";
 
 export class Footer implements IUMLGenerator {
 	id: number;

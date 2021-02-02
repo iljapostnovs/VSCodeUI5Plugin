@@ -1,6 +1,6 @@
-import {AbstractUIClass} from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
-import {IPropertyGetterStrategy} from "../interfaces/IPropertyGetterStrategy";
+import { AbstractUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import { IPropertyGetterStrategy } from "../interfaces/IPropertyGetterStrategy";
 
 export class SAPClassPropertyGetterStrategy implements IPropertyGetterStrategy {
 	private readonly _UIClass: AbstractUIClass;
@@ -22,7 +22,7 @@ export class SAPClassPropertyGetterStrategy implements IPropertyGetterStrategy {
 		return this._UIClass.properties;
 	}
 
-	getProperty(property: any): {name: string; defaultValue: any;} {
+	getProperty(property: any): { name: string; defaultValue: any; } {
 		return {
 			name: property.name,
 			defaultValue: ""

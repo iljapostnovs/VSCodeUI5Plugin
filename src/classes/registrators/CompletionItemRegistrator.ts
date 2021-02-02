@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
-import {CompletionItemFactory} from "../providers/completionitems/CompletionItemFactory";
-import {FileWatcherMediator} from "../utils/FileWatcherMediator";
-import {UI5Plugin} from "../../UI5Plugin";
-import {CustomCompletionItem} from "../providers/completionitems/CustomCompletionItem";
-import {UIDefineCompletionItemGenerator} from "../providers/completionitems/codegenerators/define/UIDefineCompletionItemGenerator";
-import {GeneratorFactory} from "../providers/completionitems/codegenerators/GeneratorFactory";
+import { CompletionItemFactory } from "../providers/completionitems/CompletionItemFactory";
+import { FileWatcherMediator } from "../utils/FileWatcherMediator";
+import { UI5Plugin } from "../../UI5Plugin";
+import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
+import { UIDefineCompletionItemGenerator } from "../providers/completionitems/codegenerators/define/UIDefineCompletionItemGenerator";
+import { GeneratorFactory } from "../providers/completionitems/codegenerators/GeneratorFactory";
 
 export class CompletionItemRegistrator {
 	static async register() {
@@ -17,7 +17,7 @@ export class CompletionItemRegistrator {
 		await JSCompletionItemFactory.createUIDefineCompletionItems();
 		console.log("JS Completion Items generated");
 
-		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
+		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({ language: "javascript", scheme: "file" }, {
 			async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 				let itemsToReturn: CustomCompletionItem[] = [];
 				try {
@@ -34,7 +34,7 @@ export class CompletionItemRegistrator {
 			}
 		}, ".", "\"");
 
-		const JSViewIDProvider = vscode.languages.registerCompletionItemProvider({language: "javascript", scheme: "file"}, {
+		const JSViewIDProvider = vscode.languages.registerCompletionItemProvider({ language: "javascript", scheme: "file" }, {
 			provideCompletionItems() {
 				return JSCompletionItemFactory.createViewIdCompletionItems();
 			}
@@ -46,7 +46,7 @@ export class CompletionItemRegistrator {
 			aChars.push(String.fromCharCode(i));
 		}
 
-		const XMLProvider = vscode.languages.registerCompletionItemProvider({language: "xml", scheme: "file"}, {
+		const XMLProvider = vscode.languages.registerCompletionItemProvider({ language: "xml", scheme: "file" }, {
 			provideCompletionItems() {
 				return XMLCompletionItemFactory.createXMLDynamicCompletionItems();
 			}

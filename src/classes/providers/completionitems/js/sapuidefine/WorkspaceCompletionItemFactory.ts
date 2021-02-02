@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import {FileReader} from "../../../../utils/FileReader";
+import { FileReader } from "../../../../utils/FileReader";
 import * as path from "path";
-import {CustomCompletionItem} from "../../CustomCompletionItem";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
 const escapedFileSeparator = "\\" + path.sep;
 const workspace = vscode.workspace;
 
@@ -14,7 +14,7 @@ class UIDefineJSFile {
 	public fsPath: string;
 	public UIDefineString: string;
 
-	constructor({fsPath, UIDefineString}: WorkspaceJSFileConstructor) {
+	constructor({ fsPath, UIDefineString }: WorkspaceJSFileConstructor) {
 		this.fsPath = fsPath;
 		this.UIDefineString = UIDefineString;
 	}
@@ -114,7 +114,7 @@ export class WorkspaceCompletionItemFactory {
 		completionItem.detail = insertionText;
 		completionItem.documentation = insertionText;
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("moveDefineToFunctionParametersOnAutocomplete")) {
-			completionItem.command = {command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define"};
+			completionItem.command = { command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define" };
 		}
 
 		return completionItem;

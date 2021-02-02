@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
-import {CustomClassUIMethod, CustomUIClass} from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import {UIClassFactory} from "../../../../UI5Classes/UIClassFactory";
-import {FileReader, Fragment, View} from "../../../../utils/FileReader";
-import {XMLParser} from "../../../../utils/XMLParser";
-import {CodeLensGenerator} from "./abstraction/CodeLensGenerator";
+import { CustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
+import { FileReader, Fragment, View } from "../../../../utils/FileReader";
+import { XMLParser } from "../../../../utils/XMLParser";
+import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 import LineColumn = require("line-column");
-import {AcornSyntaxAnalyzer} from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 
 interface EventHandlerData {
 	name: string;

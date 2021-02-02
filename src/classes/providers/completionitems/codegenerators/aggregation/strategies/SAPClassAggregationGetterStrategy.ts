@@ -1,6 +1,6 @@
-import {AbstractUIClass} from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import {UIClassFactory} from "../../../../../UI5Classes/UIClassFactory";
-import {IAggregationGetterStrategy} from "../interfaces/IAggregationGetterStrategy";
+import { AbstractUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import { IAggregationGetterStrategy } from "../interfaces/IAggregationGetterStrategy";
 
 export class SAPClassAggregationGetterStrategy implements IAggregationGetterStrategy {
 	private readonly _UIClass: AbstractUIClass;
@@ -22,7 +22,7 @@ export class SAPClassAggregationGetterStrategy implements IAggregationGetterStra
 		return this._UIClass.aggregations;
 	}
 
-	getAggregation(aggregation: any): {name: string; type: string;} {
+	getAggregation(aggregation: any): { name: string; type: string; } {
 		return {
 			name: aggregation.name,
 			type: aggregation.type

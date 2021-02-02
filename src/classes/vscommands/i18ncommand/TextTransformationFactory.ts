@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import {PascalCaseStrategy} from "./strategies/PascalCaseStrategy";
-import {ITextTransformationStrategy} from "./strategies/ITextTransformationStrategy";
-import {SnakeUpperCase} from "./strategies/SnakeUpperCase";
+import { PascalCaseStrategy } from "./strategies/PascalCaseStrategy";
+import { ITextTransformationStrategy } from "./strategies/ITextTransformationStrategy";
+import { SnakeUpperCase } from "./strategies/SnakeUpperCase";
 
 export enum CaseType {
 	PascalCase = "Pascal Case",

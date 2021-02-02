@@ -239,6 +239,78 @@
 				}
 			},
 			"type": "com.test.util.TestModel"
+		},
+		{
+			"className": "com.test.util.ObjectTest",
+			"methodName": "init",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "asd"
+				}
+			},
+			"type": "map"
+		},
+		{
+			"className": "com.test.util.ObjectTest",
+			"methodName": "init",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "setBusy"
+				}
+			},
+			"type": "sap.m.Text"
+		},
+		{
+			"className": "com.test.util.ObjectTest",
+			"methodName": "init",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "setWidth"
+				}
+			},
+			"type": "sap.m.Label"
+		},
+		{
+			"className": "com.test.util.ObjectTest",
+			"methodName": "init",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "testField3"
+				}
+			},
+			"type": "map"
+		},
+		{
+			"className": "com.test.util.ObjectTest",
+			"methodName": "init",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "testField4"
+				}
+			},
+			"type": "map"
+		},
+		{
+			"className": "com.test.util.ObjectTest",
+			"methodName": "init",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "testField6"
+				}
+			},
+			"type": "map"
 		}
 	],
 	"JSLinter": [
@@ -297,6 +369,10 @@
 					"text": "No references found for \"unusedMethod\" class member"
 				}
 			]
+		},
+		{
+			"className": "com.test.util.ObjectTest",
+			"errors": []
 		}
 	],
 	"XMLLinter": [

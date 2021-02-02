@@ -1,5 +1,5 @@
-import {IUMLGenerator} from "./interfaces/IUMLGenerator";
-import {DrawIOUMLDiagram} from "../DrawIOUMLDiagram";
+import { IUMLGenerator } from "./interfaces/IUMLGenerator";
+import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 
 export class Header implements IUMLGenerator {
 	id: number;

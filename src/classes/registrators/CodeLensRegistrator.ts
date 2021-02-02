@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import {UI5Plugin} from "../../UI5Plugin";
-import {JSCodeLensProvider} from "../providers/codelens/jscodelens/JSCodeLensProvider";
-import {XMLCodeLensProvider} from "../providers/codelens/xmlcodelens/XMLCodeLensProvider";
+import { UI5Plugin } from "../../UI5Plugin";
+import { JSCodeLensProvider } from "../providers/codelens/jscodelens/JSCodeLensProvider";
+import { XMLCodeLensProvider } from "../providers/codelens/xmlcodelens/XMLCodeLensProvider";
 
 export class CodeLensRegistrator {
 	static register() {
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("xmlCodeLens")) {
-			const XMLCodeLens = vscode.languages.registerCodeLensProvider({language: "xml", scheme: "file"}, {
+			const XMLCodeLens = vscode.languages.registerCodeLensProvider({ language: "xml", scheme: "file" }, {
 				provideCodeLenses(document: vscode.TextDocument) {
 					return XMLCodeLensProvider.getCodeLenses(document);
 				}
@@ -23,7 +23,7 @@ export class CodeLensRegistrator {
 		}
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("jsCodeLens")) {
-			const JSCodeLens = vscode.languages.registerCodeLensProvider({language: "javascript", scheme: "file"}, {
+			const JSCodeLens = vscode.languages.registerCodeLensProvider({ language: "javascript", scheme: "file" }, {
 				provideCodeLenses(document: vscode.TextDocument) {
 					return JSCodeLensProvider.getCodeLenses(document);
 				}

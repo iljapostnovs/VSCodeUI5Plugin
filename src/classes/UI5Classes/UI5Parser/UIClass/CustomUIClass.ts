@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import {FileReader} from "../../../utils/FileReader";
-import {AcornSyntaxAnalyzer} from "../../JSParser/AcornSyntaxAnalyzer";
+import { FileReader } from "../../../utils/FileReader";
+import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
-import {AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam} from "./AbstractUIClass";
+import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam } from "./AbstractUIClass";
 import * as commentParser from "comment-parser";
 const acornLoose = require("acorn-loose");
 

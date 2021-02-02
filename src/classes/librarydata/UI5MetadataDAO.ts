@@ -1,9 +1,9 @@
-import {URLBuilder} from "../utils/URLBuilder";
-import {FileReader} from "../utils/FileReader";
-import {UI5Plugin} from "../../UI5Plugin";
-import {HTTPHandler} from "../utils/HTTPHandler";
-import {SAPNode} from "./SAPNode";
-import {UI5Metadata} from "./UI5Metadata";
+import { URLBuilder } from "../utils/URLBuilder";
+import { FileReader } from "../utils/FileReader";
+import { UI5Plugin } from "../../UI5Plugin";
+import { HTTPHandler } from "../utils/HTTPHandler";
+import { SAPNode } from "./SAPNode";
+import { UI5Metadata } from "./UI5Metadata";
 
 interface LooseObject {
 	[key: string]: any;
@@ -14,7 +14,7 @@ let namespaceDesignTimes: LooseObject = {};
 export class UI5MetadataPreloader {
 	private readonly _libNames: LooseObject = {};
 	private readonly _nodes: SAPNode[];
-	private static _resolveLibPreload: Function;
+	private static _resolveLibPreload: (value: any) => void;
 	public static libsPreloaded = new Promise((resolve) => {
 		UI5MetadataPreloader._resolveLibPreload = resolve;
 	});
@@ -45,14 +45,14 @@ export class UI5MetadataPreloader {
 			return Promise.all(promises).then(() => {
 				cache = namespaceDesignTimes;
 				this._writeCache();
-				UI5MetadataPreloader._resolveLibPreload();
+				UI5MetadataPreloader._resolveLibPreload(cache);
 			});
 		} else {
 			namespaceDesignTimes = cache;
 			UI5Plugin.getInstance().initializationProgress?.report({
 				increment: 50
 			});
-			UI5MetadataPreloader._resolveLibPreload();
+			UI5MetadataPreloader._resolveLibPreload(cache);
 			return new Promise(resolve => resolve(cache));
 		}
 	}
