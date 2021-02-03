@@ -48,25 +48,23 @@ export class TagLinter extends Linter {
 			}
 		} else {
 			const tagName = tagClass.split(".")[tagClass.split(".").length - 1];
-			if (tagName) {
-				const isAggregation = tagName[0].toLowerCase() === tagName[0];
+			const isAggregation = tagName[0] ? tagName[0].toLowerCase() === tagName[0] : false;
 
-				if (!isAggregation) {
-					const UIClass = UIClassFactory.getUIClass(tagClass);
-					if (!UIClass.classExists && !this._isClassException(tagClass)) {
-						const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
-						const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
-						if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
-							errors.push({
-								code: "UI5plugin",
-								message: `"${tagClass}" class doesn't exist`,
-								source: "Tag Linter",
-								range: new vscode.Range(
-									new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
-									new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-								)
-							});
-						}
+			if (!isAggregation) {
+				const UIClass = UIClassFactory.getUIClass(tagClass);
+				if (!UIClass.classExists && !this._isClassException(tagClass)) {
+					const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
+					const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
+					if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
+						errors.push({
+							code: "UI5plugin",
+							message: `"${tagClass}" class doesn't exist`,
+							source: "Tag Linter",
+							range: new vscode.Range(
+								new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
+								new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
+							)
+						});
 					}
 				}
 			} else {
