@@ -87,7 +87,8 @@ export class JSCodeActionProvider {
 				UIClassFactory.setNewContentForCurrentUIClass(document);
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				const UIDefine = await new SAPUIDefineFactory().generateUIDefineCompletionItems();
-				const UIDefineCompletionItemsWhichContainsCurrentSelectionText = UIDefine.filter(completionItem => completionItem.label.indexOf(selectedVariableName) > -1)
+				const UIDefineCompletionItemsWhichContainsCurrentSelectionText = UIDefine
+					.filter(completionItem => completionItem.label.indexOf(selectedVariableName) > -1)
 					.filter(completionItem => !UIClass.UIDefine.find(UIDefine => `"${UIDefine.path}"` === completionItem.label))
 					.reverse();
 
