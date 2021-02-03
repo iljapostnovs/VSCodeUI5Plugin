@@ -48,7 +48,7 @@ export class TagLinter extends Linter {
 			}
 		} else {
 			const tagName = tagClass.split(".")[tagClass.split(".").length - 1];
-			const isAggregation = tagName[0].toLowerCase() === tagName[0];
+			const isAggregation = tagName[0] ? tagName[0].toLowerCase() === tagName[0] : false;
 
 			if (!isAggregation) {
 				const UIClass = UIClassFactory.getUIClass(tagClass);

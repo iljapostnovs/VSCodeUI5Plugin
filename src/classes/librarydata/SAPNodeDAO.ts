@@ -77,7 +77,7 @@ export class SAPNodeDAO {
 		const nodes = SAPNodeDAO._SAPNodes;
 		nodes.forEach(node => {
 			if (node.getMetadata()?.getRawMetadata()) {
-				const moduleName = node.getMetadata()?.getRawMetadata().module.replace(/\//g, ".");
+				const moduleName = node.getMetadata()?.getRawMetadata()?.module?.replace(/\//g, ".");
 				if (moduleName !== node.getName()) {
 					const moduleNode = this.findNode(moduleName);
 					const nodeMetadata = node.getMetadata().getRawMetadata();
