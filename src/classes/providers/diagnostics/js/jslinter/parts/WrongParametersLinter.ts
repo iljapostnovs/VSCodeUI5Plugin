@@ -62,9 +62,14 @@ export class WrongParametersLinter extends Linter {
 
 													if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
 														const paramFromMethodTypes = paramFromMethod.type.split("|");
-														let typeMismatch = !paramFromMethodTypes.includes(classNameOfTheParam);
+														const classNamesOfTheParam = classNameOfTheParam.split("|");
+														let typeMismatch = !this._getIfClassNameIntersects(paramFromMethodTypes, classNamesOfTheParam);
 														if (typeMismatch) {
-															typeMismatch = !paramFromMethodTypes.find(className => !this._getIfClassesDiffers(className, classNameOfTheParam));
+															typeMismatch = !paramFromMethodTypes.find(className => {
+																return !!classNamesOfTheParam.find(classNameOfTheParam => {
+																	return !this._getIfClassesDiffers(className, classNameOfTheParam)
+																});
+															});
 														}
 														if (typeMismatch) {
 															typeMismatch = !ConfigHandler.checkIfMethodNameIsException(classNameOfTheParam, method.name);
@@ -103,6 +108,12 @@ export class WrongParametersLinter extends Linter {
 		WrongParametersLinter.timePerChar = (end - start) / document.getText().length;
 		// console.timeEnd("WrongParameterLinter");
 		return errors;
+	}
+
+	private _getIfClassNameIntersects(classNames1: string[], classNames2: string[]) {
+		return !!classNames1.find(className1 => {
+			return !!classNames2.find(className2 => className1 === className2);
+		});
 	}
 
 	private _getIfClassesDiffers(expectedClass: string, actualClass: string) {
