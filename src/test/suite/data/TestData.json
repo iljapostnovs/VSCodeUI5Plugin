@@ -363,7 +363,7 @@
 					"text": "Method \"attachMatched\" has 2 (1 mandatory) param(s), but you provided 3"
 				},
 				{
-					"text": "\"vWhatIsThat\" parameter is of type \"any[]\", but expected \"sap.m.Dialog|sap.m.Text\""
+					"text": "\"vWhatIsThat\" parameter is of type \"any[]\", but expected \"sap.m.Dialog|sap.m.Text|sap.m.Table\""
 				},
 				{
 					"text": "No references found for \"unusedMethod\" class member"
