@@ -235,7 +235,7 @@ export class CustomUIClass extends AbstractUIClass {
 				this.fileContent = acornLoose.parse(documentText, {
 					ecmaVersion: 11,
 					onComment: (isBlock: boolean, text: string, start: number, end: number) => {
-						if (isBlock && text.startsWith("*")) {
+						if (isBlock && text?.startsWith("*")) {
 							this.comments.push({
 								text: text,
 								start: start,
@@ -284,7 +284,7 @@ export class CustomUIClass extends AbstractUIClass {
 	private _generateClassNameDotNotationFor(classPath: string) {
 		let className = classPath.replace(/\//g, ".");
 
-		if (classPath.startsWith(".")) {
+		if (classPath?.startsWith(".")) {
 			const manifest = FileReader.getManifestForClass(this.className);
 
 			if (manifest && this.classFSPath) {
@@ -386,7 +386,7 @@ export class CustomUIClass extends AbstractUIClass {
 								name: node.left.property.name,
 								type: node.left.property.name.jsType,
 								description: node.left.property.name.jsType || "",
-								visibility: node.left.property.name.startsWith("_") ? "private" : "public"
+								visibility: node.left.property.name?.startsWith("_") ? "private" : "public"
 							});
 						}
 					});
@@ -401,7 +401,7 @@ export class CustomUIClass extends AbstractUIClass {
 						returnType: property.returnType || property.value.async ? "Promise" : "void",
 						position: property.start,
 						description: "",
-						visibility: property.key.name.startsWith("_") ? "private" : "public",
+						visibility: property.key.name?.startsWith("_") ? "private" : "public",
 						acornParams: property.value.params,
 						acornNode: property.value,
 						isEventHandler: false
@@ -413,7 +413,7 @@ export class CustomUIClass extends AbstractUIClass {
 						type: property.jsType,
 						acornNode: property,
 						description: property.jsType || "",
-						visibility: property.key.name.startsWith("_") ? "private" : "public"
+						visibility: property.key.name?.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value.type === "ObjectExpression") {
@@ -423,7 +423,7 @@ export class CustomUIClass extends AbstractUIClass {
 						description: "map",
 						acornNode: property,
 						customData: this._generateCustomDataForObject(property.value),
-						visibility: property.key.name.startsWith("_") ? "private" : "public"
+						visibility: property.key.name?.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value.type === "MemberExpression") {
@@ -432,7 +432,7 @@ export class CustomUIClass extends AbstractUIClass {
 						type: undefined,
 						description: "",
 						acornNode: property,
-						visibility: property.key.name.startsWith("_") ? "private" : "public"
+						visibility: property.key.name?.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value.type === "ArrayExpression") {
@@ -441,7 +441,7 @@ export class CustomUIClass extends AbstractUIClass {
 						type: "array",
 						description: "",
 						acornNode: property,
-						visibility: property.key.name.startsWith("_") ? "private" : "public"
+						visibility: property.key.name?.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
 				}
@@ -584,7 +584,7 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	public static getTypeFromHungarianNotation(variable: string): string | undefined {
+	public static getTypeFromHungarianNotation(variable = ""): string | undefined {
 		let type;
 
 		if (variable.length >= 2) {
@@ -1019,7 +1019,7 @@ export class CustomUIClass extends AbstractUIClass {
 					default: false
 				};
 				return UIAggregations;
-			});
+			}) || [];
 		}
 	}
 
@@ -1064,7 +1064,7 @@ export class CustomUIClass extends AbstractUIClass {
 		const propertiesMetadataNode = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "properties");
 
 		if (propertiesMetadataNode) {
-			const properties = propertiesMetadataNode.value.properties || [];
+			const properties = propertiesMetadataNode?.value?.properties || [];
 			this.properties = properties.map((propertyNode: any) => {
 
 				const propertyName = propertyNode.key.name || propertyNode.key.value;
@@ -1099,7 +1099,7 @@ export class CustomUIClass extends AbstractUIClass {
 		const associationMetadataNode = metadata.value?.properties?.find((metadataNode: any) => metadataNode.key.name === "associations");
 
 		if (associationMetadataNode) {
-			const associations = associationMetadataNode.value.properties;
+			const associations = associationMetadataNode.value?.properties || [];
 			this.associations = this.associations.concat(associations.map((associationNode: any) => {
 
 				const associationName = associationNode.key.name;
