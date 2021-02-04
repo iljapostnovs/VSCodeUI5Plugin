@@ -75,7 +75,7 @@ export class MethodInserter {
 		let classIsCurrentlyOpened = false;
 
 		const currentDocument = vscode.window.activeTextEditor?.document;
-		if (currentDocument) {
+		if (currentDocument && currentDocument.fileName.endsWith(".js")) {
 			const currentClassName = FileReader.getClassNameFromPath(currentDocument.fileName);
 			if (currentClassName) {
 				classIsCurrentlyOpened = className === currentClassName;
