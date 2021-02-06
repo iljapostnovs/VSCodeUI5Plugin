@@ -296,6 +296,10 @@ export class CustomUIClass extends AbstractUIClass {
 			}
 		}
 
+		if (className.endsWith(".controller")) {
+			className = className.substring(0, className.length - ".controller".length);
+		}
+
 		return className;
 	}
 
