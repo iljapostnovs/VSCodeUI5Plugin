@@ -93,19 +93,19 @@ export class UIClassFactory {
 		};
 
 		if (className) {
-			fieldsAndMethods.fields = this._getClassFields(className);
-			fieldsAndMethods.methods = this._getClassMethods(className);
+			fieldsAndMethods.fields = this.getClassFields(className);
+			fieldsAndMethods.methods = this.getClassMethods(className);
 		}
 
 		return fieldsAndMethods;
 	}
 
-	private static _getClassFields(className: string) {
+	public static getClassFields(className: string) {
 		let fields: UIField[] = [];
 		const UIClass = this.getUIClass(className);
 		fields = UIClass.fields;
 		if (UIClass.parentClassNameDotNotation) {
-			fields = fields.concat(this._getClassFields(UIClass.parentClassNameDotNotation));
+			fields = fields.concat(this.getClassFields(UIClass.parentClassNameDotNotation));
 		}
 
 		//remove duplicates
@@ -119,12 +119,18 @@ export class UIClassFactory {
 		return fields;
 	}
 
-	private static _getClassMethods(className: string) {
+	public static getClassMethods(className: string) {
 		let methods: UIMethod[] = [];
 		const UIClass = this.getUIClass(className);
-		methods = UIClass.methods;
+		methods = UIClass.methods.map(method => Object.assign({}, method));
 		if (UIClass.parentClassNameDotNotation) {
-			methods = methods.concat(this._getClassMethods(UIClass.parentClassNameDotNotation));
+			const parentMethods = this.getClassMethods(UIClass.parentClassNameDotNotation);
+			parentMethods.forEach(parentMethod => {
+				if (parentMethod.returnType === UIClass.parentClassNameDotNotation) {
+					parentMethod.returnType = className;
+				}
+			});
+			methods = methods.concat(parentMethods);
 		}
 
 		//remove duplicates
@@ -135,6 +141,7 @@ export class UIClassFactory {
 			}
 			return accumulator;
 		}, []);
+
 		return methods;
 	}
 

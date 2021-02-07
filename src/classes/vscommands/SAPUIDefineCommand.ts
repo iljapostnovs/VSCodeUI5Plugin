@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { PascalCaseStrategy } from "./i18ncommand/strategies/PascalCaseStrategy";
 export class SAPUIDefineCommand {
 	static insertUIDefine() {
 		const editor = vscode.window.activeTextEditor;
@@ -36,7 +37,12 @@ export class SAPUIDefineCommand {
 
 						const newDefineParams = definePaths.map(definePath => {
 							const pathParts = definePath.split("/");
-							const className = pathParts[pathParts.length - 1];
+							let className = pathParts[pathParts.length - 1];
+
+							if (className.indexOf(".") > -1) {
+								const pascalCaseStrategy = new PascalCaseStrategy();
+								className = pascalCaseStrategy.transform(className.replace(".", " "));
+							}
 
 							return className;
 						});

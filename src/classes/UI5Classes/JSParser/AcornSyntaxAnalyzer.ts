@@ -1180,25 +1180,13 @@ export class AcornSyntaxAnalyzer {
 	}
 
 	public static findMethodHierarchically(className: string, methodName: string): UIMethod | undefined {
-		let method: UIMethod | undefined;
-		const UIClass = UIClassFactory.getUIClass(className);
-
-		method = UIClass.methods.find(method => method.name === methodName);
-		if (!method && UIClass.parentClassNameDotNotation) {
-			method = this.findMethodHierarchically(UIClass.parentClassNameDotNotation, methodName);
-		}
+		const method = UIClassFactory.getClassMethods(className).find(method => method.name === methodName);
 
 		return method;
 	}
 
 	private static _findFieldHierarchically(className: string, fieldName: string): UIField | undefined {
-		let field: UIField | undefined;
-		const UIClass = UIClassFactory.getUIClass(className);
-
-		field = UIClass.fields?.find(field => field.name === fieldName);
-		if (!field && UIClass.parentClassNameDotNotation) {
-			field = this._findFieldHierarchically(UIClass.parentClassNameDotNotation, fieldName);
-		}
+		const field = UIClassFactory.getClassFields(className).find(field => field.name === fieldName);
 
 		return field;
 	}
