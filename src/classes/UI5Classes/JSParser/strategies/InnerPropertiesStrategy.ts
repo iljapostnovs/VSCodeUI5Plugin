@@ -112,7 +112,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 						const parameters = AcornSyntaxAnalyzer.getParametersOfTheEvent(eventHandlerData.eventName, eventHandlerData.className);
 						if (parameters) {
 							fieldsAndMethods = {
-								className: className,
+								className: "generic",
 								methods: [],
 								fields: parameters.map(parameter => {
 									return {
@@ -139,7 +139,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 					}, []);
 
 					fieldsAndMethods = {
-						className: className,
+						className: "generic",
 						methods: [],
 						fields: models.map(model => {
 							return {
@@ -238,7 +238,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 	}
 
 	private _generatePropertyFieldsFor(className: string, fieldsAndMethods: FieldsAndMethods = {
-		className: className,
+		className: "generic",
 		fields: [],
 		methods: []
 	}) {
