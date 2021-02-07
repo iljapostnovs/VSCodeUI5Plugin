@@ -118,8 +118,6 @@ export class CompletionItemFactory {
 		UIClassFactory.setNewContentForCurrentUIClass(document);
 
 		const completionItems = jsDynamicFactory.createUIClassCompletionItems(document, position);
-		this._addRangesToCompletionItems(completionItems, document, position);
-
 		return completionItems;
 	}
 
@@ -127,28 +125,5 @@ export class CompletionItemFactory {
 		const xmlDynamicFactory = new XMLDynamicCompletionItemFactory();
 
 		return xmlDynamicFactory.createXMLDynamicCompletionItems();
-	}
-
-	private _addRangesToCompletionItems(completionItems: CustomCompletionItem[], document: vscode.TextDocument, position: vscode.Position) {
-		completionItems.forEach(completionItem => {
-			const range = new vscode.Range(position.translate({ characterDelta: -1 }), position);
-			const text = document.getText(range);
-			if (text === ".") {
-				completionItem.range = range;
-			} else {
-				const wordRange = document.getWordRangeAtPosition(position);
-				const beforeWordRange = wordRange?.union(new vscode.Range(wordRange.start.translate({ characterDelta: -1 }), wordRange.end));
-				completionItem.range = beforeWordRange;
-			}
-
-			if (completionItem.insertText instanceof vscode.SnippetString) {
-				completionItem.insertText.value = "." + completionItem.insertText.value
-			} else {
-				completionItem.insertText = "." + completionItem.insertText;
-			}
-
-			completionItem.filterText = "." + completionItem.label;
-			completionItem.sortText = "0";
-		});
 	}
 }
