@@ -24,7 +24,7 @@ export class JSCodeActionProvider {
 			const className = FileReader.getClassNameFromPath(document.fileName);
 			if (className && diagnostic.methodName && diagnostic.attribute && selectedVariableName === diagnostic.methodName) {
 				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.attribute, diagnostic.methodName, this._getInsertContentFromIdentifierName(diagnostic.methodName));
-				if (insertCodeAction) {
+				if (insertCodeAction && !accumulator.find(accum => accum.title === insertCodeAction.title)) {
 					accumulator.push(insertCodeAction);
 				}
 			}
