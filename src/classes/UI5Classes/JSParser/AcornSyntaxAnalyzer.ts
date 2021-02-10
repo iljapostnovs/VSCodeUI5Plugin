@@ -645,6 +645,9 @@ export class AcornSyntaxAnalyzer {
 			} else if (propertyName === "filter") {
 				className = variableClassName;
 			} else if (propertyName === "find") {
+				if (variableClassName === "array") {
+					variableClassName = "any[]";
+				}
 				className = variableClassName.replace("[]", "");
 			}
 			stack.splice(0, 2);
