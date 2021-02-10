@@ -345,6 +345,10 @@ export class AcornSyntaxAnalyzer {
 			className = this.findClassNameForStack(stack, className, primaryClassName, false);
 		}
 
+		if (className === "array") {
+			className = "any[]";
+		}
+
 		return className;
 	}
 
