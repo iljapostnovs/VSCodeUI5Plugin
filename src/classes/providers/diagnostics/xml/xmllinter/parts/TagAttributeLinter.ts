@@ -129,8 +129,8 @@ export class TagAttributeLinter extends Linter {
 		} else if (property?.type === "int") {
 			isValueValid = isNumeric(attributeValue);
 		} else if (event && responsibleControlName) {
-			const attributeValueWithoutDot = attributeValue.replace(".", "");
-			isValueValid = !!XMLParser.getMethodsOfTheControl(responsibleControlName).find(method => method.name === attributeValueWithoutDot);
+			const eventName = XMLParser.getEventHandlerNameFromAttributeValue(attributeValue);
+			isValueValid = !!XMLParser.getMethodsOfTheControl(responsibleControlName).find(method => method.name === eventName);
 		}
 
 		return isValueValid;

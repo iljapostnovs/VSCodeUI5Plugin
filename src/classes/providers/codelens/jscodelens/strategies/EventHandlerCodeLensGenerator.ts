@@ -97,7 +97,8 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 			const tag = XMLParser.getTagInPosition(XMLText, eventHandlerPosition);
 			const attributes = XMLParser.getAttributesOfTheTag(tag);
 			const attribute = attributes?.find(attribute => {
-				return XMLParser.getAttributeNameAndValue(attribute).attributeValue.replace(".", "") === eventHandlerName;
+				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+				return XMLParser.getEventHandlerNameFromAttributeValue(attributeValue) === eventHandlerName;
 			});
 			const idAttribute = attributes?.find(attribute => {
 				return XMLParser.getAttributeNameAndValue(attribute).attributeName === "id";

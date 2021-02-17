@@ -572,4 +572,20 @@ export class XMLParser {
 		return position;
 	}
 
+	public static getEventHandlerNameFromAttributeValue(attributeValue: string) {
+		let eventName = attributeValue;
+
+		if (eventName.startsWith(".")) {
+			eventName = eventName.replace(".", "");
+		}
+		if (eventName.includes("(")) {
+			const result = /.*(?=\(.*\))/.exec(eventName);
+			if (result) {
+				eventName = result[0];
+			}
+		}
+
+		return eventName;
+	}
+
 }

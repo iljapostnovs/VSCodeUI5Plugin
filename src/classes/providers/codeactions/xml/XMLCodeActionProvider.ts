@@ -22,9 +22,7 @@ export class XMLCodeActionProvider {
 			XMLParser.setCurrentDocument(document.getText());
 			const currentPositionOffset = document?.offsetAt(range.end);
 			const attributeData = XMLParser.getAttributeNameAndValue(diagnostic.attribute);
-			if (attributeData.attributeValue.startsWith(".")) {
-				attributeData.attributeValue = attributeData.attributeValue.replace(".", "");
-			}
+			attributeData.attributeValue = XMLParser.getEventHandlerNameFromAttributeValue(attributeData.attributeValue);
 			const tagText = XMLParser.getTagInPosition(document.getText(), currentPositionOffset).text;
 			const tagPrefix = XMLParser.getTagPrefix(tagText);
 			const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);

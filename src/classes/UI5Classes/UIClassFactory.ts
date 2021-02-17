@@ -265,7 +265,7 @@ export class UIClassFactory {
 					}
 
 					if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
-						const regex = new RegExp(`\\.?${method.name}("|')`);
+						const regex = new RegExp(`\\.?${method.name}`);
 						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isMethodMentionedInTheView) {
 							method.mentionedInTheXMLDocument = true;
