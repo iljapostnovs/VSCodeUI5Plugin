@@ -578,8 +578,9 @@ export class AcornSyntaxAnalyzer {
 			const attributes = XMLParser.getAttributesOfTheTag(tagText);
 			const attribute = attributes?.find(attribute => {
 				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+				const eventHandlerName = XMLParser.getEventHandlerNameFromAttributeValue(attributeValue);
 
-				return attributeValue === currentClassEventHandlerName;
+				return eventHandlerName === currentClassEventHandlerName;
 			});
 			if (attribute) {
 				const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
