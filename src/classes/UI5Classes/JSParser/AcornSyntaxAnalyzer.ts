@@ -879,7 +879,7 @@ export class AcornSyntaxAnalyzer {
 		if (functionParts) {
 			const variableDeclarations = this._findAllDeclarations(functionParts);
 			variableDeclaration = variableDeclarations.find(declaration => {
-				return declaration.declarations.find((declaration: any) => declaration.id.name === variableName && declaration.init);
+				return declaration.declarations.find((declaration: any) => declaration.id.name === variableName);
 			});
 		}
 
@@ -1059,13 +1059,15 @@ export class AcornSyntaxAnalyzer {
 			className = declaration._acornSyntaxAnalyserType;
 		} else {
 			const stackWasEmpty = stack.length === 0;
-			className = this.getClassNameFromSingleAcornNode(declaration.init, UIClass, stack);
-			if (declaration.id.name && (!className || className === "any" || className === "void")) {
-				className = CustomUIClass.getTypeFromHungarianNotation(declaration.id.name) || className;
-			}
+			if (declaration.init) {
+				className = this.getClassNameFromSingleAcornNode(declaration.init, UIClass, stack);
+				if (declaration.id.name && (!className || className === "any" || className === "void")) {
+					className = CustomUIClass.getTypeFromHungarianNotation(declaration.id.name) || className;
+				}
 
-			if (className && !className.includes("__map__") && stackWasEmpty) {
-				declaration._acornSyntaxAnalyserType = className;
+				if (className && !className.includes("__map__") && stackWasEmpty) {
+					declaration._acornSyntaxAnalyserType = className;
+				}
 			}
 		}
 
