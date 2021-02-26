@@ -311,6 +311,18 @@
 				}
 			},
 			"type": "map"
+		},
+		{
+			"className": "com.test.util.JSDocTest",
+			"methodName": "init",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "getItems"
+				}
+			},
+			"type": "sap.m.List"
 		}
 	],
 	"JSLinter": [
