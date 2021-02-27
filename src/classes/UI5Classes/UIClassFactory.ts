@@ -90,16 +90,18 @@ export class UIClassFactory {
 	private static _enrichVariablesWithJSDocTypes(UIClass: CustomUIClass) {
 		const classLineColumn = LineColumn(UIClass.classText);
 		UIClass.comments.forEach(comment => {
-			const commentLineColumnStart = classLineColumn.fromIndex(comment.start);
-			if (commentLineColumnStart) {
-				commentLineColumnStart.line++;
-				const indexOfBottomLine = classLineColumn.toIndex(commentLineColumnStart);
-				const variableDeclaration = this._getAcornVariableDeclarationAtIndex(UIClass, indexOfBottomLine);
-				if (variableDeclaration?.declarations && variableDeclaration.declarations[0]) {
-					const typeDoc = comment.jsdoc.tags.find((tag: any) => {
-						return tag.tag === "type";
-					});
-					if (typeDoc) {
+			const typeDoc = comment.jsdoc.tags.find((tag: any) => {
+				return tag.tag === "type";
+			});
+			if (typeDoc) {
+				const commentLineColumnEnd = classLineColumn.fromIndex(comment.end);
+				const commentLineColumnStart = classLineColumn.fromIndex(comment.start);
+				if (commentLineColumnStart && commentLineColumnEnd) {
+					const lineDifference = commentLineColumnEnd.line - commentLineColumnStart.line;
+					commentLineColumnStart.line += lineDifference + 1;
+					const indexOfBottomLine = classLineColumn.toIndex(commentLineColumnStart);
+					const variableDeclaration = this._getAcornVariableDeclarationAtIndex(UIClass, indexOfBottomLine);
+					if (variableDeclaration?.declarations && variableDeclaration.declarations[0]) {
 						variableDeclaration.declarations[0]._acornSyntaxAnalyserType = typeDoc.type;
 					}
 				}
