@@ -90,7 +90,7 @@ export class UIClassFactory {
 	private static _enrichVariablesWithJSDocTypes(UIClass: CustomUIClass) {
 		const classLineColumn = LineColumn(UIClass.classText);
 		UIClass.comments.forEach(comment => {
-			const typeDoc = comment.jsdoc.tags.find((tag: any) => {
+			const typeDoc = comment.jsdoc?.tags.find((tag: any) => {
 				return tag.tag === "type";
 			});
 			if (typeDoc) {
