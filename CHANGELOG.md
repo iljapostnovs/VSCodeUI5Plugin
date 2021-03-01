@@ -1,3 +1,6 @@
+## 0.12.11 (01-03-2021)
+* Bugfixes
+
 ## 0.12.10 (01-03-2021)
 * Add @type JSDoc support for variable declarations
 
