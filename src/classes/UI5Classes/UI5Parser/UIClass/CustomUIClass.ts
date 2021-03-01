@@ -382,7 +382,7 @@ export class CustomUIClass extends AbstractUIClass {
 	private _fillMethodsAndFields() {
 		if (this.acornClassBody?.properties) {
 			this.acornClassBody.properties?.forEach((property: any) => {
-				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
+				if (property.value?.type === "FunctionExpression" || property.value?.type === "ArrowFunctionExpression") {
 					const assignmentExpressions = AcornSyntaxAnalyzer.expandAllContent(property.value.body).filter((node: any) => node.type === "AssignmentExpression");
 					assignmentExpressions?.forEach((node: any) => {
 						if (this.isAssignmentStatementForThisVariable(node)) {
@@ -398,7 +398,7 @@ export class CustomUIClass extends AbstractUIClass {
 			});
 
 			this.acornClassBody.properties.forEach((property: any) => {
-				if (property.value.type === "FunctionExpression" || property.value.type === "ArrowFunctionExpression") {
+				if (property.value?.type === "FunctionExpression" || property.value?.type === "ArrowFunctionExpression") {
 					const method: CustomClassUIMethod = {
 						name: property.key.name,
 						params: this._generateParamTextForMethod(property.value.params),
@@ -411,7 +411,7 @@ export class CustomUIClass extends AbstractUIClass {
 						isEventHandler: false
 					};
 					this.methods.push(method);
-				} else if (property.value.type === "Identifier" || property.value.type === "Literal") {
+				} else if (property.value?.type === "Identifier" || property.value?.type === "Literal") {
 					this.fields.push({
 						name: property.key.name,
 						type: property.jsType,
@@ -420,32 +420,32 @@ export class CustomUIClass extends AbstractUIClass {
 						visibility: property.key.name?.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
-				} else if (property.value.type === "ObjectExpression") {
+				} else if (property.value?.type === "ObjectExpression") {
 					this.fields.push({
 						name: property.key.name,
 						type: "map",
 						description: "map",
 						acornNode: property,
 						customData: this._generateCustomDataForObject(property.value),
-						visibility: property.key.name?.startsWith("_") ? "private" : "public"
+						visibility: property.key?.name?.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
-				} else if (property.value.type === "MemberExpression") {
+				} else if (property.value?.type === "MemberExpression") {
 					this.fields.push({
 						name: property.key.name,
 						type: undefined,
 						description: "",
 						acornNode: property,
-						visibility: property.key.name?.startsWith("_") ? "private" : "public"
+						visibility: property.key?.name?.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
-				} else if (property.value.type === "ArrayExpression") {
+				} else if (property.value?.type === "ArrayExpression") {
 					this.fields.push({
-						name: property.key.name,
+						name: property.key?.name,
 						type: "array",
 						description: "",
 						acornNode: property,
-						visibility: property.key.name?.startsWith("_") ? "private" : "public"
+						visibility: property.key?.name?.startsWith("_") ? "private" : "public"
 					});
 					this.acornMethodsAndFields.push(property);
 				}
@@ -930,11 +930,11 @@ export class CustomUIClass extends AbstractUIClass {
 
 	private _fillUI5Metadata() {
 		if (this.acornClassBody?.properties) {
-			const metadataExists = !!this.acornClassBody.properties?.find((property: any) => property.key.name === "metadata");
-			const customMetadataExists = !!this.acornClassBody.properties?.find((property: any) => property.key.name === "customMetadata");
+			const metadataExists = !!this.acornClassBody.properties?.find((property: any) => property.key?.name === "metadata");
+			const customMetadataExists = !!this.acornClassBody.properties?.find((property: any) => property.key?.name === "customMetadata");
 
 			if (metadataExists) {
-				const metadataObject = this.acornClassBody.properties?.find((property: any) => property.key.name === "metadata");
+				const metadataObject = this.acornClassBody.properties?.find((property: any) => property.key?.name === "metadata");
 
 				this._fillAggregations(metadataObject);
 				this._fillEvents(metadataObject);
@@ -944,7 +944,7 @@ export class CustomUIClass extends AbstractUIClass {
 			}
 
 			if (customMetadataExists) {
-				const customMetadataObject = this.acornClassBody.properties?.find((property: any) => property.key.name === "customMetadata");
+				const customMetadataObject = this.acornClassBody.properties?.find((property: any) => property.key?.name === "customMetadata");
 
 				this._fillByAssociations(customMetadataObject);
 				this._fillCustomInterfaces(customMetadataObject);

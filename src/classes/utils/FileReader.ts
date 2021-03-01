@@ -293,7 +293,11 @@ export class FileReader {
 			classPaths.forEach(classPath => {
 				const className = FileReader.getClassNameFromPath(classPath);
 				if (className) {
-					UIClassFactory.getUIClass(className);
+					try {
+						UIClassFactory.getUIClass(className);
+					} catch (error) {
+						vscode.window.showErrorMessage(`Error parsing ${className}: ${error.message}`);
+					}
 				}
 			});
 		}
