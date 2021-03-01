@@ -5,6 +5,7 @@ import { JSClass } from "./UI5Parser/UIClass/JSClass";
 import { AcornSyntaxAnalyzer } from "./JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
 import { FileReader, Fragment, View } from "../utils/FileReader";
+import LineColumn = require("line-column");
 
 export interface FieldsAndMethods {
 	className: string;
@@ -76,6 +77,7 @@ export class UIClassFactory {
 	}
 
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
+		this._enrichVariablesWithJSDocTypes(UIClass);
 		this._enrichMethodParamsWithEventType(UIClass);
 		UIClass.methods.forEach(method => {
 			AcornSyntaxAnalyzer.findMethodReturnType(method, UIClass.className, false, true);
@@ -83,6 +85,43 @@ export class UIClassFactory {
 		UIClass.fields.forEach(field => {
 			AcornSyntaxAnalyzer.findFieldType(field, UIClass.className, false, true);
 		});
+	}
+
+	private static _enrichVariablesWithJSDocTypes(UIClass: CustomUIClass) {
+		const classLineColumn = LineColumn(UIClass.classText);
+		UIClass.comments.forEach(comment => {
+			const typeDoc = comment.jsdoc.tags.find((tag: any) => {
+				return tag.tag === "type";
+			});
+			if (typeDoc) {
+				const commentLineColumnEnd = classLineColumn.fromIndex(comment.end);
+				const commentLineColumnStart = classLineColumn.fromIndex(comment.start);
+				if (commentLineColumnStart && commentLineColumnEnd) {
+					const lineDifference = commentLineColumnEnd.line - commentLineColumnStart.line;
+					commentLineColumnStart.line += lineDifference + 1;
+					const indexOfBottomLine = classLineColumn.toIndex(commentLineColumnStart);
+					const variableDeclaration = this._getAcornVariableDeclarationAtIndex(UIClass, indexOfBottomLine);
+					if (variableDeclaration?.declarations && variableDeclaration.declarations[0]) {
+						variableDeclaration.declarations[0]._acornSyntaxAnalyserType = typeDoc.type;
+					}
+				}
+			}
+		});
+	}
+
+	private static _getAcornVariableDeclarationAtIndex(UIClass: CustomUIClass, index: number) {
+		let variableDeclaration: any | undefined;
+		const method = UIClass.methods.find(method => {
+			return method.acornNode?.start <= index && method.acornNode?.end >= index;
+		});
+
+		if (method && method.acornNode) {
+			variableDeclaration = AcornSyntaxAnalyzer.expandAllContent(method.acornNode).find((node: any) => {
+				return node.start === index && node.type === "VariableDeclaration";
+			});
+		}
+
+		return variableDeclaration;
 	}
 
 	public static getFieldsAndMethodsForClass(className: string) {
