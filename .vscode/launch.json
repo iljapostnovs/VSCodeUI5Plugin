@@ -4,13 +4,13 @@
 // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 {
 	"version": "0.2.0",
-	"configurations": [
-		{
+	"configurations": [{
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
+				"--disable-extensions",
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
@@ -25,9 +25,9 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-			  "--extensionDevelopmentPath=${workspaceFolder}/../VSCodeUI5PluginUsageExampleApp",
-			  "--extensionTestsPath=${workspaceFolder}/dist/test/suite/index",
-			  "--testWorkspace=${workspaceFolder}/../VSCodeUI5PluginUsageExampleApp"
+				"--extensionDevelopmentPath=${workspaceFolder}/../VSCodeUI5PluginUsageExampleApp",
+				"--extensionTestsPath=${workspaceFolder}/dist/test/suite/index",
+				"--testWorkspace=${workspaceFolder}/../VSCodeUI5PluginUsageExampleApp"
 			],
 			"outFiles": ["${workspaceFolder}/dist/test/**/*.js"],
 			"sourceMaps": true,

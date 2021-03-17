@@ -1,3 +1,6 @@
+## 0.12.13 (17-03-2021)
+* Wrong File Path JS Linter added
+
 ## 0.12.12 (01-03-2021)
 * Bugfixes
 

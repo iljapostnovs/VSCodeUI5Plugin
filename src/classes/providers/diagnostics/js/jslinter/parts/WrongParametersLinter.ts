@@ -118,7 +118,7 @@ export class WrongParametersLinter extends Linter {
 
 	private _getIfClassesDiffers(expectedClass: string, actualClass: string) {
 		let classesDiffers = true;
-		const numbers = ["number", "float", "int"];
+		const numbers = ["number", "float", "int", "integer"];
 
 		expectedClass = this._swapClassNames(expectedClass);
 		actualClass = this._swapClassNames(actualClass);
