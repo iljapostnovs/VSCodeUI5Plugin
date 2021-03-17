@@ -385,6 +385,23 @@
 		{
 			"className": "com.test.util.ObjectTest",
 			"errors": []
+		},
+		{
+			"className": "com.test.controller.WrongFilePathLinterTest",
+			"errors": [
+				{
+					"text": "Class \"com.test.controller.wrong.Path\" doesn't exist"
+				},
+				{
+					"text": "Class \"com.test.fragments.WrongFragmentTemplate\" doesn't exist"
+				},
+				{
+					"text": "Class \"com.test.view.WrongLinterTest\" doesn't exist"
+				},
+				{
+					"text": "Class \"com.test.util.WrongFormatter\" doesn't exist"
+				}
+			]
 		}
 	],
 	"XMLLinter": [
