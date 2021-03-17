@@ -65,7 +65,7 @@ export class WrongFilePathLinter extends Linter {
 		if (!isPathValid) {
 			const sFileFSPath = FileReader.convertClassNameToFSPath(sFilePath, false, true, false);
 			const aAllFragments = FileReader.getAllFragments();
-			const oFragment = aAllFragments.find(oView => oView.fsPath === sFileFSPath);
+			const oFragment = aAllFragments.find(oFragment => oFragment.fsPath === sFileFSPath);
 			isPathValid = !!oFragment;
 		}
 
