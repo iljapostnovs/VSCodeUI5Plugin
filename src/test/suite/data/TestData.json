@@ -323,6 +323,30 @@
 				}
 			},
 			"type": "sap.m.List"
+		},
+		{
+			"className": "com.test.controller.Detail",
+			"methodName": "onInit",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "testMethod"
+				}
+			},
+			"type": "com.test.util.TestModel"
+		},
+		{
+			"className": "com.test.controller.Detail",
+			"methodName": "onInit",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "anotherMethod"
+				}
+			},
+			"type": "void"
 		}
 	],
 	"JSLinter": [

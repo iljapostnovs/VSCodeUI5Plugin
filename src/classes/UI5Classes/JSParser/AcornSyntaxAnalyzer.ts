@@ -372,9 +372,7 @@ export class AcornSyntaxAnalyzer {
 				if (method.acornNode) {
 					const content = this.expandAllContent(method.acornNode);
 					const memberExpression: any = content.find(
-						content => content.type === "CallExpression" &&
-							content.callee?.property?.name === "setModel" &&
-							(content.arguments[1] && content.arguments[1].value || "") === modelName
+						content => this._checkOfThisIsCorrectSetModel(content, modelName, className)
 					);
 					methodFound = !!memberExpression;
 				}
@@ -385,9 +383,7 @@ export class AcornSyntaxAnalyzer {
 			if (method?.acornNode) {
 				const content = this.expandAllContent(method.acornNode);
 				const memberExpression = content.find(content =>
-					content.type === "CallExpression" &&
-					content.callee?.property?.name === "setModel" &&
-					(content.arguments[1]?.value || "") === modelName
+					this._checkOfThisIsCorrectSetModel(content, modelName, className)
 				);
 				if (memberExpression && memberExpression.arguments[0]) {
 					const model = memberExpression.arguments[0];
@@ -403,6 +399,22 @@ export class AcornSyntaxAnalyzer {
 			}
 		}
 		return modelClassName;
+	}
+
+	private static _checkOfThisIsCorrectSetModel(content: any, modelName: string, className: string) {
+		let bIsSetModelMethod =
+			content.type === "CallExpression" &&
+			content.callee?.property?.name === "setModel" &&
+			(content.arguments[1] && content.arguments[1].value || "") === modelName;
+
+		if (bIsSetModelMethod) {
+			const position = content.callee.property.start;
+			const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+			const classNameAtCurrentPosition = strategy.getClassNameOfTheVariableAtPosition(className, position);
+			bIsSetModelMethod = classNameAtCurrentPosition === className || classNameAtCurrentPosition === "sap.ui.core.mvc.View";
+		}
+
+		return bIsSetModelMethod;
 	}
 
 	private static _getClassNameOfTheRouterFromManifest(className: string) {

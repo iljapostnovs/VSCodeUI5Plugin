@@ -9,6 +9,7 @@ import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/U
 import { FileReader } from "../../classes/utils/FileReader";
 import { JSLinter } from "../../classes/providers/diagnostics/js/jslinter/JSLinter";
 import { XMLLinter } from "../../classes/providers/diagnostics/xml/xmllinter/XMLLinter";
+import { UI5Plugin } from "../../UI5Plugin";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -18,6 +19,7 @@ suite("Extension Test Suite", () => {
 	test("Extension launched", async () => {
 		const extension = vscode.extensions.getExtension("ui5.plugin");
 		await extension?.activate();
+		await UI5Plugin.pWhenPluginInitialized;
 
 		assert.ok(true, "Extension activated");
 	});
@@ -71,7 +73,7 @@ suite("Extension Test Suite", () => {
 				const fieldsAndMethods = positionBeforeCurrentStrategy.destructueFieldsAndMethodsAccordingToMapParams(classNameAtPosition);
 				classNameAtPosition = fieldsAndMethods?.className;
 			}
-			assert.strictEqual(data.type, classNameAtPosition, `"${data.className}" position ${position} method "${data.methodName}" type is "${classNameAtPosition}" but expected "${data.type}"`);
+			assert.strictEqual(data.type, classNameAtPosition, `"${data.className}" position ${position} method "${data.methodName}" type is "${classNameAtPosition}" but expected "${data.type}". Data: ${JSON.stringify(data)}`);
 		});
 	});
 

@@ -144,13 +144,14 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 			className = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		}
 
-		const activeTextEditor = vscode.window.activeTextEditor;
-		if (className && activeTextEditor) {
-			if (!position) {
+		if (className) {
+			const activeTextEditor = vscode.window.activeTextEditor;
+			if (!position && activeTextEditor) {
 				position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
 			}
-
-			UIClassName = this.acornGetClassName(className, position);
+			if (position) {
+				UIClassName = this.acornGetClassName(className, position);
+			}
 		}
 
 		return UIClassName;

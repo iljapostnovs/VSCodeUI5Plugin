@@ -1,0 +1,131 @@
+{
+	"_version": "1.1.0",
+	"sap.app": {
+		"_version": "1.1.0",
+		"id": "com.test",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"title": "{{App.Title}}",
+		"description": "{{App.Description}}",
+		"dataSources": {}
+	},
+	"sap.ui": {
+		"_version": "1.1.0",
+		"technology": "UI5",
+		"icons": {
+			"icon": "",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		},
+		"supportedThemes": [
+			"sap_belize"
+		],
+		"fullWidth": false
+	},
+	"sap.ui5": {
+		"_version": "1.1.0",
+		"rootView": {
+			"viewName": "com.test.view.SecondaryViews.App",
+			"type": "XML"
+		},
+		"dependencies": {
+			"minUI5Version": "1.60.10",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "com.test.i18n.i18n"
+				}
+			},
+			"TestModel": {
+				"type": "com.test.util.TestModel"
+			},
+			"AnotherModel": {
+				"type": "com.test.util.AnotherModel"
+			}
+		},
+		"config": {
+			"i18nBundle": "com.test.i18n.i18n"
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"viewType": "XML",
+				"viewPath": "com.test.view",
+				"controlId": "idApp",
+				"controlAggregation": "detailPages",
+				"async": true
+			},
+			"routes": [
+				{
+					"pattern": "",
+					"name": "Master",
+					"target": [
+						"Empty",
+						"Master"
+					]
+				},
+				{
+					"pattern": "Detail({ID})",
+					"name": "Detail",
+					"target": [
+						"Master",
+						"Detail"
+					]
+				},
+				{
+					"pattern": "Empty",
+					"name": "Empty",
+					"target": [
+						"Empty",
+						"Master"
+					]
+				},
+				{
+					"pattern": "Error",
+					"name": "Error",
+					"target": "Error"
+				}
+			],
+			"targets": {
+				"Master": {
+					"viewName": "Master",
+					"viewLevel": 1,
+					"transition": "show",
+					"controlAggregation": "masterPages"
+				},
+				"Detail": {
+					"viewName": "Detail",
+					"viewLevel": 2
+				}
+			}
+		},
+		"resources": {
+			"css": [
+				{
+					"uri": "css/style.css"
+				}
+			]
+		}
+	}
+}
