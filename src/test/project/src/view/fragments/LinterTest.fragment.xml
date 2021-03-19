@@ -1,0 +1,14 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button
+		id="idButtonFromFragment"
+		press="onFragmentButtonPress"
+		parseError="onWrongEventHandler"
+		validationError="nonExistantHandler"
+		width="100%"
+		busy="wrong value"
+		wrongAttribute=""
+	/>
+</c:FragmentDefinition>

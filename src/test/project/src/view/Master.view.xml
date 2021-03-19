@@ -1,0 +1,23 @@
+<mvc:View
+	controllerName="com.test.controller.Master"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	displayBlock="true"
+	busyIndicatorDelay="0"
+>
+	<Page>
+		<Text id="idText" text="Hello world"/>
+		<Table
+			id="idTable"
+			selectionChange="onTableSelectionChange"
+			swipe="onTableSwipe"
+		/>
+		<footer>
+			<Toolbar>
+				<Button
+					id="idButtonFooter"
+				/>
+			</Toolbar>
+		</footer>
+	</Page>
+</mvc:View>

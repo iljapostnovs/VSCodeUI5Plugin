@@ -1,0 +1,14 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Page>
+		<List
+			id="idListFromSecondFragment"
+			selectionChange="onSecondFragmentSelectionChange"
+			delete="onUnexistantDelete"
+			backgroundDesign="Solid"
+		>
+		</List>
+	</Page>
+</c:FragmentDefinition>

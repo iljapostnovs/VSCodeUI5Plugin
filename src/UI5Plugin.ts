@@ -12,6 +12,7 @@ import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegi
 import { FileReader } from "./classes/utils/FileReader";
 export class UI5Plugin {
 	private static _instance?: UI5Plugin;
+	public static pWhenPluginInitialized: Promise<void> | undefined;
 	public static getInstance() {
 		if (!UI5Plugin._instance) {
 			UI5Plugin._instance = new UI5Plugin();
@@ -30,7 +31,7 @@ export class UI5Plugin {
 		this.context?.subscriptions.push(disposable);
 	}
 	public initialize(context: vscode.ExtensionContext) {
-		return new Promise<void>((resolve, reject) => {
+		UI5Plugin.pWhenPluginInitialized = new Promise<void>((resolve, reject) => {
 			this.context = context;
 			vscode.window.withProgress({
 				location: vscode.ProgressLocation.Window,
@@ -48,6 +49,8 @@ export class UI5Plugin {
 				}
 			});
 		});
+
+		return UI5Plugin.pWhenPluginInitialized;
 	}
 	private async _registerProviders() {
 		CommandRegistrator.register(false);

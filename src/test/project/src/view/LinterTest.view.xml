@@ -1,0 +1,34 @@
+<mvc:View
+	controllerName="com.test.controller.LinterTest"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+	xmlns:l="sap.ui.layout"
+	displayBlock="true"
+	height="100%"
+	busyIndicatorDelay="0"
+>
+	<Page>
+		<nonExistantAggregation>
+		</nonExistantAggregation>
+		<content>
+			<Table
+				id="idTableFromView"
+				alternateRowColors="wrong value"
+				wrongProperty=""
+				selectionChange="nonExistantEventHandler"
+				delete="_onDelete"
+				paste=".onPaste"
+				itemPress="_onItemPress(${$parameters>/value})"
+				busy="false"
+			>
+			</Table>
+			<s:WrongNamespace/>
+			<NonExistantClass/>
+			<c:Fragment
+				fragmentName="com.test.view.fragments.LinterTest"
+				type="XML"
+			/>
+		</content>
+	</Page>
+</mvc:View>

@@ -9,8 +9,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Launch tests
         run: |
-          git clone https://github.com/iljapostnovs/VSCodeUI5PluginUsageExampleApp.git
-          move VSCodeUI5PluginUsageExampleApp ../VSCodeUI5PluginUsageExampleApp
           npm install
           npm test
   build_artifact:

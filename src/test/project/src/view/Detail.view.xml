@@ -1,0 +1,14 @@
+<mvc:View
+	controllerName="com.test.controller.Detail"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+	busyIndicatorDelay="0"
+>
+	<Page
+		id="idPage"
+		backgroundDesign="Transparent"
+	>
+		<Text text="Hello World!"/>
+	</Page>
+</mvc:View>
