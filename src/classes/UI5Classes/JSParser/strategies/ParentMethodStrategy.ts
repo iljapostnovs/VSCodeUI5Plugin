@@ -3,7 +3,6 @@ import { FieldPropertyMethodGetterStrategy } from "./abstraction/FieldPropertyMe
 import * as vscode from "vscode";
 import { FileReader } from "../../../utils/FileReader";
 import { CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
-import { UIField } from "../../UI5Parser/UIClass/AbstractUIClass";
 export class ParentMethodStrategy extends FieldPropertyMethodGetterStrategy {
 	getFieldsAndMethods(document: vscode.TextDocument, position: vscode.Position) {
 		let fieldsAndMethods: FieldsAndMethods | undefined;
@@ -15,18 +14,11 @@ export class ParentMethodStrategy extends FieldPropertyMethodGetterStrategy {
 				const positionAtClassBodyPropertyName = this._getIfPositionIsInPropertyName(UIClass, offset);
 				if (positionAtClassBodyPropertyName) {
 					const fields = UIClassFactory.getClassFields(UIClass.parentClassNameDotNotation);
-					const methods: UIField[] = UIClassFactory.getClassMethods(UIClass.parentClassNameDotNotation).map(method => {
-						return {
-							name: method.name,
-							type: "function",
-							description: method.description,
-							visibility: method.visibility
-						};
-					});
+					const methods = UIClassFactory.getClassMethods(UIClass.parentClassNameDotNotation);
 					fieldsAndMethods = {
-						className: "generic",
-						fields: methods.concat(fields),
-						methods: []
+						className: "__override__",
+						fields: fields,
+						methods: methods
 					};
 				}
 			}
