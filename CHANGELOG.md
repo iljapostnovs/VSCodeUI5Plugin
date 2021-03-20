@@ -1,3 +1,6 @@
+## 0.12.16 (20-03-2021)
+* Add support for controller extensions in manifest
+
 ## 0.12.15 (20-03-2021)
 * Update keywords
 

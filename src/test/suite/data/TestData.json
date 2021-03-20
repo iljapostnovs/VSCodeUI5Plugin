@@ -96,6 +96,105 @@
 			]
 		},
 		{
+			"className": "com.test.controller.ControllerExtension",
+			"methods": [
+				{
+					"name": "onShowHello",
+					"returnType": "sap.m.Dialog"
+				},
+				{
+					"name": "onOpenDialog",
+					"returnType": "Promise"
+				},
+				{
+					"name": "_getTable",
+					"returnType": "sap.m.Table"
+				},
+				{
+					"name": "_getArray",
+					"returnType": "any[]"
+				},
+				{
+					"name": "_getString",
+					"returnType": "string"
+				},
+				{
+					"name": "_getMap",
+					"returnType": "map"
+				},
+				{
+					"name": "_mapToFilterArray",
+					"returnType": "sap.ui.model.Filter[]"
+				},
+				{
+					"name": "_mapToDialogArray",
+					"returnType": "sap.m.Dialog[]"
+				},
+				{
+					"name": "_filterDialogArray",
+					"returnType": "sap.m.Dialog[]"
+				},
+				{
+					"name": "_findDialog",
+					"returnType": "sap.m.Dialog"
+				},
+				{
+					"name": "_getStringArray",
+					"returnType": "string[]"
+				},
+				{
+					"name": "_getMixedArrayMethodArray",
+					"returnType": "sap.m.Dialog[]"
+				},
+				{
+					"name": "onTableSelectionChange",
+					"returnType": "sap.m.ListItemBase"
+				},
+				{
+					"name": "onTableSwipe",
+					"returnType": "sap.m.Table"
+				},
+				{
+					"name": "methodFromFormatter",
+					"returnType": "sap.m.Dialog"
+				},
+				{
+					"name": "extensionMethod",
+					"returnType": "sap.m.List"
+				}
+			],
+			"fields": [
+				{
+					"name": "formatter",
+					"type": "com.test.util.Formatter"
+				},
+				{
+					"name": "_test2",
+					"type": "com.test.util.Formatter"
+				},
+				{
+					"name": "_test",
+					"type": "com.test.util.Formatter"
+				},
+				{
+					"name": "_customClassExtend",
+					"type": "com.test.util.CustomClassExtend"
+				},
+				{
+					"name": "_oMessageBox",
+					"type": "sap.m.MessageBox"
+				},
+				{
+					"name": "_oText",
+					"type": "sap.m.Text"
+				},
+				{
+					"name": "_oTable",
+					"type": "sap.m.Table"
+				}
+			]
+		},
+		{
 			"className": "com.test.util.Formatter",
 			"methods": [
 				{
@@ -135,7 +234,8 @@
 					"type": "string"
 				},
 				{
-					"name": "_customField"
+					"name": "_customField",
+					"type": "sap.m.Text"
 				}
 			]
 		},

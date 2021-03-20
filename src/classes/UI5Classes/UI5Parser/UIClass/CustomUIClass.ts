@@ -334,7 +334,11 @@ export class CustomUIClass extends AbstractUIClass {
 			this.acornReturnedClassExtendBody = part;
 
 			if (classBody) {
-				this._parentVariableName = part.callee.object.name;
+				if (part.callee.object.name) {
+					this._parentVariableName = part.callee.object.name;
+				} else if (part.callee.object.object?.name === "sap" && part.callee.object.property?.name === "ui") {
+					this.parentClassNameDotNotation = this._getParentNameFromManifest() || "";
+				}
 			}
 		} else if (part.type === "ObjectExpression") {
 			classBody = part;
@@ -356,6 +360,22 @@ export class CustomUIClass extends AbstractUIClass {
 		return classBody;
 	}
 
+	private _getParentNameFromManifest() {
+		let parentName: string | undefined;
+		const manifest = FileReader.getManifestForClass(this.className);
+		if (manifest?.content &&
+			manifest?.content["sap.ui5"]?.extends?.extensions &&
+			manifest?.content["sap.ui5"]?.extends?.extensions["sap.ui.controllerExtensions"]
+		) {
+			const mControllerExtensions = manifest.content["sap.ui5"].extends.extensions["sap.ui.controllerExtensions"];
+			parentName = Object.keys(mControllerExtensions).find(sControllerName => {
+				return mControllerExtensions[sControllerName].controllerName === this.className;
+			});
+		}
+
+		return parentName;
+	}
+
 	private _getClassBodyFromClassExtendAcorn(part: any) {
 		let classBody: any;
 
@@ -369,7 +389,7 @@ export class CustomUIClass extends AbstractUIClass {
 	private _isThisPartAClassBodyAcorn(part: any) {
 		const propertyName = part?.callee?.property?.name;
 
-		return propertyName === "extend" || propertyName === "declareStaticClass";
+		return propertyName === "extend" || propertyName === "declareStaticClass" || propertyName === "controller";
 	}
 
 	public isAssignmentStatementForThisVariable(node: any) {
