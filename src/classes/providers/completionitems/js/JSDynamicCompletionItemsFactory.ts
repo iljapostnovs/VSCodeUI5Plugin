@@ -97,17 +97,39 @@ export class JSDynamicCompletionItemsFactory {
 	private _generateInsertTextForOverridenMethod(method: UIMethod, document: vscode.TextDocument) {
 		let text = method.name;
 		const className = FileReader.getClassNameFromPath(document.fileName);
+		const methodReturnsAnything = method.returnType !== "void";
 		if (className) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 			const parentClassName = UIClass.parentClassNameDotNotation;
 			const parentUIDefineClassName = UIClass.UIDefine.find(UIDefine => UIDefine.classNameDotNotation === parentClassName);
 			if (parentUIDefineClassName) {
+				const variableAssignment = methodReturnsAnything ? "var vReturn = " : "";
+				const returnStatement = methodReturnsAnything ? "\n\treturn vReturn;\n" : "";
+				const jsDoc = this._generateJSDocForMethod(method);
 				const params = method.params.map(param => param.name).join(", ");
-				text = `${method.name}: function(${params}) {\n\t${parentUIDefineClassName.className}.prototype.${method.name}.apply(this, arguments);\n\t$0\n},`;
+				text = `${jsDoc}${method.name}: function(${params}) {\n\t${variableAssignment}${parentUIDefineClassName.className}.prototype.${method.name}.apply(this, arguments);\n\t$0\n${returnStatement}},`;
 			}
 		}
 
 		return new vscode.SnippetString(text);
+	}
+
+	private _generateJSDocForMethod(method: UIMethod) {
+		let jsDoc = "/**\n";
+		jsDoc += " * @override\n";
+		const paramTags = method.params.map(param => {
+			if (param.type === "any" || !param.type) {
+				param.type = CustomUIClass.getTypeFromHungarianNotation(param.name) || "any";
+			}
+			return ` * @param {${param.type}} ${param.name} ${param.description}\n`;
+		}).join("");
+		const returnsTag = method.returnType !== "void" ? ` * @returns {${method.returnType}}\n` : "";
+
+		jsDoc += paramTags;
+		jsDoc += returnsTag;
+		jsDoc += " */\n";
+
+		return jsDoc;
 	}
 
 

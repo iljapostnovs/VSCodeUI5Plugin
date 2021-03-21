@@ -631,7 +631,7 @@ export class CustomUIClass extends AbstractUIClass {
 			variable = variable.replace("_", "").replace("this.", "");
 			const firstChar = variable[0];
 			const secondChar = variable[1];
-			if (map[firstChar] && secondChar === secondChar.toUpperCase()) {
+			if (firstChar && secondChar && map[firstChar] && secondChar === secondChar.toUpperCase()) {
 				type = map[firstChar];
 			}
 		}

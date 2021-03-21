@@ -34,6 +34,11 @@ export class JSHoverProvider {
 					if (UIClass instanceof StandardUIClass) {
 						const constructor = UIClass.methods.find(method => method.name === "constructor");
 						if (constructor) {
+							constructor.params.forEach(param => {
+								if (param.type === "any") {
+									param.type = CustomUIClass.getTypeFromHungarianNotation(param.name) || "any";
+								}
+							});
 							text += `(${constructor.params.map(param => `${param.name}: ${param.type}`).join(", ")})`;
 						}
 					}
@@ -72,6 +77,11 @@ export class JSHoverProvider {
 				if (!method.returnType || method.returnType === "void") {
 					AcornSyntaxAnalyzer.findMethodReturnType(method, className, true, true);
 				}
+				method.params.forEach(param => {
+					if (param.type === "any") {
+						param.type = CustomUIClass.getTypeFromHungarianNotation(param.name) || "any";
+					}
+				});
 				text += `${method.name}(${method.params.map(param => `${param.name}: ${param.type}`).join(", ")}) : ${method.returnType}\n`;
 				if (method.api) {
 					text += method.api;

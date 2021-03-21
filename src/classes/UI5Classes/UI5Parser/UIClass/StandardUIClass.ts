@@ -253,6 +253,8 @@ export class StandardUIClass extends AbstractUIClass {
 			i++;
 		}
 
+		textWithoutTags = textWithoutTags.trim();
+
 		return textWithoutTags;
 	}
 
