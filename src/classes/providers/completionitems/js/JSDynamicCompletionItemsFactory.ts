@@ -85,6 +85,7 @@ export class JSDynamicCompletionItemsFactory {
 				completionItem.kind = vscode.CompletionItemKind.Method;
 				completionItem.insertText = this._generateInsertTextForOverridenMethod(method, document);
 				completionItem.detail = `(${method.visibility}) ${method.name}: ${method.returnType ? method.returnType : "void"}`;
+				completionItem.sortText = "0";
 				completionItem.documentation = method.description;
 
 				return completionItem;
