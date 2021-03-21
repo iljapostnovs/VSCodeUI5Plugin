@@ -20,6 +20,7 @@ export class ParentMethodStrategy extends FieldPropertyMethodGetterStrategy {
 						fields: fields,
 						methods: methods
 					};
+					this._filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods, ["public", "protected"]);
 				}
 			}
 		}
