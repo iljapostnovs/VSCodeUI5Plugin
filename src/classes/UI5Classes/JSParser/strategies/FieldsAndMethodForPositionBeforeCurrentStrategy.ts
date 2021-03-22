@@ -1,8 +1,7 @@
-import { CustomClassUIField, CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
+import { CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
 import { FieldPropertyMethodGetterStrategy as FieldMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
 import * as vscode from "vscode";
-import { UIField } from "../../UI5Parser/UIClass/AbstractUIClass";
 import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
 import { FileReader } from "../../../utils/FileReader";
 
@@ -14,8 +13,9 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		const UIClassName = this.getClassNameOfTheVariableAtPosition(className, offset);
 		if (UIClassName) {
 			fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
-			if (fieldsAndMethods) {
-				this._filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods, UIClassName);
+			const classNameOfTheCurrentDocument = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			if (fieldsAndMethods && classNameOfTheCurrentDocument !== className) {
+				this._filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods);
 			}
 		}
 
@@ -85,57 +85,6 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		}
 
 		return returnObject;
-	}
-	private _filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods: FieldsAndMethods, className: string) {
-		const ignoreAccessLevelModifiers = vscode.workspace.getConfiguration("ui5.plugin").get("ignoreAccessLevelModifiers");
-		if (!ignoreAccessLevelModifiers) {
-			const classNameOfTheCurrentDocument = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-			if (classNameOfTheCurrentDocument !== className) {
-				if (fieldsAndMethods?.fields) {
-					fieldsAndMethods.fields = fieldsAndMethods.fields.filter(field => field.visibility === "public");
-				}
-				if (fieldsAndMethods?.methods) {
-					fieldsAndMethods.methods = fieldsAndMethods.methods.filter(method => method.visibility === "public");
-				}
-			}
-		}
-	}
-
-	private _getFieldsAndMethodsForMap(field: CustomClassUIField, mapFields: string[]) {
-		const fieldsAndMethods: FieldsAndMethods = {
-			className: "",
-			fields: this._getUIFieldsForMap(field.customData, mapFields),
-			methods: []
-		};
-
-		return fieldsAndMethods;
-	}
-
-	private _getUIFieldsForMap(customData: any, mapFields: string[], fields: UIField[] = []) {
-		if (customData) {
-			const fieldName = mapFields.shift();
-			if (fieldName) {
-				customData = customData[fieldName];
-			}
-
-			if (mapFields.length === 0 && customData) {
-				const newFields: UIField[] = Object.keys(customData).map(key => {
-					return {
-						name: key,
-						description: "",
-						type: undefined,
-						visibility: "public"
-					};
-				});
-				newFields.forEach(newField => {
-					fields.push(newField);
-				});
-			} else {
-				this._getUIFieldsForMap(customData, mapFields, fields);
-			}
-		}
-
-		return fields;
 	}
 
 	public getClassNameOfTheVariableAtPosition(className?: string, position?: number) {

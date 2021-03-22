@@ -28,8 +28,8 @@ suite("Extension Test Suite", () => {
 		const testData = data.data;
 		testData.forEach(data => {
 			data.methods.forEach(testMethodData => {
-				const UIClass = UIClassFactory.getUIClass(data.className);
-				const method = UIClass.methods.find(method => method.name === testMethodData.name);
+				const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
+				const method = fieldsAndMethods.methods.find(method => method.name === testMethodData.name);
 				if (method?.returnType === "void") {
 					AcornSyntaxAnalyzer.findMethodReturnType(method, data.className, true, true);
 				}
@@ -42,8 +42,8 @@ suite("Extension Test Suite", () => {
 		const testData = data.data;
 		testData.forEach(data => {
 			data.fields.forEach(testFieldData => {
-				const UIClass = UIClassFactory.getUIClass(data.className);
-				const field = UIClass.fields.find(method => method.name === testFieldData.name);
+				const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
+				const field = fieldsAndMethods.fields.find(method => method.name === testFieldData.name);
 				if (field && !field?.type) {
 					AcornSyntaxAnalyzer.findFieldType(field, data.className, true, true);
 				}

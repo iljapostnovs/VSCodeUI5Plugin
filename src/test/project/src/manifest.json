@@ -120,6 +120,15 @@
 				}
 			}
 		},
+		"extends": {
+			"extensions": {
+				"sap.ui.controllerExtensions": {
+					"com.test.controller.Master": {
+						"controllerName": "com.test.controller.ControllerExtension"
+					}
+				}
+			}
+		},
 		"resources": {
 			"css": [
 				{

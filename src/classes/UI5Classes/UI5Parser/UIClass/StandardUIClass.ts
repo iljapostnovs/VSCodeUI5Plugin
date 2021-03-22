@@ -1,4 +1,4 @@
-import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssociation, TypeValue, UIField } from "./AbstractUIClass";
+import { AbstractUIClass, UIMethod, UIProperty, UIEvent, UIAggregation, UIAssociation, TypeValue, UIField, UIMethodParam } from "./AbstractUIClass";
 import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 import { MainLooper } from "../../JSParser/MainLooper";
 import { URLBuilder } from "../../../utils/URLBuilder";
@@ -51,6 +51,11 @@ const aXmlnsData = [{
 	value: "sap.uxap"
 }];
 
+const aFioriElementsControllers = [
+	"sap.suite.ui.generic.template.ObjectPage.view.Details",
+	"sap.suite.ui.generic.template.ListReport.view.ListReport"
+];
+
 export class StandardUIClass extends AbstractUIClass {
 	private readonly _nodeDAO = new SAPNodeDAO();
 	public methods: StandardClassUIMethod[] = [];
@@ -58,20 +63,79 @@ export class StandardUIClass extends AbstractUIClass {
 	constructor(className: string) {
 		super(className);
 
-		this.classExists = !!this._findSAPNode(this.className) || className.endsWith(".library");
+		if (aFioriElementsControllers.includes(className)) {
+			this.classExists = true;
 
-		if (this.classExists) {
-			this._fillParentClassName();
-			this._fillMethods();
-			this._fillProperties();
-			this._fillFields();
-			this._fillEvents();
-			this._fillAggregations();
-			this._fullAssociations();
-			this._fillConstructor();
-			this._fillInterfaces();
+			this._addFieldsAndMethodsForFioriElements(className);
+		} else {
+			this.classExists = !!this._findSAPNode(this.className) || className.endsWith(".library");
 
-			this._enrichWithXmlnsProperties();
+			if (this.classExists) {
+				this._fillParentClassName();
+				this._fillMethods();
+				this._fillProperties();
+				this._fillFields();
+				this._fillEvents();
+				this._fillAggregations();
+				this._fullAssociations();
+				this._fillConstructor();
+				this._fillInterfaces();
+
+				this._enrichWithXmlnsProperties();
+			}
+		}
+	}
+
+	private _addFieldsAndMethodsForFioriElements(className: string) {
+		const proxyFioriElementsClass: any = {
+			"sap.suite.ui.generic.template.ObjectPage.view.Details": {
+				methods: "sap.suite.ui.generic.template.ObjectPage.controllerFrameworkExtensions",
+				fields: "sap.suite.ui.generic.template.ObjectPage.extensionAPI.ExtensionAPI"
+			},
+			"sap.suite.ui.generic.template.ListReport.view.ListReport": {
+				methods: "sap.suite.ui.generic.template.ListReport.controllerFrameworkExtensions",
+				fields: "sap.suite.ui.generic.template.ListReport.extensionAPI.ExtensionAPI"
+			}
+		};
+		const neededClassForMethods = proxyFioriElementsClass[className]?.methods;
+		const neededClassForFields = proxyFioriElementsClass[className]?.fields;
+		if (neededClassForMethods) {
+			const SAPNode = this._findSAPNode(neededClassForMethods);
+			if (SAPNode) {
+				const methods = SAPNode.getMetadata()?.getRawMetadata()?.methods;
+				this.methods = methods?.map((method: any) => {
+					const standardMethod: StandardClassUIMethod = {
+						name: method.name.replace(`${neededClassForMethods}.`, ""),
+						visibility: method.visibility || "public",
+						description: method.description ? StandardUIClass.removeTags(method.description) : StandardUIClass.removeTags(method.code),
+						params: method.parameters?.map((param: any) => {
+							const parameter: UIMethodParam = {
+								isOptional: param.optional || false,
+								name: param.name,
+								description: StandardUIClass.removeTags(param.description),
+								type: param.types?.map((type: any) => type.value).join("|") || "any"
+							};
+							return parameter;
+						}) || [],
+						returnType: method.returnValue?.types?.map((type: any) => type.value).join("|") || method.returnValue?.type || "void",
+						isFromParent: false
+					};
+
+					return standardMethod;
+				}) || [];
+			}
+		}
+
+		if (neededClassForFields) {
+			const SAPNode = this._findSAPNode(neededClassForMethods);
+			if (SAPNode) {
+				this.fields = [{
+					name: "extensionAPI",
+					description: SAPNode.getMetadata()?.getRawMetadata()?.description ? StandardUIClass.removeTags(SAPNode.getMetadata().getRawMetadata().description) : "Extension API",
+					type: neededClassForFields,
+					visibility: "public"
+				}];
+			}
 		}
 	}
 
@@ -188,6 +252,8 @@ export class StandardUIClass extends AbstractUIClass {
 
 			i++;
 		}
+
+		textWithoutTags = textWithoutTags.trim();
 
 		return textWithoutTags;
 	}

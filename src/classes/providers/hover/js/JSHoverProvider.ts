@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../utils/FileReader";
 import { URLBuilder } from "../../../utils/URLBuilder";
@@ -28,18 +29,24 @@ export class JSHoverProvider {
 			} else {
 				const className = this._getClassNameForOffset(offset, currentClassName, word);
 				if (className) {
-					let text = `${word}: ${className}  \n`;
 					const UIClass = UIClassFactory.getUIClass(className);
+					let text = `${word}: ${className}`;
+					if (UIClass instanceof StandardUIClass) {
+						const constructor = UIClass.methods.find(method => method.name === "constructor");
+						if (constructor) {
+							constructor.params.forEach(param => {
+								if (param.type === "any") {
+									param.type = CustomUIClass.getTypeFromHungarianNotation(param.name) || "any";
+								}
+							});
+							text += `(${constructor.params.map(param => `${param.name}: ${param.type}`).join(", ")})`;
+						}
+					}
+					text += "  \n";
 					text += URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass);
 					const markdownString = this._getMarkdownFromText(text);
 					hover = new vscode.Hover(markdownString);
-				}// else {
-				// const text = this._getTextIfItIsFieldOrMethodOfClass(currentClassName, word);
-				// if (text) {
-				// 	const markdownString = this._getMarkdownFromText(text);
-				// 	hover = new vscode.Hover(markdownString);
-				// }
-				//}
+				}
 			}
 		}
 		return hover;
@@ -70,7 +77,12 @@ export class JSHoverProvider {
 				if (!method.returnType || method.returnType === "void") {
 					AcornSyntaxAnalyzer.findMethodReturnType(method, className, true, true);
 				}
-				text += `${method.name}(${method.params.map(param => param.name).join(", ")}) : ${method.returnType}\n`;
+				method.params.forEach(param => {
+					if (param.type === "any") {
+						param.type = CustomUIClass.getTypeFromHungarianNotation(param.name) || "any";
+					}
+				});
+				text += `${method.name}(${method.params.map(param => `${param.name}: ${param.type}`).join(", ")}) : ${method.returnType}\n`;
 				if (method.api) {
 					text += method.api;
 				}
