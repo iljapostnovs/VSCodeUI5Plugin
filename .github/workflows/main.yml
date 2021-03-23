@@ -8,9 +8,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Launch tests
-        env:
-          NPM_CONFIG_PREFIX: "~/.npm-global"
         run: |
+          mkdir ~/.npm-global
+          npm config set prefix '~/.npm-global'
+          export PATH=~/.npm-global/bin:$PATH
+          source ~/.profile
           npm install
           npm test
   build_artifact:
@@ -21,6 +23,7 @@ jobs:
         env:
           NPM_CONFIG_PREFIX: "~/.npm-global"
         run: |
+          export PATH=~/.npm-global/bin:$PATH
           npm install
           npm install -g vsce
           vsce package
