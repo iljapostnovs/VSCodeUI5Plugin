@@ -6,7 +6,7 @@ name: Release and deploy
 
 jobs:
   release:
-   name: Create Release
+    name: Create Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
