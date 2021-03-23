@@ -1,17 +1,14 @@
-name: Test vscode plugin and build artifact
+name: Test and build
 on:
   push:
     branches: [ development ]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - name: Launch tests
-        env:
-          NPM_CONFIG_PREFIX: "~/.npm-global"
         run: |
-          export PATH=~/.npm-global/bin:$PATH
           npm install
           npm test
   build_artifact:
