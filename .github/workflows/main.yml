@@ -8,6 +8,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Launch tests
+        env:
+          NPM_CONFIG_PREFIX: "~/.npm-global"
         run: |
           npm install
           npm test
@@ -16,6 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: npm install and build
+        env:
+          NPM_CONFIG_PREFIX: "~/.npm-global"
         run: |
           npm install
           npm install -g vsce
