@@ -1,3 +1,6 @@
+## 0.12.17 (23-03-2021)
+* Bugfixes
+
 ## 0.12.16 (21-03-2021)
 * Support for controller extensions in manifest added
 * Completion items for overriding methods/fields added

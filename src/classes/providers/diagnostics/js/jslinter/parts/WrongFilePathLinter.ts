@@ -4,6 +4,7 @@ import LineColumn = require("line-column");
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
+import * as fs from "fs";
 
 export class WrongFilePathLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
@@ -67,6 +68,13 @@ export class WrongFilePathLinter extends Linter {
 			const aAllFragments = FileReader.getAllFragments();
 			const oFragment = aAllFragments.find(oFragment => oFragment.fsPath === sFileFSPath);
 			isPathValid = !!oFragment;
+		}
+
+		if (!isPathValid) {
+			const sFileFSPath = FileReader.convertClassNameToFSPath(sFilePath)?.replace(".js", ".properties");
+			if (sFileFSPath) {
+				isPathValid = fs.existsSync(sFileFSPath);
+			}
 		}
 
 		return isPathValid;
