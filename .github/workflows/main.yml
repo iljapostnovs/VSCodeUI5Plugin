@@ -4,6 +4,7 @@ on:
     branches: [ development ]
 jobs:
   test:
+    name: Test Extension
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -12,6 +13,7 @@ jobs:
           npm install
           npm test
   build_artifact:
+    name: Build Extension
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
