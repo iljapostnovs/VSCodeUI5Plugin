@@ -1,5 +1,5 @@
 # SAPUI5 Extension
-![TestAndBuildBadge](https://github.com/iljapostnovs/VSCodeUI5Plugin/workflows/Test and build/badge.svg?branch=development)
+![TestAndBuildBadge](https://github.com/iljapostnovs/VSCodeUI5Plugin/workflows/Test%20and%20build/badge.svg?branch=development)
 
 This plugin contains perks for UI5 developers.
 
