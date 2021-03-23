@@ -4,7 +4,7 @@ on:
     branches: [ development ]
 jobs:
   test:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Launch tests
@@ -12,7 +12,7 @@ jobs:
           npm install
           npm test
   build_artifact:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: npm install and build
