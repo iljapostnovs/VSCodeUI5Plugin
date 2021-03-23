@@ -1,9 +1,7 @@
+name: Release and deploy
 on:
   push:
     branches: [ master ]
-
-name: Release and deploy
-
 jobs:
   release:
     name: Create Release
