@@ -71,7 +71,20 @@ export class WrongFilePathLinter extends Linter {
 		}
 
 		if (!isPathValid) {
+			if (sFilePath.endsWith(".")) {
+				sFilePath = sFilePath.substring(0, sFilePath.length - 1);
+			}
 			const sFileFSPath = FileReader.convertClassNameToFSPath(sFilePath)?.replace(".js", ".properties");
+			if (sFileFSPath) {
+				isPathValid = fs.existsSync(sFileFSPath);
+			}
+		}
+
+		if (!isPathValid) {
+			if (sFilePath.endsWith(".")) {
+				sFilePath = sFilePath.substring(0, sFilePath.length - 1);
+			}
+			const sFileFSPath = FileReader.convertClassNameToFSPath(sFilePath)?.replace(".js", "");
 			if (sFileFSPath) {
 				isPathValid = fs.existsSync(sFileFSPath);
 			}
