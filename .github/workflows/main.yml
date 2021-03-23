@@ -1,9 +1,10 @@
-name: Test vscode plugin and build artifact
+name: Test and build
 on:
   push:
     branches: [ development ]
 jobs:
   test:
+    name: Test Extension
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
@@ -12,11 +13,15 @@ jobs:
           npm install
           npm test
   build_artifact:
-    runs-on: windows-latest
+    name: Build Extension
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: npm install and build
+        env:
+          NPM_CONFIG_PREFIX: "~/.npm-global"
         run: |
+          export PATH=~/.npm-global/bin:$PATH
           npm install
           npm install -g vsce
           vsce package

@@ -1,25 +1,25 @@
+name: Release and deploy
 on:
   push:
     branches: [ master ]
-
-name: Release and deploy
-
 jobs:
   release:
-    name: Create GitHub Release
-    runs-on: windows-latest
+    name: Create Release
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: package-version
+        run: node -p -e '`PACKAGE_VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.event.head_commit.message }}
-          release_name: ${{ github.event.head_commit.message }}
-          body: ${{ github.event.head_commit.message }} release
+          tag_name: v${{ env.PACKAGE_VERSION }}
+          release_name: v${{ env.PACKAGE_VERSION }}
+          body: v${{ env.PACKAGE_VERSION }}
           draft: false
           prerelease: false
   deploy:
