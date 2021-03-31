@@ -1,3 +1,6 @@
+## 0.12.20 (31-03-2021)
+* Update default JSLinter exceptions
+
 ## 0.12.19 (23-03-2021)
 * Update readme
 
