@@ -36,64 +36,68 @@ export class WrongParametersLinter extends Linter {
 									if (fieldsAndMethods) {
 										const method = fieldsAndMethods.methods.find(method => method.name === methodName);
 										if (method) {
-											const methodParams = method.params;
-											const mandatoryMethodParams = methodParams.filter(param => !param.isOptional && param.type !== "boolean");
-											if (params.length < mandatoryMethodParams.length || params.length > methodParams.length) {
-												const positionStart = LineColumn(UIClass.classText).fromIndex(call.callee.property.start);
-												const positionEnd = LineColumn(UIClass.classText).fromIndex(call.callee.property.end);
-												if (positionStart && positionEnd) {
-													errors.push({
-														acornNode: call,
-														code: "UI5Plugin",
-														source: "Parameter Linter",
-														message: `Method "${methodName}" has ${methodParams.length} (${mandatoryMethodParams.length} mandatory) param(s), but you provided ${params.length}`,
-														range: new vscode.Range(
-															new vscode.Position(positionStart.line - 1, positionStart.col - 1),
-															new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-														)
-													});
-												}
-											}
+											const isException = ConfigHandler.checkIfMethodNameIsException(fieldsAndMethods.className, method.name);
+											if (!isException) {
 
-											params.forEach((param: any, i: number) => {
-												const paramFromMethod = method.params[i];
-												if (paramFromMethod && (paramFromMethod.type !== "any" && paramFromMethod.type !== "void" && paramFromMethod.type)) {
-													const classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(param, UIClass);
-
-													if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
-														const paramFromMethodTypes = paramFromMethod.type.split("|");
-														const classNamesOfTheParam = classNameOfTheParam.split("|");
-														let typeMismatch = !this._getIfClassNameIntersects(paramFromMethodTypes, classNamesOfTheParam);
-														if (typeMismatch) {
-															typeMismatch = !paramFromMethodTypes.find(className => {
-																return !!classNamesOfTheParam.find(classNameOfTheParam => {
-																	return !this._getIfClassesDiffers(className, classNameOfTheParam)
-																});
-															});
-														}
-														if (typeMismatch) {
-															typeMismatch = !ConfigHandler.checkIfMethodNameIsException(classNameOfTheParam, method.name);
-														}
-														if (typeMismatch) {
-															const positionStart = LineColumn(UIClass.classText).fromIndex(param.start);
-															const positionEnd = LineColumn(UIClass.classText).fromIndex(param.end);
-															if (positionStart && positionEnd) {
-																errors.push({
-																	acornNode: param,
-																	code: "UI5Plugin",
-																	source: "Parameter Linter",
-																	message: `"${paramFromMethod.name}" parameter is of type "${classNameOfTheParam}", but expected "${paramFromMethod.type}"`,
-																	range: new vscode.Range(
-																		new vscode.Position(positionStart.line - 1, positionStart.col - 1),
-																		new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-																	)
-																});
-															}
-														}
+												const methodParams = method.params;
+												const mandatoryMethodParams = methodParams.filter(param => !param.isOptional && param.type !== "boolean");
+												if (params.length < mandatoryMethodParams.length || params.length > methodParams.length) {
+													const positionStart = LineColumn(UIClass.classText).fromIndex(call.callee.property.start);
+													const positionEnd = LineColumn(UIClass.classText).fromIndex(call.callee.property.end);
+													if (positionStart && positionEnd) {
+														errors.push({
+															acornNode: call,
+															code: "UI5Plugin",
+															source: "Parameter Linter",
+															message: `Method "${methodName}" has ${methodParams.length} (${mandatoryMethodParams.length} mandatory) param(s), but you provided ${params.length}`,
+															range: new vscode.Range(
+																new vscode.Position(positionStart.line - 1, positionStart.col - 1),
+																new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
+															)
+														});
 													}
 												}
 
-											});
+												params.forEach((param: any, i: number) => {
+													const paramFromMethod = method.params[i];
+													if (paramFromMethod && (paramFromMethod.type !== "any" && paramFromMethod.type !== "void" && paramFromMethod.type)) {
+														const classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(param, UIClass);
+
+														if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
+															const paramFromMethodTypes = paramFromMethod.type.split("|");
+															const classNamesOfTheParam = classNameOfTheParam.split("|");
+															let typeMismatch = !this._getIfClassNameIntersects(paramFromMethodTypes, classNamesOfTheParam);
+															if (typeMismatch) {
+																typeMismatch = !paramFromMethodTypes.find(className => {
+																	return !!classNamesOfTheParam.find(classNameOfTheParam => {
+																		return !this._getIfClassesDiffers(className, classNameOfTheParam)
+																	});
+																});
+															}
+															if (typeMismatch) {
+																typeMismatch = !ConfigHandler.checkIfMethodNameIsException(classNameOfTheParam, method.name);
+															}
+															if (typeMismatch) {
+																const positionStart = LineColumn(UIClass.classText).fromIndex(param.start);
+																const positionEnd = LineColumn(UIClass.classText).fromIndex(param.end);
+																if (positionStart && positionEnd) {
+																	errors.push({
+																		acornNode: param,
+																		code: "UI5Plugin",
+																		source: "Parameter Linter",
+																		message: `"${paramFromMethod.name}" parameter is of type "${classNameOfTheParam}", but expected "${paramFromMethod.type}"`,
+																		range: new vscode.Range(
+																			new vscode.Position(positionStart.line - 1, positionStart.col - 1),
+																			new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
+																		)
+																	});
+																}
+															}
+														}
+													}
+
+												});
+											}
 										}
 									}
 								}

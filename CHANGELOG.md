@@ -1,3 +1,6 @@
+## 0.12.21 (12-04-2021)
+* Fix JS Linter exceptions for Wrong Parameters Linter
+
 ## 0.12.20 (31-03-2021)
 * Update default JSLinter exceptions
 
