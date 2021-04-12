@@ -34,7 +34,7 @@ export class XMLParser {
 		let IdsResult: string[] = [];
 		const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		if (currentClass) {
-			const idRegExp = /(?<=\sid=").*?(?="\s)/g;
+			const idRegExp = /(?<=\sid=").*?(?="\s?)/g;
 			const view = FileReader.getViewForController(currentClass);
 			if (view) {
 				IdsResult = view.content.match(idRegExp) || [];
