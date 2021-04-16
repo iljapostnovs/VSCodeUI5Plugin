@@ -311,7 +311,7 @@ export class AcornSyntaxAnalyzer {
 					}
 
 					//get hungarian notation type
-					if (!className || className === "any" || className === "void") {
+					if ((!className || className === "any" || className === "void") && !stackWasModified) {
 						className = CustomUIClass.getTypeFromHungarianNotation(currentNode.name) || "";
 					}
 				}
@@ -1075,7 +1075,7 @@ export class AcornSyntaxAnalyzer {
 			const stackWasEmpty = stack.length === 0;
 			if (declaration.init) {
 				className = this.getClassNameFromSingleAcornNode(declaration.init, UIClass, stack);
-				if (declaration.id.name && (!className || className === "any" || className === "void")) {
+				if (declaration.id.name && (!className || className === "any" || className === "void") && declaration.init?.type !== "ObjectExpression") {
 					className = CustomUIClass.getTypeFromHungarianNotation(declaration.id.name) || className;
 				}
 
@@ -1125,6 +1125,8 @@ export class AcornSyntaxAnalyzer {
 						const field = node.properties.find((property: any) => property.key.name === nextNode.property.name);
 						if (field && field.value) {
 							className = this.getClassNameFromSingleAcornNode(field.value, UIClass, stack);
+						} else {
+							className = "any";
 						}
 					}
 

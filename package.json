@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.23",
+	"version": "0.12.24",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -217,10 +217,6 @@
 						}
 					},
 					"default": [
-						{
-							"className": "sap.ui.model.json.JSONModel",
-							"memberName": "setProperty"
-						},
 						{
 							"className": "sap.ui.model.Binding",
 							"memberName": "*"
