@@ -75,9 +75,6 @@ export class WrongParametersLinter extends Linter {
 																});
 															}
 															if (typeMismatch) {
-																typeMismatch = !ConfigHandler.checkIfMethodNameIsException(classNameOfTheParam, method.name);
-															}
-															if (typeMismatch) {
 																const positionStart = LineColumn(UIClass.classText).fromIndex(param.start);
 																const positionEnd = LineColumn(UIClass.classText).fromIndex(param.end);
 																if (positionStart && positionEnd) {

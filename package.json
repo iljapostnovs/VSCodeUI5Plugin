@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.21",
+	"version": "0.12.23",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -208,6 +208,11 @@
 							"memberName": {
 								"type": "string",
 								"description": "Name of the method/field. Use \"*\" for wild card"
+							},
+							"applyToChildren": {
+								"type": "boolean",
+								"description": "If the rule should be applied to class children (classes which extends this class)",
+								"default": false
 							}
 						}
 					},

@@ -1,3 +1,10 @@
+## 0.12.23 (16-04-2021)
+* Bugfixes
+* New field added to JSLinterExceptions property - applyToChildren
+
+## 0.12.22 (12-04-2021)
+* Bugfixes
+
 ## 0.12.21 (12-04-2021)
 * Fix JS Linter exceptions for Wrong Parameters Linter
 

@@ -107,7 +107,7 @@ export class JSDynamicCompletionItemsFactory {
 				const variableAssignment = methodReturnsAnything ? "var vReturn = " : "";
 				const returnStatement = methodReturnsAnything ? "\n\treturn vReturn;\n" : "";
 				const jsDoc = this._generateJSDocForMethod(method);
-				const params = method.params.map(param => param.name).join(", ");
+				const params = method.params.map(param => param.name.replace("?", "")).join(", ");
 				text = `${jsDoc}${method.name}: function(${params}) {\n\t${variableAssignment}${parentUIDefineClassName.className}.prototype.${method.name}.apply(this, arguments);\n\t$0\n${returnStatement}},`;
 			}
 		}
@@ -118,11 +118,9 @@ export class JSDynamicCompletionItemsFactory {
 	private _generateJSDocForMethod(method: UIMethod) {
 		let jsDoc = "/**\n";
 		jsDoc += " * @override\n";
+
 		const paramTags = method.params.map(param => {
-			if (param.type === "any" || !param.type) {
-				param.type = CustomUIClass.getTypeFromHungarianNotation(param.name) || "any";
-			}
-			return ` * @param {${param.type}} ${param.name} ${param.description}\n`;
+			return ` * @param {${param.type}} ${param.isOptional ? "[" : ""}${param.name.replace("?", "")}${param.isOptional ? "]" : ""} ${param.description}\n`;
 		}).join("");
 		const returnsTag = method.returnType !== "void" ? ` * @returns {${method.returnType}}\n` : "";
 
