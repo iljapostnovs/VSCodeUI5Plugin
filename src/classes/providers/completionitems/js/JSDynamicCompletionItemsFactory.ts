@@ -118,10 +118,8 @@ export class JSDynamicCompletionItemsFactory {
 	private _generateJSDocForMethod(method: UIMethod) {
 		let jsDoc = "/**\n";
 		jsDoc += " * @override\n";
+
 		const paramTags = method.params.map(param => {
-			if (param.type === "any" || !param.type) {
-				param.type = CustomUIClass.getTypeFromHungarianNotation(param.name) || "any";
-			}
 			return ` * @param {${param.type}} ${param.isOptional ? "[" : ""}${param.name.replace("?", "")}${param.isOptional ? "]" : ""} ${param.description}\n`;
 		}).join("");
 		const returnsTag = method.returnType !== "void" ? ` * @returns {${method.returnType}}\n` : "";

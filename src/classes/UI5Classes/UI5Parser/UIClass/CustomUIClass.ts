@@ -60,6 +60,7 @@ export class CustomUIClass extends AbstractUIClass {
 		this._fillUI5Metadata();
 		this._fillMethodsAndFields();
 		this._enrichMethodInfoWithJSDocs();
+		this._enrichMethodParamsWithHungarianNotation();
 	}
 
 	private _enrichMethodInfoWithJSDocs() {
@@ -223,6 +224,16 @@ export class CustomUIClass extends AbstractUIClass {
 				object[key] = tag.type;
 			}
 		}
+	}
+
+	private _enrichMethodParamsWithHungarianNotation() {
+		this.methods.forEach(method => {
+			method.params.forEach(param => {
+				if (param.type === "any" || !param.type) {
+					param.type = CustomUIClass.getTypeFromHungarianNotation(param.name) || "any";
+				}
+			});
+		});
 	}
 
 	private _readFileContainingThisClassCode(documentText?: string) {

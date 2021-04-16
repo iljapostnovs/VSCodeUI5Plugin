@@ -208,6 +208,11 @@
 							"memberName": {
 								"type": "string",
 								"description": "Name of the method/field. Use \"*\" for wild card"
+							},
+							"applyToChildren": {
+								"type": "boolean",
+								"description": "If the rule should be applied to class children (classes which extends this class)",
+								"default": false
 							}
 						}
 					},
