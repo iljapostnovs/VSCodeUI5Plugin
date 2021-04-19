@@ -82,7 +82,7 @@ export class WrongParametersLinter extends Linter {
 																		acornNode: param,
 																		code: "UI5Plugin",
 																		source: "Parameter Linter",
-																		message: `"${paramFromMethod.name}" parameter is of type "${classNameOfTheParam}", but expected "${paramFromMethod.type}"`,
+																		message: `"${paramFromMethod.name}" param is of type "${paramFromMethod.type}", but provided "${classNameOfTheParam}"`,
 																		range: new vscode.Range(
 																			new vscode.Position(positionStart.line - 1, positionStart.col - 1),
 																			new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)

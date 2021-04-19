@@ -463,7 +463,7 @@
 					"text": "\"wrongField\" does not exist in \"sap.m.Dialog\""
 				},
 				{
-					"text": "\"aThirdParam\" parameter is of type \"number[]\", but expected \"string[]\""
+					"text": "\"aThirdParam\" param is of type \"string[]\", but provided \"number[]\""
 				},
 				{
 					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
@@ -481,7 +481,7 @@
 					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
 				},
 				{
-					"text": "\"bAllow\" parameter is of type \"number\", but expected \"boolean\""
+					"text": "\"bAllow\" param is of type \"boolean\", but provided \"number\""
 				},
 				{
 					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 0"
@@ -490,16 +490,16 @@
 					"text": "Method \"_testMethodParams\" has 3 (2 mandatory) param(s), but you provided 1"
 				},
 				{
-					"text": "\"oSecondParam\" parameter is of type \"sap.m.Dialog\", but expected \"sap.m.Text\""
+					"text": "\"oSecondParam\" param is of type \"sap.m.Text\", but provided \"sap.m.Dialog\""
 				},
 				{
-					"text": "\"sText\" parameter is of type \"number\", but expected \"string\""
+					"text": "\"sText\" param is of type \"string\", but provided \"number\""
 				},
 				{
 					"text": "Method \"attachMatched\" has 2 (1 mandatory) param(s), but you provided 3"
 				},
 				{
-					"text": "\"vWhatIsThat\" parameter is of type \"any[]\", but expected \"sap.m.Dialog|sap.m.Text|sap.m.Table\""
+					"text": "\"vWhatIsThat\" param is of type \"sap.m.Dialog|sap.m.Text|sap.m.Table\", but provided \"any[]\""
 				},
 				{
 					"text": "No references found for \"unusedMethod\" class member"
