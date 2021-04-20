@@ -16,7 +16,14 @@ export class SwitchToViewCommand {
 						.filter(key => allUIClasses[key] instanceof CustomUIClass)
 						.map(key => <CustomUIClass>allUIClasses[key])
 						.filter(UIClass => FileReader.getClassPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
-					const controllerOfThisModel = controllers.find(controller => UIClassFactory.getDefaultModelForClass(controller.className) === currentClassName);
+
+					const controllersWithThisModelInUIDefine = controllers.filter(controller => {
+						const bControllerHasThisModelInUIDefine = !!controller.UIDefine.find(UIDefine => UIDefine.classNameDotNotation === currentClassName);
+						return bControllerHasThisModelInUIDefine;
+					});
+					const controllerOfThisModel =
+						controllersWithThisModelInUIDefine.find(controller => UIClassFactory.getDefaultModelForClass(controller.className) === currentClassName) ||
+						controllers.find(controller => UIClassFactory.getDefaultModelForClass(controller.className) === currentClassName);
 					if (controllerOfThisModel) {
 						await this._switchToViewOrFragmentFromUIClass(controllerOfThisModel.className);
 					}
