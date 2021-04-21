@@ -199,7 +199,10 @@ export class AcornSyntaxAnalyzer {
 						className = this._getClassNameOfTheComponent(primaryClassName);
 					} else if (memberName === "getModel" && callExpression.arguments) {
 						const modelName = callExpression.arguments[0]?.value || "";
+						// const isControl = UIClassFactory.isClassAChildOfClassB(currentClassName, "sap.ui.core.Control");
+						// if (isControl) {
 						className = this.getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
+						// }
 					}
 
 					if (!className) {
@@ -355,6 +358,7 @@ export class AcornSyntaxAnalyzer {
 	}
 
 	public static getClassNameOfTheModelFromManifest(modelName: string, className: string, clearStack = false) {
+		const stackCopy = [...this.declarationStack];
 		if (clearStack) {
 			this.declarationStack = [];
 		}
@@ -388,6 +392,7 @@ export class AcornSyntaxAnalyzer {
 					this._checkOfThisIsCorrectSetModel(content, modelName, className)
 				);
 				if (memberExpression && memberExpression.arguments[0]) {
+					this.declarationStack = stackCopy;
 					const model = memberExpression.arguments[0];
 					const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 					if (!this.declarationStack.includes(model)) {
@@ -680,22 +685,25 @@ export class AcornSyntaxAnalyzer {
 
 	private static _getClassNameIfNodeIsParamOfArrayMethod(identifierNode: any, currentClassName: string) {
 		let className = "";
-		const UIClass = UIClassFactory.getUIClass(currentClassName);
 
-		if (UIClass instanceof CustomUIClass) {
-			const acornMethod = this.findAcornNode(UIClass.acornMethodsAndFields, identifierNode.end);
-			if (acornMethod) {
-				const content = this.expandAllContent(acornMethod.value);
-				const node = this._getCallExpressionNodeWhichIsArrayMethod(content, identifierNode.end);
-				if (node) {
-					const isFirstParamOfArrayMethod = node.arguments[0]?.params && node.arguments[0]?.params[0]?.name === identifierNode.name;
-					if (isFirstParamOfArrayMethod) {
-						const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-						className = strategy.acornGetClassName(currentClassName, node.callee.object.end + 1, false) || "";
-						if (className.endsWith("[]")) {
-							className = className.replace("[]", "");
-						} else if (className.toLowerCase() === "array") {
-							className = "any";
+		if (!this.declarationStack.includes(identifierNode)) {
+			const UIClass = UIClassFactory.getUIClass(currentClassName);
+			this.declarationStack.push(identifierNode);
+			if (UIClass instanceof CustomUIClass) {
+				const acornMethod = this.findAcornNode(UIClass.acornMethodsAndFields, identifierNode.end);
+				if (acornMethod) {
+					const content = this.expandAllContent(acornMethod.value);
+					const node = this._getCallExpressionNodeWhichIsArrayMethod(content, identifierNode.end);
+					if (node) {
+						const isFirstParamOfArrayMethod = node.arguments[0]?.params && node.arguments[0]?.params[0]?.name === identifierNode.name;
+						if (isFirstParamOfArrayMethod) {
+							const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+							className = strategy.acornGetClassName(currentClassName, node.callee.object.end + 1, false) || "";
+							if (className.endsWith("[]")) {
+								className = className.replace("[]", "");
+							} else if (className.toLowerCase() === "array") {
+								className = "any";
+							}
 						}
 					}
 				}
@@ -747,6 +755,10 @@ export class AcornSyntaxAnalyzer {
 			//this means that last MemberExpression was related to the method name, not to the class name
 			classNameParts.pop();
 			usedNodeCount--;
+			node = stack[usedNodeCount];
+			if (node && node._acornSyntaxAnalyserType) {
+				node._acornSyntaxAnalyserType = null;
+			}
 		}
 
 		stack.splice(0, usedNodeCount);
@@ -904,7 +916,7 @@ export class AcornSyntaxAnalyzer {
 		let declarations: any[] = [];
 		nodes.forEach((node: any) => {
 			const content = this.expandAllContent(node);
-			declarations = declarations.concat(content.filter((node: any) => node.type === "VariableDeclaration"))
+			declarations = declarations.concat(content.filter((node: any) => node.type === "VariableDeclaration"));
 		});
 
 		return declarations;

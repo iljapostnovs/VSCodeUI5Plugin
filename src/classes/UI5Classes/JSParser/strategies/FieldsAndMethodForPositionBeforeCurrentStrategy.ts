@@ -38,7 +38,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 					type: "any",
 					visibility: "public"
 				}))
-			}
+			};
 		} else if (classNamePartsFromMapParam.length > 1) {
 			const className = classNamePartsFromMapParam.shift();
 			if (className) {
