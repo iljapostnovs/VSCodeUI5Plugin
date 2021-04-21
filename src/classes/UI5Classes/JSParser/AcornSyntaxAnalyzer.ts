@@ -199,7 +199,10 @@ export class AcornSyntaxAnalyzer {
 						className = this._getClassNameOfTheComponent(primaryClassName);
 					} else if (memberName === "getModel" && callExpression.arguments) {
 						const modelName = callExpression.arguments[0]?.value || "";
-						className = this.getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
+						const isControl = UIClassFactory.isClassAChildOfClassB(currentClassName, "sap.ui.core.Control");
+						if (isControl) {
+							className = this.getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
+						}
 					}
 
 					if (!className) {
@@ -747,6 +750,10 @@ export class AcornSyntaxAnalyzer {
 			//this means that last MemberExpression was related to the method name, not to the class name
 			classNameParts.pop();
 			usedNodeCount--;
+			node = stack[usedNodeCount];
+			if (node && node._acornSyntaxAnalyserType) {
+				node._acornSyntaxAnalyserType = null;
+			}
 		}
 
 		stack.splice(0, usedNodeCount);
@@ -904,7 +911,7 @@ export class AcornSyntaxAnalyzer {
 		let declarations: any[] = [];
 		nodes.forEach((node: any) => {
 			const content = this.expandAllContent(node);
-			declarations = declarations.concat(content.filter((node: any) => node.type === "VariableDeclaration"))
+			declarations = declarations.concat(content.filter((node: any) => node.type === "VariableDeclaration"));
 		});
 
 		return declarations;
