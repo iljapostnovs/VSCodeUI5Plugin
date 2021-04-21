@@ -199,10 +199,7 @@ export class AcornSyntaxAnalyzer {
 						className = this._getClassNameOfTheComponent(primaryClassName);
 					} else if (memberName === "getModel" && callExpression.arguments) {
 						const modelName = callExpression.arguments[0]?.value || "";
-						// const isControl = UIClassFactory.isClassAChildOfClassB(currentClassName, "sap.ui.core.Control");
-						// if (isControl) {
 						className = this.getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
-						// }
 					}
 
 					if (!className) {
