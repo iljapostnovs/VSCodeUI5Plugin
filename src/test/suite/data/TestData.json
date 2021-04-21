@@ -269,6 +269,18 @@
 			"type": "com.test.util.CustomClassExtend"
 		},
 		{
+			"className": "com.test.controller.CoreModelTest",
+			"methodName": "onInit",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "testMethod"
+				}
+			},
+			"type": "sap.ui.model.Model"
+		},
+		{
 			"className": "com.test.controller.Master",
 			"methodName": "onShowHello",
 			"positionAddition": 1,
