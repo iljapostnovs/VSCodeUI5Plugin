@@ -34,6 +34,7 @@ export interface CustomClassUIMethod extends UIMethod {
 export interface CustomClassUIField extends UIField {
 	customData?: LooseObject;
 	acornNode?: any;
+	mentionedInTheXMLDocument?: boolean;
 }
 export class CustomUIClass extends AbstractUIClass {
 	public methods: CustomClassUIMethod[] = [];

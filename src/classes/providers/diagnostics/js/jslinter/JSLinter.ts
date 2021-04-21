@@ -7,6 +7,7 @@ import { WrongImportLinter } from "./parts/WrongImportLinter";
 import { WrongParametersLinter } from "./parts/WrongParametersLinter";
 import { UnusedMethodLinter } from "./parts/UnusedMethodLinter";
 import { WrongFilePathLinter } from "./parts/WrongFilePathLinter";
+// import { PublicMemberLinter } from "./parts/PublicMemberLinter";
 
 export class JSLinter {
 	static getLintingErrors(document: vscode.TextDocument): Error[] {
@@ -16,9 +17,11 @@ export class JSLinter {
 			new WrongImportLinter(),
 			new WrongParametersLinter(),
 			new UnusedMethodLinter(),
-			new WrongFilePathLinter()
+			new WrongFilePathLinter()//,
+			// new PublicMemberLinter()
 		];
 
+		console.time("JS Linter");
 		let errors: Error[] = [];
 		try {
 			linters.forEach(linter => {
@@ -27,6 +30,7 @@ export class JSLinter {
 		} catch (error) {
 			console.error(error);
 		}
+		console.timeEnd("JS Linter");
 
 		return errors;
 	}

@@ -51,16 +51,7 @@ export class UnusedMethodLinter extends Linter {
 	private _checkIfMethodIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, method: CustomClassUIMethod) {
 		const isException = this._checkIfMethodIsException(UIClass.className, method.name);
 		let methodIsUsed = false;
-		let isMethodOverriden = false;
-
-		if (UIClass.parentClassNameDotNotation) {
-			const allMethods = UIClassFactory.getFieldsAndMethodsForClass(UIClass.parentClassNameDotNotation).methods;
-			const sameMethod = allMethods.find(methodFromParent => {
-				return methodFromParent.name === method.name;
-			});
-
-			isMethodOverriden = !!sameMethod;
-		}
+		const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, method.name);
 
 		if (method.isEventHandler || method.mentionedInTheXMLDocument || isMethodOverriden) {
 			methodIsUsed = true;

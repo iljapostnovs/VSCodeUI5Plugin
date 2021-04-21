@@ -280,10 +280,11 @@ export class UIClassFactory {
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.methods.forEach(method => {
 				if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
-					const regex = new RegExp(`"\\.?${method.name}"`);
+					const regex = new RegExp(`(\\.|"|')${method.name}"`);
 					if (viewOfTheControl) {
 						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isMethodMentionedInTheView) {
+							method.mentionedInTheXMLDocument = true;
 							method.isEventHandler = true;
 							if (method?.acornNode?.params && method?.acornNode?.params[0]) {
 								method.acornNode.params[0].jsType = "sap.ui.base.Event";
@@ -293,6 +294,7 @@ export class UIClassFactory {
 								const isMethodMentionedInTheFragment = regex.test(fragment.content);
 								if (isMethodMentionedInTheFragment) {
 									method.isEventHandler = true;
+									method.mentionedInTheXMLDocument = true;
 									if (method?.acornNode?.params && method?.acornNode?.params[0]) {
 										method.acornNode.params[0].jsType = "sap.ui.base.Event";
 									}
@@ -304,7 +306,7 @@ export class UIClassFactory {
 					}
 
 					if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
-						const regex = new RegExp(`\\.?${method.name}`);
+						const regex = new RegExp(`(\\.|"|')${method.name}`);
 						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isMethodMentionedInTheView) {
 							method.mentionedInTheXMLDocument = true;
@@ -327,17 +329,18 @@ export class UIClassFactory {
 		viewsAndFragments.fragments.forEach(fragment => {
 			CurrentUIClass.methods.forEach(method => {
 				if (!method.isEventHandler) {
-					const regex = new RegExp(`".?${method.name}"`);
+					const regex = new RegExp(`(\\.|"|')${method.name}"`);
 					const isMethodMentionedInTheFragment = regex.test(fragment.content);
 					if (isMethodMentionedInTheFragment) {
 						method.isEventHandler = true;
+						method.mentionedInTheXMLDocument = true;
 						if (method?.acornNode?.params && method?.acornNode?.params[0]) {
 							method.acornNode.params[0].jsType = "sap.ui.base.Event";
 						}
 					}
 				}
 				if (!method.isEventHandler) {
-					const regex = new RegExp(`\\.?${method.name}'`);
+					const regex = new RegExp(`(\\.|"|')${method.name}'`);
 					const isMethodMentionedInTheFragment = regex.test(fragment.content);
 					if (isMethodMentionedInTheFragment) {
 						method.mentionedInTheXMLDocument = true;
@@ -407,5 +410,29 @@ export class UIClassFactory {
 		}
 
 		return defaultModel;
+	}
+
+	public static isMethodOverriden(className: string, methodName: string) {
+		let isMethodOverriden = false;
+		let sameField = false;
+		const UIClass = this.getUIClass(className);
+		if (UIClass.parentClassNameDotNotation) {
+			const fieldsAndMethods = this.getFieldsAndMethodsForClass(UIClass.parentClassNameDotNotation);
+			const allMethods = fieldsAndMethods.methods;
+			const allFields = fieldsAndMethods.fields;
+			const sameMethod = !!allMethods.find(methodFromParent => {
+				return methodFromParent.name === methodName;
+			});
+
+			if (!sameMethod) {
+				sameField = !!allFields.find(fieldFromParent => {
+					return fieldFromParent.name === methodName;
+				});
+			}
+
+			isMethodOverriden = sameMethod || sameField;
+		}
+
+		return isMethodOverriden;
 	}
 }

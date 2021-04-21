@@ -556,7 +556,7 @@ export class AcornSyntaxAnalyzer {
 							}
 
 							if (eventHandlerNode && eventHandlerNode.property?.name === eventHandler.name) {
-								const className = strategy.acornGetClassName(UIClass.className, callExpression.callee.property.start, true);
+								const className = strategy.acornGetClassName(UIClass.className, callExpression.callee.property.start, false);
 								if (className) {
 									const events = UIClassFactory.getClassEvents(className);
 									if (events.find(event => event.name === eventName)) {

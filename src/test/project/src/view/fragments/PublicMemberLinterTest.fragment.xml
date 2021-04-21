@@ -1,0 +1,10 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button press="publicUsedMethodInFragment"/>
+	<Button press="{
+		path: 'test', 
+		formatter: '.secondPublicUsedMethodInFragment'
+	}"/>
+</c:FragmentDefinition>
