@@ -1,6 +1,7 @@
-## 0.12.26 (2-04-2021)
+## 0.12.26 (22-04-2021)
 * Bugfixes
 * Public member linter introduced
+* Unused method linter now is replaced with unused member linter, which also checks fields
 
 ## 0.12.25 (21-04-2021)
 * Bugfixes

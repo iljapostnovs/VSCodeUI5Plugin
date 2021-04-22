@@ -2,17 +2,17 @@ import { Error, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { FileReader } from "../../../../../utils/FileReader";
-import { CustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomClassUIField, CustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
-export class UnusedMethodLinter extends Linter {
+export class UnusedMemberLinter extends Linter {
 	getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
-		// console.time("Unused Method Linter");
-		if (vscode.workspace.getConfiguration("ui5.plugin").get("useUnusedMethodLinter")) {
+		// console.time("Unused Member Linter");
+		if (vscode.workspace.getConfiguration("ui5.plugin").get("useUnusedMemberLinter")) {
 			const className = FileReader.getClassNameFromPath(document.fileName);
 			if (className) {
 				const UIClass = UIClassFactory.getUIClass(className);
@@ -20,19 +20,31 @@ export class UnusedMethodLinter extends Linter {
 					const allUIClassesMap = UIClassFactory.getAllExistentUIClasses();
 					const allUIClasses = Object.keys(allUIClassesMap).map(key => allUIClassesMap[key]);
 					const customUIClasses = allUIClasses.filter(UIClass => UIClass instanceof CustomUIClass) as CustomUIClass[];
-					UIClass.methods.forEach(method => {
-						const methodIsUsed = this._checkIfMethodIsUsed(customUIClasses, UIClass, method);
-						if (!methodIsUsed && method.position) {
-							const position = LineColumn(UIClass.classText).fromIndex(method.position);
-							if (position) {
+					const methodsAndFields: (CustomClassUIField | CustomClassUIMethod)[] = [
+						...UIClass.methods,
+						...UIClass.fields
+					];
+					methodsAndFields.forEach((methodOrField: any) => {
+						const methodIsUsed = this._checkIfMethodIsUsed(customUIClasses, UIClass, methodOrField);
+						if (!methodIsUsed && methodOrField.acornNode) {
+							const positionBegin = LineColumn(UIClass.classText).fromIndex(
+								methodOrField.position ? methodOrField.position :
+									methodOrField.acornNode.start
+							);
+							const positionEnd = LineColumn(UIClass.classText).fromIndex(
+								methodOrField.position ? methodOrField.position + methodOrField.name.length :
+									methodOrField.acornNode.key ? methodOrField.acornNode.key.end :
+										methodOrField.acornNode.end
+							);
+							if (positionBegin && positionEnd) {
 								errors.push({
 									source: "Unused method Linter",
-									acornNode: method.acornNode,
+									acornNode: methodOrField.acornNode,
 									code: "UI5Plugin",
-									message: `No references found for "${method.name}" class member`,
+									message: `No references found for "${methodOrField.name}" class member`,
 									range: new vscode.Range(
-										new vscode.Position(position.line - 1, position.col - 1),
-										new vscode.Position(position.line - 1, position.col + method.name.length - 1)
+										new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
+										new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
 									),
 									tags: [vscode.DiagnosticTag.Unnecessary],
 									severity: vscode.DiagnosticSeverity.Hint
@@ -48,25 +60,25 @@ export class UnusedMethodLinter extends Linter {
 		return errors;
 	}
 
-	private _checkIfMethodIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, method: CustomClassUIMethod) {
-		const isException = this._checkIfMethodIsException(UIClass.className, method.name);
-		let methodIsUsed = false;
-		const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, method.name);
+	private _checkIfMethodIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, methodOrField: CustomClassUIMethod | CustomClassUIField) {
+		const isException = this._checkIfMethodIsException(UIClass.className, methodOrField.name);
+		let memberIsUsed = false;
+		const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, methodOrField.name);
 
-		if (method.isEventHandler || method.mentionedInTheXMLDocument || isMethodOverriden) {
-			methodIsUsed = true;
+		if (methodOrField.mentionedInTheXMLDocument || isMethodOverriden) {
+			memberIsUsed = true;
 		} else if (!isException) {
 			const classOfTheMethod = UIClass.className;
 
 			customUIClasses.find(customUIClass => {
 				return !!customUIClass.methods.find(methodFromClass => {
 					if (methodFromClass.acornNode) {
-						const expressions = AcornSyntaxAnalyzer.expandAllContent(methodFromClass.acornNode).filter((node: any) => node.type === "MemberExpression");
-						expressions.find((expression: any) => {
-							const propertyName = expression.callee?.property?.name || expression?.property?.name;
-							const currentMethodIsCalled = propertyName === method.name;
+						const memberExpressions = AcornSyntaxAnalyzer.expandAllContent(methodFromClass.acornNode).filter((node: any) => node.type === "MemberExpression");
+						memberExpressions.find((memberExpression: any) => {
+							const propertyName = memberExpression.callee?.property?.name || memberExpression?.property?.name;
+							const currentMethodIsCalled = propertyName === methodOrField.name;
 							if (currentMethodIsCalled) {
-								const position = expression.callee?.property?.start || expression?.property?.start;
+								const position = memberExpression.callee?.property?.start || memberExpression?.property?.start;
 								const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 								const classNameOfTheCallee = strategy.acornGetClassName(customUIClass.className, position, true);
 								if (
@@ -77,22 +89,22 @@ export class UnusedMethodLinter extends Linter {
 										UIClassFactory.isClassAChildOfClassB(classNameOfTheCallee, classOfTheMethod)
 									)
 								) {
-									methodIsUsed = true;
+									memberIsUsed = true;
 								}
 							}
 
-							return methodIsUsed;
+							return memberIsUsed;
 						});
 					}
 
-					return methodIsUsed;
+					return memberIsUsed;
 				});
 			});
 		} else {
-			methodIsUsed = true;
+			memberIsUsed = true;
 		}
 
-		return methodIsUsed;
+		return memberIsUsed;
 	}
 
 	private _checkIfMethodIsException(className: string, methodName: string) {

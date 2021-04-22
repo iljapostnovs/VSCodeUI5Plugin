@@ -6,7 +6,7 @@ sap.ui.define([
 	"sap/ui/model/Filter",
 	"sap/ui/model/FilterOperator",
 	"sap/m/Dialog"
-], function (
+], function(
 	Controller,
 	MessageToast,
 	Formatter,
@@ -39,8 +39,8 @@ sap.ui.define([
 		 * @param {sap.m.MessageBox} test2 class
 		 * @returns {sap.m.Dialog} instance
 		 */
-		onShowHello: function (test, test2) {
-		// read msg from i18n model
+		onShowHello: function(test, test2) {
+			// read msg from i18n model
 			this._test = new Formatter();
 			if (3 > 9) {
 				// this._test.
@@ -98,7 +98,7 @@ sap.ui.define([
 			this._oMessageBox = test2;
 		},
 
-		onOpenDialog : function () {
+		onOpenDialog: function() {
 			this.getOwnerComponent().openHelloDialog();
 			this._test2 = new Formatter();
 			this._test123 = 123;
@@ -183,11 +183,13 @@ sap.ui.define([
 		_getMixedArrayMethodArray: function() {
 			const aStrings = ["1", "2"];
 			const aDialogs = aStrings
-			.map(sString => {
-				return new Dialog({title: sString});
-			})
-			.filter(oDialog => oDialog.getTitle())
-			.find(oDialog => oDialog.getTitle());
+				.map(sString => {
+					return new Dialog({
+						title: sString
+					});
+				})
+				.filter(oDialog => oDialog.getTitle())
+				.find(oDialog => oDialog.getTitle());
 
 			return [aDialogs];
 		},

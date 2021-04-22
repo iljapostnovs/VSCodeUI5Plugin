@@ -4,14 +4,14 @@ sap.ui.define([
 	"sap/ui/Device",
 	"sap/ui/model/odata/type/Decimal",
 	"com/test/util/Formatter",
-	"com/test/controller/PublicMemberLinterTest/controller"
+	"com/test/controller/PublicMemberLinterTest"
 ], function(
 	Controller,
 	Dialog,
 	Device,
 	Decimal,
 	Formatter,
-	controller
+	PublicMemberLinterTest
 ) {
 	"use strict";
 

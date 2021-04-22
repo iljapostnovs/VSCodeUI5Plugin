@@ -422,7 +422,8 @@ export class CustomUIClass extends AbstractUIClass {
 								name: node.left.property.name,
 								type: node.left.property.name.jsType,
 								description: node.left.property.name.jsType || "",
-								visibility: node.left.property.name?.startsWith("_") ? "private" : "public"
+								visibility: node.left.property.name?.startsWith("_") ? "private" : "public",
+								acornNode: node.left
 							});
 						}
 					});
@@ -601,7 +602,8 @@ export class CustomUIClass extends AbstractUIClass {
 						name: name,
 						visibility: name?.startsWith("_") ? "private" : "public",
 						type: typeof assignmentBody.value,
-						description: assignmentBody.jsType || ""
+						description: assignmentBody.jsType || "",
+						acornNode: node.expression.left
 					});
 				}
 			});

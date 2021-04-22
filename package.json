@@ -122,10 +122,10 @@
 					"default": true,
 					"description": "JS Linter: Should Wrong method parameters validator be used"
 				},
-				"ui5.plugin.useUnusedMethodLinter": {
+				"ui5.plugin.useUnusedMemberLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should unused method validator be used"
+					"description": "JS Linter: Should unused method/field validator be used"
 				},
 				"ui5.plugin.useWrongFilePathLinter": {
 					"type": "boolean",

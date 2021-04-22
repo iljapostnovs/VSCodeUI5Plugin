@@ -16,6 +16,8 @@ sap.ui.define([
 			"com.test.view.fragments.PublicMemberLinterTest";
 			this._privateMethod();
 			this.publicUnusedMethod();
+
+			this.secondUnusedPublicField = 123;
 		},
 
 		_privateMethod: function() {
