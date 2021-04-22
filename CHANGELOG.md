@@ -1,5 +1,6 @@
-## 0.12.26 (21-04-2021)
+## 0.12.26 (2-04-2021)
 * Bugfixes
+* Public member linter introduced
 
 ## 0.12.25 (21-04-2021)
 * Bugfixes

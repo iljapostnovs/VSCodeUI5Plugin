@@ -10,5 +10,6 @@
 		width="100%"
 		busy="wrong value"
 		wrongAttribute=""
+		icon=".formatter.test"
 	/>
 </c:FragmentDefinition>

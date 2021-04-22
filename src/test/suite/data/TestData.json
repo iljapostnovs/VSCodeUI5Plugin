@@ -515,12 +515,22 @@
 				},
 				{
 					"text": "No references found for \"unusedMethod\" class member"
+				},
+				{
+					"text": "Method \"getRouter\" is possibly private, no references found"
+				},
+				{
+					"text": "Method \"unusedMethod\" is possibly private, no references found"
 				}
 			]
 		},
 		{
 			"className": "com.test.util.ObjectTest",
-			"errors": []
+			"errors": [{
+				"text": "Field \"testMap\" is possibly private, no references found"
+			},{
+				"text": "Method \"returnTest\" is possibly private, no references found"
+			}]
 		},
 		{
 			"className": "com.test.controller.WrongFilePathLinterTest",

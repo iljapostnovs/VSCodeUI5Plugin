@@ -132,6 +132,11 @@
 					"default": true,
 					"description": "JS Linter: Should wrong file path validator be used"
 				},
+				"ui5.plugin.usePublicMemberLinter": {
+					"type": "boolean",
+					"default": true,
+					"description": "JS Linter: Should public member validator be used"
+				},
 				"ui5.plugin.moveDefineToFunctionParametersOnAutocomplete": {
 					"type": "boolean",
 					"default": true,
