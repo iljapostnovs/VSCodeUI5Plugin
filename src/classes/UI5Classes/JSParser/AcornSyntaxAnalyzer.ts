@@ -866,7 +866,8 @@ export class AcornSyntaxAnalyzer {
 									description: field.description,
 									params: methodFromAnotherClass.params,
 									returnType: methodFromAnotherClass.returnType,
-									visibility: field.visibility
+									visibility: field.visibility,
+									owner: UIClass.className
 								});
 							}
 						}

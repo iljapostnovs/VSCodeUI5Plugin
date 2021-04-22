@@ -6,7 +6,7 @@ export class ConfigHandler {
 	}
 
 	static checkIfMemberIsException(className = "", memberName = "") {
-		const hardcodedExceptions = ["metadata", "renderer"];
+		const hardcodedExceptions = ["metadata", "renderer", "onAfterRendering"];
 		const classExceptions = ConfigHandler.getJSLinterExceptions();
 		const isException = hardcodedExceptions.includes(memberName) || !!classExceptions.find(classException => {
 			let isException = (classException.className === className || classException.className === "*") &&

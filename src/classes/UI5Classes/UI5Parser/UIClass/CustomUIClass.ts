@@ -423,7 +423,8 @@ export class CustomUIClass extends AbstractUIClass {
 								type: node.left.property.name.jsType,
 								description: node.left.property.name.jsType || "",
 								visibility: node.left.property.name?.startsWith("_") ? "private" : "public",
-								acornNode: node.left
+								acornNode: node.left,
+								owner: this.className
 							});
 						}
 					});
@@ -441,7 +442,8 @@ export class CustomUIClass extends AbstractUIClass {
 						visibility: property.key.name?.startsWith("_") ? "private" : "public",
 						acornParams: property.value.params,
 						acornNode: property.value,
-						isEventHandler: false
+						isEventHandler: false,
+						owner: this.className
 					};
 					this.methods.push(method);
 				} else if (property.value?.type === "Identifier" || property.value?.type === "Literal") {
@@ -450,7 +452,8 @@ export class CustomUIClass extends AbstractUIClass {
 						type: property.jsType,
 						acornNode: property,
 						description: property.jsType || "",
-						visibility: property.key.name?.startsWith("_") ? "private" : "public"
+						visibility: property.key.name?.startsWith("_") ? "private" : "public",
+						owner: this.className
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value?.type === "ObjectExpression") {
@@ -460,7 +463,8 @@ export class CustomUIClass extends AbstractUIClass {
 						description: "map",
 						acornNode: property,
 						customData: this._generateCustomDataForObject(property.value),
-						visibility: property.key?.name?.startsWith("_") ? "private" : "public"
+						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
+						owner: this.className
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value?.type === "MemberExpression") {
@@ -469,7 +473,8 @@ export class CustomUIClass extends AbstractUIClass {
 						type: undefined,
 						description: "",
 						acornNode: property,
-						visibility: property.key?.name?.startsWith("_") ? "private" : "public"
+						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
+						owner: this.className
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value?.type === "ArrayExpression") {
@@ -478,7 +483,8 @@ export class CustomUIClass extends AbstractUIClass {
 						type: "array",
 						description: "",
 						acornNode: property,
-						visibility: property.key?.name?.startsWith("_") ? "private" : "public"
+						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
+						owner: this.className
 					});
 					this.acornMethodsAndFields.push(property);
 				}
@@ -501,7 +507,8 @@ export class CustomUIClass extends AbstractUIClass {
 				name: "prototype",
 				description: "Prototype of the class",
 				type: this.className,
-				visibility: "public"
+				visibility: "public",
+				owner: this.className
 			});
 		}
 
@@ -594,7 +601,8 @@ export class CustomUIClass extends AbstractUIClass {
 						visibility: name?.startsWith("_") ? "private" : "public",
 						acornParams: assignmentBody.params,
 						acornNode: assignmentBody,
-						isEventHandler: false
+						isEventHandler: false,
+						owner: this.className
 					};
 					this.methods.push(method);
 				} else if (isField) {
@@ -603,7 +611,8 @@ export class CustomUIClass extends AbstractUIClass {
 						visibility: name?.startsWith("_") ? "private" : "public",
 						type: typeof assignmentBody.value,
 						description: assignmentBody.jsType || "",
-						acornNode: node.expression.left
+						acornNode: node.expression.left,
+						owner: this.className
 					});
 				}
 			});
@@ -676,7 +685,8 @@ export class CustomUIClass extends AbstractUIClass {
 				params: [],
 				returnType: property.type || "void",
 				visibility: property.visibility,
-				isEventHandler: false
+				isEventHandler: false,
+				owner: this.className
 			});
 
 			aMethods.push({
@@ -690,7 +700,8 @@ export class CustomUIClass extends AbstractUIClass {
 				}],
 				returnType: this.className,
 				visibility: property.visibility,
-				isEventHandler: false
+				isEventHandler: false,
+				owner: this.className
 			});
 		});
 	}
@@ -826,7 +837,8 @@ export class CustomUIClass extends AbstractUIClass {
 					params: method.params,
 					returnType: method.returnType,
 					visibility: aggregation.visibility,
-					isEventHandler: false
+					isEventHandler: false,
+					owner: this.className
 				});
 			});
 
@@ -881,7 +893,8 @@ export class CustomUIClass extends AbstractUIClass {
 					params: eventMethod.params,
 					returnType: this.className,
 					visibility: event.visibility,
-					isEventHandler: false
+					isEventHandler: false,
+					owner: this.className
 				});
 			});
 		});
@@ -946,7 +959,8 @@ export class CustomUIClass extends AbstractUIClass {
 					params: method.params,
 					returnType: association.type || this.className,
 					visibility: association.visibility,
-					isEventHandler: false
+					isEventHandler: false,
+					owner: this.className
 				});
 			});
 

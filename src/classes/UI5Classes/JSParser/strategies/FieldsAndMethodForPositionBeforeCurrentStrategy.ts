@@ -15,6 +15,8 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 			fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
 			if (fieldsAndMethods && className !== fieldsAndMethods.className) {
 				this._filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods);
+			} else if (fieldsAndMethods) {
+				this._filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods, ["private", "protected", "public"])
 			}
 		}
 
@@ -35,7 +37,8 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 					name: field,
 					description: field,
 					type: "any",
-					visibility: "public"
+					visibility: "public",
+					owner: ""
 				}))
 			};
 		} else if (classNamePartsFromMapParam.length > 1) {
@@ -53,7 +56,8 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 							description: key,
 							name: key,
 							visibility: "public",
-							type: typeof paramStructure[key] === "string" ? paramStructure[key] : typeof paramStructure[key]
+							type: typeof paramStructure[key] === "string" ? paramStructure[key] : typeof paramStructure[key],
+							owner: ""
 						};
 					}) : [],
 					methods: []
