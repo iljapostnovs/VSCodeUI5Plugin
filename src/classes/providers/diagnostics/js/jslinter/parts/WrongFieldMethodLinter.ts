@@ -130,12 +130,12 @@ export class WrongFieldMethodLinter extends Linter {
 									if (member?.visibility === "protected") {
 										const currentDocumentClassName = FileReader.getClassNameFromPath(document.fileName);
 										if (currentDocumentClassName && !UIClassFactory.isClassAChildOfClassB(currentDocumentClassName, singleFieldsAndMethods.className)) {
-											sErrorMessage = `"${nextNodeName}" is a private member of class "${singleFieldsAndMethods.className}"`;
+											sErrorMessage = `"${nextNodeName}" is a protected member of class "${singleFieldsAndMethods.className}"`;
 										}
 									} else if (member?.visibility === "private") {
 										const currentDocumentClassName = FileReader.getClassNameFromPath(document.fileName);
 										if (currentDocumentClassName && singleFieldsAndMethods.className !== currentDocumentClassName) {
-											sErrorMessage = `"${nextNodeName}" is a protected member of class "${singleFieldsAndMethods.className}"`;
+											sErrorMessage = `"${nextNodeName}" is a private member of class "${singleFieldsAndMethods.className}"`;
 										}
 									}
 

@@ -556,10 +556,10 @@
 			"className": "com.test.util.AccessLevelModifierSecondTest",
 			"errors": [
 				{
-					"text": "\"_privateMethod\" is a protected member of class \"com.test.util.AccessLevelModifierTest\""
+					"text": "\"_privateMethod\" is a private member of class \"com.test.util.AccessLevelModifierTest\""
 				},
 				{
-					"text": "\"_protectedMethod\" is a private member of class \"com.test.util.AccessLevelModifierTest\""
+					"text": "\"_protectedMethod\" is a protected member of class \"com.test.util.AccessLevelModifierTest\""
 				}
 			]
 		},
