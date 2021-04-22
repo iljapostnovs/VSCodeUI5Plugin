@@ -6,6 +6,9 @@ sap.ui.define([
 	"use strict";
 
 	return ManagedObject.extend("com.test.util.IfLinterTest", {
+		metadata: {
+
+		},
 		test: function() {
 			if (this.dummyField) {
 

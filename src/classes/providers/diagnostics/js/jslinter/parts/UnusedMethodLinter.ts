@@ -96,7 +96,7 @@ export class UnusedMethodLinter extends Linter {
 	}
 
 	private _checkIfMethodIsException(className: string, methodName: string) {
-		return ConfigHandler.checkIfMethodNameIsException(className, methodName) ||
+		return ConfigHandler.checkIfMemberIsException(className, methodName) ||
 			this._checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className, methodName);
 	}
 

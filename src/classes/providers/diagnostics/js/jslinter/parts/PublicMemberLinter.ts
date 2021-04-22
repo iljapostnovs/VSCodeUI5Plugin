@@ -22,7 +22,7 @@ export class PublicMemberLinter extends Linter {
 					const publicMethods = UIClass.methods.filter(method => method.visibility === "public");
 					const publicFields = UIClass.fields.filter(field => field.visibility === "public");
 					publicMethods.forEach(method => {
-						const isException = this._checkIfMethodIsException(UIClass.className, method.name);
+						const isException = this._checkIfMemberIsException(UIClass.className, method.name);
 						if (!isException) {
 							const methodIsUsed = this._checkIfMemberIsUsedElsewhere(customUIClasses, UIClass, method.name, method);
 							if (!methodIsUsed && method.position) {
@@ -45,7 +45,7 @@ export class PublicMemberLinter extends Linter {
 					});
 
 					publicFields.forEach(field => {
-						const isException = this._checkIfMethodIsException(UIClass.className, field.name);
+						const isException = this._checkIfMemberIsException(UIClass.className, field.name);
 						if (!isException) {
 							const methodIsUsed = this._checkIfMemberIsUsedElsewhere(customUIClasses, UIClass, field.name, field);
 							if (!methodIsUsed && field.acornNode) {
@@ -115,9 +115,9 @@ export class PublicMemberLinter extends Linter {
 		return isMemberUsedInOtherClasses;
 	}
 
-	private _checkIfMethodIsException(className: string, methodName: string) {
-		return ConfigHandler.checkIfMethodNameIsException(className, methodName) ||
-			this._checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className, methodName);
+	private _checkIfMemberIsException(className: string, memberName: string) {
+		return ConfigHandler.checkIfMemberIsException(className, memberName) ||
+			this._checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className, memberName);
 	}
 
 	private _checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className: string, methodName: string) {
