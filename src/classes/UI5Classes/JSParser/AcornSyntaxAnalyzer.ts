@@ -130,7 +130,7 @@ export class AcornSyntaxAnalyzer {
 
 		if (node.test?.start < position && node.test?.end >= position) {
 			correctPart = node.test;
-		} if (node.consequent?.start < position && node.consequent?.end >= position) {
+		} else if (node.consequent?.start < position && node.consequent?.end >= position) {
 			correctPart = this.findAcornNode(node.consequent.body || [node.consequent], position);
 		} else if (node.alternate) {
 			correctPart = this._getIfStatementPart(node.alternate, position);
