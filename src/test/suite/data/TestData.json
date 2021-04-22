@@ -526,11 +526,14 @@
 		},
 		{
 			"className": "com.test.util.ObjectTest",
-			"errors": [{
-				"text": "Field \"testMap\" is possibly private, no references found"
-			},{
-				"text": "Method \"returnTest\" is possibly private, no references found"
-			}]
+			"errors": [
+				{
+					"text": "Field \"testMap\" is possibly private, no references found"
+				},
+				{
+					"text": "Method \"returnTest\" is possibly private, no references found"
+				}
+			]
 		},
 		{
 			"className": "com.test.controller.WrongFilePathLinterTest",
@@ -548,6 +551,21 @@
 					"text": "Class \"com.test.util.WrongFormatter\" doesn't exist"
 				}
 			]
+		},
+		{
+			"className": "com.test.util.AccessLevelModifierSecondTest",
+			"errors": [
+				{
+					"text": "\"_privateMethod\" is a protected member of class \"com.test.util.AccessLevelModifierTest\""
+				},
+				{
+					"text": "\"_protectedMethod\" is a private member of class \"com.test.util.AccessLevelModifierTest\""
+				}
+			]
+		},
+		{
+			"className": "com.test.util.AccessLevelModifierTest",
+			"errors": []
 		}
 	],
 	"XMLLinter": [

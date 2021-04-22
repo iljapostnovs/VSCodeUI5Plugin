@@ -73,7 +73,7 @@ suite("Extension Test Suite", () => {
 				const fieldsAndMethods = positionBeforeCurrentStrategy.destructueFieldsAndMethodsAccordingToMapParams(classNameAtPosition);
 				classNameAtPosition = fieldsAndMethods?.className;
 			}
-			assert.strictEqual(data.type, classNameAtPosition, `"${data.className}" position ${position} method "${data.methodName}" type is "${classNameAtPosition}" but expected "${data.type}". Data: ${JSON.stringify(data)}`);
+			assert.strictEqual(classNameAtPosition, data.type, `"${data.className}" position ${position} method "${data.methodName}" type is "${classNameAtPosition}" but expected "${data.type}". Data: ${JSON.stringify(data)}`);
 		});
 	});
 
@@ -85,11 +85,11 @@ suite("Extension Test Suite", () => {
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const errors = JSLinter.getLintingErrors(document);
-				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
+				assert.strictEqual(errors.length, data.errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
-					assert.ok(!!errorInDocument, `"${data.className}" class should have ${dataError.text} error, but it doesn't`);
+					assert.ok(!!errorInDocument, `"${data.className}" class should have "${dataError.text}" error, but it doesn't`);
 				});
 			}
 

@@ -13,8 +13,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		const UIClassName = this.getClassNameOfTheVariableAtPosition(className, offset);
 		if (UIClassName) {
 			fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
-			const classNameOfTheCurrentDocument = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-			if (fieldsAndMethods && classNameOfTheCurrentDocument !== className) {
+			if (fieldsAndMethods && className !== fieldsAndMethods.className) {
 				this._filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods);
 			}
 		}
