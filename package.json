@@ -223,6 +223,14 @@
 					},
 					"default": [
 						{
+							"className": "sap.ui.core.Control",
+							"memberName": "getDomRef"
+						},
+						{
+							"className": "sap.ui.model.json.JSONModel",
+							"memberName": "iSizeLimit"
+						},
+						{
 							"className": "sap.ui.model.Binding",
 							"memberName": "*"
 						},
