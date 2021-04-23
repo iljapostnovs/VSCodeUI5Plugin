@@ -517,10 +517,10 @@
 					"text": "No references found for \"unusedMethod\" class member"
 				},
 				{
-					"text": "Method \"getRouter\" is possibly private, no references found"
+					"text": "Method \"getRouter\" is possibly private, no references found in other classes"
 				},
 				{
-					"text": "Method \"unusedMethod\" is possibly private, no references found"
+					"text": "Method \"unusedMethod\" is possibly private, no references found in other classes"
 				}
 			]
 		},
@@ -528,10 +528,10 @@
 			"className": "com.test.util.ObjectTest",
 			"errors": [
 				{
-					"text": "Field \"testMap\" is possibly private, no references found"
+					"text": "Field \"testMap\" is possibly private, no references found in other classes"
 				},
 				{
-					"text": "Method \"returnTest\" is possibly private, no references found"
+					"text": "Method \"returnTest\" is possibly private, no references found in other classes"
 				}
 			]
 		},

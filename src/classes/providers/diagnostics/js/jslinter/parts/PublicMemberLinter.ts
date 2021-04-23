@@ -32,7 +32,7 @@ export class PublicMemberLinter extends Linter {
 										source: "Public member linter",
 										acornNode: method.acornNode,
 										code: "UI5Plugin",
-										message: `Method "${method.name}" is possibly private, no references found`,
+										message: `Method "${method.name}" is possibly private, no references found in other classes`,
 										range: new vscode.Range(
 											new vscode.Position(position.line - 1, position.col - 1),
 											new vscode.Position(position.line - 1, position.col + method.name.length - 1)
@@ -61,7 +61,7 @@ export class PublicMemberLinter extends Linter {
 										source: "Public member linter",
 										acornNode: field.acornNode,
 										code: "UI5Plugin",
-										message: `Field "${field.name}" is possibly private, no references found`,
+										message: `Field "${field.name}" is possibly private, no references found in other classes`,
 										range: new vscode.Range(
 											new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
 											new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
@@ -110,7 +110,10 @@ export class PublicMemberLinter extends Linter {
 						isMemberUsedInOtherClasses = !!memberExpressions.find((memberExpression: any) => {
 							const calleeClassName = strategy.acornGetClassName(customUIClass.className, memberExpression.end, true);
 
-							return calleeClassName && UIClassFactory.isClassAChildOfClassB(calleeClassName, UIClass.className);
+							return calleeClassName && (
+								UIClassFactory.isClassAChildOfClassB(calleeClassName, UIClass.className) ||
+								UIClassFactory.isClassAChildOfClassB(UIClass.className, calleeClassName)
+							);
 						});
 					}
 				}
