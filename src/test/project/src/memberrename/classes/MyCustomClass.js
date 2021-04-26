@@ -6,8 +6,10 @@ sap.ui.define([
 	"use strict";
 
 	return ManagedObject.extend("com.test.memberrename.classes.MyCustomClass", {
-		myCustomMethod: function() {
+		myField1: 123,
 
+		myCustomMethod: function() {
+			this.myField2 = "asd";
 		}
 	});
 });

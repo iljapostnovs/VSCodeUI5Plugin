@@ -15,6 +15,9 @@ sap.ui.define([
 			const oMyCustomClassExtension = new MyCustomClassExtension();
 
 			oMyCustomClass.myCustomMethod();
+			oMyCustomClass.myField1 = "123";
+			oMyCustomClass.myField2 = 123;
+
 			oMyCustomClassExtension.myCustomMethod();
 			oMyCustomClassExtension.anotherCustomMethod();
 		}
