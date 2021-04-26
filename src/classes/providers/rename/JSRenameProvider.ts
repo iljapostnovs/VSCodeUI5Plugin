@@ -7,7 +7,7 @@ import { FileReader } from "../../utils/FileReader";
 import LineColumn = require("line-column");
 
 export class JSRenameProvider {
-	static provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string): vscode.ProviderResult<vscode.WorkspaceEdit> {
+	static async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string) {
 		const workspaceEdit = new vscode.WorkspaceEdit();
 
 		const className = FileReader.getClassNameFromPath(document.fileName);
@@ -15,38 +15,62 @@ export class JSRenameProvider {
 			UIClassFactory.setNewCodeForClass(className, document.getText());
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 			const offset = document.offsetAt(position);
-			const methods = UIClass.methods;
 			const memberInClassBody = UIClass.acornClassBody?.properties.find((property: any) => {
 				return property.key.start <= offset && property.key.end >= offset;
 			});
 
 			if (memberInClassBody) {
-				const method = methods.find(method => method.name === memberInClassBody.key.name);
-				if (method) {
-					this._addTextEditsForMethodsInClassBodyRename(className, method.name, newName, workspaceEdit, document);
+				const methodOrField =
+					UIClass.methods.find(method => method.name === memberInClassBody.key.name) ||
+					UIClass.fields.find(field => field.name === memberInClassBody.key.name);
+				if (methodOrField) {
+					this._addTextEditsForMembersInClassBodyRename(className, methodOrField.name, newName, workspaceEdit, document);
+				}
+			} else {
+				const methodOrField =
+					UIClass.methods.find(method => method.acornNode?.start <= offset && method.acornNode?.end >= offset) ||
+					UIClass.fields.find(field => field.acornNode?.start <= offset && field.acornNode?.end >= offset);
+				if (methodOrField) {
+					const range = document.getWordRangeAtPosition(position);
+					const oldMethodName = range && document.getText(range);
+					if (oldMethodName) {
+						const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+						const classNameOfTheCurrentMethod = strategy.acornGetClassName(className, offset, true);
+						const isThisClassFromAProject = classNameOfTheCurrentMethod && !!FileReader.getManifestForClass(classNameOfTheCurrentMethod);
+						if (classNameOfTheCurrentMethod && isThisClassFromAProject) {
+							const UIClass = <CustomUIClass>UIClassFactory.getUIClass(classNameOfTheCurrentMethod);
+							if (UIClass.classFSPath) {
+								const uri = vscode.Uri.file(UIClass.classFSPath);
+								const document = await vscode.workspace.openTextDocument(uri);
+
+								this._addTextEditsForMembersInClassBodyRename(classNameOfTheCurrentMethod, oldMethodName, newName, workspaceEdit, document);
+							}
+						}
+					}
 				}
 			}
 		}
-		// workspaceEdit.replace
-		return workspaceEdit;
+
+		return workspaceEdit.size > 0 ? workspaceEdit : null;
 	}
 
-	private static _addTextEditsForMethodsInClassBodyRename(className: string, oldMethodName: string, newMethodName: string, workspaceEdit: vscode.WorkspaceEdit, document: vscode.TextDocument) {
+	private static _addTextEditsForMembersInClassBodyRename(className: string, oldMemberName: string, newMemberName: string, workspaceEdit: vscode.WorkspaceEdit, document: vscode.TextDocument) {
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
-		const method = UIClass.methods.find(method => method.name === oldMethodName);
-		if (method?.acornNode) {
+		const methodOrField = UIClass.methods.find(method => method.name === oldMemberName) || UIClass.fields.find(field => field.name === oldMemberName);
+		if (methodOrField?.acornNode) {
 			const acornPropertyNode = UIClass.acornClassBody?.properties.find((property: any) => {
-				return property.value === method.acornNode;
+				return methodOrField.acornNode && (property.value === methodOrField.acornNode || property.value === methodOrField.acornNode?.value);
 			});
 
 			if (acornPropertyNode) {
 				const positionBegin = document.positionAt(acornPropertyNode.key.start);
 				const positionEnd = document.positionAt(acornPropertyNode.key.end);
 				const range = new vscode.Range(positionBegin, positionEnd);
-				workspaceEdit.replace(document.uri, range, newMethodName);
+				workspaceEdit.replace(document.uri, range, newMemberName);
 
-				this._addTextEditsForMemberRename(className, oldMethodName, newMethodName, workspaceEdit);
 			}
+
+			this._addTextEditsForMemberRename(className, oldMemberName, newMemberName, workspaceEdit);
 		}
 	}
 

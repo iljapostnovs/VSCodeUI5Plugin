@@ -16,7 +16,7 @@ sap.ui.define([
 
 			oMyCustomClass.myCustomMethod();
 			oMyCustomClass.myField1 = "123";
-			oMyCustomClass.myField2 = 123;
+			oMyCustomClass.myField3 = 123;
 
 			oMyCustomClassExtension.myCustomMethod();
 			oMyCustomClassExtension.anotherCustomMethod();

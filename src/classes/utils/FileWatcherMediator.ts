@@ -18,36 +18,64 @@ const workspace = vscode.workspace;
 
 export class FileWatcherMediator {
 	static register() {
+		const watcher = vscode.workspace.createFileSystemWatcher("**/*.{js,xml,json,properties}");
 		let disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
 			ClearCacheCommand.reloadWindow();
 		});
 
 		UI5Plugin.getInstance().addDisposable(disposable);
 
-		disposable = workspace.onDidSaveTextDocument(document => {
-			if (document.fileName.endsWith(".js")) {
+		disposable = watcher.onDidChange((uri: vscode.Uri) => {
+			setTimeout(async () => {
+				const document = await vscode.workspace.openTextDocument(uri);
+				if (document.fileName.endsWith(".js")) {
 
-				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
-				if (currentClassNameDotNotation) {
-					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
+					const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
+					if (currentClassNameDotNotation) {
+						UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
+					}
+				} else if (document.fileName.endsWith(".view.xml")) {
+
+					const viewContent = document.getText();
+					FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath);
+				} else if (document.fileName.endsWith(".fragment.xml")) {
+
+					FileReader.setNewFragmentContentToCache(document);
+				} else if (document.fileName.endsWith(".properties")) {
+
+					ResourceModelData.readTexts();
+				} else if (document.fileName.endsWith("manifest.json")) {
+
+					FileReader.rereadAllManifests();
 				}
-			} else if (document.fileName.endsWith(".view.xml")) {
-
-				const viewContent = document.getText();
-				FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath);
-			} else if (document.fileName.endsWith(".fragment.xml")) {
-
-				FileReader.setNewFragmentContentToCache(document);
-			} else if (document.fileName.endsWith(".properties")) {
-
-				ResourceModelData.readTexts();
-			} else if (document.fileName.endsWith("manifest.json")) {
-
-				FileReader.rereadAllManifests();
-			}
+			}, 50);
 		});
-
 		UI5Plugin.getInstance().addDisposable(disposable);
+
+		// disposable = workspace.onDidSaveTextDocument(document => {
+		// 	if (document.fileName.endsWith(".js")) {
+
+		// 		const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
+		// 		if (currentClassNameDotNotation) {
+		// 			UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
+		// 		}
+		// 	} else if (document.fileName.endsWith(".view.xml")) {
+
+		// 		const viewContent = document.getText();
+		// 		FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath);
+		// 	} else if (document.fileName.endsWith(".fragment.xml")) {
+
+		// 		FileReader.setNewFragmentContentToCache(document);
+		// 	} else if (document.fileName.endsWith(".properties")) {
+
+		// 		ResourceModelData.readTexts();
+		// 	} else if (document.fileName.endsWith("manifest.json")) {
+
+		// 		FileReader.rereadAllManifests();
+		// 	}
+		// });
+
+		// UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = workspace.onDidCreateFiles(event => {
 			event.files.forEach(this._handleFileCreate.bind(this));

@@ -9,7 +9,7 @@ sap.ui.define([
 		myField1: 123,
 
 		myCustomMethod: function() {
-			this.myField2 = "asd";
+			this.myField3 = "asd";
 		}
 	});
 });

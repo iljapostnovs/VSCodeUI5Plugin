@@ -1,3 +1,6 @@
+## 0.12.27 (26-04-2021)
+* File rename handler introduced. Now you can rename methods/fields.
+
 ## 0.12.26 (22-04-2021)
 * Bugfixes
 * Public member linter introduced
