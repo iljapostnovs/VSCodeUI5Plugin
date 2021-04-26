@@ -130,7 +130,7 @@ export class AcornSyntaxAnalyzer {
 
 		if (node.test?.start < position && node.test?.end >= position) {
 			correctPart = node.test;
-		} if (node.consequent?.start < position && node.consequent?.end >= position) {
+		} else if (node.consequent?.start < position && node.consequent?.end >= position) {
 			correctPart = this.findAcornNode(node.consequent.body || [node.consequent], position);
 		} else if (node.alternate) {
 			correctPart = this._getIfStatementPart(node.alternate, position);
@@ -199,10 +199,7 @@ export class AcornSyntaxAnalyzer {
 						className = this._getClassNameOfTheComponent(primaryClassName);
 					} else if (memberName === "getModel" && callExpression.arguments) {
 						const modelName = callExpression.arguments[0]?.value || "";
-						// const isControl = UIClassFactory.isClassAChildOfClassB(currentClassName, "sap.ui.core.Control");
-						// if (isControl) {
 						className = this.getClassNameOfTheModelFromManifest(modelName, primaryClassName) || className;
-						// }
 					}
 
 					if (!className) {
@@ -559,7 +556,7 @@ export class AcornSyntaxAnalyzer {
 							}
 
 							if (eventHandlerNode && eventHandlerNode.property?.name === eventHandler.name) {
-								const className = strategy.acornGetClassName(UIClass.className, callExpression.callee.property.start, true);
+								const className = strategy.acornGetClassName(UIClass.className, callExpression.callee.property.start, false);
 								if (className) {
 									const events = UIClassFactory.getClassEvents(className);
 									if (events.find(event => event.name === eventName)) {
@@ -869,7 +866,8 @@ export class AcornSyntaxAnalyzer {
 									description: field.description,
 									params: methodFromAnotherClass.params,
 									returnType: methodFromAnotherClass.returnType,
-									visibility: field.visibility
+									visibility: field.visibility,
+									owner: UIClass.className
 								});
 							}
 						}

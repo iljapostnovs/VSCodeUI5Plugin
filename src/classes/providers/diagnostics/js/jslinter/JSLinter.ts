@@ -5,8 +5,9 @@ import * as vscode from "vscode";
 import { WrongClassNameLinter } from "./parts/WrongClassNameLinter";
 import { WrongImportLinter } from "./parts/WrongImportLinter";
 import { WrongParametersLinter } from "./parts/WrongParametersLinter";
-import { UnusedMethodLinter } from "./parts/UnusedMethodLinter";
+import { UnusedMemberLinter } from "./parts/UnusedMemberLinter";
 import { WrongFilePathLinter } from "./parts/WrongFilePathLinter";
+import { PublicMemberLinter } from "./parts/PublicMemberLinter";
 
 export class JSLinter {
 	static getLintingErrors(document: vscode.TextDocument): Error[] {
@@ -15,8 +16,9 @@ export class JSLinter {
 			new WrongClassNameLinter(),
 			new WrongImportLinter(),
 			new WrongParametersLinter(),
-			new UnusedMethodLinter(),
-			new WrongFilePathLinter()
+			new UnusedMemberLinter(),
+			new WrongFilePathLinter(),
+			new PublicMemberLinter()
 		];
 
 		let errors: Error[] = [];

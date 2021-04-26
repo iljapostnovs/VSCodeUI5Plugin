@@ -3,13 +3,15 @@ sap.ui.define([
 	"sap/m/Dialog",
 	"sap/ui/Device",
 	"sap/ui/model/odata/type/Decimal",
-	"com/test/util/Formatter"
+	"com/test/util/Formatter",
+	"com/test/controller/PublicMemberLinterTest"
 ], function(
 	Controller,
 	Dialog,
 	Device,
 	Decimal,
-	Formatter
+	Formatter,
+	PublicMemberLinterTest
 ) {
 	"use strict";
 
@@ -25,6 +27,9 @@ sap.ui.define([
 		},
 
 		onInit: function() {
+			const controller = new PublicMemberLinterTest();
+			controller.publicUsedMethodInOtherClass();
+			controller.publicUsedField;
 			const oText = new sap.m.Text();
 			const iNumber = 123;
 			this._nonExistentMethod();
@@ -134,11 +139,12 @@ sap.ui.define([
 
 		_getMap: function() {
 			var aRecords = this.getView().getModel().getProperty("/");
-			return aRecords.find(sValue => ({asd: 123}));
+			return aRecords.find(sValue => ({
+				asd: 123
+			}));
 		},
 
-		onPaste: function() {
-		},
+		onPaste: function() {},
 
 		_onItemPress: function() {
 

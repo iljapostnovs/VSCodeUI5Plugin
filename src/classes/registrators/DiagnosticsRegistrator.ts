@@ -133,7 +133,7 @@ export class DiagnosticsRegistrator {
 			diagnostic.source = error.source;
 			diagnostic.isController = error.isController;
 			diagnostic.tags = error.tags;
-			diagnostic.severity = error.severity || vscode.DiagnosticSeverity.Warning;
+			diagnostic.severity = error.severity !== undefined ? error.severity : vscode.DiagnosticSeverity.Warning;
 
 			return diagnostic;
 		});

@@ -118,7 +118,8 @@ export class StandardUIClass extends AbstractUIClass {
 							return parameter;
 						}) || [],
 						returnType: method.returnValue?.types?.map((type: any) => type.value).join("|") || method.returnValue?.type || "void",
-						isFromParent: false
+						isFromParent: false,
+						owner: this.className
 					};
 
 					return standardMethod;
@@ -133,7 +134,8 @@ export class StandardUIClass extends AbstractUIClass {
 					name: "extensionAPI",
 					description: SAPNode.getMetadata()?.getRawMetadata()?.description ? StandardUIClass.removeTags(SAPNode.getMetadata().getRawMetadata().description) : "Extension API",
 					type: neededClassForFields,
-					visibility: "public"
+					visibility: "public",
+					owner: this.className
 				}];
 			}
 		}
@@ -185,7 +187,8 @@ export class StandardUIClass extends AbstractUIClass {
 				returnType: method.returnValue ? method.returnValue.type : "void",
 				isFromParent: !isParent,
 				api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name),
-				visibility: method.visibility
+				visibility: method.visibility,
+				owner: this.className
 			};
 
 			this._removeFirstArgumentIfItIsEvent(classMethod);
@@ -276,7 +279,8 @@ export class StandardUIClass extends AbstractUIClass {
 				name: name,
 				type: type,
 				description: `${additionalDescription}\n${StandardUIClass.removeTags(description)}`.trim(),
-				visibility: visibility
+				visibility: visibility,
+				owner: this.className
 			});
 			return accumulator;
 		}, []) || [];
@@ -432,7 +436,8 @@ export class StandardUIClass extends AbstractUIClass {
 				returnType: this.className,
 				isFromParent: false,
 				api: URLBuilder.getInstance().getUrlForClassApi(this),
-				visibility: "public"
+				visibility: "public",
+				owner: this.className
 			});
 		}
 	}

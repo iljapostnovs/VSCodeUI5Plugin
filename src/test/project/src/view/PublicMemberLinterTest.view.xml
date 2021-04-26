@@ -1,0 +1,14 @@
+<mvc:View
+	controllerName="com.test.controller.PublicMemberLinterTest"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	displayBlock="true"
+	height="100%"
+	busyIndicatorDelay="0"
+>
+	<Button press="publicUsedMethodInView"/>
+	<Button press="{
+		path: 'test', 
+		formatter: '.secondPublicUsedMethodInView'
+	}"/>
+</mvc:View>

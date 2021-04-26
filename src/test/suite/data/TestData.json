@@ -269,6 +269,18 @@
 			"type": "com.test.util.CustomClassExtend"
 		},
 		{
+			"className": "com.test.controller.CoreModelTest",
+			"methodName": "onInit",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "testMethod"
+				}
+			},
+			"type": "sap.ui.model.Model"
+		},
+		{
 			"className": "com.test.controller.Master",
 			"methodName": "onShowHello",
 			"positionAddition": 1,
@@ -503,12 +515,25 @@
 				},
 				{
 					"text": "No references found for \"unusedMethod\" class member"
+				},
+				{
+					"text": "Method \"getRouter\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"unusedMethod\" is possibly private, no references found in other classes"
 				}
 			]
 		},
 		{
 			"className": "com.test.util.ObjectTest",
-			"errors": []
+			"errors": [
+				{
+					"text": "Field \"testMap\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"returnTest\" is possibly private, no references found in other classes"
+				}
+			]
 		},
 		{
 			"className": "com.test.controller.WrongFilePathLinterTest",
@@ -526,6 +551,21 @@
 					"text": "Class \"com.test.util.WrongFormatter\" doesn't exist"
 				}
 			]
+		},
+		{
+			"className": "com.test.util.AccessLevelModifierSecondTest",
+			"errors": [
+				{
+					"text": "\"_privateMethod\" is a private member of class \"com.test.util.AccessLevelModifierTest\""
+				},
+				{
+					"text": "\"_protectedMethod\" is a protected member of class \"com.test.util.AccessLevelModifierTest\""
+				}
+			]
+		},
+		{
+			"className": "com.test.util.AccessLevelModifierTest",
+			"errors": []
 		}
 	],
 	"XMLLinter": [

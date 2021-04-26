@@ -36,7 +36,7 @@ export class WrongParametersLinter extends Linter {
 									if (fieldsAndMethods) {
 										const method = fieldsAndMethods.methods.find(method => method.name === methodName);
 										if (method) {
-											const isException = ConfigHandler.checkIfMethodNameIsException(fieldsAndMethods.className, method.name);
+											const isException = ConfigHandler.checkIfMemberIsException(fieldsAndMethods.className, method.name);
 											if (!isException) {
 
 												const methodParams = method.params;

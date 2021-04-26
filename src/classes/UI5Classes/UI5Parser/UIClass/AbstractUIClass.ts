@@ -13,12 +13,14 @@ export interface UIMethod {
 	returnType: string;
 	description: string;
 	visibility: string;
+	owner: string;
 	api?: string;
 }
 export interface UIField {
 	readonly name: string;
 	type: string | undefined;
 	visibility: string;
+	owner: string;
 	description: string;
 }
 export interface TypeValue {

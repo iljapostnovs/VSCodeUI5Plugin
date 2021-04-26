@@ -36,7 +36,7 @@ export class WrongFieldMethodLinter extends Linter {
 			acornMethods.forEach((method: any) => {
 				if (method.body) {
 					method.body.forEach((node: any) => {
-						const validationErrors = this._getErrorsForExpression(node, UIClass);
+						const validationErrors = this._getErrorsForExpression(node, UIClass, document);
 						errors = errors.concat(validationErrors);
 					});
 				}
@@ -47,7 +47,7 @@ export class WrongFieldMethodLinter extends Linter {
 		return errors;
 	}
 
-	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, errors: Error[] = [], droppedNodes: any[] = [], errorNodes: any[] = []) {
+	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, document: vscode.TextDocument, errors: Error[] = [], droppedNodes: any[] = [], errorNodes: any[] = []) {
 		if (droppedNodes.includes(node)) {
 			return [];
 		}
@@ -82,18 +82,16 @@ export class WrongFieldMethodLinter extends Linter {
 					const nextNodeName = nextNode.property?.name;
 					const nodeText = UIClass.classText.substring(nextNode.start, nextNode.end);
 					if (!nodeText.endsWith("]") && !errorNodes.includes(nextNode)) {
-						const isMethodException = ConfigHandler.checkIfMethodNameIsException(className, nextNodeName);
+						const isMethodException = ConfigHandler.checkIfMemberIsException(className, nextNodeName);
 
 						if (nextNodeName && !isMethodException) {
 							const fieldsAndMethods = classNames.map(className => strategy.destructueFieldsAndMethodsAccordingToMapParams(className));
 							const singleFieldsAndMethods = fieldsAndMethods.find(fieldsAndMethods => {
-								if (nextNode && fieldsAndMethods) {
-									if (nextNodeName) {
-										const method = fieldsAndMethods.methods.find(method => method.name === nextNodeName);
-										const field = fieldsAndMethods.fields.find(field => field.name === nextNodeName);
+								if (nextNode && fieldsAndMethods && nextNodeName) {
+									const method = fieldsAndMethods.methods.find(method => method.name === nextNodeName);
+									const field = fieldsAndMethods.fields.find(field => field.name === nextNodeName);
 
-										return method || field;
-									}
+									return method || field;
 								}
 
 								return false;
@@ -103,7 +101,7 @@ export class WrongFieldMethodLinter extends Linter {
 								if (className.includes("__map__")) {
 									className = "map";
 								}
-								const isMethodException = ConfigHandler.checkIfMethodNameIsException(className, nextNodeName);
+								const isMethodException = ConfigHandler.checkIfMemberIsException(className, nextNodeName);
 								if (!isMethodException) {
 									const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
 									if (position) {
@@ -124,6 +122,45 @@ export class WrongFieldMethodLinter extends Linter {
 									}
 									break;
 								}
+							} else {
+								const ignoreAccessLevelModifiers = vscode.workspace.getConfiguration("ui5.plugin").get("ignoreAccessLevelModifiers");
+								if (!ignoreAccessLevelModifiers) {
+									const member = singleFieldsAndMethods.fields.find(field => field.name === nextNodeName) || singleFieldsAndMethods.methods.find(method => method.name === nextNodeName);
+									let sErrorMessage = "";
+									if (member?.visibility === "protected") {
+										const currentDocumentClassName = FileReader.getClassNameFromPath(document.fileName);
+										if (currentDocumentClassName && !UIClassFactory.isClassAChildOfClassB(currentDocumentClassName, singleFieldsAndMethods.className)) {
+											sErrorMessage = `"${nextNodeName}" is a protected member of class "${member.owner}"`;
+										}
+									} else if (member?.visibility === "private") {
+										const currentDocumentClassName = FileReader.getClassNameFromPath(document.fileName);
+										if (currentDocumentClassName && member.owner !== currentDocumentClassName) {
+											sErrorMessage = `"${nextNodeName}" is a private member of class "${member.owner}"`;
+										}
+									}
+
+									if (sErrorMessage) {
+										const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
+										if (position) {
+											errorNodes.push(nextNode);
+											errors.push({
+												message: sErrorMessage,
+												code: "UI5Plugin",
+												source: "Field/Method Linter",
+												range: new vscode.Range(
+													new vscode.Position(position.line - 1, position.col),
+													new vscode.Position(position.line - 1, position.col + nextNodeName.length)
+												),
+												acornNode: nextNode,
+												type: CustomDiagnosticType.NonExistentMethod,
+												methodName: nextNodeName,
+												sourceClassName: className,
+												severity: vscode.DiagnosticSeverity.Error
+											});
+										}
+										break;
+									}
+								}
 							}
 						}
 					} else if (nodeText.endsWith("]")) {
@@ -139,7 +176,7 @@ export class WrongFieldMethodLinter extends Linter {
 
 		const innerNodes = AcornSyntaxAnalyzer.getContent(node);
 		if (innerNodes) {
-			innerNodes.forEach((node: any) => this._getErrorsForExpression(node, UIClass, errors, droppedNodes, errorNodes));
+			innerNodes.forEach((node: any) => this._getErrorsForExpression(node, UIClass, document, errors, droppedNodes, errorNodes));
 		}
 
 		return errors;

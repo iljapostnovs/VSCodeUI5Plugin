@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.25",
+	"version": "0.12.26",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -105,32 +105,37 @@
 				"ui5.plugin.useWrongFieldMethodLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should Wrong Field and Method validator be used"
+					"description": "JS Linter: Should Wrong Field and Method validator be used. It checks if used fields and methods exists and if they are used correctly according to access level modifiers (Access level modifiers are checked only if ignoreAccessLevelModifiers is set to false)."
 				},
 				"ui5.plugin.useWrongClassNameLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should Wrong UI5 Class Name validator be used"
+					"description": "JS Linter: Should Wrong UI5 Class Name validator be used. It checks if class path which is provided in <class>.extend(\"here\", ... is correct"
 				},
 				"ui5.plugin.useWrongImportLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should Wrong SAP UI Define Import validator be used"
+					"description": "JS Linter: Should Wrong SAP UI Define Import validator be used. It checks if sap.ui.define imports have corresponding classes."
 				},
 				"ui5.plugin.useWrongParametersLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should Wrong method parameters validator be used"
+					"description": "JS Linter: Should Wrong method parameters validator be used. It checks if parameter quantity and data types are consistent."
 				},
-				"ui5.plugin.useUnusedMethodLinter": {
+				"ui5.plugin.useUnusedMemberLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should unused method validator be used"
+					"description": "JS Linter: Should unused method/field validator be used. It checks if class members (fields and methods) are used."
 				},
 				"ui5.plugin.useWrongFilePathLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should wrong file path validator be used"
+					"description": "JS Linter: Should wrong file path validator be used. It checks if paths has corresponding file, e.g. com.test.TestFragment should have ./webapp/TestFragment.fragment.xml"
+				},
+				"ui5.plugin.usePublicMemberLinter": {
+					"type": "boolean",
+					"default": true,
+					"description": "JS Linter: Should public member validator be used. It will check if public members probably should be private."
 				},
 				"ui5.plugin.moveDefineToFunctionParametersOnAutocomplete": {
 					"type": "boolean",
@@ -217,6 +222,16 @@
 						}
 					},
 					"default": [
+						{
+							"className": "sap.ui.core.Element",
+							"memberName": "getDomRef",
+							"applyToChildren": true
+						},
+						{
+							"className": "sap.ui.model.json.JSONModel",
+							"memberName": "iSizeLimit",
+							"applyToChildren": true
+						},
 						{
 							"className": "sap.ui.model.Binding",
 							"memberName": "*"
@@ -330,17 +345,18 @@
 		"@types/glob": "^7.1.3",
 		"@types/line-column": "^1.0.0",
 		"@types/mocha": "^8.2.2",
-		"@types/node": "^14.14.37",
+		"@types/node": "^14.14.41",
 		"@types/vscode": "^1.55.0",
-		"@typescript-eslint/eslint-plugin": "^4.21.0",
-		"@typescript-eslint/parser": "^4.21.0",
+		"@types/webpack": "^5.28.0",
+		"@typescript-eslint/eslint-plugin": "^4.22.0",
+		"@typescript-eslint/parser": "^4.22.0",
 		"clean-webpack-plugin": "^3.0.0",
 		"eslint": "^7.24.0",
 		"mocha": "^8.3.2",
-		"ts-loader": "^8.1.0",
+		"ts-loader": "^9.0.2",
 		"typescript": "^4.2.4",
 		"vscode-test": "^1.5.2",
-		"webpack": "^5.31.2",
+		"webpack": "^5.35.0",
 		"webpack-cli": "^4.6.0"
 	},
 	"dependencies": {
