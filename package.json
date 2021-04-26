@@ -105,37 +105,37 @@
 				"ui5.plugin.useWrongFieldMethodLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should Wrong Field and Method validator be used"
+					"description": "JS Linter: Should Wrong Field and Method validator be used. It checks if used fields and methods exists and if they are used correctly according to access level modifiers (Access level modifiers are checked only if ignoreAccessLevelModifiers is set to false)."
 				},
 				"ui5.plugin.useWrongClassNameLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should Wrong UI5 Class Name validator be used"
+					"description": "JS Linter: Should Wrong UI5 Class Name validator be used. It checks if class path which is provided in <class>.extend(\"here\", ... is correct"
 				},
 				"ui5.plugin.useWrongImportLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should Wrong SAP UI Define Import validator be used"
+					"description": "JS Linter: Should Wrong SAP UI Define Import validator be used. It checks if your paths in sap.ui.define has the classes which are imported."
 				},
 				"ui5.plugin.useWrongParametersLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should Wrong method parameters validator be used"
+					"description": "JS Linter: Should Wrong method parameters validator be used. It checks if parameter quantity and data types are consistent."
 				},
 				"ui5.plugin.useUnusedMemberLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should unused method/field validator be used"
+					"description": "JS Linter: Should unused method/field validator be used. It checks if class members (fields and methods) are used."
 				},
 				"ui5.plugin.useWrongFilePathLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should wrong file path validator be used"
+					"description": "JS Linter: Should wrong file path validator be used. It checks if paths has corresponding file, e.g. com.test.TestFragment should have ./webapp/TestFragment.fragment.xml"
 				},
 				"ui5.plugin.usePublicMemberLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should public member validator be used"
+					"description": "JS Linter: Should public member validator be used. It will check if public members probably should be private."
 				},
 				"ui5.plugin.moveDefineToFunctionParametersOnAutocomplete": {
 					"type": "boolean",
