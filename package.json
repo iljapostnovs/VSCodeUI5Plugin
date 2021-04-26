@@ -115,7 +115,7 @@
 				"ui5.plugin.useWrongImportLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should Wrong SAP UI Define Import validator be used. It checks if your paths in sap.ui.define has the classes which are imported."
+					"description": "JS Linter: Should Wrong SAP UI Define Import validator be used. It checks if sap.ui.define imports have corresponding classes."
 				},
 				"ui5.plugin.useWrongParametersLinter": {
 					"type": "boolean",

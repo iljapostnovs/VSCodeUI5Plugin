@@ -46,6 +46,14 @@ sap.ui.define([
 
 		secondPublicUsedMethodInFragment: function() {
 
+		},
+
+		onpaste: function() {
+
+		},
+
+		onclick: function() {
+
 		}
 	});
 });
