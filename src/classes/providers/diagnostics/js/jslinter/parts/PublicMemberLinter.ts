@@ -48,14 +48,9 @@ export class PublicMemberLinter extends Linter {
 						const isException = this._checkIfMemberIsException(UIClass.className, field.name);
 						if (!isException) {
 							const fieldIsUsed = this._checkIfMemberIsUsedElsewhere(customUIClasses, UIClass, field.name, field);
-							if (!fieldIsUsed && field.acornNode) {
-								const positionBegin = LineColumn(UIClass.classText).fromIndex(field.acornNode.start);
-								const positionEnd = LineColumn(UIClass.classText).fromIndex(
-									field.acornNode.left ? field.acornNode.left.end :
-										field.acornNode.property ? field.acornNode.property.end :
-											field.acornNode.key ? field.acornNode.key.end :
-												field.acornNode.end
-								);
+							if (!fieldIsUsed && field.memberPropertyNode) {
+								const positionBegin = LineColumn(UIClass.classText).fromIndex(field.memberPropertyNode.start);
+								const positionEnd = LineColumn(UIClass.classText).fromIndex(field.memberPropertyNode.end);
 								if (positionBegin && positionEnd) {
 									errors.push({
 										source: "Public member linter",

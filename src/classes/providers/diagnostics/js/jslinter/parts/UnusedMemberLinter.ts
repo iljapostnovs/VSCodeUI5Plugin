@@ -26,16 +26,9 @@ export class UnusedMemberLinter extends Linter {
 					];
 					methodsAndFields.forEach((methodOrField: any) => {
 						const methodIsUsed = this._checkIfMethodIsUsed(customUIClasses, UIClass, methodOrField);
-						if (!methodIsUsed && methodOrField.acornNode) {
-							const positionBegin = LineColumn(UIClass.classText).fromIndex(
-								methodOrField.position ? methodOrField.position :
-									methodOrField.acornNode.start
-							);
-							const positionEnd = LineColumn(UIClass.classText).fromIndex(
-								methodOrField.position ? methodOrField.position + methodOrField.name.length :
-									methodOrField.acornNode.key ? methodOrField.acornNode.key.end :
-										methodOrField.acornNode.end
-							);
+						if (!methodIsUsed && methodOrField.memberPropertyNode) {
+							const positionBegin = LineColumn(UIClass.classText).fromIndex(methodOrField.memberPropertyNode.start);
+							const positionEnd = LineColumn(UIClass.classText).fromIndex(methodOrField.memberPropertyNode.end);
 							if (positionBegin && positionEnd) {
 								errors.push({
 									source: "Unused method Linter",

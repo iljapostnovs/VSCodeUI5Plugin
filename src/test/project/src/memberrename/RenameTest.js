@@ -15,14 +15,15 @@ sap.ui.define([
 			const oMyCustomClassExtension = new MyCustomClassExtension();
 
 			oMyCustomClass.myCustomMethod();
-			oMyCustomClass.myField1 = "123";
+			oMyCustomClass.myField2 = "123";
 			oMyCustomClass.myField3 = 123;
+
 			oMyCustomClass.myInstanceMethod();
 			oMyCustomClass.myStaticMethod();
 			oMyCustomClass.myStaticField;
 			oMyCustomClass.myInstanceField;
 
-			// oMyCustomClassExtension.myCustomMethod();
+			oMyCustomClassExtension.myCustomMethod();
 			oMyCustomClassExtension.anotherCustomMethod();
 		}
 	});

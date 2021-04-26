@@ -50,31 +50,6 @@ export class FileWatcherMediator {
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 
-		// disposable = workspace.onDidSaveTextDocument(document => {
-		// 	if (document.fileName.endsWith(".js")) {
-
-		// 		const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
-		// 		if (currentClassNameDotNotation) {
-		// 			UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
-		// 		}
-		// 	} else if (document.fileName.endsWith(".view.xml")) {
-
-		// 		const viewContent = document.getText();
-		// 		FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath);
-		// 	} else if (document.fileName.endsWith(".fragment.xml")) {
-
-		// 		FileReader.setNewFragmentContentToCache(document);
-		// 	} else if (document.fileName.endsWith(".properties")) {
-
-		// 		ResourceModelData.readTexts();
-		// 	} else if (document.fileName.endsWith("manifest.json")) {
-
-		// 		FileReader.rereadAllManifests();
-		// 	}
-		// });
-
-		// UI5Plugin.getInstance().addDisposable(disposable);
-
 		disposable = workspace.onDidCreateFiles(event => {
 			event.files.forEach(this._handleFileCreate.bind(this));
 		});

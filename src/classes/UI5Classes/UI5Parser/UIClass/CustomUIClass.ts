@@ -6,7 +6,7 @@ import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty,
 import * as commentParser from "comment-parser";
 const acornLoose = require("acorn-loose");
 
-interface UIDefine {
+interface IUIDefine {
 	path: string;
 	className: string;
 	classNameDotNotation: string;
@@ -18,30 +18,34 @@ interface LooseObject {
 	[key: string]: any;
 }
 
-interface Comment {
+export interface IAcornNodeBearer {
+	acornNode?: any;
+	memberPropertyNode?: any;
+}
+
+export interface IXMLDocumentMentionable {
+	mentionedInTheXMLDocument?: boolean;
+}
+interface IComment {
 	text: string;
 	start: number;
 	end: number;
 	jsdoc: any;
 }
-export interface CustomClassUIMethod extends UIMethod {
+export interface CustomClassUIMethod extends UIMethod, IAcornNodeBearer, IXMLDocumentMentionable {
 	position?: number;
-	acornParams?: any;
-	acornNode?: any;
 	isEventHandler: boolean;
-	mentionedInTheXMLDocument?: boolean;
+	acornParams?: any;
 }
-export interface CustomClassUIField extends UIField {
+export interface CustomClassUIField extends UIField, IAcornNodeBearer, IXMLDocumentMentionable {
 	customData?: LooseObject;
-	acornNode?: any;
-	mentionedInTheXMLDocument?: boolean;
 }
 export class CustomUIClass extends AbstractUIClass {
 	public methods: CustomClassUIMethod[] = [];
 	public fields: CustomClassUIField[] = [];
 	public classText = "";
-	public UIDefine: UIDefine[] = [];
-	public comments: Comment[] = [];
+	public UIDefine: IUIDefine[] = [];
+	public comments: IComment[] = [];
 	public acornClassBody: any;
 	public acornMethodsAndFields: any[] = [];
 	public fileContent: any;
@@ -125,7 +129,6 @@ export class CustomUIClass extends AbstractUIClass {
 					const isPrivate = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "private");
 					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
 					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
-					// const fieldType = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "type");
 
 					const UIMethod = this.methods.find(method => method.name === methodName);
 					if (paramTags && UIMethod) {
@@ -268,7 +271,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private _getUIDefine() {
-		let UIDefine: UIDefine[] = [];
+		let UIDefine: IUIDefine[] = [];
 
 		if (this.fileContent) {
 			const args = this.fileContent?.body[0]?.expression?.arguments;
@@ -277,7 +280,7 @@ export class CustomUIClass extends AbstractUIClass {
 				const UIDefineClassNames: string[] = args[1].params?.map((part: any) => part.name) || [];
 				UIDefine = UIDefinePaths
 					.filter(path => !!path)
-					.map((classPath, index): UIDefine => {
+					.map((classPath, index): IUIDefine => {
 						return {
 							path: classPath,
 							className: UIDefineClassNames[index],
@@ -424,7 +427,8 @@ export class CustomUIClass extends AbstractUIClass {
 								description: node.left.property.name.jsType || "",
 								visibility: node.left.property.name?.startsWith("_") ? "private" : "public",
 								acornNode: node.left,
-								owner: this.className
+								owner: this.className,
+								memberPropertyNode: node.left.property
 							});
 						}
 					});
@@ -443,7 +447,8 @@ export class CustomUIClass extends AbstractUIClass {
 						acornParams: property.value.params,
 						acornNode: property.value,
 						isEventHandler: false,
-						owner: this.className
+						owner: this.className,
+						memberPropertyNode: property.key
 					};
 					this.methods.push(method);
 				} else if (property.value?.type === "Identifier" || property.value?.type === "Literal") {
@@ -453,7 +458,8 @@ export class CustomUIClass extends AbstractUIClass {
 						acornNode: property,
 						description: property.jsType || "",
 						visibility: property.key.name?.startsWith("_") ? "private" : "public",
-						owner: this.className
+						owner: this.className,
+						memberPropertyNode: property.key
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value?.type === "ObjectExpression") {
@@ -464,7 +470,8 @@ export class CustomUIClass extends AbstractUIClass {
 						acornNode: property,
 						customData: this._generateCustomDataForObject(property.value),
 						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
-						owner: this.className
+						owner: this.className,
+						memberPropertyNode: property.key
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value?.type === "MemberExpression") {
@@ -474,7 +481,8 @@ export class CustomUIClass extends AbstractUIClass {
 						description: "",
 						acornNode: property,
 						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
-						owner: this.className
+						owner: this.className,
+						memberPropertyNode: property.key
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value?.type === "ArrayExpression") {
@@ -484,13 +492,14 @@ export class CustomUIClass extends AbstractUIClass {
 						description: "",
 						acornNode: property,
 						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
-						owner: this.className
+						owner: this.className,
+						memberPropertyNode: property.key
 					});
 					this.acornMethodsAndFields.push(property);
 				}
 			});
 
-			this._fillStaticMethodsAndFields();
+			this._fillMethodsAndFieldsFromPrototype();
 
 			//remove duplicates
 			this.fields = this.fields.reduce((accumulator: UIField[], field: UIField) => {
@@ -569,7 +578,7 @@ export class CustomUIClass extends AbstractUIClass {
 		return UIDefineBody;
 	}
 
-	private _fillStaticMethodsAndFields() {
+	private _fillMethodsAndFieldsFromPrototype() {
 		const UIDefineBody = this.getUIDefineAcornBody();
 
 		if (UIDefineBody && this.classBodyAcornVariableName) {
@@ -596,13 +605,14 @@ export class CustomUIClass extends AbstractUIClass {
 							type: param.jsType || ""
 						})),
 						returnType: assignmentBody.returnType || assignmentBody.async ? "Promise" : "void",
-						position: assignmentBody.start,
+						position: node.expression.left.property.start,
 						description: "",
 						visibility: name?.startsWith("_") ? "private" : "public",
 						acornParams: assignmentBody.params,
 						acornNode: assignmentBody,
 						isEventHandler: false,
-						owner: this.className
+						owner: this.className,
+						memberPropertyNode: node.expression.left.property
 					};
 					this.methods.push(method);
 				} else if (isField) {
@@ -612,7 +622,8 @@ export class CustomUIClass extends AbstractUIClass {
 						type: typeof assignmentBody.value,
 						description: assignmentBody.jsType || "",
 						acornNode: node.expression.left,
-						owner: this.className
+						owner: this.className,
+						memberPropertyNode: node.expression.left.property
 					});
 				}
 			});

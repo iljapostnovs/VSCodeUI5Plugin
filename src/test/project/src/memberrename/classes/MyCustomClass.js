@@ -6,7 +6,7 @@ sap.ui.define([
 	"use strict";
 
 	const MyCustomClass = ManagedObject.extend("com.test.memberrename.classes.MyCustomClass", {
-		myField1: 123,
+		myField2: 123,
 
 		myCustomMethod: function() {
 			this.myField3 = "asd";
