@@ -25,30 +25,28 @@ export class FileWatcherMediator {
 
 		UI5Plugin.getInstance().addDisposable(disposable);
 
-		disposable = watcher.onDidChange((uri: vscode.Uri) => {
-			setTimeout(async () => {
-				const document = await vscode.workspace.openTextDocument(uri);
-				if (document.fileName.endsWith(".js")) {
+		disposable = watcher.onDidChange(async (uri: vscode.Uri) => {
+			const document = await vscode.workspace.openTextDocument(uri);
+			if (document.fileName.endsWith(".js")) {
 
-					const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
-					if (currentClassNameDotNotation) {
-						UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
-					}
-				} else if (document.fileName.endsWith(".view.xml")) {
-
-					const viewContent = document.getText();
-					FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath);
-				} else if (document.fileName.endsWith(".fragment.xml")) {
-
-					FileReader.setNewFragmentContentToCache(document);
-				} else if (document.fileName.endsWith(".properties")) {
-
-					ResourceModelData.readTexts();
-				} else if (document.fileName.endsWith("manifest.json")) {
-
-					FileReader.rereadAllManifests();
+				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
+				if (currentClassNameDotNotation) {
+					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
 				}
-			}, 50);
+			} else if (document.fileName.endsWith(".view.xml")) {
+
+				const viewContent = document.getText();
+				FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath);
+			} else if (document.fileName.endsWith(".fragment.xml")) {
+
+				FileReader.setNewFragmentContentToCache(document);
+			} else if (document.fileName.endsWith(".properties")) {
+
+				ResourceModelData.readTexts();
+			} else if (document.fileName.endsWith("manifest.json")) {
+
+				FileReader.rereadAllManifests();
+			}
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 
