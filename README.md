@@ -123,6 +123,12 @@ XML Formatter is available.<br/>
 ![XMLFormatter](/images/XMLFormatter.gif)
 
 ----------
+## JS Rename Provider
+Rename provider for js is provided.<br/>
+
+![JSRenameProvider](/images/JSRenameProvider.gif)
+
+----------
 ## Commands
 
 ### Move sap.ui.define to parameters

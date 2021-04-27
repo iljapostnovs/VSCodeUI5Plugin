@@ -1,5 +1,6 @@
-## 0.12.27 (26-04-2021)
+## 0.12.27 (27-04-2021)
 * File rename handler introduced. Now you can rename methods/fields.
+* Bugfixes
 
 ## 0.12.26 (22-04-2021)
 * Bugfixes
