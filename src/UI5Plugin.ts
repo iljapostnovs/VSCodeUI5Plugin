@@ -10,6 +10,7 @@ import { JSCodeActionRegistrator } from "./classes/registrators/CodeActionRegist
 import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
 import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
 import { FileReader } from "./classes/utils/FileReader";
+import { JSRenameRegistrator } from "./classes/registrators/RenameRegistreator";
 export class UI5Plugin {
 	private static _instance?: UI5Plugin;
 	public static pWhenPluginInitialized: Promise<void> | undefined;
@@ -65,6 +66,7 @@ export class UI5Plugin {
 		JSCodeActionRegistrator.register();
 		HoverRegistrator.register();
 		XMLFormatterRegistrator.register();
+		JSRenameRegistrator.register();
 	}
 
 	static registerFallbackCommands() {

@@ -7,8 +7,10 @@ export interface UIMethodParam {
 	type: string;
 }
 
-export interface UIMethod {
+export interface IName {
 	readonly name: string;
+}
+export interface UIMethod extends IName {
 	readonly params: UIMethodParam[];
 	returnType: string;
 	description: string;
@@ -16,8 +18,7 @@ export interface UIMethod {
 	owner: string;
 	api?: string;
 }
-export interface UIField {
-	readonly name: string;
+export interface UIField extends IName {
 	type: string | undefined;
 	visibility: string;
 	owner: string;
@@ -27,15 +28,13 @@ export interface TypeValue {
 	text: string;
 	description: string;
 }
-export interface UIProperty {
-	name: string;
+export interface UIProperty extends IName {
 	type: string | undefined;
 	typeValues: TypeValue[];
 	visibility: string;
 	description: string;
 }
-export interface UIAggregation {
-	name: string;
+export interface UIAggregation extends IName {
 	type: string;
 	multiple: boolean;
 	singularName: string;
@@ -43,18 +42,15 @@ export interface UIAggregation {
 	description: string;
 	default: boolean;
 }
-export interface UIEventParam {
-	name: string;
+export interface UIEventParam extends IName {
 	type: string;
 }
-export interface UIEvent {
-	name: string;
+export interface UIEvent extends IName {
 	visibility: string;
 	description: string;
 	params: UIEventParam[];
 }
-export interface UIAssociation {
-	name: string;
+export interface UIAssociation extends IName {
 	type: string | undefined;
 	description: string;
 	visibility: string;

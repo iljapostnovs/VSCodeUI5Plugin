@@ -18,13 +18,15 @@ const workspace = vscode.workspace;
 
 export class FileWatcherMediator {
 	static register() {
+		const watcher = vscode.workspace.createFileSystemWatcher("**/*.{js,xml,json,properties}");
 		let disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
 			ClearCacheCommand.reloadWindow();
 		});
 
 		UI5Plugin.getInstance().addDisposable(disposable);
 
-		disposable = workspace.onDidSaveTextDocument(document => {
+		disposable = watcher.onDidChange(async (uri: vscode.Uri) => {
+			const document = await vscode.workspace.openTextDocument(uri);
 			if (document.fileName.endsWith(".js")) {
 
 				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
@@ -46,7 +48,6 @@ export class FileWatcherMediator {
 				FileReader.rereadAllManifests();
 			}
 		});
-
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = workspace.onDidCreateFiles(event => {

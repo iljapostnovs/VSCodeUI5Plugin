@@ -14,27 +14,29 @@ export class UIClassDefinitionFinder {
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 		const classNameAtCurrentPosition = strategy.getClassNameOfTheVariableAtPosition(className, document.offsetAt(position));
 		if (classNameAtCurrentPosition) {
-			location = this._getMethodLocation(classNameAtCurrentPosition, methodName, openInBrowserIfStandardMethod);
+			location = this._getMemberLocation(classNameAtCurrentPosition, methodName, openInBrowserIfStandardMethod);
 		}
 
 		return location;
 	}
 
-	private static _getMethodLocation(className: string, methodName: string, openInBrowserIfStandardMethod: boolean) {
+	private static _getMemberLocation(className: string, memberName: string, openInBrowserIfStandardMethod: boolean) {
 		let location: vscode.Location | undefined;
 		if (className) {
 			const UIClass = UIClassFactory.getUIClass(className);
-			const method = UIClass.methods.find(method => method.name === methodName);
-			if (method) {
+			const methodOrField =
+				UIClass.methods.find(method => method.name === memberName) ||
+				UIClass.fields.find(field => field.name === memberName);
+			if (methodOrField) {
 				const isThisClassFromAProject = !!FileReader.getManifestForClass(className);
 				if (!isThisClassFromAProject && openInBrowserIfStandardMethod) {
-					this._openClassMethodInTheBrowser(className, methodName);
+					this._openClassMethodInTheBrowser(className, memberName);
 				} else {
-					location = this._getVSCodeMethodLocation(className, methodName);
+					location = this._getVSCodeMemberLocation(className, memberName);
 				}
 			} else {
 				if (UIClass.parentClassNameDotNotation) {
-					location = this._getMethodLocation(UIClass.parentClassNameDotNotation, methodName, openInBrowserIfStandardMethod);
+					location = this._getMemberLocation(UIClass.parentClassNameDotNotation, memberName, openInBrowserIfStandardMethod);
 				}
 			}
 		}
@@ -42,18 +44,18 @@ export class UIClassDefinitionFinder {
 		return location;
 	}
 
-	private static _getVSCodeMethodLocation(classNameDotNotation: string, methodName: string) {
+	private static _getVSCodeMemberLocation(classNameDotNotation: string, memberName: string) {
 		let location: vscode.Location | undefined;
 		const UIClass = UIClassFactory.getUIClass(classNameDotNotation);
 
 		if (UIClass instanceof CustomUIClass) {
-			const currentMethod = UIClass.methods.find(method => method.name === methodName);
-			if (currentMethod) {
+			const currentMember = UIClass.methods.find(method => method.name === memberName) || UIClass.fields.find(field => field.name === memberName);
+			if (currentMember?.memberPropertyNode) {
 				const classPath = FileReader.getClassPathFromClassName(UIClass.className);
 				if (classPath) {
 					const classUri = vscode.Uri.file(classPath);
-					if (currentMethod.position) {
-						const position = LineColumn(UIClass.classText).fromIndex(currentMethod.position);
+					if (currentMember.memberPropertyNode.start) {
+						const position = LineColumn(UIClass.classText).fromIndex(currentMember.memberPropertyNode.start);
 						if (position) {
 							const methodPosition = new vscode.Position(position.line - 1, position.col - 1);
 							location = new vscode.Location(classUri, methodPosition);
