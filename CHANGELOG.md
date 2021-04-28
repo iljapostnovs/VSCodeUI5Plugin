@@ -1,3 +1,6 @@
+## 0.12.28 (28-04-2021)
+* FileWatcher bugfixes
+
 ## 0.12.27 (27-04-2021)
 * File rename handler introduced. Now you can rename methods/fields.
 * Bugfixes

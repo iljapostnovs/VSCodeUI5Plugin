@@ -56,7 +56,7 @@ export class UIClassFactory {
 		return isExtendedBy;
 	}
 
-	public static setNewContentForCurrentUIClass(document: vscode.TextDocument) {
+	public static setNewContentForClassUsingDocument(document: vscode.TextDocument) {
 		const documentText = document.getText();
 		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 
@@ -66,14 +66,18 @@ export class UIClassFactory {
 	}
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
-		// console.time(`Class parsing for ${classNameDotNotation} took`);
-		this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
+		console.time(`Class parsing for ${classNameDotNotation} took`);
 
-		const UIClass = this._UIClasses[classNameDotNotation];
-		if (UIClass instanceof CustomUIClass) {
-			this.enrichTypesInCustomClass(UIClass);
+
+		if (!this._UIClasses[classNameDotNotation] || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length) {
+			this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
+
+			const UIClass = this._UIClasses[classNameDotNotation];
+			if (UIClass instanceof CustomUIClass) {
+				this.enrichTypesInCustomClass(UIClass);
+			}
 		}
-		// console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
+		console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
 	}
 
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
@@ -502,5 +506,9 @@ export class UIClassFactory {
 		}
 
 		return isMethodOverriden;
+	}
+
+	public static removeClass(className: string) {
+		delete this._UIClasses[className];
 	}
 }
