@@ -66,7 +66,7 @@ export class UIClassFactory {
 	}
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
-		console.time(`Class parsing for ${classNameDotNotation} took`);
+		// console.time(`Class parsing for ${classNameDotNotation} took`);
 
 
 		if (!this._UIClasses[classNameDotNotation] || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length) {
@@ -77,7 +77,7 @@ export class UIClassFactory {
 				this.enrichTypesInCustomClass(UIClass);
 			}
 		}
-		console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
+		// console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
 	}
 
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {

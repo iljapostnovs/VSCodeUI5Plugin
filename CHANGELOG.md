@@ -1,3 +1,6 @@
+## 0.12.29 (29-04-2021)
+* Remove unnecessary console logs
+
 ## 0.12.28 (28-04-2021)
 * FileWatcher bugfixes
 

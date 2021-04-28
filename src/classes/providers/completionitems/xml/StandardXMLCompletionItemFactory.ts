@@ -22,7 +22,7 @@ export class StandardXMLCompletionItemFactory {
 		let completionItems: CustomCompletionItem[] = [];
 		const SAPNodes = this._nodeDAO.getAllNodesSync();
 
-		console.time("Generating completion items");
+		// console.time("Generating completion items");
 		for (const node of SAPNodes) {
 			UI5Plugin.getInstance().initializationProgress?.report({
 				message: "Generating Completion Items: " + node.getDisplayName(),
@@ -30,7 +30,7 @@ export class StandardXMLCompletionItemFactory {
 			});
 			completionItems = completionItems.concat(this._generateClassCompletionItemsRecursively(node));
 		}
-		console.timeEnd("Generating completion items");
+		// console.timeEnd("Generating completion items");
 
 		return completionItems;
 	}
