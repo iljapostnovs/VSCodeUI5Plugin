@@ -603,6 +603,15 @@ export class FileReader {
 
 		return src;
 	}
+
+	public static removeFromCache(path: string) {
+		const classPath = this.getClassNameFromPath(path);
+		if (path.endsWith(".view.xml") && classPath) {
+			delete this._viewCache[classPath];
+		} else if (path.endsWith(".fragment.xml") && classPath) {
+			delete this._fragmentCache[classPath];
+		}
+	}
 }
 
 export namespace FileReader {

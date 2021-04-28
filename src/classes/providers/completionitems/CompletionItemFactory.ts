@@ -71,7 +71,7 @@ export class CompletionItemFactory {
 			completionItems = CompletionItemFactory.JSDefineCompletionItems;
 
 			if (document) {
-				UIClassFactory.setNewContentForCurrentUIClass(document);
+				UIClassFactory.setNewContentForClassUsingDocument(document);
 			}
 			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 			if (currentClassName) {
@@ -115,7 +115,7 @@ export class CompletionItemFactory {
 
 	public createPropertyMethodCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		const jsDynamicFactory = new JSDynamicCompletionItemsFactory();
-		UIClassFactory.setNewContentForCurrentUIClass(document);
+		UIClassFactory.setNewContentForClassUsingDocument(document);
 
 		const completionItems = jsDynamicFactory.createUIClassCompletionItems(document, position);
 		return completionItems;

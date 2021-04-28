@@ -56,7 +56,7 @@ export class UIClassFactory {
 		return isExtendedBy;
 	}
 
-	public static setNewContentForCurrentUIClass(document: vscode.TextDocument) {
+	public static setNewContentForClassUsingDocument(document: vscode.TextDocument) {
 		const documentText = document.getText();
 		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 
@@ -502,5 +502,9 @@ export class UIClassFactory {
 		}
 
 		return isMethodOverriden;
+	}
+
+	public static removeClass(className: string) {
+		delete this._UIClasses[className];
 	}
 }

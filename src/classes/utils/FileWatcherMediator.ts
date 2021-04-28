@@ -50,8 +50,8 @@ export class FileWatcherMediator {
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 
-		disposable = workspace.onDidCreateFiles(event => {
-			event.files.forEach(this._handleFileCreate.bind(this));
+		disposable = watcher.onDidCreate(uri => {
+			this._handleFileCreate(uri);
 		});
 
 		UI5Plugin.getInstance().addDisposable(disposable);
@@ -68,16 +68,23 @@ export class FileWatcherMediator {
 
 		UI5Plugin.getInstance().addDisposable(disposable);
 
-		//sync diagnostics with deleted/renamed files
-		disposable = vscode.workspace.onDidDeleteFiles(event => {
-			event.files.forEach(file => {
-				if (file.fsPath.endsWith(".js")) {
-					DiagnosticsRegistrator.removeDiagnosticForUri(file, "js");
+		watcher.onDidDelete(uri => {
+			if (uri.fsPath.endsWith(".js")) {
+				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "js");
+			}
+			if (uri.fsPath.endsWith(".xml")) {
+				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "xml");
+			}
+
+			if (uri.fsPath.endsWith(".js")) {
+
+				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(uri.fsPath);
+				if (currentClassNameDotNotation) {
+					UIClassFactory.removeClass(currentClassNameDotNotation);
 				}
-				if (file.fsPath.endsWith(".xml")) {
-					DiagnosticsRegistrator.removeDiagnosticForUri(file, "xml");
-				}
-			});
+			} else if (uri.fsPath.endsWith(".xml")) {
+				FileReader.removeFromCache(uri.fsPath);
+			}
 		});
 
 		UI5Plugin.getInstance().addDisposable(disposable);

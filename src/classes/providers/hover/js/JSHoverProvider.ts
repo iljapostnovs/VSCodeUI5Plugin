@@ -17,7 +17,7 @@ export class JSHoverProvider {
 		let hover: vscode.Hover | undefined;
 
 		if (currentClassName) {
-			UIClassFactory.setNewContentForCurrentUIClass(document);
+			UIClassFactory.setNewContentForClassUsingDocument(document);
 
 			const className = strategy.acornGetClassName(currentClassName, offset) || "";
 			const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
