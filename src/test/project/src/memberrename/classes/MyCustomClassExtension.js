@@ -10,7 +10,12 @@ sap.ui.define([
 		 * @override
 		 */
 		myCustomMethod: function() {
+			this._myPrivateField = "asd";
 			MyCustomClass.prototype.myCustomMethod.apply(this, arguments);
+		},
+
+		_myPrivateMethod: function() {
+
 		},
 
 		anotherCustomMethod: function() {

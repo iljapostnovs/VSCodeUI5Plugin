@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.29",
+	"version": "0.12.30",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -136,6 +136,11 @@
 					"type": "boolean",
 					"default": true,
 					"description": "JS Linter: Should public member validator be used. It will check if public members probably should be private."
+				},
+				"ui5.plugin.useWrongOverrideLinter": {
+					"type": "boolean",
+					"default": true,
+					"description": "JS Linter: Should wrong override validator be used. It will check if private members are not overriden."
 				},
 				"ui5.plugin.moveDefineToFunctionParametersOnAutocomplete": {
 					"type": "boolean",

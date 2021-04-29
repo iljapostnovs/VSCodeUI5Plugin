@@ -60,11 +60,16 @@ Code Lens for Internalization Texts is provided<br/>
 ----------
 ## XML Diagnostics
 XML Diagnostics is provided<br/>
-There are two linters available:<br/>
-* Attribute linter, which checks for property existence, value, prefix existence, event handler existence, class existence<br/>
+XML Linters available:<br/>
+* Attribute linter<br/>
+>Checks for property existence, property value, prefix existence, event handler existence
 * Unused namespace linter<br/>
+>Checks if declared namespaces are used
+* Tag linter<br/>
+>Checks for class and aggregation existence
 
-> Related preference entries: *ui5.plugin.xmlDiagnostics*<br/>
+> Related preference entries:<br/>
+> *ui5.plugin.xmlDiagnostics*<br/>
 
 ![DynamicCompletionItems](/images/XMLDiagnostics.gif)
 
@@ -73,13 +78,21 @@ There are two linters available:<br/>
 > You can define diagnostic exceptions using *ui5.plugin.JSLinterExceptions* preference entry.
 
 JS Diagnostics is provided<br/>
-There are seven linters available:<br/>
+JS Linters available:<br/>
 * Wrong field/method usage linter<br/>
+>It checks for existence of the class members and if they are used correctly according to access level modifiers
 * Wrong custom class name linter<br/>
+>It checks if your class name in ```<AnyClass>.extend("here")``` is correct
 * Wrong import path linter<br/>
+>It checks if imported module exists
 * Unused field/method linter<br/>
+>Self explanatory: checks if methods/fields are used at all
 * Wrong file path linter<br/>
+>Checks if any strings that contains app namespace have according fragment, view or class
 * Public member linter<br/>
+>Checks if class members should be public. Warning is generated if member is public, but there are no references for it in other classes
+* Wrong override linter<br/>
+>Checks if overriden members are not protected/private
 * Wrong parameter usage in the methods linter, which checks for parameter quantity and data type<br/>
 	> Use jsdoc to make your parameters optional, e.g.
 	```javascript
@@ -98,6 +111,7 @@ There are seven linters available:<br/>
 > *ui5.plugin.useUnusedMemberLinter*<br/>
 > *ui5.plugin.useWrongFilePathLinter*<br/>
 > *ui5.plugin.usePublicMemberLinter*<br/>
+> *ui5.plugin.useWrongOverrideLinter*<br/>
 
 ![DynamicCompletionItems](/images/JSDiagnostics.gif)
 

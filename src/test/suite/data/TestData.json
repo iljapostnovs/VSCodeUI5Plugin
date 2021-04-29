@@ -564,6 +564,17 @@
 			]
 		},
 		{
+			"className": "com.test.memberrename.classes.MyCustomClassExtension",
+			"errors": [
+				{
+					"text": "You can't override \"_myPrivateField\" because it is a private member of class \"com.test.memberrename.classes.MyCustomClass\""
+				},
+				{
+					"text": "You can't override \"_myPrivateMethod\" because it is a private member of class \"com.test.memberrename.classes.MyCustomClass\""
+				}
+			]
+		},
+		{
 			"className": "com.test.util.AccessLevelModifierTest",
 			"errors": []
 		}

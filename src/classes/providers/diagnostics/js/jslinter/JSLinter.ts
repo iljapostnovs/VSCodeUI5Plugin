@@ -8,6 +8,7 @@ import { WrongParametersLinter } from "./parts/WrongParametersLinter";
 import { UnusedMemberLinter } from "./parts/UnusedMemberLinter";
 import { WrongFilePathLinter } from "./parts/WrongFilePathLinter";
 import { PublicMemberLinter } from "./parts/PublicMemberLinter";
+import { WrongOverrideLinter } from "./parts/WrongOverrideLinter";
 
 export class JSLinter {
 	static getLintingErrors(document: vscode.TextDocument): Error[] {
@@ -18,7 +19,8 @@ export class JSLinter {
 			new WrongParametersLinter(),
 			new UnusedMemberLinter(),
 			new WrongFilePathLinter(),
-			new PublicMemberLinter()
+			new PublicMemberLinter(),
+			new WrongOverrideLinter()
 		];
 
 		let errors: Error[] = [];

@@ -1,4 +1,7 @@
-## 0.12.29 (29-04-2021)
+## 0.12.30 (29-04-2021)
+* Wrong override linter introduced
+
+## 0.12.29 (28-04-2021)
 * Remove unnecessary console logs
 
 ## 0.12.28 (28-04-2021)
