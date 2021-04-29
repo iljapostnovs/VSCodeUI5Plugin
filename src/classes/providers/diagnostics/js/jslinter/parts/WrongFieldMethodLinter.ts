@@ -152,7 +152,6 @@ export class WrongFieldMethodLinter extends Linter {
 													new vscode.Position(position.line - 1, position.col + nextNodeName.length)
 												),
 												acornNode: nextNode,
-												type: CustomDiagnosticType.NonExistentMethod,
 												methodName: nextNodeName,
 												sourceClassName: className,
 												severity: vscode.DiagnosticSeverity.Error

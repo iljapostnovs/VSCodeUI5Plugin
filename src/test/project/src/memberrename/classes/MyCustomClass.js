@@ -10,6 +10,12 @@ sap.ui.define([
 
 		myCustomMethod: function() {
 			this.myField3 = "asd";
+			this._myPrivateField = 123;
+			this._myPrivateMethod();
+		},
+
+		_myPrivateMethod: function() {
+
 		}
 	});
 
