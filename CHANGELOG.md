@@ -1,4 +1,4 @@
-## 0.12.30 (30-04-2021)
+## 0.12.31 (01-05-2021)
 * DOM event handlers added to exceptions for JS linters
 
 ## 0.12.30 (29-04-2021)
