@@ -11,6 +11,7 @@ import { JSLinter } from "../../classes/providers/diagnostics/js/jslinter/JSLint
 import { XMLLinter } from "../../classes/providers/diagnostics/xml/xmllinter/XMLLinter";
 import { UI5Plugin } from "../../UI5Plugin";
 import { JSRenameProvider } from "../../classes/providers/rename/JSRenameProvider";
+import { ConfigHandler } from "../../classes/providers/diagnostics/js/jslinter/parts/config/ConfigHandler";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -224,6 +225,15 @@ suite("Extension Test Suite", () => {
 				}
 			}
 		}
+	});
+
+	test("Check config handler", () => {
+		const testData = data.ConfigHandler;
+		testData.forEach(config => {
+			const isException = ConfigHandler.checkIfMemberIsException(config.className, config.methodName);
+
+			assert.strictEqual(isException, config.result, `"${config.className}" -> "${config.methodName}" should have exception value "${config.result}", but it has "${isException}"`);
+		});
 	});
 });
 

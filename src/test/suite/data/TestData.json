@@ -679,5 +679,32 @@
 				]
 			}
 		}
+	],
+	"ConfigHandler": [
+		{
+			"className": "*",
+			"methodName": "onpress",
+			"result": true
+		},
+		{
+			"className": "*",
+			"methodName": "onclick",
+			"result": true
+		},
+		{
+			"className": "*",
+			"methodName": "aclick",
+			"result": false
+		},
+		{
+			"className": "*",
+			"methodName": "onanything",
+			"result": true
+		},
+		{
+			"className": "*",
+			"methodName": "onTest",
+			"result": false
+		}
 	]
 }

@@ -27,10 +27,16 @@ export class ConfigHandler {
 	}
 
 	private static _checkIfMemberIsEventHandler(memberName: string) {
-		const memberNameStartsWithOn = memberName.startsWith("on");
-		const eventNameIsLowerCase = !!memberName[2] && memberName[2].toLowerCase() === memberName[2];
+		if (memberName.length <= 3) {
+			return false;
+		}
 
-		const isDomEventHandler = memberNameStartsWithOn && eventNameIsLowerCase;
+		const chars = memberName.split("");
+		const firstChars = chars.splice(0, 2).join("");
+		const memberNameStartsWithOn = firstChars === "on";
+		const restCharsAreLowerCase = chars.every(char => char.toLowerCase() === char);
+
+		const isDomEventHandler = memberNameStartsWithOn && restCharsAreLowerCase;
 
 		return isDomEventHandler;
 	}
