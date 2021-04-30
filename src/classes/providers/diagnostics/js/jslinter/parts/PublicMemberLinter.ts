@@ -121,8 +121,7 @@ export class PublicMemberLinter extends Linter {
 
 	private _checkIfMemberIsException(className: string, memberName: string) {
 		return ConfigHandler.checkIfMemberIsException(className, memberName) ||
-			this._checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className, memberName) ||
-			this._checkIfThisIsDomEventHandler(className, memberName);
+			this._checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className, memberName);
 	}
 
 	private _checkIfThisIsStandardMethodFromPropertyEventAggregationAssociation(className: string, methodName: string) {
@@ -155,15 +154,5 @@ export class PublicMemberLinter extends Linter {
 		});
 
 		return isStandartMethod;
-	}
-
-	private _checkIfThisIsDomEventHandler(className: string, methodName: string) {
-
-		const memberNameStartsWithOn = methodName.startsWith("on");
-		const eventNameIsLowerCase = methodName[2] && methodName[2].toLowerCase() === methodName[2];
-
-		const isDomEventHandler = memberNameStartsWithOn && eventNameIsLowerCase;
-
-		return isDomEventHandler;
 	}
 }

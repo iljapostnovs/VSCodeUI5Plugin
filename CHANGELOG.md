@@ -1,3 +1,6 @@
+## 0.12.31 (01-05-2021)
+* DOM event handlers added to exceptions for JS linters
+
 ## 0.12.30 (29-04-2021)
 * Wrong override linter introduced
 

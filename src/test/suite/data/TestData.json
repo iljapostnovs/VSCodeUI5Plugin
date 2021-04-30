@@ -632,7 +632,7 @@
 			"className": "com.test.view.fragments.SecondFragment",
 			"errors": [
 				{
-					"text": "Invalid attribute value (onUnexistantDelete)"
+					"text": "Invalid attribute value (onNonExistentDelete)"
 				}
 			]
 		},
@@ -640,7 +640,7 @@
 			"className": "com.test.view.fragments.ThirdFragment",
 			"errors": [
 				{
-					"text": "Invalid attribute value (onUnexistantDelete)"
+					"text": "Invalid attribute value (onNonExistentDelete)"
 				}
 			]
 		}
@@ -657,6 +657,54 @@
 				"onSecondFragmentSelectionChange",
 				"onThirdFragmentSelectionChange"
 			]
+		}
+	],
+	"RenameProvider": [
+		{
+			"className": "com.test.memberrename.classes.MyCustomClass",
+			"methodName": "myCustomMethod",
+			"renames": {
+				"member": {
+					"className": "com.test.memberrename.classes.MyCustomClass"
+				},
+				"methods": [
+					{
+						"className": "com.test.memberrename.RenameTest",
+						"containerMethod": "init"
+					},
+					{
+						"className": "com.test.memberrename.classes.MyCustomClassExtension",
+						"containerMethod": "myCustomMethod"
+					}
+				]
+			}
+		}
+	],
+	"ConfigHandler": [
+		{
+			"className": "*",
+			"methodName": "onpress",
+			"result": true
+		},
+		{
+			"className": "*",
+			"methodName": "onclick",
+			"result": true
+		},
+		{
+			"className": "*",
+			"methodName": "aclick",
+			"result": false
+		},
+		{
+			"className": "*",
+			"methodName": "onanything",
+			"result": true
+		},
+		{
+			"className": "*",
+			"methodName": "onTest",
+			"result": false
 		}
 	]
 }
