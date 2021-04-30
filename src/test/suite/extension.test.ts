@@ -10,6 +10,7 @@ import { FileReader } from "../../classes/utils/FileReader";
 import { JSLinter } from "../../classes/providers/diagnostics/js/jslinter/JSLinter";
 import { XMLLinter } from "../../classes/providers/diagnostics/xml/xmllinter/XMLLinter";
 import { UI5Plugin } from "../../UI5Plugin";
+import { JSRenameProvider } from "../../classes/providers/rename/JSRenameProvider";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -140,12 +141,88 @@ suite("Extension Test Suite", () => {
 		for (const data of testData) {
 			const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
 			data.eventHandlers.forEach(eventHandlerName => {
-				const eventHandlerMethod: any = fieldsAndMethods.methods.find((method: any)=> {
+				const eventHandlerMethod: any = fieldsAndMethods.methods.find((method: any) => {
 					return method.name === eventHandlerName;
 				});
 				assert.ok(!!eventHandlerMethod.isEventHandler, `"${data.className}" class should have "${eventHandlerName}" method recognized as event handler, but it doesn't`);
 			});
 
+		}
+	});
+
+	test("JS Rename Handler working properly", async () => {
+		const testData = data.RenameProvider;
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+
+		for (const data of testData) {
+			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(data.className);
+
+			const filePath = FileReader.convertClassNameToFSPath(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const method = UIClass.methods.find(method => method.name === data.methodName);
+				if (method && method.memberPropertyNode) {
+					const position = document.positionAt(method.memberPropertyNode.start);
+					const newMethodName = `${data.methodName}New`;
+					const workspaceEdits = await JSRenameProvider.provideRenameEdits(document, position, newMethodName);
+
+					const entries = workspaceEdits?.entries();
+					const entry = entries?.shift();
+					if (workspaceEdits && entry) {
+						const uri = entry[0];
+						const textEdit = entry[1];
+						const startOffset = document.offsetAt(textEdit[0].range.start);
+						const endOffset = document.offsetAt(textEdit[0].range.end);
+
+						assert.strictEqual(uri.fsPath, filePath);
+						assert.strictEqual(method.memberPropertyNode.start, startOffset);
+						assert.strictEqual(method.memberPropertyNode.end, endOffset);
+					}
+
+					for (const methodRename of data.renames.methods) {
+						const UIClass = <CustomUIClass>UIClassFactory.getUIClass(methodRename.className);
+						const containerMethod = UIClass.methods.find(method => method.name === methodRename.containerMethod);
+						const allNodes = AcornSyntaxAnalyzer.expandAllContent(containerMethod?.acornNode);
+						const allNodesWithCurrentMethod = allNodes.filter((node: any) => node.type === "MemberExpression" && node.property?.name === data.methodName);
+						const allNodesFromCurrentClass = allNodesWithCurrentMethod.filter((node: any) => {
+							const ownerClassName = strategy.acornGetClassName(methodRename.className, node.end, true);
+							return ownerClassName === data.className;
+						});
+
+						assert.ok(allNodesFromCurrentClass.length > 0, `Nodes with "${data.methodName}" method in "${methodRename.className}" class "${methodRename.containerMethod}" method not found`);
+
+						if (entries) {
+							for (const node of allNodesFromCurrentClass) {
+								let necessaryEntry: [vscode.Uri, vscode.TextEdit[]] | undefined;
+								for (const entry of entries) {
+									const uri = entry[0];
+									const document = await vscode.workspace.openTextDocument(uri);
+									const textEdit = entry[1];
+									const startOffset = document.offsetAt(textEdit[0].range.start);
+									const endOffset = document.offsetAt(textEdit[0].range.end);
+									if (
+										node.property.start === startOffset &&
+										node.property.end === endOffset
+									) {
+										necessaryEntry = entry;
+										break;
+									}
+								}
+
+								assert.ok(!!necessaryEntry, `Workspace edit for node "${node.property.name}" not found`);
+								if (necessaryEntry) {
+									const index = entries?.indexOf(necessaryEntry);
+									entries?.splice(index, 1);
+								}
+							}
+						}
+					}
+
+					if (entries) {
+						assert.ok(entries.length === 0, "All workspace edit entries found");
+					}
+				}
+			}
 		}
 	});
 });
