@@ -16,9 +16,22 @@ export class ConfigHandler {
 				isException = UIClassFactory.isClassAChildOfClassB(className, classException.className);
 			}
 
+			if (!isException) {
+				isException = this._checkIfMemberIsEventHandler(memberName);
+			}
+
 			return isException;
 		});
 
 		return isException;
+	}
+
+	private static _checkIfMemberIsEventHandler(memberName: string) {
+		const memberNameStartsWithOn = memberName.startsWith("on");
+		const eventNameIsLowerCase = !!memberName[2] && memberName[2].toLowerCase() === memberName[2];
+
+		const isDomEventHandler = memberNameStartsWithOn && eventNameIsLowerCase;
+
+		return isDomEventHandler;
 	}
 }
