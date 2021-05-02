@@ -1231,6 +1231,7 @@ export class AcornSyntaxAnalyzer {
 		return nodes.find((node: any) => node.start < position && node.end >= position);
 	}
 
+	//TODO: Refactoring
 	public static getClassNameOfTheCurrentDocument(classPath?: string) {
 		let returnClassName;
 

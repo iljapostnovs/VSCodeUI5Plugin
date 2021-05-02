@@ -5,6 +5,7 @@ import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUICla
 import { FieldsAndMethods, UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../utils/FileReader";
 import { CustomCompletionItem } from "../CustomCompletionItem";
+import { ClassCompletionItemFactory } from "./ClassCompletionItemFactory";
 
 export class JSDynamicCompletionItemsFactory {
 
@@ -13,6 +14,10 @@ export class JSDynamicCompletionItemsFactory {
 		const fieldsAndMethods = AcornSyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable(document, position);
 		if (fieldsAndMethods) {
 			completionItems = this._generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods, document, position);
+		}
+
+		if (completionItems.length === 0) {
+			completionItems = ClassCompletionItemFactory.createCompletionItems(document);
 		}
 
 		return completionItems;

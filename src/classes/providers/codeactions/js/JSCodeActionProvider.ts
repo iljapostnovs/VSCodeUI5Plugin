@@ -2,11 +2,11 @@ import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import LineColumn = require("line-column");
 import { CustomDiagnostics, CustomDiagnosticType } from "../../../registrators/DiagnosticsRegistrator";
 import { MethodInserter } from "../util/MethodInserter";
 import { FileReader } from "../../../utils/FileReader";
 import { SAPUIDefineFactory } from "../../completionitems/js/sapuidefine/SAPUIDefineFactory";
+import { ReusableMethods } from "../../reuse/ReusableMethods";
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -97,7 +97,7 @@ export class JSCodeActionProvider {
 					UIDefineCodeAction.isPreferred = true;
 					UIDefineCodeAction.edit = new vscode.WorkspaceEdit();
 					UIDefineCodeAction.command = { command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define" };
-					const position = this._getPositionOfTheLastUIDefine(document);
+					const position = ReusableMethods.getPositionOfTheLastUIDefine(document);
 					if (position) {
 						const insertText = UIClass.UIDefine.length === 0 ? `\n\t${completionItem.label}` : `,\n\t${completionItem.label}`;
 						UIDefineCodeAction.edit.insert(document.uri, position, insertText);
@@ -155,32 +155,4 @@ export class JSCodeActionProvider {
 
 		return selectedVariableName;
 	}
-
-	private static _getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
-		let position: vscode.Position | undefined;
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
-		if (currentClassName) {
-			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
-			const mainFunction = UIClass.fileContent?.body[0]?.expression;
-			const definePaths: any[] = mainFunction?.arguments[0]?.elements;
-
-			let insertPosition = 0;
-			if (definePaths?.length) {
-				const lastDefinePath = definePaths[definePaths.length - 1];
-				insertPosition = lastDefinePath.end;
-			} else {
-				insertPosition = mainFunction?.arguments[0]?.start;
-			}
-
-			const lineColumn = LineColumn(document.getText()).fromIndex(insertPosition);
-
-			if (lineColumn) {
-				position = new vscode.Position(lineColumn.line - 1, lineColumn.col);
-			}
-
-		}
-
-		return position;
-	}
-
 }
