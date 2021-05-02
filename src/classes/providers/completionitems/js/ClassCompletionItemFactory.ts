@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { ReusableMethods } from "../../reuse/ReusableMethods";
 import { FileReader } from "../../../utils/FileReader";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 
 export class ClassCompletionItemFactory {
 	static createCompletionItems(document: vscode.TextDocument) {
@@ -14,21 +15,24 @@ export class ClassCompletionItemFactory {
 
 			const currentUIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 			const classNames = Object.keys(classes);
-			const UIClasses = classNames.map(className => classes[className]).filter(UIClass => {
-				return !currentUIClass.UIDefine.find(UIDefine => UIClass.className === UIDefine.classNameDotNotation);
+			const customUIClassNames = classNames.filter(className => UIClassFactory.getUIClass(className) instanceof CustomUIClass);
+			const standardUIClassNames = Object.keys(new SAPNodeDAO().getFlatNodes());
+			const allClassNames = customUIClassNames.concat(standardUIClassNames);
+			const filteredClassNames = allClassNames.filter(className => {
+				return !currentUIClass.UIDefine.find(UIDefine => className === UIDefine.classNameDotNotation);
 			});
-			completionItems = UIClasses.map(UIClass => {
-				const classNameParts = UIClass.className.split(".");
+			completionItems = filteredClassNames.map(className => {
+				const classNameParts = className.split(".");
 				const shortClassName = classNameParts[classNameParts.length - 1];
 				const completionItem: CustomCompletionItem = new CustomCompletionItem(shortClassName);
 				completionItem.kind = vscode.CompletionItemKind.Class;
 				completionItem.insertText = shortClassName;
-				completionItem.detail = `${UIClass.className}`;
+				completionItem.detail = `${className}`;
 
 				const position = ReusableMethods.getPositionOfTheLastUIDefine(document);
 				if (position) {
 					const range = new vscode.Range(position, position);
-					const classNameModulePath = `"${UIClass.className.replace(/\./g, "/")}"`;
+					const classNameModulePath = `"${className.replace(/\./g, "/")}"`;
 					const insertText = currentUIClass.UIDefine.length === 0 ? `\n\t${classNameModulePath}` : `,\n\t${classNameModulePath}`;
 					completionItem.additionalTextEdits = [new vscode.TextEdit(range, insertText)];
 					completionItem.command = { command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define" };
