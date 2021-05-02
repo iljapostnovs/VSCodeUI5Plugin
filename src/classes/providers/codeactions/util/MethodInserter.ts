@@ -21,9 +21,13 @@ export class MethodInserter {
 				const currentPosition = vscode.window.activeTextEditor.document.offsetAt(currentSelection);
 				if (currentPosition) {
 					const currentMethod = UIClass.methods.find(method => method.acornNode?.start < currentPosition && method.acornNode?.end > currentPosition);
-					if (currentMethod) {
+					const propertyValues = UIClass.acornClassBody?.properties?.map((node: any) => node.value);
+					if (currentMethod && propertyValues) {
+						const methodsInClassBody = UIClass.methods.filter(method => {
+							return propertyValues.includes(method.acornNode);
+						});
 						offset = currentMethod.acornNode.end;
-						const currentMethodIsLastMethod = UIClass.methods.indexOf(currentMethod) === UIClass.methods.length - 1;
+						const currentMethodIsLastMethod = methodsInClassBody.indexOf(currentMethod) === methodsInClassBody.length - 1;
 
 						if (!thereAreNoMethods) {
 							insertText = `\n${insertText}`;
