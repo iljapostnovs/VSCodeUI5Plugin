@@ -1,4 +1,4 @@
-## 0.12.32 (04-05-2021)
+## 0.12.33 (04-05-2021)
 * Bugfixes and performance improvements
 
 ## 0.12.32 (03-05-2021)
