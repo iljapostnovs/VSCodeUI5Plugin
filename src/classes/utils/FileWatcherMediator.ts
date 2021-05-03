@@ -45,19 +45,19 @@ export class FileWatcherMediator {
 		let disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
 			ClearCacheCommand.reloadWindow();
 		});
-
 		UI5Plugin.getInstance().addDisposable(disposable);
 
-		vscode.workspace.onDidChangeTextDocument(event => {
+		disposable = vscode.workspace.onDidChangeTextDocument(event => {
 			this._onChange(event.document.uri);
 		});
+		UI5Plugin.getInstance().addDisposable(disposable);
+
 		disposable = watcher.onDidChange(this._onChange);
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = watcher.onDidCreate(uri => {
 			this._handleFileCreate(uri);
 		});
-
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = workspace.onDidRenameFiles(event => {
@@ -69,7 +69,6 @@ export class FileWatcherMediator {
 				}
 			});
 		});
-
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		watcher.onDidDelete(uri => {
@@ -90,7 +89,6 @@ export class FileWatcherMediator {
 				FileReader.removeFromCache(uri.fsPath);
 			}
 		});
-
 		UI5Plugin.getInstance().addDisposable(disposable);
 	}
 

@@ -463,7 +463,7 @@ export class FileReader {
 		fsPath = fsPath.replace(/\//g, fileSeparator);
 		let className: string | undefined;
 		const manifests = this.getAllManifests();
-		const currentManifest = manifests.find(manifest => fsPath.indexOf(manifest.fsPath) > -1);
+		const currentManifest = manifests.find(manifest => fsPath.startsWith(manifest.fsPath));
 		if (currentManifest) {
 			className =
 				fsPath
