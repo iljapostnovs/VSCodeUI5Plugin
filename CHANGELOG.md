@@ -1,3 +1,6 @@
+## 0.12.33 (04-05-2021)
+* Bugfixes and performance improvements
+
 ## 0.12.32 (03-05-2021)
 * Breaking (hopefully not really) change: Source folder preference entry removed, now plugin searches for manifest.json files and sets the namespaces relative to them using the id.
 * Change XML completion items insert range
