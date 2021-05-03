@@ -9,43 +9,9 @@ export class MethodInserter {
 		let insertMethodCodeAction: vscode.CodeAction | undefined;
 		const classPath = FileReader.getClassPathFromClassName(className);
 		if (classPath) {
-			const classIsCurrentlyOpened = this._checkIfClassIsCurrentlyOpened(className);
 			const classUri = vscode.Uri.file(classPath);
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
-			const thereAreNoMethods = UIClass.acornClassBody.properties.length === 0;
-			let offset = 0;
-			let insertText = `\n\t\t${methodName}: ${insertContent}`;
-
-			if (classIsCurrentlyOpened && vscode.window.activeTextEditor) {
-				const currentSelection = vscode.window.activeTextEditor.selection.start;
-				const currentPosition = vscode.window.activeTextEditor.document.offsetAt(currentSelection);
-				if (currentPosition) {
-					const currentMethod = UIClass.methods.find(method => method.acornNode?.start < currentPosition && method.acornNode?.end > currentPosition);
-					if (currentMethod) {
-						offset = currentMethod.acornNode.end;
-						const currentMethodIsLastMethod = UIClass.methods.indexOf(currentMethod) === UIClass.methods.length - 1;
-
-						if (!thereAreNoMethods) {
-							insertText = `\n${insertText}`;
-						}
-
-						if (!currentMethodIsLastMethod) {
-							insertText += ","
-						} else {
-							insertText = `,${insertText}`;
-						}
-					}
-				}
-			} else {
-				const lastMethod = UIClass.acornClassBody.properties[UIClass.acornClassBody.properties.length - 1];
-				if (lastMethod || thereAreNoMethods) {
-					offset = lastMethod?.end || UIClass.acornClassBody.start;
-				}
-
-				if (!thereAreNoMethods) {
-					insertText = `,\n${insertText}`;
-				}
-			}
+			const { offset, insertText } = this._getInsertTextAndOffset(insertContent, className, methodName);
 
 			const lineColumn = LineColumn(UIClass.classText).fromIndex(offset);
 
@@ -69,6 +35,52 @@ export class MethodInserter {
 		}
 
 		return insertMethodCodeAction;
+	}
+
+	private static _getInsertTextAndOffset(insertContent: string, className: string, methodName: string) {
+		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+		let offset = 0;
+		const classIsCurrentlyOpened = this._checkIfClassIsCurrentlyOpened(className);
+		const thereAreNoMethods = UIClass.acornClassBody.properties.length === 0;
+
+		let insertText = `\n\t\t${methodName}: ${insertContent}`;
+
+		if (classIsCurrentlyOpened && vscode.window.activeTextEditor) {
+			const currentSelection = vscode.window.activeTextEditor.selection.start;
+			const currentPosition = vscode.window.activeTextEditor.document.offsetAt(currentSelection);
+			if (currentPosition) {
+				const currentMethod = UIClass.methods.find(method => method.acornNode?.start < currentPosition && method.acornNode?.end > currentPosition);
+				const propertyValues = UIClass.acornClassBody?.properties?.map((node: any) => node.value);
+				if (currentMethod && propertyValues) {
+					const methodsInClassBody = UIClass.methods.filter(method => {
+						return propertyValues.includes(method.acornNode);
+					});
+					offset = currentMethod.acornNode.end;
+					const currentMethodIsLastMethod = methodsInClassBody.indexOf(currentMethod) === methodsInClassBody.length - 1;
+
+					if (!thereAreNoMethods) {
+						insertText = `\n${insertText}`;
+					}
+
+					if (!currentMethodIsLastMethod) {
+						insertText += ","
+					} else {
+						insertText = `,${insertText}`;
+					}
+				}
+			}
+		} else {
+			const lastMethod = UIClass.acornClassBody.properties[UIClass.acornClassBody.properties.length - 1];
+			if (lastMethod || thereAreNoMethods) {
+				offset = lastMethod?.end || UIClass.acornClassBody.start;
+			}
+
+			if (!thereAreNoMethods) {
+				insertText = `,\n${insertText}`;
+			}
+		}
+
+		return { insertText, offset };
 	}
 
 	private static _checkIfClassIsCurrentlyOpened(className: string) {

@@ -155,9 +155,9 @@ export class FileReader {
 	}
 
 	public static getManifestsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
-		const src = this.getSrcFolderName();
+		// const src = this.getSrcFolderName(wsFolder);
 		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-		const manifestPaths = glob.sync(`${wsFolderFSPath}/${src}/manifest.json`);
+		const manifestPaths = glob.sync(`${wsFolderFSPath}/**/manifest.json`);
 		const manifests: manifestPaths[] = manifestPaths.map(manifestPath => {
 			return {
 				fsPath: manifestPath.replace(/\//g, fileSeparator)
@@ -286,10 +286,9 @@ export class FileReader {
 
 	private static _readAllJSFiles() {
 		const wsFolders = workspace.workspaceFolders || [];
-		const src = this.getSrcFolderName();
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const classPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.js`);
+			const classPaths = glob.sync(`${wsFolderFSPath}/**/*.js`);
 			classPaths.forEach(classPath => {
 				const className = FileReader.getClassNameFromPath(classPath);
 				if (className) {
@@ -305,10 +304,10 @@ export class FileReader {
 
 	private static _readAllViewsAndSaveInCache() {
 		const wsFolders = workspace.workspaceFolders || [];
-		const src = this.getSrcFolderName();
 		for (const wsFolder of wsFolders) {
+			// const src = this.getSrcFolderName(wsFolder);
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.view.xml`);
+			const viewPaths = glob.sync(`${wsFolderFSPath}/**/*.view.xml`);
 			viewPaths.forEach(viewPath => {
 				const viewContent = fs.readFileSync(viewPath, "utf8");
 				const fragments = this.getFragments(viewContent);
@@ -326,10 +325,10 @@ export class FileReader {
 
 	private static _readAllFragmentsAndSaveInCache() {
 		const wsFolders = workspace.workspaceFolders || [];
-		const src = this.getSrcFolderName();
 		for (const wsFolder of wsFolders) {
+			// const src = this.getSrcFolderName(wsFolder);
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const fragmentPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.fragment.xml`);
+			const fragmentPaths = glob.sync(`${wsFolderFSPath}/**/*.fragment.xml`);
 			fragmentPaths.forEach(fragmentPath => {
 				const fragmentContent = fs.readFileSync(fragmentPath, "utf8");
 				const fragmentFSPath = fragmentPath.replace(/\//g, fileSeparator);
@@ -347,9 +346,9 @@ export class FileReader {
 
 	public static getAllJSClassNamesFromProject(wsFolder: vscode.WorkspaceFolder) {
 		let classNames: string[] = [];
-		const src = this.getSrcFolderName();
+		// const src = this.getSrcFolderName(wsFolder);
 		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-		const viewPaths = glob.sync(`${wsFolderFSPath}/${src}/**/*.js`);
+		const viewPaths = glob.sync(`${wsFolderFSPath}/**/*.js`);
 		classNames = viewPaths.reduce((accumulator: string[], viewPath) => {
 			const path = this.getClassNameFromPath(viewPath);
 			if (path) {
@@ -464,7 +463,7 @@ export class FileReader {
 		fsPath = fsPath.replace(/\//g, fileSeparator);
 		let className: string | undefined;
 		const manifests = this.getAllManifests();
-		const currentManifest = manifests.find(manifest => fsPath.indexOf(manifest.fsPath) > -1);
+		const currentManifest = manifests.find(manifest => fsPath.startsWith(manifest.fsPath));
 		if (currentManifest) {
 			className =
 				fsPath
@@ -586,22 +585,6 @@ export class FileReader {
 		if (currentClassName) {
 			return this.getManifestForClass(currentClassName);
 		}
-	}
-
-	public static getSrcFolderName() {
-		const wsFolders = workspace.workspaceFolders || [];
-		let src = vscode.workspace.getConfiguration("ui5.plugin").get("src");
-		for (const wsFolder of wsFolders) {
-			const srcPath = `${wsFolder.uri.fsPath}${fileSeparator}${src}`;
-			if (!fs.existsSync(srcPath)) {
-				const webappPath = `${wsFolder.uri.fsPath}${fileSeparator}webapp`;
-				if (fs.existsSync(webappPath)) {
-					src = "webapp";
-				}
-			}
-		}
-
-		return src;
 	}
 
 	public static removeFromCache(path: string) {

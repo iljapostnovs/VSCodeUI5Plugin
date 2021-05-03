@@ -54,27 +54,26 @@ export class XMLDynamicCompletionItemFactory {
 	private _generateRangeForReplacement(positionType: PositionType, XMLText: string, positionOffset: number) {
 		const position = vscode.window.activeTextEditor?.selection.start;
 		let range = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
-		const word = range && vscode.window.activeTextEditor?.document.getText(range);
+		// const word = range && vscode.window.activeTextEditor?.document.getText(range);
 
-		if (positionType === PositionType.InTheTagAttributes) {
+		if (positionType === PositionType.InTheString) {
 			const tagPosition = XMLParser.getTagBeginEndPosition(XMLText, positionOffset);
 			const tag = XMLParser.getTagInPosition(XMLText, positionOffset);
 			const attributes = XMLParser.getAttributesOfTheTag(tag);
-			const attribute = attributes?.find(attribute => XMLParser.getAttributeNameAndValue(attribute).attributeName === word);
+			const attribute = attributes?.find(attribute => {
+				const index = tag.text.indexOf(attribute);
+				const offset = tag.positionBegin + index;
+				return positionOffset > offset && positionOffset < offset + attribute.length;
+			});
 			if (attribute) {
-				const indexOfTag = tag.text.indexOf(attribute);
-				const lineColumnBegin = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfTag);
-				const lineColumnEnd = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfTag + attribute.length);
+				const indexOfAttribute = tag.text.indexOf(attribute);
+				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+				const indexOfValue = attribute.indexOf(attributeValue);
+				const lineColumnBegin = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfAttribute + indexOfValue);
+				const lineColumnEnd = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfAttribute + indexOfValue + attributeValue.length);
 				if (lineColumnBegin && lineColumnEnd && lineColumnBegin.line === lineColumnEnd.line) {
 					range = new vscode.Range(lineColumnBegin.line - 1, lineColumnBegin.col - 1, lineColumnEnd.line - 1, lineColumnEnd.col - 1);
 				}
-			}
-		} else if (positionType === PositionType.InTheClassName) {
-			const tagPosition = XMLParser.getTagBeginEndPosition(XMLText, positionOffset);
-			const lineColumnBegin = LineColumn(XMLText).fromIndex(tagPosition.positionBegin);
-			const lineColumnEnd = LineColumn(XMLText).fromIndex(tagPosition.positionEnd);
-			if (lineColumnBegin && lineColumnEnd && lineColumnBegin.line === lineColumnEnd.line) {
-				range = new vscode.Range(lineColumnBegin.line - 1, lineColumnBegin.col - 1, lineColumnEnd.line - 1, lineColumnEnd.col - 1);
 			}
 		}
 
@@ -130,12 +129,10 @@ export class XMLDynamicCompletionItemFactory {
 								methods = XMLParser.getMethodsOfTheControl(className);
 							}
 						}
-						const mappedMethods = methods.map(classMethod =>
-							({
-								text: classMethod.name,
-								description: classMethod.description
-							})
-						);
+						const mappedMethods = methods.map(classMethod => ({
+							text: classMethod.name,
+							description: classMethod.description
+						}));
 
 						completionItems = this._generateCompletionItemsFromTypeValues(mappedMethods);
 					}
@@ -434,9 +431,9 @@ export class XMLDynamicCompletionItemFactory {
 		completionItems = UIClass.properties.map(property => {
 			const completionItem: CustomCompletionItem = new CustomCompletionItem(property.name);
 			completionItem.kind = vscode.CompletionItemKind.Property;
-			const typeValueValues = property.typeValues.map(typeValue => typeValue.text);
-			const insertTextValues = typeValueValues.length > 0 ? `|${typeValueValues.join(",")}|` : "";
-			completionItem.insertText = new vscode.SnippetString(`${property.name}="\${1${insertTextValues}}"$0`);
+			// const typeValueValues = property.typeValues.map(typeValue => typeValue.text);
+			// const insertTextValues = typeValueValues.length > 0 ? `|${typeValueValues.join(",")}|` : "";
+			completionItem.insertText = new vscode.SnippetString(`${property.name}`);
 			completionItem.detail = `${property.name}: ${property.type}`;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForPropertiesApi(UIClass);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${property.description}`);
@@ -459,8 +456,8 @@ export class XMLDynamicCompletionItemFactory {
 		completionItems = UIClass.events.map(event => {
 			const completionItem: CustomCompletionItem = new CustomCompletionItem(event.name);
 			completionItem.kind = vscode.CompletionItemKind.Event;
-			const insertTextValues = eventValues.length > 0 ? `|${eventValues.join(",")}|` : "";
-			completionItem.insertText = new vscode.SnippetString(`${event.name}="\${1${insertTextValues}}"$0`);
+			// const insertTextValues = eventValues.length > 0 ? `|${eventValues.join(",")}|` : "";
+			completionItem.insertText = new vscode.SnippetString(`${event.name}`);
 			completionItem.detail = event.name;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForEventsApi(UIClass, event.name);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${event.description}`);
@@ -483,7 +480,7 @@ export class XMLDynamicCompletionItemFactory {
 		completionItems = UIClass.aggregations.map(aggregation => {
 			const completionItem: CustomCompletionItem = new CustomCompletionItem(aggregation.name);
 			completionItem.kind = vscode.CompletionItemKind.Property;
-			completionItem.insertText = new vscode.SnippetString(`${aggregation.name}="\${1}"$0`);
+			completionItem.insertText = new vscode.SnippetString(`${aggregation.name}`);
 			completionItem.detail = aggregation.name;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForAggregationApi(UIClass);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${aggregation.description}\n${aggregation.type}`);
@@ -506,7 +503,7 @@ export class XMLDynamicCompletionItemFactory {
 		completionItems = UIClass.associations.map(association => {
 			const completionItem: CustomCompletionItem = new CustomCompletionItem(association.name);
 			completionItem.kind = vscode.CompletionItemKind.Property;
-			completionItem.insertText = new vscode.SnippetString(`${association.name}="\${1}"$0`);
+			completionItem.insertText = new vscode.SnippetString(`${association.name}`);
 			completionItem.detail = association.name;
 			const UI5ApiUri = URLBuilder.getInstance().getMarkupUrlForAssociationApi(UIClass);
 			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${association.description}`);

@@ -253,6 +253,16 @@
 					"type": "sap.m.Text"
 				}
 			]
+		},
+		{
+			"className": "com.test.library.control.BaseController",
+			"methods": [
+				{
+					"name": "methodFromLibrary",
+					"returnType": "void"
+				}
+			],
+			"fields": []
 		}
 	],
 	"SyntaxAnalyser": [
