@@ -1,0 +1,50 @@
+{
+	"_version": "1.1.0",
+	"sap.app": {
+		"_version": "1.2.0",
+		"id": "com.test.library",
+		"type": "library",
+		"embeds": [],
+		"i18n": "i18n/i18n.properties",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"title": "{{title}}",
+		"description": "{{description}}",
+		"ach": "CA-HOME",
+		"resources": "resources.json",
+		"offline": false
+	},
+	"sap.ui": {
+		"_version": "1.1.0",
+		"technology": "UI5",
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		},
+		"supportedThemes": []
+	},
+	"sap.ui5": {
+		"_version": "1.1.0",
+		"dependencies": {
+			"minUI5Version": "1.60.10",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {}
+			}
+		},
+		"models": {},
+		"contentDensities": {
+			"cozy": true,
+			"compact": true
+		},
+		"resources": {
+			"css": [
+				{
+					"uri": "css/style.css"
+				}
+			]
+		}
+	}
+}
