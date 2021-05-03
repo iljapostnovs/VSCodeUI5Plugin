@@ -72,11 +72,6 @@
 					"pattern": "^1\\.[0-9]{2}\\.[0-9]{1,2}$",
 					"description": "SAPUI5 Library version for lib metadata preload"
 				},
-				"ui5.plugin.src": {
-					"type": "string",
-					"default": "src",
-					"description": "Source folder in your workspace"
-				},
 				"ui5.plugin.jsCodeLens": {
 					"type": "boolean",
 					"default": true,

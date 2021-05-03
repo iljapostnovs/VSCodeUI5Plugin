@@ -252,7 +252,7 @@ function() {
 ### Assumptions
 * File starts with sap.ui.define
 * Your class body is in AnyUI5Class.extend("name", {_here_});<br/>
-* You have manifest.json in source folder
+* You have manifest.json with app/lib id
 * App ID (Component name) and i18n paths are defined in manifest.json
 * File is without syntax errors
 * Name of the class of the UI5Class is the same as file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")

@@ -28,10 +28,10 @@ export abstract class FileRenameHandler {
 
 		const workspace = vscode.workspace;
 		const wsFolders = workspace.workspaceFolders || [];
-		const src = FileReader.getSrcFolderName();
+		// const src = FileReader.getSrcFolderName();
 
 		for (const wsFolder of wsFolders) {
-			const workspaceFilePaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/" + src + "/**/*{.js,.xml,.json}");
+			const workspaceFilePaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/**/*{.js,.xml,.json}");
 			workspaceFilePaths.forEach(filePath => {
 				let fileContent = fs.readFileSync(filePath, "utf8");
 				if (fileContent.indexOf(textToReplaceFromDotNotation) > -1 || fileContent.indexOf(textToReplaceFromSlashNotation) > -1) {

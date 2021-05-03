@@ -97,13 +97,9 @@ export class WorkspaceCompletionItemFactory {
 	}
 
 	private _findJSFilesInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
-		return new Promise(resolve => {
-			const src = FileReader.getSrcFolderName();
+		// const src = FileReader.getSrcFolderName(wsFolder);
 
-			vscode.workspace
-				.findFiles(new vscode.RelativePattern(wsFolder, `${src}/**/*.js`))
-				.then(resolve);
-		});
+		return vscode.workspace.findFiles(new vscode.RelativePattern(wsFolder, "**/*.js"));
 	}
 
 	private static _generateCompletionItem(workspaceJSFile: UIDefineJSFile) {
