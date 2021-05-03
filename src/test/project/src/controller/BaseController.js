@@ -1,13 +1,12 @@
 sap.ui.define([
-	"com/test/library/control/BaseController"
-], function (
-	BaseController
+	"sap/ui/core/mvc/Controller"
+], function(
+	Controller
 ) {
 	"use strict";
-	return BaseController.extend("com.test.controller.BaseController", {
+	return Controller.extend("com.test.controller.BaseController", {
 		_test: function() {
 			//
-			this.libra
 		},
 
 		getModel: function(sModelName) {
