@@ -17,7 +17,7 @@ export class JSDynamicCompletionItemsFactory {
 		}
 
 		if (completionItems.length === 0) {
-			completionItems = ClassCompletionItemFactory.createCompletionItems(document);
+			completionItems = ClassCompletionItemFactory.createCompletionItems(document, position);
 		}
 
 		return completionItems;
