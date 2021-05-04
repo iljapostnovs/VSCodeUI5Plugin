@@ -83,7 +83,7 @@ export class UIClassFactory {
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
 		this._enrichVariablesWithJSDocTypes(UIClass);
 		this._enrichMethodParamsWithEventType(UIClass);
-		this._checkIfFieldIsIsedInXMLDocuments(UIClass);
+		this._checkIfFieldIsUsedInXMLDocuments(UIClass);
 		UIClass.methods.forEach(method => {
 			AcornSyntaxAnalyzer.findMethodReturnType(method, UIClass.className, false, true);
 		});
@@ -92,7 +92,7 @@ export class UIClassFactory {
 		});
 	}
 
-	private static _checkIfFieldIsIsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
+	private static _checkIfFieldIsUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments = this._getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.fields.forEach(field => {

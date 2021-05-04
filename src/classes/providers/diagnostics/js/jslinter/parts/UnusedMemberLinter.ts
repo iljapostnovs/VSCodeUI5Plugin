@@ -26,7 +26,7 @@ export class UnusedMemberLinter extends Linter {
 						...UIClass.fields
 					];
 					methodsAndFields.forEach((methodOrField: any) => {
-						const methodIsUsed = this._checkIfMethodIsUsed(customUIClasses, UIClass, methodOrField);
+						const methodIsUsed = this._checkIfMemberIsUsed(customUIClasses, UIClass, methodOrField);
 						if (!methodIsUsed && methodOrField.memberPropertyNode) {
 							const positionBegin = LineColumn(UIClass.classText).fromIndex(methodOrField.memberPropertyNode.start);
 							const positionEnd = LineColumn(UIClass.classText).fromIndex(methodOrField.memberPropertyNode.end);
@@ -54,7 +54,7 @@ export class UnusedMemberLinter extends Linter {
 		return errors;
 	}
 
-	private _checkIfMethodIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, methodOrField: CustomClassUIMethod | CustomClassUIField) {
+	private _checkIfMemberIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, methodOrField: CustomClassUIMethod | CustomClassUIField) {
 		const isException = this._checkIfMethodIsException(UIClass.className, methodOrField.name);
 		let memberIsUsed = false;
 		const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, methodOrField.name);

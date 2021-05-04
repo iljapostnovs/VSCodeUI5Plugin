@@ -1,29 +1,36 @@
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../../../../UI5Classes/UIClassFactory";
 export class ConfigHandler {
+	private static _cache: { [key: string]: boolean } = {}
 	static getJSLinterExceptions(): Array<{ className: string; memberName: string; applyToChildren: boolean }> {
 		return vscode.workspace.getConfiguration("ui5.plugin").get("JSLinterExceptions") || [];
 	}
 
 	static checkIfMemberIsException(className = "", memberName = "") {
-		const hardcodedExceptions = ["metadata", "renderer", "onAfterRendering", "customMetadata"];
-		const classExceptions = ConfigHandler.getJSLinterExceptions();
-		const isException = hardcodedExceptions.includes(memberName) || !!classExceptions.find(classException => {
-			let isException = (classException.className === className || classException.className === "*") &&
-				(classException.memberName === memberName || classException.memberName === "*");
+		const cacheKey = [className, memberName].join(",");
 
-			if (!isException && classException.applyToChildren && (classException.memberName === memberName || classException.memberName === "*")) {
-				isException = UIClassFactory.isClassAChildOfClassB(className, classException.className);
-			}
+		if (!this._cache[cacheKey]) {
+			const hardcodedExceptions = ["metadata", "renderer", "onAfterRendering", "customMetadata"];
+			const classExceptions = ConfigHandler.getJSLinterExceptions();
+			const isException = hardcodedExceptions.includes(memberName) || !!classExceptions.find(classException => {
+				let isException = (classException.className === className || classException.className === "*") &&
+					(classException.memberName === memberName || classException.memberName === "*");
 
-			if (!isException) {
-				isException = this._checkIfMemberIsEventHandler(memberName);
-			}
+				if (!isException && classException.applyToChildren && (classException.memberName === memberName || classException.memberName === "*")) {
+					isException = UIClassFactory.isClassAChildOfClassB(className, classException.className);
+				}
 
-			return isException;
-		});
+				if (!isException) {
+					isException = this._checkIfMemberIsEventHandler(memberName);
+				}
 
-		return isException;
+				return isException;
+			});
+
+			this._cache[cacheKey] = isException;
+		}
+
+		return this._cache[cacheKey];
 	}
 
 	private static _checkIfMemberIsEventHandler(memberName: string) {
