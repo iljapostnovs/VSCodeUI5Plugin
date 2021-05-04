@@ -1,5 +1,5 @@
 ## 0.12.34 (04-05-2021)
-* Bugfixes
+* Bugfixes and performance improvements
 
 ## 0.12.33 (04-05-2021)
 * Bugfixes and performance improvements
