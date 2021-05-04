@@ -8,7 +8,8 @@ import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyn
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
 export class PublicMemberLinter extends Linter {
-	getErrors(document: vscode.TextDocument): Error[] {
+	protected className = "PublicMemberLinter";
+	_getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("usePublicMemberLinter")) {

@@ -9,8 +9,9 @@ import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import { ConfigHandler } from "./config/ConfigHandler";
 export class WrongFieldMethodLinter extends Linter {
+	protected className = "WrongFieldMethodLinter";
 	public static timePerChar = 0;
-	getErrors(document: vscode.TextDocument): Error[] {
+	_getErrors(document: vscode.TextDocument): Error[] {
 		let errors: Error[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongFieldMethodLinter")) {

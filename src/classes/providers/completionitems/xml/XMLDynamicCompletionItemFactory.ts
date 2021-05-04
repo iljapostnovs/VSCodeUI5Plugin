@@ -68,11 +68,13 @@ export class XMLDynamicCompletionItemFactory {
 			if (attribute) {
 				const indexOfAttribute = tag.text.indexOf(attribute);
 				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
-				const indexOfValue = attribute.indexOf(attributeValue);
-				const lineColumnBegin = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfAttribute + indexOfValue);
-				const lineColumnEnd = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfAttribute + indexOfValue + attributeValue.length);
-				if (lineColumnBegin && lineColumnEnd && lineColumnBegin.line === lineColumnEnd.line) {
-					range = new vscode.Range(lineColumnBegin.line - 1, lineColumnBegin.col - 1, lineColumnEnd.line - 1, lineColumnEnd.col - 1);
+				if (attributeValue) {
+					const indexOfValue = attribute.indexOf(attributeValue);
+					const lineColumnBegin = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfAttribute + indexOfValue);
+					const lineColumnEnd = LineColumn(XMLText).fromIndex(tagPosition.positionBegin + indexOfAttribute + indexOfValue + attributeValue.length);
+					if (lineColumnBegin && lineColumnEnd && lineColumnBegin.line === lineColumnEnd.line) {
+						range = new vscode.Range(lineColumnBegin.line - 1, lineColumnBegin.col - 1, lineColumnEnd.line - 1, lineColumnEnd.col - 1);
+					}
 				}
 			}
 		}

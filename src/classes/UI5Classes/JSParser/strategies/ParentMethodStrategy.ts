@@ -13,8 +13,8 @@ export class ParentMethodStrategy extends FieldPropertyMethodGetterStrategy {
 			if (UIClass instanceof CustomUIClass && UIClass.parentClassNameDotNotation) {
 				const positionAtClassBodyPropertyName = this._getIfPositionIsInPropertyName(UIClass, offset);
 				if (positionAtClassBodyPropertyName) {
-					const fields = UIClassFactory.getClassFields(UIClass.parentClassNameDotNotation);
-					const methods = UIClassFactory.getClassMethods(UIClass.parentClassNameDotNotation);
+					const fields = UIClassFactory.getClassFields(UIClass.parentClassNameDotNotation, false);
+					const methods = UIClassFactory.getClassMethods(UIClass.parentClassNameDotNotation, false);
 					fieldsAndMethods = {
 						className: "__override__",
 						fields: fields,

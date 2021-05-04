@@ -9,14 +9,6 @@ const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
 const workspace = vscode.workspace;
-export interface Fragment {
-	content: string;
-	fsPath: string;
-	name: string;
-}
-interface Fragments {
-	[key: string]: Fragment;
-}
 export class FileReader {
 	private static _manifests: UIManifest[] = [];
 	private static readonly _viewCache: Views = {};
@@ -28,6 +20,7 @@ export class FileReader {
 		const controllerName = this.getControllerNameFromView(viewContent);
 		if (controllerName) {
 			this._viewCache[controllerName] = {
+				idClassMap: {},
 				content: viewContent,
 				fsPath: fsPath,
 				fragments: this.getFragments(viewContent)
@@ -41,7 +34,8 @@ export class FileReader {
 			this._fragmentCache[fragmentName] = {
 				content: document.getText(),
 				fsPath: document.fileName,
-				name: fragmentName
+				name: fragmentName,
+				idClassMap: {}
 			};
 
 			Object.keys(this._viewCache).forEach(key => {
@@ -169,13 +163,13 @@ export class FileReader {
 
 	public static getClassNameFromView(controllerClassName: string, controlId: string) {
 		let className: string | undefined;
-		const documentText = this.getViewText(controllerClassName);
-		if (documentText) {
-			className = this._getClassOfControlIdFromView(documentText, controlId);
+		const view = this.getViewForController(controllerClassName);
+		if (view) {
+			className = this._getClassOfControlIdFromView(view, controlId);
 			if (!className) {
 				const view = this.getViewForController(controllerClassName);
 				view?.fragments.find(fragment => {
-					className = this._getClassOfControlIdFromView(fragment.content, controlId);
+					className = this._getClassOfControlIdFromView(fragment, controlId);
 					return !!className;
 				});
 			}
@@ -225,40 +219,44 @@ export class FileReader {
 		return this.getViewForController(controllerName)?.content;
 	}
 
-	private static _getClassOfControlIdFromView(documentText: string, controlId: string) {
-		let controlClass = "";
-		//TODO: move to XMLParser
-		const controlResults = new RegExp(`(?=id="${controlId}")`).exec(documentText);
-		if (controlResults) {
-			let beginIndex = controlResults.index;
-			while (beginIndex > 0 && documentText[beginIndex] !== "<") {
-				beginIndex--;
-			}
-			beginIndex++;
+	private static _getClassOfControlIdFromView(viewOrFragment: View | Fragment, controlId: string) {
+		if (!viewOrFragment.idClassMap[controlId]) {
+			let controlClass = "";
+			//TODO: move to XMLParser
+			const controlResults = new RegExp(`(?=id="${controlId}")`).exec(viewOrFragment.content);
+			if (controlResults) {
+				let beginIndex = controlResults.index;
+				while (beginIndex > 0 && viewOrFragment.content[beginIndex] !== "<") {
+					beginIndex--;
+				}
+				beginIndex++;
 
-			let endIndex = beginIndex;
-			while (endIndex < documentText.length && !this._isSeparator(documentText[endIndex])) {
-				endIndex++;
-			}
+				let endIndex = beginIndex;
+				while (endIndex < viewOrFragment.content.length && !this._isSeparator(viewOrFragment.content[endIndex])) {
+					endIndex++;
+				}
 
-			let regExpBase;
-			const classTag = documentText.substring(beginIndex, endIndex);
-			const classTagParts = classTag.split(":");
-			let className;
-			if (classTagParts.length === 1) {
-				regExpBase = "(?<=xmlns=\").*?(?=\")";
-				className = classTagParts[0];
-			} else {
-				regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*?(?=")`;
-				className = classTagParts[1];
+				let regExpBase;
+				const classTag = viewOrFragment.content.substring(beginIndex, endIndex);
+				const classTagParts = classTag.split(":");
+				let className;
+				if (classTagParts.length === 1) {
+					regExpBase = "(?<=xmlns=\").*?(?=\")";
+					className = classTagParts[0];
+				} else {
+					regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*?(?=")`;
+					className = classTagParts[1];
+				}
+				const rClassName = new RegExp(regExpBase);
+				const classNameResult = rClassName.exec(viewOrFragment.content);
+				if (classNameResult) {
+					controlClass = [classNameResult[0], className.trim()].join(".");
+				}
 			}
-			const rClassName = new RegExp(regExpBase);
-			const classNameResult = rClassName.exec(documentText);
-			if (classNameResult) {
-				controlClass = [classNameResult[0], className.trim()].join(".");
-			}
+			viewOrFragment.idClassMap[controlId] = controlClass;
 		}
-		return controlClass;
+
+		return viewOrFragment.idClassMap[controlId];
 	}
 
 	static readAllViewsAndFragments() {
@@ -314,6 +312,7 @@ export class FileReader {
 				const controllerName = this.getControllerNameFromView(viewContent);
 				if (controllerName) {
 					this._viewCache[controllerName] = {
+						idClassMap: {},
 						content: viewContent,
 						fsPath: viewPath.replace(/\//g, fileSeparator),
 						fragments: fragments
@@ -337,7 +336,8 @@ export class FileReader {
 					this._fragmentCache[fragmentName] = {
 						content: fragmentContent,
 						fsPath: fragmentFSPath,
-						name: fragmentName
+						name: fragmentName,
+						idClassMap: {}
 					};
 				}
 			});
@@ -421,7 +421,8 @@ export class FileReader {
 					fragments.push({
 						content: fragment.content,
 						name: fragmentName,
-						fsPath: fragmentPath
+						fsPath: fragmentPath,
+						idClassMap: {}
 					});
 				}
 			}
@@ -623,5 +624,20 @@ export interface View {
 	fsPath: string;
 	content: string;
 	fragments: Fragment[];
+	idClassMap: {
+		[key: string]: string;
+	}
 }
 
+
+export interface Fragment {
+	content: string;
+	fsPath: string;
+	name: string;
+	idClassMap: {
+		[key: string]: string;
+	}
+}
+interface Fragments {
+	[key: string]: Fragment;
+}

@@ -6,7 +6,8 @@ import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import { AbstractUIClass, UIField, UIMethod } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 export class WrongOverrideLinter extends Linter {
-	getErrors(document: vscode.TextDocument): Error[] {
+	protected className = "WrongOverrideLinter";
+	_getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongOverrideLinter")) {

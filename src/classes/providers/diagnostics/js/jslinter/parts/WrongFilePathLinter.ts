@@ -7,7 +7,8 @@ import { FileReader } from "../../../../../utils/FileReader";
 import * as fs from "fs";
 
 export class WrongFilePathLinter extends Linter {
-	getErrors(document: vscode.TextDocument): Error[] {
+	protected className = "WrongFilePathLinter";
+	_getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongFilePathLinter")) {

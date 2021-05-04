@@ -66,24 +66,24 @@ export class UIClassFactory {
 	}
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
-		// console.time(`Class parsing for ${classNameDotNotation} took`);
-
-
 		if (!this._UIClasses[classNameDotNotation] || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length) {
+			// console.time(`Class parsing for ${classNameDotNotation} took`);
 			this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 
 			const UIClass = this._UIClasses[classNameDotNotation];
 			if (UIClass instanceof CustomUIClass) {
+				// console.time(`Enriching ${classNameDotNotation} took`);
 				this.enrichTypesInCustomClass(UIClass);
+				// console.timeEnd(`Enriching ${classNameDotNotation} took`);
 			}
+			// console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
 		}
-		// console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
 	}
 
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
 		this._enrichVariablesWithJSDocTypes(UIClass);
 		this._enrichMethodParamsWithEventType(UIClass);
-		this._checkIfFieldIsIsedInXMLDocuments(UIClass);
+		this._checkIfFieldIsUsedInXMLDocuments(UIClass);
 		UIClass.methods.forEach(method => {
 			AcornSyntaxAnalyzer.findMethodReturnType(method, UIClass.className, false, true);
 		});
@@ -92,7 +92,7 @@ export class UIClassFactory {
 		});
 	}
 
-	private static _checkIfFieldIsIsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
+	private static _checkIfFieldIsUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments = this._getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.fields.forEach(field => {
@@ -196,7 +196,7 @@ export class UIClassFactory {
 		return variableDeclaration;
 	}
 
-	public static getFieldsAndMethodsForClass(className: string) {
+	public static getFieldsAndMethodsForClass(className: string, returnDuplicates = true) {
 		const fieldsAndMethods: FieldsAndMethods = {
 			className: className,
 			fields: [],
@@ -204,14 +204,14 @@ export class UIClassFactory {
 		};
 
 		if (className) {
-			fieldsAndMethods.fields = this.getClassFields(className);
-			fieldsAndMethods.methods = this.getClassMethods(className);
+			fieldsAndMethods.fields = this.getClassFields(className, returnDuplicates);
+			fieldsAndMethods.methods = this.getClassMethods(className, returnDuplicates);
 		}
 
 		return fieldsAndMethods;
 	}
 
-	public static getClassFields(className: string) {
+	public static getClassFields(className: string, returnDuplicates = true) {
 		let fields: UIField[] = [];
 		const UIClass = this.getUIClass(className);
 		fields = UIClass.fields;
@@ -219,21 +219,23 @@ export class UIClassFactory {
 			fields = fields.concat(this.getClassFields(UIClass.parentClassNameDotNotation));
 		}
 
-		//remove duplicates
-		fields = fields.reduce((accumulator: UIField[], field: UIField) => {
-			const fieldInAccumulator = accumulator.find(accumulatorField => accumulatorField.name === field.name);
-			if (!fieldInAccumulator) {
-				accumulator.push(field);
-			}
-			return accumulator;
-		}, []);
+		if (!returnDuplicates) {
+			//remove duplicates
+			fields = fields.reduce((accumulator: UIField[], field: UIField) => {
+				const fieldInAccumulator = accumulator.find(accumulatorField => accumulatorField.name === field.name);
+				if (!fieldInAccumulator) {
+					accumulator.push(field);
+				}
+				return accumulator;
+			}, []);
+		}
+
 		return fields;
 	}
 
-	public static getClassMethods(className: string) {
-		let methods: UIMethod[] = [];
+	public static getClassMethods(className: string, returnDuplicates = true) {
 		const UIClass = this.getUIClass(className);
-		methods = UIClass.methods.map(method => Object.assign({}, method));
+		let methods: UIMethod[] = UIClass.methods;
 		if (UIClass.parentClassNameDotNotation) {
 			const parentMethods = this.getClassMethods(UIClass.parentClassNameDotNotation);
 			parentMethods.forEach(parentMethod => {
@@ -245,86 +247,97 @@ export class UIClassFactory {
 		}
 
 		//remove duplicates
-		methods = methods.reduce((accumulator: UIMethod[], method: UIMethod) => {
-			const methodInAccumulator = accumulator.find(accumulatorMethod => accumulatorMethod.name === method.name);
-			if (!methodInAccumulator) {
-				accumulator.push(method);
-			}
-			return accumulator;
-		}, []);
+		if (!returnDuplicates) {
+			methods = methods.reduce((accumulator: UIMethod[], method: UIMethod) => {
+				const methodInAccumulator = accumulator.find(accumulatorMethod => accumulatorMethod.name === method.name);
+				if (!methodInAccumulator) {
+					accumulator.push(method);
+				}
+				return accumulator;
+			}, []);
+		}
 
 		return methods;
 	}
 
-	public static getClassEvents(className: string) {
+	public static getClassEvents(className: string, returnDuplicates = true) {
 		const UIClass = this.getUIClass(className);
 		let events: UIEvent[] = UIClass.events;
 		if (UIClass.parentClassNameDotNotation) {
 			events = events.concat(this.getClassEvents(UIClass.parentClassNameDotNotation));
 		}
 
-		//remove duplicates
-		events = events.reduce((accumulator: UIEvent[], event: UIEvent) => {
-			const eventInAccumulator = accumulator.find(accumulatorEvent => accumulatorEvent.name === event.name);
-			if (!eventInAccumulator) {
-				accumulator.push(event);
-			}
-			return accumulator;
-		}, []);
+		if (!returnDuplicates) {
+			//remove duplicates
+			events = events.reduce((accumulator: UIEvent[], event: UIEvent) => {
+				const eventInAccumulator = accumulator.find(accumulatorEvent => accumulatorEvent.name === event.name);
+				if (!eventInAccumulator) {
+					accumulator.push(event);
+				}
+				return accumulator;
+			}, []);
+		}
+
 		return events;
 	}
 
-	public static getClassAggregations(className: string) {
+	public static getClassAggregations(className: string, returnDuplicates = true) {
 		const UIClass = this.getUIClass(className);
 		let aggregations: UIAggregation[] = UIClass.aggregations;
 		if (UIClass.parentClassNameDotNotation) {
 			aggregations = aggregations.concat(this.getClassAggregations(UIClass.parentClassNameDotNotation));
 		}
 
-		//remove duplicates
-		aggregations = aggregations.reduce((accumulator: UIAggregation[], aggregation: UIAggregation) => {
-			const aggregationInAccumulator = accumulator.find(accumulatorAggregation => accumulatorAggregation.name === aggregation.name);
-			if (!aggregationInAccumulator) {
-				accumulator.push(aggregation);
-			}
-			return accumulator;
-		}, []);
+		if (!returnDuplicates) {
+			//remove duplicates
+			aggregations = aggregations.reduce((accumulator: UIAggregation[], aggregation: UIAggregation) => {
+				const aggregationInAccumulator = accumulator.find(accumulatorAggregation => accumulatorAggregation.name === aggregation.name);
+				if (!aggregationInAccumulator) {
+					accumulator.push(aggregation);
+				}
+				return accumulator;
+			}, []);
+		}
 		return aggregations;
 	}
 
-	public static getClassAssociations(className: string) {
+	public static getClassAssociations(className: string, returnDuplicates = true) {
 		const UIClass = this.getUIClass(className);
 		let associations: UIAssociation[] = UIClass.associations;
 		if (UIClass.parentClassNameDotNotation) {
 			associations = associations.concat(this.getClassAssociations(UIClass.parentClassNameDotNotation));
 		}
 
-		//remove duplicates
-		associations = associations.reduce((accumulator: UIAssociation[], association: UIAssociation) => {
-			const associationInAccumulator = accumulator.find(accumulatorAssociation => accumulatorAssociation.name === association.name);
-			if (!associationInAccumulator) {
-				accumulator.push(association);
-			}
-			return accumulator;
-		}, []);
+		if (!returnDuplicates) {
+			//remove duplicates
+			associations = associations.reduce((accumulator: UIAssociation[], association: UIAssociation) => {
+				const associationInAccumulator = accumulator.find(accumulatorAssociation => accumulatorAssociation.name === association.name);
+				if (!associationInAccumulator) {
+					accumulator.push(association);
+				}
+				return accumulator;
+			}, []);
+		}
 		return associations;
 	}
 
-	public static getClassProperties(className: string) {
+	public static getClassProperties(className: string, returnDuplicates = true) {
 		const UIClass = this.getUIClass(className);
 		let properties: UIProperty[] = UIClass.properties;
 		if (UIClass.parentClassNameDotNotation) {
 			properties = properties.concat(this.getClassProperties(UIClass.parentClassNameDotNotation));
 		}
 
-		//remove duplicates
-		properties = properties.reduce((accumulator: UIProperty[], property: UIProperty) => {
-			const propertyInAccumulator = accumulator.find(accumulatorProperty => accumulatorProperty.name === property.name);
-			if (!propertyInAccumulator) {
-				accumulator.push(property);
-			}
-			return accumulator;
-		}, []);
+		if (!returnDuplicates) {
+			//remove duplicates
+			properties = properties.reduce((accumulator: UIProperty[], property: UIProperty) => {
+				const propertyInAccumulator = accumulator.find(accumulatorProperty => accumulatorProperty.name === property.name);
+				if (!propertyInAccumulator) {
+					accumulator.push(property);
+				}
+				return accumulator;
+			}, []);
+		}
 		return properties;
 	}
 

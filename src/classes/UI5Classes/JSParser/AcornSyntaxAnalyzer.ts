@@ -369,8 +369,8 @@ export class AcornSyntaxAnalyzer {
 		}
 
 		if (!modelClassName) {
-			const UIClass = UIClassFactory.getFieldsAndMethodsForClass(className);
-			const method = (<CustomClassUIMethod[]>UIClass.methods).find(method => {
+			const methods = UIClassFactory.getClassMethods(className);
+			const method = (<CustomClassUIMethod[]>methods).find(method => {
 				let methodFound = false;
 				if (method.acornNode) {
 					const content = this.expandAllContent(method.acornNode);

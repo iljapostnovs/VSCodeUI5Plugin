@@ -3,6 +3,7 @@ import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../utils/FileReader";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
+import { ReusableMethods } from "../../reuse/ReusableMethods";
 
 export class MethodInserter {
 	static createInsertMethodCodeAction(className: string, methodName: string, insertContent: string) {
@@ -50,13 +51,9 @@ export class MethodInserter {
 			const currentPosition = vscode.window.activeTextEditor.document.offsetAt(currentSelection);
 			if (currentPosition) {
 				const currentMethod = UIClass.methods.find(method => method.acornNode?.start < currentPosition && method.acornNode?.end > currentPosition);
-				const propertyValues = UIClass.acornClassBody?.properties?.map((node: any) => node.value);
-				if (currentMethod && propertyValues) {
-					const methodsInClassBody = UIClass.methods.filter(method => {
-						return propertyValues.includes(method.acornNode);
-					});
+				if (currentMethod) {
 					offset = currentMethod.acornNode.end;
-					const currentMethodIsLastMethod = methodsInClassBody.indexOf(currentMethod) === methodsInClassBody.length - 1;
+					const currentMethodIsLastMethod = ReusableMethods.getIfMethodIsLastOne(UIClass, currentMethod);
 
 					if (!thereAreNoMethods) {
 						insertText = `\n${insertText}`;

@@ -8,7 +8,8 @@ import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyn
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
 export class UnusedMemberLinter extends Linter {
-	getErrors(document: vscode.TextDocument): Error[] {
+	protected className = "UnusedMemberLinter";
+	_getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
 		// console.time("Unused Member Linter");
@@ -25,7 +26,7 @@ export class UnusedMemberLinter extends Linter {
 						...UIClass.fields
 					];
 					methodsAndFields.forEach((methodOrField: any) => {
-						const methodIsUsed = this._checkIfMethodIsUsed(customUIClasses, UIClass, methodOrField);
+						const methodIsUsed = this._checkIfMemberIsUsed(customUIClasses, UIClass, methodOrField);
 						if (!methodIsUsed && methodOrField.memberPropertyNode) {
 							const positionBegin = LineColumn(UIClass.classText).fromIndex(methodOrField.memberPropertyNode.start);
 							const positionEnd = LineColumn(UIClass.classText).fromIndex(methodOrField.memberPropertyNode.end);
@@ -53,7 +54,7 @@ export class UnusedMemberLinter extends Linter {
 		return errors;
 	}
 
-	private _checkIfMethodIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, methodOrField: CustomClassUIMethod | CustomClassUIField) {
+	private _checkIfMemberIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, methodOrField: CustomClassUIMethod | CustomClassUIField) {
 		const isException = this._checkIfMethodIsException(UIClass.className, methodOrField.name);
 		let memberIsUsed = false;
 		const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, methodOrField.name);
