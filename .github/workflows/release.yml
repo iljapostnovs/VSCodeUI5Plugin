@@ -36,3 +36,13 @@ jobs:
           args: "publish -p $VSCE_TOKEN"
         env:
           VSCE_TOKEN: ${{ secrets.VSCE_TOKEN }}
+  publish_ovsx:
+    name: Publish to open vsx
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: npm install
+        run: npm install
+      - name: publish
+        run: npx ovsx publish -p $OVSX_TOKEN
