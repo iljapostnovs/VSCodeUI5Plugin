@@ -11,6 +11,7 @@ import { PublicMemberLinter } from "./parts/PublicMemberLinter";
 import { WrongOverrideLinter } from "./parts/WrongOverrideLinter";
 
 export class JSLinter {
+	static timePerchar = 0;
 	static getLintingErrors(document: vscode.TextDocument): Error[] {
 		const linters: Linter[] = [
 			new WrongFieldMethodLinter(),

@@ -342,6 +342,10 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private _getClassBodyFromPartAcorn(part: any, partParent: any): any {
+		if (!part || !partParent) {
+			return null;
+		}
+
 		let classBody: any;
 
 		if (part.type === "CallExpression") {

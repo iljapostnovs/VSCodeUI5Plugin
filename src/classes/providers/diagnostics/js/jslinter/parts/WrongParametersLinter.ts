@@ -9,9 +9,10 @@ import { FileReader } from "../../../../../utils/FileReader";
 import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
 import { ConfigHandler } from "./config/ConfigHandler";
 export class WrongParametersLinter extends Linter {
+	protected className = "WrongParametersLinter";
 	public static timePerChar = 0;
 	private static readonly _sapNodeDAO = new SAPNodeDAO();
-	getErrors(document: vscode.TextDocument): Error[] {
+	_getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
 		// console.time("WrongParameterLinter");

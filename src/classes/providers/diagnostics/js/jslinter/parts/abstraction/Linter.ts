@@ -16,5 +16,18 @@ export interface Error {
 	severity?: vscode.DiagnosticSeverity;
 }
 export abstract class Linter {
-	abstract getErrors(document: vscode.TextDocument): Error[];
+	protected abstract className: string;
+	timePerChar = 0;
+	protected abstract _getErrors(document: vscode.TextDocument): Error[];
+	getErrors(document: vscode.TextDocument): Error[] {
+		const timeStart = new Date().getTime();
+		const errors = this._getErrors(document);
+		const timeEnd = new Date().getTime();
+
+		const timeSpent = timeEnd - timeStart;
+		this.timePerChar = timeSpent / document.getText().length;
+
+		console.log(`Time spent by ${this.className}: ${timeSpent}`);
+		return errors;
+	}
 }

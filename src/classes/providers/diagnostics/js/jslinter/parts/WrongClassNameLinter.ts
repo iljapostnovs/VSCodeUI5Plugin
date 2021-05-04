@@ -5,7 +5,8 @@ import { FileReader } from "../../../../../utils/FileReader";
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 export class WrongClassNameLinter extends Linter {
-	getErrors(document: vscode.TextDocument): Error[] {
+	protected className = "WrongClassNameLinter";
+	_getErrors(document: vscode.TextDocument): Error[] {
 		const errors: Error[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongClassNameLinter")) {

@@ -107,14 +107,10 @@ export class DiagnosticsRegistrator {
 
 		if (isJSDiagnosticsEnabled && !this._timeoutId) {
 			const timeout = this._getTimeoutForDocument(document);
-			// if (timeout) {
 			this._timeoutId = setTimeout(() => {
 				this._updateDiagnosticCollection(document, collection);
 				this._timeoutId = null;
 			}, timeout);
-			// } else {
-			// this._updateDiagnosticCollection(document, collection);
-			// }
 		}
 	}
 
