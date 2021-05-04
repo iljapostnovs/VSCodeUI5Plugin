@@ -1,3 +1,6 @@
+## 0.12.35 (04-05-2021)
+* ui5.plugin.excludeFolderPattern preference entry introduced
+
 ## 0.12.34 (04-05-2021)
 * Bugfixes and performance improvements
 

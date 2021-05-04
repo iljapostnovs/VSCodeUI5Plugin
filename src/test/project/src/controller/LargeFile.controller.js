@@ -24,7 +24,6 @@ sap.ui.define([
 		},
 
 		method1: function() {
-			this.met
 			this.getView().byId("idTestLabel").setText(this.getString());
 			this.getView().byId("idTestTable").setAlternateRowColors(true);
 			this.getView().byId("idTestText").setText("asd");

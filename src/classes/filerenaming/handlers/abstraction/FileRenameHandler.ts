@@ -31,7 +31,10 @@ export abstract class FileRenameHandler {
 		// const src = FileReader.getSrcFolderName();
 
 		for (const wsFolder of wsFolders) {
-			const workspaceFilePaths = glob.sync(wsFolder.uri.fsPath.replace(/\\/g, "/") + "/**/*{.js,.xml,.json}");
+			const wsFolderFSPath = wsFolder.uri.fsPath;
+			const workspaceFilePaths = glob.sync(wsFolderFSPath.replace(/\\/g, "/") + "/**/*{.js,.xml,.json}", {
+				ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+			});
 			workspaceFilePaths.forEach(filePath => {
 				let fileContent = fs.readFileSync(filePath, "utf8");
 				if (fileContent.indexOf(textToReplaceFromDotNotation) > -1 || fileContent.indexOf(textToReplaceFromSlashNotation) > -1) {

@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.34",
+	"version": "0.12.35",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -66,6 +66,12 @@
 		"configuration": {
 			"title": "SAPUI5 Plugin",
 			"properties": {
+				"ui5.plugin.excludeFolderPattern": {
+					"type": "string",
+					"default": "resources/**",
+					"pattern": "^.+$",
+					"description": "RegExp pattern which shows what should be excluded from search. Useful if you have local SAPUI5 libraries in your workspace. \"resources\" folder is default value."
+				},
 				"ui5.plugin.ui5version": {
 					"type": "string",
 					"default": "1.60.11",

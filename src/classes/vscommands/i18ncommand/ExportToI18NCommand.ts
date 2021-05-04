@@ -6,8 +6,6 @@ import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
 import { TextTransformationFactory, CaseType } from "./TextTransformationFactory";
 import * as jsClassData from "./i18nIDs.json";
 
-const workspace = vscode.workspace;
-
 export class ExportToI18NCommand {
 	public static async export() {
 		const editor = vscode.window.activeTextEditor;
@@ -124,7 +122,7 @@ export class ExportToI18NCommand {
 				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".view.xml", "");
 				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".xml", "");
 				const nameParts = currentlyOpenedFileFSName.split(path.sep);
-				const fileName = nameParts[nameParts.length -1];
+				const fileName = nameParts[nameParts.length - 1];
 
 				const transofrmatedText = textTransformationStrategy.transform(text);
 				proposedI18NValue = `${fileName}${addition}.${transofrmatedText}`;
@@ -199,20 +197,13 @@ export class ExportToI18NCommand {
 	private static async _insertIntoI18NFile(stringToInsert: string) {
 		const manifest = FileReader.getCurrentWorkspaceFoldersManifest();
 		const manifestFsPath = manifest?.fsPath;
-		const i18nRelativePath = manifest?.content["sap.app"].i18n;
+		const i18nRelativePath = manifest?.content["sap.app"]?.i18n;
 		if (manifestFsPath && i18nRelativePath) {
 			const i18nFSPath = `${manifestFsPath}${path.sep}${i18nRelativePath.replace(/\//g, path.sep)}`;
 
 			fs.appendFileSync(i18nFSPath, stringToInsert, "utf8");
 			ResourceModelData.readTexts();
 		}
-	}
-
-	public static findManifestsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
-		return new Promise((resolve) => {
-			workspace.findFiles(new vscode.RelativePattern(wsFolder || "", "**/manifest.json"))
-				.then(resolve);
-		});
 	}
 
 	static fileType = {
