@@ -27,7 +27,7 @@ export abstract class Linter {
 		const timeSpent = timeEnd - timeStart;
 		this.timePerChar = timeSpent / document.getText().length;
 
-		console.log(`Time spent by ${this.className}: ${timeSpent}`);
+		// console.log(`Time spent by ${this.className}: ${timeSpent}`);
 		return errors;
 	}
 }
