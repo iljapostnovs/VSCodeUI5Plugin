@@ -67,16 +67,16 @@ export class UIClassFactory {
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
 		if (!this._UIClasses[classNameDotNotation] || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length) {
-			console.time(`Class parsing for ${classNameDotNotation} took`);
+			// console.time(`Class parsing for ${classNameDotNotation} took`);
 			this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 
 			const UIClass = this._UIClasses[classNameDotNotation];
 			if (UIClass instanceof CustomUIClass) {
-				console.time(`Enriching ${classNameDotNotation} took`);
+				// console.time(`Enriching ${classNameDotNotation} took`);
 				this.enrichTypesInCustomClass(UIClass);
-				console.timeEnd(`Enriching ${classNameDotNotation} took`);
+				// console.timeEnd(`Enriching ${classNameDotNotation} took`);
 			}
-			console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
+			// console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
 		}
 	}
 
