@@ -135,7 +135,7 @@ export class FileReader {
 					const UI5Manifest: any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
 					const manifestFsPath: string = manifest.fsPath.replace(`${fileSeparator}manifest.json`, "");
 					const UIManifest = {
-						componentName: UI5Manifest["sap.app"].id,
+						componentName: UI5Manifest["sap.app"]?.id || "",
 						fsPath: manifestFsPath,
 						content: UI5Manifest
 					};
@@ -151,7 +151,9 @@ export class FileReader {
 	public static getManifestsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
 		// const src = this.getSrcFolderName(wsFolder);
 		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-		const manifestPaths = glob.sync(`${wsFolderFSPath}/**/manifest.json`);
+		const manifestPaths = glob.sync(`${wsFolderFSPath}/**/manifest.json`, {
+			ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+		});
 		const manifests: manifestPaths[] = manifestPaths.map(manifestPath => {
 			return {
 				fsPath: manifestPath.replace(/\//g, fileSeparator)
@@ -286,7 +288,9 @@ export class FileReader {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const classPaths = glob.sync(`${wsFolderFSPath}/**/*.js`);
+			const classPaths = glob.sync(`${wsFolderFSPath}/**/*.js`, {
+				ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+			});
 			classPaths.forEach(classPath => {
 				const className = FileReader.getClassNameFromPath(classPath);
 				if (className) {
@@ -305,7 +309,9 @@ export class FileReader {
 		for (const wsFolder of wsFolders) {
 			// const src = this.getSrcFolderName(wsFolder);
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const viewPaths = glob.sync(`${wsFolderFSPath}/**/*.view.xml`);
+			const viewPaths = glob.sync(`${wsFolderFSPath}/**/*.view.xml`, {
+				ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+			});
 			viewPaths.forEach(viewPath => {
 				const viewContent = fs.readFileSync(viewPath, "utf8");
 				const fragments = this.getFragments(viewContent);
@@ -327,7 +333,9 @@ export class FileReader {
 		for (const wsFolder of wsFolders) {
 			// const src = this.getSrcFolderName(wsFolder);
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const fragmentPaths = glob.sync(`${wsFolderFSPath}/**/*.fragment.xml`);
+			const fragmentPaths = glob.sync(`${wsFolderFSPath}/**/*.fragment.xml`, {
+				ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+			});
 			fragmentPaths.forEach(fragmentPath => {
 				const fragmentContent = fs.readFileSync(fragmentPath, "utf8");
 				const fragmentFSPath = fragmentPath.replace(/\//g, fileSeparator);
@@ -348,7 +356,9 @@ export class FileReader {
 		let classNames: string[] = [];
 		// const src = this.getSrcFolderName(wsFolder);
 		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-		const viewPaths = glob.sync(`${wsFolderFSPath}/**/*.js`);
+		const viewPaths = glob.sync(`${wsFolderFSPath}/**/*.js`, {
+			ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+		});
 		classNames = viewPaths.reduce((accumulator: string[], viewPath) => {
 			const path = this.getClassNameFromPath(viewPath);
 			if (path) {
@@ -572,7 +582,7 @@ export class FileReader {
 	}
 
 	public static getResourceModelUriForManifest(manifest: UIManifest) {
-		const i18nRelativePath = manifest.content["sap.app"].i18n || `i18n${fileSeparator}i18n.properties`;
+		const i18nRelativePath = typeof manifest.content["sap.app"]?.i18n === "string" ? manifest.content["sap.app"]?.i18n : `i18n${fileSeparator}i18n.properties`;
 		const i18nPath = i18nRelativePath.replace(/\//g, fileSeparator);
 		return `${manifest.fsPath}${fileSeparator}${i18nPath}`;
 	}

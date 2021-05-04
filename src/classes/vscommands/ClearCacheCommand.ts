@@ -13,7 +13,8 @@ export class ClearCacheCommand {
 				event.affectsConfiguration("ui5.plugin.signatureHelp") ||
 				event.affectsConfiguration("ui5.plugin.libsToLoad") ||
 				event.affectsConfiguration("ui5.plugin.dataSource") ||
-				event.affectsConfiguration("ui5.plugin.xmlDiagnostics");
+				event.affectsConfiguration("ui5.plugin.xmlDiagnostics") ||
+				event.affectsConfiguration("ui5.plugin.excludeFolderPattern");
 
 			if (event.affectsConfiguration("ui5.plugin.libsToLoad") || event.affectsConfiguration("ui5.plugin.dataSource")) {
 				this.clearCache();
@@ -34,7 +35,7 @@ export class ClearCacheCommand {
 	public static reloadWindow() {
 		const action = "Reload";
 		vscode.window
-			.showInformationMessage( "Reload window in order for change in extension ui5.plugin configuration to take effect.", action)
+			.showInformationMessage("Reload window in order for change in extension ui5.plugin configuration to take effect.", action)
 			.then(selectedAction => {
 				if (selectedAction === action) {
 					vscode.commands.executeCommand("workbench.action.reloadWindow");

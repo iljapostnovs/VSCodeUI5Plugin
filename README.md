@@ -9,6 +9,8 @@ Before you start working with the plugin, it will be useful to set formatOnSave 
 ```
 The reason for it is described in [Known limitations](#known-limitations)
 
+Make sure that you have ```ui5.plugin.excludeFolderPattern``` property set correctly. This property is critical if you have SAPUI5 libraries in your workspace.
+
 ----------
 ## Completion Items
 ### XML
