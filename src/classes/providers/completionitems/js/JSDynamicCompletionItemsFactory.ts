@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { UIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { UIField, UIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethods, UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../utils/FileReader";
@@ -25,6 +25,22 @@ export class JSDynamicCompletionItemsFactory {
 	}
 
 	private _generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods: FieldsAndMethods, document: vscode.TextDocument, position: vscode.Position) {
+		//remove duplicates
+		fieldsAndMethods.methods = fieldsAndMethods.methods.reduce((accumulator: UIMethod[], method: UIMethod) => {
+			const methodInAccumulator = accumulator.find(accumulatorMethod => accumulatorMethod.name === method.name);
+			if (!methodInAccumulator) {
+				accumulator.push(method);
+			}
+			return accumulator;
+		}, []);
+		fieldsAndMethods.fields = fieldsAndMethods.fields.reduce((accumulator: UIField[], field: UIField) => {
+			const methodInAccumulator = accumulator.find(accumulatorField => accumulatorField.name === field.name);
+			if (!methodInAccumulator) {
+				accumulator.push(field);
+			}
+			return accumulator;
+		}, []);
+
 		const range = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
 		const word = range && vscode.window.activeTextEditor?.document.getText(range);
 		let completionItems: CustomCompletionItem[] = [];

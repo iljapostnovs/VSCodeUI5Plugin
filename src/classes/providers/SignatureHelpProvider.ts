@@ -20,7 +20,7 @@ export class SignatureHelpProvider {
 			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 			const stackOfNodes = positionBeforeCurrentStrategy.getStackOfNodesForPosition(currentClassName, position + 1, true);
 
-			if (stackOfNodes. length > 0) {
+			if (stackOfNodes.length > 0) {
 				const callExpression = stackOfNodes[stackOfNodes.length - 1].type === "CallExpression" ? stackOfNodes.pop() : null; //removes CallExpression
 				const lastNode = stackOfNodes.length > 0 ? stackOfNodes.pop() : callExpression;
 				let methodName = lastNode.property?.name;
