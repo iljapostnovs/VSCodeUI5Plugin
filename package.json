@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.35",
+	"version": "0.12.36",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -67,10 +67,18 @@
 			"title": "SAPUI5 Plugin",
 			"properties": {
 				"ui5.plugin.excludeFolderPattern": {
-					"type": "string",
-					"default": "resources/**",
-					"pattern": "^.+$",
-					"description": "RegExp pattern which shows what should be excluded from search. Useful if you have local SAPUI5 libraries in your workspace. \"resources\" folder is default value."
+					"description": "Pattern which shows what should be excluded from search. Useful if you have local SAPUI5 libraries or node modules in your workspace. See glob npm package -> ignore option",
+					"type": "array",
+					"items": {
+						"type": "object",
+						"title": "Class name and method name. \"*\" for wild card",
+						"pattern": "^.+$"
+					},
+					"default": [
+						"resources/**",
+						"dist/**",
+						"node_modules/**"
+					]
 				},
 				"ui5.plugin.ui5version": {
 					"type": "string",

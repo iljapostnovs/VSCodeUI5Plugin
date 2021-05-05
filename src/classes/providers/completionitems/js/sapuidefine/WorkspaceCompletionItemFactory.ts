@@ -3,6 +3,7 @@ import * as fs from "fs";
 import { FileReader } from "../../../../utils/FileReader";
 import * as path from "path";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
+import glob = require("glob");
 const escapedFileSeparator = "\\" + path.sep;
 const workspace = vscode.workspace;
 
@@ -63,28 +64,26 @@ export class WorkspaceCompletionItemFactory {
 		const wsFolders = workspace.workspaceFolders || [];
 		const separator = path.sep;
 		for (const wsFolder of wsFolders) {
-			const manifests: any = FileReader.getManifestsInWorkspaceFolder(wsFolder);
+			const manifests: any = FileReader.getManifestPathsInWorkspaceFolder(wsFolder);
 
 			for (const manifest of manifests) {
 				const manifestPath = path.normalize(manifest.fsPath);
 				const UI5Manifest: any = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 				const manifestFsPath: string = manifestPath.replace(`${separator}manifest.json`, "");
 				const UI5ComponentName: string = UI5Manifest["sap.app"]?.id || "";
-				const projectJSFiles: any = await this._findJSFilesInWorkspaceFolder(wsFolder);
+				const projectJSFiles = this._findJSFilesInWorkspaceFolder(wsFolder);
 
-				projectJSFiles.forEach((projectJSFile: any) => {
-					if (projectJSFile.fsPath.indexOf(manifestFsPath) > -1) {
+				projectJSFiles.forEach((projectJSFilePath) => {
+					if (projectJSFilePath.indexOf(manifestFsPath) > -1) {
 						const JSFileUIDefineString =
-							projectJSFile.fsPath
+							projectJSFilePath
 								.replace(".js", "")
-								.replace(manifestPath
-									.replace(`${separator}manifest.json`, ""), UI5ComponentName)
+								.replace(manifestPath.replace(`${separator}manifest.json`, ""), UI5ComponentName)
 								.replace(/\./g, "/")
-								.replace(new RegExp(`${escapedFileSeparator}`, "g")
-									, "/");
+								.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
 						workspaceJSFiles.push(
 							new UIDefineJSFile({
-								fsPath: projectJSFile.fsPath,
+								fsPath: projectJSFilePath,
 								UIDefineString: JSFileUIDefineString
 							})
 						);
@@ -97,9 +96,15 @@ export class WorkspaceCompletionItemFactory {
 	}
 
 	private _findJSFilesInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
-		// const src = FileReader.getSrcFolderName(wsFolder);
+		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
 
-		return vscode.workspace.findFiles(new vscode.RelativePattern(wsFolder, "**/*.js"), new vscode.RelativePattern(wsFolder, vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || ""));
+		const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
+		const exclusionPaths = exclusions.map(excludeString => {
+			return `${wsFolderFSPath}/${excludeString}`
+		});
+		return glob.sync(`${wsFolderFSPath}/**/*.js`, {
+			ignore: exclusionPaths
+		}).map(jsFilePath => path.normalize(jsFilePath));
 	}
 
 	private static _generateCompletionItem(workspaceJSFile: UIDefineJSFile) {
