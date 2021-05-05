@@ -70,8 +70,8 @@
 					"description": "Pattern which shows what should be excluded from search. Useful if you have local SAPUI5 libraries or node modules in your workspace. See glob npm package -> ignore option",
 					"type": "array",
 					"items": {
-						"type": "object",
-						"title": "Class name and method name. \"*\" for wild card",
+						"type": "string",
+						"title": "Exclude pattern",
 						"pattern": "^.+$"
 					},
 					"default": [
