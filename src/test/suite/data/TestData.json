@@ -469,6 +469,18 @@
 				}
 			},
 			"type": "void"
+		},
+		{
+			"className": "com.extend.fragmenttest.controller.MasterExtend",
+			"methodName": "eventHandler10",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "setBusy"
+				}
+			},
+			"type": "sap.m.Button"
 		}
 	],
 	"JSLinter": [
@@ -587,6 +599,42 @@
 		{
 			"className": "com.test.util.AccessLevelModifierTest",
 			"errors": []
+		},
+		{
+			"className": "com.extend.fragmenttest.controller.MasterExtend",
+			"errors": [
+				{
+					"text": "\"bBusy\" param is of type \"boolean\", but provided \"number\""
+				},
+				{
+					"text": "No references found for \"unusedEventHandlerExtended\" class member"
+				},
+				{
+					"text": "Method \"unusedEventHandlerExtended\" is possibly private, no references found in other classes"
+				}
+			]
+		},
+		{
+			"className": "com.extend.fragmenttest.util.FormatterExtension",
+			"errors": [
+				{
+					"text": "No references found for \"unusedExtendedFormatValue\" class member"
+				},
+				{
+					"text": "Method \"unusedExtendedFormatValue\" is possibly private, no references found in other classes"
+				}
+			]
+		},
+		{
+			"className": "com.test.fragmenttest.util.Formatter",
+			"errors": [
+				{
+					"text": "No references found for \"unusedFormatValue\" class member"
+				},
+				{
+					"text": "Method \"unusedFormatValue\" is possibly private, no references found in other classes"
+				}
+			]
 		}
 	],
 	"XMLLinter": [
@@ -616,6 +664,14 @@
 				},
 				{
 					"text": "\"sap.m.NonExistantClass\" class doesn't exist"
+				}
+			]
+		},
+		{
+			"className": "com.test.fragmenttest.view.Master",
+			"errors": [
+				{
+					"text": "Invalid attribute value (eventHandler11)"
 				}
 			]
 		}
@@ -666,6 +722,24 @@
 				"onFragmentButtonPress",
 				"onSecondFragmentSelectionChange",
 				"onThirdFragmentSelectionChange"
+			]
+		},
+		{
+			"className": "com.extend.fragmenttest.controller.MasterExtend",
+			"eventHandlers": [
+				"eventHandler10",
+				"eventHandler11",
+				"eventHandler14"
+			]
+		},
+		{
+			"className": "com.extend.fragmenttest.controller.MasterExtend",
+			"eventHandlers": [
+				"eventHandler1",
+				"eventHandler2",
+				"eventHandler3",
+				"eventHandler4",
+				"eventHandler12"
 			]
 		}
 	],
