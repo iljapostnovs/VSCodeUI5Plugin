@@ -352,7 +352,8 @@
 		"lint": "tslint -p ./",
 		"test": "node ./dist/test/TestRunner.js",
 		"pretest": "npm run compilets",
-		"watch": "npm run compilets"
+		"watch": "npm run compilets",
+		"install_ext": "vsce package && PowerShell -Command \"code --install-extension $(node -p -e '`ui5plugin-` + require(`./package.json`).version + `.vsix`')\""
 	},
 	"devDependencies": {
 		"@types/axios": "^0.14.0",

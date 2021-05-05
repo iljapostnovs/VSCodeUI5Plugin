@@ -1,7 +1,9 @@
 sap.ui.define([
-	"com/test/fragmenttest/controller/Master.controller"
+	"com/test/fragmenttest/controller/Master.controller",
+	"com/extend/fragmenttest/util/FormatterExtension"
 ], function(
-	MasterController
+	MasterController,
+	FormatterExtension
 ) {
 	"use strict";
 
@@ -10,6 +12,9 @@ sap.ui.define([
 		eventHandler10() {
 			"com.extend.fragmenttest.view.fragments.FragmentController2"
 		},
-		eventHandler11() {}
+		eventHandler11() {},
+		unusedEventHandlerExtended() {},
+		eventHandler14() {}
+
 	});
 });

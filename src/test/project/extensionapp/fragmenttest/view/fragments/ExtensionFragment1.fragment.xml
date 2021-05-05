@@ -7,10 +7,17 @@
 		text="{
 			formatter: '.formatter.formatValueExtensionFragment1'
 		}"
+		blocked="{
+			formatter: '.formatter.formatValueExtensionFragmentParent'
+		}"
 		press="eventHandler10"
 	/>
 	<Text
 		id="idTextExtensionFragment1"
 		validateFieldGroup="eventHandler4"
+	/>
+	<c:Fragment
+		fragmentName="com.extend.fragmenttest.view.fragments.FragmentInExtensionFragment1"
+		type="XML"
 	/>
 </c:FragmentDefinition>

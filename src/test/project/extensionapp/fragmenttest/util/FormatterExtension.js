@@ -1,5 +1,5 @@
 sap.ui.define([
-	"com/test/util/Formatter"
+	"com/test/fragmenttest/util/Formatter"
 ], function(
 	Formatter
 ) {
@@ -7,6 +7,7 @@ sap.ui.define([
 
 	return Formatter.extend("com.extend.fragmenttest.util.FormatterExtension", {
 		formatValueExtensionFragment1() {},
-		formatValueFragmentController2() {}
+		formatValueFragmentController2() {},
+		unusedExtendedFormatValue() {}
 	});
 });

@@ -23,7 +23,7 @@ export class FileReader {
 				idClassMap: {},
 				content: viewContent,
 				fsPath: fsPath,
-				fragments: this.getFragmentsFromView(viewContent)
+				fragments: this.getFragmentsFromXMLDocuments(viewContent)
 			};
 		}
 	}
@@ -322,7 +322,7 @@ export class FileReader {
 			viewPaths.forEach(viewPath => {
 				const viewContent = fs.readFileSync(viewPath, "utf8");
 				const viewFSPath = viewPath.replace(/\//g, fileSeparator);
-				const fragments = this.getFragmentsFromView(viewContent);
+				const fragments = this.getFragmentsFromXMLDocuments(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				if (controllerName) {
 					this._viewCache[controllerName] = {
@@ -482,7 +482,7 @@ export class FileReader {
 		return responsibleClassName;
 	}
 
-	public static getFragmentsFromView(documentText: string) {
+	public static getFragmentsFromXMLDocuments(documentText: string) {
 		const fragments: Fragment[] = [];
 		const fragmentTags = this._getFragmentTags(documentText);
 		fragmentTags.forEach(fragmentTag => {

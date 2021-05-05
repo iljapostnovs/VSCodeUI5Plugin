@@ -76,15 +76,14 @@ export class UIClassFactory {
 
 			const UIClass = this._UIClasses[classNameDotNotation];
 			if (UIClass instanceof CustomUIClass) {
-				// console.time(`Enriching ${classNameDotNotation} took`);
 				this.enrichTypesInCustomClass(UIClass);
-				// console.timeEnd(`Enriching ${classNameDotNotation} took`);
 			}
 			// console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
 		}
 	}
 
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
+		// console.time(`Enriching ${UIClass.className} took`);
 		this._enrichVariablesWithJSDocTypes(UIClass);
 		this._enrichMethodParamsWithEventType(UIClass);
 		this._checkIfFieldIsUsedInXMLDocuments(UIClass);
@@ -94,6 +93,7 @@ export class UIClassFactory {
 		UIClass.fields.forEach(field => {
 			AcornSyntaxAnalyzer.findFieldType(field, UIClass.className, false, true);
 		});
+		// console.timeEnd(`Enriching ${UIClass.className} took`);
 	}
 
 	private static _checkIfFieldIsUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
@@ -439,40 +439,75 @@ export class UIClassFactory {
 		});
 	}
 
-	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass) {
-		const isController = FileReader.getClassPathFromClassName(CurrentUIClass.className)?.endsWith(".controller.js") || false;
+	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = []): ViewsAndFragments {
+		if (checkedClasses.includes(CurrentUIClass.className)) {
+			return { fragments: [], views: [] };
+		}
+
+		checkedClasses.push(CurrentUIClass.className);
+		const viewsAndFragments: ViewsAndFragments = this._getViewsAndFragmentsRelatedTo(CurrentUIClass);
+
+		const children = this._getAllChildrenOfClass(CurrentUIClass);
+		const parentUIClasses = this._getAllCustomUIClasses().filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && CurrentUIClass !== UIClass);
+		const whereMentioned = this._getAllClassesWhereClassIsImported(CurrentUIClass.className);
+		const relatedClasses = [...parentUIClasses, ...children, ...whereMentioned];
+		const relatedViewsAndFragments = relatedClasses.reduce((accumulator: ViewsAndFragments, relatedUIClass: CustomUIClass) => {
+			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses);
+			accumulator.fragments = accumulator.fragments.concat(relatedFragmentsAndViews.fragments);
+			accumulator.views = accumulator.views.concat(relatedFragmentsAndViews.views);
+			return accumulator;
+		}, {
+			views: [],
+			fragments: []
+		});
+		viewsAndFragments.fragments = viewsAndFragments.fragments.concat(relatedViewsAndFragments.fragments);
+		viewsAndFragments.views = viewsAndFragments.views.concat(relatedViewsAndFragments.views);
+		viewsAndFragments.views.forEach(view => {
+			viewsAndFragments.fragments.push(...this._getFragmentFromViewManifestExtensions(CurrentUIClass, view));
+		});
+
+		return viewsAndFragments;
+	}
+
+	private static _getViewsAndFragmentsRelatedTo(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments: ViewsAndFragments = {
 			views: [],
 			fragments: []
 		};
-		if (isController) {
-			const allUIClasses = Object.keys(this.getAllExistentUIClasses()).map(key => this.getAllExistentUIClasses()[key]);
-			const customUIClasses = allUIClasses.filter(UIClass => UIClass instanceof CustomUIClass) as CustomUIClass[];
-			const childrenUIClasses = customUIClasses.filter(UIClass => this.isClassAChildOfClassB(UIClass.className, CurrentUIClass.className));
-			const parentUIClasses = customUIClasses.filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className));
-			childrenUIClasses.concat(parentUIClasses).forEach(childUIClass => {
-				const view = FileReader.getViewForController(childUIClass.className);
-				if (view) {
-					viewsAndFragments.views.push(view);
-				}
-				viewsAndFragments.fragments.push(...FileReader.getFragmentsMentionedInClass(CurrentUIClass.className));
-			});
 
-			viewsAndFragments.views.forEach(view => {
-				viewsAndFragments.fragments.push(...this._getFragmentFromViewManifestExtensions(CurrentUIClass, view));
-			});
-		} else {
-			viewsAndFragments.fragments = FileReader.getFragmentsMentionedInClass(CurrentUIClass.className);
-			const views = [];
-			const view = FileReader.getViewForController(CurrentUIClass.className);
-			if (view) {
-				views.push(view);
-			}
-			viewsAndFragments.views = views;
+		viewsAndFragments.fragments = FileReader.getFragmentsMentionedInClass(CurrentUIClass.className);
+		const views = [];
+		const view = FileReader.getViewForController(CurrentUIClass.className);
+		if (view) {
+			views.push(view);
 		}
-
+		viewsAndFragments.views = views;
 
 		return viewsAndFragments;
+	}
+
+	private static _getAllClassesWhereClassIsImported(className: string) {
+		return this._getAllCustomUIClasses().filter(UIClass => {
+			return !!UIClass.UIDefine.find(UIDefine => {
+				return UIDefine.classNameDotNotation === className;
+			});
+		});
+	}
+
+	private static _getAllChildrenOfClass(UIClass: CustomUIClass, bFirstLevelinheritance = false) {
+		return bFirstLevelinheritance ? this._getAllCustomUIClasses().filter(CurrentUIClass => {
+			return CurrentUIClass.parentClassNameDotNotation === UIClass.className;
+		}) : this._getAllCustomUIClasses().filter(CurrentUIClass => {
+			return this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && UIClass.className !== CurrentUIClass.className;
+		});
+	}
+
+	private static _getAllCustomUIClasses(): CustomUIClass[] {
+		const allUIClasses = this.getAllExistentUIClasses();
+
+		return Object.keys(allUIClasses).filter(UIClassName => {
+			return allUIClasses[UIClassName] instanceof CustomUIClass;
+		}).map(UIClassName => allUIClasses[UIClassName] as CustomUIClass);
 	}
 
 	private static _getFragmentFromViewManifestExtensions(UIClass: CustomUIClass, view: View) {

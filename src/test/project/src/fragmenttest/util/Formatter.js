@@ -8,6 +8,8 @@ sap.ui.define([
 	return ManagedObject.extend("com.test.fragmenttest.util.Formatter", {
 		formatValueViewMaster() {},
 		formatValueViewFragment1() {},
-		formatValueFragmentController1() {}
+		formatValueFragmentController1() {},
+		formatValueExtensionFragmentParent() {},
+		unusedFormatValue() {}
 	});
 });

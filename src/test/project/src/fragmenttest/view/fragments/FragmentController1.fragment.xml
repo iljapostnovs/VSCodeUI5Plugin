@@ -5,7 +5,7 @@
 	<Button
 		id="idButtonFragmentController1"
 		text="{
-			formatter: '.formatter.formatValueViewController1'
+			formatter: '.formatter.formatValueFragmentController1'
 		}"
 		press="eventHandler4"
 	/>

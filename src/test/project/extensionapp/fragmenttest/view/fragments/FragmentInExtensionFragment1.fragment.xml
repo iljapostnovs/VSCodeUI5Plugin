@@ -1,0 +1,9 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button
+		id="idButtonInFragmentInExtensionFragment1"
+		press="eventHandler14"
+	/>
+</c:FragmentDefinition>

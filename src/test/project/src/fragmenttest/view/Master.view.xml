@@ -13,6 +13,7 @@
 			formatter: '.formatter.formatValueViewMaster'
 		}"
 		press="eventHandler1"
+		parseError="eventHandler11"
 	/>
 	<c:Fragment
 		fragmentName="com.test.fragmenttest.view.fragments.FragmentView1"

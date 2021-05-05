@@ -17,6 +17,7 @@ sap.ui.define([
 		},
 		eventHandler3() {},
 		eventHandler4() {},
-		eventHandler12() {}
+		eventHandler12() {},
+		unusedEventHandler() {}
 	});
 });
