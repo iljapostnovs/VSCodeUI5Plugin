@@ -11,10 +11,13 @@ sap.ui.define([
 		formatter: FormatterExtension,
 		eventHandler10() {
 			"com.extend.fragmenttest.view.fragments.FragmentController2"
+			const test = this.getView().byId("idButtonInFragmentInExtensionFragment1");
+			test.setBusy(123);
 		},
 		eventHandler11() {},
 		unusedEventHandlerExtended() {},
-		eventHandler14() {}
-
+		eventHandler14(oEvent) {
+			const source = oEvent.getSource();
+		}
 	});
 });

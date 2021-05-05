@@ -523,12 +523,14 @@ export class UIClassFactory {
 						const fragmentName = extension.fragmentName;
 						const fragment = FileReader.getFragment(fragmentName);
 						if (fragment) {
-							fragments.push(fragment);
+							const fragmentsInFragment: Fragment[] = FileReader.getFragmentsInFragment(fragment);
+							fragments.push(fragment, ...fragmentsInFragment);
 						}
 					}
 				});
 			}
 		}
+
 		return fragments;
 	}
 

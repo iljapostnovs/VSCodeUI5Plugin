@@ -19,33 +19,40 @@ export class FileReader {
 	public static setNewViewContentToCache(viewContent: string, fsPath: string) {
 		const controllerName = this.getControllerNameFromView(viewContent);
 		if (controllerName) {
-			this._viewCache[controllerName] = {
-				idClassMap: {},
-				content: viewContent,
-				fsPath: fsPath,
-				fragments: this.getFragmentsFromXMLDocuments(viewContent)
-			};
+			if (this._viewCache[controllerName]) {
+				this._viewCache[controllerName].content = viewContent;
+				this._viewCache[controllerName].idClassMap = {};
+				this._viewCache[controllerName].fsPath = fsPath;
+				this._viewCache[controllerName].fragments = this.getFragmentsFromXMLDocumentText(viewContent);
+			} else {
+				this._viewCache[controllerName] = {
+					idClassMap: {},
+					content: viewContent,
+					fsPath: fsPath,
+					fragments: this.getFragmentsFromXMLDocumentText(viewContent)
+				};
+			}
 		}
 	}
 
 	public static setNewFragmentContentToCache(document: vscode.TextDocument) {
 		const fragmentName = this.getClassNameFromPath(document.fileName);
 		if (fragmentName) {
-			this._fragmentCache[fragmentName] = {
-				content: document.getText(),
-				fsPath: document.fileName,
-				name: fragmentName,
-				idClassMap: {}
-			};
-
-			Object.keys(this._viewCache).forEach(key => {
-				const view = this._viewCache[key];
-				view.fragments.forEach((fragment, index) => {
-					if (fragment.name === fragmentName) {
-						view.fragments[index] = this._fragmentCache[fragmentName];
-					}
-				})
-			})
+			if (this._fragmentCache[fragmentName]) {
+				this._fragmentCache[fragmentName].content = document.getText();
+				this._fragmentCache[fragmentName].fsPath = document.fileName;
+				this._fragmentCache[fragmentName].name = fragmentName;
+				this._fragmentCache[fragmentName].idClassMap = {};
+				this._fragmentCache[fragmentName].fragments = this.getFragmentsFromXMLDocumentText(document.getText());
+			} else {
+				this._fragmentCache[fragmentName] = {
+					content: document.getText(),
+					fsPath: document.fileName,
+					name: fragmentName,
+					idClassMap: {},
+					fragments: this.getFragmentsFromXMLDocumentText(document.getText())
+				};
+			}
 		}
 	}
 
@@ -186,9 +193,23 @@ export class FileReader {
 		if (view) {
 			className = this._getClassOfControlIdFromView(view, controlId);
 			if (!className) {
-				const view = this.getViewForController(controllerClassName);
-				view?.fragments.find(fragment => {
+				view.fragments.find(fragment => {
 					className = this._getClassOfControlIdFromView(fragment, controlId);
+					return !!className;
+				});
+			}
+		}
+
+		if (!className) {
+			const UIClass = UIClassFactory.getUIClass(controllerClassName);
+			if (UIClass instanceof CustomUIClass) {
+				const fragmentsAndViews = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+				const fragmentAndViewArray = [
+					...fragmentsAndViews.views,
+					...fragmentsAndViews.fragments
+				];
+				fragmentAndViewArray.find(view => {
+					className = this._getClassOfControlIdFromView(view, controlId);
 					return !!className;
 				});
 			}
@@ -197,7 +218,7 @@ export class FileReader {
 		return className;
 	}
 
-	public static getViewForController(controllerName: string) {
+	public static getViewForController(controllerName: string): View | undefined {
 		if (!this._viewCache[controllerName]) {
 			// this._readAllViewsAndSaveInCache();
 		}
@@ -220,9 +241,26 @@ export class FileReader {
 				return UIClass.classText.indexOf(`"${fragment.name}"`) > -1;
 			});
 
+			const fragmentsInFragment: Fragment[] = [];
+			fragments.forEach(fragment => {
+				fragmentsInFragment.push(...this.getFragmentsInFragment(fragment));
+			});
+
+			fragments.push(...fragmentsInFragment);
+
 		}
 
 		return fragments;
+	}
+
+	static getFragmentsInFragment(fragment: Fragment) {
+		const fragmentsInFragment: Fragment[] = [];
+		const fragments = fragment.fragments;
+		fragments.forEach(fragment => {
+			fragmentsInFragment.push(...this.getFragmentsInFragment(fragment));
+		});
+
+		return fragments.concat(fragmentsInFragment);
 	}
 
 	public static getFirstFragmentForClass(className: string): Fragment | undefined {
@@ -269,7 +307,9 @@ export class FileReader {
 					controlClass = [classNameResult[0], className.trim()].join(".");
 				}
 			}
-			viewOrFragment.idClassMap[controlId] = controlClass;
+			if (controlClass) {
+				viewOrFragment.idClassMap[controlId] = controlClass;
+			}
 		}
 
 		return viewOrFragment.idClassMap[controlId];
@@ -322,7 +362,7 @@ export class FileReader {
 			viewPaths.forEach(viewPath => {
 				const viewContent = fs.readFileSync(viewPath, "utf8");
 				const viewFSPath = viewPath.replace(/\//g, fileSeparator);
-				const fragments = this.getFragmentsFromXMLDocuments(viewContent);
+				const fragments = this.getFragmentsFromXMLDocumentText(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				if (controllerName) {
 					this._viewCache[controllerName] = {
@@ -349,9 +389,14 @@ export class FileReader {
 						content: fragmentContent,
 						fsPath: fragmentFSPath,
 						name: fragmentName,
-						idClassMap: {}
+						idClassMap: {},
+						fragments: []
 					};
 				}
+			});
+
+			this.getAllFragments().forEach(fragment => {
+				fragment.fragments = this.getFragmentsFromXMLDocumentText(fragment.content);
 			});
 		}
 	}
@@ -482,7 +527,7 @@ export class FileReader {
 		return responsibleClassName;
 	}
 
-	public static getFragmentsFromXMLDocuments(documentText: string) {
+	public static getFragmentsFromXMLDocumentText(documentText: string) {
 		const fragments: Fragment[] = [];
 		const fragmentTags = this._getFragmentTags(documentText);
 		fragmentTags.forEach(fragmentTag => {
@@ -491,7 +536,6 @@ export class FileReader {
 				const fragmentPath = this.getClassPathFromClassName(fragmentName, true);
 				const fragment = this.getFragment(fragmentName);
 				if (fragment && fragmentPath) {
-					documentText = documentText.replace(fragmentTag, fragment.content);
 					fragments.push(fragment);
 				}
 			}
@@ -518,7 +562,7 @@ export class FileReader {
 	}
 
 	private static _getFragmentTags(documentText: string) {
-		return documentText.match(/<.*?Fragment(.|\s)*?\/>/g) || [];
+		return documentText.match(/<.*?:Fragment\s(.|\s)*?\/>/g) || [];
 	}
 
 	private static _isSeparator(char: string) {
@@ -701,7 +745,8 @@ export interface Fragment {
 	name: string;
 	idClassMap: {
 		[key: string]: string;
-	}
+	};
+	fragments: Fragment[];
 }
 interface Fragments {
 	[key: string]: Fragment;
