@@ -149,7 +149,14 @@ export class FileReader {
 	}
 
 	public static getManifestPathsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
+		const timeStart = new Date().getTime();
 		const manifestPaths = this._readFilesInWorkspace(wsFolder, "**/manifest.json");
+		const timeEnd = new Date().getTime();
+		const timeSpent = timeEnd - timeStart;
+		if (timeSpent > 5000 || manifestPaths.length > 30) {
+			vscode.window.showInformationMessage(`Reading manifests took ${timeSpent / 100}s and ${manifestPaths.length} manifests found. Please make sure that "ui5.plugin.excludeFolderPattern" preference is configured correctly.`);
+		}
+
 		const manifests: manifestPaths[] = manifestPaths.map(manifestPath => {
 			return {
 				fsPath: manifestPath.replace(/\//g, fileSeparator)
