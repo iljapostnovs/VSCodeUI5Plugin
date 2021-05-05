@@ -1,3 +1,7 @@
+## 0.12.37 (05-05-2021)
+* Refactoring
+* Information message added if manifest reading is too slow or there are too much manifests found
+
 ## 0.12.36 (05-05-2021)
 * node_modules and dist added to default exclusions
 * ui5.plugin.excludeFolderPattern is now an array
