@@ -32,8 +32,12 @@ export abstract class FileRenameHandler {
 
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath;
+			const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
+			const exclusionPaths = exclusions.map(excludeString => {
+				return `${wsFolderFSPath}/${excludeString}`
+			});
 			const workspaceFilePaths = glob.sync(wsFolderFSPath.replace(/\\/g, "/") + "/**/*{.js,.xml,.json}", {
-				ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+				ignore: exclusionPaths
 			});
 			workspaceFilePaths.forEach(filePath => {
 				let fileContent = fs.readFileSync(filePath, "utf8");

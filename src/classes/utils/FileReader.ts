@@ -129,7 +129,7 @@ export class FileReader {
 	private static _fetchAllWorkspaceManifests() {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
-			const manifests = this.getManifestsInWorkspaceFolder(wsFolder);
+			const manifests = this.getManifestPathsInWorkspaceFolder(wsFolder);
 			for (const manifest of manifests) {
 				try {
 					const UI5Manifest: any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
@@ -148,11 +148,14 @@ export class FileReader {
 		}
 	}
 
-	public static getManifestsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
-		// const src = this.getSrcFolderName(wsFolder);
+	public static getManifestPathsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
 		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+		const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
+		const exclusionPaths = exclusions.map(excludeString => {
+			return `${wsFolderFSPath}/${excludeString}`
+		});
 		const manifestPaths = glob.sync(`${wsFolderFSPath}/**/manifest.json`, {
-			ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+			ignore: exclusionPaths
 		});
 		const manifests: manifestPaths[] = manifestPaths.map(manifestPath => {
 			return {
@@ -288,8 +291,12 @@ export class FileReader {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+			const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
+			const exclusionPaths = exclusions.map(excludeString => {
+				return `${wsFolderFSPath}/${excludeString}`
+			});
 			const classPaths = glob.sync(`${wsFolderFSPath}/**/*.js`, {
-				ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+				ignore: exclusionPaths
 			});
 			classPaths.forEach(classPath => {
 				const className = FileReader.getClassNameFromPath(classPath);
@@ -309,8 +316,12 @@ export class FileReader {
 		for (const wsFolder of wsFolders) {
 			// const src = this.getSrcFolderName(wsFolder);
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+			const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
+			const exclusionPaths = exclusions.map(excludeString => {
+				return `${wsFolderFSPath}/${excludeString}`
+			});
 			const viewPaths = glob.sync(`${wsFolderFSPath}/**/*.view.xml`, {
-				ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+				ignore: exclusionPaths
 			});
 			viewPaths.forEach(viewPath => {
 				const viewContent = fs.readFileSync(viewPath, "utf8");
@@ -333,8 +344,12 @@ export class FileReader {
 		for (const wsFolder of wsFolders) {
 			// const src = this.getSrcFolderName(wsFolder);
 			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+			const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
+			const exclusionPaths = exclusions.map(excludeString => {
+				return `${wsFolderFSPath}/${excludeString}`
+			});
 			const fragmentPaths = glob.sync(`${wsFolderFSPath}/**/*.fragment.xml`, {
-				ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+				ignore: exclusionPaths
 			});
 			fragmentPaths.forEach(fragmentPath => {
 				const fragmentContent = fs.readFileSync(fragmentPath, "utf8");
@@ -356,8 +371,12 @@ export class FileReader {
 		let classNames: string[] = [];
 		// const src = this.getSrcFolderName(wsFolder);
 		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+		const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
+		const exclusionPaths = exclusions.map(excludeString => {
+			return `${wsFolderFSPath}/${excludeString}`
+		});
 		const viewPaths = glob.sync(`${wsFolderFSPath}/**/*.js`, {
-			ignore: `${wsFolderFSPath}/${vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern")}`
+			ignore: exclusionPaths
 		});
 		classNames = viewPaths.reduce((accumulator: string[], viewPath) => {
 			const path = this.getClassNameFromPath(viewPath);
