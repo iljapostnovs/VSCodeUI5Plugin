@@ -35,8 +35,8 @@ export class CompletionItemRegistrator {
 		}, ".", "\"", "'");
 
 		const JSViewIDProvider = vscode.languages.registerCompletionItemProvider({ language: "javascript", scheme: "file" }, {
-			provideCompletionItems() {
-				return JSCompletionItemFactory.createViewIdCompletionItems();
+			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+				return JSCompletionItemFactory.createViewIdCompletionItems(document, position);
 			}
 		}, "\"", "'");
 

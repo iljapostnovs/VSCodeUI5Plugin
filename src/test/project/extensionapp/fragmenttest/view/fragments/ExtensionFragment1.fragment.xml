@@ -1,0 +1,16 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button
+		id="idButtonExtensionFragment1"
+		text="{
+			formatter: '.formatter.formatValueExtensionFragment1'
+		}"
+		press="eventHandler10"
+	/>
+	<Text
+		id="idTextExtensionFragment1"
+		validateFieldGroup="eventHandler4"
+	/>
+</c:FragmentDefinition>

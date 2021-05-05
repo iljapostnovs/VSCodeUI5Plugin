@@ -23,7 +23,7 @@ export class FileReader {
 				idClassMap: {},
 				content: viewContent,
 				fsPath: fsPath,
-				fragments: this.getFragments(viewContent)
+				fragments: this.getFragmentsFromView(viewContent)
 			};
 		}
 	}
@@ -211,17 +211,14 @@ export class FileReader {
 		return view;
 	}
 
-	public static getFragmentsForClass(className: string) {
+	public static getFragmentsMentionedInClass(className: string) {
 		let fragments: Fragment[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 
 		if (UIClass instanceof CustomUIClass) {
-			const fragmentKeys = Object.keys(this._fragmentCache).filter(key => {
-				return UIClass.classText.indexOf(`"${this._fragmentCache[key].name}"`) > -1;
+			fragments = this.getAllFragments().filter(fragment => {
+				return UIClass.classText.indexOf(`"${fragment.name}"`) > -1;
 			});
-			if (fragmentKeys) {
-				fragments = fragmentKeys.map(fragmentKey => this._fragmentCache[fragmentKey]);
-			}
 
 		}
 
@@ -229,7 +226,7 @@ export class FileReader {
 	}
 
 	public static getFirstFragmentForClass(className: string): Fragment | undefined {
-		const fragment = this.getFragmentsForClass(className)[0];
+		const fragment = this.getFragmentsMentionedInClass(className)[0];
 
 		return fragment;
 	}
@@ -324,13 +321,14 @@ export class FileReader {
 			const viewPaths = this._readFilesInWorkspace(wsFolder, "**/*.view.xml");
 			viewPaths.forEach(viewPath => {
 				const viewContent = fs.readFileSync(viewPath, "utf8");
-				const fragments = this.getFragments(viewContent);
+				const viewFSPath = viewPath.replace(/\//g, fileSeparator);
+				const fragments = this.getFragmentsFromView(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				if (controllerName) {
 					this._viewCache[controllerName] = {
 						idClassMap: {},
 						content: viewContent,
-						fsPath: viewPath.replace(/\//g, fileSeparator),
+						fsPath: viewFSPath,
 						fragments: fragments
 					};
 				}
@@ -398,9 +396,73 @@ export class FileReader {
 			} else {
 				responsibleClassName = this._getResponsibleClassNameForFragmentFromCustomUIClasses(document);
 			}
+
+			if (!responsibleClassName) {
+				responsibleClassName = this._getResponsibleClassNameForFragmentFromManifestExtensions(document);
+			}
 		}
 
 		return responsibleClassName;
+	}
+
+	public static getManifestExtensionsForClass(className: string): any | undefined {
+		const manifest = FileReader.getManifestForClass(className);
+		return manifest?.content["sap.ui5"]?.extends?.extensions;
+	}
+
+	private static _getResponsibleClassNameForFragmentFromManifestExtensions(document: vscode.TextDocument) {
+		let responsibleClassName: string | undefined;
+		const fragmentName = this.getClassNameFromPath(document.fileName);
+		if (fragmentName) {
+			const extensions = this.getManifestExtensionsForClass(fragmentName);
+			const viewExtensions = extensions && extensions["sap.ui.viewExtensions"];
+			if (viewExtensions) {
+				const viewName = Object.keys(viewExtensions).find(viewName => {
+					const viewExtensionPoints = viewExtensions[viewName];
+					if (viewExtensionPoints) {
+						return Object.keys(viewExtensionPoints).find(extensionPointName => {
+							return viewExtensionPoints[extensionPointName].fragmentName === fragmentName;
+						});
+					}
+					return false;
+				});
+
+				if (viewName) {
+					const view = this.getAllViews().find(view => {
+						const currentViewName = this.getClassNameFromPath(view.fsPath);
+						if (currentViewName) {
+							return currentViewName === viewName;
+						}
+						return false;
+					});
+					if (view) {
+						responsibleClassName = this.getControllerNameFromView(view.content);
+
+						if (responsibleClassName) {
+							responsibleClassName = this._swapResponsibleControllerIfItIsExtendedInManifest(responsibleClassName, fragmentName);
+						}
+					}
+				}
+			}
+		}
+
+		return responsibleClassName;
+	}
+
+	private static _swapResponsibleControllerIfItIsExtendedInManifest(controllerName: string, sourceClassName: string) {
+		const extensions = this.getManifestExtensionsForClass(sourceClassName);
+		const controllerReplacements = extensions && extensions["sap.ui.controllerReplacements"];
+
+		if (controllerReplacements) {
+			const replacementKey = Object.keys(controllerReplacements).find(replacementKey => {
+				return replacementKey === controllerName;
+			});
+			if (replacementKey) {
+				controllerName = controllerReplacements[replacementKey];
+			}
+		}
+
+		return controllerName;
 	}
 
 	private static _getResponsibleClassNameForFragmentFromCustomUIClasses(document: vscode.TextDocument) {
@@ -420,22 +482,17 @@ export class FileReader {
 		return responsibleClassName;
 	}
 
-	public static getFragments(documentText: string) {
+	public static getFragmentsFromView(documentText: string) {
 		const fragments: Fragment[] = [];
 		const fragmentTags = this._getFragmentTags(documentText);
 		fragmentTags.forEach(fragmentTag => {
 			const fragmentName = this._getFragmentNameFromTag(fragmentTag);
 			if (fragmentName) {
 				const fragmentPath = this.getClassPathFromClassName(fragmentName, true);
-				const fragment = this._getFragment(fragmentName);
+				const fragment = this.getFragment(fragmentName);
 				if (fragment && fragmentPath) {
 					documentText = documentText.replace(fragmentTag, fragment.content);
-					fragments.push({
-						content: fragment.content,
-						name: fragmentName,
-						fsPath: fragmentPath,
-						idClassMap: {}
-					});
+					fragments.push(fragment);
 				}
 			}
 		});
@@ -443,11 +500,7 @@ export class FileReader {
 		return fragments;
 	}
 
-	private static _getFragment(fragmentName: string): Fragment | undefined {
-		if (!this._fragmentCache[fragmentName]) {
-			// this._readAllFragmentsAndSaveInCache();
-		}
-
+	static getFragment(fragmentName: string): Fragment | undefined {
 		return this._fragmentCache[fragmentName];
 	}
 

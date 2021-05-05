@@ -107,10 +107,10 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	public createViewIdCompletionItems() {
+	public createViewIdCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		const idCompletionItems = new ViewIdCompletionItemFactory();
 
-		return idCompletionItems.createIdCompletionItems();
+		return idCompletionItems.createIdCompletionItems(document, position);
 	}
 
 	public createPropertyMethodCompletionItems(document: vscode.TextDocument, position: vscode.Position) {

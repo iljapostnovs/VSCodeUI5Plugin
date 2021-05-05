@@ -2,8 +2,8 @@ import * as vscode from "vscode";
 import { FileReader } from "./FileReader";
 import { UIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 export enum PositionType {
 	InTheTagAttributes = "1",
@@ -30,22 +30,27 @@ function escapeRegExp(string: string) {
 }
 
 export class XMLParser {
-	static getAllIDsInCurrentView() {
-		let IdsResult: string[] = [];
-		const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+	static getAllIDsInCurrentView(document: vscode.TextDocument) {
+		const IdsResult: string[] = [];
+		const currentClass = FileReader.getClassNameFromPath(document.fileName);
 		if (currentClass) {
+			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClass);
 			const idRegExp = /(?<=\sid=").*?(?="\s?)/g;
-			const view = FileReader.getViewForController(currentClass);
-			if (view) {
-				IdsResult = view.content.match(idRegExp) || [];
+			// const view = FileReader.getViewForController(currentClass);
+			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+			viewsAndFragments.views.forEach(view => {
+				const IdsViewResult = view.content.match(idRegExp) || [];
+				if (IdsViewResult) {
+					IdsResult.push(...IdsViewResult);
+				}
 				view.fragments.forEach(fragment => {
 					const IdsFragmentResult = fragment.content.match(idRegExp) || [];
 					if (IdsFragmentResult) {
 						IdsResult.push(...IdsFragmentResult);
 					}
 				});
-			}
-			const fragments = FileReader.getFragmentsForClass(currentClass);
+			});
+			const fragments = viewsAndFragments.fragments;
 			fragments.forEach(fragment => {
 				const IdsFragmentResult = fragment.content.match(idRegExp) || [];
 				if (IdsFragmentResult) {

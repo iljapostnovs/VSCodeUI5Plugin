@@ -1,0 +1,16 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button
+		id="idButtonFragmentController2"
+		text="{
+			formatter: '.formatter.formatValueFragmentController2'
+		}"
+		press="eventHandler11"
+	/>
+	<Text
+		id="idTextFragmentController2"
+		modelContextChange="eventHandler12"
+	/>
+</c:FragmentDefinition>

@@ -503,15 +503,19 @@ export class AcornSyntaxAnalyzer {
 				}
 			}
 			if (currentClassEventHandlerName && !eventHandlerData) {
-				const fragmentsOfTheController = FileReader.getFragmentsForClass(className);
-				fragmentsOfTheController.find(fragmentOfTheController => {
-					eventHandlerData = this._getEventHandlerDataFromXMLText(fragmentOfTheController.content, currentClassEventHandlerName);
+				// const fragmentsOfTheController = FileReader.getFragmentsForClass(className);
+				const UIClass = UIClassFactory.getUIClass(className);
+				if (UIClass instanceof CustomUIClass) {
+					const fragmentsOfTheController = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass).fragments;
+					fragmentsOfTheController.find(fragmentOfTheController => {
+						eventHandlerData = this._getEventHandlerDataFromXMLText(fragmentOfTheController.content, currentClassEventHandlerName);
 
-					return !!eventHandlerData;
-				});
+						return !!eventHandlerData;
+					});
 
-				if (!eventHandlerData) {
-					eventHandlerData = this.getEventHandlerDataFromJSClass(className, currentClassEventHandlerName);
+					if (!eventHandlerData) {
+						eventHandlerData = this.getEventHandlerDataFromJSClass(className, currentClassEventHandlerName);
+					}
 				}
 			}
 		}

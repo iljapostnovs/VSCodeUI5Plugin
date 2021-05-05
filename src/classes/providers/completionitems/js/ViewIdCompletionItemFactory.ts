@@ -5,29 +5,27 @@ import { XMLParser } from "../../../utils/XMLParser";
 import { CustomCompletionItem } from "../CustomCompletionItem";
 
 export class ViewIdCompletionItemFactory {
-	public createIdCompletionItems() {
+	public createIdCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		const strategy = new InnerPropertiesStrategy();
-		const activeTextEditor = vscode.window.activeTextEditor;
-		const position = activeTextEditor?.document.offsetAt(activeTextEditor.selection.start);
+		const offset = document.offsetAt(position);
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		if (currentClassName && position) {
-			const nodes = strategy.getStackOfNodesForInnerParamsForPosition(currentClassName, position, true);
+			const nodes = strategy.getStackOfNodesForInnerParamsForPosition(currentClassName, offset, true);
 			if (nodes.length === 1 && nodes[0].callee?.property?.name === "byId") {
-				const viewIDs = XMLParser.getAllIDsInCurrentView();
-				completionItems = this._generateCompletionItemsFromUICompletionItems(viewIDs);
+				const viewIDs = XMLParser.getAllIDsInCurrentView(document);
+				completionItems = this._generateCompletionItemsFromUICompletionItems(viewIDs, document, position);
 			}
 		}
 
 		return completionItems;
 	}
 
-	private _generateCompletionItemsFromUICompletionItems(viewIDs: string[]) {
-		const position = vscode.window.activeTextEditor?.selection.start;
-		const currentRange = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
-
-		return viewIDs.map(viewId => {
+	private _generateCompletionItemsFromUICompletionItems(viewIDs: string[], document: vscode.TextDocument, position: vscode.Position) {
+		const currentRange = document.getWordRangeAtPosition(position);
+		const uniqueViewIds = [...new Set(viewIDs)];
+		return uniqueViewIds.map(viewId => {
 			const completionItem: CustomCompletionItem = new CustomCompletionItem(viewId);
 			completionItem.kind = vscode.CompletionItemKind.Keyword;
 			completionItem.insertText = viewId;

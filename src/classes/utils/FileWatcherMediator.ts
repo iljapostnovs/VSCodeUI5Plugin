@@ -90,6 +90,17 @@ export class FileWatcherMediator {
 			}
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
+
+		disposable = vscode.window.onDidChangeActiveTextEditor(textEditor => {
+			if (textEditor?.document.fileName.endsWith(".js")) {
+
+				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(textEditor?.document.uri.fsPath);
+				if (currentClassNameDotNotation) {
+					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, textEditor?.document.getText(), true);
+				}
+			}
+		});
+		UI5Plugin.getInstance().addDisposable(disposable);
 	}
 
 	private static _handleFileRename(file: {

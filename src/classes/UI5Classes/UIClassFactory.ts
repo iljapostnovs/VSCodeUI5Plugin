@@ -65,8 +65,12 @@ export class UIClassFactory {
 		}
 	}
 
-	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string) {
-		if (!this._UIClasses[classNameDotNotation] || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length) {
+	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string, force = false) {
+		if (
+			force ||
+			!this._UIClasses[classNameDotNotation] ||
+			(<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length
+		) {
 			// console.time(`Class parsing for ${classNameDotNotation} took`);
 			this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 
@@ -93,7 +97,7 @@ export class UIClassFactory {
 	}
 
 	private static _checkIfFieldIsUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
-		const viewsAndFragments = this._getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
+		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.fields.forEach(field => {
 				if (!field.mentionedInTheXMLDocument) {
@@ -361,7 +365,7 @@ export class UIClassFactory {
 	}
 
 	private static _enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass: CustomUIClass) {
-		const viewsAndFragments = this._getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
+		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.methods.forEach(method => {
 				if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
@@ -435,7 +439,7 @@ export class UIClassFactory {
 		});
 	}
 
-	private static _getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass) {
+	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass) {
 		const isController = FileReader.getClassPathFromClassName(CurrentUIClass.className)?.endsWith(".controller.js") || false;
 		const viewsAndFragments: ViewsAndFragments = {
 			views: [],
@@ -445,22 +449,52 @@ export class UIClassFactory {
 			const allUIClasses = Object.keys(this.getAllExistentUIClasses()).map(key => this.getAllExistentUIClasses()[key]);
 			const customUIClasses = allUIClasses.filter(UIClass => UIClass instanceof CustomUIClass) as CustomUIClass[];
 			const childrenUIClasses = customUIClasses.filter(UIClass => this.isClassAChildOfClassB(UIClass.className, CurrentUIClass.className));
-			childrenUIClasses.forEach(childUIClass => {
+			const parentUIClasses = customUIClasses.filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className));
+			childrenUIClasses.concat(parentUIClasses).forEach(childUIClass => {
 				const view = FileReader.getViewForController(childUIClass.className);
 				if (view) {
 					viewsAndFragments.views.push(view);
 				}
-				viewsAndFragments.fragments.push(...FileReader.getFragmentsForClass(CurrentUIClass.className));
+				viewsAndFragments.fragments.push(...FileReader.getFragmentsMentionedInClass(CurrentUIClass.className));
+			});
+
+			viewsAndFragments.views.forEach(view => {
+				viewsAndFragments.fragments.push(...this._getFragmentFromViewManifestExtensions(CurrentUIClass, view));
 			});
 		} else {
-			const fragments = FileReader.getAllFragments();
-			viewsAndFragments.fragments = fragments;
-			const views = FileReader.getAllViews();
+			viewsAndFragments.fragments = FileReader.getFragmentsMentionedInClass(CurrentUIClass.className);
+			const views = [];
+			const view = FileReader.getViewForController(CurrentUIClass.className);
+			if (view) {
+				views.push(view);
+			}
 			viewsAndFragments.views = views;
 		}
 
 
 		return viewsAndFragments;
+	}
+
+	private static _getFragmentFromViewManifestExtensions(UIClass: CustomUIClass, view: View) {
+		const fragments: Fragment[] = [];
+		const viewName = FileReader.getClassNameFromPath(view.fsPath);
+		if (viewName) {
+			const extensions = FileReader.getManifestExtensionsForClass(UIClass.className);
+			const viewExtension = extensions && extensions["sap.ui.viewExtensions"] && extensions["sap.ui.viewExtensions"][viewName];
+			if (viewExtension) {
+				Object.keys(viewExtension).forEach(key => {
+					const extension = viewExtension[key];
+					if (extension.type === "XML" && extension.className === "sap.ui.core.Fragment") {
+						const fragmentName = extension.fragmentName;
+						const fragment = FileReader.getFragment(fragmentName);
+						if (fragment) {
+							fragments.push(fragment);
+						}
+					}
+				});
+			}
+		}
+		return fragments;
 	}
 
 	private static _enrichMethodParamsWithEventTypeFromAttachEvents(UIClass: CustomUIClass) {

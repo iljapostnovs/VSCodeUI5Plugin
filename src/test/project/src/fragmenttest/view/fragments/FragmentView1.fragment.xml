@@ -1,0 +1,12 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button
+		id="idButtonFragmentView1"
+		text="{
+			formatter: '.formatter.formatValueViewFragment1'
+		}"
+		press="eventHandler2"
+	/>
+</c:FragmentDefinition>

@@ -1,3 +1,6 @@
+## 0.12.38 (05-05-2021)
+* Added support for fragments defined in manifest extensions
+
 ## 0.12.37 (05-05-2021)
 * Refactoring
 * Information message added if manifest reading is too slow or there are too much manifests found
