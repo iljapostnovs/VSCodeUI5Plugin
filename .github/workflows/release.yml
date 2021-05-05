@@ -45,4 +45,4 @@ jobs:
       - name: npm install
         run: npm install
       - name: publish
-        run: npx ovsx publish -p $OVSX_TOKEN
+        run: npx ovsx publish -p ${{ secrets.OVSX_TOKEN }}
