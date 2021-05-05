@@ -149,20 +149,27 @@ export class FileReader {
 	}
 
 	public static getManifestPathsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
-		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-		const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
-		const exclusionPaths = exclusions.map(excludeString => {
-			return `${wsFolderFSPath}/${excludeString}`
-		});
-		const manifestPaths = glob.sync(`${wsFolderFSPath}/**/manifest.json`, {
-			ignore: exclusionPaths
-		});
+		const manifestPaths = this._readFilesInWorkspace(wsFolder, "**/manifest.json");
 		const manifests: manifestPaths[] = manifestPaths.map(manifestPath => {
 			return {
 				fsPath: manifestPath.replace(/\//g, fileSeparator)
 			};
 		});
 		return manifests;
+	}
+
+	private static _readFilesInWorkspace(wsFolder: vscode.WorkspaceFolder, path: string) {
+
+		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+		const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
+		const exclusionPaths = exclusions.map(excludeString => {
+			return `${wsFolderFSPath}/${excludeString}`
+		});
+		const filePaths = glob.sync(`${wsFolderFSPath}/${path}`, {
+			ignore: exclusionPaths
+		});
+
+		return filePaths;
 	}
 
 
@@ -290,14 +297,7 @@ export class FileReader {
 	private static _readAllJSFiles() {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
-			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
-			const exclusionPaths = exclusions.map(excludeString => {
-				return `${wsFolderFSPath}/${excludeString}`
-			});
-			const classPaths = glob.sync(`${wsFolderFSPath}/**/*.js`, {
-				ignore: exclusionPaths
-			});
+			const classPaths = this._readFilesInWorkspace(wsFolder, "**/*.js");
 			classPaths.forEach(classPath => {
 				const className = FileReader.getClassNameFromPath(classPath);
 				if (className) {
@@ -314,15 +314,7 @@ export class FileReader {
 	private static _readAllViewsAndSaveInCache() {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
-			// const src = this.getSrcFolderName(wsFolder);
-			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
-			const exclusionPaths = exclusions.map(excludeString => {
-				return `${wsFolderFSPath}/${excludeString}`
-			});
-			const viewPaths = glob.sync(`${wsFolderFSPath}/**/*.view.xml`, {
-				ignore: exclusionPaths
-			});
+			const viewPaths = this._readFilesInWorkspace(wsFolder, "**/*.view.xml");
 			viewPaths.forEach(viewPath => {
 				const viewContent = fs.readFileSync(viewPath, "utf8");
 				const fragments = this.getFragments(viewContent);
@@ -342,15 +334,7 @@ export class FileReader {
 	private static _readAllFragmentsAndSaveInCache() {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
-			// const src = this.getSrcFolderName(wsFolder);
-			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
-			const exclusionPaths = exclusions.map(excludeString => {
-				return `${wsFolderFSPath}/${excludeString}`
-			});
-			const fragmentPaths = glob.sync(`${wsFolderFSPath}/**/*.fragment.xml`, {
-				ignore: exclusionPaths
-			});
+			const fragmentPaths = this._readFilesInWorkspace(wsFolder, "**/*.fragment.xml");
 			fragmentPaths.forEach(fragmentPath => {
 				const fragmentContent = fs.readFileSync(fragmentPath, "utf8");
 				const fragmentFSPath = fragmentPath.replace(/\//g, fileSeparator);
@@ -369,16 +353,8 @@ export class FileReader {
 
 	public static getAllJSClassNamesFromProject(wsFolder: vscode.WorkspaceFolder) {
 		let classNames: string[] = [];
-		// const src = this.getSrcFolderName(wsFolder);
-		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-		const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
-		const exclusionPaths = exclusions.map(excludeString => {
-			return `${wsFolderFSPath}/${excludeString}`
-		});
-		const viewPaths = glob.sync(`${wsFolderFSPath}/**/*.js`, {
-			ignore: exclusionPaths
-		});
-		classNames = viewPaths.reduce((accumulator: string[], viewPath) => {
+		const classPaths = this._readFilesInWorkspace(wsFolder, "**/*.js");
+		classNames = classPaths.reduce((accumulator: string[], viewPath) => {
 			const path = this.getClassNameFromPath(viewPath);
 			if (path) {
 				accumulator.push(path);
