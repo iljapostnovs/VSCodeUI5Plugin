@@ -760,6 +760,36 @@
 						"className": "com.test.memberrename.classes.MyCustomClassExtension",
 						"containerMethod": "myCustomMethod"
 					}
+				],
+				"XMLDocEdits": []
+			}
+		},
+		{
+			"className": "com.extend.fragmenttest.controller.MasterExtend",
+			"methodName": "eventHandler10",
+			"renames": {
+				"member": {
+					"className": "com.extend.fragmenttest.controller.MasterExtend"
+				},
+				"methods": [
+					{
+						"className": "com.extend.fragmenttest.controller.MasterExtend",
+						"containerMethod": "eventHandler10"
+					}
+				],
+				"XMLDocEdits": [
+					{
+						"className": "com.extend.fragmenttest.view.fragments.ExtensionFragment1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "press"
+					},
+					{
+						"className": "com.extend.fragmenttest.view.fragments.ExtensionFragment1",
+						"type": "fragment",
+						"tagClassName": "Text",
+						"attribute": "validationError"
+					}
 				]
 			}
 		}

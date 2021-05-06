@@ -12,6 +12,7 @@ import { XMLLinter } from "../../classes/providers/diagnostics/xml/xmllinter/XML
 import { UI5Plugin } from "../../UI5Plugin";
 import { JSRenameProvider } from "../../classes/providers/rename/JSRenameProvider";
 import { ConfigHandler } from "../../classes/providers/diagnostics/js/jslinter/parts/config/ConfigHandler";
+import { XMLParser } from "../../classes/utils/XMLParser";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -158,9 +159,10 @@ suite("Extension Test Suite", () => {
 		for (const data of testData) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(data.className);
 
-			const filePath = FileReader.convertClassNameToFSPath(data.className);
+			const filePath = FileReader.getClassPathFromClassName(data.className);
 			if (filePath) {
-				const document = await vscode.workspace.openTextDocument(filePath);
+				const uri = vscode.Uri.file(filePath);
+				const document = await vscode.workspace.openTextDocument(uri);
 				const method = UIClass.methods.find(method => method.name === data.methodName);
 				if (method && method.memberPropertyNode) {
 					const position = document.positionAt(method.memberPropertyNode.start);
@@ -168,60 +170,68 @@ suite("Extension Test Suite", () => {
 					const workspaceEdits = await JSRenameProvider.provideRenameEdits(document, position, newMethodName);
 
 					const entries = workspaceEdits?.entries();
-					const entry = entries?.shift();
-					if (workspaceEdits && entry) {
-						const uri = entry[0];
-						const textEdit = entry[1];
-						const startOffset = document.offsetAt(textEdit[0].range.start);
-						const endOffset = document.offsetAt(textEdit[0].range.end);
+					if (entries) {
+						const textEditQuantity = entries.reduce((accumulator, entry) => {
+							accumulator += entry[1].length;
 
-						assert.strictEqual(uri.fsPath, filePath);
-						assert.strictEqual(method.memberPropertyNode.start, startOffset);
-						assert.strictEqual(method.memberPropertyNode.end, endOffset);
-					}
+							return accumulator;
+						}, 0);
+						const expectedEditQuantity = data.renames.methods.length + data.renames.XMLDocEdits.length + 1; //1 - edit of method in main class itself
+						assert.strictEqual(textEditQuantity, expectedEditQuantity, `Expected ${expectedEditQuantity} edits, but got ${textEditQuantity} for "${data.className}" -> "${data.methodName}"`);
 
-					for (const methodRename of data.renames.methods) {
-						const UIClass = <CustomUIClass>UIClassFactory.getUIClass(methodRename.className);
-						const containerMethod = UIClass.methods.find(method => method.name === methodRename.containerMethod);
-						const allNodes = AcornSyntaxAnalyzer.expandAllContent(containerMethod?.acornNode);
-						const allNodesWithCurrentMethod = allNodes.filter((node: any) => node.type === "MemberExpression" && node.property?.name === data.methodName);
-						const allNodesFromCurrentClass = allNodesWithCurrentMethod.filter((node: any) => {
-							const ownerClassName = strategy.acornGetClassName(methodRename.className, node.end, true);
-							return ownerClassName === data.className;
-						});
+						if (workspaceEdits) {
+							assertEntry(entries, uri, method.memberPropertyNode.start, method.memberPropertyNode.end);
+						}
 
-						assert.ok(allNodesFromCurrentClass.length > 0, `Nodes with "${data.methodName}" method in "${methodRename.className}" class "${methodRename.containerMethod}" method not found`);
+						for (const methodRename of data.renames.methods) {
+							const filePath = FileReader.getClassPathFromClassName(methodRename.className);
+							const uri = filePath && vscode.Uri.file(filePath);
+							if (uri) {
+								const UIClass = <CustomUIClass>UIClassFactory.getUIClass(methodRename.className);
+								const containerMethod = UIClass.methods.find(method => method.name === methodRename.containerMethod);
+								const allNodes = AcornSyntaxAnalyzer.expandAllContent(containerMethod?.acornNode);
+								const allNodesWithCurrentMethod = allNodes.filter((node: any) => node.type === "MemberExpression" && node.property?.name === data.methodName);
+								const allNodesFromCurrentClass = allNodesWithCurrentMethod.filter((node: any) => {
+									const ownerClassName = strategy.acornGetClassName(methodRename.className, node.end, true);
+									return ownerClassName === data.className;
+								});
 
-						if (entries) {
-							for (const node of allNodesFromCurrentClass) {
-								let necessaryEntry: [vscode.Uri, vscode.TextEdit[]] | undefined;
-								for (const entry of entries) {
-									const uri = entry[0];
-									const document = await vscode.workspace.openTextDocument(uri);
-									const textEdit = entry[1];
-									const startOffset = document.offsetAt(textEdit[0].range.start);
-									const endOffset = document.offsetAt(textEdit[0].range.end);
-									if (
-										node.property.start === startOffset &&
-										node.property.end === endOffset
-									) {
-										necessaryEntry = entry;
-										break;
-									}
+								assert.ok(allNodesFromCurrentClass.length > 0, `Nodes with "${data.methodName}" method in "${methodRename.className}" class "${methodRename.containerMethod}" method not found`);
+
+								for (const node of allNodesFromCurrentClass) {
+									await assertEntry(entries, uri, node.property.start, node.property.end);
 								}
+							}
+						}
 
-								assert.ok(!!necessaryEntry, `Workspace edit for node "${node.property.name}" not found`);
-								if (necessaryEntry) {
-									const index = entries?.indexOf(necessaryEntry);
-									entries?.splice(index, 1);
+						for (const XMLDocEdit of data.renames.XMLDocEdits) {
+							const filePath = FileReader.convertClassNameToFSPath(XMLDocEdit.className, false, XMLDocEdit.type === "fragment", XMLDocEdit.type === "view");
+							if (filePath) {
+								const uri = vscode.Uri.file(filePath);
+								const document = await vscode.workspace.openTextDocument(uri);
+								const XMLText = document.getText();
+								const tagsAndAttributes = XMLParser.getEventHandlerTagsAndAttributes(XMLText, data.methodName);
+								const tagAndAttribute = tagsAndAttributes.find(tagAndAttribute => {
+									return XMLParser.getClassNameFromTag(tagAndAttribute.tag.text) === XMLDocEdit.tagClassName;
+								});
+								if (tagAndAttribute) {
+									const attribute = tagAndAttribute.attributes.find(attribute => {
+										return XMLParser.getAttributeNameAndValue(attribute).attributeName === XMLDocEdit.attribute;
+									});
+									if (attribute) {
+										const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+										const positionOfAttribute = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute);
+										const positionOfValueBegin = positionOfAttribute + attribute.indexOf(attributeValue);
+										const positionOfValueEnd = positionOfValueBegin + attributeValue.length;
+
+										assertEntry(entries, uri, positionOfValueBegin, positionOfValueEnd);
+
+									}
 								}
 							}
 						}
 					}
-
-					if (entries) {
-						assert.ok(entries.length === 0, "All workspace edit entries found");
-					}
+					assert.ok(!!entries, "No workspace edit entries found");
 				}
 			}
 		}
@@ -236,6 +246,35 @@ suite("Extension Test Suite", () => {
 		});
 	});
 });
+
+async function assertEntry(entries: [vscode.Uri, vscode.TextEdit[]][], uri: vscode.Uri, offsetBegin: number, offsetEnd: number) {
+	let necessaryEntry: [vscode.Uri, vscode.TextEdit[]] | undefined;
+	for (const entry of entries) {
+		const entryUri = entry[0];
+		if (uri.fsPath === uri.fsPath) {
+			const document = await vscode.workspace.openTextDocument(entryUri);
+			const textEdits = entry[1];
+			for (const textEdit of textEdits) {
+				const startOffset = document.offsetAt(textEdit.range.start);
+				const endOffset = document.offsetAt(textEdit.range.end);
+				if (
+					offsetBegin === startOffset &&
+					offsetEnd === endOffset
+				) {
+					necessaryEntry = entry;
+					break;
+				}
+			}
+			if (necessaryEntry) {
+				break;
+			}
+		}
+	}
+
+	assert.ok(!!necessaryEntry, `Workspace edit for "${uri.fsPath}" position ${offsetBegin}-${offsetEnd} not found`);
+
+	return !!necessaryEntry;
+}
 
 function compareProperties(dataNode: any, node2: any): boolean {
 	let allInnerNodesExists = true;

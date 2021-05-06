@@ -14,6 +14,7 @@ sap.ui.define([
 			const test = this.getView().byId("idButtonInFragmentInExtensionFragment1");
 			test.setBusy(123);
 			const oSource = oEvent.getSource();
+			this.eventHandler10(oEvent);
 		},
 		eventHandler11() {},
 		unusedEventHandlerExtended() {},
