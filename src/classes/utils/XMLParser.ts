@@ -30,6 +30,30 @@ function escapeRegExp(string: string) {
 }
 
 export class XMLParser {
+	static getEventHandlerTagsAndAttributes(XMLText: string, eventHandlerName: string) {
+		const tagAndAttributes: { tag: Tag, attributes: string[] }[] = [];
+		this.setCurrentDocument(XMLText);
+		const positions = this.getPositionsOfEventHandler(eventHandlerName, XMLText);
+		if (positions.length > 0) {
+			positions.forEach(position => {
+				const tag = this.getTagInPosition(XMLText, position);
+				const attributes = this.getAttributesOfTheTag(tag);
+				const eventHandlerAttributes = attributes?.filter(attribute => {
+					const { attributeValue } = this.getAttributeNameAndValue(attribute);
+					const currentEventHandlerName = this.getEventHandlerNameFromAttributeValue(attributeValue);
+
+					return currentEventHandlerName === eventHandlerName;
+				});
+				if (eventHandlerAttributes && eventHandlerAttributes.length > 0) {
+					tagAndAttributes.push({ tag, attributes: eventHandlerAttributes });
+				}
+			})
+		}
+		XMLParser.setCurrentDocument(undefined);
+
+		return tagAndAttributes;
+	}
+
 	static getAllIDsInCurrentView(document: vscode.TextDocument) {
 		const IdsResult: string[] = [];
 		const currentClass = FileReader.getClassNameFromPath(document.fileName);
@@ -565,16 +589,17 @@ export class XMLParser {
 		};
 	}
 
-	public static getPositionOfEventHandler(eventHandlerName: string, document: string) {
-		let position;
+	public static getPositionsOfEventHandler(eventHandlerName: string, document: string) {
+		const positions: number[] = [];
 
-		const regex = new RegExp(`".?${eventHandlerName}"`);
-		const result = regex.exec(document);
-		if (result) {
-			position = result.index;
+		const regex = new RegExp(`".?${eventHandlerName}"`, "g");
+		let result = regex.exec(document);
+		while (result) {
+			positions.push(result.index);
+			result = regex.exec(document);
 		}
 
-		return position;
+		return positions;
 	}
 
 	public static getEventHandlerNameFromAttributeValue(attributeValue: string) {

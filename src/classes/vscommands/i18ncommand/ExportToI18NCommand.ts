@@ -111,7 +111,11 @@ export class ExportToI18NCommand {
 					if (openedFileType === ExportToI18NCommand.fileType.controller) {
 						returnString = "Controller";
 					} else if (openedFileType === ExportToI18NCommand.fileType.xml) {
-						returnString = "View";
+						if (currentlyOpenedFileFSPath.endsWith(".fragment.xml")) {
+							returnString = "Fragment";
+						} else {
+							returnString = "View";
+						}
 					}
 
 					return returnString;
@@ -120,12 +124,13 @@ export class ExportToI18NCommand {
 				let currentlyOpenedFileFSName = currentlyOpenedFileFSPath.replace(".controller.js", "");
 				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".js", "");
 				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".view.xml", "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".fragment.xml", "");
 				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".xml", "");
 				const nameParts = currentlyOpenedFileFSName.split(path.sep);
 				const fileName = nameParts[nameParts.length - 1];
 
-				const transofrmatedText = textTransformationStrategy.transform(text);
-				proposedI18NValue = `${fileName}${addition}.${transofrmatedText}`;
+				const transformatedText = textTransformationStrategy.transform(text);
+				proposedI18NValue = `${fileName}${addition}.${transformatedText}`;
 
 			} else if (textTransformationStrategyType === CaseType.SnakeUpperCase) {
 

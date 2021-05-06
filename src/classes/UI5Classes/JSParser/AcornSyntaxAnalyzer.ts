@@ -588,35 +588,27 @@ export class AcornSyntaxAnalyzer {
 		return eventHandlerData;
 	}
 
-	private static _getEventHandlerDataFromXMLText(viewOfTheController: string, currentClassEventHandlerName: string) {
+	private static _getEventHandlerDataFromXMLText(XMLText: string, currentClassEventHandlerName: string) {
 		let eventHandlerData;
 
-		XMLParser.setCurrentDocument(viewOfTheController);
-		const position = XMLParser.getPositionOfEventHandler(currentClassEventHandlerName, viewOfTheController);
-		if (position) {
-			const tagText = XMLParser.getTagInPosition(viewOfTheController, position).text;
-			const attributes = XMLParser.getAttributesOfTheTag(tagText);
-			const attribute = attributes?.find(attribute => {
-				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
-				const eventHandlerName = XMLParser.getEventHandlerNameFromAttributeValue(attributeValue);
+		XMLParser.setCurrentDocument(XMLText);
+		const tagsAndAttributes = XMLParser.getEventHandlerTagsAndAttributes(XMLText, currentClassEventHandlerName);
+		if (tagsAndAttributes.length > 0) {
+			const { tag, attributes } = tagsAndAttributes[0];
+			const attribute = attributes[0];
+			const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
+			const eventName = attributeName;
+			if (eventName) {
+				const tagPrefix = XMLParser.getTagPrefix(tag.text);
+				const classNameOfTheTag = XMLParser.getClassNameFromTag(tag.text);
 
-				return eventHandlerName === currentClassEventHandlerName;
-			});
-			if (attribute) {
-				const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
-				const eventName = attributeName;
-				if (tagText && eventName) {
-					const tagPrefix = XMLParser.getTagPrefix(tagText);
-					const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
-
-					if (classNameOfTheTag) {
-						const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOfTheController, tagPrefix, position);
-						const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
-						eventHandlerData = {
-							className: classOfTheTag,
-							eventName: eventName
-						};
-					}
+				if (classNameOfTheTag) {
+					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(XMLText, tagPrefix, tag.positionBegin);
+					const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
+					eventHandlerData = {
+						className: classOfTheTag,
+						eventName: eventName
+					};
 				}
 			}
 		}

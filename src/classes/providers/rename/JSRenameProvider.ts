@@ -5,6 +5,7 @@ import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass"
 import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../utils/FileReader";
 import LineColumn = require("line-column");
+import { XMLParser } from "../../utils/XMLParser";
 
 interface WorkspaceEdit {
 	uri: vscode.Uri;
@@ -100,6 +101,7 @@ export class JSRenameProvider {
 			});
 
 			this._addTextEditsForMemberRename(className, oldMemberName, newMemberName, workspaceEdits);
+			this._addTextEditsForEventHandlersInXMLDocs(className, oldMemberName, newMemberName, workspaceEdits);
 		}
 	}
 
@@ -134,5 +136,41 @@ export class JSRenameProvider {
 				});
 			}
 		});
+	}
+
+	private static _addTextEditsForEventHandlersInXMLDocs(className: string, oldMemberName: string, newMemberName: string, workspaceEdits: WorkspaceEdit[]) {
+		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+		const methodOrField =
+			UIClass.methods.find(method => method.name === oldMemberName) ||
+			UIClass.fields.find(field => field.name === oldMemberName);
+		if (methodOrField?.mentionedInTheXMLDocument) {
+			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+			const viewAndFragmentArray = [...viewsAndFragments.fragments, ...viewsAndFragments.views];
+			viewAndFragmentArray.forEach(viewOrFragment => {
+				const tagsAndAttributes = XMLParser.getEventHandlerTagsAndAttributes(viewOrFragment.content, oldMemberName);
+
+				tagsAndAttributes.forEach(tagAndAttribute => {
+					const { tag, attributes } = tagAndAttribute;
+					attributes.forEach(attribute => {
+						const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+						const positionOfAttribute = tag.positionBegin + tag.text.indexOf(attribute);
+						const positionOfValueBegin = positionOfAttribute + attribute.indexOf(attributeValue);
+						const positionOfValueEnd = positionOfValueBegin + attributeValue.length;
+						const classUri = vscode.Uri.file(viewOrFragment.fsPath);
+						const lineColumnStart = LineColumn(viewOrFragment.content).fromIndex(positionOfValueBegin);
+						const lineColumnEnd = LineColumn(viewOrFragment.content).fromIndex(positionOfValueEnd);
+						if (lineColumnStart && lineColumnEnd) {
+							const positionStart = new vscode.Position(lineColumnStart.line - 1, lineColumnStart.col - 1);
+							const positionEnd = new vscode.Position(lineColumnEnd.line - 1, lineColumnEnd.col - 1);
+							workspaceEdits.push({
+								uri: classUri,
+								range: new vscode.Range(positionStart, positionEnd),
+								newValue: newMemberName
+							});
+						}
+					});
+				});
+			});
+		}
 	}
 }

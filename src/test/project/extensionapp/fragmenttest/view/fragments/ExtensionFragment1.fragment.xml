@@ -15,6 +15,7 @@
 	<Text
 		id="idTextExtensionFragment1"
 		validateFieldGroup="eventHandler4"
+		validationError="eventHandler10"
 	/>
 	<c:Fragment
 		fragmentName="com.extend.fragmenttest.view.fragments.FragmentInExtensionFragment1"
