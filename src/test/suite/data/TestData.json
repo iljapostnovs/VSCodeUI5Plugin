@@ -486,7 +486,7 @@
 	"JSLinter": [
 		{
 			"className": "com.test.controller.LargeFile",
-			"timeLimit": 1500,
+			"timeLimit": 2000,
 			"errors": [
 				{
 					"text": "No references found for \"method1\" class member"
@@ -965,7 +965,7 @@
 		{
 			"className": "com.test.view.LargeFile",
 			"errors": [],
-			"timeLimit": 200
+			"timeLimit": 400
 		},
 		{
 			"className": "com.test.view.LinterTest",

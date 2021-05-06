@@ -94,6 +94,7 @@ suite("Extension Test Suite", () => {
 
 				assert.strictEqual(errors.length, data.errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
 				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
+				console.log(`JS Linter for ${data.className} spent ${timeSpent}ms`);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
@@ -115,6 +116,7 @@ suite("Extension Test Suite", () => {
 				const errors = XMLLinter.getLintingErrors(document);
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
+				console.log(`XML Linter for ${data.className} spent ${timeSpent}ms`);
 				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
 				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
 
