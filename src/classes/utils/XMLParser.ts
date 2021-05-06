@@ -33,14 +33,18 @@ export class XMLParser {
 	static getEventHandlerTagsAndAttributes(XMLText: string, eventHandlerName: string) {
 		const tagAndAttributes: { tag: Tag, attributes: string[] }[] = [];
 		this.setCurrentDocument(XMLText);
-		const positions = this.getPositionsOfEventHandler(eventHandlerName, XMLText);
+		const positions = this.getPositionsOfFunctionCallInXMLText(eventHandlerName, XMLText);
 		if (positions.length > 0) {
 			positions.forEach(position => {
 				const tag = this.getTagInPosition(XMLText, position);
 				const attributes = this.getAttributesOfTheTag(tag);
 				const eventHandlerAttributes = attributes?.filter(attribute => {
 					const { attributeValue } = this.getAttributeNameAndValue(attribute);
-					const currentEventHandlerName = this.getEventHandlerNameFromAttributeValue(attributeValue);
+					let currentEventHandlerName = this.getEventHandlerNameFromAttributeValue(attributeValue);
+
+					if (currentEventHandlerName.includes(eventHandlerName)) {
+						currentEventHandlerName = eventHandlerName;
+					}
 
 					return currentEventHandlerName === eventHandlerName;
 				});
@@ -589,14 +593,14 @@ export class XMLParser {
 		};
 	}
 
-	public static getPositionsOfEventHandler(eventHandlerName: string, document: string) {
+	public static getPositionsOfFunctionCallInXMLText(functionCallName: string, XMLText: string) {
 		const positions: number[] = [];
 
-		const regex = new RegExp(`".?${eventHandlerName}"`, "g");
-		let result = regex.exec(document);
+		const regex = new RegExp(`.?${functionCallName}("|')`, "g");
+		let result = regex.exec(XMLText);
 		while (result) {
 			positions.push(result.index);
-			result = regex.exec(document);
+			result = regex.exec(XMLText);
 		}
 
 		return positions;

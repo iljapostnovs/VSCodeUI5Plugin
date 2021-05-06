@@ -3391,7 +3391,7 @@ sap.ui.define([
 		}
 	});
 
-	LargeFile.prototype.test = () => {};
+	LargeFile.prototype.test = () => { };
 
 	return LargeFile;
 });

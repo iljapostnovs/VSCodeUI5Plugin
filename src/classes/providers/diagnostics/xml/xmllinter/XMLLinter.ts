@@ -17,7 +17,7 @@ export class XMLLinter {
 		linters.forEach(linter => {
 			errors = errors.concat(linter.getErrors(document));
 		});
-
+		// copy(JSON.stringify(errors.map(error => ({text: error.message}))))
 		return errors;
 	}
 }

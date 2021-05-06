@@ -155,10 +155,11 @@ export class JSRenameProvider {
 						const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 						const positionOfAttribute = tag.positionBegin + tag.text.indexOf(attribute);
 						const positionOfValueBegin = positionOfAttribute + attribute.indexOf(attributeValue);
-						const positionOfValueEnd = positionOfValueBegin + attributeValue.length;
+						const positionOfEventHandlerInAttributeValueBegin = positionOfValueBegin + attributeValue.indexOf(oldMemberName);
+						const positionOfEventHandlerInAttributeValueEnd = positionOfEventHandlerInAttributeValueBegin + oldMemberName.length;
 						const classUri = vscode.Uri.file(viewOrFragment.fsPath);
-						const lineColumnStart = LineColumn(viewOrFragment.content).fromIndex(positionOfValueBegin);
-						const lineColumnEnd = LineColumn(viewOrFragment.content).fromIndex(positionOfValueEnd);
+						const lineColumnStart = LineColumn(viewOrFragment.content).fromIndex(positionOfEventHandlerInAttributeValueBegin);
+						const lineColumnEnd = LineColumn(viewOrFragment.content).fromIndex(positionOfEventHandlerInAttributeValueEnd);
 						if (lineColumnStart && lineColumnEnd) {
 							const positionStart = new vscode.Position(lineColumnStart.line - 1, lineColumnStart.col - 1);
 							const positionEnd = new vscode.Position(lineColumnEnd.line - 1, lineColumnEnd.col - 1);

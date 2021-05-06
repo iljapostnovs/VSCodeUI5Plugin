@@ -33,6 +33,7 @@ export class JSLinter {
 			console.error(error);
 		}
 
+		// copy(JSON.stringify(errors.map(error => ({text: error.message}))))
 		return errors;
 	}
 }
