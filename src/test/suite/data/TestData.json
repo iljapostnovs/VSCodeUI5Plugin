@@ -1170,6 +1170,29 @@
 					}
 				]
 			}
+		},
+		{
+			"className": "com.extend.fragmenttest.util.RandomUtil",
+			"methodName": "formatGlobal",
+			"renames": {
+				"member": {
+					"className": "com.extend.fragmenttest.util.RandomUtil"
+				},
+				"methods": [
+					{
+						"className": "com.extend.fragmenttest.util.RandomUtil",
+						"containerMethod": "formatGlobal"
+					}
+				],
+				"XMLDocEdits": [
+					{
+						"className": "com.extend.fragmenttest.view.fragments.FragmentInExtensionFragment1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "busy"
+					}
+				]
+			}
 		}
 	],
 	"ConfigHandler": [
