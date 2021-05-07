@@ -7,6 +7,9 @@
 		text="{
 			formatter: '.formatter.formatValueViewFragment1'
 		}"
+		textDirection="{
+			formatter: '.formatter.formatGlobal'
+		}"
 		press="eventHandler2"
 	/>
 </c:FragmentDefinition>

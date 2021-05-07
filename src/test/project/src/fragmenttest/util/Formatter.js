@@ -10,6 +10,7 @@ sap.ui.define([
 		formatValueViewFragment1() {},
 		formatValueFragmentController1() {},
 		formatValueExtensionFragmentParent() {},
-		unusedFormatValue() {}
+		unusedFormatValue() {},
+		formatGlobal() {}
 	});
 });

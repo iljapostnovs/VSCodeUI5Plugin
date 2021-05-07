@@ -8,5 +8,8 @@
 			formatter: '.formatter.formatValueFragmentController1'
 		}"
 		press="eventHandler4"
+		textDirection="{
+			formatter: '.formatter.formatGlobal'
+		}"
 	/>
 </c:FragmentDefinition>

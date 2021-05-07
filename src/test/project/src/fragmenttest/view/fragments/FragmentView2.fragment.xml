@@ -5,5 +5,8 @@
 	<Button
 		id="idButtonFragmentView2"
 		press="eventHandler3"
+		textDirection="{
+			formatter: '.formatter.formatGlobal'
+		}"
 	/>
 </c:FragmentDefinition>
