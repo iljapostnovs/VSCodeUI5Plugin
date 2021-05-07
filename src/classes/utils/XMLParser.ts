@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { FileReader } from "./FileReader";
+import { FileReader, Fragment, View } from "./FileReader";
 import { UIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
@@ -30,20 +30,37 @@ function escapeRegExp(string: string) {
 }
 
 export class XMLParser {
-	static getEventHandlerTagsAndAttributes(XMLText: string, eventHandlerName: string) {
+	static getXMLFunctionCallTagsAndAttributes(viewOrFragment: View | Fragment, eventHandlerName: string, functionCallClassName?: string) {
 		const tagAndAttributes: { tag: Tag, attributes: string[] }[] = [];
-		this.setCurrentDocument(XMLText);
-		const positions = this.getPositionsOfFunctionCallInXMLText(eventHandlerName, XMLText);
+		this.setCurrentDocument(viewOrFragment.content);
+		const positions = this.getPositionsOfFunctionCallInXMLText(eventHandlerName, viewOrFragment.content);
 		if (positions.length > 0) {
 			positions.forEach(position => {
-				const tag = this.getTagInPosition(XMLText, position);
+				const tag = this.getTagInPosition(viewOrFragment.content, position);
 				const attributes = this.getAttributesOfTheTag(tag);
 				const eventHandlerAttributes = attributes?.filter(attribute => {
 					const { attributeValue } = this.getAttributeNameAndValue(attribute);
 					let currentEventHandlerName = this.getEventHandlerNameFromAttributeValue(attributeValue);
 
-					if (currentEventHandlerName.includes(eventHandlerName)) {
-						currentEventHandlerName = eventHandlerName;
+					if (currentEventHandlerName !== eventHandlerName && currentEventHandlerName.includes(eventHandlerName)) {
+						const results = new RegExp(`((\\..*?\\.)|("))${eventHandlerName}("|')`).exec(currentEventHandlerName);
+						if (results && results[0].split(".").length > 2) {
+							const result = results[0].substring(0, results[0].length - 1).split(".").slice(1);
+							if (functionCallClassName) {
+								const handlerField = result[0];
+								const responsibleClassName = FileReader.getResponsibleClassNameForViewOrFragment(viewOrFragment);
+								if (responsibleClassName) {
+									const fields = UIClassFactory.getClassFields(responsibleClassName);
+									const field = fields.find(field => field.name === handlerField);
+									if (field && field.type !== functionCallClassName) {
+										return false;
+									}
+								}
+							}
+							currentEventHandlerName = result[1];
+						} else {
+							currentEventHandlerName = eventHandlerName;
+						}
 					}
 
 					return currentEventHandlerName === eventHandlerName;
@@ -596,7 +613,8 @@ export class XMLParser {
 	public static getPositionsOfFunctionCallInXMLText(functionCallName: string, XMLText: string) {
 		const positions: number[] = [];
 
-		const regex = new RegExp(`.?${functionCallName}("|')`, "g");
+		const regExpString = `\\.?${functionCallName}("|')`;
+		const regex = new RegExp(regExpString, "g");
 		let result = regex.exec(XMLText);
 		while (result) {
 			positions.push(result.index);

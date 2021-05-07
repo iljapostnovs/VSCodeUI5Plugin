@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
-import { FileReader } from "../../utils/FileReader";
+import { FileReader, Fragment, View } from "../../utils/FileReader";
 import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
 import { CustomClassUIMethod, CustomUIClass, CustomClassUIField } from "../UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
@@ -493,10 +493,10 @@ export class AcornSyntaxAnalyzer {
 			const currentClassEventHandlerName = this._getEventHandlerName(node, className);
 			const viewOfTheController = FileReader.getViewForController(className);
 			if (viewOfTheController && currentClassEventHandlerName) {
-				eventHandlerData = this._getEventHandlerDataFromXMLText(viewOfTheController.content, currentClassEventHandlerName);
+				eventHandlerData = this._getEventHandlerDataFromXMLText(viewOfTheController, currentClassEventHandlerName);
 				if (!eventHandlerData) {
 					viewOfTheController.fragments.find(fragment => {
-						eventHandlerData = this._getEventHandlerDataFromXMLText(fragment.content, currentClassEventHandlerName);
+						eventHandlerData = this._getEventHandlerDataFromXMLText(fragment, currentClassEventHandlerName);
 
 						return !!eventHandlerData;
 					});
@@ -508,7 +508,7 @@ export class AcornSyntaxAnalyzer {
 				if (UIClass instanceof CustomUIClass) {
 					const fragmentsOfTheController = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass).fragments;
 					fragmentsOfTheController.find(fragmentOfTheController => {
-						eventHandlerData = this._getEventHandlerDataFromXMLText(fragmentOfTheController.content, currentClassEventHandlerName);
+						eventHandlerData = this._getEventHandlerDataFromXMLText(fragmentOfTheController, currentClassEventHandlerName);
 
 						return !!eventHandlerData;
 					});
@@ -588,11 +588,11 @@ export class AcornSyntaxAnalyzer {
 		return eventHandlerData;
 	}
 
-	private static _getEventHandlerDataFromXMLText(XMLText: string, currentClassEventHandlerName: string) {
+	private static _getEventHandlerDataFromXMLText(viewOrFragment: View | Fragment, currentClassEventHandlerName: string) {
 		let eventHandlerData;
 
-		XMLParser.setCurrentDocument(XMLText);
-		const tagsAndAttributes = XMLParser.getEventHandlerTagsAndAttributes(XMLText, currentClassEventHandlerName);
+		XMLParser.setCurrentDocument(viewOrFragment.content);
+		const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(viewOrFragment, currentClassEventHandlerName);
 		if (tagsAndAttributes.length > 0) {
 			const { tag, attributes } = tagsAndAttributes[0];
 			const attribute = attributes[0];
@@ -603,7 +603,7 @@ export class AcornSyntaxAnalyzer {
 				const classNameOfTheTag = XMLParser.getClassNameFromTag(tag.text);
 
 				if (classNameOfTheTag) {
-					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(XMLText, tagPrefix, tag.positionBegin);
+					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOrFragment.content, tagPrefix, tag.positionBegin);
 					const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
 					eventHandlerData = {
 						className: classOfTheTag,

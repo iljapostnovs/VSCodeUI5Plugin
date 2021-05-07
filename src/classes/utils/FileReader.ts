@@ -422,16 +422,26 @@ export class FileReader {
 
 		return controllerName;
 	}
-
 	static getResponsibleClassForXMLDocument(document: vscode.TextDocument) {
-		const isFragment = document.fileName.endsWith(".fragment.xml");
-		const isView = document.fileName.endsWith(".view.xml");
+		let viewOrFragment: View | Fragment | undefined = FileReader.getAllViews().find(view => view.fsPath === document.fileName);
+		if (!viewOrFragment) {
+			viewOrFragment = FileReader.getAllFragments().find(fragment => fragment.fsPath === document.fileName);
+		}
+
+		if (viewOrFragment) {
+			return this.getResponsibleClassNameForViewOrFragment(viewOrFragment);
+		}
+	}
+
+	static getResponsibleClassNameForViewOrFragment(viewOrFragment: View | Fragment) {
+		const isFragment = viewOrFragment.fsPath.endsWith(".fragment.xml");
+		const isView = viewOrFragment.fsPath.endsWith(".view.xml");
 		let responsibleClassName;
 
 		if (isView) {
-			responsibleClassName = this.getControllerNameFromView(document.getText());
+			responsibleClassName = this.getControllerNameFromView(viewOrFragment.content);
 		} else if (isFragment) {
-			const fragmentName = this.getClassNameFromPath(document.fileName);
+			const fragmentName = this.getClassNameFromPath(viewOrFragment.fsPath);
 			const responsibleViewKey = Object.keys(this._viewCache).find(key => {
 				return !!this._viewCache[key].fragments.find(fragmentFromView => fragmentFromView.name === fragmentName);
 			});
@@ -439,11 +449,11 @@ export class FileReader {
 				const responsibleView = this._viewCache[responsibleViewKey];
 				responsibleClassName = this.getControllerNameFromView(responsibleView.content);
 			} else {
-				responsibleClassName = this._getResponsibleClassNameForFragmentFromCustomUIClasses(document);
+				responsibleClassName = this._getResponsibleClassNameForFragmentFromCustomUIClasses(viewOrFragment);
 			}
 
 			if (!responsibleClassName) {
-				responsibleClassName = this._getResponsibleClassNameForFragmentFromManifestExtensions(document);
+				responsibleClassName = this._getResponsibleClassNameForFragmentFromManifestExtensions(viewOrFragment);
 			}
 		}
 
@@ -455,9 +465,9 @@ export class FileReader {
 		return manifest?.content["sap.ui5"]?.extends?.extensions;
 	}
 
-	private static _getResponsibleClassNameForFragmentFromManifestExtensions(document: vscode.TextDocument) {
+	private static _getResponsibleClassNameForFragmentFromManifestExtensions(viewOrFragment: View | Fragment) {
 		let responsibleClassName: string | undefined;
-		const fragmentName = this.getClassNameFromPath(document.fileName);
+		const fragmentName = this.getClassNameFromPath(viewOrFragment.fsPath);
 		if (fragmentName) {
 			const extensions = this.getManifestExtensionsForClass(fragmentName);
 			const viewExtensions = extensions && extensions["sap.ui.viewExtensions"];
@@ -510,9 +520,9 @@ export class FileReader {
 		return controllerName;
 	}
 
-	private static _getResponsibleClassNameForFragmentFromCustomUIClasses(document: vscode.TextDocument) {
+	private static _getResponsibleClassNameForFragmentFromCustomUIClasses(viewOrFragment: View | Fragment) {
 		const allUIClasses = UIClassFactory.getAllExistentUIClasses();
-		const fragmentName = this.getClassNameFromPath(document.fileName);
+		const fragmentName = this.getClassNameFromPath(viewOrFragment.fsPath);
 		const responsibleClassName = Object.keys(allUIClasses).find(key => {
 			let classFound = false;
 			const UIClass = allUIClasses[key];

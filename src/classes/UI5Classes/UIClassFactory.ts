@@ -96,6 +96,7 @@ export class UIClassFactory {
 		// console.timeEnd(`Enriching ${UIClass.className} took`);
 	}
 
+	//TODO: Refactor this mess
 	private static _checkIfFieldIsUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
 		viewsAndFragments.views.forEach(viewOfTheControl => {

@@ -219,24 +219,25 @@ suite("Extension Test Suite", () => {
 							const filePath = FileReader.convertClassNameToFSPath(XMLDocEdit.className, false, XMLDocEdit.type === "fragment", XMLDocEdit.type === "view");
 							if (filePath) {
 								const uri = vscode.Uri.file(filePath);
-								const document = await vscode.workspace.openTextDocument(uri);
-								const XMLText = document.getText();
-								const tagsAndAttributes = XMLParser.getEventHandlerTagsAndAttributes(XMLText, data.methodName);
-								const tagAndAttribute = tagsAndAttributes.find(tagAndAttribute => {
-									return XMLParser.getClassNameFromTag(tagAndAttribute.tag.text) === XMLDocEdit.tagClassName;
-								});
-								if (tagAndAttribute) {
-									const attribute = tagAndAttribute.attributes.find(attribute => {
-										return XMLParser.getAttributeNameAndValue(attribute).attributeName === XMLDocEdit.attribute;
+								const viewOrFragment = XMLDocEdit.type === "fragment" ? FileReader.getAllFragments().find(fragment => fragment.fsPath === filePath) : FileReader.getAllViews().find(view => view.fsPath === filePath);
+								if (viewOrFragment) {
+									const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(viewOrFragment, data.methodName);
+									const tagAndAttribute = tagsAndAttributes.find(tagAndAttribute => {
+										return XMLParser.getClassNameFromTag(tagAndAttribute.tag.text) === XMLDocEdit.tagClassName;
 									});
-									if (attribute) {
-										const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
-										const positionOfAttribute = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute);
-										const positionOfValueBegin = positionOfAttribute + attribute.indexOf(attributeValue);
-										const positionOfValueEnd = positionOfValueBegin + attributeValue.length;
+									if (tagAndAttribute) {
+										const attribute = tagAndAttribute.attributes.find(attribute => {
+											return XMLParser.getAttributeNameAndValue(attribute).attributeName === XMLDocEdit.attribute;
+										});
+										if (attribute) {
+											const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+											const positionOfAttribute = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute);
+											const positionOfValueBegin = positionOfAttribute + attribute.indexOf(attributeValue);
+											const positionOfValueEnd = positionOfValueBegin + attributeValue.length;
 
-										assertEntry(entries, uri, positionOfValueBegin, positionOfValueEnd);
+											assertEntry(entries, uri, positionOfValueBegin, positionOfValueEnd);
 
+										}
 									}
 								}
 							}

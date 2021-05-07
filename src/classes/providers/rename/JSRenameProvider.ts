@@ -147,7 +147,7 @@ export class JSRenameProvider {
 			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
 			const viewAndFragmentArray = [...viewsAndFragments.fragments, ...viewsAndFragments.views];
 			viewAndFragmentArray.forEach(viewOrFragment => {
-				const tagsAndAttributes = XMLParser.getEventHandlerTagsAndAttributes(viewOrFragment.content, oldMemberName);
+				const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(viewOrFragment, oldMemberName, className);
 
 				tagsAndAttributes.forEach(tagAndAttribute => {
 					const { tag, attributes } = tagAndAttribute;
