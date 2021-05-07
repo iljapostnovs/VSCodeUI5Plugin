@@ -6,8 +6,7 @@ sap.ui.define([
 	"use strict";
 
 	return ManagedObject.extend("com.extend.fragmenttest.util.RandomUtil", {
-		formatValueExtensionFragment1: function() {
-
-		}
+		formatValueExtensionFragment1() {},
+		formatGlobal() {}
 	});
 });

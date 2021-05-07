@@ -8,5 +8,8 @@
 		textDirection="{
 			formatter: '.formatter.formatGlobal'
 		}"
+		busy="{
+			formatter: '.randomUtil.formatGlobal'
+		}"
 	/>
 </c:FragmentDefinition>
