@@ -52,7 +52,7 @@ export class XMLParser {
 								if (responsibleClassName) {
 									const fields = UIClassFactory.getClassFields(responsibleClassName);
 									const field = fields.find(field => field.name === handlerField);
-									if (field && field.type !== functionCallClassName) {
+									if (field && field.type && !UIClassFactory.isClassAChildOfClassB(field.type, functionCallClassName)) {
 										return false;
 									}
 								}

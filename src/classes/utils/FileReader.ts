@@ -440,7 +440,7 @@ export class FileReader {
 	static getResponsibleClassNameForViewOrFragment(viewOrFragment: IXMLFile) {
 		const isFragment = viewOrFragment.fsPath.endsWith(".fragment.xml");
 		const isView = viewOrFragment.fsPath.endsWith(".view.xml");
-		let responsibleClassName;
+		let responsibleClassName: string | undefined;
 
 		if (isView) {
 			responsibleClassName = this.getControllerNameFromView(viewOrFragment.content);
@@ -454,6 +454,15 @@ export class FileReader {
 				responsibleClassName = this.getControllerNameFromView(responsibleView.content);
 			} else {
 				responsibleClassName = this._getResponsibleClassNameForFragmentFromCustomUIClasses(viewOrFragment);
+			}
+
+			if (!responsibleClassName) {
+				const responsibleFragment = FileReader.getAllFragments().find(fragment => {
+					return fragment.fragments.find(fragment => fragment.fsPath === viewOrFragment.fsPath);
+				});
+				if (responsibleFragment) {
+					responsibleClassName = this.getResponsibleClassNameForViewOrFragment(responsibleFragment);
+				}
 			}
 
 			if (!responsibleClassName) {
