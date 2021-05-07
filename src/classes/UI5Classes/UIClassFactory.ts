@@ -160,6 +160,12 @@ export class UIClassFactory {
 					}
 				}
 			});
+			CurrentUIClass.fields.forEach(field => {
+				if (!field.mentionedInTheXMLDocument) {
+					const regex = new RegExp(`\\.${field.name}\\.`);
+					field.mentionedInTheXMLDocument = regex.test(fragment.content);
+				}
+			});
 		});
 	}
 

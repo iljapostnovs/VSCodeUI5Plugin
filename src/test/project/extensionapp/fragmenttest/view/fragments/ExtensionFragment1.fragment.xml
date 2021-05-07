@@ -10,6 +10,9 @@
 		blocked="{
 			formatter: '.formatter.formatValueExtensionFragmentParent'
 		}"
+		activeIcon="{
+			formatter: '.randomUtil.formatValueExtensionFragment1'
+		}"
 		press="eventHandler10"
 	/>
 	<Text
