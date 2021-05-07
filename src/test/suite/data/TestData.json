@@ -1123,6 +1123,53 @@
 					}
 				]
 			}
+		},
+		{
+			"className": "com.test.fragmenttest.util.Formatter",
+			"methodName": "formatGlobal",
+			"renames": {
+				"member": {
+					"className": "com.test.fragmenttest.util.Formatter"
+				},
+				"methods": [
+					{
+						"className": "com.test.fragmenttest.util.Formatter",
+						"containerMethod": "formatGlobal"
+					}
+				],
+				"XMLDocEdits": [
+					{
+						"className": "com.test.fragmenttest.view.fragments.FragmentView1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "textDirection"
+					},
+					{
+						"className": "com.test.fragmenttest.view.fragments.FragmentView1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "activeIcon"
+					},
+					{
+						"className": "com.test.fragmenttest.view.fragments.FragmentView2",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "textDirection"
+					},
+					{
+						"className": "com.test.fragmenttest.view.fragments.FragmentController1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "activeIcon"
+					},
+					{
+						"className": "com.extend.fragmenttest.view.fragments.FragmentInExtensionFragment1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "activeIcon"
+					}
+				]
+			}
 		}
 	],
 	"ConfigHandler": [

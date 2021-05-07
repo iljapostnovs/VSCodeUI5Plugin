@@ -10,6 +10,9 @@
 		textDirection="{
 			formatter: '.formatter.formatGlobal'
 		}"
+		activeIcon="{
+			formatter: '.formatter.formatGlobal'
+		}"
 		press="eventHandler2"
 	/>
 </c:FragmentDefinition>

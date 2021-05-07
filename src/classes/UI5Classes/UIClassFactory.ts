@@ -446,7 +446,7 @@ export class UIClassFactory {
 		});
 	}
 
-	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = []): IViewsAndFragments {
+	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = [], removeDuplicates = true): IViewsAndFragments {
 		if (checkedClasses.includes(CurrentUIClass.className)) {
 			return { fragments: [], views: [] };
 		}
@@ -459,7 +459,7 @@ export class UIClassFactory {
 		const whereMentioned = this._getAllClassesWhereClassIsImported(CurrentUIClass.className);
 		const relatedClasses = [...parentUIClasses, ...children, ...whereMentioned];
 		const relatedViewsAndFragments = relatedClasses.reduce((accumulator: IViewsAndFragments, relatedUIClass: CustomUIClass) => {
-			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses);
+			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false);
 			accumulator.fragments = accumulator.fragments.concat(relatedFragmentsAndViews.fragments);
 			accumulator.views = accumulator.views.concat(relatedFragmentsAndViews.views);
 			return accumulator;
@@ -472,6 +472,21 @@ export class UIClassFactory {
 		viewsAndFragments.views.forEach(view => {
 			viewsAndFragments.fragments.push(...this._getFragmentFromViewManifestExtensions(CurrentUIClass, view));
 		});
+
+		if (removeDuplicates) {
+			viewsAndFragments.fragments = viewsAndFragments.fragments.reduce((accumulator: IFragment[], fragment) => {
+				if (!accumulator.find(accumulatorFragment => accumulatorFragment.fsPath === fragment.fsPath)) {
+					accumulator.push(fragment);
+				}
+				return accumulator;
+			}, []);
+			viewsAndFragments.views = viewsAndFragments.views.reduce((accumulator: IView[], view) => {
+				if (!accumulator.find(accumulatorFragment => accumulatorFragment.fsPath === view.fsPath)) {
+					accumulator.push(view);
+				}
+				return accumulator;
+			}, []);
+		}
 
 		return viewsAndFragments;
 	}
@@ -487,6 +502,7 @@ export class UIClassFactory {
 		const view = FileReader.getViewForController(CurrentUIClass.className);
 		if (view) {
 			views.push(view);
+			viewsAndFragments.fragments.push(...view.fragments);
 		}
 		viewsAndFragments.views = views;
 
