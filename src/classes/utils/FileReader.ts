@@ -723,8 +723,16 @@ export class FileReader {
 	public static removeFromCache(path: string) {
 		const classPath = this.getClassNameFromPath(path);
 		if (path.endsWith(".view.xml") && classPath) {
+			if (this._viewCache[classPath]) {
+				this._viewCache[classPath].content = "";
+				this._fragmentCache[classPath].idClassMap = {};
+			}
 			delete this._viewCache[classPath];
 		} else if (path.endsWith(".fragment.xml") && classPath) {
+			if (this._fragmentCache[classPath]) {
+				this._fragmentCache[classPath].content = "";
+				this._fragmentCache[classPath].idClassMap = {};
+			}
 			delete this._fragmentCache[classPath];
 		}
 	}
