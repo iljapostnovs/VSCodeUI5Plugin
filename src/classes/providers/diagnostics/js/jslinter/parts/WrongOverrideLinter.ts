@@ -1,14 +1,14 @@
-import { Error, Linter } from "./abstraction/Linter";
+import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import { CustomClassUIField, CustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { ICustomClassUIField, ICustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
-import { AbstractUIClass, UIField, UIMethod } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass, IUIField, IUIMethod } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 export class WrongOverrideLinter extends Linter {
 	protected className = "WrongOverrideLinter";
-	_getErrors(document: vscode.TextDocument): Error[] {
-		const errors: Error[] = [];
+	_getErrors(document: vscode.TextDocument): IError[] {
+		const errors: IError[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongOverrideLinter")) {
 			const className = FileReader.getClassNameFromPath(document.fileName);
@@ -32,8 +32,8 @@ export class WrongOverrideLinter extends Linter {
 		return errors;
 	}
 
-	private _getIfMemberIsWronglyOverriden(UIClass: CustomUIClass, UIMember: CustomClassUIMethod | CustomClassUIField) {
-		let error: Error | undefined;
+	private _getIfMemberIsWronglyOverriden(UIClass: CustomUIClass, UIMember: ICustomClassUIMethod | ICustomClassUIField) {
+		let error: IError | undefined;
 		const parentMember = this._getMemberFromParent(UIClass, UIMember);
 		if (parentMember && parentMember.visibility === "private" && UIMember.memberPropertyNode) {
 			const positionStart = LineColumn(UIClass.classText).fromIndex(UIMember.memberPropertyNode.start);
@@ -58,8 +58,8 @@ export class WrongOverrideLinter extends Linter {
 		return error;
 	}
 
-	private _getMemberFromParent(UIClass: AbstractUIClass, UIMember: UIMethod | CustomClassUIField): UIMethod | UIField | undefined {
-		let parentMember: UIMethod | UIField | undefined;
+	private _getMemberFromParent(UIClass: AbstractUIClass, UIMember: IUIMethod | ICustomClassUIField): IUIMethod | IUIField | undefined {
+		let parentMember: IUIMethod | IUIField | undefined;
 		if (UIClass.parentClassNameDotNotation) {
 			const UIClassParent = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
 			const fieldsAndMethods = [

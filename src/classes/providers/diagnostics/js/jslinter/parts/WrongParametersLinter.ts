@@ -1,4 +1,4 @@
-import { Error, Linter } from "./abstraction/Linter";
+import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
@@ -12,8 +12,8 @@ export class WrongParametersLinter extends Linter {
 	protected className = "WrongParametersLinter";
 	public static timePerChar = 0;
 	private static readonly _sapNodeDAO = new SAPNodeDAO();
-	_getErrors(document: vscode.TextDocument): Error[] {
-		const errors: Error[] = [];
+	_getErrors(document: vscode.TextDocument): IError[] {
+		const errors: IError[] = [];
 
 		// console.time("WrongParameterLinter");
 		const start = new Date().getTime();

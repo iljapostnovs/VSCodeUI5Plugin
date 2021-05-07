@@ -1,11 +1,11 @@
-import { Error, Linter } from "./abstraction/Linter";
+import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
 import { FileReader } from "../../../../../utils/FileReader";
 
-interface AttributeValidation {
+interface IAttributeValidation {
 	valid: boolean;
 	message?: string;
 }
@@ -15,8 +15,8 @@ function isNumeric(value: string) {
 }
 
 export class TagAttributeLinter extends Linter {
-	getErrors(document: vscode.TextDocument): Error[] {
-		const errors: Error[] = [];
+	getErrors(document: vscode.TextDocument): IError[] {
+		const errors: IError[] = [];
 		const documentText = document.getText();
 
 		//check tags
@@ -66,8 +66,8 @@ export class TagAttributeLinter extends Linter {
 
 		return errors;
 	}
-	private _validateTagAttribute(className: string, attribute: string, attributes: string[], document: vscode.TextDocument): AttributeValidation {
-		let attributeValidation: AttributeValidation = {
+	private _validateTagAttribute(className: string, attribute: string, attributes: string[], document: vscode.TextDocument): IAttributeValidation {
+		let attributeValidation: IAttributeValidation = {
 			valid: false
 		};
 

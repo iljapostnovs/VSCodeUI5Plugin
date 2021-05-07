@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { FileReader, Fragment, View } from "./FileReader";
-import { UIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { FileReader, IXMLFile } from "./FileReader";
+import { IUIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 export enum PositionType {
@@ -14,14 +14,14 @@ export enum PositionType {
 	InBodyOfTheClass = "6"
 }
 
-interface PrefixResults {
+interface IPrefixResults {
 	[key: string]: any[]
 }
-interface XMLDocumentData {
+interface IXMLDocumentData {
 	document: string;
 	strings: boolean[];
-	tags: Tag[];
-	prefixResults: PrefixResults;
+	tags: ITag[];
+	prefixResults: IPrefixResults;
 	isMarkedAsUndefined: boolean;
 	areAllStringsClosed: boolean;
 }
@@ -30,8 +30,8 @@ function escapeRegExp(string: string) {
 }
 
 export class XMLParser {
-	static getXMLFunctionCallTagsAndAttributes(viewOrFragment: View | Fragment, eventHandlerName: string, functionCallClassName?: string) {
-		const tagAndAttributes: { tag: Tag, attributes: string[] }[] = [];
+	static getXMLFunctionCallTagsAndAttributes(viewOrFragment: IXMLFile, eventHandlerName: string, functionCallClassName?: string) {
+		const tagAndAttributes: { tag: ITag, attributes: string[] }[] = [];
 		this.setCurrentDocument(viewOrFragment.content);
 		const positions = this.getPositionsOfFunctionCallInXMLText(eventHandlerName, viewOrFragment.content);
 		if (positions.length > 0) {
@@ -135,7 +135,7 @@ export class XMLParser {
 	}
 
 	static getParentTagAtPosition(XMLText?: string, position?: number, closedTags: string[] = []) {
-		let parentTag: Tag = {
+		let parentTag: ITag = {
 			positionBegin: 0,
 			positionEnd: 0,
 			text: ""
@@ -181,7 +181,7 @@ export class XMLParser {
 	public static getTagInPosition(XMLViewText: string, position: number) {
 		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLViewText, position);
 		const tagText = XMLViewText.substring(positionBegin, positionEnd);
-		const tag: Tag = {
+		const tag: ITag = {
 			text: tagText,
 			positionBegin: positionBegin,
 			positionEnd: positionEnd
@@ -290,7 +290,7 @@ export class XMLParser {
 		return tagPrefix;
 	}
 
-	static getFullClassNameFromTag(tag: Tag, XMLText: string) {
+	static getFullClassNameFromTag(tag: ITag, XMLText: string) {
 		let className = this.getClassNameFromTag(tag.text);
 		const classTagPrefix = this.getTagPrefix(tag.text);
 		const libraryPath = this.getLibraryPathFromTagPrefix(XMLText, classTagPrefix, tag.positionEnd);
@@ -446,7 +446,7 @@ export class XMLParser {
 	}
 
 	static getMethodsOfTheControl(controllerName = this.getControllerNameOfTheCurrentDocument()) {
-		let classMethods: UIMethod[] = [];
+		let classMethods: IUIMethod[] = [];
 
 		if (controllerName) {
 			classMethods = this._getClassMethodsRecursively(controllerName);
@@ -467,7 +467,7 @@ export class XMLParser {
 	}
 
 	private static _getClassMethodsRecursively(className: string, onlyCustomMethods = true) {
-		let methods: UIMethod[] = [];
+		let methods: IUIMethod[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 		methods = UIClass.methods;
 
@@ -490,7 +490,7 @@ export class XMLParser {
 		return prefix;
 	}
 
-	private static _currentDocument: XMLDocumentData = {
+	private static _currentDocument: IXMLDocumentData = {
 		document: "",
 		strings: [],
 		tags: [],
@@ -508,7 +508,7 @@ export class XMLParser {
 		}
 
 		let i = 0;
-		const tags: Tag[] = [];
+		const tags: ITag[] = [];
 
 		while (i < document.length) {
 			const thisIsTagEnd = document[i] === ">" && !XMLParser.getIfPositionIsInString(document, i);
@@ -585,8 +585,8 @@ export class XMLParser {
 		return i;
 	}
 
-	public static getAttributesOfTheTag(tag: Tag | string) {
-		const tagOfTagInterface = tag as Tag;
+	public static getAttributesOfTheTag(tag: ITag | string) {
+		const tagOfTagInterface = tag as ITag;
 		const tagAsString = tag as string;
 
 		let text = "";

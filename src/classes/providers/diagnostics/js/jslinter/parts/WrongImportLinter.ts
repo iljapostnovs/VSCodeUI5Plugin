@@ -1,4 +1,4 @@
-import { Error, Linter } from "./abstraction/Linter";
+import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
@@ -6,8 +6,8 @@ import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 export class WrongImportLinter extends Linter {
 	protected className = "WrongImportLinter";
-	_getErrors(document: vscode.TextDocument): Error[] {
-		const errors: Error[] = [];
+	_getErrors(document: vscode.TextDocument): IError[] {
+		const errors: IError[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongImportLinter")) {
 			const className = FileReader.getClassNameFromPath(document.fileName);

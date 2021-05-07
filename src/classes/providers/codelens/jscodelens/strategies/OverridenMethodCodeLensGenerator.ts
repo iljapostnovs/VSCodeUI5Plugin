@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { CustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { ICustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../utils/FileReader";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
@@ -12,7 +12,7 @@ export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {
 			const UIClass = UIClassFactory.getUIClass(currentClass);
 			if (UIClass instanceof CustomUIClass && UIClass.parentClassNameDotNotation) {
 				const rootMethods = UIClass.methods;
-				const overriddenMethods: CustomClassUIMethod[] = [];
+				const overriddenMethods: ICustomClassUIMethod[] = [];
 				const parentMethods = this._getAllParentMethods(UIClass.parentClassNameDotNotation);
 
 				rootMethods.forEach(method => {
@@ -38,7 +38,7 @@ export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {
 		return methods;
 	}
 
-	private _generateCodeLensesForMethods(document: vscode.TextDocument, methods: CustomClassUIMethod[]) {
+	private _generateCodeLensesForMethods(document: vscode.TextDocument, methods: ICustomClassUIMethod[]) {
 		const codeLenses: vscode.CodeLens[] = [];
 
 		if (document) {

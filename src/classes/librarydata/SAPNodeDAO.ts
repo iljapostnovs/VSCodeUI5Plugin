@@ -4,7 +4,7 @@ import { URLBuilder } from "../utils/URLBuilder";
 import { HTTPHandler } from "../utils/HTTPHandler";
 import { SAPNode } from "./SAPNode";
 import { UI5MetadataPreloader } from "./UI5MetadataDAO";
-interface LooseNodeObject {
+interface ILooseNodeObject {
 	[key: string]: SAPNode;
 }
 
@@ -12,7 +12,7 @@ export class SAPNodeDAO {
 	private static readonly _nodePath: string = URLBuilder.getInstance().getAPIIndexUrl();
 	private _nodes: any;
 	private static readonly _SAPNodes: SAPNode[] = [];
-	private static readonly _flatSAPNodes: LooseNodeObject = {};
+	private static readonly _flatSAPNodes: ILooseNodeObject = {};
 
 	public async getAllNodes() {
 		if (SAPNodeDAO._SAPNodes.length === 0) {

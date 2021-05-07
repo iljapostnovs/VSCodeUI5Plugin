@@ -7,7 +7,7 @@ import glob = require("glob");
 const escapedFileSeparator = "\\" + path.sep;
 const workspace = vscode.workspace;
 
-interface WorkspaceJSFileConstructor {
+interface IWorkspaceJSFileConstructor {
 	fsPath: string;
 	UIDefineString: string;
 }
@@ -15,7 +15,7 @@ class UIDefineJSFile {
 	public fsPath: string;
 	public UIDefineString: string;
 
-	constructor({ fsPath, UIDefineString }: WorkspaceJSFileConstructor) {
+	constructor({ fsPath, UIDefineString }: IWorkspaceJSFileConstructor) {
 		this.fsPath = fsPath;
 		this.UIDefineString = UIDefineString;
 	}

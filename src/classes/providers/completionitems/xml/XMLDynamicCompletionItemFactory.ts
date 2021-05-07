@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { AbstractUIClass, TypeValue, UIProperty, UIEvent, UIAggregation } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass, ITypeValue, IUIProperty, IUIEvent, IUIAggregation } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { URLBuilder } from "../../../utils/URLBuilder";
 import { XMLParser, PositionType } from "../../../utils/XMLParser";
 import { ResourceModelData } from "../../../UI5Classes/ResourceModelData";
@@ -300,7 +300,7 @@ export class XMLDynamicCompletionItemFactory {
 		return completionItems;
 	}
 
-	private _generateAggregationCompletionItems(aggregations: UIAggregation[], classTagPrefix: string) {
+	private _generateAggregationCompletionItems(aggregations: IUIAggregation[], classTagPrefix: string) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = aggregations.map(aggregation => {
@@ -314,7 +314,7 @@ export class XMLDynamicCompletionItemFactory {
 		return completionItems;
 	}
 
-	private _generateInsertTextForAggregation(aggregation: UIAggregation, prefix: string) {
+	private _generateInsertTextForAggregation(aggregation: IUIAggregation, prefix: string) {
 		if (prefix) {
 			prefix = `${prefix}:`;
 		}
@@ -374,8 +374,8 @@ export class XMLDynamicCompletionItemFactory {
 		return completionItems;
 	}
 
-	private _getUIAggregationRecursively(UIClass: AbstractUIClass, aggregationName: string): UIAggregation | undefined {
-		let aggregation: UIAggregation | undefined;
+	private _getUIAggregationRecursively(UIClass: AbstractUIClass, aggregationName: string): IUIAggregation | undefined {
+		let aggregation: IUIAggregation | undefined;
 		aggregation = UIClass.aggregations.find(aggregation => aggregation.name === aggregationName);
 		if (!aggregation && UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
@@ -385,7 +385,7 @@ export class XMLDynamicCompletionItemFactory {
 		return aggregation;
 	}
 
-	private _getAllAggregationsRecursively(UIClass: AbstractUIClass): UIAggregation[] {
+	private _getAllAggregationsRecursively(UIClass: AbstractUIClass): IUIAggregation[] {
 		let aggregations = UIClass.aggregations;
 		if (UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
@@ -395,8 +395,8 @@ export class XMLDynamicCompletionItemFactory {
 		return aggregations;
 	}
 
-	private _getUIPropertyRecursively(UIClass: AbstractUIClass, propertyName: string): UIProperty | undefined {
-		let property: UIProperty | undefined;
+	private _getUIPropertyRecursively(UIClass: AbstractUIClass, propertyName: string): IUIProperty | undefined {
+		let property: IUIProperty | undefined;
 		property = UIClass.properties.find(property => property.name === propertyName);
 		if (!property && UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
@@ -406,8 +406,8 @@ export class XMLDynamicCompletionItemFactory {
 		return property;
 	}
 
-	private _getUIEventRecursively(UIClass: AbstractUIClass, eventName: string): UIEvent | undefined {
-		let event: UIEvent | undefined;
+	private _getUIEventRecursively(UIClass: AbstractUIClass, eventName: string): IUIEvent | undefined {
+		let event: IUIEvent | undefined;
 		event = UIClass.events.find(event => event.name === eventName);
 		if (!event && UIClass.parentClassNameDotNotation) {
 			const parentClass = UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation);
@@ -417,7 +417,7 @@ export class XMLDynamicCompletionItemFactory {
 		return event;
 	}
 
-	private _generateCompletionItemsFromTypeValues(typeValues: TypeValue[]) {
+	private _generateCompletionItemsFromTypeValues(typeValues: ITypeValue[]) {
 		return this._removeDuplicateCompletionItems(typeValues.map(typeValue => {
 			const completionItem = new CustomCompletionItem(typeValue.text, vscode.CompletionItemKind.Keyword);
 			completionItem.detail = typeValue.text;

@@ -1,16 +1,16 @@
-import { Error, Linter } from "./abstraction/Linter";
+import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { FileReader } from "../../../../../utils/FileReader";
-import { CustomClassUIField, CustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { ICustomClassUIField, ICustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
 export class UnusedMemberLinter extends Linter {
 	protected className = "UnusedMemberLinter";
-	_getErrors(document: vscode.TextDocument): Error[] {
-		const errors: Error[] = [];
+	_getErrors(document: vscode.TextDocument): IError[] {
+		const errors: IError[] = [];
 
 		// console.time("Unused Member Linter");
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useUnusedMemberLinter")) {
@@ -21,7 +21,7 @@ export class UnusedMemberLinter extends Linter {
 					const allUIClassesMap = UIClassFactory.getAllExistentUIClasses();
 					const allUIClasses = Object.keys(allUIClassesMap).map(key => allUIClassesMap[key]);
 					const customUIClasses = allUIClasses.filter(UIClass => UIClass instanceof CustomUIClass) as CustomUIClass[];
-					const methodsAndFields: (CustomClassUIField | CustomClassUIMethod)[] = [
+					const methodsAndFields: (ICustomClassUIField | ICustomClassUIMethod)[] = [
 						...UIClass.methods,
 						...UIClass.fields
 					];
@@ -54,7 +54,7 @@ export class UnusedMemberLinter extends Linter {
 		return errors;
 	}
 
-	private _checkIfMemberIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, methodOrField: CustomClassUIMethod | CustomClassUIField) {
+	private _checkIfMemberIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, methodOrField: ICustomClassUIMethod | ICustomClassUIField) {
 		const isException = this._checkIfMethodIsException(UIClass.className, methodOrField.name);
 		let memberIsUsed = false;
 		const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, methodOrField.name);

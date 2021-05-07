@@ -1,15 +1,15 @@
 import { IUMLGenerator } from "./interfaces/IUMLGenerator";
-import { UIField } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { IUIField } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 import { ClassHead } from "./ClassHead";
 import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
 
 export class Field implements IUMLGenerator, ITextLengthGettable {
 	id: number;
-	UIField: UIField;
+	UIField: IUIField;
 	parent: ClassHead;
 	index: number;
-	constructor(UIField: UIField, parent: ClassHead, index: number) {
+	constructor(UIField: IUIField, parent: ClassHead, index: number) {
 		this.id = DrawIOUMLDiagram.getUniqueId();
 		this.UIField = UIField;
 		this.parent = parent;

@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { UIClassFactory, FieldsAndMethods } from "../UIClassFactory";
-import { FileReader, Fragment, View } from "../../utils/FileReader";
-import { UIField, UIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
-import { CustomClassUIMethod, CustomUIClass, CustomClassUIField } from "../UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory, IFieldsAndMethods } from "../UIClassFactory";
+import { FileReader, IXMLFile } from "../../utils/FileReader";
+import { IUIField, IUIMethod } from "../UI5Parser/UIClass/AbstractUIClass";
+import { ICustomClassUIMethod, CustomUIClass, ICustomClassUIField } from "../UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "./strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { FieldPropertyMethodGetterStrategy } from "./strategies/abstraction/FieldPropertyMethodGetterStrategy";
 import { InnerPropertiesStrategy } from "./strategies/InnerPropertiesStrategy";
@@ -11,7 +11,7 @@ import { SAPNodeDAO } from "../../librarydata/SAPNodeDAO";
 import { ParentMethodStrategy } from "./strategies/ParentMethodStrategy";
 export class AcornSyntaxAnalyzer {
 	static getFieldsAndMethodsOfTheCurrentVariable(document: vscode.TextDocument, position: vscode.Position) {
-		let fieldsAndMethods: FieldsAndMethods | undefined;
+		let fieldsAndMethods: IFieldsAndMethods | undefined;
 
 		const aStrategies: FieldPropertyMethodGetterStrategy[] = [
 			new FieldsAndMethodForPositionBeforeCurrentStrategy(),
@@ -216,11 +216,11 @@ export class AcornSyntaxAnalyzer {
 								className = method.returnType;
 							}
 
-							if (className === "map" && (<CustomClassUIMethod>method).acornNode) {
+							if (className === "map" && (<ICustomClassUIMethod>method).acornNode) {
 								currentNode._acornSyntaxAnalyserType = "map";
 								const UIClass = UIClassFactory.getUIClass(currentClassName);
 								if (UIClass instanceof CustomUIClass) {
-									const body = (method as CustomClassUIMethod).acornNode.body?.body;
+									const body = (method as ICustomClassUIMethod).acornNode.body?.body;
 									if (body) {
 										const returnStatement = body.find((node: any) => node.type === "ReturnStatement");
 										if (returnStatement?.argument) {
@@ -243,11 +243,11 @@ export class AcornSyntaxAnalyzer {
 							className = field.type;
 						}
 
-						if (className === "map" && (<CustomClassUIField>field).acornNode?.value) {
+						if (className === "map" && (<ICustomClassUIField>field).acornNode?.value) {
 							currentNode._acornSyntaxAnalyserType = "map";
 							const UIClass = UIClassFactory.getUIClass(primaryClassName);
 							if (UIClass instanceof CustomUIClass) {
-								className = this.getClassNameFromSingleAcornNode((field as CustomClassUIField).acornNode.value, UIClass, stack);
+								className = this.getClassNameFromSingleAcornNode((field as ICustomClassUIField).acornNode.value, UIClass, stack);
 							}
 						}
 					}
@@ -370,7 +370,7 @@ export class AcornSyntaxAnalyzer {
 
 		if (!modelClassName) {
 			const methods = UIClassFactory.getClassMethods(className);
-			const method = (<CustomClassUIMethod[]>methods).find(method => {
+			const method = (<ICustomClassUIMethod[]>methods).find(method => {
 				let methodFound = false;
 				if (method.acornNode) {
 					const content = this.expandAllContent(method.acornNode);
@@ -588,7 +588,7 @@ export class AcornSyntaxAnalyzer {
 		return eventHandlerData;
 	}
 
-	private static _getEventHandlerDataFromXMLText(viewOrFragment: View | Fragment, currentClassEventHandlerName: string) {
+	private static _getEventHandlerDataFromXMLText(viewOrFragment: IXMLFile, currentClassEventHandlerName: string) {
 		let eventHandlerData;
 
 		XMLParser.setCurrentDocument(viewOrFragment.content);
@@ -789,7 +789,7 @@ export class AcornSyntaxAnalyzer {
 		return className;
 	}
 
-	public static findMethodReturnType(method: UIMethod, className: string, includeParentMethods = true, clearStack = false) {
+	public static findMethodReturnType(method: IUIMethod, className: string, includeParentMethods = true, clearStack = false) {
 		if (clearStack) {
 			this.declarationStack = [];
 		}
@@ -821,7 +821,7 @@ export class AcornSyntaxAnalyzer {
 		}
 	}
 
-	public static findFieldType(field: UIField, className: string, includeParentMethods = true, clearStack = false) {
+	public static findFieldType(field: IUIField, className: string, includeParentMethods = true, clearStack = false) {
 		const UIClass = UIClassFactory.getUIClass(className);
 		if (clearStack) {
 			this.declarationStack = [];
@@ -1211,13 +1211,13 @@ export class AcornSyntaxAnalyzer {
 		return className;
 	}
 
-	public static findMethodHierarchically(className: string, methodName: string): UIMethod | undefined {
+	public static findMethodHierarchically(className: string, methodName: string): IUIMethod | undefined {
 		const method = UIClassFactory.getClassMethods(className).find(method => method.name === methodName);
 
 		return method;
 	}
 
-	private static _findFieldHierarchically(className: string, fieldName: string): UIField | undefined {
+	private static _findFieldHierarchically(className: string, fieldName: string): IUIField | undefined {
 		const field = UIClassFactory.getClassFields(className).find(field => field.name === fieldName);
 
 		return field;

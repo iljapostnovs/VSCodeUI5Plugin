@@ -10,8 +10,8 @@ const escapedFileSeparator = "\\" + path.sep;
 
 const workspace = vscode.workspace;
 export class FileReader {
-	private static _manifests: UIManifest[] = [];
-	private static readonly _viewCache: Views = {};
+	private static _manifests: IUIManifest[] = [];
+	private static readonly _viewCache: IViews = {};
 	private static readonly _fragmentCache: Fragments = {};
 	private static readonly _UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
 	public static globalStoragePath: string | undefined;
@@ -19,6 +19,7 @@ export class FileReader {
 	public static setNewViewContentToCache(viewContent: string, fsPath: string) {
 		const controllerName = this.getControllerNameFromView(viewContent);
 		if (controllerName) {
+			const viewName = this.getClassNameFromPath(fsPath);
 			if (this._viewCache[controllerName]) {
 				this._viewCache[controllerName].content = viewContent;
 				this._viewCache[controllerName].idClassMap = {};
@@ -27,6 +28,7 @@ export class FileReader {
 			} else {
 				this._viewCache[controllerName] = {
 					idClassMap: {},
+					name: viewName || "",
 					content: viewContent,
 					fsPath: fsPath,
 					fragments: this.getFragmentsFromXMLDocumentText(viewContent)
@@ -164,7 +166,7 @@ export class FileReader {
 			vscode.window.showInformationMessage(`Reading manifests took ${timeSpent / 100}s and ${manifestPaths.length} manifests found. Please make sure that "ui5.plugin.excludeFolderPattern" preference is configured correctly.`);
 		}
 
-		const manifests: manifestPaths[] = manifestPaths.map(manifestPath => {
+		const manifests: IManifestPaths[] = manifestPaths.map(manifestPath => {
 			return {
 				fsPath: manifestPath.replace(/\//g, fileSeparator)
 			};
@@ -218,12 +220,12 @@ export class FileReader {
 		return className;
 	}
 
-	public static getViewForController(controllerName: string): View | undefined {
+	public static getViewForController(controllerName: string): IView | undefined {
 		if (!this._viewCache[controllerName]) {
 			// this._readAllViewsAndSaveInCache();
 		}
 
-		let view: View | undefined;
+		let view: IView | undefined;
 
 		if (this._viewCache[controllerName]) {
 			view = this._viewCache[controllerName];
@@ -233,7 +235,7 @@ export class FileReader {
 	}
 
 	public static getFragmentsMentionedInClass(className: string) {
-		let fragments: Fragment[] = [];
+		let fragments: IFragment[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 
 		if (UIClass instanceof CustomUIClass) {
@@ -241,7 +243,7 @@ export class FileReader {
 				return UIClass.classText.indexOf(`"${fragment.name}"`) > -1;
 			});
 
-			const fragmentsInFragment: Fragment[] = [];
+			const fragmentsInFragment: IFragment[] = [];
 			fragments.forEach(fragment => {
 				fragmentsInFragment.push(...this.getFragmentsInFragment(fragment));
 			});
@@ -253,8 +255,8 @@ export class FileReader {
 		return fragments;
 	}
 
-	static getFragmentsInFragment(fragment: Fragment) {
-		const fragmentsInFragment: Fragment[] = [];
+	static getFragmentsInFragment(fragment: IFragment) {
+		const fragmentsInFragment: IFragment[] = [];
 		const fragments = fragment.fragments;
 		fragments.forEach(fragment => {
 			fragmentsInFragment.push(...this.getFragmentsInFragment(fragment));
@@ -263,7 +265,7 @@ export class FileReader {
 		return fragments.concat(fragmentsInFragment);
 	}
 
-	public static getFirstFragmentForClass(className: string): Fragment | undefined {
+	public static getFirstFragmentForClass(className: string): IFragment | undefined {
 		const fragment = this.getFragmentsMentionedInClass(className)[0];
 
 		return fragment;
@@ -273,7 +275,7 @@ export class FileReader {
 		return this.getViewForController(controllerName)?.content;
 	}
 
-	private static _getClassOfControlIdFromView(viewOrFragment: View | Fragment, controlId: string) {
+	private static _getClassOfControlIdFromView(viewOrFragment: IXMLFile & IIdClassMap, controlId: string) {
 		if (!viewOrFragment.idClassMap[controlId]) {
 			let controlClass = "";
 			//TODO: move to XMLParser
@@ -364,9 +366,11 @@ export class FileReader {
 				const viewFSPath = viewPath.replace(/\//g, fileSeparator);
 				const fragments = this.getFragmentsFromXMLDocumentText(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
+				const viewName = this.getClassNameFromPath(viewFSPath);
 				if (controllerName) {
 					this._viewCache[controllerName] = {
 						idClassMap: {},
+						name: viewName || "",
 						content: viewContent,
 						fsPath: viewFSPath,
 						fragments: fragments
@@ -423,7 +427,7 @@ export class FileReader {
 		return controllerName;
 	}
 	static getResponsibleClassForXMLDocument(document: vscode.TextDocument) {
-		let viewOrFragment: View | Fragment | undefined = FileReader.getAllViews().find(view => view.fsPath === document.fileName);
+		let viewOrFragment: IXMLFile | undefined = FileReader.getAllViews().find(view => view.fsPath === document.fileName);
 		if (!viewOrFragment) {
 			viewOrFragment = FileReader.getAllFragments().find(fragment => fragment.fsPath === document.fileName);
 		}
@@ -433,7 +437,7 @@ export class FileReader {
 		}
 	}
 
-	static getResponsibleClassNameForViewOrFragment(viewOrFragment: View | Fragment) {
+	static getResponsibleClassNameForViewOrFragment(viewOrFragment: IXMLFile) {
 		const isFragment = viewOrFragment.fsPath.endsWith(".fragment.xml");
 		const isView = viewOrFragment.fsPath.endsWith(".view.xml");
 		let responsibleClassName;
@@ -465,7 +469,7 @@ export class FileReader {
 		return manifest?.content["sap.ui5"]?.extends?.extensions;
 	}
 
-	private static _getResponsibleClassNameForFragmentFromManifestExtensions(viewOrFragment: View | Fragment) {
+	private static _getResponsibleClassNameForFragmentFromManifestExtensions(viewOrFragment: IXMLFile) {
 		let responsibleClassName: string | undefined;
 		const fragmentName = this.getClassNameFromPath(viewOrFragment.fsPath);
 		if (fragmentName) {
@@ -520,7 +524,7 @@ export class FileReader {
 		return controllerName;
 	}
 
-	private static _getResponsibleClassNameForFragmentFromCustomUIClasses(viewOrFragment: View | Fragment) {
+	private static _getResponsibleClassNameForFragmentFromCustomUIClasses(viewOrFragment: IXMLFile) {
 		const allUIClasses = UIClassFactory.getAllExistentUIClasses();
 		const fragmentName = this.getClassNameFromPath(viewOrFragment.fsPath);
 		const responsibleClassName = Object.keys(allUIClasses).find(key => {
@@ -538,7 +542,7 @@ export class FileReader {
 	}
 
 	public static getFragmentsFromXMLDocumentText(documentText: string) {
-		const fragments: Fragment[] = [];
+		const fragments: IFragment[] = [];
 		const fragmentTags = this._getFragmentTags(documentText);
 		fragmentTags.forEach(fragmentTag => {
 			const fragmentName = this._getFragmentNameFromTag(fragmentTag);
@@ -554,7 +558,7 @@ export class FileReader {
 		return fragments;
 	}
 
-	static getFragment(fragmentName: string): Fragment | undefined {
+	static getFragment(fragmentName: string): IFragment | undefined {
 		return this._fragmentCache[fragmentName];
 	}
 
@@ -678,7 +682,7 @@ export class FileReader {
 		});
 	}
 
-	public static readResourceModelFile(manifest: UIManifest) {
+	public static readResourceModelFile(manifest: IUIManifest) {
 		let resourceModelFileContent = "";
 		const resourceModelFilePath = this.getResourceModelUriForManifest(manifest);
 		try {
@@ -690,7 +694,7 @@ export class FileReader {
 		return resourceModelFileContent;
 	}
 
-	public static getResourceModelUriForManifest(manifest: UIManifest) {
+	public static getResourceModelUriForManifest(manifest: IUIManifest) {
 		const i18nRelativePath = typeof manifest.content["sap.app"]?.i18n === "string" ? manifest.content["sap.app"]?.i18n : `i18n${fileSeparator}i18n.properties`;
 		const i18nPath = i18nRelativePath.replace(/\//g, fileSeparator);
 		return `${manifest.fsPath}${fileSeparator}${i18nPath}`;
@@ -725,39 +729,41 @@ export namespace FileReader {
 	}
 }
 
-interface UIManifest {
+interface IUIManifest {
 	fsPath: string;
 	componentName: string;
 	content: any;
 }
 
-interface manifestPaths {
+interface IManifestPaths {
 	fsPath: string;
 }
 
-export interface Views {
-	[key: string]: View;
+export interface IViews {
+	[key: string]: IView;
 }
 
-export interface View {
-	fsPath: string;
-	content: string;
-	fragments: Fragment[];
-	idClassMap: {
-		[key: string]: string;
-	}
+export interface IView extends IXMLFile, IIdClassMap, IHasFragments {
+}
+export interface IHasFragments {
+	fragments: IFragment[];
 }
 
-
-export interface Fragment {
+export interface IXMLFile {
 	content: string;
 	fsPath: string;
 	name: string;
+}
+export interface IIdClassMap {
 	idClassMap: {
 		[key: string]: string;
 	};
-	fragments: Fragment[];
 }
+
+
+export interface IFragment extends IXMLFile, IIdClassMap, IHasFragments {
+}
+
 interface Fragments {
-	[key: string]: Fragment;
+	[key: string]: IFragment;
 }

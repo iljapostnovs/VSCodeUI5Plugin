@@ -1,12 +1,12 @@
 import { FileReader } from "../utils/FileReader";
-import { TypeValue } from "./UI5Parser/UIClass/AbstractUIClass";
+import { ITypeValue } from "./UI5Parser/UIClass/AbstractUIClass";
 
-interface ResourceModel {
-	[key: string]: TypeValue[];
+interface IResourceModel {
+	[key: string]: ITypeValue[];
 }
 
 export class ResourceModelData {
-	public static resourceModels: ResourceModel = {};
+	public static resourceModels: IResourceModel = {};
 
 	static async readTexts() {
 		const resourceModelFiles = FileReader.getResourceModelFiles();

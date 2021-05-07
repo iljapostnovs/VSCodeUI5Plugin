@@ -1,14 +1,14 @@
-import { Error, Linter, Tag } from "./abstraction/Linter";
+import { IError, Linter, ITag } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
-import { UIAggregation } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { IUIAggregation } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 
 
 export class TagLinter extends Linter {
-	getErrors(document: vscode.TextDocument): Error[] {
-		const errors: Error[] = [];
+	getErrors(document: vscode.TextDocument): IError[] {
+		const errors: IError[] = [];
 		const documentText = document.getText();
 
 		//check tags
@@ -26,9 +26,9 @@ export class TagLinter extends Linter {
 		return errors;
 	}
 
-	private _getClassNameErrors(tag: Tag, document: vscode.TextDocument) {
+	private _getClassNameErrors(tag: ITag, document: vscode.TextDocument) {
 		const documentText = document.getText();
-		const errors: Error[] = [];
+		const errors: IError[] = [];
 		const tagClass = XMLParser.getFullClassNameFromTag(tag, documentText);
 		if (!tagClass) {
 			const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
@@ -100,7 +100,7 @@ export class TagLinter extends Linter {
 		return errors;
 	}
 
-	private _findAggregation(className: string, aggregationName: string): UIAggregation | undefined {
+	private _findAggregation(className: string, aggregationName: string): IUIAggregation | undefined {
 		const UIClass = UIClassFactory.getUIClass(className);
 		let aggregation = UIClass.aggregations.find(aggregation => aggregation.name === aggregationName);
 		if (!aggregation && UIClass.parentClassNameDotNotation) {

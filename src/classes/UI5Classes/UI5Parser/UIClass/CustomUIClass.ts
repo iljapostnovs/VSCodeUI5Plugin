@@ -2,7 +2,7 @@
 import { FileReader } from "../../../utils/FileReader";
 import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
-import { AbstractUIClass, UIField, UIAggregation, UIEvent, UIMethod, UIProperty, UIAssociation, UIEventParam, UIMethodParam } from "./AbstractUIClass";
+import { AbstractUIClass, IUIField, IUIAggregation, IUIEvent, IUIMethod, IUIProperty, IUIAssociation, IUIEventParam, IUIMethodParam } from "./AbstractUIClass";
 import * as commentParser from "comment-parser";
 const acornLoose = require("acorn-loose");
 
@@ -14,7 +14,7 @@ interface IUIDefine {
 	end: number;
 	acornNode: any;
 }
-interface LooseObject {
+interface ILooseObject {
 	[key: string]: any;
 }
 
@@ -32,17 +32,17 @@ interface IComment {
 	end: number;
 	jsdoc: any;
 }
-export interface CustomClassUIMethod extends UIMethod, IAcornNodeBearer, IXMLDocumentMentionable {
+export interface ICustomClassUIMethod extends IUIMethod, IAcornNodeBearer, IXMLDocumentMentionable {
 	position?: number;
 	isEventHandler: boolean;
 	acornParams?: any;
 }
-export interface CustomClassUIField extends UIField, IAcornNodeBearer, IXMLDocumentMentionable {
-	customData?: LooseObject;
+export interface ICustomClassUIField extends IUIField, IAcornNodeBearer, IXMLDocumentMentionable {
+	customData?: ILooseObject;
 }
 export class CustomUIClass extends AbstractUIClass {
-	public methods: CustomClassUIMethod[] = [];
-	public fields: CustomClassUIField[] = [];
+	public methods: ICustomClassUIMethod[] = [];
+	public fields: ICustomClassUIField[] = [];
 	public classText = "";
 	public UIDefine: IUIDefine[] = [];
 	public comments: IComment[] = [];
@@ -192,7 +192,7 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	private _fillParamJSTypesFromTag(tag: any, params: any[], method: CustomClassUIMethod) {
+	private _fillParamJSTypesFromTag(tag: any, params: any[], method: ICustomClassUIMethod) {
 		const tagNameParts = tag.name.split(".");
 		if (tagNameParts.length > 1) {
 			const paramName = tagNameParts.shift();
@@ -441,7 +441,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 			this.acornClassBody.properties.forEach((property: any) => {
 				if (property.value?.type === "FunctionExpression" || property.value?.type === "ArrowFunctionExpression") {
-					const method: CustomClassUIMethod = {
+					const method: ICustomClassUIMethod = {
 						name: property.key.name,
 						params: this._generateParamTextForMethod(property.value.params),
 						returnType: property.returnType || property.value.async ? "Promise" : "void",
@@ -506,7 +506,7 @@ export class CustomUIClass extends AbstractUIClass {
 			this._fillMethodsAndFieldsFromPrototype();
 
 			//remove duplicates
-			this.fields = this.fields.reduce((accumulator: UIField[], field: UIField) => {
+			this.fields = this.fields.reduce((accumulator: IUIField[], field: IUIField) => {
 				const existingField = accumulator.find(accumulatedField => accumulatedField.name === field.name);
 				if (existingField && field.type && !existingField.type) {
 					accumulator[accumulator.indexOf(existingField)] = field;
@@ -534,7 +534,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private _generateParamTextForMethod(acornParams: any[]) {
-		const params: UIMethodParam[] = acornParams.map((param: any) => {
+		const params: IUIMethodParam[] = acornParams.map((param: any) => {
 			let name = "";
 			if (param.type === "Identifier") {
 				name = param.name || "Unknown";
@@ -555,7 +555,7 @@ export class CustomUIClass extends AbstractUIClass {
 		return params;
 	}
 
-	private _generateCustomDataForObject(node: any, looseObject: LooseObject = {}) {
+	private _generateCustomDataForObject(node: any, looseObject: ILooseObject = {}) {
 		node.properties?.forEach((property: any) => {
 			looseObject[property.key.name] = {};
 			if (property.value.type === "ObjectExpression") {
@@ -601,7 +601,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 				const name = node.expression.left.property.name;
 				if (isMethod) {
-					const method: CustomClassUIMethod = {
+					const method: ICustomClassUIMethod = {
 						name: name,
 						params: assignmentBody.params.map((param: any) => ({
 							name: param.name,
@@ -634,7 +634,7 @@ export class CustomUIClass extends AbstractUIClass {
 		}
 	}
 
-	public static generateDescriptionForMethod(method: UIMethod) {
+	public static generateDescriptionForMethod(method: IUIMethod) {
 		return `(${method.params.map(param => param.name).join(", ")}) : ${method.returnType ? method.returnType : "void"}`;
 	}
 
@@ -650,7 +650,7 @@ export class CustomUIClass extends AbstractUIClass {
 		let type;
 
 		if (variable.length >= 2) {
-			const map: LooseObject = {
+			const map: ILooseObject = {
 				$: "Element",
 				o: "object",
 				a: "array",
@@ -678,7 +678,7 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 
 	private _fillMethodsFromMetadata() {
-		const additionalMethods: CustomClassUIMethod[] = [];
+		const additionalMethods: ICustomClassUIMethod[] = [];
 
 		this._fillPropertyMethods(additionalMethods);
 		this._fillAggregationMethods(additionalMethods);
@@ -688,7 +688,7 @@ export class CustomUIClass extends AbstractUIClass {
 		this.methods = this.methods.concat(additionalMethods);
 	}
 
-	private _fillPropertyMethods(aMethods: CustomClassUIMethod[]) {
+	private _fillPropertyMethods(aMethods: ICustomClassUIMethod[]) {
 		this.properties?.forEach(property => {
 			const propertyWithFirstBigLetter = `${property.name[0].toUpperCase()}${property.name.substring(1, property.name.length)}`;
 			const getterName = `get${propertyWithFirstBigLetter}`;
@@ -721,10 +721,10 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private _fillAggregationMethods(additionalMethods: CustomClassUIMethod[]) {
+	private _fillAggregationMethods(additionalMethods: ICustomClassUIMethod[]) {
 		interface method {
 			name: string;
-			params: UIMethodParam[];
+			params: IUIMethodParam[];
 			returnType: string;
 		}
 		this.aggregations?.forEach(aggregation => {
@@ -860,7 +860,7 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private _fillEventMethods(aMethods: CustomClassUIMethod[]) {
+	private _fillEventMethods(aMethods: ICustomClassUIMethod[]) {
 		this.events?.forEach(event => {
 			const eventWithFirstBigLetter = `${event.name[0].toUpperCase()}${event.name.substring(1, event.name.length)}`;
 			const aEventMethods = [
@@ -915,7 +915,7 @@ export class CustomUIClass extends AbstractUIClass {
 		});
 	}
 
-	private _fillAssociationMethods(additionalMethods: CustomClassUIMethod[]) {
+	private _fillAssociationMethods(additionalMethods: ICustomClassUIMethod[]) {
 		this.associations?.forEach(association => {
 			const associationWithFirstBigLetter = `${association.singularName[0].toUpperCase()}${association.singularName.substring(1, association.singularName.length)}`;
 
@@ -1076,7 +1076,7 @@ export class CustomUIClass extends AbstractUIClass {
 					visibility = visibilityProp.value.value;
 				}
 
-				const UIAggregations: UIAggregation = {
+				const UIAggregations: IUIAggregation = {
 					name: aggregationName,
 					type: aggregationType || "any",
 					multiple: multiple,
@@ -1103,19 +1103,19 @@ export class CustomUIClass extends AbstractUIClass {
 					visibility = visibilityProp.value.value;
 				}
 
-				let eventParams: UIEventParam[] = [];
+				let eventParams: IUIEventParam[] = [];
 				const params = eventNode.value?.properties?.find((node: any) => node.key.name === "parameters");
 				if (params) {
 					eventParams = params.value?.properties?.map((param: any) => {
 						const type = param.value?.properties?.find((param: any) => param.key.name === "type")?.value?.value || "";
-						const eventParam: UIEventParam = {
+						const eventParam: IUIEventParam = {
 							name: param.key.name,
 							type: type
 						};
 						return eventParam;
 					}) || [];
 				}
-				const UIEvent: UIEvent = {
+				const UIEvent: IUIEvent = {
 					name: eventNode.key.name,
 					description: "",
 					visibility: visibility,
@@ -1149,7 +1149,7 @@ export class CustomUIClass extends AbstractUIClass {
 					visibility = visibilityProp.value.value;
 				}
 
-				const UIProperties: UIProperty = {
+				const UIProperties: IUIProperty = {
 					name: propertyName,
 					type: propertyType,
 					visibility: visibility,
@@ -1199,7 +1199,7 @@ export class CustomUIClass extends AbstractUIClass {
 					visibility = visibilityProp.value.value;
 				}
 
-				const UIAssociations: UIAssociation = {
+				const UIAssociations: IUIAssociation = {
 					name: associationName,
 					type: associationType,
 					multiple: multiple,

@@ -1,29 +1,29 @@
-import { AbstractUIClass, UIAggregation, UIAssociation, UIEvent, UIField, UIMethod, UIProperty } from "./UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass, IUIAggregation, IUIAssociation, IUIEvent, IUIField, IUIMethod, IUIProperty } from "./UI5Parser/UIClass/AbstractUIClass";
 import { CustomUIClass } from "./UI5Parser/UIClass/CustomUIClass";
 import { StandardUIClass } from "./UI5Parser/UIClass/StandardUIClass";
 import { JSClass } from "./UI5Parser/UIClass/JSClass";
 import { AcornSyntaxAnalyzer } from "./JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
-import { FileReader, Fragment, View } from "../utils/FileReader";
+import { FileReader, IFragment, IView } from "../utils/FileReader";
 import LineColumn = require("line-column");
 
-export interface FieldsAndMethods {
+export interface IFieldsAndMethods {
 	className: string;
-	fields: UIField[];
-	methods: UIMethod[];
+	fields: IUIField[];
+	methods: IUIMethod[];
 }
 
-interface ViewsAndFragments {
-	views: View[];
-	fragments: Fragment[];
+interface IViewsAndFragments {
+	views: IView[];
+	fragments: IFragment[];
 }
 
-interface UIClassMap {
+interface IUIClassMap {
 	[key: string]: AbstractUIClass;
 }
 
 export class UIClassFactory {
-	private static readonly _UIClasses: UIClassMap = {
+	private static readonly _UIClasses: IUIClassMap = {
 		Promise: new JSClass("Promise"),
 		array: new JSClass("array"),
 		string: new JSClass("string"),
@@ -208,7 +208,7 @@ export class UIClassFactory {
 	}
 
 	public static getFieldsAndMethodsForClass(className: string, returnDuplicates = true) {
-		const fieldsAndMethods: FieldsAndMethods = {
+		const fieldsAndMethods: IFieldsAndMethods = {
 			className: className,
 			fields: [],
 			methods: []
@@ -223,7 +223,7 @@ export class UIClassFactory {
 	}
 
 	public static getClassFields(className: string, returnDuplicates = true) {
-		let fields: UIField[] = [];
+		let fields: IUIField[] = [];
 		const UIClass = this.getUIClass(className);
 		fields = UIClass.fields;
 		if (UIClass.parentClassNameDotNotation) {
@@ -232,7 +232,7 @@ export class UIClassFactory {
 
 		if (!returnDuplicates) {
 			//remove duplicates
-			fields = fields.reduce((accumulator: UIField[], field: UIField) => {
+			fields = fields.reduce((accumulator: IUIField[], field: IUIField) => {
 				const fieldInAccumulator = accumulator.find(accumulatorField => accumulatorField.name === field.name);
 				if (!fieldInAccumulator) {
 					accumulator.push(field);
@@ -246,7 +246,7 @@ export class UIClassFactory {
 
 	public static getClassMethods(className: string, returnDuplicates = true) {
 		const UIClass = this.getUIClass(className);
-		let methods: UIMethod[] = UIClass.methods;
+		let methods: IUIMethod[] = UIClass.methods;
 		if (UIClass.parentClassNameDotNotation) {
 			const parentMethods = this.getClassMethods(UIClass.parentClassNameDotNotation);
 			parentMethods.forEach(parentMethod => {
@@ -259,7 +259,7 @@ export class UIClassFactory {
 
 		//remove duplicates
 		if (!returnDuplicates) {
-			methods = methods.reduce((accumulator: UIMethod[], method: UIMethod) => {
+			methods = methods.reduce((accumulator: IUIMethod[], method: IUIMethod) => {
 				const methodInAccumulator = accumulator.find(accumulatorMethod => accumulatorMethod.name === method.name);
 				if (!methodInAccumulator) {
 					accumulator.push(method);
@@ -273,14 +273,14 @@ export class UIClassFactory {
 
 	public static getClassEvents(className: string, returnDuplicates = true) {
 		const UIClass = this.getUIClass(className);
-		let events: UIEvent[] = UIClass.events;
+		let events: IUIEvent[] = UIClass.events;
 		if (UIClass.parentClassNameDotNotation) {
 			events = events.concat(this.getClassEvents(UIClass.parentClassNameDotNotation));
 		}
 
 		if (!returnDuplicates) {
 			//remove duplicates
-			events = events.reduce((accumulator: UIEvent[], event: UIEvent) => {
+			events = events.reduce((accumulator: IUIEvent[], event: IUIEvent) => {
 				const eventInAccumulator = accumulator.find(accumulatorEvent => accumulatorEvent.name === event.name);
 				if (!eventInAccumulator) {
 					accumulator.push(event);
@@ -294,14 +294,14 @@ export class UIClassFactory {
 
 	public static getClassAggregations(className: string, returnDuplicates = true) {
 		const UIClass = this.getUIClass(className);
-		let aggregations: UIAggregation[] = UIClass.aggregations;
+		let aggregations: IUIAggregation[] = UIClass.aggregations;
 		if (UIClass.parentClassNameDotNotation) {
 			aggregations = aggregations.concat(this.getClassAggregations(UIClass.parentClassNameDotNotation));
 		}
 
 		if (!returnDuplicates) {
 			//remove duplicates
-			aggregations = aggregations.reduce((accumulator: UIAggregation[], aggregation: UIAggregation) => {
+			aggregations = aggregations.reduce((accumulator: IUIAggregation[], aggregation: IUIAggregation) => {
 				const aggregationInAccumulator = accumulator.find(accumulatorAggregation => accumulatorAggregation.name === aggregation.name);
 				if (!aggregationInAccumulator) {
 					accumulator.push(aggregation);
@@ -314,14 +314,14 @@ export class UIClassFactory {
 
 	public static getClassAssociations(className: string, returnDuplicates = true) {
 		const UIClass = this.getUIClass(className);
-		let associations: UIAssociation[] = UIClass.associations;
+		let associations: IUIAssociation[] = UIClass.associations;
 		if (UIClass.parentClassNameDotNotation) {
 			associations = associations.concat(this.getClassAssociations(UIClass.parentClassNameDotNotation));
 		}
 
 		if (!returnDuplicates) {
 			//remove duplicates
-			associations = associations.reduce((accumulator: UIAssociation[], association: UIAssociation) => {
+			associations = associations.reduce((accumulator: IUIAssociation[], association: IUIAssociation) => {
 				const associationInAccumulator = accumulator.find(accumulatorAssociation => accumulatorAssociation.name === association.name);
 				if (!associationInAccumulator) {
 					accumulator.push(association);
@@ -334,14 +334,14 @@ export class UIClassFactory {
 
 	public static getClassProperties(className: string, returnDuplicates = true) {
 		const UIClass = this.getUIClass(className);
-		let properties: UIProperty[] = UIClass.properties;
+		let properties: IUIProperty[] = UIClass.properties;
 		if (UIClass.parentClassNameDotNotation) {
 			properties = properties.concat(this.getClassProperties(UIClass.parentClassNameDotNotation));
 		}
 
 		if (!returnDuplicates) {
 			//remove duplicates
-			properties = properties.reduce((accumulator: UIProperty[], property: UIProperty) => {
+			properties = properties.reduce((accumulator: IUIProperty[], property: IUIProperty) => {
 				const propertyInAccumulator = accumulator.find(accumulatorProperty => accumulatorProperty.name === property.name);
 				if (!propertyInAccumulator) {
 					accumulator.push(property);
@@ -446,19 +446,19 @@ export class UIClassFactory {
 		});
 	}
 
-	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = []): ViewsAndFragments {
+	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = []): IViewsAndFragments {
 		if (checkedClasses.includes(CurrentUIClass.className)) {
 			return { fragments: [], views: [] };
 		}
 
 		checkedClasses.push(CurrentUIClass.className);
-		const viewsAndFragments: ViewsAndFragments = this._getViewsAndFragmentsRelatedTo(CurrentUIClass);
+		const viewsAndFragments: IViewsAndFragments = this._getViewsAndFragmentsRelatedTo(CurrentUIClass);
 
 		const children = this._getAllChildrenOfClass(CurrentUIClass);
 		const parentUIClasses = this._getAllCustomUIClasses().filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && CurrentUIClass !== UIClass);
 		const whereMentioned = this._getAllClassesWhereClassIsImported(CurrentUIClass.className);
 		const relatedClasses = [...parentUIClasses, ...children, ...whereMentioned];
-		const relatedViewsAndFragments = relatedClasses.reduce((accumulator: ViewsAndFragments, relatedUIClass: CustomUIClass) => {
+		const relatedViewsAndFragments = relatedClasses.reduce((accumulator: IViewsAndFragments, relatedUIClass: CustomUIClass) => {
 			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses);
 			accumulator.fragments = accumulator.fragments.concat(relatedFragmentsAndViews.fragments);
 			accumulator.views = accumulator.views.concat(relatedFragmentsAndViews.views);
@@ -477,7 +477,7 @@ export class UIClassFactory {
 	}
 
 	private static _getViewsAndFragmentsRelatedTo(CurrentUIClass: CustomUIClass) {
-		const viewsAndFragments: ViewsAndFragments = {
+		const viewsAndFragments: IViewsAndFragments = {
 			views: [],
 			fragments: []
 		};
@@ -517,8 +517,8 @@ export class UIClassFactory {
 		}).map(UIClassName => allUIClasses[UIClassName] as CustomUIClass);
 	}
 
-	private static _getFragmentFromViewManifestExtensions(UIClass: CustomUIClass, view: View) {
-		const fragments: Fragment[] = [];
+	private static _getFragmentFromViewManifestExtensions(UIClass: CustomUIClass, view: IView) {
+		const fragments: IFragment[] = [];
 		const viewName = FileReader.getClassNameFromPath(view.fsPath);
 		if (viewName) {
 			const extensions = FileReader.getManifestExtensionsForClass(UIClass.className);
@@ -530,7 +530,7 @@ export class UIClassFactory {
 						const fragmentName = extension.fragmentName;
 						const fragment = FileReader.getFragment(fragmentName);
 						if (fragment) {
-							const fragmentsInFragment: Fragment[] = FileReader.getFragmentsInFragment(fragment);
+							const fragmentsInFragment: IFragment[] = FileReader.getFragmentsInFragment(fragment);
 							fragments.push(fragment, ...fragmentsInFragment);
 						}
 					}

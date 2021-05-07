@@ -1,5 +1,5 @@
 import { CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
-import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
+import { IFieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
 import { FieldPropertyMethodGetterStrategy as FieldMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
 import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
@@ -7,7 +7,7 @@ import { FileReader } from "../../../utils/FileReader";
 
 export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethodGetterStrategy {
 	getFieldsAndMethods(document: vscode.TextDocument, position: vscode.Position) {
-		let fieldsAndMethods: FieldsAndMethods | undefined;
+		let fieldsAndMethods: IFieldsAndMethods | undefined;
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		const offset = document.offsetAt(position);
 		const UIClassName = this.getClassNameOfTheVariableAtPosition(className, offset);
@@ -22,8 +22,8 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 
 		return fieldsAndMethods;
 	}
-	public destructueFieldsAndMethodsAccordingToMapParams(className: string): FieldsAndMethods | undefined {
-		let fieldsAndMethods: FieldsAndMethods | undefined;
+	public destructueFieldsAndMethodsAccordingToMapParams(className: string): IFieldsAndMethods | undefined {
+		let fieldsAndMethods: IFieldsAndMethods | undefined;
 		const isMap = className.includes("__map__");
 		const classNamePartsFromMapParam = className.split("__mapparam__");
 

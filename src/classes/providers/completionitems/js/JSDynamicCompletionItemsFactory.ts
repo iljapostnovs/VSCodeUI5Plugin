@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { UIField, UIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { IUIField, IUIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { FieldsAndMethods, UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import { IFieldsAndMethods, UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../utils/FileReader";
 import { ReusableMethods } from "../../reuse/ReusableMethods";
 import { CustomCompletionItem } from "../CustomCompletionItem";
@@ -24,16 +24,16 @@ export class JSDynamicCompletionItemsFactory {
 		return completionItems;
 	}
 
-	private _generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods: FieldsAndMethods, document: vscode.TextDocument, position: vscode.Position) {
+	private _generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods: IFieldsAndMethods, document: vscode.TextDocument, position: vscode.Position) {
 		//remove duplicates
-		fieldsAndMethods.methods = fieldsAndMethods.methods.reduce((accumulator: UIMethod[], method: UIMethod) => {
+		fieldsAndMethods.methods = fieldsAndMethods.methods.reduce((accumulator: IUIMethod[], method: IUIMethod) => {
 			const methodInAccumulator = accumulator.find(accumulatorMethod => accumulatorMethod.name === method.name);
 			if (!methodInAccumulator) {
 				accumulator.push(method);
 			}
 			return accumulator;
 		}, []);
-		fieldsAndMethods.fields = fieldsAndMethods.fields.reduce((accumulator: UIField[], field: UIField) => {
+		fieldsAndMethods.fields = fieldsAndMethods.fields.reduce((accumulator: IUIField[], field: IUIField) => {
 			const methodInAccumulator = accumulator.find(accumulatorField => accumulatorField.name === field.name);
 			if (!methodInAccumulator) {
 				accumulator.push(field);
@@ -118,7 +118,7 @@ export class JSDynamicCompletionItemsFactory {
 		return completionItems;
 	}
 
-	private _generateInsertTextForOverridenMethod(method: UIMethod, document: vscode.TextDocument, position: number) {
+	private _generateInsertTextForOverridenMethod(method: IUIMethod, document: vscode.TextDocument, position: number) {
 		let text = method.name;
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		const methodReturnsAnything = method.returnType !== "void";
@@ -143,7 +143,7 @@ export class JSDynamicCompletionItemsFactory {
 		return new vscode.SnippetString(text);
 	}
 
-	private _generateJSDocForMethod(method: UIMethod) {
+	private _generateJSDocForMethod(method: IUIMethod) {
 		let jsDoc = "/**\n";
 		jsDoc += " * @override\n";
 

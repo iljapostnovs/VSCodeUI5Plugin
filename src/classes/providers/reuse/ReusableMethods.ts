@@ -2,7 +2,7 @@
 import LineColumn = require("line-column");
 import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { CustomClassUIMethod, CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { ICustomClassUIMethod, CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
 export class ReusableMethods {
 	static getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
@@ -51,7 +51,7 @@ export class ReusableMethods {
 		return isPositionAfterLastMethod;
 	}
 
-	static getIfMethodIsLastOne(UIClass: CustomUIClass, method: CustomClassUIMethod) {
+	static getIfMethodIsLastOne(UIClass: CustomUIClass, method: ICustomClassUIMethod) {
 		let currentMethodIsLastMethod = false;
 		const propertyValues = UIClass.acornClassBody?.properties?.map((node: any) => node.value);
 		if (propertyValues) {

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import { XMLParser } from "./XMLParser";
 
 export class XMLFormatter {
@@ -72,7 +72,7 @@ export class XMLFormatter {
 		return textEdits;
 	}
 
-	private static _modifyIndentationLevel(currentTag: Tag, indentationLevel: number, beforeTagGeneration: boolean) {
+	private static _modifyIndentationLevel(currentTag: ITag, indentationLevel: number, beforeTagGeneration: boolean) {
 		if (beforeTagGeneration && currentTag.text.startsWith("</")) {
 			indentationLevel--;
 		} else if (!beforeTagGeneration && currentTag.text.startsWith("<") && !currentTag.text.endsWith("/>") && !currentTag.text.startsWith("</")) {
@@ -118,7 +118,7 @@ export class XMLFormatter {
 
 	private static _getAllTags(document: string) {
 		let i = 0;
-		const tags: Tag[] = [];
+		const tags: ITag[] = [];
 		const allStringsAreClosed = this._getIfAllStringsAreClosed(document);
 
 		if (allStringsAreClosed) {

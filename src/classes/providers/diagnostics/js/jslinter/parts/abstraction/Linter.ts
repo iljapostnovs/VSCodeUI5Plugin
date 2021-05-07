@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { CustomDiagnosticType } from "../../../../../../registrators/DiagnosticsRegistrator";
 
-export interface Error {
+export interface IError {
 	code: string;
 	message: string;
 	range: vscode.Range;
@@ -18,8 +18,8 @@ export interface Error {
 export abstract class Linter {
 	protected abstract className: string;
 	timePerChar = 0;
-	protected abstract _getErrors(document: vscode.TextDocument): Error[];
-	getErrors(document: vscode.TextDocument): Error[] {
+	protected abstract _getErrors(document: vscode.TextDocument): IError[];
+	getErrors(document: vscode.TextDocument): IError[] {
 		const timeStart = new Date().getTime();
 		const errors = this._getErrors(document);
 		const timeEnd = new Date().getTime();

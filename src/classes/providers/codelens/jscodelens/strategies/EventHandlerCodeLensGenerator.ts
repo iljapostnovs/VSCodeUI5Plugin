@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
-import { CustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { ICustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
-import { FileReader, Fragment, View } from "../../../../utils/FileReader";
+import { FileReader, IXMLFile } from "../../../../utils/FileReader";
 import { XMLParser } from "../../../../utils/XMLParser";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 import LineColumn = require("line-column");
 import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 
-interface EventHandlerData {
+interface IEventHandlerData {
 	name: string;
 	className: string;
 	start: number;
@@ -46,9 +46,9 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		return codeLenses;
 	}
 
-	private _getCodeLensesForEventsFromXMLText(XMLText: View | Fragment, eventHandlers: CustomClassUIMethod[], document: vscode.TextDocument) {
+	private _getCodeLensesForEventsFromXMLText(XMLText: IXMLFile, eventHandlers: ICustomClassUIMethod[], document: vscode.TextDocument) {
 		const codeLenses: vscode.CodeLens[] = [];
-		const solvedEventHandlers: CustomClassUIMethod[] = [];
+		const solvedEventHandlers: ICustomClassUIMethod[] = [];
 		XMLParser.setCurrentDocument(XMLText.content);
 		eventHandlers.forEach(eventHandler => {
 			const eventHandlerXMLData = this._getEventHandlerData(XMLText.content, eventHandler.name);
@@ -87,7 +87,7 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 	}
 
 	private _getEventHandlerData(XMLText: string, eventHandlerName: string) {
-		let eventHandlerData: EventHandlerData | undefined;
+		let eventHandlerData: IEventHandlerData | undefined;
 
 		const regex = new RegExp(`".?${eventHandlerName}"`);
 		const eventHandlerPosition = regex.exec(XMLText)?.index;
@@ -123,8 +123,8 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		return eventHandlerData;
 	}
 
-	private _getCodeLensesForEventsFromJSClass(eventHandlers: CustomClassUIMethod[], document: vscode.TextDocument) {
-		const solvedEventHandlers: CustomClassUIMethod[] = [];
+	private _getCodeLensesForEventsFromJSClass(eventHandlers: ICustomClassUIMethod[], document: vscode.TextDocument) {
+		const solvedEventHandlers: ICustomClassUIMethod[] = [];
 		const codeLenses: vscode.CodeLens[] = [];
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		if (className) {

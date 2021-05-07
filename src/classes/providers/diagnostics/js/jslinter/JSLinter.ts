@@ -1,5 +1,5 @@
 import { Linter } from "./parts/abstraction/Linter";
-import { Error } from "./parts/abstraction/Linter";
+import { IError } from "./parts/abstraction/Linter";
 import { WrongFieldMethodLinter } from "./parts/WrongFieldMethodLinter";
 import * as vscode from "vscode";
 import { WrongClassNameLinter } from "./parts/WrongClassNameLinter";
@@ -12,7 +12,7 @@ import { WrongOverrideLinter } from "./parts/WrongOverrideLinter";
 
 export class JSLinter {
 	static timePerchar = 0;
-	static getLintingErrors(document: vscode.TextDocument): Error[] {
+	static getLintingErrors(document: vscode.TextDocument): IError[] {
 		const linters: Linter[] = [
 			new WrongFieldMethodLinter(),
 			new WrongClassNameLinter(),
@@ -24,7 +24,7 @@ export class JSLinter {
 			new WrongOverrideLinter()
 		];
 
-		let errors: Error[] = [];
+		let errors: IError[] = [];
 		try {
 			linters.forEach(linter => {
 				errors = errors.concat(linter.getErrors(document));
