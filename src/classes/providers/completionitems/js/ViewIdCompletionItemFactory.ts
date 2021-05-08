@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { InnerPropertiesStrategy } from "../../../UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
-import { XMLFileTransformer } from "../../../utils/FileReader";
+import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../utils/XMLParser";
 import { CustomCompletionItem } from "../CustomCompletionItem";
 
@@ -15,9 +16,15 @@ export class ViewIdCompletionItemFactory {
 		if (currentClassName && position) {
 			const nodes = strategy.getStackOfNodesForInnerParamsForPosition(currentClassName, offset, true);
 			if (nodes.length === 1 && nodes[0].callee?.property?.name === "byId") {
-				const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
-				const viewIDs = XMLFile && XMLParser.getAllIDsInCurrentView(XMLFile) || [];
-				completionItems = this._generateCompletionItemsFromUICompletionItems(viewIDs, document, position);
+
+				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+				const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+				const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
+				const viewIds: string[] = [];
+				XMLDocuments.forEach(XMLDocument => {
+					viewIds.push(...XMLParser.getAllIDsInCurrentView(XMLDocument));
+				});
+				completionItems = this._generateCompletionItemsFromUICompletionItems(viewIds, document, position);
 			}
 		}
 

@@ -244,17 +244,16 @@ export class UIClassFactory {
 		return fields;
 	}
 
-	public static getClassMethods(className: string, returnDuplicates = true) {
+	public static getClassMethods(className: string, returnDuplicates = true, methods: IUIMethod[] = []) {
 		const UIClass = this.getUIClass(className);
-		let methods: IUIMethod[] = UIClass.methods;
+		methods.push(...UIClass.methods);
 		if (UIClass.parentClassNameDotNotation) {
-			const parentMethods = this.getClassMethods(UIClass.parentClassNameDotNotation);
-			parentMethods.forEach(parentMethod => {
-				if (parentMethod.returnType === UIClass.parentClassNameDotNotation) {
-					parentMethod.returnType = className;
-				}
-			});
-			methods = methods.concat(parentMethods);
+			this.getClassMethods(UIClass.parentClassNameDotNotation, true, methods);
+			// methods.forEach(parentMethod => {
+			// 	if (parentMethod.returnType === UIClass.parentClassNameDotNotation) {
+			// 		parentMethod.returnType = className;
+			// 	}
+			// });
 		}
 
 		//remove duplicates

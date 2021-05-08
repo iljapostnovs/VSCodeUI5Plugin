@@ -3,7 +3,6 @@ import { FileReader, IXMLFile } from "./FileReader";
 import { IUIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
-import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 export enum PositionType {
 	InTheTagAttributes = "1",
@@ -21,7 +20,6 @@ function escapeRegExp(string: string) {
 export class XMLParser {
 	static getXMLFunctionCallTagsAndAttributes(viewOrFragment: IXMLFile, eventHandlerName: string, functionCallClassName?: string) {
 		const tagAndAttributes: { tag: ITag, attributes: string[] }[] = [];
-		// this.setCurrentDocument(viewOrFragment.content);
 		const positions = this.getPositionsOfFunctionCallInXMLText(eventHandlerName, viewOrFragment.content);
 		if (positions.length > 0) {
 			positions.forEach(position => {
@@ -59,38 +57,16 @@ export class XMLParser {
 				}
 			})
 		}
-		// XMLParser.setCurrentDocument(undefined);
 
 		return tagAndAttributes;
 	}
 
 	static getAllIDsInCurrentView(XMLFile: IXMLFile) {
 		const IdsResult: string[] = [];
-		const currentClass = FileReader.getClassNameFromPath(XMLFile.fsPath);
-		if (currentClass) {
-			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClass);
-			const idRegExp = /(?<=\sid=").*?(?="\s?)/g;
-			// const view = FileReader.getViewForController(currentClass);
-			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
-			viewsAndFragments.views.forEach(view => {
-				const IdsViewResult = view.content.match(idRegExp) || [];
-				if (IdsViewResult) {
-					IdsResult.push(...IdsViewResult);
-				}
-				view.fragments.forEach(fragment => {
-					const IdsFragmentResult = fragment.content.match(idRegExp) || [];
-					if (IdsFragmentResult) {
-						IdsResult.push(...IdsFragmentResult);
-					}
-				});
-			});
-			const fragments = viewsAndFragments.fragments;
-			fragments.forEach(fragment => {
-				const IdsFragmentResult = fragment.content.match(idRegExp) || [];
-				if (IdsFragmentResult) {
-					IdsResult.push(...IdsFragmentResult);
-				}
-			});
+		const idRegExp = /(?<=\sid=").*?(?="\s?)/g;
+		const IdsViewResult = XMLFile.content.match(idRegExp) || [];
+		if (IdsViewResult) {
+			IdsResult.push(...IdsViewResult);
 		}
 
 		return IdsResult;

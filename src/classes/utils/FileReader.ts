@@ -224,7 +224,7 @@ export class FileReader {
 		return filePaths;
 	}
 
-
+	//TODO: Refactor this
 	public static getClassNameFromView(controllerClassName: string, controlId: string) {
 		let className: string | undefined;
 		const view = this.getViewForController(controllerClassName);
@@ -257,10 +257,6 @@ export class FileReader {
 	}
 
 	public static getViewForController(controllerName: string): IView | undefined {
-		if (!this._viewCache[controllerName]) {
-			// this._readAllViewsAndSaveInCache();
-		}
-
 		let view: IView | undefined;
 
 		if (this._viewCache[controllerName]) {
@@ -463,13 +459,9 @@ export class FileReader {
 		return controllerName;
 	}
 	static getResponsibleClassForXMLDocument(document: vscode.TextDocument) {
-		let viewOrFragment: IXMLFile | undefined = FileReader.getAllViews().find(view => view.fsPath === document.fileName);
-		if (!viewOrFragment) {
-			viewOrFragment = FileReader.getAllFragments().find(fragment => fragment.fsPath === document.fileName);
-		}
-
-		if (viewOrFragment) {
-			return this.getResponsibleClassNameForViewOrFragment(viewOrFragment);
+		const XMLDocument = XMLFileTransformer.transformFromVSCodeDocument(document);
+		if (XMLDocument) {
+			return this.getResponsibleClassNameForViewOrFragment(XMLDocument);
 		}
 	}
 
@@ -782,7 +774,7 @@ export class FileReader {
 		}
 
 		if (!xmlFile && fileType === "view" || !fileType) {
-			xmlFile = this.getAllViews().find(view => view.name === className);
+			xmlFile = this._viewCache[className] || this.getAllViews().find(view => view.name === className);
 		}
 
 		return xmlFile;
