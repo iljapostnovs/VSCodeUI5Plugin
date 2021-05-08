@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import { XMLFileTransformer } from "../../../utils/FileReader";
 import { URLBuilder } from "../../../utils/URLBuilder";
 import { XMLParser } from "../../../utils/XMLParser";
 
@@ -8,56 +9,26 @@ export class XMLHoverProvider {
 		const range = document.getWordRangeAtPosition(position);
 		const word = document.getText(range);
 		const offset = document.offsetAt(position);
-		const documentText = document.getText();
 		let hover: vscode.Hover | undefined;
 
-		XMLParser.setCurrentDocument(documentText);
+		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		if (XMLFile) {
+			const allTags = XMLParser.getAllTags(XMLFile);
+			const tag = allTags.find(tag => tag.positionBegin < offset && tag.positionEnd >= offset);
+			if (tag) {
+				const tagName = XMLParser.getClassNameFromTag(tag.text);
+				const classOfTheTag = XMLParser.getClassNameInPosition(XMLFile, offset);
+				const attributes = XMLParser.getAttributesOfTheTag(tag);
+				const attribute = attributes?.find(attribute => {
+					const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
+					return attributeName === word;
+				});
 
-		const allTags = XMLParser.getAllTags(documentText);
-		const tag = allTags.find(tag => tag.positionBegin < offset && tag.positionEnd >= offset);
-		if (tag) {
-			const tagName = XMLParser.getClassNameFromTag(tag.text);
-			const classOfTheTag = XMLParser.getClassNameInPosition(documentText, offset);
-			const attributes = XMLParser.getAttributesOfTheTag(tag);
-			const attribute = attributes?.find(attribute => {
-				const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
-				return attributeName === word;
-			});
+				if (attribute) {
+					//highlighted text is attribute
+					const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
 
-			if (attribute) {
-				//highlighted text is attribute
-				const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
-
-				const text = this._getTextIfItIsFieldOrMethodOfClass(classOfTheTag, attributeName);
-
-				if (text) {
-					const markdownString = new vscode.MarkdownString();
-					markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
-					markdownString.appendMarkdown(text);
-					hover = new vscode.Hover(markdownString);
-				}
-			} else if (tagName === word) {
-				//highlighted text is class or aggregation
-				const isClassName = word[0].toUpperCase() === word[0];
-				if (isClassName) {
-					//is class
-					const markdownString = new vscode.MarkdownString();
-					markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
-					const UIClass = UIClassFactory.getUIClass(classOfTheTag);
-					const text = `${URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass)}`;
-					markdownString.appendMarkdown(text);
-					hover = new vscode.Hover(markdownString);
-				} else {
-					//is aggregation
-					let parentTag = XMLParser.getParentTagAtPosition(documentText, offset);
-					const tagClass = XMLParser.getClassNameInPosition(documentText, parentTag.positionBegin);
-
-					if (!this._isThisAClass(tagClass)) {
-						parentTag = XMLParser.getParentTagAtPosition(documentText, parentTag.positionBegin - 1);
-					}
-
-					const classOfTheTag = XMLParser.getClassNameInPosition(documentText, parentTag.positionBegin);
-					const text = this._getTextIfItIsFieldOrMethodOfClass(classOfTheTag, word);
+					const text = this._getTextIfItIsFieldOrMethodOfClass(classOfTheTag, attributeName);
 
 					if (text) {
 						const markdownString = new vscode.MarkdownString();
@@ -65,11 +36,39 @@ export class XMLHoverProvider {
 						markdownString.appendMarkdown(text);
 						hover = new vscode.Hover(markdownString);
 					}
+				} else if (tagName === word) {
+					//highlighted text is class or aggregation
+					const isClassName = word[0].toUpperCase() === word[0];
+					if (isClassName) {
+						//is class
+						const markdownString = new vscode.MarkdownString();
+						markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
+						const UIClass = UIClassFactory.getUIClass(classOfTheTag);
+						const text = `${URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass)}`;
+						markdownString.appendMarkdown(text);
+						hover = new vscode.Hover(markdownString);
+					} else {
+						//is aggregation
+						let parentTag = XMLParser.getParentTagAtPosition(XMLFile, offset);
+						const tagClass = XMLParser.getClassNameInPosition(XMLFile, parentTag.positionBegin);
+
+						if (!this._isThisAClass(tagClass)) {
+							parentTag = XMLParser.getParentTagAtPosition(XMLFile, parentTag.positionBegin - 1);
+						}
+
+						const classOfTheTag = XMLParser.getClassNameInPosition(XMLFile, parentTag.positionBegin);
+						const text = this._getTextIfItIsFieldOrMethodOfClass(classOfTheTag, word);
+
+						if (text) {
+							const markdownString = new vscode.MarkdownString();
+							markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
+							markdownString.appendMarkdown(text);
+							hover = new vscode.Hover(markdownString);
+						}
+					}
 				}
 			}
 		}
-
-		XMLParser.setCurrentDocument(undefined);
 
 		return hover;
 	}

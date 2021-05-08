@@ -49,9 +49,8 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 	private _getCodeLensesForEventsFromXMLText(XMLText: IXMLFile, eventHandlers: ICustomClassUIMethod[], document: vscode.TextDocument) {
 		const codeLenses: vscode.CodeLens[] = [];
 		const solvedEventHandlers: ICustomClassUIMethod[] = [];
-		XMLParser.setCurrentDocument(XMLText.content);
 		eventHandlers.forEach(eventHandler => {
-			const eventHandlerXMLData = this._getEventHandlerData(XMLText.content, eventHandler.name);
+			const eventHandlerXMLData = this._getEventHandlerData(XMLText, eventHandler.name);
 			if (eventHandlerXMLData && eventHandler.position) {
 				const positionBegin = document.positionAt(eventHandler.position);
 				const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
@@ -86,11 +85,11 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		return codeLenses;
 	}
 
-	private _getEventHandlerData(XMLText: string, eventHandlerName: string) {
+	private _getEventHandlerData(XMLText: IXMLFile, eventHandlerName: string) {
 		let eventHandlerData: IEventHandlerData | undefined;
 
 		const regex = new RegExp(`".?${eventHandlerName}"`);
-		const eventHandlerPosition = regex.exec(XMLText)?.index;
+		const eventHandlerPosition = regex.exec(XMLText.content)?.index;
 		if (eventHandlerPosition) {
 			const tag = XMLParser.getTagInPosition(XMLText, eventHandlerPosition);
 			const attributes = XMLParser.getAttributesOfTheTag(tag);

@@ -591,7 +591,6 @@ export class AcornSyntaxAnalyzer {
 	private static _getEventHandlerDataFromXMLText(viewOrFragment: IXMLFile, currentClassEventHandlerName: string) {
 		let eventHandlerData;
 
-		XMLParser.setCurrentDocument(viewOrFragment.content);
 		const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(viewOrFragment, currentClassEventHandlerName);
 		if (tagsAndAttributes.length > 0) {
 			const { tag, attributes } = tagsAndAttributes[0];
@@ -603,7 +602,7 @@ export class AcornSyntaxAnalyzer {
 				const classNameOfTheTag = XMLParser.getClassNameFromTag(tag.text);
 
 				if (classNameOfTheTag) {
-					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOrFragment.content, tagPrefix, tag.positionBegin);
+					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(viewOrFragment, tagPrefix, tag.positionBegin);
 					const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
 					eventHandlerData = {
 						className: classOfTheTag,
@@ -612,7 +611,6 @@ export class AcornSyntaxAnalyzer {
 				}
 			}
 		}
-		XMLParser.setCurrentDocument(undefined);
 
 		return eventHandlerData;
 	}

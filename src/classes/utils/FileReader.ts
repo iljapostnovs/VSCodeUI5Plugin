@@ -5,10 +5,44 @@ import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer"
 import * as path from "path";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { XMLParser } from "./XMLParser";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
 const workspace = vscode.workspace;
+
+export class XMLFileTransformer {
+	static transformFromVSCodeDocument(document: vscode.TextDocument) {
+		const className = FileReader.getClassNameFromPath(document.fileName);
+		if (className) {
+			const xmlType = document.fileName.endsWith(".fragment.xml") ? "fragment" : "view";
+			const XMLFile = FileReader.getXMLFile(className, xmlType);
+			if (XMLFile && !XMLFile.XMLParserData) {
+				const stringData = XMLParser.getStringPositionMapping(document.getText());
+				XMLFile.XMLParserData = {
+					tags: [],
+					strings: stringData.positionMapping,
+					prefixResults: {},
+					areAllStringsClosed: stringData.areAllStringsClosed
+				};
+			}
+			// if (!XMLFile) {
+			// 	switch (xmlType) {
+			// 		case "view":
+			// 			FileReader.setNewViewContentToCache(document.getText(), document.fileName);
+			// 			break;
+			// 		case "fragment":
+			// 			FileReader.setNewFragmentContentToCache(document);
+			// 			break;
+
+			// 	}
+			// }
+
+			return XMLFile;
+		}
+	}
+}
 export class FileReader {
 	private static _manifests: IUIManifest[] = [];
 	private static readonly _viewCache: IViews = {};
@@ -25,6 +59,7 @@ export class FileReader {
 				this._viewCache[controllerName].idClassMap = {};
 				this._viewCache[controllerName].fsPath = fsPath;
 				this._viewCache[controllerName].fragments = this.getFragmentsFromXMLDocumentText(viewContent);
+				this._viewCache[controllerName].XMLParserData = undefined;
 			} else {
 				this._viewCache[controllerName] = {
 					idClassMap: {},
@@ -46,6 +81,7 @@ export class FileReader {
 				this._fragmentCache[fragmentName].name = fragmentName;
 				this._fragmentCache[fragmentName].idClassMap = {};
 				this._fragmentCache[fragmentName].fragments = this.getFragmentsFromXMLDocumentText(document.getText());
+				this._fragmentCache[fragmentName].XMLParserData = undefined;
 			} else {
 				this._fragmentCache[fragmentName] = {
 					content: document.getText(),
@@ -725,16 +761,31 @@ export class FileReader {
 		if (path.endsWith(".view.xml") && classPath) {
 			if (this._viewCache[classPath]) {
 				this._viewCache[classPath].content = "";
-				this._fragmentCache[classPath].idClassMap = {};
+				this._viewCache[classPath].idClassMap = {};
+				this._viewCache[classPath].XMLParserData = undefined;
 			}
 			delete this._viewCache[classPath];
 		} else if (path.endsWith(".fragment.xml") && classPath) {
 			if (this._fragmentCache[classPath]) {
 				this._fragmentCache[classPath].content = "";
 				this._fragmentCache[classPath].idClassMap = {};
+				this._fragmentCache[classPath].XMLParserData = undefined;
 			}
 			delete this._fragmentCache[classPath];
 		}
+	}
+
+	static getXMLFile(className: string, fileType?: string) {
+		let xmlFile: IXMLFile | undefined;
+		if (fileType === "fragment" || !fileType) {
+			xmlFile = this.getAllFragments().find(fragment => fragment.name === className);
+		}
+
+		if (!xmlFile && fileType === "view" || !fileType) {
+			xmlFile = this.getAllViews().find(view => view.name === className);
+		}
+
+		return xmlFile;
 	}
 }
 
@@ -762,23 +813,32 @@ export interface IViews {
 
 export interface IView extends IXMLFile, IIdClassMap, IHasFragments {
 }
-export interface IHasFragments {
-	fragments: IFragment[];
+export interface IFragment extends IXMLFile, IIdClassMap, IHasFragments {
 }
-
-export interface IXMLFile {
+export interface IXMLFile extends IXMLParserCacheable {
 	content: string;
 	fsPath: string;
 	name: string;
+}
+export interface IHasFragments {
+	fragments: IFragment[];
 }
 export interface IIdClassMap {
 	idClassMap: {
 		[key: string]: string;
 	};
 }
-
-
-export interface IFragment extends IXMLFile, IIdClassMap, IHasFragments {
+interface IPrefixResults {
+	[key: string]: any[]
+}
+interface IXMLParserData {
+	strings: boolean[];
+	tags: ITag[];
+	prefixResults: IPrefixResults;
+	areAllStringsClosed: boolean;
+}
+export interface IXMLParserCacheable {
+	XMLParserData?: IXMLParserData
 }
 
 interface Fragments {
