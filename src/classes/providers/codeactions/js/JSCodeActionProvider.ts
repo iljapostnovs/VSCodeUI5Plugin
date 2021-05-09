@@ -138,7 +138,7 @@ export class JSCodeActionProvider {
 
 		if (!selectedVariableName) {
 			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
-			if (currentClassName && vscode.window.activeTextEditor) {
+			if (currentClassName) {
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				const currentPositionOffset = document?.offsetAt(range.end);
 				const node = AcornSyntaxAnalyzer.findAcornNode(UIClass.acornMethodsAndFields, currentPositionOffset);

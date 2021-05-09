@@ -16,27 +16,23 @@ export class UIDefineCompletionItemGenerator {
 		return defineString;
 	}
 
-	public static getIfCurrentPositionIsInDefine(tryToSetNewContentIfPositionIsNearUIDefine = true): boolean {
+	public static getIfCurrentPositionIsInDefine(document: vscode.TextDocument, position: vscode.Position, tryToSetNewContentIfPositionIsNearUIDefine = true): boolean {
 		let isCurrentPositionInUIDefine = false;
-		const textEditor = vscode.window.activeTextEditor;
-		const document = textEditor?.document;
-		if (document && textEditor) {
-			const currentPositionOffset = document?.offsetAt(textEditor.selection.start);
-			const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-			const UIClass = currentClass && UIClassFactory.getUIClass(currentClass);
-			if (UIClass instanceof CustomUIClass && currentPositionOffset) {
-				const args = UIClass.fileContent?.body[0]?.expression?.arguments;
-				if (args && args.length === 2) {
-					const UIDefinePaths: any = args[0];
+		const currentPositionOffset = document.offsetAt(position);
+		const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+		const UIClass = currentClass && UIClassFactory.getUIClass(currentClass);
+		if (UIClass instanceof CustomUIClass && currentPositionOffset) {
+			const args = UIClass.fileContent?.body[0]?.expression?.arguments;
+			if (args && args.length === 2) {
+				const UIDefinePaths: any = args[0];
 
-					isCurrentPositionInUIDefine = currentPositionOffset > UIDefinePaths.start && currentPositionOffset <= UIDefinePaths.end;
+				isCurrentPositionInUIDefine = currentPositionOffset > UIDefinePaths.start && currentPositionOffset <= UIDefinePaths.end;
 
-					if (tryToSetNewContentIfPositionIsNearUIDefine && !isCurrentPositionInUIDefine) {
-						const isCurrentPositionNearEndOfTheUIDefine = currentPositionOffset > UIDefinePaths.start && Math.abs(currentPositionOffset - UIDefinePaths.end) < 10;
-						if (isCurrentPositionNearEndOfTheUIDefine) {
-							UIClassFactory.setNewCodeForClass(UIClass.className, document.getText());
-							isCurrentPositionInUIDefine = this.getIfCurrentPositionIsInDefine(false);
-						}
+				if (tryToSetNewContentIfPositionIsNearUIDefine && !isCurrentPositionInUIDefine) {
+					const isCurrentPositionNearEndOfTheUIDefine = currentPositionOffset > UIDefinePaths.start && Math.abs(currentPositionOffset - UIDefinePaths.end) < 10;
+					if (isCurrentPositionNearEndOfTheUIDefine) {
+						UIClassFactory.setNewCodeForClass(UIClass.className, document.getText());
+						isCurrentPositionInUIDefine = this.getIfCurrentPositionIsInDefine(document, position, false);
 					}
 				}
 			}

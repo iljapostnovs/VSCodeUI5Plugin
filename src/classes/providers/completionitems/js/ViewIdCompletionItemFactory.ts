@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { InnerPropertiesStrategy } from "../../../UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import { FileReader } from "../../../utils/FileReader";
 import { XMLParser } from "../../../utils/XMLParser";
 import { CustomCompletionItem } from "../CustomCompletionItem";
 
@@ -12,8 +12,8 @@ export class ViewIdCompletionItemFactory {
 
 		const strategy = new InnerPropertiesStrategy();
 		const offset = document.offsetAt(position);
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-		if (currentClassName && position) {
+		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
+		if (currentClassName) {
 			const nodes = strategy.getStackOfNodesForInnerParamsForPosition(currentClassName, offset, true);
 			if (nodes.length === 1 && nodes[0].callee?.property?.name === "byId") {
 
@@ -27,6 +27,7 @@ export class ViewIdCompletionItemFactory {
 				completionItems = this._generateCompletionItemsFromUICompletionItems(viewIds, document, position);
 			}
 		}
+		//copy(JSON.stringify(completionItems.map(item => item.insertText)))
 
 		return completionItems;
 	}

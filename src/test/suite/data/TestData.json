@@ -1221,5 +1221,24 @@
 			"methodName": "onTest",
 			"result": false
 		}
-	]
+	],
+	"CompletionItems": {
+		"ViewId": [
+			{
+				"className": "com.extend.fragmenttest.controller.MasterExtend",
+				"textToFind": "this.getView().byId(\"",
+				"items": [
+					"idButtonMasterView",
+					"idButtonFragmentController2",
+					"idTextFragmentController2",
+					"idButtonFragmentController1",
+					"idButtonFragmentView1",
+					"idButtonFragmentView2",
+					"idButtonExtensionFragment1",
+					"idTextExtensionFragment1",
+					"idButtonInFragmentInExtensionFragment1"
+				]
+			}
+		]
+	}
 }

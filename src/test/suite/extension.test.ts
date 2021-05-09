@@ -13,6 +13,7 @@ import { UI5Plugin } from "../../UI5Plugin";
 import { JSRenameProvider } from "../../classes/providers/rename/JSRenameProvider";
 import { ConfigHandler } from "../../classes/providers/diagnostics/js/jslinter/parts/config/ConfigHandler";
 import { XMLParser } from "../../classes/utils/XMLParser";
+import { ViewIdCompletionItemFactory } from "../../classes/providers/completionitems/js/ViewIdCompletionItemFactory";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -257,6 +258,25 @@ suite("Extension Test Suite", () => {
 			assert.strictEqual(isException, config.result, `"${config.className}" -> "${config.methodName}" should have exception value "${config.result}", but it has "${isException}"`);
 		});
 	});
+
+	test("View ID Completion items generated successfully", async () => {
+		const testData = data.CompletionItems.ViewId;
+		const factory = new ViewIdCompletionItemFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createIdCompletionItems(document, position);
+				assert.strictEqual(completionItems.length, data.items.length, `"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}`);
+
+				const completionItemInsertTexts = completionItems.map(item => item.insertText);
+				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
 });
 
 async function assertEntry(entries: [vscode.Uri, vscode.TextEdit[]][], uri: vscode.Uri, offsetBegin: number, offsetEnd: number) {
@@ -303,4 +323,13 @@ function compareProperties(dataNode: any, node2: any): boolean {
 	}
 
 	return allInnerNodesExists;
+}
+
+function compareArrays(completionItemInsertTexts: (string | vscode.SnippetString | undefined)[], items: string[]) {
+	completionItemInsertTexts.forEach(insertText => {
+		if (typeof insertText === "string") {
+			const item = items.find(item => item === insertText);
+			assert.ok(!!item, `"${insertText}" wasn't found in ${JSON.stringify(items)} array`);
+		}
+	});
 }

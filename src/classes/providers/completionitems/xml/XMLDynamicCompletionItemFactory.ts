@@ -12,14 +12,12 @@ import { CustomCompletionItem } from "../CustomCompletionItem";
 import LineColumn = require("line-column");
 
 export class XMLDynamicCompletionItemFactory {
-	public createXMLDynamicCompletionItems() {
+	public createXMLDynamicCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
-		const textEditor = vscode.window.activeTextEditor;
-		const document = textEditor?.document;
 		const XMLFile = document && XMLFileTransformer.transformFromVSCodeDocument(document);
 
-		if (textEditor && document && XMLFile) {
-			const currentPositionOffset = document.offsetAt(textEditor.selection.start);
+		if (XMLFile) {
+			const currentPositionOffset = document.offsetAt(position);
 			const positionType = XMLParser.getPositionType(XMLFile, currentPositionOffset);
 
 			if (positionType === PositionType.InTheTagAttributes) {
@@ -38,7 +36,7 @@ export class XMLDynamicCompletionItemFactory {
 			}
 
 			completionItems = this._removeDuplicateCompletionItems(completionItems);
-			const range = this._generateRangeForReplacement(positionType, XMLFile, currentPositionOffset);
+			const range = this._generateRangeForReplacement(positionType, XMLFile, document, position);
 			if (range) {
 				completionItems.forEach(completionItem => {
 					completionItem.range = range;
@@ -49,10 +47,9 @@ export class XMLDynamicCompletionItemFactory {
 		return completionItems;
 	}
 
-	private _generateRangeForReplacement(positionType: PositionType, XMLFile: IXMLFile, positionOffset: number) {
-		const position = vscode.window.activeTextEditor?.selection.start;
-		let range = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
-
+	private _generateRangeForReplacement(positionType: PositionType, XMLFile: IXMLFile, document: vscode.TextDocument, position: vscode.Position) {
+		let range = document.getWordRangeAtPosition(position);
+		const positionOffset = document.offsetAt(position);
 		if (positionType === PositionType.InTheString) {
 			const tagPosition = XMLParser.getTagBeginEndPosition(XMLFile, positionOffset);
 			const tag = XMLParser.getTagInPosition(XMLFile, positionOffset);

@@ -24,11 +24,11 @@ export class CompletionItemFactory {
 		this._language = completionItemType;
 	}
 
-	public async createUIDefineCompletionItems(document?: vscode.TextDocument) {
+	public async createUIDefineCompletionItems(document?: vscode.TextDocument, position?: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		if (this._language === GeneratorFactory.language.js) {
-			completionItems = await this._createJSCompletionItems(document);
+			completionItems = await this._createJSCompletionItems(document, position);
 		} else if (this._language === GeneratorFactory.language.xml) {
 			if (CompletionItemFactory.XMLStandardLibCompletionItems.length === 0) {
 				completionItems = await this._createXMLCompletionItems();
@@ -60,7 +60,7 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	private async _createJSCompletionItems(document?: vscode.TextDocument) {
+	private async _createJSCompletionItems(document?: vscode.TextDocument, position?: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		if (CompletionItemFactory.JSDefineCompletionItems.length === 0) {
@@ -70,21 +70,18 @@ export class CompletionItemFactory {
 		} else {
 			completionItems = CompletionItemFactory.JSDefineCompletionItems;
 
-			if (document) {
+			if (document && position) {
 				UIClassFactory.setNewContentForClassUsingDocument(document);
-			}
-			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-			if (currentClassName) {
-				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
-				const activeTextEditor = vscode.window.activeTextEditor;
-				const position = activeTextEditor?.document.offsetAt(activeTextEditor.selection.start);
-				if (position) {
+				const offset = document.offsetAt(position);
+				const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+				if (currentClassName) {
+					const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 
 					if (UIClass.fileContent) {
 						const args = UIClass.fileContent?.body[0]?.expression?.arguments;
 						if (args && args.length === 2) {
 							const UIDefinePaths: string[] = args[0].elements || [];
-							const node = AcornSyntaxAnalyzer.findAcornNode(UIDefinePaths, position);
+							const node = AcornSyntaxAnalyzer.findAcornNode(UIDefinePaths, offset);
 							const isString = node?.type === "Literal";
 							if (isString) {
 								completionItems = completionItems.map(completionItem => {
@@ -99,6 +96,7 @@ export class CompletionItemFactory {
 								});
 							}
 						}
+
 					}
 				}
 			}
@@ -121,9 +119,9 @@ export class CompletionItemFactory {
 		return completionItems;
 	}
 
-	public createXMLDynamicCompletionItems() {
+	public createXMLDynamicCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		const xmlDynamicFactory = new XMLDynamicCompletionItemFactory();
 
-		return xmlDynamicFactory.createXMLDynamicCompletionItems();
+		return xmlDynamicFactory.createXMLDynamicCompletionItems(document, position);
 	}
 }

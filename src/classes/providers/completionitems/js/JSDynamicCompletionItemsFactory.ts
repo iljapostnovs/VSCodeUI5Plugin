@@ -41,8 +41,8 @@ export class JSDynamicCompletionItemsFactory {
 			return accumulator;
 		}, []);
 
-		const range = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
-		const word = range && vscode.window.activeTextEditor?.document.getText(range);
+		const range = position && document.getWordRangeAtPosition(position);
+		const word = range && document.getText(range);
 		let completionItems: CustomCompletionItem[] = [];
 
 		if (fieldsAndMethods.className !== "__override__") {
@@ -68,8 +68,7 @@ export class JSDynamicCompletionItemsFactory {
 				mardownString.appendMarkdown(classMethod.description);
 				completionItem.documentation = mardownString;
 
-				const position = vscode.window.activeTextEditor?.selection.start;
-				const currentRange = position && vscode.window.activeTextEditor?.document.getWordRangeAtPosition(position);
+				const currentRange = document.getWordRangeAtPosition(position);
 				if (currentRange) {
 					completionItem.range = currentRange;
 				}
