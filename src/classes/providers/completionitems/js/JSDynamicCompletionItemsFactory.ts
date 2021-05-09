@@ -21,6 +21,7 @@ export class JSDynamicCompletionItemsFactory {
 			completionItems = ClassCompletionItemFactory.createCompletionItems(document, position);
 		}
 
+		//copy(JSON.stringify(completionItems.map(item => item.insertText.value || item.insertText)))
 		return completionItems;
 	}
 
