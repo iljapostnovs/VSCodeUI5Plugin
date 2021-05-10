@@ -27,17 +27,13 @@ export class XMLFileTransformer {
 					areAllStringsClosed: stringData.areAllStringsClosed
 				};
 			}
-			// if (!XMLFile) {
-			// 	switch (xmlType) {
-			// 		case "view":
-			// 			FileReader.setNewViewContentToCache(document.getText(), document.fileName);
-			// 			break;
-			// 		case "fragment":
-			// 			FileReader.setNewFragmentContentToCache(document);
-			// 			break;
-
-			// 	}
-			// }
+			if (XMLFile && XMLFile.content.length !== document.getText().length) {
+				if (xmlType === "view") {
+					FileReader.setNewViewContentToCache(document.getText(), document.fileName);
+				} else if (xmlType === "fragment") {
+					FileReader.setNewFragmentContentToCache(document);
+				}
+			}
 
 			return XMLFile;
 		}
@@ -52,7 +48,7 @@ export class FileReader {
 
 	public static setNewViewContentToCache(viewContent: string, fsPath: string) {
 		const controllerName = this.getControllerNameFromView(viewContent);
-		if (controllerName) {
+		if (controllerName && this._viewCache[controllerName]?.content.length !== viewContent.length) {//TODO: What if there is no controller?
 			const viewName = this.getClassNameFromPath(fsPath);
 			if (this._viewCache[controllerName]) {
 				this._viewCache[controllerName].content = viewContent;
@@ -74,7 +70,7 @@ export class FileReader {
 
 	public static setNewFragmentContentToCache(document: vscode.TextDocument) {
 		const fragmentName = this.getClassNameFromPath(document.fileName);
-		if (fragmentName) {
+		if (fragmentName && this._fragmentCache[fragmentName]?.content.length !== document.getText().length) {
 			if (this._fragmentCache[fragmentName]) {
 				this._fragmentCache[fragmentName].content = document.getText();
 				this._fragmentCache[fragmentName].fsPath = document.fileName;
