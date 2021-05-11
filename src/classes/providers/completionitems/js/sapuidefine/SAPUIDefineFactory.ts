@@ -20,7 +20,7 @@ export class SAPUIDefineFactory {
 		}
 
 		completionItems = completionItems.concat(await workspaceCompletionItemFactory.getCompletionItems());
-
+		// copy(JSON.stringify(completionItems.map(item => item.insertText)))
 		return completionItems;
 	}
 

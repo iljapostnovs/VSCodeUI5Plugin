@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../classes/UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
+import * as CompletionItemsData from "./data/completionitems/JSCompletionItems.json";
 import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { FileReader } from "../../classes/utils/FileReader";
@@ -15,6 +16,7 @@ import { ConfigHandler } from "../../classes/providers/diagnostics/js/jslinter/p
 import { XMLParser } from "../../classes/utils/XMLParser";
 import { ViewIdCompletionItemFactory } from "../../classes/providers/completionitems/js/ViewIdCompletionItemFactory";
 import { JSDynamicCompletionItemsFactory } from "../../classes/providers/completionitems/js/JSDynamicCompletionItemsFactory";
+import { SAPUIDefineFactory } from "../../classes/providers/completionitems/js/sapuidefine/SAPUIDefineFactory";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -261,7 +263,7 @@ suite("Extension Test Suite", () => {
 	});
 
 	test("View ID Completion items generated successfully", async () => {
-		const testData = data.CompletionItems.ViewId;
+		const testData = CompletionItemsData.ViewId;
 		const factory = new ViewIdCompletionItemFactory();
 
 		for (const data of testData) {
@@ -271,16 +273,16 @@ suite("Extension Test Suite", () => {
 				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
 				const position = document.positionAt(offset);
 				const completionItems = factory.createIdCompletionItems(document, position);
-				assert.strictEqual(completionItems.length, data.items.length, `"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}`);
 
-				const completionItemInsertTexts = completionItems.map(item => item.insertText);
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
 				compareArrays(completionItemInsertTexts, data.items);
+				assert.strictEqual(completionItems.length, data.items.length, `"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}`);
 			}
 		}
 	});
 
 	test("JS Dynamic Completion items generated successfully", async () => {
-		const testData = data.CompletionItems.JSDynamicCompletionItems;
+		const testData = CompletionItemsData.JSDynamicCompletionItems;
 		const factory = new JSDynamicCompletionItemsFactory();
 
 		for (const data of testData) {
@@ -290,9 +292,25 @@ suite("Extension Test Suite", () => {
 				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
 				const position = document.positionAt(offset);
 				const completionItems = factory.createUIClassCompletionItems(document, position);
-				assert.strictEqual(completionItems.length, data.items.length, `"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}. Search term "${data.textToFind}"`);
 
-				const completionItemInsertTexts = completionItems.map(item => item.insertText);
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
+				compareArrays(completionItemInsertTexts, data.items);
+
+				assert.strictEqual(completionItems.length, data.items.length, `"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}. Search term "${data.textToFind}"`);
+			}
+		}
+	});
+
+	test("JS UI Define Completion items generated successfully", async () => {
+		const testData = CompletionItemsData.UIDefine;
+		const factory = new SAPUIDefineFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const completionItems = await factory.generateUIDefineCompletionItems();
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
 				compareArrays(completionItemInsertTexts, data.items);
 			}
 		}
@@ -350,6 +368,18 @@ function compareArrays(completionItemInsertTexts: (string | vscode.SnippetString
 		const stringToInsert = typeof insertText === "string" ? insertText :
 			insertText instanceof vscode.SnippetString ? insertText.value : undefined;
 		const item = items.find(item => item === stringToInsert);
-		assert.ok(!!item, `"${stringToInsert}" wasn't found in ${JSON.stringify(items)} array`);
+		assert.ok(!!item, `"${stringToInsert}" wasn't found in ${JSON.stringify(items.slice(0, 10))}... array`);
 	});
+
+	const difference1 = completionItemInsertTexts.filter((stringToInsert) => {
+		return !items.find(item => item === stringToInsert);
+	});
+	const difference2 = items.filter((stringToInsert) => {
+		return !completionItemInsertTexts.find(item => item === stringToInsert);
+	});
+
+	if (difference1.length !== 0 || difference2.length !== 0) {
+		console.log(`Difference1: ${JSON.stringify(difference1)}`);
+		console.log(`Difference2: ${JSON.stringify(difference2)}`);
+	}
 }
