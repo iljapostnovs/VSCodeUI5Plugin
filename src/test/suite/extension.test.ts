@@ -5,6 +5,7 @@ import { AcornSyntaxAnalyzer } from "../../classes/UI5Classes/JSParser/AcornSynt
 import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
 import * as CompletionItemsData from "./data/completionitems/JSCompletionItems.json";
+import * as XMLCompletionItemData from "./data/completionitems/XMLCompletionItems.json";
 import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { FileReader } from "../../classes/utils/FileReader";
@@ -17,6 +18,7 @@ import { XMLParser } from "../../classes/utils/XMLParser";
 import { ViewIdCompletionItemFactory } from "../../classes/providers/completionitems/js/ViewIdCompletionItemFactory";
 import { JSDynamicCompletionItemsFactory } from "../../classes/providers/completionitems/js/JSDynamicCompletionItemsFactory";
 import { SAPUIDefineFactory } from "../../classes/providers/completionitems/js/sapuidefine/SAPUIDefineFactory";
+import { XMLDynamicCompletionItemFactory } from "../../classes/providers/completionitems/xml/XMLDynamicCompletionItemFactory";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -315,6 +317,78 @@ suite("Extension Test Suite", () => {
 			}
 		}
 	});
+
+	test("XML attribute Completion items generated successfully", async () => {
+		const testData = XMLCompletionItemData.attributes;
+		const factory = new XMLDynamicCompletionItemFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
+
+	test("XML attribute values Completion items generated successfully", async () => {
+		const testData = XMLCompletionItemData.attributeValues;
+		const factory = new XMLDynamicCompletionItemFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
+
+	test("XML aggregation Completion items generated successfully", async () => {
+		const testData = XMLCompletionItemData.tags.aggregations;
+		const factory = new XMLDynamicCompletionItemFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
+
+	test("XML class Completion items generated successfully", async () => {
+		const testData = XMLCompletionItemData.tags.classTags;
+		const factory = new XMLDynamicCompletionItemFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
 });
 
 async function assertEntry(entries: [vscode.Uri, vscode.TextEdit[]][], uri: vscode.Uri, offsetBegin: number, offsetEnd: number) {
@@ -370,16 +444,4 @@ function compareArrays(completionItemInsertTexts: (string | vscode.SnippetString
 		const item = items.find(item => item === stringToInsert);
 		assert.ok(!!item, `"${stringToInsert}" wasn't found in ${JSON.stringify(items.slice(0, 10))}... array`);
 	});
-
-	const difference1 = completionItemInsertTexts.filter((stringToInsert) => {
-		return !items.find(item => item === stringToInsert);
-	});
-	const difference2 = items.filter((stringToInsert) => {
-		return !completionItemInsertTexts.find(item => item === stringToInsert);
-	});
-
-	if (difference1.length !== 0 || difference2.length !== 0) {
-		console.log(`Difference1: ${JSON.stringify(difference1)}`);
-		console.log(`Difference2: ${JSON.stringify(difference2)}`);
-	}
 }

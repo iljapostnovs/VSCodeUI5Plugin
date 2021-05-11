@@ -44,6 +44,7 @@ export class XMLDynamicCompletionItemFactory {
 			}
 		}
 
+		//copy(JSON.stringify(completionItems.map(item => item.insertText?.value || item.insertText || item.label)))
 		return completionItems;
 	}
 
