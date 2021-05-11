@@ -1,23 +1,23 @@
 import { Linter } from "./parts/abstraction/Linter";
 import { TagAttributeLinter } from "./parts/TagAttributeLinter";
 import { UnusedNamespaceLinter } from "./parts/UnusedNamespaceLinter";
-import { Error } from "./parts/abstraction/Linter";
+import { IError } from "./parts/abstraction/Linter";
 import * as vscode from "vscode";
 import { TagLinter } from "./parts/TagLinter";
 
 export class XMLLinter {
-	static getLintingErrors(document: vscode.TextDocument): Error[] {
+	static getLintingErrors(document: vscode.TextDocument): IError[] {
 		const linters: Linter[] = [
 			new TagAttributeLinter(),
 			new UnusedNamespaceLinter(),
 			new TagLinter()
 		];
 
-		let errors: Error[] = [];
+		let errors: IError[] = [];
 		linters.forEach(linter => {
 			errors = errors.concat(linter.getErrors(document));
 		});
-
+		// copy(JSON.stringify(errors.map(error => ({text: error.message}))))
 		return errors;
 	}
 }

@@ -1,0 +1,15 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button
+		id="idButtonFragmentController1"
+		text="{
+			formatter: '.formatter.formatValueFragmentController1'
+		}"
+		press="eventHandler4"
+		textDirection="{
+			formatter: '.formatter.formatGlobal'
+		}"
+	/>
+</c:FragmentDefinition>

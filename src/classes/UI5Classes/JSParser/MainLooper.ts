@@ -33,7 +33,7 @@ export class MainLooper {
 	}
 
 	private static _getCommentRanges(text: string) {
-		const ranges: CommentRanges[] = [];
+		const ranges: ICommentRanges[] = [];
 
 		if (this._areAllOpenedCommendsClosed(text)) {
 			const rComments = /(\/\*(.|\s)*?\*\/)|(\/\/.*)/g;
@@ -76,14 +76,14 @@ export class MainLooper {
 		return iOpenedCommendCount - iClosedCommentCount === 0;
 	}
 
-	private static _checkIfIndexIsInCommentRange(commentRanges: CommentRanges[], index: number) {
+	private static _checkIfIndexIsInCommentRange(commentRanges: ICommentRanges[], index: number) {
 		return !!commentRanges.find(commentRange => {
 			return index >= commentRange.from && index < commentRange.to;
 		});
 	}
 }
 
-export interface CommentRanges {
+export interface ICommentRanges {
 	from: number;
 	to: number;
 }

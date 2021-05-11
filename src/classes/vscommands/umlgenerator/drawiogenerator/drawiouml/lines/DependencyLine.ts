@@ -3,15 +3,15 @@ import { DrawIOUMLDiagram } from "../../DrawIOUMLDiagram";
 import { Header } from "../Header";
 import { ClassHead } from "../ClassHead";
 
-interface SourceTarget {
+interface ISourceTarget {
 	source: ClassHead;
 	target: ClassHead;
 }
 export class DependencyLine implements IUMLGenerator {
 	id: number;
 	parent: Header;
-	sourceTarget: SourceTarget;
-	constructor(parent: Header, sourceTarget: SourceTarget) {
+	sourceTarget: ISourceTarget;
+	constructor(parent: Header, sourceTarget: ISourceTarget) {
 		this.id = DrawIOUMLDiagram.getUniqueId();
 		this.parent = parent;
 		this.sourceTarget = sourceTarget;

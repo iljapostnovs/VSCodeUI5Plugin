@@ -1,5 +1,5 @@
 import { CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
-import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
+import { IFieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
 import { FieldPropertyMethodGetterStrategy as FieldMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
 import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
@@ -7,10 +7,10 @@ import { FileReader } from "../../../utils/FileReader";
 
 export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethodGetterStrategy {
 	getFieldsAndMethods(document: vscode.TextDocument, position: vscode.Position) {
-		let fieldsAndMethods: FieldsAndMethods | undefined;
+		let fieldsAndMethods: IFieldsAndMethods | undefined;
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		const offset = document.offsetAt(position);
-		const UIClassName = this.getClassNameOfTheVariableAtPosition(className, offset);
+		const UIClassName = className && this.getClassNameOfTheVariableAtPosition(className, offset);
 		if (UIClassName) {
 			fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(UIClassName);
 			if (fieldsAndMethods && className !== fieldsAndMethods.className) {
@@ -22,8 +22,8 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 
 		return fieldsAndMethods;
 	}
-	public destructueFieldsAndMethodsAccordingToMapParams(className: string): FieldsAndMethods | undefined {
-		let fieldsAndMethods: FieldsAndMethods | undefined;
+	public destructueFieldsAndMethodsAccordingToMapParams(className: string): IFieldsAndMethods | undefined {
+		let fieldsAndMethods: IFieldsAndMethods | undefined;
 		const isMap = className.includes("__map__");
 		const classNamePartsFromMapParam = className.split("__mapparam__");
 
@@ -90,23 +90,8 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		return returnObject;
 	}
 
-	public getClassNameOfTheVariableAtPosition(className?: string, position?: number) {
-		let UIClassName;
-		if (!className) {
-			className = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-		}
-
-		if (className) {
-			const activeTextEditor = vscode.window.activeTextEditor;
-			if (!position && activeTextEditor) {
-				position = activeTextEditor.document.offsetAt(activeTextEditor.selection.start);
-			}
-			if (position) {
-				UIClassName = this.acornGetClassName(className, position);
-			}
-		}
-
-		return UIClassName;
+	public getClassNameOfTheVariableAtPosition(className: string, position: number) {
+		return this.acornGetClassName(className, position);
 	}
 
 	public acornGetClassName(className: string, position: number, clearStack = true, checkForLastPosition = false) {

@@ -1,6 +1,6 @@
 import { SAPIcons } from "../../SAPIcons";
 
-export interface UIMethodParam {
+export interface IUIMethodParam {
 	name: string;
 	description: string;
 	isOptional: boolean;
@@ -10,31 +10,31 @@ export interface UIMethodParam {
 export interface IName {
 	readonly name: string;
 }
-export interface UIMethod extends IName {
-	readonly params: UIMethodParam[];
+export interface IUIMethod extends IName {
+	readonly params: IUIMethodParam[];
 	returnType: string;
 	description: string;
 	visibility: string;
 	owner: string;
 	api?: string;
 }
-export interface UIField extends IName {
+export interface IUIField extends IName {
 	type: string | undefined;
 	visibility: string;
 	owner: string;
 	description: string;
 }
-export interface TypeValue {
+export interface ITypeValue {
 	text: string;
 	description: string;
 }
-export interface UIProperty extends IName {
+export interface IUIProperty extends IName {
 	type: string | undefined;
-	typeValues: TypeValue[];
+	typeValues: ITypeValue[];
 	visibility: string;
 	description: string;
 }
-export interface UIAggregation extends IName {
+export interface IUIAggregation extends IName {
 	type: string;
 	multiple: boolean;
 	singularName: string;
@@ -42,15 +42,15 @@ export interface UIAggregation extends IName {
 	description: string;
 	default: boolean;
 }
-export interface UIEventParam extends IName {
+export interface IUIEventParam extends IName {
 	type: string;
 }
-export interface UIEvent extends IName {
+export interface IUIEvent extends IName {
 	visibility: string;
 	description: string;
-	params: UIEventParam[];
+	params: IUIEventParam[];
 }
-export interface UIAssociation extends IName {
+export interface IUIAssociation extends IName {
 	type: string | undefined;
 	description: string;
 	visibility: string;
@@ -60,12 +60,12 @@ export interface UIAssociation extends IName {
 export abstract class AbstractUIClass {
 	public classExists: boolean;
 	public className: string;
-	public methods: UIMethod[] = [];
-	public fields: UIField[] = [];
-	public properties: UIProperty[] = [];
-	public aggregations: UIAggregation[] = [];
-	public events: UIEvent[] = [];
-	public associations: UIAssociation[] = [];
+	public methods: IUIMethod[] = [];
+	public fields: IUIField[] = [];
+	public properties: IUIProperty[] = [];
+	public aggregations: IUIAggregation[] = [];
+	public events: IUIEvent[] = [];
+	public associations: IUIAssociation[] = [];
 	public interfaces: string[] = [];
 	public parentClassNameDotNotation = "";
 
@@ -76,7 +76,7 @@ export abstract class AbstractUIClass {
 	}
 
 	protected generateTypeValues(type: string) {
-		let typeValues: TypeValue[] = [];
+		let typeValues: ITypeValue[] = [];
 
 		if (type === "boolean") {
 			typeValues = [

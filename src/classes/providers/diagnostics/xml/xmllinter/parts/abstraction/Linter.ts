@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-export interface Error {
+export interface IError {
 	code: string;
 	message: string;
 	source: string;
@@ -9,12 +9,12 @@ export interface Error {
 	attribute?: string;
 }
 
-export interface Tag {
+export interface ITag {
 	text: string;
 	positionBegin: number;
 	positionEnd: number;
 }
 
 export abstract class Linter {
-	abstract getErrors(document: vscode.TextDocument): Error[];
+	abstract getErrors(document: vscode.TextDocument): IError[];
 }

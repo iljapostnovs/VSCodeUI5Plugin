@@ -1,6 +1,6 @@
 import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 import { CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
-import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
+import { IFieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../AcornSyntaxAnalyzer";
 import { FieldPropertyMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
 import * as vscode from "vscode";
@@ -9,13 +9,13 @@ import { FileReader } from "../../../utils/FileReader";
 
 export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 	getFieldsAndMethods() {
-		const fieldsAndMethods: FieldsAndMethods | undefined = this._acornGetPropertiesForParamsInCurrentPosition();
+		const fieldsAndMethods: IFieldsAndMethods | undefined = this._acornGetPropertiesForParamsInCurrentPosition();
 
 		return fieldsAndMethods;
 	}
 
 	private _acornGetPropertiesForParamsInCurrentPosition() {
-		let fieldsAndMethods: FieldsAndMethods | undefined;
+		let fieldsAndMethods: IFieldsAndMethods | undefined;
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 
 		const activeTextEditor = vscode.window.activeTextEditor;
@@ -35,7 +35,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 	}
 
 	private _getFieldsAndMethodsForNewExpression(newExpression: any) {
-		let fieldsAndMethods: FieldsAndMethods | undefined;
+		let fieldsAndMethods: IFieldsAndMethods | undefined;
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		const position = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor.selection.start);
 		if (position && currentClassName) {
@@ -66,7 +66,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 	}
 
 	private _getFieldsAndMethodsForCallExpression(callExpression: any) {
-		let fieldsAndMethods: FieldsAndMethods | undefined;
+		let fieldsAndMethods: IFieldsAndMethods | undefined;
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		const position = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor.selection.start);
 
@@ -240,7 +240,7 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 		return objectToReturn;
 	}
 
-	private _generatePropertyFieldsFor(className: string, fieldsAndMethods: FieldsAndMethods = {
+	private _generatePropertyFieldsFor(className: string, fieldsAndMethods: IFieldsAndMethods = {
 		className: "generic",
 		fields: [],
 		methods: []

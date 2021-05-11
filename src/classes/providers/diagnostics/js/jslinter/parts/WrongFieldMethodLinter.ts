@@ -1,4 +1,4 @@
-import { Error, Linter } from "./abstraction/Linter";
+import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { CustomDiagnosticType } from "../../../../../registrators/DiagnosticsRegistrator";
@@ -11,8 +11,8 @@ import { ConfigHandler } from "./config/ConfigHandler";
 export class WrongFieldMethodLinter extends Linter {
 	protected className = "WrongFieldMethodLinter";
 	public static timePerChar = 0;
-	_getErrors(document: vscode.TextDocument): Error[] {
-		let errors: Error[] = [];
+	_getErrors(document: vscode.TextDocument): IError[] {
+		let errors: IError[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongFieldMethodLinter")) {
 			// console.time("WrongFieldMethodLinter");
@@ -26,8 +26,8 @@ export class WrongFieldMethodLinter extends Linter {
 		return errors;
 	}
 
-	private _getLintingErrors(document: vscode.TextDocument): Error[] {
-		let errors: Error[] = [];
+	private _getLintingErrors(document: vscode.TextDocument): IError[] {
+		let errors: IError[] = [];
 
 		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 		if (currentClassName) {
@@ -48,7 +48,7 @@ export class WrongFieldMethodLinter extends Linter {
 		return errors;
 	}
 
-	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, document: vscode.TextDocument, errors: Error[] = [], droppedNodes: any[] = [], errorNodes: any[] = []) {
+	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, document: vscode.TextDocument, errors: IError[] = [], droppedNodes: any[] = [], errorNodes: any[] = []) {
 		if (droppedNodes.includes(node)) {
 			return [];
 		}

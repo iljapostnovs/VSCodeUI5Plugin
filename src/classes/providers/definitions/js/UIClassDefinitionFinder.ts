@@ -12,7 +12,7 @@ export class UIClassDefinitionFinder {
 		const methodName = document.getText(document.getWordRangeAtPosition(position));
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-		const classNameAtCurrentPosition = strategy.getClassNameOfTheVariableAtPosition(className, document.offsetAt(position));
+		const classNameAtCurrentPosition = className && strategy.getClassNameOfTheVariableAtPosition(className, document.offsetAt(position));
 		if (classNameAtCurrentPosition) {
 			location = this._getMemberLocation(classNameAtCurrentPosition, methodName, openInBrowserIfStandardMethod);
 		}

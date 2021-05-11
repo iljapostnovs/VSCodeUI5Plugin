@@ -1,4 +1,4 @@
-import { AbstractUIClass, UIField, UIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractUIClass, IUIField, IUIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { Property } from "./drawiouml/Property";
 import { Method } from "./drawiouml/Method";
 import { Field } from "./drawiouml/Field";
@@ -68,7 +68,7 @@ export class DrawIOUMLDiagram {
 		let index = 0;
 		const properties = this.UIClass.properties.map((property, i) => new Property(property, this.classHead, index + i));
 		index += properties.length;
-		const fields = this.UIClass.fields.sort((a: UIField, b: UIField) => {
+		const fields = this.UIClass.fields.sort((a: IUIField, b: IUIField) => {
 			const isFirstFieldPrivate = a.name.startsWith("_");
 			const isSecondFieldPrivate = b.name.startsWith("_");
 
@@ -77,7 +77,7 @@ export class DrawIOUMLDiagram {
 			.filter(field => field.name !== "prototype")
 			.map((field, i) => new Field(field, this.classHead, index + i));
 		index += fields.length;
-		const methods = this.UIClass.methods.sort((a: UIMethod, b: UIMethod) => {
+		const methods = this.UIClass.methods.sort((a: IUIMethod, b: IUIMethod) => {
 			const isFirstMethodPrivate = a.name.startsWith("_");
 			const isSecondMethodPrivate = b.name.startsWith("_");
 
@@ -114,7 +114,7 @@ export class DrawIOUMLDiagram {
 		let index = 0;
 		const properties = this.UIClass.properties.map((property, i) => new Property(property, this.classHead, index + i));
 		index += properties.length;
-		const fields = this.UIClass.fields.sort((a: UIField, b: UIField) => {
+		const fields = this.UIClass.fields.sort((a: IUIField, b: IUIField) => {
 			const isFirstFieldPrivate = a.name.startsWith("_");
 			const isSecondFieldPrivate = b.name.startsWith("_");
 
@@ -123,7 +123,7 @@ export class DrawIOUMLDiagram {
 			.filter(field => field.name !== "prototype")
 			.map((field, i) => new Field(field, this.classHead, index + i));
 		index += fields.length;
-		const methods = this.UIClass.methods.sort((a: UIMethod, b: UIMethod) => {
+		const methods = this.UIClass.methods.sort((a: IUIMethod, b: IUIMethod) => {
 			const isFirstMethodPrivate = a.name.startsWith("_");
 			const isSecondMethodPrivate = b.name.startsWith("_");
 

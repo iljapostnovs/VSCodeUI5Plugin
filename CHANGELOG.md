@@ -1,3 +1,8 @@
+## 0.12.38 (11-05-2021)
+* Added support for fragments defined in manifest extensions
+* Improve detecting of function used in XML files
+* JS Rename now also renames event handlers in XML files
+
 ## 0.12.37 (05-05-2021)
 * Refactoring
 * Information message added if manifest reading is too slow or there are too much manifests found

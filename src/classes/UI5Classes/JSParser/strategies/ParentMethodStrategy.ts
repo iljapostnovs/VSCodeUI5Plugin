@@ -1,11 +1,11 @@
-import { FieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
+import { IFieldsAndMethods, UIClassFactory } from "../../UIClassFactory";
 import { FieldPropertyMethodGetterStrategy } from "./abstraction/FieldPropertyMethodGetterStrategy";
 import * as vscode from "vscode";
 import { FileReader } from "../../../utils/FileReader";
 import { CustomUIClass } from "../../UI5Parser/UIClass/CustomUIClass";
 export class ParentMethodStrategy extends FieldPropertyMethodGetterStrategy {
 	getFieldsAndMethods(document: vscode.TextDocument, position: vscode.Position) {
-		let fieldsAndMethods: FieldsAndMethods | undefined;
+		let fieldsAndMethods: IFieldsAndMethods | undefined;
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		const offset = document.offsetAt(position);
 		if (className) {

@@ -4,6 +4,8 @@ import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../classes/UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
+import * as CompletionItemsData from "./data/completionitems/JSCompletionItems.json";
+import * as XMLCompletionItemData from "./data/completionitems/XMLCompletionItems.json";
 import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { FileReader } from "../../classes/utils/FileReader";
@@ -12,6 +14,11 @@ import { XMLLinter } from "../../classes/providers/diagnostics/xml/xmllinter/XML
 import { UI5Plugin } from "../../UI5Plugin";
 import { JSRenameProvider } from "../../classes/providers/rename/JSRenameProvider";
 import { ConfigHandler } from "../../classes/providers/diagnostics/js/jslinter/parts/config/ConfigHandler";
+import { XMLParser } from "../../classes/utils/XMLParser";
+import { ViewIdCompletionItemFactory } from "../../classes/providers/completionitems/js/ViewIdCompletionItemFactory";
+import { JSDynamicCompletionItemsFactory } from "../../classes/providers/completionitems/js/JSDynamicCompletionItemsFactory";
+import { SAPUIDefineFactory } from "../../classes/providers/completionitems/js/sapuidefine/SAPUIDefineFactory";
+import { XMLDynamicCompletionItemFactory } from "../../classes/providers/completionitems/xml/XMLDynamicCompletionItemFactory";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -86,8 +93,14 @@ suite("Extension Test Suite", () => {
 			const filePath = FileReader.getClassPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
+				const startTime = new Date().getTime();
 				const errors = JSLinter.getLintingErrors(document);
+				const endTime = new Date().getTime();
+				const timeSpent = endTime - startTime;
+
 				assert.strictEqual(errors.length, data.errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
+				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
+				console.log(`JS Linter for ${data.className} spent ${timeSpent}ms`);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
@@ -105,8 +118,13 @@ suite("Extension Test Suite", () => {
 			const filePath = FileReader.convertClassNameToFSPath(data.className, false, false, true);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
+				const startTime = new Date().getTime();
 				const errors = XMLLinter.getLintingErrors(document);
+				const endTime = new Date().getTime();
+				const timeSpent = endTime - startTime;
+				console.log(`XML Linter for ${data.className} spent ${timeSpent}ms`);
 				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
+				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
@@ -158,9 +176,10 @@ suite("Extension Test Suite", () => {
 		for (const data of testData) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(data.className);
 
-			const filePath = FileReader.convertClassNameToFSPath(data.className);
+			const filePath = FileReader.getClassPathFromClassName(data.className);
 			if (filePath) {
-				const document = await vscode.workspace.openTextDocument(filePath);
+				const uri = vscode.Uri.file(filePath);
+				const document = await vscode.workspace.openTextDocument(uri);
 				const method = UIClass.methods.find(method => method.name === data.methodName);
 				if (method && method.memberPropertyNode) {
 					const position = document.positionAt(method.memberPropertyNode.start);
@@ -168,60 +187,69 @@ suite("Extension Test Suite", () => {
 					const workspaceEdits = await JSRenameProvider.provideRenameEdits(document, position, newMethodName);
 
 					const entries = workspaceEdits?.entries();
-					const entry = entries?.shift();
-					if (workspaceEdits && entry) {
-						const uri = entry[0];
-						const textEdit = entry[1];
-						const startOffset = document.offsetAt(textEdit[0].range.start);
-						const endOffset = document.offsetAt(textEdit[0].range.end);
+					if (entries) {
+						const textEditQuantity = entries.reduce((accumulator, entry) => {
+							accumulator += entry[1].length;
 
-						assert.strictEqual(uri.fsPath, filePath);
-						assert.strictEqual(method.memberPropertyNode.start, startOffset);
-						assert.strictEqual(method.memberPropertyNode.end, endOffset);
-					}
+							return accumulator;
+						}, 0);
+						const expectedEditQuantity = data.renames.methods.length + data.renames.XMLDocEdits.length + 1; //1 - edit of method in main class itself
+						assert.strictEqual(textEditQuantity, expectedEditQuantity, `Expected ${expectedEditQuantity} edits, but got ${textEditQuantity} for "${data.className}" -> "${data.methodName}"`);
 
-					for (const methodRename of data.renames.methods) {
-						const UIClass = <CustomUIClass>UIClassFactory.getUIClass(methodRename.className);
-						const containerMethod = UIClass.methods.find(method => method.name === methodRename.containerMethod);
-						const allNodes = AcornSyntaxAnalyzer.expandAllContent(containerMethod?.acornNode);
-						const allNodesWithCurrentMethod = allNodes.filter((node: any) => node.type === "MemberExpression" && node.property?.name === data.methodName);
-						const allNodesFromCurrentClass = allNodesWithCurrentMethod.filter((node: any) => {
-							const ownerClassName = strategy.acornGetClassName(methodRename.className, node.end, true);
-							return ownerClassName === data.className;
-						});
+						if (workspaceEdits) {
+							assertEntry(entries, uri, method.memberPropertyNode.start, method.memberPropertyNode.end);
+						}
 
-						assert.ok(allNodesFromCurrentClass.length > 0, `Nodes with "${data.methodName}" method in "${methodRename.className}" class "${methodRename.containerMethod}" method not found`);
+						for (const methodRename of data.renames.methods) {
+							const filePath = FileReader.getClassPathFromClassName(methodRename.className);
+							const uri = filePath && vscode.Uri.file(filePath);
+							if (uri) {
+								const UIClass = <CustomUIClass>UIClassFactory.getUIClass(methodRename.className);
+								const containerMethod = UIClass.methods.find(method => method.name === methodRename.containerMethod);
+								const allNodes = AcornSyntaxAnalyzer.expandAllContent(containerMethod?.acornNode);
+								const allNodesWithCurrentMethod = allNodes.filter((node: any) => node.type === "MemberExpression" && node.property?.name === data.methodName);
+								const allNodesFromCurrentClass = allNodesWithCurrentMethod.filter((node: any) => {
+									const ownerClassName = strategy.acornGetClassName(methodRename.className, node.end, true);
+									return ownerClassName === data.className;
+								});
 
-						if (entries) {
-							for (const node of allNodesFromCurrentClass) {
-								let necessaryEntry: [vscode.Uri, vscode.TextEdit[]] | undefined;
-								for (const entry of entries) {
-									const uri = entry[0];
-									const document = await vscode.workspace.openTextDocument(uri);
-									const textEdit = entry[1];
-									const startOffset = document.offsetAt(textEdit[0].range.start);
-									const endOffset = document.offsetAt(textEdit[0].range.end);
-									if (
-										node.property.start === startOffset &&
-										node.property.end === endOffset
-									) {
-										necessaryEntry = entry;
-										break;
-									}
+								assert.ok(allNodesFromCurrentClass.length > 0, `Nodes with "${data.methodName}" method in "${methodRename.className}" class "${methodRename.containerMethod}" method not found`);
+
+								for (const node of allNodesFromCurrentClass) {
+									await assertEntry(entries, uri, node.property.start, node.property.end);
 								}
+							}
+						}
 
-								assert.ok(!!necessaryEntry, `Workspace edit for node "${node.property.name}" not found`);
-								if (necessaryEntry) {
-									const index = entries?.indexOf(necessaryEntry);
-									entries?.splice(index, 1);
+						for (const XMLDocEdit of data.renames.XMLDocEdits) {
+							const filePath = FileReader.convertClassNameToFSPath(XMLDocEdit.className, false, XMLDocEdit.type === "fragment", XMLDocEdit.type === "view");
+							if (filePath) {
+								const uri = vscode.Uri.file(filePath);
+								const viewOrFragment = XMLDocEdit.type === "fragment" ? FileReader.getAllFragments().find(fragment => fragment.fsPath === filePath) : FileReader.getAllViews().find(view => view.fsPath === filePath);
+								if (viewOrFragment) {
+									const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(viewOrFragment, data.methodName);
+									const tagAndAttribute = tagsAndAttributes.find(tagAndAttribute => {
+										return XMLParser.getClassNameFromTag(tagAndAttribute.tag.text) === XMLDocEdit.tagClassName;
+									});
+									if (tagAndAttribute) {
+										const attribute = tagAndAttribute.attributes.find(attribute => {
+											return XMLParser.getAttributeNameAndValue(attribute).attributeName === XMLDocEdit.attribute;
+										});
+										if (attribute) {
+											const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+											const positionOfAttribute = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute);
+											const positionOfValueBegin = positionOfAttribute + attribute.indexOf(attributeValue);
+											const positionOfValueEnd = positionOfValueBegin + attributeValue.length;
+
+											assertEntry(entries, uri, positionOfValueBegin, positionOfValueEnd);
+
+										}
+									}
 								}
 							}
 						}
 					}
-
-					if (entries) {
-						assert.ok(entries.length === 0, "All workspace edit entries found");
-					}
+					assert.ok(!!entries, "No workspace edit entries found");
 				}
 			}
 		}
@@ -235,7 +263,162 @@ suite("Extension Test Suite", () => {
 			assert.strictEqual(isException, config.result, `"${config.className}" -> "${config.methodName}" should have exception value "${config.result}", but it has "${isException}"`);
 		});
 	});
+
+	test("View ID Completion items generated successfully", async () => {
+		const testData = CompletionItemsData.ViewId;
+		const factory = new ViewIdCompletionItemFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createIdCompletionItems(document, position);
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
+				compareArrays(completionItemInsertTexts, data.items);
+				assert.strictEqual(completionItems.length, data.items.length, `"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}`);
+			}
+		}
+	});
+
+	test("JS Dynamic Completion items generated successfully", async () => {
+		const testData = CompletionItemsData.JSDynamicCompletionItems;
+		const factory = new JSDynamicCompletionItemsFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createUIClassCompletionItems(document, position);
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
+				compareArrays(completionItemInsertTexts, data.items);
+
+				assert.strictEqual(completionItems.length, data.items.length, `"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}. Search term "${data.textToFind}"`);
+			}
+		}
+	});
+
+	test("JS UI Define Completion items generated successfully", async () => {
+		const testData = CompletionItemsData.UIDefine;
+		const factory = new SAPUIDefineFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const completionItems = await factory.generateUIDefineCompletionItems();
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
+				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
+
+	test("XML attribute Completion items generated successfully", async () => {
+		const testData = XMLCompletionItemData.attributes;
+		const factory = new XMLDynamicCompletionItemFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
+
+	test("XML attribute values Completion items generated successfully", async () => {
+		const testData = XMLCompletionItemData.attributeValues;
+		const factory = new XMLDynamicCompletionItemFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
+
+	test("XML aggregation Completion items generated successfully", async () => {
+		const testData = XMLCompletionItemData.tags.aggregations;
+		const factory = new XMLDynamicCompletionItemFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
+
+	test("XML class Completion items generated successfully", async () => {
+		const testData = XMLCompletionItemData.tags.classTags;
+		const factory = new XMLDynamicCompletionItemFactory();
+
+		for (const data of testData) {
+			const filePath = FileReader.getClassPathFromClassName(data.className);
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
+				const position = document.positionAt(offset);
+				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+
+				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
 });
+
+async function assertEntry(entries: [vscode.Uri, vscode.TextEdit[]][], uri: vscode.Uri, offsetBegin: number, offsetEnd: number) {
+	let necessaryEntry: [vscode.Uri, vscode.TextEdit[]] | undefined;
+	for (const entry of entries) {
+		const entryUri = entry[0];
+		if (uri.fsPath === uri.fsPath) {
+			const document = await vscode.workspace.openTextDocument(entryUri);
+			const textEdits = entry[1];
+			for (const textEdit of textEdits) {
+				const startOffset = document.offsetAt(textEdit.range.start);
+				const endOffset = document.offsetAt(textEdit.range.end);
+				if (
+					offsetBegin === startOffset &&
+					offsetEnd === endOffset
+				) {
+					necessaryEntry = entry;
+					break;
+				}
+			}
+			if (necessaryEntry) {
+				break;
+			}
+		}
+	}
+
+	assert.ok(!!necessaryEntry, `Workspace edit for "${uri.fsPath}" position ${offsetBegin}-${offsetEnd} not found`);
+
+	return !!necessaryEntry;
+}
 
 function compareProperties(dataNode: any, node2: any): boolean {
 	let allInnerNodesExists = true;
@@ -252,4 +435,13 @@ function compareProperties(dataNode: any, node2: any): boolean {
 	}
 
 	return allInnerNodesExists;
+}
+
+function compareArrays(completionItemInsertTexts: (string | vscode.SnippetString | undefined)[], items: string[]) {
+	completionItemInsertTexts.forEach(insertText => {
+		const stringToInsert = typeof insertText === "string" ? insertText :
+			insertText instanceof vscode.SnippetString ? insertText.value : undefined;
+		const item = items.find(item => item === stringToInsert);
+		assert.ok(!!item, `"${stringToInsert}" wasn't found in ${JSON.stringify(items.slice(0, 10))}... array`);
+	});
 }

@@ -5,15 +5,16 @@ import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass"
 import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../utils/FileReader";
 import LineColumn = require("line-column");
+import { XMLParser } from "../../utils/XMLParser";
 
-interface WorkspaceEdit {
+interface IWorkspaceEdit {
 	uri: vscode.Uri;
 	range: vscode.Range;
 	newValue: string;
 }
 export class JSRenameProvider {
 	static async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string) {
-		let workspaceEdits: WorkspaceEdit[] = [];
+		let workspaceEdits: IWorkspaceEdit[] = [];
 
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		if (className) {
@@ -69,8 +70,8 @@ export class JSRenameProvider {
 		return workspaceEdit;
 	}
 
-	private static _removeOverlapingEdits(workspaceEdits: WorkspaceEdit[]) {
-		return workspaceEdits.reduce((accumulator: WorkspaceEdit[], workspaceEdit) => {
+	private static _removeOverlapingEdits(workspaceEdits: IWorkspaceEdit[]) {
+		return workspaceEdits.reduce((accumulator: IWorkspaceEdit[], workspaceEdit) => {
 			const isOverlapingEdit = !!accumulator.find(workspaceEditInAccumulator => {
 				return workspaceEditInAccumulator.uri.path === workspaceEdit.uri.path &&
 					workspaceEditInAccumulator.range.isEqual(workspaceEdit.range);
@@ -84,7 +85,7 @@ export class JSRenameProvider {
 		}, []);
 	}
 
-	private static _addTextEditsForMembersInClassBodyRename(className: string, oldMemberName: string, newMemberName: string, workspaceEdits: WorkspaceEdit[], document: vscode.TextDocument) {
+	private static _addTextEditsForMembersInClassBodyRename(className: string, oldMemberName: string, newMemberName: string, workspaceEdits: IWorkspaceEdit[], document: vscode.TextDocument) {
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 		const methodOrField =
 			UIClass.methods.find(method => method.name === oldMemberName) ||
@@ -100,10 +101,11 @@ export class JSRenameProvider {
 			});
 
 			this._addTextEditsForMemberRename(className, oldMemberName, newMemberName, workspaceEdits);
+			this._addTextEditsForEventHandlersInXMLDocs(className, oldMemberName, newMemberName, workspaceEdits);
 		}
 	}
 
-	private static _addTextEditsForMemberRename(className: string, oldMemberName: string, newMemberName: string, workspaceEdits: WorkspaceEdit[]) {
+	private static _addTextEditsForMemberRename(className: string, oldMemberName: string, newMemberName: string, workspaceEdits: IWorkspaceEdit[]) {
 		const UIClasses = UIClassFactory.getAllExistentUIClasses();
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 		Object.keys(UIClasses).forEach(key => {
@@ -134,5 +136,42 @@ export class JSRenameProvider {
 				});
 			}
 		});
+	}
+
+	private static _addTextEditsForEventHandlersInXMLDocs(className: string, oldMemberName: string, newMemberName: string, workspaceEdits: IWorkspaceEdit[]) {
+		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+		const methodOrField =
+			UIClass.methods.find(method => method.name === oldMemberName) ||
+			UIClass.fields.find(field => field.name === oldMemberName);
+		if (methodOrField?.mentionedInTheXMLDocument) {
+			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+			const viewAndFragmentArray = [...viewsAndFragments.fragments, ...viewsAndFragments.views];
+			viewAndFragmentArray.forEach(viewOrFragment => {
+				const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(viewOrFragment, oldMemberName, className);
+
+				tagsAndAttributes.forEach(tagAndAttribute => {
+					const { tag, attributes } = tagAndAttribute;
+					attributes.forEach(attribute => {
+						const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+						const positionOfAttribute = tag.positionBegin + tag.text.indexOf(attribute);
+						const positionOfValueBegin = positionOfAttribute + attribute.indexOf(attributeValue);
+						const positionOfEventHandlerInAttributeValueBegin = positionOfValueBegin + attributeValue.indexOf(oldMemberName);
+						const positionOfEventHandlerInAttributeValueEnd = positionOfEventHandlerInAttributeValueBegin + oldMemberName.length;
+						const classUri = vscode.Uri.file(viewOrFragment.fsPath);
+						const lineColumnStart = LineColumn(viewOrFragment.content).fromIndex(positionOfEventHandlerInAttributeValueBegin);
+						const lineColumnEnd = LineColumn(viewOrFragment.content).fromIndex(positionOfEventHandlerInAttributeValueEnd);
+						if (lineColumnStart && lineColumnEnd) {
+							const positionStart = new vscode.Position(lineColumnStart.line - 1, lineColumnStart.col - 1);
+							const positionEnd = new vscode.Position(lineColumnEnd.line - 1, lineColumnEnd.col - 1);
+							workspaceEdits.push({
+								uri: classUri,
+								range: new vscode.Range(positionStart, positionEnd),
+								newValue: newMemberName
+							});
+						}
+					});
+				});
+			});
+		}
 	}
 }

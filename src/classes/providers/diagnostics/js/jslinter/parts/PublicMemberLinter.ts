@@ -1,16 +1,16 @@
-import { Error, Linter } from "./abstraction/Linter";
+import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { FileReader } from "../../../../../utils/FileReader";
-import { CustomClassUIField, CustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { ICustomClassUIField, ICustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
 export class PublicMemberLinter extends Linter {
 	protected className = "PublicMemberLinter";
-	_getErrors(document: vscode.TextDocument): Error[] {
-		const errors: Error[] = [];
+	_getErrors(document: vscode.TextDocument): IError[] {
+		const errors: IError[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("usePublicMemberLinter")) {
 			const className = FileReader.getClassNameFromPath(document.fileName);
@@ -75,7 +75,7 @@ export class PublicMemberLinter extends Linter {
 		return errors;
 	}
 
-	private _checkIfMemberIsUsedElsewhere(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, memberName: string, fieldOrMethod: CustomClassUIField | CustomClassUIMethod) {
+	private _checkIfMemberIsUsedElsewhere(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, memberName: string, fieldOrMethod: ICustomClassUIField | ICustomClassUIMethod) {
 		let isMethodUsedElsewhere = false;
 
 		const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, memberName);

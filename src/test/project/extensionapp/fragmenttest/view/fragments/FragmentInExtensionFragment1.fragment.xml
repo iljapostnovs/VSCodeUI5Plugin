@@ -1,0 +1,15 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button
+		id="idButtonInFragmentInExtensionFragment1"
+		press="eventHandler14"
+		textDirection="{
+			formatter: '.formatter.formatGlobal'
+		}"
+		busy="{
+			formatter: '.randomUtil.formatGlobal'
+		}"
+	/>
+</c:FragmentDefinition>

@@ -30,11 +30,11 @@ sap.ui.define([
 			this.testMap.test.setBusy(true);
 			this.returnTest().test.setBusy(true);
 			mObject.testField3.testField4.testField6.setWidth("100%");
-			this.test().setBusy(true);
+			this._test().setBusy(true);
 			return mObject;
 		},
 
-		test: function() {
+		_test: function() {
 			return this.testMap.test;
 		},
 

@@ -9,12 +9,12 @@ import { DependencyLine } from "./drawiouml/lines/DependencyLine";
 import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
 import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
 
-interface UsedClassMap {
+interface IUsedClassMap {
 	[key: string]: {
 		isUsed: boolean;
 	};
 }
-interface UsageMap {
+interface IUsageMap {
 	[key: string]: {
 		diagram: DrawIOUMLDiagram;
 		// children: InheritanceTree;
@@ -82,7 +82,7 @@ export class MassDrawIOUMLDiagram {
 		const usageMap = this._buildUsageMap(UMLDiagrams);
 
 		//build used class map
-		const usedClassMap: UsedClassMap = {};
+		const usedClassMap: IUsedClassMap = {};
 		Object.keys(usageMap).forEach(key => {
 			usedClassMap[key] = { isUsed: false };
 		});
@@ -125,7 +125,7 @@ export class MassDrawIOUMLDiagram {
 		}
 	}
 
-	private static _buildInheritanceTree(usageMap: UsageMap, rootUMLDiagram: DrawIOUMLDiagram, usedClassMap: UsedClassMap, UMLDiagram: DrawIOUMLDiagram = rootUMLDiagram, previousRootDiagrams: DrawIOUMLDiagram[] = []) {
+	private static _buildInheritanceTree(usageMap: IUsageMap, rootUMLDiagram: DrawIOUMLDiagram, usedClassMap: IUsedClassMap, UMLDiagram: DrawIOUMLDiagram = rootUMLDiagram, previousRootDiagrams: DrawIOUMLDiagram[] = []) {
 		usedClassMap[UMLDiagram.UIClass.className].isUsed = true;
 
 		this._setColumnsForTree(rootUMLDiagram, usageMap);
@@ -138,7 +138,7 @@ export class MassDrawIOUMLDiagram {
 		});
 	}
 
-	private static _getAllDiagramsInUsageMap(usageMap: UsageMap, UMLDiagram: DrawIOUMLDiagram, diagrams: DrawIOUMLDiagram[] = []) {
+	private static _getAllDiagramsInUsageMap(usageMap: IUsageMap, UMLDiagram: DrawIOUMLDiagram, diagrams: DrawIOUMLDiagram[] = []) {
 		diagrams.push(UMLDiagram);
 		const usageMapEntry = usageMap[UMLDiagram.UIClass.className];
 
@@ -149,7 +149,7 @@ export class MassDrawIOUMLDiagram {
 		return diagrams;
 	}
 
-	private static _getDiagramXAxis(usageMap: UsageMap, UMLDiagram: DrawIOUMLDiagram, rootUMLDiagram: DrawIOUMLDiagram, previousRootDiagrams: DrawIOUMLDiagram[]) {
+	private static _getDiagramXAxis(usageMap: IUsageMap, UMLDiagram: DrawIOUMLDiagram, rootUMLDiagram: DrawIOUMLDiagram, previousRootDiagrams: DrawIOUMLDiagram[]) {
 		const previousDiagramColumnCount =  previousRootDiagrams.reduce((accumulator, diagram) => {
 			accumulator += this._getLeavesCount(usageMap, diagram);
 			return accumulator;
@@ -174,7 +174,7 @@ export class MassDrawIOUMLDiagram {
 		return widthTakenBeforeThisRootDiagram + widthSum;
 	}
 
-	private static _getColumnWidths(usageMap: UsageMap, rootDiagram: DrawIOUMLDiagram) {
+	private static _getColumnWidths(usageMap: IUsageMap, rootDiagram: DrawIOUMLDiagram) {
 		const columnsCount = this._getLeavesCount(usageMap, rootDiagram);
 		const columnWidths: number[] = [];
 
@@ -195,7 +195,7 @@ export class MassDrawIOUMLDiagram {
 		return columnWidths;
 	}
 
-	private static _getDiagramYAxis(usageMap: UsageMap, UMLDiagram: DrawIOUMLDiagram, rootUMLDiagram: DrawIOUMLDiagram) {
+	private static _getDiagramYAxis(usageMap: IUsageMap, UMLDiagram: DrawIOUMLDiagram, rootUMLDiagram: DrawIOUMLDiagram) {
 		const rowsCount = this._getTreeHeight(usageMap, rootUMLDiagram);
 		const rowHeights: number[] = [];
 
@@ -222,7 +222,7 @@ export class MassDrawIOUMLDiagram {
 		return heightsSum;
 	}
 
-	private static _getTreeHeight(usageMap: UsageMap, UMLDiagram: DrawIOUMLDiagram) {
+	private static _getTreeHeight(usageMap: IUsageMap, UMLDiagram: DrawIOUMLDiagram) {
 		const usageMapEntry = usageMap[UMLDiagram.UIClass.className];
 		let height = usageMapEntry.level;
 
@@ -237,7 +237,7 @@ export class MassDrawIOUMLDiagram {
 		return height;
 	}
 
-	private static _getLeavesCount(usageMap: UsageMap, UMLDiagram: DrawIOUMLDiagram) {
+	private static _getLeavesCount(usageMap: IUsageMap, UMLDiagram: DrawIOUMLDiagram) {
 		const usageMapEntry = usageMap[UMLDiagram.UIClass.className];
 		let leavesCount = 0;
 		usageMapEntry.usedBy.forEach(child => {
@@ -252,7 +252,7 @@ export class MassDrawIOUMLDiagram {
 		return leavesCount || 1;
 	}
 
-	private static _buildUsageMap(UMLDiagrams: DrawIOUMLDiagram[], usageMap: UsageMap = {}) {
+	private static _buildUsageMap(UMLDiagrams: DrawIOUMLDiagram[], usageMap: IUsageMap = {}) {
 		//build initial structure
 		UMLDiagrams.forEach(UMLDiagram => {
 			const UIClass = UMLDiagram.UIClass;
@@ -292,7 +292,7 @@ export class MassDrawIOUMLDiagram {
 		return usageMap;
 	}
 
-	private static _getTreeDepth(UMLDiagram: DrawIOUMLDiagram, usageMap: UsageMap) {
+	private static _getTreeDepth(UMLDiagram: DrawIOUMLDiagram, usageMap: IUsageMap) {
 		const usageMapEntry = usageMap[UMLDiagram.UIClass.className];
 		let treeDepth = usageMapEntry.usedBy.length;
 		usageMapEntry.usedBy.forEach(diagram => {
@@ -302,7 +302,7 @@ export class MassDrawIOUMLDiagram {
 		return treeDepth;
 	}
 
-	private static _setTreeLevels(UMLDiagrams: DrawIOUMLDiagram[], usageMap: UsageMap, currentLevel = 1) {
+	private static _setTreeLevels(UMLDiagrams: DrawIOUMLDiagram[], usageMap: IUsageMap, currentLevel = 1) {
 		UMLDiagrams.forEach(UMLDiagram => {
 			const usageMapEntry = usageMap[UMLDiagram.UIClass.className];
 			if (usageMapEntry.level === 0) {
@@ -312,7 +312,7 @@ export class MassDrawIOUMLDiagram {
 		});
 	}
 
-	private static _setColumnsForTree(rootDiagram: DrawIOUMLDiagram, usageMap: UsageMap) {
+	private static _setColumnsForTree(rootDiagram: DrawIOUMLDiagram, usageMap: IUsageMap) {
 		const rootUsageMapEntry = usageMap[rootDiagram.UIClass.className];
 
 		let currentChildrenColumn = rootUsageMapEntry.column;

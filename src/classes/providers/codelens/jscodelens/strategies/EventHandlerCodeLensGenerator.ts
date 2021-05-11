@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
-import { CustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { ICustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
-import { FileReader, Fragment, View } from "../../../../utils/FileReader";
+import { FileReader, IXMLFile } from "../../../../utils/FileReader";
 import { XMLParser } from "../../../../utils/XMLParser";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 import LineColumn = require("line-column");
 import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 
-interface EventHandlerData {
+interface IEventHandlerData {
 	name: string;
 	className: string;
 	start: number;
@@ -28,17 +28,15 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		if (className) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 			const eventHandlers = UIClass.methods.filter(method => method.isEventHandler);
-			const XMLView = FileReader.getViewForController(className);
-			const fragments = FileReader.getFragmentsForClass(className);
-			if (XMLView) {
+			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+			viewsAndFragments.views.forEach(XMLView => {
 				codeLenses.push(...this._getCodeLensesForEventsFromXMLText(XMLView, eventHandlers, document));
 
 				XMLView.fragments.forEach(fragment => {
 					codeLenses.push(...this._getCodeLensesForEventsFromXMLText(fragment, eventHandlers, document));
 				});
-
-			}
-			fragments.forEach(fragment => {
+			});
+			viewsAndFragments.fragments.forEach(fragment => {
 				codeLenses.push(...this._getCodeLensesForEventsFromXMLText(fragment, eventHandlers, document));
 			});
 
@@ -48,12 +46,11 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		return codeLenses;
 	}
 
-	private _getCodeLensesForEventsFromXMLText(XMLText: View | Fragment, eventHandlers: CustomClassUIMethod[], document: vscode.TextDocument) {
+	private _getCodeLensesForEventsFromXMLText(XMLText: IXMLFile, eventHandlers: ICustomClassUIMethod[], document: vscode.TextDocument) {
 		const codeLenses: vscode.CodeLens[] = [];
-		const solvedEventHandlers: CustomClassUIMethod[] = [];
-		XMLParser.setCurrentDocument(XMLText.content);
+		const solvedEventHandlers: ICustomClassUIMethod[] = [];
 		eventHandlers.forEach(eventHandler => {
-			const eventHandlerXMLData = this._getEventHandlerData(XMLText.content, eventHandler.name);
+			const eventHandlerXMLData = this._getEventHandlerData(XMLText, eventHandler.name);
 			if (eventHandlerXMLData && eventHandler.position) {
 				const positionBegin = document.positionAt(eventHandler.position);
 				const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
@@ -88,11 +85,11 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		return codeLenses;
 	}
 
-	private _getEventHandlerData(XMLText: string, eventHandlerName: string) {
-		let eventHandlerData: EventHandlerData | undefined;
+	private _getEventHandlerData(XMLText: IXMLFile, eventHandlerName: string) {
+		let eventHandlerData: IEventHandlerData | undefined;
 
 		const regex = new RegExp(`".?${eventHandlerName}"`);
-		const eventHandlerPosition = regex.exec(XMLText)?.index;
+		const eventHandlerPosition = regex.exec(XMLText.content)?.index;
 		if (eventHandlerPosition) {
 			const tag = XMLParser.getTagInPosition(XMLText, eventHandlerPosition);
 			const attributes = XMLParser.getAttributesOfTheTag(tag);
@@ -125,8 +122,8 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		return eventHandlerData;
 	}
 
-	private _getCodeLensesForEventsFromJSClass(eventHandlers: CustomClassUIMethod[], document: vscode.TextDocument) {
-		const solvedEventHandlers: CustomClassUIMethod[] = [];
+	private _getCodeLensesForEventsFromJSClass(eventHandlers: ICustomClassUIMethod[], document: vscode.TextDocument) {
+		const solvedEventHandlers: ICustomClassUIMethod[] = [];
 		const codeLenses: vscode.CodeLens[] = [];
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		if (className) {

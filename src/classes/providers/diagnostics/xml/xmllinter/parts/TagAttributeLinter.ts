@@ -1,11 +1,11 @@
-import { Error, Linter } from "./abstraction/Linter";
+import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
-import { FileReader } from "../../../../../utils/FileReader";
+import { FileReader, XMLFileTransformer } from "../../../../../utils/FileReader";
 
-interface AttributeValidation {
+interface IAttributeValidation {
 	valid: boolean;
 	message?: string;
 }
@@ -15,59 +15,59 @@ function isNumeric(value: string) {
 }
 
 export class TagAttributeLinter extends Linter {
-	getErrors(document: vscode.TextDocument): Error[] {
-		const errors: Error[] = [];
+	getErrors(document: vscode.TextDocument): IError[] {
+		const errors: IError[] = [];
 		const documentText = document.getText();
 
 		//check tags
 		// console.time("Tag attribute linter");
-		XMLParser.setCurrentDocument(documentText);
 
-		const tags = XMLParser.getAllTags(documentText);
-		tags.forEach(tag => {
-			const tagAttributes = XMLParser.getAttributesOfTheTag(tag);
-			if (tagAttributes) {
+		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		if (XMLFile) {
+			const tags = XMLParser.getAllTags(XMLFile);
+			tags.forEach(tag => {
+				const tagAttributes = XMLParser.getAttributesOfTheTag(tag);
+				if (tagAttributes) {
 
-				const tagPrefix = XMLParser.getTagPrefix(tag.text);
-				const className = XMLParser.getClassNameFromTag(tag.text);
+					const tagPrefix = XMLParser.getTagPrefix(tag.text);
+					const className = XMLParser.getClassNameFromTag(tag.text);
 
-				if (className) {
-					const libraryPath = XMLParser.getLibraryPathFromTagPrefix(documentText, tagPrefix, tag.positionEnd);
-					if (libraryPath) {
-						//check if tag class exists
-						const classOfTheTag = [libraryPath, className].join(".");
-						tagAttributes.forEach(tagAttribute => {
-							//check tag attributes
-							const attributeValidation = this._validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes, document);
-							if (!attributeValidation.valid) {
-								const indexOfTagBegining = tag.text.indexOf(tagAttribute);
-								const position = LineColumn(documentText).fromIndex(tag.positionBegin + indexOfTagBegining);
-								if (position && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
-									errors.push({
-										code: "UI5plugin",
-										message: attributeValidation.message || "Invalid attribute",
-										source: "Tag Attribute linter",
-										attribute: tagAttribute,
-										range: new vscode.Range(
-											new vscode.Position(position.line - 1, position.col - 1),
-											new vscode.Position(position.line - 1, position.col + tagAttribute.length - 1)
-										)
-									});
+					if (className) {
+						const libraryPath = XMLParser.getLibraryPathFromTagPrefix(XMLFile, tagPrefix, tag.positionEnd);
+						if (libraryPath) {
+							//check if tag class exists
+							const classOfTheTag = [libraryPath, className].join(".");
+							tagAttributes.forEach(tagAttribute => {
+								//check tag attributes
+								const attributeValidation = this._validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes, document);
+								if (!attributeValidation.valid) {
+									const indexOfTagBegining = tag.text.indexOf(tagAttribute);
+									const position = LineColumn(documentText).fromIndex(tag.positionBegin + indexOfTagBegining);
+									if (position && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
+										errors.push({
+											code: "UI5plugin",
+											message: attributeValidation.message || "Invalid attribute",
+											source: "Tag Attribute linter",
+											attribute: tagAttribute,
+											range: new vscode.Range(
+												new vscode.Position(position.line - 1, position.col - 1),
+												new vscode.Position(position.line - 1, position.col + tagAttribute.length - 1)
+											)
+										});
+									}
 								}
-							}
-						});
+							});
+						}
 					}
 				}
-			}
-		});
-
-		XMLParser.setCurrentDocument(undefined);
+			});
+		}
 		// console.timeEnd("Tag attribute linter");
 
 		return errors;
 	}
-	private _validateTagAttribute(className: string, attribute: string, attributes: string[], document: vscode.TextDocument): AttributeValidation {
-		let attributeValidation: AttributeValidation = {
+	private _validateTagAttribute(className: string, attribute: string, attributes: string[], document: vscode.TextDocument): IAttributeValidation {
+		let attributeValidation: IAttributeValidation = {
 			valid: false
 		};
 

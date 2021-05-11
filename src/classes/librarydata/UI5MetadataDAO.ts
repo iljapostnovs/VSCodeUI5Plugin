@@ -5,14 +5,14 @@ import { HTTPHandler } from "../utils/HTTPHandler";
 import { SAPNode } from "./SAPNode";
 import { UI5Metadata } from "./UI5Metadata";
 
-interface LooseObject {
+interface ILooseObject {
 	[key: string]: any;
 }
 
-let namespaceDesignTimes: LooseObject = {};
+let namespaceDesignTimes: ILooseObject = {};
 
 export class UI5MetadataPreloader {
-	private readonly _libNames: LooseObject = {};
+	private readonly _libNames: ILooseObject = {};
 	private readonly _nodes: SAPNode[];
 	private static _resolveLibPreload: (value: any) => void;
 	public static libsPreloaded = new Promise((resolve) => {

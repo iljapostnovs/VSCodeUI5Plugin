@@ -1,9 +1,9 @@
-import { FieldsAndMethods } from "../../../UIClassFactory";
+import { IFieldsAndMethods } from "../../../UIClassFactory";
 import * as vscode from "vscode";
 export abstract class FieldPropertyMethodGetterStrategy {
-	abstract getFieldsAndMethods(document: vscode.TextDocument, position: vscode.Position): FieldsAndMethods | undefined;
+	abstract getFieldsAndMethods(document: vscode.TextDocument, position: vscode.Position): IFieldsAndMethods | undefined;
 
-	protected _filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods: FieldsAndMethods, visibility = ["public"]) {
+	protected _filterFieldsAndMethodsAccordingToAccessLevelModifiers(fieldsAndMethods: IFieldsAndMethods, visibility = ["public"]) {
 		const ignoreAccessLevelModifiers = vscode.workspace.getConfiguration("ui5.plugin").get("ignoreAccessLevelModifiers");
 		if (!ignoreAccessLevelModifiers) {
 			if (fieldsAndMethods?.fields) {

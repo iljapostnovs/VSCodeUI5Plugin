@@ -5,7 +5,7 @@ import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 
 export class SignatureHelpProvider {
-	static getSignature(document: vscode.TextDocument) {
+	static getSignature(document: vscode.TextDocument, position: vscode.Position) {
 		const signatureHelp = new vscode.SignatureHelp();
 
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
@@ -13,12 +13,11 @@ export class SignatureHelpProvider {
 			UIClassFactory.setNewCodeForClass(currentClassName, document.getText());
 		}
 
-		const activeTextEditor = vscode.window.activeTextEditor;
-		const position = activeTextEditor?.document.offsetAt(activeTextEditor.selection.start);
+		const offset = document.offsetAt(position);
 
-		if (currentClassName && position) {
+		if (currentClassName && offset) {
 			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-			const stackOfNodes = positionBeforeCurrentStrategy.getStackOfNodesForPosition(currentClassName, position + 1, true);
+			const stackOfNodes = positionBeforeCurrentStrategy.getStackOfNodesForPosition(currentClassName, offset + 1, true);
 
 			if (stackOfNodes.length > 0) {
 				const callExpression = stackOfNodes[stackOfNodes.length - 1].type === "CallExpression" ? stackOfNodes.pop() : null; //removes CallExpression

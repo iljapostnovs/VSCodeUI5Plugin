@@ -469,11 +469,339 @@
 				}
 			},
 			"type": "void"
+		},
+		{
+			"className": "com.extend.fragmenttest.controller.MasterExtend",
+			"methodName": "eventHandler10",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "setBusy"
+				}
+			},
+			"type": "sap.m.Button"
 		}
 	],
 	"JSLinter": [
 		{
+			"className": "com.test.controller.LargeFile",
+			"timeLimit": 2000,
+			"errors": [
+				{
+					"text": "No references found for \"method1\" class member"
+				},
+				{
+					"text": "No references found for \"method2\" class member"
+				},
+				{
+					"text": "No references found for \"method3\" class member"
+				},
+				{
+					"text": "No references found for \"method4\" class member"
+				},
+				{
+					"text": "No references found for \"method5\" class member"
+				},
+				{
+					"text": "No references found for \"method6\" class member"
+				},
+				{
+					"text": "No references found for \"method7\" class member"
+				},
+				{
+					"text": "No references found for \"method8\" class member"
+				},
+				{
+					"text": "No references found for \"method9\" class member"
+				},
+				{
+					"text": "No references found for \"method10\" class member"
+				},
+				{
+					"text": "No references found for \"method60\" class member"
+				},
+				{
+					"text": "No references found for \"method11\" class member"
+				},
+				{
+					"text": "No references found for \"method12\" class member"
+				},
+				{
+					"text": "No references found for \"method13\" class member"
+				},
+				{
+					"text": "No references found for \"method14\" class member"
+				},
+				{
+					"text": "No references found for \"method15\" class member"
+				},
+				{
+					"text": "No references found for \"method16\" class member"
+				},
+				{
+					"text": "No references found for \"method17\" class member"
+				},
+				{
+					"text": "No references found for \"method18\" class member"
+				},
+				{
+					"text": "No references found for \"method19\" class member"
+				},
+				{
+					"text": "No references found for \"method20\" class member"
+				},
+				{
+					"text": "No references found for \"method21\" class member"
+				},
+				{
+					"text": "No references found for \"method22\" class member"
+				},
+				{
+					"text": "No references found for \"method23\" class member"
+				},
+				{
+					"text": "No references found for \"method24\" class member"
+				},
+				{
+					"text": "No references found for \"method25\" class member"
+				},
+				{
+					"text": "No references found for \"method26\" class member"
+				},
+				{
+					"text": "No references found for \"method27\" class member"
+				},
+				{
+					"text": "No references found for \"method28\" class member"
+				},
+				{
+					"text": "No references found for \"method29\" class member"
+				},
+				{
+					"text": "No references found for \"method30\" class member"
+				},
+				{
+					"text": "No references found for \"method31\" class member"
+				},
+				{
+					"text": "No references found for \"method32\" class member"
+				},
+				{
+					"text": "No references found for \"method33\" class member"
+				},
+				{
+					"text": "No references found for \"method34\" class member"
+				},
+				{
+					"text": "No references found for \"method35\" class member"
+				},
+				{
+					"text": "No references found for \"method36\" class member"
+				},
+				{
+					"text": "No references found for \"method37\" class member"
+				},
+				{
+					"text": "No references found for \"method38\" class member"
+				},
+				{
+					"text": "No references found for \"method39\" class member"
+				},
+				{
+					"text": "No references found for \"method40\" class member"
+				},
+				{
+					"text": "No references found for \"method41\" class member"
+				},
+				{
+					"text": "No references found for \"method42\" class member"
+				},
+				{
+					"text": "No references found for \"method43\" class member"
+				},
+				{
+					"text": "No references found for \"method44\" class member"
+				},
+				{
+					"text": "No references found for \"method45\" class member"
+				},
+				{
+					"text": "No references found for \"method46\" class member"
+				},
+				{
+					"text": "No references found for \"method47\" class member"
+				},
+				{
+					"text": "No references found for \"method48\" class member"
+				},
+				{
+					"text": "No references found for \"method49\" class member"
+				},
+				{
+					"text": "No references found for \"method50\" class member"
+				},
+				{
+					"text": "Method \"getString\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method1\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method2\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method3\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method4\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method5\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method6\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method7\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method8\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method9\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method10\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method60\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method11\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method12\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method13\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method14\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method15\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method16\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method17\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method18\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method19\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method20\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method21\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method22\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method23\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method24\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method25\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method26\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method27\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method28\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method29\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method30\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method31\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method32\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method33\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method34\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method35\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method36\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method37\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method38\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method39\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method40\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method41\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method42\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method43\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method44\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method45\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method46\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method47\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method48\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method49\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"method50\" is possibly private, no references found in other classes"
+				}
+			]
+		},
+		{
 			"className": "com.test.controller.LinterTest",
+			"timeLimit": 100,
 			"errors": [
 				{
 					"text": "\"_nonExistentMethod\" does not exist in \"com.test.controller.LinterTest\""
@@ -536,6 +864,7 @@
 		},
 		{
 			"className": "com.test.util.ObjectTest",
+			"timeLimit": 100,
 			"errors": [
 				{
 					"text": "Field \"testMap\" is possibly private, no references found in other classes"
@@ -547,6 +876,7 @@
 		},
 		{
 			"className": "com.test.controller.WrongFilePathLinterTest",
+			"timeLimit": 100,
 			"errors": [
 				{
 					"text": "Class \"com.test.controller.wrong.Path\" doesn't exist"
@@ -564,6 +894,7 @@
 		},
 		{
 			"className": "com.test.util.AccessLevelModifierSecondTest",
+			"timeLimit": 100,
 			"errors": [
 				{
 					"text": "\"_privateMethod\" is a private member of class \"com.test.util.AccessLevelModifierTest\""
@@ -575,6 +906,7 @@
 		},
 		{
 			"className": "com.test.memberrename.classes.MyCustomClassExtension",
+			"timeLimit": 100,
 			"errors": [
 				{
 					"text": "You can't override \"_myPrivateField\" because it is a private member of class \"com.test.memberrename.classes.MyCustomClass\""
@@ -586,12 +918,58 @@
 		},
 		{
 			"className": "com.test.util.AccessLevelModifierTest",
+			"timeLimit": 100,
 			"errors": []
+		},
+		{
+			"className": "com.extend.fragmenttest.controller.MasterExtend",
+			"timeLimit": 100,
+			"errors": [
+				{
+					"text": "\"bBusy\" param is of type \"boolean\", but provided \"number\""
+				},
+				{
+					"text": "No references found for \"unusedEventHandlerExtended\" class member"
+				},
+				{
+					"text": "Method \"unusedEventHandlerExtended\" is possibly private, no references found in other classes"
+				}
+			]
+		},
+		{
+			"className": "com.extend.fragmenttest.util.FormatterExtension",
+			"timeLimit": 100,
+			"errors": [
+				{
+					"text": "No references found for \"unusedExtendedFormatValue\" class member"
+				},
+				{
+					"text": "Method \"unusedExtendedFormatValue\" is possibly private, no references found in other classes"
+				}
+			]
+		},
+		{
+			"className": "com.test.fragmenttest.util.Formatter",
+			"timeLimit": 100,
+			"errors": [
+				{
+					"text": "No references found for \"unusedFormatValue\" class member"
+				},
+				{
+					"text": "Method \"unusedFormatValue\" is possibly private, no references found in other classes"
+				}
+			]
 		}
 	],
 	"XMLLinter": [
 		{
+			"className": "com.test.view.LargeFile",
+			"errors": [],
+			"timeLimit": 400
+		},
+		{
 			"className": "com.test.view.LinterTest",
+			"timeLimit": 100,
 			"errors": [
 				{
 					"text": "Invalid attribute value (wrong value)"
@@ -616,6 +994,15 @@
 				},
 				{
 					"text": "\"sap.m.NonExistantClass\" class doesn't exist"
+				}
+			]
+		},
+		{
+			"className": "com.test.fragmenttest.view.Master",
+			"timeLimit": 100,
+			"errors": [
+				{
+					"text": "Invalid attribute value (eventHandler11)"
 				}
 			]
 		}
@@ -667,6 +1054,24 @@
 				"onSecondFragmentSelectionChange",
 				"onThirdFragmentSelectionChange"
 			]
+		},
+		{
+			"className": "com.extend.fragmenttest.controller.MasterExtend",
+			"eventHandlers": [
+				"eventHandler10",
+				"eventHandler11",
+				"eventHandler14"
+			]
+		},
+		{
+			"className": "com.extend.fragmenttest.controller.MasterExtend",
+			"eventHandlers": [
+				"eventHandler1",
+				"eventHandler2",
+				"eventHandler3",
+				"eventHandler4",
+				"eventHandler12"
+			]
 		}
 	],
 	"RenameProvider": [
@@ -685,6 +1090,106 @@
 					{
 						"className": "com.test.memberrename.classes.MyCustomClassExtension",
 						"containerMethod": "myCustomMethod"
+					}
+				],
+				"XMLDocEdits": []
+			}
+		},
+		{
+			"className": "com.extend.fragmenttest.controller.MasterExtend",
+			"methodName": "eventHandler10",
+			"renames": {
+				"member": {
+					"className": "com.extend.fragmenttest.controller.MasterExtend"
+				},
+				"methods": [
+					{
+						"className": "com.extend.fragmenttest.controller.MasterExtend",
+						"containerMethod": "eventHandler10"
+					}
+				],
+				"XMLDocEdits": [
+					{
+						"className": "com.extend.fragmenttest.view.fragments.ExtensionFragment1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "press"
+					},
+					{
+						"className": "com.extend.fragmenttest.view.fragments.ExtensionFragment1",
+						"type": "fragment",
+						"tagClassName": "Text",
+						"attribute": "validationError"
+					}
+				]
+			}
+		},
+		{
+			"className": "com.test.fragmenttest.util.Formatter",
+			"methodName": "formatGlobal",
+			"renames": {
+				"member": {
+					"className": "com.test.fragmenttest.util.Formatter"
+				},
+				"methods": [
+					{
+						"className": "com.test.fragmenttest.util.Formatter",
+						"containerMethod": "formatGlobal"
+					}
+				],
+				"XMLDocEdits": [
+					{
+						"className": "com.test.fragmenttest.view.fragments.FragmentView1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "textDirection"
+					},
+					{
+						"className": "com.test.fragmenttest.view.fragments.FragmentView1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "activeIcon"
+					},
+					{
+						"className": "com.test.fragmenttest.view.fragments.FragmentView2",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "textDirection"
+					},
+					{
+						"className": "com.test.fragmenttest.view.fragments.FragmentController1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "activeIcon"
+					},
+					{
+						"className": "com.extend.fragmenttest.view.fragments.FragmentInExtensionFragment1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "activeIcon"
+					}
+				]
+			}
+		},
+		{
+			"className": "com.extend.fragmenttest.util.RandomUtil",
+			"methodName": "formatGlobal",
+			"renames": {
+				"member": {
+					"className": "com.extend.fragmenttest.util.RandomUtil"
+				},
+				"methods": [
+					{
+						"className": "com.extend.fragmenttest.util.RandomUtil",
+						"containerMethod": "formatGlobal"
+					}
+				],
+				"XMLDocEdits": [
+					{
+						"className": "com.extend.fragmenttest.view.fragments.FragmentInExtensionFragment1",
+						"type": "fragment",
+						"tagClassName": "Button",
+						"attribute": "busy"
 					}
 				]
 			}

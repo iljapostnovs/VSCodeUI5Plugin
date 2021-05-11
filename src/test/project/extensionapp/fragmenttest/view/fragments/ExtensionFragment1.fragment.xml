@@ -1,0 +1,27 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button
+		id="idButtonExtensionFragment1"
+		text="{
+			formatter: '.formatter.formatValueExtensionFragment1'
+		}"
+		blocked="{
+			formatter: '.formatter.formatValueExtensionFragmentParent'
+		}"
+		activeIcon="{
+			formatter: '.randomUtil.formatValueExtensionFragment1'
+		}"
+		press="eventHandler10"
+	/>
+	<Text
+		id="idTextExtensionFragment1"
+		validateFieldGroup="eventHandler4"
+		validationError="eventHandler10"
+	/>
+	<c:Fragment
+		fragmentName="com.extend.fragmenttest.view.fragments.FragmentInExtensionFragment1"
+		type="XML"
+	/>
+</c:FragmentDefinition>

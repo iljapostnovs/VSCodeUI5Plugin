@@ -1,35 +1,33 @@
-import { Error, Linter, Tag } from "./abstraction/Linter";
+import { IError, Linter, ITag } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
-import { UIAggregation } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { IUIAggregation } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { IXMLFile, XMLFileTransformer } from "../../../../../utils/FileReader";
 
 
 export class TagLinter extends Linter {
-	getErrors(document: vscode.TextDocument): Error[] {
-		const errors: Error[] = [];
-		const documentText = document.getText();
+	getErrors(document: vscode.TextDocument): IError[] {
+		const errors: IError[] = [];
 
-		//check tags
 		// console.time("Tag linter");
-		XMLParser.setCurrentDocument(documentText);
-
-		const tags = XMLParser.getAllTags(documentText);
-		tags.forEach(tag => {
-			errors.push(...this._getClassNameErrors(tag, document));
-		});
-
-		XMLParser.setCurrentDocument(undefined);
+		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		if (XMLFile) {
+			const tags = XMLParser.getAllTags(XMLFile);
+			tags.forEach(tag => {
+				errors.push(...this._getClassNameErrors(tag, XMLFile));
+			});
+		}
 		// console.timeEnd("Tag linter");
 
 		return errors;
 	}
 
-	private _getClassNameErrors(tag: Tag, document: vscode.TextDocument) {
-		const documentText = document.getText();
-		const errors: Error[] = [];
-		const tagClass = XMLParser.getFullClassNameFromTag(tag, documentText);
+	private _getClassNameErrors(tag: ITag, XMLFile: IXMLFile) {
+		const documentText = XMLFile.content;
+		const errors: IError[] = [];
+		const tagClass = XMLParser.getFullClassNameFromTag(tag, XMLFile);
 		if (!tagClass) {
 			const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
 			const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
@@ -72,9 +70,9 @@ export class TagLinter extends Linter {
 				if (tag.text.startsWith("</")) {
 					position = tag.positionEnd;
 				}
-				const parentTag = XMLParser.getParentTagAtPosition(documentText, position - 1);
+				const parentTag = XMLParser.getParentTagAtPosition(XMLFile, position - 1);
 				if (parentTag.text) {
-					const tagClass = XMLParser.getFullClassNameFromTag(parentTag, documentText);
+					const tagClass = XMLParser.getFullClassNameFromTag(parentTag, XMLFile);
 					if (tagClass) {
 						const aggregation = this._findAggregation(tagClass, tagName);
 						if (!aggregation) {
@@ -100,7 +98,7 @@ export class TagLinter extends Linter {
 		return errors;
 	}
 
-	private _findAggregation(className: string, aggregationName: string): UIAggregation | undefined {
+	private _findAggregation(className: string, aggregationName: string): IUIAggregation | undefined {
 		const UIClass = UIClassFactory.getUIClass(className);
 		let aggregation = UIClass.aggregations.find(aggregation => aggregation.name === aggregationName);
 		if (!aggregation && UIClass.parentClassNameDotNotation) {

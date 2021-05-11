@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
-import { FileReader } from "./FileReader";
-import { UIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { FileReader, IXMLFile } from "./FileReader";
+import { IUIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { Tag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 
 export enum PositionType {
 	InTheTagAttributes = "1",
@@ -14,52 +13,68 @@ export enum PositionType {
 	InBodyOfTheClass = "6"
 }
 
-interface PrefixResults {
-	[key: string]: any[]
-}
-interface XMLDocumentData {
-	document: string;
-	strings: boolean[];
-	tags: Tag[];
-	prefixResults: PrefixResults;
-	isMarkedAsUndefined: boolean;
-	areAllStringsClosed: boolean;
-}
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export class XMLParser {
-	static getAllIDsInCurrentView() {
-		let IdsResult: string[] = [];
-		const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-		if (currentClass) {
-			const idRegExp = /(?<=\sid=").*?(?="\s?)/g;
-			const view = FileReader.getViewForController(currentClass);
-			if (view) {
-				IdsResult = view.content.match(idRegExp) || [];
-				view.fragments.forEach(fragment => {
-					const IdsFragmentResult = fragment.content.match(idRegExp) || [];
-					if (IdsFragmentResult) {
-						IdsResult.push(...IdsFragmentResult);
+	static getXMLFunctionCallTagsAndAttributes(viewOrFragment: IXMLFile, eventHandlerName: string, functionCallClassName?: string) {
+		const tagAndAttributes: { tag: ITag, attributes: string[] }[] = [];
+		const positions = this.getPositionsOfFunctionCallInXMLText(eventHandlerName, viewOrFragment.content);
+		if (positions.length > 0) {
+			positions.forEach(position => {
+				const tag = this.getTagInPosition(viewOrFragment, position);
+				const attributes = this.getAttributesOfTheTag(tag);
+				const eventHandlerAttributes = attributes?.filter(attribute => {
+					const { attributeValue } = this.getAttributeNameAndValue(attribute);
+					let currentEventHandlerName = this.getEventHandlerNameFromAttributeValue(attributeValue);
+
+					if (currentEventHandlerName !== eventHandlerName && currentEventHandlerName.includes(eventHandlerName)) {
+						const results = new RegExp(`((\\..*?\\.)|("))${eventHandlerName}("|')`).exec(currentEventHandlerName);
+						if (results && results[0].split(".").length > 2) {
+							const result = results[0].substring(0, results[0].length - 1).split(".").slice(1);
+							if (functionCallClassName) {
+								const handlerField = result[0];
+								const responsibleClassName = FileReader.getResponsibleClassNameForViewOrFragment(viewOrFragment);
+								if (responsibleClassName) {
+									const fields = UIClassFactory.getClassFields(responsibleClassName);
+									const field = fields.find(field => field.name === handlerField);
+									if (field && field.type && !UIClassFactory.isClassAChildOfClassB(field.type, functionCallClassName)) {
+										return false;
+									}
+								}
+							}
+							currentEventHandlerName = result[1];
+						} else {
+							currentEventHandlerName = eventHandlerName;
+						}
 					}
+
+					return currentEventHandlerName === eventHandlerName;
 				});
-			}
-			const fragments = FileReader.getFragmentsForClass(currentClass);
-			fragments.forEach(fragment => {
-				const IdsFragmentResult = fragment.content.match(idRegExp) || [];
-				if (IdsFragmentResult) {
-					IdsResult.push(...IdsFragmentResult);
+				if (eventHandlerAttributes && eventHandlerAttributes.length > 0) {
+					tagAndAttributes.push({ tag, attributes: eventHandlerAttributes });
 				}
-			});
+			})
+		}
+
+		return tagAndAttributes;
+	}
+
+	static getAllIDsInCurrentView(XMLFile: IXMLFile) {
+		const IdsResult: string[] = [];
+		const idRegExp = /(?<=\sid=").*?(?="\s?)/g;
+		const IdsViewResult = XMLFile.content.match(idRegExp) || [];
+		if (IdsViewResult) {
+			IdsResult.push(...IdsViewResult);
 		}
 
 		return IdsResult;
 	}
-	static getLibraryNameInPosition(XMLViewText: string, currentPosition: number) {
-		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition).text;
+	static getLibraryNameInPosition(XMLFile: IXMLFile, currentPosition: number) {
+		const currentTagText = this.getTagInPosition(XMLFile, currentPosition).text;
 		const tagPrefix = this.getTagPrefix(currentTagText);
-		const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix, currentPosition);
+		const libraryPath = this.getLibraryPathFromTagPrefix(XMLFile, tagPrefix, currentPosition);
 
 		if (!libraryPath) {
 			const error = new Error(`xmlns:${tagPrefix} is not defined`);
@@ -69,13 +84,14 @@ export class XMLParser {
 
 		return libraryPath;
 	}
-	static getClassNameInPosition(XMLViewText: string, currentPosition: number) {
+
+	static getClassNameInPosition(XMLFile: IXMLFile, currentPosition: number) {
 		let currentPositionClass = "";
-		const currentTagText = this.getTagInPosition(XMLViewText, currentPosition).text;
+		const currentTagText = this.getTagInPosition(XMLFile, currentPosition).text;
 		const tagPrefix = this.getTagPrefix(currentTagText);
 		const className = this.getClassNameFromTag(currentTagText);
 		if (className) {
-			const libraryPath = this.getLibraryPathFromTagPrefix(XMLViewText, tagPrefix, currentPosition);
+			const libraryPath = this.getLibraryPathFromTagPrefix(XMLFile, tagPrefix, currentPosition);
 			if (libraryPath) {
 				currentPositionClass = [libraryPath, className].join(".");
 			}
@@ -84,38 +100,33 @@ export class XMLParser {
 		return currentPositionClass;
 	}
 
-	static getParentTagAtPosition(XMLText?: string, position?: number, closedTags: string[] = []) {
-		let parentTag: Tag = {
+	static getParentTagAtPosition(XMLFile: IXMLFile, position: number, closedTags: string[] = []) {
+		let parentTag: ITag = {
 			positionBegin: 0,
 			positionEnd: 0,
 			text: ""
 		};
-		if (!XMLText) {
-			XMLText = vscode.window.activeTextEditor?.document.getText();
-		}
-		if (!position) {
-			position = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
-		}
+		const XMLText = XMLFile.content;
 
 		if (XMLText && position) {
-			const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLText, position);
-			const tag = this.getTagInPosition(XMLText, position);
+			const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLFile, position);
+			const tag = this.getTagInPosition(XMLFile, position);
 			const croppedTag = tag.text.substring(1, tag.text.length - 1); // remove < >
 			const tagIsSelfClosed = croppedTag.endsWith("/");
 			const itIsClosureTag = croppedTag.startsWith("/");
 			if (tagIsSelfClosed) {
-				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+				parentTag = this.getParentTagAtPosition(XMLFile, positionBegin - 1, closedTags);
 			} else if (itIsClosureTag) {
 				closedTags.push(croppedTag.substring(1, croppedTag.length));
-				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+				parentTag = this.getParentTagAtPosition(XMLFile, positionBegin - 1, closedTags);
 			} else if (closedTags.length > 0) {
 				closedTags.pop();
-				parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+				parentTag = this.getParentTagAtPosition(XMLFile, positionBegin - 1, closedTags);
 			} else {
 				const className = this.getClassNameFromTag(tag.text);
 				if (closedTags.includes(className)) {
 					closedTags.splice(closedTags.indexOf(className), 1);
-					parentTag = this.getParentTagAtPosition(XMLText, positionBegin - 1, closedTags);
+					parentTag = this.getParentTagAtPosition(XMLFile, positionBegin - 1, closedTags);
 				} else {
 					parentTag.positionBegin = positionBegin;
 					parentTag.positionEnd = positionEnd;
@@ -128,10 +139,11 @@ export class XMLParser {
 		return parentTag;
 	}
 
-	public static getTagInPosition(XMLViewText: string, position: number) {
-		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLViewText, position);
-		const tagText = XMLViewText.substring(positionBegin, positionEnd);
-		const tag: Tag = {
+	public static getTagInPosition(XMLFile: IXMLFile, position: number) {
+		const XMLText = XMLFile.content;
+		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLFile, position);
+		const tagText = XMLText.substring(positionBegin, positionEnd);
+		const tag: ITag = {
 			text: tagText,
 			positionBegin: positionBegin,
 			positionEnd: positionEnd
@@ -140,17 +152,18 @@ export class XMLParser {
 		return tag;
 	}
 
-	public static getTagBeginEndPosition(XMLViewText: string, position: number) {
+	public static getTagBeginEndPosition(XMLFile: IXMLFile, position: number) {
 		let i = position;
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 
-		while (i > 0 && (XMLViewText[i] !== "<" || !this.getIfPositionIsNotInComments(XMLViewText, i) || this.getIfPositionIsInString(XMLViewText, i))) {
+		const XMLText = XMLFile.content;
+		while (i > 0 && (XMLText[i] !== "<" || !this.getIfPositionIsNotInComments(XMLText, i) || this.getIfPositionIsInString(XMLFile, i))) {
 			i--;
 		}
 		tagPositionBegin = i;
 
-		while (i < XMLViewText.length && (XMLViewText[i] !== ">" || !this.getIfPositionIsNotInComments(XMLViewText, i) || this.getIfPositionIsInString(XMLViewText, i))) {
+		while (i < XMLText.length && (XMLText[i] !== ">" || !this.getIfPositionIsNotInComments(XMLText, i) || this.getIfPositionIsInString(XMLFile, i))) {
 			i++;
 		}
 		tagPositionEnd = i + 1;
@@ -190,21 +203,21 @@ export class XMLParser {
 		return isPositionNotInComments;
 	}
 
-	static getIfPositionIsInString(XMLViewText: string, position: number) {
+	static getIfPositionIsInString(XMLFile: IXMLFile, position: number) {
+		const XMLText = XMLFile.content;
 		let isInString = false;
-		const currentDocument = this._getCurrentDocument();
-		if (currentDocument) {
-			isInString = !!currentDocument.strings[position];
+		if (XMLFile?.XMLParserData?.strings) {
+			isInString = !!XMLFile?.XMLParserData?.strings[position];
 		} else {
 			let quotionMarkCount = 0;
 			let secondTypeQuotionMarkCount = 0;
 
 			let i = 0;
 			while (i < position) {
-				if (XMLViewText[i] === "\"") {
+				if (XMLText[i] === "\"") {
 					quotionMarkCount++;
 				}
-				if (XMLViewText[i] === "'") {
+				if (XMLText[i] === "'") {
 					secondTypeQuotionMarkCount++;
 				}
 
@@ -240,10 +253,10 @@ export class XMLParser {
 		return tagPrefix;
 	}
 
-	static getFullClassNameFromTag(tag: Tag, XMLText: string) {
+	static getFullClassNameFromTag(tag: ITag, XMLFile: IXMLFile) {
 		let className = this.getClassNameFromTag(tag.text);
 		const classTagPrefix = this.getTagPrefix(tag.text);
-		const libraryPath = this.getLibraryPathFromTagPrefix(XMLText, classTagPrefix, tag.positionEnd);
+		const libraryPath = this.getLibraryPathFromTagPrefix(XMLFile, classTagPrefix, tag.positionEnd);
 		if (libraryPath) {
 			className = [libraryPath, className].join(".");
 		} else {
@@ -281,13 +294,13 @@ export class XMLParser {
 		return className;
 	}
 
-	static getLibraryPathFromTagPrefix(XMLViewText: string, tagPrefix: string, position: number) {
+	static getLibraryPathFromTagPrefix(XMLFile: IXMLFile, tagPrefix: string, position: number) {
 		let libraryPath;
 		let regExpBase;
 		let delta = 0;
-		const currentDocument = this._getCurrentDocument();
-		const results = currentDocument?.prefixResults[tagPrefix] || [];
-		const tagPositionEnd = this.getTagBeginEndPosition(XMLViewText, position).positionEnd;
+		const XMLText = XMLFile.content;
+		const results = XMLFile?.XMLParserData?.prefixResults[tagPrefix] || [];
+		const tagPositionEnd = this.getTagBeginEndPosition(XMLFile, position).positionEnd;
 
 		if (results.length === 0) {
 			if (!tagPrefix) {
@@ -297,7 +310,7 @@ export class XMLParser {
 			}
 			const rClassName = new RegExp(regExpBase, "g");
 
-			let classNameResult = rClassName.exec(XMLViewText);
+			let classNameResult = rClassName.exec(XMLText);
 
 			while (classNameResult) {
 				results.push({
@@ -305,13 +318,13 @@ export class XMLParser {
 					position: classNameResult.index
 				});
 
-				classNameResult = rClassName.exec(XMLViewText);
+				classNameResult = rClassName.exec(XMLText);
 				if (results.find(result => result.position === classNameResult?.index)) {
 					classNameResult = null;
 				}
 			}
-			if (currentDocument) {
-				currentDocument.prefixResults[tagPrefix] = results;
+			if (XMLFile?.XMLParserData) {
+				XMLFile.XMLParserData.prefixResults[tagPrefix] = results;
 			}
 		}
 
@@ -339,28 +352,29 @@ export class XMLParser {
 		return libraryPath;
 	}
 
-	static getPositionType(XMLViewText: string, currentPosition: number) {
+	static getPositionType(XMLFile: IXMLFile, currentPosition: number) {
 		let i = currentPosition;
 		let tagPositionBegin = 0;
 		let tagPositionEnd = 0;
 		let positionType: PositionType = PositionType.Content;
 		// let positionInString = false; TODO: this
 
-		if (this.getIfPositionIsInString(XMLViewText, currentPosition)) {
+		const XMLText = XMLFile.content;
+		if (this.getIfPositionIsInString(XMLFile, currentPosition)) {
 			positionType = PositionType.InTheString;
 		} else {
-			while (i > 0 && XMLViewText[i] !== "<") {
+			while (i > 0 && XMLText[i] !== "<") {
 				i--;
 			}
 			tagPositionBegin = i;
 
-			while (i < XMLViewText.length && (XMLViewText[i] !== ">" || this.getIfPositionIsInString(XMLViewText, i))) {
+			while (i < XMLText.length && (XMLText[i] !== ">" || this.getIfPositionIsInString(XMLFile, i))) {
 				i++;
 			}
 			tagPositionEnd = i + 1;
 
 			const positionIsInsideTheClassTag = currentPosition > tagPositionBegin && currentPosition < tagPositionEnd;
-			const tagText = XMLViewText.substring(tagPositionBegin, currentPosition);
+			const tagText = XMLText.substring(tagPositionBegin, currentPosition);
 			const positionInTheAttributes = /\s/.test(tagText);
 
 			if (positionIsInsideTheClassTag && positionInTheAttributes) {
@@ -396,7 +410,7 @@ export class XMLParser {
 	}
 
 	static getMethodsOfTheControl(controllerName = this.getControllerNameOfTheCurrentDocument()) {
-		let classMethods: UIMethod[] = [];
+		let classMethods: IUIMethod[] = [];
 
 		if (controllerName) {
 			classMethods = this._getClassMethodsRecursively(controllerName);
@@ -417,7 +431,7 @@ export class XMLParser {
 	}
 
 	private static _getClassMethodsRecursively(className: string, onlyCustomMethods = true) {
-		let methods: UIMethod[] = [];
+		let methods: IUIMethod[] = [];
 		const UIClass = UIClassFactory.getUIClass(className);
 		methods = UIClass.methods;
 
@@ -440,32 +454,48 @@ export class XMLParser {
 		return prefix;
 	}
 
-	private static _currentDocument: XMLDocumentData = {
-		document: "",
-		strings: [],
-		tags: [],
-		prefixResults: {},
-		isMarkedAsUndefined: true,
-		areAllStringsClosed: true
-	}
+	// private static _currentDocument: IXMLDocumentData = {
+	// 	document: "",
+	// 	strings: [],
+	// 	tags: [],
+	// 	prefixResults: {},
+	// 	isMarkedAsUndefined: true,
+	// 	areAllStringsClosed: true
+	// }
 
-	public static getAllTags(document: string) {
-		const currentDocument = this._getCurrentDocument();
-		if (currentDocument && currentDocument.tags.length > 0) {
-			return currentDocument.tags;
-		} else if (currentDocument && !currentDocument.areAllStringsClosed) {
+	private static _getXMLFileFromVSCodeDocument(XMLFile: IXMLFile): IXMLFile | undefined {
+		const className = FileReader.getClassNameFromPath(XMLFile.fsPath);
+		if (className) {
+			const xmlType = className?.endsWith(".fragment.xml") ? "fragment" : "view";
+			const XMLFile = FileReader.getXMLFile(className, xmlType);
+			if (XMLFile && !XMLFile.XMLParserData) {
+				XMLFile.XMLParserData = {
+					tags: [],
+					strings: [],
+					prefixResults: {},
+					areAllStringsClosed: false
+				};
+			}
+			return XMLFile;
+		}
+	}
+	public static getAllTags(XMLFile: IXMLFile) {
+		const XMLText = XMLFile.content;
+		if (XMLFile?.XMLParserData && XMLFile.XMLParserData.tags.length > 0) {
+			return XMLFile?.XMLParserData?.tags;
+		} else if (!XMLFile?.XMLParserData?.areAllStringsClosed) {
 			return [];
 		}
 
 		let i = 0;
-		const tags: Tag[] = [];
+		const tags: ITag[] = [];
 
-		while (i < document.length) {
-			const thisIsTagEnd = document[i] === ">" && !XMLParser.getIfPositionIsInString(document, i);
+		while (i < XMLText.length) {
+			const thisIsTagEnd = XMLText[i] === ">" && !XMLParser.getIfPositionIsInString(XMLFile, i);
 			if (thisIsTagEnd) {
-				const indexOfTagBegining = this._getTagBeginingIndex(document, i);
+				const indexOfTagBegining = this._getTagBeginingIndex(XMLFile, i);
 				tags.push({
-					text: document.substring(indexOfTagBegining, i + 1),
+					text: XMLText.substring(indexOfTagBegining, i + 1),
 					positionBegin: indexOfTagBegining,
 					positionEnd: i
 				});
@@ -473,35 +503,41 @@ export class XMLParser {
 			i++;
 		}
 
-		if (currentDocument) {
-			currentDocument.tags = tags;
+		if (XMLFile?.XMLParserData?.tags) {
+			XMLFile.XMLParserData.tags = tags;
 		}
 
 		return tags;
 	}
 
-	private static _getCurrentDocument() {
-		const currentDocument = this._currentDocument.isMarkedAsUndefined ? undefined : this._currentDocument;
-		return currentDocument;
+	public static setCurrentDocument() {
+		// const className = FileReader.getClassNameFromPath(XMLFile.fsPath);
+		// if (className) {
+		// 	const xmlType = className?.endsWith(".fragment.xml") ? "fragment" : "view";
+		// 	const XMLFile: IXMLParserCacheable | undefined = FileReader.getXMLFile(className, xmlType);
+		// 	if (XMLFile) {
+		// 		// XMLFile.areAllStringsClosed
+		// 	}
+		// }
 	}
 
-	public static setCurrentDocument(document: string | undefined) {
-		if (!document) {
-			this._currentDocument.isMarkedAsUndefined = true;
-		} else {
-			if (document !== this._currentDocument.document) {
-				this._currentDocument.document = document;
-				const stringData = this._getStringPositionMapping(document);
-				this._currentDocument.strings = stringData.positionMapping;
-				this._currentDocument.areAllStringsClosed = stringData.areAllStringsClosed;
-				this._currentDocument.tags = [];
-				this._currentDocument.prefixResults = {};
-			}
-			this._currentDocument.isMarkedAsUndefined = false;
-		}
-	}
+	// public static setCurrentDocument(document: string | undefined) {
+	// 	if (!document) {
+	// 		this._currentDocument.isMarkedAsUndefined = true;
+	// 	} else {
+	// 		if (document !== this._currentDocument.document) {
+	// 			this._currentDocument.document = document;
+	// 			const stringData = this._getStringPositionMapping(document);
+	// 			this._currentDocument.strings = stringData.positionMapping;
+	// 			this._currentDocument.areAllStringsClosed = stringData.areAllStringsClosed;
+	// 			this._currentDocument.tags = [];
+	// 			this._currentDocument.prefixResults = {};
+	// 		}
+	// 		this._currentDocument.isMarkedAsUndefined = false;
+	// 	}
+	// }
 
-	private static _getStringPositionMapping(document: string) {
+	static getStringPositionMapping(document: string) {
 		const positionMapping: boolean[] = [];
 		let quotionMarkCount = 0;
 		let secondTypeQuotionMarkCount = 0;
@@ -525,18 +561,19 @@ export class XMLParser {
 		};
 	}
 
-	private static _getTagBeginingIndex(document: string, position: number) {
+	private static _getTagBeginingIndex(XMLFile: IXMLFile, position: number) {
 		let i = position;
+		const XMLText = XMLFile.content;
 
-		while (i > 0 && (document[i] !== "<" || XMLParser.getIfPositionIsInString(document, i))) {
+		while (i > 0 && (XMLText[i] !== "<" || XMLParser.getIfPositionIsInString(XMLFile, i))) {
 			i--;
 		}
 
 		return i;
 	}
 
-	public static getAttributesOfTheTag(tag: Tag | string) {
-		const tagOfTagInterface = tag as Tag;
+	public static getAttributesOfTheTag(tag: ITag | string) {
+		const tagOfTagInterface = tag as ITag;
 		const tagAsString = tag as string;
 
 		let text = "";
@@ -560,16 +597,18 @@ export class XMLParser {
 		};
 	}
 
-	public static getPositionOfEventHandler(eventHandlerName: string, document: string) {
-		let position;
+	public static getPositionsOfFunctionCallInXMLText(functionCallName: string, XMLText: string) {
+		const positions: number[] = [];
 
-		const regex = new RegExp(`".?${eventHandlerName}"`);
-		const result = regex.exec(document);
-		if (result) {
-			position = result.index;
+		const regExpString = `\\.?${functionCallName}("|')`;
+		const regex = new RegExp(regExpString, "g");
+		let result = regex.exec(XMLText);
+		while (result) {
+			positions.push(result.index);
+			result = regex.exec(XMLText);
 		}
 
-		return position;
+		return positions;
 	}
 
 	public static getEventHandlerNameFromAttributeValue(attributeValue: string) {
