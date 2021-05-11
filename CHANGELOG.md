@@ -1,4 +1,4 @@
-## 0.12.38 (06-05-2021)
+## 0.12.38 (11-05-2021)
 * Added support for fragments defined in manifest extensions
 * Improve detecting of function used in XML files
 * JS Rename now also renames event handlers in XML files
