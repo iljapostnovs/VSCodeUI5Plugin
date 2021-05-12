@@ -1,18 +1,19 @@
 import * as vscode from "vscode";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { AbstractUIClass, ITypeValue, IUIProperty, IUIEvent, IUIAggregation } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { URLBuilder } from "../../../utils/URLBuilder";
-import { XMLParser, PositionType } from "../../../utils/XMLParser";
-import { ResourceModelData } from "../../../UI5Classes/ResourceModelData";
-import { FileReader, IXMLFile, XMLFileTransformer } from "../../../utils/FileReader";
-import { CompletionItemFactory } from "../CompletionItemFactory";
-import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
+import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
+import { AbstractUIClass, ITypeValue, IUIProperty, IUIEvent, IUIAggregation } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { URLBuilder } from "../../../../utils/URLBuilder";
+import { XMLParser, PositionType } from "../../../../utils/XMLParser";
+import { ResourceModelData } from "../../../../UI5Classes/ResourceModelData";
+import { FileReader, IXMLFile, XMLFileTransformer } from "../../../../utils/FileReader";
+import { CompletionItemFactory } from "../../CompletionItemFactory";
+import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
 import { StandardXMLCompletionItemFactory } from "./StandardXMLCompletionItemFactory";
-import { CustomCompletionItem } from "../CustomCompletionItem";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
 import LineColumn = require("line-column");
+import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
-export class XMLDynamicCompletionItemFactory {
-	public createXMLDynamicCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
+	public createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 		const XMLFile = document && XMLFileTransformer.transformFromVSCodeDocument(document);
 
@@ -84,7 +85,7 @@ export class XMLDynamicCompletionItemFactory {
 		if (textEditor) {
 			const document = textEditor.document;
 			const XMLText = document.getText();
-			completionItems = this._convertToFileSpecificCompletionItems(CompletionItemFactory.XMLStandardLibCompletionItems, XMLText, addPrefix);
+			completionItems = this._convertToFileSpecificCompletionItems(StandardXMLCompletionItemFactory.XMLStandardLibCompletionItems, XMLText, addPrefix);
 		}
 
 		return completionItems;

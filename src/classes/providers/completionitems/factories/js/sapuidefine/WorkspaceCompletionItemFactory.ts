@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { FileReader } from "../../../../utils/FileReader";
 import * as path from "path";
-import { CustomCompletionItem } from "../../CustomCompletionItem";
 import glob = require("glob");
+import { FileReader } from "../../../../../utils/FileReader";
+import { CustomCompletionItem } from "../../../CustomCompletionItem";
 const escapedFileSeparator = "\\" + path.sep;
 const workspace = vscode.workspace;
 

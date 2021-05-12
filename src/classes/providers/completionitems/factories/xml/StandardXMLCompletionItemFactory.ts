@@ -1,20 +1,25 @@
 import * as vscode from "vscode";
-import { SAPNode } from "../../../librarydata/SAPNode";
-import { URLBuilder } from "../../../utils/URLBuilder";
-import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
-import { UI5Plugin } from "../../../../UI5Plugin";
-import { AbstractUIClass } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
-import { IPropertyGenerator } from "../codegenerators/property/interfaces/IPropertyGenerator";
-import { GeneratorFactory } from "../codegenerators/GeneratorFactory";
-import { IAggregationGenerator } from "../codegenerators/aggregation/interfaces/IAggregationGenerator";
-import { SAPNodePropertyGenerationStrategy } from "../codegenerators/property/strategies/SAPNodePropertyGetterStrategy";
-import { SAPClassAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
-import { SAPNodeAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
-import { SAPClassPropertyGetterStrategy } from "../codegenerators/property/strategies/SAPClassPropertyGetterStrategy";
-import { CustomCompletionItem } from "../CustomCompletionItem";
+import { UI5Plugin } from "../../../../../UI5Plugin";
+import { SAPNode } from "../../../../librarydata/SAPNode";
+import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
+import { AbstractUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { StandardUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
+import { URLBuilder } from "../../../../utils/URLBuilder";
+import { IAggregationGenerator } from "../../codegenerators/aggregation/interfaces/IAggregationGenerator";
+import { SAPClassAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
+import { SAPNodeAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
+import { GeneratorFactory } from "../../codegenerators/GeneratorFactory";
+import { IPropertyGenerator } from "../../codegenerators/property/interfaces/IPropertyGenerator";
+import { SAPClassPropertyGetterStrategy } from "../../codegenerators/property/strategies/SAPClassPropertyGetterStrategy";
+import { SAPNodePropertyGenerationStrategy } from "../../codegenerators/property/strategies/SAPNodePropertyGetterStrategy";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
+import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
-export class StandardXMLCompletionItemFactory {
+export class StandardXMLCompletionItemFactory implements ICompletionItemFactory {
+	static XMLStandardLibCompletionItems: CustomCompletionItem[] = [];
+	createCompletionItems(document: vscode.TextDocument, position: vscode.Position): CustomCompletionItem[] {
+		throw new Error("Method not implemented.");
+	}
 	private readonly _nodeDAO = new SAPNodeDAO();
 
 	async generateAggregationPropertyCompletionItems() {

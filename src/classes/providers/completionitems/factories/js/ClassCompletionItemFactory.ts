@@ -1,14 +1,15 @@
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { CustomCompletionItem } from "../CustomCompletionItem";
 import * as vscode from "vscode";
-import { ReusableMethods } from "../../reuse/ReusableMethods";
-import { FileReader } from "../../../utils/FileReader";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
-import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
+import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
+import { FileReader } from "../../../../utils/FileReader";
+import { ReusableMethods } from "../../../reuse/ReusableMethods";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
+import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
-export class ClassCompletionItemFactory {
-	static createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+export class ClassCompletionItemFactory implements ICompletionItemFactory {
+	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		const currentPositionIsNotAMemberOrFNCall = this._getIfPositionIsNotInMember(document, position);
@@ -54,7 +55,7 @@ export class ClassCompletionItemFactory {
 
 		return completionItems;
 	}
-	private static _getIfPositionIsNotInMember(document: vscode.TextDocument, position: vscode.Position) {
+	private _getIfPositionIsNotInMember(document: vscode.TextDocument, position: vscode.Position) {
 		let currentPositionIsNotAMemberOrFNCall = false;
 
 		const currentClassName = FileReader.getClassNameFromPath(document.fileName);

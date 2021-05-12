@@ -1,13 +1,14 @@
 import * as vscode from "vscode";
-import { InnerPropertiesStrategy } from "../../../UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../utils/FileReader";
-import { XMLParser } from "../../../utils/XMLParser";
-import { CustomCompletionItem } from "../CustomCompletionItem";
+import { InnerPropertiesStrategy } from "../../../../UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
+import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
+import { FileReader } from "../../../../utils/FileReader";
+import { XMLParser } from "../../../../utils/XMLParser";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
+import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
-export class ViewIdCompletionItemFactory {
-	public createIdCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+export class ViewIdCompletionItemFactory implements ICompletionItemFactory {
+	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		const strategy = new InnerPropertiesStrategy();

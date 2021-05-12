@@ -1,11 +1,10 @@
 import * as vscode from "vscode";
+import { SAPNode } from "../../../../../librarydata/SAPNode";
+import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
+import { URLBuilder } from "../../../../../utils/URLBuilder";
+import { GeneratorFactory } from "../../../codegenerators/GeneratorFactory";
+import { CustomCompletionItem } from "../../../CustomCompletionItem";
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
-import { SAPNode } from "../../../../librarydata/SAPNode";
-import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
-import { URLBuilder } from "../../../../utils/URLBuilder";
-import { GeneratorFactory } from "../../codegenerators/GeneratorFactory";
-import { CustomCompletionItem } from "../../CustomCompletionItem";
-
 export class SAPUIDefineFactory {
 	private static readonly _nodeDAO = new SAPNodeDAO();
 

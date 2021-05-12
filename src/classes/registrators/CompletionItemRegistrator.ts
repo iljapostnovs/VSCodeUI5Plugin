@@ -5,6 +5,8 @@ import { UI5Plugin } from "../../UI5Plugin";
 import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
 import { UIDefineCompletionItemGenerator } from "../providers/completionitems/codegenerators/define/UIDefineCompletionItemGenerator";
 import { GeneratorFactory } from "../providers/completionitems/codegenerators/GeneratorFactory";
+import { ICompletionItemFactory } from "../providers/completionitems/factories/abstraction/ICompletionItemFactory";
+import { AbstractCompletionItemFactory } from "../providers/completionitems/factories/AbstractCompletionItemFactory";
 
 export class CompletionItemRegistrator {
 	static async register() {
@@ -20,12 +22,16 @@ export class CompletionItemRegistrator {
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({ language: "javascript", scheme: "file" }, {
 			async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 				let itemsToReturn: CustomCompletionItem[] = [];
+				let completionItemFactory: ICompletionItemFactory | undefined;
 				try {
 					if (UIDefineCompletionItemGenerator.getIfCurrentPositionIsInDefine(document, position)) {
-						itemsToReturn = await JSCompletionItemFactory.createUIDefineCompletionItems(document, position);
+						completionItemFactory = AbstractCompletionItemFactory.getFactory(AbstractCompletionItemFactory.javascript.sapUiDefine);
+						// itemsToReturn = await JSCompletionItemFactory.createUIDefineCompletionItems(document, position);
 					} else {
-						itemsToReturn = JSCompletionItemFactory.createPropertyMethodCompletionItems(document, position);
+						// itemsToReturn = JSCompletionItemFactory.createPropertyMethodCompletionItems(document, position);
+						completionItemFactory = AbstractCompletionItemFactory.getFactory(AbstractCompletionItemFactory.javascript.member);
 					}
+					itemsToReturn = await completionItemFactory?.createCompletionItems(document, position);
 
 				} catch (error) {
 					console.log(error);
