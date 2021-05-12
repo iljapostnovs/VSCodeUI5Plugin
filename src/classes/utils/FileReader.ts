@@ -259,7 +259,30 @@ export class FileReader {
 			view = this._viewCache[controllerName];
 		}
 
+		if (!this._viewCache[controllerName]) {
+			const swappedControllerName = this._swapControllerNameIfItWasReplacedInManifest(controllerName);
+			if (swappedControllerName !== controllerName) {
+				view = this.getViewForController(swappedControllerName);
+			}
+		}
+
 		return view;
+	}
+
+	private static _swapControllerNameIfItWasReplacedInManifest(controllerName: string) {
+		const extensions = this.getManifestExtensionsForClass(controllerName);
+		const controllerReplacements = extensions && extensions["sap.ui.controllerReplacements"];
+
+		if (controllerReplacements) {
+			const replacementKey = Object.keys(controllerReplacements).find(replacementKey => {
+				return controllerReplacements[replacementKey] === controllerName;
+			});
+			if (replacementKey) {
+				controllerName = replacementKey;
+			}
+		}
+
+		return controllerName;
 	}
 
 	public static getFragmentsMentionedInClass(className: string) {

@@ -445,7 +445,7 @@ export class UIClassFactory {
 		});
 	}
 
-	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = [], removeDuplicates = true): IViewsAndFragments {
+	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = [], removeDuplicates = true, isRootClass = true): IViewsAndFragments {
 		if (checkedClasses.includes(CurrentUIClass.className)) {
 			return { fragments: [], views: [] };
 		}
@@ -453,12 +453,14 @@ export class UIClassFactory {
 		checkedClasses.push(CurrentUIClass.className);
 		const viewsAndFragments: IViewsAndFragments = this._getViewsAndFragmentsRelatedTo(CurrentUIClass);
 
-		const children = this._getAllChildrenOfClass(CurrentUIClass);
 		const parentUIClasses = this._getAllCustomUIClasses().filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && CurrentUIClass !== UIClass);
 		const whereMentioned = this._getAllClassesWhereClassIsImported(CurrentUIClass.className);
-		const relatedClasses = [...parentUIClasses, ...children, ...whereMentioned];
+		const relatedClasses = [...parentUIClasses, ...whereMentioned];
+		if (isRootClass) {
+			relatedClasses.push(...this._getAllChildrenOfClass(CurrentUIClass));
+		}
 		const relatedViewsAndFragments = relatedClasses.reduce((accumulator: IViewsAndFragments, relatedUIClass: CustomUIClass) => {
-			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false);
+			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false, false);
 			accumulator.fragments = accumulator.fragments.concat(relatedFragmentsAndViews.fragments);
 			accumulator.views = accumulator.views.concat(relatedFragmentsAndViews.views);
 			return accumulator;
@@ -469,7 +471,7 @@ export class UIClassFactory {
 		viewsAndFragments.fragments = viewsAndFragments.fragments.concat(relatedViewsAndFragments.fragments);
 		viewsAndFragments.views = viewsAndFragments.views.concat(relatedViewsAndFragments.views);
 		viewsAndFragments.views.forEach(view => {
-			viewsAndFragments.fragments.push(...this._getFragmentFromViewManifestExtensions(CurrentUIClass, view));
+			viewsAndFragments.fragments.push(...this._getFragmentFromViewManifestExtensions(CurrentUIClass.className, view));
 		});
 
 		if (removeDuplicates) {
@@ -510,7 +512,7 @@ export class UIClassFactory {
 
 	private static _getAllClassesWhereClassIsImported(className: string) {
 		return this._getAllCustomUIClasses().filter(UIClass => {
-			return !!UIClass.UIDefine.find(UIDefine => {
+			return UIClass.parentClassNameDotNotation !== className && !!UIClass.UIDefine.find(UIDefine => {
 				return UIDefine.classNameDotNotation === className;
 			});
 		});
@@ -532,11 +534,11 @@ export class UIClassFactory {
 		}).map(UIClassName => allUIClasses[UIClassName] as CustomUIClass);
 	}
 
-	private static _getFragmentFromViewManifestExtensions(UIClass: CustomUIClass, view: IView) {
+	private static _getFragmentFromViewManifestExtensions(className: string, view: IView) {
 		const fragments: IFragment[] = [];
 		const viewName = FileReader.getClassNameFromPath(view.fsPath);
 		if (viewName) {
-			const extensions = FileReader.getManifestExtensionsForClass(UIClass.className);
+			const extensions = FileReader.getManifestExtensionsForClass(className);
 			const viewExtension = extensions && extensions["sap.ui.viewExtensions"] && extensions["sap.ui.viewExtensions"][viewName];
 			if (viewExtension) {
 				Object.keys(viewExtension).forEach(key => {
