@@ -64,9 +64,8 @@ export class SAPUIDefineFactory implements ICompletionItemFactory {
 			completionItems = completionItems.concat(this._recursiveUIDefineCompletionItemGeneration(node));
 		}
 
-		completionItems = completionItems.concat(await workspaceCompletionItemFactory.getCompletionItems());
+		completionItems = completionItems.concat(await workspaceCompletionItemFactory.createCompletionItems());
 		// copy(JSON.stringify(completionItems.map(item => item.insertText)))
-		// completionItems = SAPUIDefineFactory.JSDefineCompletionItems;
 		return completionItems;
 	}
 

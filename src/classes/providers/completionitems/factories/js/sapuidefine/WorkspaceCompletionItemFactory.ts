@@ -4,6 +4,7 @@ import * as path from "path";
 import glob = require("glob");
 import { FileReader } from "../../../../../utils/FileReader";
 import { CustomCompletionItem } from "../../../CustomCompletionItem";
+import { ICompletionItemFactory } from "../../abstraction/ICompletionItemFactory";
 const escapedFileSeparator = "\\" + path.sep;
 const workspace = vscode.workspace;
 
@@ -20,7 +21,7 @@ class UIDefineJSFile {
 		this.UIDefineString = UIDefineString;
 	}
 }
-export class WorkspaceCompletionItemFactory {
+export class WorkspaceCompletionItemFactory implements ICompletionItemFactory {
 	static async synchronizeCreate(completionItems: CustomCompletionItem[], textDocument: vscode.Uri) {
 		const fileFsPath = textDocument.fsPath;
 		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
@@ -47,7 +48,7 @@ export class WorkspaceCompletionItemFactory {
 		}
 	}
 
-	async getCompletionItems() {
+	async createCompletionItems() {
 		const completionItems: CustomCompletionItem[] = [];
 
 		const JSFilesOfAllWorkspaces = await this._getAllJSFilesOfAllWorkspaces();

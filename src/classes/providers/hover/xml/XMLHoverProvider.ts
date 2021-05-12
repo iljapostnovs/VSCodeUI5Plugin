@@ -1,4 +1,6 @@
 import * as vscode from "vscode";
+import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
+import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { XMLFileTransformer } from "../../../utils/FileReader";
 import { URLBuilder } from "../../../utils/URLBuilder";
@@ -44,7 +46,11 @@ export class XMLHoverProvider {
 						const markdownString = new vscode.MarkdownString();
 						markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
 						const UIClass = UIClassFactory.getUIClass(classOfTheTag);
-						const text = `${URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass)}`;
+						const node = new SAPNodeDAO().findNode(UIClass.className);
+						let classDescription = node?.getMetadata()?.getRawMetadata()?.description || "";
+						classDescription = StandardUIClass.removeTags(classDescription);
+						const description = classDescription ? `  \n${classDescription}` : "";
+						const text = `${URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass)}${description}`;
 						markdownString.appendMarkdown(text);
 						hover = new vscode.Hover(markdownString);
 					} else {
