@@ -15,10 +15,10 @@ import { UI5Plugin } from "../../UI5Plugin";
 import { JSRenameProvider } from "../../classes/providers/rename/JSRenameProvider";
 import { ConfigHandler } from "../../classes/providers/diagnostics/js/jslinter/parts/config/ConfigHandler";
 import { XMLParser } from "../../classes/utils/XMLParser";
-import { ViewIdCompletionItemFactory } from "../../classes/providers/completionitems/js/ViewIdCompletionItemFactory";
-import { JSDynamicCompletionItemsFactory } from "../../classes/providers/completionitems/js/JSDynamicCompletionItemsFactory";
-import { SAPUIDefineFactory } from "../../classes/providers/completionitems/js/sapuidefine/SAPUIDefineFactory";
-import { XMLDynamicCompletionItemFactory } from "../../classes/providers/completionitems/xml/XMLDynamicCompletionItemFactory";
+import { JSDynamicCompletionItemsFactory } from "../../classes/providers/completionitems/factories/js/JSDynamicCompletionItemsFactory";
+import { SAPUIDefineFactory } from "../../classes/providers/completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
+import { ViewIdCompletionItemFactory } from "../../classes/providers/completionitems/factories/js/ViewIdCompletionItemFactory";
+import { XMLDynamicCompletionItemFactory } from "../../classes/providers/completionitems/factories/xml/XMLDynamicCompletionItemFactory";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -274,7 +274,7 @@ suite("Extension Test Suite", () => {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
 				const position = document.positionAt(offset);
-				const completionItems = factory.createIdCompletionItems(document, position);
+				const completionItems = await factory.createCompletionItems(document, position);
 
 				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
 				compareArrays(completionItemInsertTexts, data.items);
@@ -293,7 +293,7 @@ suite("Extension Test Suite", () => {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
 				const position = document.positionAt(offset);
-				const completionItems = factory.createUIClassCompletionItems(document, position);
+				const completionItems = await factory.createCompletionItems(document, position);
 
 				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
 				compareArrays(completionItemInsertTexts, data.items);
@@ -328,7 +328,7 @@ suite("Extension Test Suite", () => {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
 				const position = document.positionAt(offset);
-				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+				const completionItems = await factory.createCompletionItems(document, position);
 
 				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
 				compareArrays(completionItemInsertTexts, data.items);
@@ -346,7 +346,7 @@ suite("Extension Test Suite", () => {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
 				const position = document.positionAt(offset);
-				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+				const completionItems = await factory.createCompletionItems(document, position);
 
 				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
 				compareArrays(completionItemInsertTexts, data.items);
@@ -364,7 +364,7 @@ suite("Extension Test Suite", () => {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
 				const position = document.positionAt(offset);
-				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+				const completionItems = await factory.createCompletionItems(document, position);
 
 				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
 				compareArrays(completionItemInsertTexts, data.items);
@@ -382,7 +382,7 @@ suite("Extension Test Suite", () => {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
 				const position = document.positionAt(offset);
-				const completionItems = factory.createXMLDynamicCompletionItems(document, position);
+				const completionItems = await factory.createCompletionItems(document, position);
 
 				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
 				compareArrays(completionItemInsertTexts, data.items);

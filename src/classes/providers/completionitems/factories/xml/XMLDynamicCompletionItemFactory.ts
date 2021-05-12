@@ -5,7 +5,6 @@ import { URLBuilder } from "../../../../utils/URLBuilder";
 import { XMLParser, PositionType } from "../../../../utils/XMLParser";
 import { ResourceModelData } from "../../../../UI5Classes/ResourceModelData";
 import { FileReader, IXMLFile, XMLFileTransformer } from "../../../../utils/FileReader";
-import { CompletionItemFactory } from "../../CompletionItemFactory";
 import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
 import { StandardXMLCompletionItemFactory } from "./StandardXMLCompletionItemFactory";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
@@ -13,7 +12,7 @@ import LineColumn = require("line-column");
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
 export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
-	public createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 		const XMLFile = document && XMLFileTransformer.transformFromVSCodeDocument(document);
 

@@ -19,7 +19,7 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 		}
 
 		if (completionItems.length === 0) {
-			completionItems = ClassCompletionItemFactory.createCompletionItems(document, position);
+			completionItems = await new ClassCompletionItemFactory().createCompletionItems(document, position);
 		}
 
 		//copy(JSON.stringify(completionItems.map(item => item.insertText.value || item.insertText)))

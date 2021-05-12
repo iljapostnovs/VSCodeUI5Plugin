@@ -8,7 +8,7 @@ import { XMLDynamicCompletionItemFactory } from "./xml/XMLDynamicCompletionItemF
 
 export class AbstractCompletionItemFactory {
 	static getFactory(type: AbstractCompletionItemFactory.javascript | AbstractCompletionItemFactory.xml): ICompletionItemFactory {
-		let factory;
+		let factory: ICompletionItemFactory;
 		switch (type) {
 			case AbstractCompletionItemFactory.javascript.sapUiDefine:
 				factory = new SAPUIDefineFactory();

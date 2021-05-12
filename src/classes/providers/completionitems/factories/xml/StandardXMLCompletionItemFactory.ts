@@ -2,6 +2,9 @@ import * as vscode from "vscode";
 import { UI5Plugin } from "../../../../../UI5Plugin";
 import { SAPNode } from "../../../../librarydata/SAPNode";
 import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
+import { UI5MetadataPreloader } from "../../../../librarydata/UI5MetadataDAO";
+import { ResourceModelData } from "../../../../UI5Classes/ResourceModelData";
+import { SAPIcons } from "../../../../UI5Classes/SAPIcons";
 import { AbstractUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { StandardUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { URLBuilder } from "../../../../utils/URLBuilder";
@@ -17,10 +20,27 @@ import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
 export class StandardXMLCompletionItemFactory implements ICompletionItemFactory {
 	static XMLStandardLibCompletionItems: CustomCompletionItem[] = [];
-	createCompletionItems(document: vscode.TextDocument, position: vscode.Position): CustomCompletionItem[] {
-		throw new Error("Method not implemented.");
+	async createCompletionItems() {
+		return this.generateAggregationPropertyCompletionItems();
 	}
+
 	private readonly _nodeDAO = new SAPNodeDAO();
+
+	async preloadCompletionItems() {
+		const _nodeDAO = new SAPNodeDAO();
+		const SAPNodes = await _nodeDAO.getAllNodes();
+
+		const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
+		await Promise.all([
+			metadataPreloader.preloadLibs(),
+			SAPIcons.preloadIcons(),
+			ResourceModelData.readTexts()
+		]);
+		console.log("Libs are preloaded");
+
+		StandardXMLCompletionItemFactory.XMLStandardLibCompletionItems = await this.generateAggregationPropertyCompletionItems();
+		console.log("After the preload XML Completion Items are generated successfully");
+	}
 
 	async generateAggregationPropertyCompletionItems() {
 		const availableProgressLeft = 50;

@@ -1,22 +1,17 @@
 import * as vscode from "vscode";
-import { CompletionItemFactory } from "../providers/completionitems/CompletionItemFactory";
-import { FileWatcherMediator } from "../utils/FileWatcherMediator";
 import { UI5Plugin } from "../../UI5Plugin";
 import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
 import { UIDefineCompletionItemGenerator } from "../providers/completionitems/codegenerators/define/UIDefineCompletionItemGenerator";
-import { GeneratorFactory } from "../providers/completionitems/codegenerators/GeneratorFactory";
 import { ICompletionItemFactory } from "../providers/completionitems/factories/abstraction/ICompletionItemFactory";
 import { AbstractCompletionItemFactory } from "../providers/completionitems/factories/AbstractCompletionItemFactory";
+import { StandardXMLCompletionItemFactory } from "../providers/completionitems/factories/xml/StandardXMLCompletionItemFactory";
+import { SAPUIDefineFactory } from "../providers/completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
 
 export class CompletionItemRegistrator {
 	static async register() {
-		/* Completion Items */
-		const XMLCompletionItemFactory = new CompletionItemFactory(GeneratorFactory.language.xml);
-		await XMLCompletionItemFactory.createUIDefineCompletionItems();
+		await new StandardXMLCompletionItemFactory().preloadCompletionItems();
 		console.log("XML Completion Items generated");
-
-		const JSCompletionItemFactory = new CompletionItemFactory(GeneratorFactory.language.js);
-		await JSCompletionItemFactory.createUIDefineCompletionItems();
+		await new SAPUIDefineFactory().preloadCompletionItems();
 		console.log("JS Completion Items generated");
 
 		const JSMethodPropertyProvider = vscode.languages.registerCompletionItemProvider({ language: "javascript", scheme: "file" }, {
@@ -26,9 +21,7 @@ export class CompletionItemRegistrator {
 				try {
 					if (UIDefineCompletionItemGenerator.getIfCurrentPositionIsInDefine(document, position)) {
 						completionItemFactory = AbstractCompletionItemFactory.getFactory(AbstractCompletionItemFactory.javascript.sapUiDefine);
-						// itemsToReturn = await JSCompletionItemFactory.createUIDefineCompletionItems(document, position);
 					} else {
-						// itemsToReturn = JSCompletionItemFactory.createPropertyMethodCompletionItems(document, position);
 						completionItemFactory = AbstractCompletionItemFactory.getFactory(AbstractCompletionItemFactory.javascript.member);
 					}
 					itemsToReturn = await completionItemFactory?.createCompletionItems(document, position);
@@ -42,7 +35,7 @@ export class CompletionItemRegistrator {
 
 		const JSViewIDProvider = vscode.languages.registerCompletionItemProvider({ language: "javascript", scheme: "file" }, {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
-				return JSCompletionItemFactory.createViewIdCompletionItems(document, position);
+				return AbstractCompletionItemFactory.getFactory(AbstractCompletionItemFactory.javascript.viewId).createCompletionItems(document, position);
 			}
 		}, "\"", "'");
 
@@ -54,14 +47,12 @@ export class CompletionItemRegistrator {
 
 		const XMLProvider = vscode.languages.registerCompletionItemProvider({ language: "xml", scheme: "file" }, {
 			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
-				return XMLCompletionItemFactory.createXMLDynamicCompletionItems(document, position);
+				return AbstractCompletionItemFactory.getFactory(AbstractCompletionItemFactory.xml.dynamic).createCompletionItems(document, position);
 			}
 		}, "<", ":", "\"", "*", ...aChars);
 
 		UI5Plugin.getInstance().addDisposable(XMLProvider);
 		UI5Plugin.getInstance().addDisposable(JSMethodPropertyProvider);
 		UI5Plugin.getInstance().addDisposable(JSViewIDProvider);
-
-		FileWatcherMediator.synchronizeSAPUIDefineCompletionItems(CompletionItemFactory.JSDefineCompletionItems);
 	}
 }

@@ -1,11 +1,57 @@
 import * as vscode from "vscode";
 import { SAPNode } from "../../../../../librarydata/SAPNode";
 import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
+import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import { FileWatcherMediator } from "../../../../../utils/FileWatcherMediator";
 import { URLBuilder } from "../../../../../utils/URLBuilder";
 import { GeneratorFactory } from "../../../codegenerators/GeneratorFactory";
 import { CustomCompletionItem } from "../../../CustomCompletionItem";
+import { ICompletionItemFactory } from "../../abstraction/ICompletionItemFactory";
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
-export class SAPUIDefineFactory {
+export class SAPUIDefineFactory implements ICompletionItemFactory {
+	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+		let completionItems = SAPUIDefineFactory.JSDefineCompletionItems;
+
+		if (document && position) {
+			UIClassFactory.setNewContentForClassUsingDocument(document);
+			const offset = document.offsetAt(position);
+			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			if (currentClassName) {
+				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+
+				if (UIClass.fileContent) {
+					const args = UIClass.fileContent?.body[0]?.expression?.arguments;
+					if (args && args.length === 2) {
+						const UIDefinePaths: string[] = args[0].elements || [];
+						const node = AcornSyntaxAnalyzer.findAcornNode(UIDefinePaths, offset);
+						const isString = node?.type === "Literal";
+						if (isString) {
+							completionItems = completionItems.map(completionItem => {
+								const completionItemWOQuotes = new CustomCompletionItem(completionItem.label);
+								completionItemWOQuotes.kind = completionItem.kind;
+								completionItemWOQuotes.className = completionItem.className;
+								completionItemWOQuotes.insertText = (<any>completionItem.insertText).substring(1, (<any>completionItem.insertText).length - 1);
+								completionItemWOQuotes.documentation = completionItem.documentation;
+								completionItemWOQuotes.command = completionItem.command;
+
+								return completionItemWOQuotes;
+							});
+						}
+					}
+
+				}
+			}
+		}
+
+		return completionItems;
+	}
+	public static JSDefineCompletionItems: CustomCompletionItem[] = [];
+	async preloadCompletionItems() {
+		SAPUIDefineFactory.JSDefineCompletionItems = await this.generateUIDefineCompletionItems();
+		FileWatcherMediator.synchronizeSAPUIDefineCompletionItems(SAPUIDefineFactory.JSDefineCompletionItems);
+	}
 	private static readonly _nodeDAO = new SAPNodeDAO();
 
 	public async generateUIDefineCompletionItems() {
@@ -20,6 +66,7 @@ export class SAPUIDefineFactory {
 
 		completionItems = completionItems.concat(await workspaceCompletionItemFactory.getCompletionItems());
 		// copy(JSON.stringify(completionItems.map(item => item.insertText)))
+		// completionItems = SAPUIDefineFactory.JSDefineCompletionItems;
 		return completionItems;
 	}
 

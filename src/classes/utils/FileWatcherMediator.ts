@@ -12,7 +12,7 @@ import { TemplateGeneratorFactory } from "../templateinserters/TemplateGenerator
 import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
 import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
-import { WorkspaceCompletionItemFactory } from "../providers/completionitems/js/sapuidefine/WorkspaceCompletionItemFactory";
+import { WorkspaceCompletionItemFactory } from "../providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
 const fileSeparator = path.sep;
 const workspace = vscode.workspace;
 
