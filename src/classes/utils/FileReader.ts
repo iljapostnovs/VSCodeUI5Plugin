@@ -13,7 +13,7 @@ const escapedFileSeparator = "\\" + path.sep;
 const workspace = vscode.workspace;
 
 export class XMLFileTransformer {
-	static transformFromVSCodeDocument(document: vscode.TextDocument) {
+	static transformFromVSCodeDocument(document: vscode.TextDocument, forceRefresh = false) {
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		if (className) {
 			const xmlType = document.fileName.endsWith(".fragment.xml") ? "fragment" : "view";
@@ -27,7 +27,7 @@ export class XMLFileTransformer {
 					areAllStringsClosed: stringData.areAllStringsClosed
 				};
 			}
-			if (XMLFile && XMLFile.content.length !== document.getText().length) {
+			if (XMLFile && (XMLFile.content.length !== document.getText().length || forceRefresh)) {
 				if (xmlType === "view") {
 					FileReader.setNewViewContentToCache(document.getText(), document.fileName);
 				} else if (xmlType === "fragment") {

@@ -8,7 +8,7 @@ export class XMLFormatter {
 		const textEdits: vscode.TextEdit[] = [];
 		const documentText = document.getText();
 
-		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document, true);
 		if (XMLFile) {
 			const allTags = this._getAllTags(XMLFile);
 
