@@ -826,6 +826,10 @@ export class AcornSyntaxAnalyzer {
 		}
 
 		const innerField = UIClass.fields.find(innerfield => innerfield.name === field.name);
+		const customField = innerField as ICustomClassUIField;
+		if (customField?.acornNode?.value?.type === "Literal" && UIClass instanceof CustomUIClass) {
+			customField.type = this.getClassNameFromSingleAcornNode(customField.acornNode.value, UIClass);
+		}
 		if (innerField && innerField.type) {
 			field.type = innerField.type;
 		} else if (UIClass instanceof CustomUIClass) {
@@ -866,8 +870,6 @@ export class AcornSyntaxAnalyzer {
 							}
 						}
 					}
-				} else if (property.value.type === "Literal") {
-					field.type = this.getClassNameFromSingleAcornNode(property.value, UIClass);
 				}
 				if (field.type) {
 					typeFound = true;
