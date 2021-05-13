@@ -55,7 +55,7 @@ export abstract class FileRenameHandler {
 							UIClassFactory.setNewCodeForClass(classNameOfTheReplacedFile, fileContent);
 						}
 					} else if (filePath.endsWith(".view.xml")) {
-						FileReader.setNewViewContentToCache(fileContent, filePath);
+						FileReader.setNewViewContentToCache(fileContent, filePath, true);
 					}
 				}
 			});

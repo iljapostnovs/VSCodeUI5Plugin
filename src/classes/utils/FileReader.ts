@@ -46,9 +46,9 @@ export class FileReader {
 	private static readonly _UI5Version: any = vscode.workspace.getConfiguration("ui5.plugin").get("ui5version");
 	public static globalStoragePath: string | undefined;
 
-	public static setNewViewContentToCache(viewContent: string, fsPath: string) {
+	public static setNewViewContentToCache(viewContent: string, fsPath: string, forceRefresh = false) {
 		const controllerName = this.getControllerNameFromView(viewContent);
-		if (controllerName && this._viewCache[controllerName]?.content.length !== viewContent.length) {//TODO: What if there is no controller?
+		if (controllerName && (this._viewCache[controllerName]?.content.length !== viewContent.length || forceRefresh)) {//TODO: What if there is no controller?
 			const viewName = this.getClassNameFromPath(fsPath);
 			if (this._viewCache[controllerName]) {
 				this._viewCache[controllerName].content = viewContent;
@@ -68,9 +68,9 @@ export class FileReader {
 		}
 	}
 
-	public static setNewFragmentContentToCache(document: vscode.TextDocument) {
+	public static setNewFragmentContentToCache(document: vscode.TextDocument, forceRefresh = false) {
 		const fragmentName = this.getClassNameFromPath(document.fileName);
-		if (fragmentName && this._fragmentCache[fragmentName]?.content.length !== document.getText().length) {
+		if (fragmentName && (this._fragmentCache[fragmentName]?.content.length !== document.getText().length || forceRefresh)) {
 			if (this._fragmentCache[fragmentName]) {
 				this._fragmentCache[fragmentName].content = document.getText();
 				this._fragmentCache[fragmentName].fsPath = document.fileName;

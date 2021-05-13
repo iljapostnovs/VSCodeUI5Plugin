@@ -28,10 +28,10 @@ export class FileWatcherMediator {
 		} else if (document.fileName.endsWith(".view.xml")) {
 
 			const viewContent = document.getText();
-			FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath);
+			FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath, true);
 		} else if (document.fileName.endsWith(".fragment.xml")) {
 
-			FileReader.setNewFragmentContentToCache(document);
+			FileReader.setNewFragmentContentToCache(document, true);
 		} else if (document.fileName.endsWith(".properties")) {
 
 			ResourceModelData.readTexts();
