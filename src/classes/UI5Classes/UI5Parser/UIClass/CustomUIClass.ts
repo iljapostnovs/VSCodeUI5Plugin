@@ -573,10 +573,13 @@ export class CustomUIClass extends AbstractUIClass {
 		const UIDefineBodyExists =
 			this.fileContent?.body &&
 			this.fileContent?.body[0]?.expression?.arguments &&
-			body?.body[0]?.expression?.arguments[1]?.body?.body;
+			(
+				body?.body[0]?.expression?.arguments[1]?.body?.body ||
+				body?.body[0]?.expression?.arguments[2]?.body?.body
+			)
 
 		if (UIDefineBodyExists) {
-			UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body;
+			UIDefineBody = this.fileContent?.body[0]?.expression?.arguments[1]?.body?.body || this.fileContent?.body[0]?.expression?.arguments[2]?.body?.body;
 		}
 
 		return UIDefineBody;
