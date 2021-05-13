@@ -56,6 +56,8 @@ export abstract class FileRenameHandler {
 						}
 					} else if (filePath.endsWith(".view.xml")) {
 						FileReader.setNewViewContentToCache(fileContent, filePath, true);
+					} else if (filePath.endsWith(".fragment.xml")) {
+						FileReader.setNewFragmentContentToCache(fileContent, filePath, true);
 					}
 				}
 			});

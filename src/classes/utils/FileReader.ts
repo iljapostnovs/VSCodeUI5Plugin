@@ -31,7 +31,7 @@ export class XMLFileTransformer {
 				if (xmlType === "view") {
 					FileReader.setNewViewContentToCache(document.getText(), document.fileName);
 				} else if (xmlType === "fragment") {
-					FileReader.setNewFragmentContentToCache(document);
+					FileReader.setNewFragmentContentToCache(document.getText(), document.fileName);
 				}
 			}
 
@@ -68,23 +68,23 @@ export class FileReader {
 		}
 	}
 
-	public static setNewFragmentContentToCache(document: vscode.TextDocument, forceRefresh = false) {
-		const fragmentName = this.getClassNameFromPath(document.fileName);
-		if (fragmentName && (this._fragmentCache[fragmentName]?.content.length !== document.getText().length || forceRefresh)) {
+	public static setNewFragmentContentToCache(text: string, fsPath: string, forceRefresh = false) {
+		const fragmentName = this.getClassNameFromPath(fsPath);
+		if (fragmentName && (this._fragmentCache[fragmentName]?.content.length !== text.length || forceRefresh)) {
 			if (this._fragmentCache[fragmentName]) {
-				this._fragmentCache[fragmentName].content = document.getText();
-				this._fragmentCache[fragmentName].fsPath = document.fileName;
+				this._fragmentCache[fragmentName].content = text;
+				this._fragmentCache[fragmentName].fsPath = fsPath;
 				this._fragmentCache[fragmentName].name = fragmentName;
 				this._fragmentCache[fragmentName].idClassMap = {};
-				this._fragmentCache[fragmentName].fragments = this.getFragmentsFromXMLDocumentText(document.getText());
+				this._fragmentCache[fragmentName].fragments = this.getFragmentsFromXMLDocumentText(text);
 				this._fragmentCache[fragmentName].XMLParserData = undefined;
 			} else {
 				this._fragmentCache[fragmentName] = {
-					content: document.getText(),
-					fsPath: document.fileName,
+					content: text,
+					fsPath: fsPath,
 					name: fragmentName,
 					idClassMap: {},
-					fragments: this.getFragmentsFromXMLDocumentText(document.getText())
+					fragments: this.getFragmentsFromXMLDocumentText(text)
 				};
 			}
 		}
@@ -797,6 +797,30 @@ export class FileReader {
 		}
 
 		return xmlFile;
+	}
+
+	static replaceViewNames(oldName: string, newName: string) {
+		const XMLFile = this.getXMLFile(oldName, "view");
+		const newFSPath = this.convertClassNameToFSPath(newName, false, false, true);
+		const oldFSPath = this.convertClassNameToFSPath(oldName, false, false, true);
+		if (XMLFile && newFSPath && oldFSPath) {
+			XMLFile.fsPath = newFSPath;
+			XMLFile.name = newName;
+
+			this.removeFromCache(oldFSPath);
+		}
+	}
+
+	static replaceFragmentNames(oldName: string, newName: string) {
+		const fragment = this._fragmentCache[oldName];
+		const newFSPath = this.convertClassNameToFSPath(newName, false, true);
+		const oldFSPath = this.convertClassNameToFSPath(oldName, false, true);
+		if (fragment && newFSPath && oldFSPath) {
+			fragment.fsPath = newFSPath;
+			fragment.name = newName;
+			this._fragmentCache[newName] = this._fragmentCache[oldName];
+			this.removeFromCache(oldFSPath);
+		}
 	}
 }
 

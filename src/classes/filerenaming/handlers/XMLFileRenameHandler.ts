@@ -13,9 +13,30 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 	handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri): void {
 		if (newUri.fsPath.endsWith(".view.xml")) {
 			this._replaceViewNames(oldUri, newUri);
+		} else if (newUri.fsPath.endsWith(".fragment.xml")) {
+			this._replaceFragmentNames(oldUri, newUri);
 		}
 
+		const oldClassName = FileReader.getClassNameFromPath(oldUri.fsPath);
+		const newClassName = FileReader.getClassNameFromPath(newUri.fsPath);
+		if (oldClassName && newClassName) {
+			if (newUri.fsPath.endsWith(".view.xml")) {
+				FileReader.replaceViewNames(oldClassName, newClassName);
+			} else if (newUri.fsPath.endsWith(".fragment.xml")) {
+				FileReader.replaceFragmentNames(oldClassName, newClassName);
+			}
+		}
 		DiagnosticsRegistrator.removeDiagnosticForUri(oldUri, "xml");
+	}
+
+
+	private _replaceFragmentNames(oldUri: vscode.Uri, newUri: vscode.Uri) {
+		const textToReplaceFromDotNotation = FileReader.getClassNameFromPath(oldUri.fsPath)?.replace(".fragment.xml", "");
+		const textToReplaceToDotNotation = FileReader.getClassNameFromPath(newUri.fsPath)?.replace(".fragment.xml", "");
+
+		if (textToReplaceFromDotNotation && textToReplaceToDotNotation) {
+			this.replaceAllOccurrencesInFiles(textToReplaceFromDotNotation, textToReplaceToDotNotation);
+		}
 	}
 
 

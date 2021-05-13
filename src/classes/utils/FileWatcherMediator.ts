@@ -31,7 +31,7 @@ export class FileWatcherMediator {
 			FileReader.setNewViewContentToCache(viewContent, document.uri.fsPath, true);
 		} else if (document.fileName.endsWith(".fragment.xml")) {
 
-			FileReader.setNewFragmentContentToCache(document, true);
+			FileReader.setNewFragmentContentToCache(document.getText(), document.fileName, true);
 		} else if (document.fileName.endsWith(".properties")) {
 
 			ResourceModelData.readTexts();

@@ -625,4 +625,10 @@ export class UIClassFactory {
 	public static removeClass(className: string) {
 		delete this._UIClasses[className];
 	}
+
+	public static setNewNameForClass(oldName: string, newName: string) {
+		this._UIClasses[newName] = this._UIClasses[oldName];
+		this._UIClasses[newName].className = newName;
+		this.removeClass(oldName);
+	}
 }
