@@ -866,6 +866,8 @@ export class AcornSyntaxAnalyzer {
 							}
 						}
 					}
+				} else if (property.value.type === "Literal") {
+					field.type = this.getClassNameFromSingleAcornNode(property.value, UIClass);
 				}
 				if (field.type) {
 					typeFound = true;

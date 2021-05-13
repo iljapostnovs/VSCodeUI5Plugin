@@ -324,7 +324,8 @@ export class CustomUIClass extends AbstractUIClass {
 
 		const returnKeyword = this._getReturnKeywordFromBody();
 		if (returnKeyword && body) {
-			classBody = this._getClassBodyFromPartAcorn(returnKeyword.argument, body.body[0].expression.arguments[1].body);
+
+			classBody = this._getClassBodyFromPartAcorn(returnKeyword.argument);
 		}
 
 		return classBody;
@@ -341,8 +342,9 @@ export class CustomUIClass extends AbstractUIClass {
 		return returnKeyword;
 	}
 
-	private _getClassBodyFromPartAcorn(part: any, partParent: any): any {
-		if (!part || !partParent) {
+	private _getClassBodyFromPartAcorn(part: any): any {
+		const bodyParts = this.getUIDefineAcornBody();
+		if (!part || !bodyParts) {
 			return null;
 		}
 
@@ -362,7 +364,7 @@ export class CustomUIClass extends AbstractUIClass {
 		} else if (part.type === "ObjectExpression") {
 			classBody = part;
 		} else if (part.type === "Identifier") {
-			const variable = partParent.body
+			const variable = bodyParts
 				.filter((body: any) => body.type === "VariableDeclaration")
 				.find((variable: any) =>
 					variable.declarations.find((declaration: any) => declaration.id.name === part.name)
@@ -370,7 +372,7 @@ export class CustomUIClass extends AbstractUIClass {
 
 			if (variable) {
 				const neededDeclaration = variable.declarations.find((declaration: any) => declaration.id.name === part.name);
-				classBody = this._getClassBodyFromPartAcorn(neededDeclaration.init, partParent);
+				classBody = this._getClassBodyFromPartAcorn(neededDeclaration.init);
 				this.acornReturnedClassExtendBody = neededDeclaration.init;
 				this.classBodyAcornVariableName = part.name;
 			}
