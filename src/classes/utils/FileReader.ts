@@ -296,7 +296,7 @@ export class FileReader {
 
 			const fragmentsInFragment: IFragment[] = [];
 			fragments.forEach(fragment => {
-				fragmentsInFragment.push(...this.getFragmentsInFragment(fragment));
+				fragmentsInFragment.push(...this.getFragmentsInXMLFile(fragment));
 			});
 
 			fragments.push(...fragmentsInFragment);
@@ -306,11 +306,11 @@ export class FileReader {
 		return fragments;
 	}
 
-	static getFragmentsInFragment(fragment: IFragment) {
+	static getFragmentsInXMLFile(XMLFile: IXMLFile) {
 		const fragmentsInFragment: IFragment[] = [];
-		const fragments = fragment.fragments;
+		const fragments = XMLFile.fragments;
 		fragments.forEach(fragment => {
-			fragmentsInFragment.push(...this.getFragmentsInFragment(fragment));
+			fragmentsInFragment.push(...this.getFragmentsInXMLFile(fragment));
 		});
 
 		return fragments.concat(fragmentsInFragment);
@@ -822,11 +822,11 @@ export interface IViews {
 	[key: string]: IView;
 }
 
-export interface IView extends IXMLFile, IIdClassMap, IHasFragments {
+export interface IView extends IXMLFile, IIdClassMap {
 }
-export interface IFragment extends IXMLFile, IIdClassMap, IHasFragments {
+export interface IFragment extends IXMLFile, IIdClassMap {
 }
-export interface IXMLFile extends IXMLParserCacheable {
+export interface IXMLFile extends IXMLParserCacheable, IHasFragments {
 	content: string;
 	fsPath: string;
 	name: string;
