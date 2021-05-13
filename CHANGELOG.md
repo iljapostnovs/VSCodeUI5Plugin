@@ -1,3 +1,7 @@
+## 0.12.39 (14-05-2021)
+* Bugfixes
+* Wrong file path linter also added for XML Linter
+
 ## 0.12.38 (11-05-2021)
 * Added support for fragments defined in manifest extensions
 * Improve detecting of function used in XML files

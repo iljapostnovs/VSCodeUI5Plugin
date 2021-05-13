@@ -474,14 +474,13 @@ export class UIClassFactory {
 			viewsAndFragments.fragments.push(...this._getFragmentFromViewManifestExtensions(CurrentUIClass.className, view));
 		});
 
-		viewsAndFragments.views.forEach(view => {
-			viewsAndFragments.fragments.push(...FileReader.getFragmentsInXMLFile(view));
-		});
-		viewsAndFragments.fragments.forEach(fragment => {
-			viewsAndFragments.fragments.push(...FileReader.getFragmentsInXMLFile(fragment));
-		});
-
 		if (removeDuplicates) {
+			viewsAndFragments.views.forEach(view => {
+				viewsAndFragments.fragments.push(...FileReader.getFragmentsInXMLFile(view));
+			});
+			viewsAndFragments.fragments.forEach(fragment => {
+				viewsAndFragments.fragments.push(...FileReader.getFragmentsInXMLFile(fragment));
+			});
 			viewsAndFragments.fragments = viewsAndFragments.fragments.reduce((accumulator: IFragment[], fragment) => {
 				if (!accumulator.find(accumulatorFragment => accumulatorFragment.fsPath === fragment.fsPath)) {
 					accumulator.push(fragment);

@@ -789,10 +789,10 @@ export class FileReader {
 	static getXMLFile(className: string, fileType?: string) {
 		let xmlFile: IXMLFile | undefined;
 		if (fileType === "fragment" || !fileType) {
-			xmlFile = this.getAllFragments().find(fragment => fragment.name === className);
+			xmlFile = this.getFragment(className);
 		}
 
-		if (!xmlFile && fileType === "view" || !fileType) {
+		if (!xmlFile && (fileType === "view" || !fileType)) {
 			xmlFile = this._viewCache[className] || this.getAllViews().find(view => view.name === className);
 		}
 
