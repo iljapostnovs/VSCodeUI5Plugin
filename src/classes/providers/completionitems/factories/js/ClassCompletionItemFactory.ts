@@ -12,9 +12,9 @@ export class ClassCompletionItemFactory implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 
-		const currentPositionIsNotAMemberOrFNCall = this._getIfPositionIsNotInMember(document, position);
+		const ifPositionIsNewExpressionOrExprStatement = this._getIfPositionIsNewExpressionOrExpressionStatement(document, position);
 
-		if (currentPositionIsNotAMemberOrFNCall) {
+		if (ifPositionIsNewExpressionOrExprStatement) {
 			const classes = UIClassFactory.getAllExistentUIClasses();
 			const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 			if (currentClassName) {
@@ -55,8 +55,8 @@ export class ClassCompletionItemFactory implements ICompletionItemFactory {
 
 		return completionItems;
 	}
-	private _getIfPositionIsNotInMember(document: vscode.TextDocument, position: vscode.Position) {
-		let currentPositionIsNotAMemberOrFNCall = false;
+	private _getIfPositionIsNewExpressionOrExpressionStatement(document: vscode.TextDocument, position: vscode.Position) {
+		let currentPositionIsNewExpressionOrExpressionStatement = false;
 
 		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 		if (currentClassName) {
@@ -67,18 +67,22 @@ export class ClassCompletionItemFactory implements ICompletionItemFactory {
 			});
 			if (currentMethod) {
 				const allContent = AcornSyntaxAnalyzer.expandAllContent(currentMethod.acornNode);
-				const memberOrCallExpression = allContent.find((node: any) => {
+				const newExpressionOrExpressionStatement = allContent.find((node: any) => {
 					return (
-						node.type === "MemberExpression" || node.type === "CallExpression"
+						node.type === "NewExpression" ||
+						(
+							node.type === "ExpressionStatement" &&
+							node.expression?.type === "Identifier"
+						)
 					) &&
 						node.start <= offset && node.end >= offset;
 				});
 
-				currentPositionIsNotAMemberOrFNCall = !memberOrCallExpression;
+				currentPositionIsNewExpressionOrExpressionStatement = !!newExpressionOrExpressionStatement;
 			}
 		}
 
 
-		return currentPositionIsNotAMemberOrFNCall;
+		return currentPositionIsNewExpressionOrExpressionStatement;
 	}
 }
