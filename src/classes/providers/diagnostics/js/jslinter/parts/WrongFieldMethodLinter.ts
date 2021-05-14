@@ -104,16 +104,17 @@ export class WrongFieldMethodLinter extends Linter {
 								}
 								const isMethodException = ConfigHandler.checkIfMemberIsException(className, nextNodeName);
 								if (!isMethodException) {
-									const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
-									if (position) {
+									const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start);
+									const positionEnd = LineColumn(UIClass.classText).fromIndex(nextNode.property.end);
+									if (position && positionEnd) {
 										errorNodes.push(nextNode);
 										errors.push({
 											message: `"${nextNodeName}" does not exist in "${className}"`,
 											code: "UI5Plugin",
 											source: "Field/Method Linter",
 											range: new vscode.Range(
-												new vscode.Position(position.line - 1, position.col),
-												new vscode.Position(position.line - 1, position.col + nextNodeName.length)
+												new vscode.Position(position.line - 1, position.col - 1),
+												new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
 											),
 											acornNode: nextNode,
 											type: CustomDiagnosticType.NonExistentMethod,
@@ -141,16 +142,17 @@ export class WrongFieldMethodLinter extends Linter {
 									}
 
 									if (sErrorMessage) {
-										const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
-										if (position) {
+										const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start);
+										const positionEnd = LineColumn(UIClass.classText).fromIndex(nextNode.property.end);
+										if (position && positionEnd) {
 											errorNodes.push(nextNode);
 											errors.push({
 												message: sErrorMessage,
 												code: "UI5Plugin",
 												source: "Field/Method Linter",
 												range: new vscode.Range(
-													new vscode.Position(position.line - 1, position.col),
-													new vscode.Position(position.line - 1, position.col + nextNodeName.length)
+													new vscode.Position(position.line - 1, position.col - 1),
+													new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
 												),
 												acornNode: nextNode,
 												methodName: nextNodeName,

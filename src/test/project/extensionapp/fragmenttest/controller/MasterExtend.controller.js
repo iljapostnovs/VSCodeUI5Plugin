@@ -20,7 +20,7 @@ sap.ui.define([
 			this.eventHandler10(oEvent);
 		},
 		eventHandler11() {},
-		unusedEventHandlerExtended() {},
+		async unusedEventHandlerExtended() {},
 		eventHandler14(oEvent) {
 			const source = oEvent.getSource();
 		}

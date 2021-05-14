@@ -1,6 +1,7 @@
 ## 0.12.39 (14-05-2021)
 * Bugfixes
 * Wrong file path linter also added for XML Linter
+* Now you can click on fragment/view names to navigate into them
 
 ## 0.12.38 (11-05-2021)
 * Added support for fragments defined in manifest extensions
