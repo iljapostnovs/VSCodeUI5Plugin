@@ -4,17 +4,18 @@ import { AbstractUIClass, ITypeValue, IUIProperty, IUIEvent, IUIAggregation } fr
 import { URLBuilder } from "../../../../utils/URLBuilder";
 import { XMLParser, PositionType } from "../../../../utils/XMLParser";
 import { ResourceModelData } from "../../../../UI5Classes/ResourceModelData";
-import { FileReader, IXMLFile, XMLFileTransformer } from "../../../../utils/FileReader";
+import { FileReader, IXMLFile } from "../../../../utils/FileReader";
 import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
 import { StandardXMLCompletionItemFactory } from "./StandardXMLCompletionItemFactory";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import LineColumn = require("line-column");
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
+import { TextDocumentTransformer } from "../../../../utils/TextDocumentTransformer";
 
 export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
-		const XMLFile = document && XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = document && TextDocumentTransformer.toXMLFile(document);
 
 		if (XMLFile) {
 			const currentPositionOffset = document.offsetAt(position);
@@ -94,7 +95,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 	private _getAttributeValuesCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
 		const document = vscode.window.activeTextEditor?.document;
-		const XMLFile = document && XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = document && TextDocumentTransformer.toXMLFile(document);
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
 		if (document && XMLFile && currentPositionOffset) {
@@ -143,7 +144,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 	private _getTagCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
-		const XMLFile = vscode.window.activeTextEditor?.document && XMLFileTransformer.transformFromVSCodeDocument(vscode.window.activeTextEditor?.document);
+		const XMLFile = vscode.window.activeTextEditor?.document && TextDocumentTransformer.toXMLFile(vscode.window.activeTextEditor?.document);
 
 		if (XMLFile && currentPositionOffset) {
 			try {
@@ -230,7 +231,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 	}
 
 	private _filterCompletionItemsByAggregationsType(completionItems: CustomCompletionItem[]) {
-		const XMLFile = vscode.window.activeTextEditor?.document && XMLFileTransformer.transformFromVSCodeDocument(vscode.window.activeTextEditor?.document);
+		const XMLFile = vscode.window.activeTextEditor?.document && TextDocumentTransformer.toXMLFile(vscode.window.activeTextEditor?.document);
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
 		if (XMLFile && currentPositionOffset) {
@@ -242,7 +243,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 	}
 
 	private _getParentTagCompletionItems(currentPosition: number, completionItems: CustomCompletionItem[] = this._getAllFileSpecificCompletionItems()) {
-		const XMLFile = vscode.window.activeTextEditor?.document && XMLFileTransformer.transformFromVSCodeDocument(vscode.window.activeTextEditor?.document);
+		const XMLFile = vscode.window.activeTextEditor?.document && TextDocumentTransformer.toXMLFile(vscode.window.activeTextEditor?.document);
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
 		if (XMLFile && currentPositionOffset) {
@@ -350,7 +351,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 	private _getAttributeCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
 
-		const XMLFile = vscode.window.activeTextEditor?.document && XMLFileTransformer.transformFromVSCodeDocument(vscode.window.activeTextEditor?.document);
+		const XMLFile = vscode.window.activeTextEditor?.document && TextDocumentTransformer.toXMLFile(vscode.window.activeTextEditor?.document);
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
 		if (XMLFile && currentPositionOffset) {

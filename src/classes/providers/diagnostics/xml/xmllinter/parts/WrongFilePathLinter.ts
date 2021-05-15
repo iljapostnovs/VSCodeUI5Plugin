@@ -1,7 +1,8 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
-import { FileReader, XMLFileTransformer } from "../../../../../utils/FileReader";
+import { FileReader } from "../../../../../utils/FileReader";
+import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
 
 export class WrongFilePathLinter extends Linter {
 	protected className = "WrongFilePathLinter";
@@ -9,7 +10,7 @@ export class WrongFilePathLinter extends Linter {
 		const errors: IError[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongFilePathLinter")) {
-			const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+			const XMLFile = TextDocumentTransformer.toXMLFile(document);
 			if (XMLFile) {
 				const manifest = FileReader.getManifestForClass(XMLFile.name);
 				if (manifest) {

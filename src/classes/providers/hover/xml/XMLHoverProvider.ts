@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
 import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { XMLFileTransformer } from "../../../utils/FileReader";
+import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
 import { URLBuilder } from "../../../utils/URLBuilder";
 import { XMLParser } from "../../../utils/XMLParser";
 
@@ -13,7 +13,7 @@ export class XMLHoverProvider {
 		const offset = document.offsetAt(position);
 		let hover: vscode.Hover | undefined;
 
-		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = TextDocumentTransformer.toXMLFile(document);
 		if (XMLFile) {
 			const allTags = XMLParser.getAllTags(XMLFile);
 			const tag = allTags.find(tag => tag.positionBegin < offset && tag.positionEnd >= offset);

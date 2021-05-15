@@ -6,15 +6,21 @@ import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardU
 import { URLBuilder } from "../../../utils/URLBuilder";
 import LineColumn = require("line-column");
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
+import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 export class UIClassDefinitionFinder {
-	public static getPositionAndUriOfCurrentVariableDefinition(document: vscode.TextDocument, position: vscode.Position, openInBrowserIfStandardMethod = false): vscode.Location | undefined {
-		let location: vscode.Location | undefined;
+	public static getPositionAndUriOfCurrentVariableDefinition(document: vscode.TextDocument, position: vscode.Position, openInBrowserIfStandardMethod = false) {
+		let location: vscode.Location | vscode.LocationLink[] | undefined;
 		const methodName = document.getText(document.getWordRangeAtPosition(position));
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 		const classNameAtCurrentPosition = className && strategy.getClassNameOfTheVariableAtPosition(className, document.offsetAt(position));
 		if (classNameAtCurrentPosition) {
 			location = this._getMemberLocation(classNameAtCurrentPosition, methodName, openInBrowserIfStandardMethod);
+		}
+
+		if (!location) {
+			location = this._getXMLFileLocation(document, position);
 		}
 
 		return location;
@@ -43,6 +49,37 @@ export class UIClassDefinitionFinder {
 
 		return location;
 	}
+	static _getXMLFileLocation(document: vscode.TextDocument, position: vscode.Position) {
+		let location: vscode.LocationLink[] | undefined;
+
+		const UIClass = TextDocumentTransformer.toCustomUIClass(document);
+		if (UIClass) {
+			const offset = document.offsetAt(position);
+			const method = UIClass.methods.find(method => method.acornNode?.start <= offset && method.acornNode.end >= offset);
+			if (method && method.acornNode) {
+				const allContent = AcornSyntaxAnalyzer.expandAllContent(method.acornNode);
+				const contentInPosition = allContent.filter((content: any) => content.start <= offset && content.end >= offset);
+				const literal = contentInPosition.find((content: any) => content.type === "Literal");
+				if (literal?.value) {
+					const XMLFile = FileReader.getXMLFile(literal.value);
+					if (XMLFile) {
+						const classUri = vscode.Uri.file(XMLFile.fsPath);
+						const vscodePosition = new vscode.Position(0, 0);
+						const originSelectionPositionBegin = document.positionAt(literal.start);
+						const originSelectionPositionEnd = document.positionAt(literal.end);
+						location = [{
+							targetRange: new vscode.Range(vscodePosition, vscodePosition),
+							targetUri: classUri,
+							originSelectionRange: new vscode.Range(originSelectionPositionBegin, originSelectionPositionEnd)
+						}];
+					}
+				}
+
+			}
+		}
+
+		return location;
+	}
 
 	private static _getVSCodeMemberLocation(classNameDotNotation: string, memberName: string) {
 		let location: vscode.Location | undefined;
@@ -63,7 +100,6 @@ export class UIClassDefinitionFinder {
 					}
 				}
 			}
-
 		}
 
 		return location;

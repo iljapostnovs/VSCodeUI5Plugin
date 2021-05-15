@@ -6,39 +6,12 @@ import * as path from "path";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
-import { XMLParser } from "./XMLParser";
+import { TextDocumentTransformer } from "./TextDocumentTransformer";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
 const workspace = vscode.workspace;
 
-export class XMLFileTransformer {
-	static transformFromVSCodeDocument(document: vscode.TextDocument, forceRefresh = false) {
-		const className = FileReader.getClassNameFromPath(document.fileName);
-		if (className) {
-			const xmlType = document.fileName.endsWith(".fragment.xml") ? "fragment" : "view";
-			const XMLFile = FileReader.getXMLFile(className, xmlType);
-			if (XMLFile && !XMLFile.XMLParserData) {
-				const stringData = XMLParser.getStringPositionMapping(document.getText());
-				XMLFile.XMLParserData = {
-					tags: [],
-					strings: stringData.positionMapping,
-					prefixResults: {},
-					areAllStringsClosed: stringData.areAllStringsClosed
-				};
-			}
-			if (XMLFile && (XMLFile.content.length !== document.getText().length || forceRefresh)) {
-				if (xmlType === "view") {
-					FileReader.setNewViewContentToCache(document.getText(), document.fileName);
-				} else if (xmlType === "fragment") {
-					FileReader.setNewFragmentContentToCache(document.getText(), document.fileName);
-				}
-			}
-
-			return XMLFile;
-		}
-	}
-}
 export class FileReader {
 	private static _manifests: IUIManifest[] = [];
 	private static readonly _viewCache: IViews = {};
@@ -478,7 +451,7 @@ export class FileReader {
 		return controllerName;
 	}
 	static getResponsibleClassForXMLDocument(document: vscode.TextDocument) {
-		const XMLDocument = XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLDocument = TextDocumentTransformer.toXMLFile(document);
 		if (XMLDocument) {
 			return this.getResponsibleClassNameForViewOrFragment(XMLDocument);
 		}

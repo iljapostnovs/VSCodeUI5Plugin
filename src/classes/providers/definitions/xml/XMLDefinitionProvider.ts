@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { FileReader, XMLFileTransformer } from "../../../utils/FileReader";
+import { FileReader } from "../../../utils/FileReader";
 import LineColumn = require("line-column");
 import { XMLParser } from "../../../utils/XMLParser";
 import { ITag } from "../../diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
 export class XMLDefinitionProvider {
 	public static provideDefinitionsFor(document: vscode.TextDocument, position: vscode.Position) {
 		let location: vscode.Location | vscode.LocationLink[] | undefined;
@@ -12,7 +13,7 @@ export class XMLDefinitionProvider {
 		const range = document.getWordRangeAtPosition(position);
 		const word = document.getText(range);
 
-		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = TextDocumentTransformer.toXMLFile(document);
 		if (XMLFile) {
 			const tag = XMLParser.getTagInPosition(XMLFile, offset);
 			const attributes = XMLParser.getAttributesOfTheTag(tag);
@@ -48,7 +49,6 @@ export class XMLDefinitionProvider {
 				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 				const attributeValueOffsetBegin = tag.positionBegin + tag.text.indexOf(attribute) + attribute.indexOf(attributeValue);
 				const attributeValueOffsetEnd = attributeValueOffsetBegin + attributeValue.length;
-
 
 				return attributeValueOffsetBegin <= offset && attributeValueOffsetEnd >= offset;
 			});

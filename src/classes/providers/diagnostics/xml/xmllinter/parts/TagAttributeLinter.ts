@@ -3,7 +3,8 @@ import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
-import { FileReader, XMLFileTransformer } from "../../../../../utils/FileReader";
+import { FileReader } from "../../../../../utils/FileReader";
+import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
 
 interface IAttributeValidation {
 	valid: boolean;
@@ -22,7 +23,7 @@ export class TagAttributeLinter extends Linter {
 		//check tags
 		// console.time("Tag attribute linter");
 
-		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = TextDocumentTransformer.toXMLFile(document);
 		if (XMLFile) {
 			const tags = XMLParser.getAllTags(XMLFile);
 			tags.forEach(tag => {

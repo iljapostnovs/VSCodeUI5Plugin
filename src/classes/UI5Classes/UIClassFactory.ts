@@ -21,7 +21,6 @@ interface IViewsAndFragments {
 interface IUIClassMap {
 	[key: string]: AbstractUIClass;
 }
-
 export class UIClassFactory {
 	private static readonly _UIClasses: IUIClassMap = {
 		Promise: new JSClass("Promise"),
