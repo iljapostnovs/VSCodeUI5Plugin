@@ -74,7 +74,7 @@ export class XMLParser {
 		allTags.forEach(tag => {
 			const idAttribute = this.getAttributesOfTheTag(tag)?.find(attribute => this.getAttributeNameAndValue(attribute).attributeName === "id");
 			if (idAttribute) {
-				const className = this.getClassNameInPosition(XMLFile, tag.positionBegin);
+				const className = this.getClassNameInPosition(XMLFile, tag.positionBegin + 1);
 
 				result.push({
 					className: className,

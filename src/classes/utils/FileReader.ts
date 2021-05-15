@@ -7,6 +7,7 @@ import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import { TextDocumentTransformer } from "./TextDocumentTransformer";
+import { XMLParser } from "./XMLParser";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
@@ -299,46 +300,50 @@ export class FileReader {
 		return this.getViewForController(controllerName)?.content;
 	}
 
-	private static _getClassOfControlIdFromView(viewOrFragment: IXMLFile & IIdClassMap, controlId: string) {
-		if (!viewOrFragment.idClassMap[controlId]) {
+	private static _getClassOfControlIdFromView(XMLFile: IXMLFile & IIdClassMap, controlId: string) {
+		if (!XMLFile.idClassMap[controlId]) {
 			let controlClass = "";
+
+			const allIds = XMLParser.getAllIDsInCurrentView(XMLFile);
+			const id = allIds.find(idData => idData.id === controlId);
+			controlClass = id?.className || "";
 			//TODO: move to XMLParser
-			const controlResults = new RegExp(`(?=id="${controlId}")`).exec(viewOrFragment.content);
-			if (controlResults) {
-				let beginIndex = controlResults.index;
-				while (beginIndex > 0 && viewOrFragment.content[beginIndex] !== "<") {
-					beginIndex--;
-				}
-				beginIndex++;
+			// const controlResults = new RegExp(`(?=id="${controlId}")`).exec(viewOrFragment.content);
+			// if (controlResults) {
+			// 	let beginIndex = controlResults.index;
+			// 	while (beginIndex > 0 && viewOrFragment.content[beginIndex] !== "<") {
+			// 		beginIndex--;
+			// 	}
+			// 	beginIndex++;
 
-				let endIndex = beginIndex;
-				while (endIndex < viewOrFragment.content.length && !this._isSeparator(viewOrFragment.content[endIndex])) {
-					endIndex++;
-				}
+			// 	let endIndex = beginIndex;
+			// 	while (endIndex < viewOrFragment.content.length && !this._isSeparator(viewOrFragment.content[endIndex])) {
+			// 		endIndex++;
+			// 	}
 
-				let regExpBase;
-				const classTag = viewOrFragment.content.substring(beginIndex, endIndex);
-				const classTagParts = classTag.split(":");
-				let className;
-				if (classTagParts.length === 1) {
-					regExpBase = "(?<=xmlns=\").*?(?=\")";
-					className = classTagParts[0];
-				} else {
-					regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*?(?=")`;
-					className = classTagParts[1];
-				}
-				const rClassName = new RegExp(regExpBase);
-				const classNameResult = rClassName.exec(viewOrFragment.content);
-				if (classNameResult) {
-					controlClass = [classNameResult[0], className.trim()].join(".");
-				}
-			}
+			// 	let regExpBase;
+			// 	const classTag = viewOrFragment.content.substring(beginIndex, endIndex);
+			// 	const classTagParts = classTag.split(":");
+			// 	let className;
+			// 	if (classTagParts.length === 1) {
+			// 		regExpBase = "(?<=xmlns=\").*?(?=\")";
+			// 		className = classTagParts[0];
+			// 	} else {
+			// 		regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*?(?=")`;
+			// 		className = classTagParts[1];
+			// 	}
+			// 	const rClassName = new RegExp(regExpBase);
+			// 	const classNameResult = rClassName.exec(viewOrFragment.content);
+			// 	if (classNameResult) {
+			// 		controlClass = [classNameResult[0], className.trim()].join(".");
+			// 	}
+			// }
 			if (controlClass) {
-				viewOrFragment.idClassMap[controlId] = controlClass;
+				XMLFile.idClassMap[controlId] = controlClass;
 			}
 		}
 
-		return viewOrFragment.idClassMap[controlId];
+		return XMLFile.idClassMap[controlId];
 	}
 
 	static readAllViewsAndFragments() {
