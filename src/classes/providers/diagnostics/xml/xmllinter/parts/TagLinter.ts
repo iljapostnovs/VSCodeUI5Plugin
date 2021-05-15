@@ -11,8 +11,6 @@ import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransf
 export class TagLinter extends Linter {
 	getErrors(document: vscode.TextDocument): IError[] {
 		const errors: IError[] = [];
-
-		// console.time("Tag linter");
 		const XMLFile = TextDocumentTransformer.toXMLFile(document);
 		if (XMLFile) {
 			const tags = XMLParser.getAllTags(XMLFile);
@@ -20,6 +18,8 @@ export class TagLinter extends Linter {
 				errors.push(...this._getClassNameErrors(tag, XMLFile));
 			});
 		}
+
+		// console.time("Tag linter");
 		// console.timeEnd("Tag linter");
 
 		return errors;

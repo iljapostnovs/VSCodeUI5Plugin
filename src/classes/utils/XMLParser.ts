@@ -156,14 +156,54 @@ export class XMLParser {
 	}
 
 	public static getTagInPosition(XMLFile: IXMLFile, position: number) {
+		let tag = this._getTagInPosition(XMLFile, position);
+		if (tag) {
+			return tag;
+		}
+
 		const XMLText = XMLFile.content;
 		const { positionBegin, positionEnd } = this.getTagBeginEndPosition(XMLFile, position);
 		const tagText = XMLText.substring(positionBegin, positionEnd);
-		const tag: ITag = {
+		tag = {
 			text: tagText,
 			positionBegin: positionBegin,
 			positionEnd: positionEnd
 		};
+		return tag;
+	}
+
+	private static _getTagInPosition(XMLFile: IXMLFile, position: number) {
+		if (!XMLFile.XMLParserData || XMLFile.XMLParserData?.tags.length === 0) {
+			this.getAllTags(XMLFile);
+		}
+		if (XMLFile.XMLParserData?.tags) {
+			return this._findInPosition(XMLFile.XMLParserData.tags, position);
+		}
+	}
+
+	private static _findInPosition(tags: ITag[], position: number, currentIndex = 0): ITag | undefined {
+		let tag: ITag | undefined;
+		if (tags.length === 0) {
+			return tag;
+		}
+		const correctPosition = tags[currentIndex].positionBegin <= position && tags[currentIndex].positionEnd >= position;
+		if (tags.length === 1 && !correctPosition) {
+			return tag;
+		}
+		if (correctPosition) {
+			tag = tags[currentIndex];
+		} else {
+			const middleIndex = Math.floor(tags.length / 2); //5 -> 2
+			const firstArrayHalf = tags.slice(0, middleIndex);
+			const secondArrayHalf = tags.slice(middleIndex, tags.length);
+			let nextTags: ITag[] = [];
+			if (secondArrayHalf[0]?.positionBegin <= position) {
+				nextTags = secondArrayHalf;
+			} else {
+				nextTags = firstArrayHalf;
+			}
+			tag = this._findInPosition(nextTags, position, currentIndex);
+		}
 
 		return tag;
 	}

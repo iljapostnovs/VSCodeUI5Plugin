@@ -307,37 +307,6 @@ export class FileReader {
 			const allIds = XMLParser.getAllIDsInCurrentView(XMLFile);
 			const id = allIds.find(idData => idData.id === controlId);
 			controlClass = id?.className || "";
-			//TODO: move to XMLParser
-			// const controlResults = new RegExp(`(?=id="${controlId}")`).exec(viewOrFragment.content);
-			// if (controlResults) {
-			// 	let beginIndex = controlResults.index;
-			// 	while (beginIndex > 0 && viewOrFragment.content[beginIndex] !== "<") {
-			// 		beginIndex--;
-			// 	}
-			// 	beginIndex++;
-
-			// 	let endIndex = beginIndex;
-			// 	while (endIndex < viewOrFragment.content.length && !this._isSeparator(viewOrFragment.content[endIndex])) {
-			// 		endIndex++;
-			// 	}
-
-			// 	let regExpBase;
-			// 	const classTag = viewOrFragment.content.substring(beginIndex, endIndex);
-			// 	const classTagParts = classTag.split(":");
-			// 	let className;
-			// 	if (classTagParts.length === 1) {
-			// 		regExpBase = "(?<=xmlns=\").*?(?=\")";
-			// 		className = classTagParts[0];
-			// 	} else {
-			// 		regExpBase = `(?<=xmlns(:${classTagParts[0]})=").*?(?=")`;
-			// 		className = classTagParts[1];
-			// 	}
-			// 	const rClassName = new RegExp(regExpBase);
-			// 	const classNameResult = rClassName.exec(viewOrFragment.content);
-			// 	if (classNameResult) {
-			// 		controlClass = [classNameResult[0], className.trim()].join(".");
-			// 	}
-			// }
 			if (controlClass) {
 				XMLFile.idClassMap[controlId] = controlClass;
 			}
