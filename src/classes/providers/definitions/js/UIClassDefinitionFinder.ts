@@ -20,7 +20,37 @@ export class UIClassDefinitionFinder {
 		}
 
 		if (!location) {
+			location = this._getClassLocation(document, position);
+		}
+
+		if (!location) {
 			location = this._getXMLFileLocation(document, position);
+		}
+
+		return location;
+	}
+	private static _getClassLocation(document: vscode.TextDocument, position: vscode.Position): vscode.Location | undefined {
+		let location: vscode.Location | undefined;
+		const UIClass = TextDocumentTransformer.toCustomUIClass(document);
+		const offset = document.offsetAt(position);
+		if (UIClass) {
+			const method = UIClass.methods.find(method => method.acornNode?.start <= offset && method.acornNode.end >= offset);
+			if (method && method.acornNode) {
+				const allContent = AcornSyntaxAnalyzer.expandAllContent(method.acornNode);
+				const contentInPosition = allContent.filter((content: any) => content.start <= offset && content.end >= offset);
+				const identifier = contentInPosition.find((content: any) => content.type === "Identifier");
+				if (identifier?.name) {
+					const importedClass = UIClass.UIDefine.find(UIDefine => UIDefine.className === identifier.name);
+					if (importedClass) {
+						const importedUIClass = UIClassFactory.getUIClass(importedClass.classNameDotNotation);
+						if (importedUIClass instanceof CustomUIClass && importedUIClass.classFSPath) {
+							const classUri = vscode.Uri.file(importedUIClass.classFSPath);
+							const vscodePosition = new vscode.Position(0, 0);
+							location = new vscode.Location(classUri, vscodePosition);
+						}
+					}
+				}
+			}
 		}
 
 		return location;
@@ -49,7 +79,7 @@ export class UIClassDefinitionFinder {
 
 		return location;
 	}
-	static _getXMLFileLocation(document: vscode.TextDocument, position: vscode.Position) {
+	private static _getXMLFileLocation(document: vscode.TextDocument, position: vscode.Position) {
 		let location: vscode.LocationLink[] | undefined;
 
 		const UIClass = TextDocumentTransformer.toCustomUIClass(document);
