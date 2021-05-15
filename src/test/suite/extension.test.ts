@@ -94,7 +94,7 @@ suite("Extension Test Suite", () => {
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
-				const errors = JSLinter.getLintingErrors(document);
+				const errors = await JSLinter.getLintingErrors(document);
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
 

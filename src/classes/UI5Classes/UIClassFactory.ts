@@ -70,6 +70,10 @@ export class UIClassFactory {
 			!this._UIClasses[classNameDotNotation] ||
 			(<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length
 		) {
+			const oldClass = this._UIClasses[classNameDotNotation];
+			if (oldClass && oldClass instanceof CustomUIClass && oldClass.acornClassBody) {
+				this._clearAcornNodes(oldClass);
+			}
 			// console.time(`Class parsing for ${classNameDotNotation} took`);
 			this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 
@@ -79,6 +83,13 @@ export class UIClassFactory {
 			}
 			// console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
 		}
+	}
+	private static _clearAcornNodes(oldClass: CustomUIClass) {
+		const allContent = AcornSyntaxAnalyzer.expandAllContent(oldClass.acornClassBody);
+		allContent.forEach((content: any) => {
+
+			delete content.expandedContent;
+		});
 	}
 
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
