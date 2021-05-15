@@ -17,6 +17,12 @@ function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+export interface IXMLDocumentIdData {
+	id: string,
+	className: string,
+	tagText: string
+}
+
 export class XMLParser {
 	static getXMLFunctionCallTagsAndAttributes(viewOrFragment: IXMLFile, eventHandlerName: string, functionCallClassName?: string) {
 		const tagAndAttributes: { tag: ITag, attributes: string[] }[] = [];
@@ -62,14 +68,24 @@ export class XMLParser {
 	}
 
 	static getAllIDsInCurrentView(XMLFile: IXMLFile) {
-		const IdsResult: string[] = [];
-		const idRegExp = /(?<=\sid=").*?(?="\s?)/g;
-		const IdsViewResult = XMLFile.content.match(idRegExp) || [];
-		if (IdsViewResult) {
-			IdsResult.push(...IdsViewResult);
-		}
+		const result: IXMLDocumentIdData[] = [];
 
-		return IdsResult;
+		const allTags = this.getAllTags(XMLFile);
+		allTags.forEach(tag => {
+			const idAttribute = this.getAttributesOfTheTag(tag)?.find(attribute => this.getAttributeNameAndValue(attribute).attributeName === "id");
+			if (idAttribute) {
+				const className = this.getClassNameInPosition(XMLFile, tag.positionBegin);
+
+				result.push({
+					className: className,
+					id: this.getAttributeNameAndValue(idAttribute).attributeValue,
+					tagText: tag.text
+				});
+			}
+
+		});
+
+		return result;
 	}
 	static getLibraryNameInPosition(XMLFile: IXMLFile, currentPosition: number) {
 		const currentTagText = this.getTagInPosition(XMLFile, currentPosition).text;
@@ -206,8 +222,13 @@ export class XMLParser {
 	static getIfPositionIsInString(XMLFile: IXMLFile, position: number) {
 		const XMLText = XMLFile.content;
 		let isInString = false;
-		if (XMLFile?.XMLParserData?.strings) {
-			isInString = !!XMLFile?.XMLParserData?.strings[position];
+
+		if (!XMLFile.XMLParserData) {
+			this._fillXMLParsedData(XMLFile);
+		}
+
+		if (XMLFile.XMLParserData?.strings) {
+			isInString = !!XMLFile.XMLParserData.strings[position];
 		} else {
 			let quotionMarkCount = 0;
 			let secondTypeQuotionMarkCount = 0;
@@ -299,7 +320,7 @@ export class XMLParser {
 		let regExpBase;
 		let delta = 0;
 		const XMLText = XMLFile.content;
-		const results = XMLFile?.XMLParserData?.prefixResults[tagPrefix] || [];
+		const results = XMLFile.XMLParserData?.prefixResults[tagPrefix] || [];
 		const tagPositionEnd = this.getTagBeginEndPosition(XMLFile, position).positionEnd;
 
 		if (results.length === 0) {
@@ -323,7 +344,11 @@ export class XMLParser {
 					classNameResult = null;
 				}
 			}
-			if (XMLFile?.XMLParserData) {
+
+			if (!XMLFile.XMLParserData) {
+				this._fillXMLParsedData(XMLFile);
+			}
+			if (XMLFile.XMLParserData) {
 				XMLFile.XMLParserData.prefixResults[tagPrefix] = results;
 			}
 		}
@@ -454,36 +479,11 @@ export class XMLParser {
 		return prefix;
 	}
 
-	// private static _currentDocument: IXMLDocumentData = {
-	// 	document: "",
-	// 	strings: [],
-	// 	tags: [],
-	// 	prefixResults: {},
-	// 	isMarkedAsUndefined: true,
-	// 	areAllStringsClosed: true
-	// }
-
-	private static _getXMLFileFromVSCodeDocument(XMLFile: IXMLFile): IXMLFile | undefined {
-		const className = FileReader.getClassNameFromPath(XMLFile.fsPath);
-		if (className) {
-			const xmlType = className?.endsWith(".fragment.xml") ? "fragment" : "view";
-			const XMLFile = FileReader.getXMLFile(className, xmlType);
-			if (XMLFile && !XMLFile.XMLParserData) {
-				XMLFile.XMLParserData = {
-					tags: [],
-					strings: [],
-					prefixResults: {},
-					areAllStringsClosed: false
-				};
-			}
-			return XMLFile;
-		}
-	}
 	public static getAllTags(XMLFile: IXMLFile) {
 		const XMLText = XMLFile.content;
-		if (XMLFile?.XMLParserData && XMLFile.XMLParserData.tags.length > 0) {
-			return XMLFile?.XMLParserData?.tags;
-		} else if (!XMLFile?.XMLParserData?.areAllStringsClosed) {
+		if (XMLFile.XMLParserData && XMLFile.XMLParserData.tags.length > 0) {
+			return XMLFile.XMLParserData?.tags;
+		} else if (XMLFile.XMLParserData && !XMLFile.XMLParserData.areAllStringsClosed) {
 			return [];
 		}
 
@@ -503,11 +503,26 @@ export class XMLParser {
 			i++;
 		}
 
-		if (XMLFile?.XMLParserData?.tags) {
+		if (!XMLFile.XMLParserData) {
+			this._fillXMLParsedData(XMLFile);
+		}
+		if (XMLFile.XMLParserData) {
 			XMLFile.XMLParserData.tags = tags;
 		}
 
 		return tags;
+	}
+
+	private static _fillXMLParsedData(XMLFile: IXMLFile) {
+		XMLFile.XMLParserData = {
+			areAllStringsClosed: false,
+			prefixResults: {},
+			tags: [],
+			strings: []
+		};
+		const stringData = this.getStringPositionMapping(XMLFile.content);
+		XMLFile.XMLParserData.strings = stringData.positionMapping;
+		XMLFile.XMLParserData.areAllStringsClosed = stringData.areAllStringsClosed;
 	}
 
 	public static setCurrentDocument() {
