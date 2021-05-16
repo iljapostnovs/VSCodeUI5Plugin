@@ -431,6 +431,7 @@ export class FileReader {
 		}
 	}
 
+	//TODO: compare it to similar method?
 	static getResponsibleClassNameForViewOrFragment(viewOrFragment: IXMLFile) {
 		const isFragment = viewOrFragment.fsPath.endsWith(".fragment.xml");
 		const isView = viewOrFragment.fsPath.endsWith(".view.xml");

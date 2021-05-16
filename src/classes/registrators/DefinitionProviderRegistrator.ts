@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
-import { UIClassDefinitionFinder } from "../providers/definitions/js/UIClassDefinitionFinder";
+import { JSDefinitionProvider } from "../providers/definitions/js/JSDefinitionProvider";
 import { XMLDefinitionProvider } from "../providers/definitions/xml/XMLDefinitionProvider";
 
 export class DefinitionProviderRegistrator {
@@ -8,12 +8,12 @@ export class DefinitionProviderRegistrator {
 		/* Definition provider */
 		const definitionProviderDisposable = vscode.languages.registerDefinitionProvider({ language: "javascript", scheme: "file" }, {
 			provideDefinition(document: vscode.TextDocument, position: vscode.Position) {
-				return UIClassDefinitionFinder.getPositionAndUriOfCurrentVariableDefinition(document, position, false);
+				return JSDefinitionProvider.getPositionAndUriOfCurrentVariableDefinition(document, position, false);
 			}
 		});
 		const typeDefinitionProviderDisposable = vscode.languages.registerTypeDefinitionProvider({ language: "javascript", scheme: "file" }, {
 			provideTypeDefinition(document: vscode.TextDocument, position: vscode.Position) {
-				return UIClassDefinitionFinder.getPositionAndUriOfCurrentVariableDefinition(document, position, true);
+				return JSDefinitionProvider.getPositionAndUriOfCurrentVariableDefinition(document, position, true);
 			}
 		});
 		const XMLDefinitionProviderDisposable = vscode.languages.registerDefinitionProvider({ language: "xml", scheme: "file" }, {
