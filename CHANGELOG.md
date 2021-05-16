@@ -2,7 +2,7 @@
 * Bugfixes
 * Wrong file path linter also added for XML Linter
 * Now you can click on fragment/view names to navigate into them
-* Now you can click on id from view/fragment to navigate into them
+* Now you can click on id of control to navigate into view/fragment
 
 ## 0.12.38 (11-05-2021)
 * Added support for fragments defined in manifest extensions
@@ -15,7 +15,7 @@
 
 ## 0.12.36 (05-05-2021)
 * node_modules and dist added to default exclusions
-* ui5.plugin.excludeFolderPattern is now an array
+* ui5.plugin.excludeFolderPattern is now an array\
 
 ## 0.12.35 (04-05-2021)
 * ui5.plugin.excludeFolderPattern preference entry introduced
