@@ -640,5 +640,13 @@ export class UIClassFactory {
 		this._UIClasses[newName] = this._UIClasses[oldName];
 		this._UIClasses[newName].className = newName;
 		this.removeClass(oldName);
+
+		const UIClass = this._UIClasses[newName];
+		if (UIClass instanceof CustomUIClass && UIClass.classFSPath?.endsWith(".controller.js")) {
+			const view = FileReader.getViewForController(UIClass.className);
+			if (view) {
+				FileReader.replaceControllerNameForView(oldName, newName);
+			}
+		}
 	}
 }

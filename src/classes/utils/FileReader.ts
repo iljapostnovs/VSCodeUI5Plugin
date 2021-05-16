@@ -583,10 +583,6 @@ export class FileReader {
 		return documentText.match(/<.*?:Fragment\s(.|\s)*?\/>/g) || [];
 	}
 
-	private static _isSeparator(char: string) {
-		return char === " " || char === "	" || char === ";" || char === "\n" || char === "\t" || char === "\r";
-	}
-
 	public static getClassNameFromPath(fsPath: string) {
 		fsPath = fsPath.replace(/\//g, fileSeparator);
 		let className: string | undefined;
@@ -755,8 +751,13 @@ export class FileReader {
 			XMLFile.fsPath = newFSPath;
 			XMLFile.name = newName;
 
-			this.removeFromCache(oldFSPath);
+			// this.removeFromCache(oldFSPath);
 		}
+	}
+
+	static replaceControllerNameForView(oldName: string, newName: string) {
+		this._viewCache[newName] = this._viewCache[oldName];
+		delete this._viewCache[oldName];
 	}
 
 	static replaceFragmentNames(oldName: string, newName: string) {
@@ -767,7 +768,8 @@ export class FileReader {
 			fragment.fsPath = newFSPath;
 			fragment.name = newName;
 			this._fragmentCache[newName] = this._fragmentCache[oldName];
-			this.removeFromCache(oldFSPath);
+			// this.removeFromCache(oldFSPath);
+			delete this._fragmentCache[oldName];
 		}
 	}
 }
