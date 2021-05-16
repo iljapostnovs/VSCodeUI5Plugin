@@ -50,42 +50,42 @@ export class WrongFilePathLinter extends Linter {
 		return errors;
 	}
 
-	private _validateClassName(sFilePath: string) {
+	private _validateClassName(className: string) {
 		let isPathValid = false;
-		const UIClass = UIClassFactory.getUIClass(sFilePath);
+		const UIClass = UIClassFactory.getUIClass(className);
 		if (UIClass && UIClass instanceof CustomUIClass) {
 			isPathValid = UIClass.classExists;
 		}
 
 		if (!isPathValid) {
-			const sFileFSPath = FileReader.convertClassNameToFSPath(sFilePath, false, false, true);
+			const sFileFSPath = FileReader.convertClassNameToFSPath(className, false, false, true);
 			const aAllViews = FileReader.getAllViews();
 			const oView = aAllViews.find(oView => oView.fsPath === sFileFSPath);
 			isPathValid = !!oView;
 		}
 
 		if (!isPathValid) {
-			const sFileFSPath = FileReader.convertClassNameToFSPath(sFilePath, false, true, false);
+			const sFileFSPath = FileReader.convertClassNameToFSPath(className, false, true, false);
 			const aAllFragments = FileReader.getAllFragments();
 			const oFragment = aAllFragments.find(oFragment => oFragment.fsPath === sFileFSPath);
 			isPathValid = !!oFragment;
 		}
 
 		if (!isPathValid) {
-			if (sFilePath.endsWith(".")) {
-				sFilePath = sFilePath.substring(0, sFilePath.length - 1);
+			if (className.endsWith(".")) {
+				className = className.substring(0, className.length - 1);
 			}
-			const sFileFSPath = FileReader.convertClassNameToFSPath(sFilePath)?.replace(".js", ".properties");
+			const sFileFSPath = FileReader.convertClassNameToFSPath(className)?.replace(".js", ".properties");
 			if (sFileFSPath) {
 				isPathValid = fs.existsSync(sFileFSPath);
 			}
 		}
 
 		if (!isPathValid) {
-			if (sFilePath.endsWith(".")) {
-				sFilePath = sFilePath.substring(0, sFilePath.length - 1);
+			if (className.endsWith(".")) {
+				className = className.substring(0, className.length - 1);
 			}
-			const sFileFSPath = FileReader.convertClassNameToFSPath(sFilePath)?.replace(".js", "");
+			const sFileFSPath = FileReader.convertClassNameToFSPath(className)?.replace(".js", "");
 			if (sFileFSPath) {
 				isPathValid = fs.existsSync(sFileFSPath);
 			}

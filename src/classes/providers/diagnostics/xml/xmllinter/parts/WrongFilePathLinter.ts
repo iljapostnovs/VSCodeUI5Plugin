@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { FileReader } from "../../../../../utils/FileReader";
 import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
+import * as fs from "fs";
 
 export class WrongFilePathLinter extends Linter {
 	protected className = "WrongFilePathLinter";
@@ -45,6 +46,19 @@ export class WrongFilePathLinter extends Linter {
 	}
 
 	private _validateClassName(className: string) {
-		return !!FileReader.getXMLFile(className);
+		let isPathValid = !!FileReader.getXMLFile(className);
+
+		if (!isPathValid) {
+			if (className.endsWith(".")) {
+				className = className.substring(0, className.length - 1);
+			}
+			const sFileFSPath = FileReader.convertClassNameToFSPath(className)?.replace(".js", "");
+			if (sFileFSPath) {
+				isPathValid = fs.existsSync(sFileFSPath);
+			}
+		}
+
+
+		return isPathValid;
 	}
 }
