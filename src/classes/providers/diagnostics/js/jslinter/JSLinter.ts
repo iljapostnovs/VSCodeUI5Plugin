@@ -12,7 +12,7 @@ import { WrongOverrideLinter } from "./parts/WrongOverrideLinter";
 
 export class JSLinter {
 	static timePerchar = 0;
-	static getLintingErrors(document: vscode.TextDocument): IError[] {
+	static async getLintingErrors(document: vscode.TextDocument) {
 		const linters: Linter[] = [
 			new WrongFieldMethodLinter(),
 			new WrongClassNameLinter(),
@@ -26,9 +26,9 @@ export class JSLinter {
 
 		let errors: IError[] = [];
 		try {
-			linters.forEach(linter => {
-				errors = errors.concat(linter.getErrors(document));
-			});
+			for (const linter of linters) {
+				errors = errors.concat(await linter.getErrors(document));
+			}
 		} catch (error) {
 			console.error(error);
 		}

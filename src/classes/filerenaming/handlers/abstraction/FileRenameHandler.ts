@@ -43,6 +43,7 @@ export abstract class FileRenameHandler {
 				let fileContent = fs.readFileSync(filePath, "utf8");
 				if (fileContent.indexOf(textToReplaceFromDotNotation) > -1 || fileContent.indexOf(textToReplaceFromSlashNotation) > -1) {
 					fileContent = fileContent.replace(new RegExp("\\\"" + textToReplaceFromDotNotation.replace(/\./g, "\\.") + "\\\"", "g"), "\"" + textToReplaceToDotNotation + "\"");
+					fileContent = fileContent.replace(new RegExp("\\{" + textToReplaceFromDotNotation.replace(/\./g, "\\.") + "\\}", "g"), "{" + textToReplaceToDotNotation + "}");
 					fileContent = fileContent.replace(new RegExp("\\\"" + textToReplaceFromSlashNotation.replace(/\./g, "\\.") + "\\\"", "g"), "\"" + textToReplaceToSlashNotation + "\"");
 					//TODO: Think how to do it async. Sync currently needed for folder rename, where mass file change is fired and
 					//there might be multiple changes for the same file
@@ -55,7 +56,9 @@ export abstract class FileRenameHandler {
 							UIClassFactory.setNewCodeForClass(classNameOfTheReplacedFile, fileContent);
 						}
 					} else if (filePath.endsWith(".view.xml")) {
-						FileReader.setNewViewContentToCache(fileContent, filePath);
+						FileReader.setNewViewContentToCache(fileContent, filePath, true);
+					} else if (filePath.endsWith(".fragment.xml")) {
+						FileReader.setNewFragmentContentToCache(fileContent, filePath, true);
 					}
 				}
 			});

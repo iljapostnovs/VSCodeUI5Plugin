@@ -801,7 +801,7 @@
 		},
 		{
 			"className": "com.test.controller.LinterTest",
-			"timeLimit": 100,
+			"timeLimit": 500,
 			"errors": [
 				{
 					"text": "\"_nonExistentMethod\" does not exist in \"com.test.controller.LinterTest\""

@@ -1,17 +1,19 @@
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { FileReader, XMLFileTransformer } from "../../../utils/FileReader";
+import { FileReader } from "../../../utils/FileReader";
 import LineColumn = require("line-column");
 import { XMLParser } from "../../../utils/XMLParser";
+import { ITag } from "../../diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
 export class XMLDefinitionProvider {
-	public static provideDefinitionsFor(document: vscode.TextDocument, position: vscode.Position): vscode.Location | undefined {
-		let location: vscode.Location | undefined;
+	public static provideDefinitionsFor(document: vscode.TextDocument, position: vscode.Position) {
+		let location: vscode.Location | vscode.LocationLink[] | undefined;
 		const offset = document.offsetAt(position);
 		const range = document.getWordRangeAtPosition(position);
 		const word = document.getText(range);
 
-		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = TextDocumentTransformer.toXMLFile(document);
 		if (XMLFile) {
 			const tag = XMLParser.getTagInPosition(XMLFile, offset);
 			const attributes = XMLParser.getAttributesOfTheTag(tag);
@@ -28,6 +30,44 @@ export class XMLDefinitionProvider {
 				const responsibleClassName = FileReader.getResponsibleClassForXMLDocument(document);
 				if (responsibleClassName) {
 					location = this._getLocationFor(responsibleClassName, eventHandlerName);
+				}
+			}
+
+			if (!location) {
+				location = this._getLocationForFragmentOrViewPaths(tag, offset, document);
+			}
+		}
+
+		return location;
+	}
+
+	private static _getLocationForFragmentOrViewPaths(tag: ITag, offset: number, document: vscode.TextDocument) {
+		let location: vscode.LocationLink[] | undefined;
+		const attributes = XMLParser.getAttributesOfTheTag(tag);
+		if (attributes) {
+			const attribute = attributes?.find(attribute => {
+				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+				const attributeValueOffsetBegin = tag.positionBegin + tag.text.indexOf(attribute) + attribute.indexOf(attributeValue);
+				const attributeValueOffsetEnd = attributeValueOffsetBegin + attributeValue.length;
+
+				return attributeValueOffsetBegin <= offset && attributeValueOffsetEnd >= offset;
+			});
+
+			if (attribute) {
+				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+				const attributeValueOffsetBegin = tag.positionBegin + tag.text.indexOf(attribute) + attribute.indexOf(attributeValue);
+				const attributeValueOffsetEnd = attributeValueOffsetBegin + attributeValue.length;
+				const XMLFile = FileReader.getXMLFile(attributeValue);
+				if (XMLFile) {
+					const classUri = vscode.Uri.file(XMLFile.fsPath);
+					const vscodePosition = new vscode.Position(0, 0);
+					const originSelectionPositionBegin = document.positionAt(attributeValueOffsetBegin);
+					const originSelectionPositionEnd = document.positionAt(attributeValueOffsetEnd);
+					location = [{
+						targetRange: new vscode.Range(vscodePosition, vscodePosition),
+						targetUri: classUri,
+						originSelectionRange: new vscode.Range(originSelectionPositionBegin, originSelectionPositionEnd)
+					}];
 				}
 			}
 		}

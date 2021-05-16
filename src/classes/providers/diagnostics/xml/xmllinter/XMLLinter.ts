@@ -4,13 +4,15 @@ import { UnusedNamespaceLinter } from "./parts/UnusedNamespaceLinter";
 import { IError } from "./parts/abstraction/Linter";
 import * as vscode from "vscode";
 import { TagLinter } from "./parts/TagLinter";
+import { WrongFilePathLinter } from "./parts/WrongFilePathLinter";
 
 export class XMLLinter {
 	static getLintingErrors(document: vscode.TextDocument): IError[] {
 		const linters: Linter[] = [
 			new TagAttributeLinter(),
 			new UnusedNamespaceLinter(),
-			new TagLinter()
+			new TagLinter(),
+			new WrongFilePathLinter()
 		];
 
 		let errors: IError[] = [];

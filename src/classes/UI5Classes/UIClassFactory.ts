@@ -21,7 +21,6 @@ interface IViewsAndFragments {
 interface IUIClassMap {
 	[key: string]: AbstractUIClass;
 }
-
 export class UIClassFactory {
 	private static readonly _UIClasses: IUIClassMap = {
 		Promise: new JSClass("Promise"),
@@ -71,6 +70,10 @@ export class UIClassFactory {
 			!this._UIClasses[classNameDotNotation] ||
 			(<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length
 		) {
+			const oldClass = this._UIClasses[classNameDotNotation];
+			if (oldClass && oldClass instanceof CustomUIClass && oldClass.acornClassBody) {
+				this._clearAcornNodes(oldClass);
+			}
 			// console.time(`Class parsing for ${classNameDotNotation} took`);
 			this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 
@@ -80,6 +83,13 @@ export class UIClassFactory {
 			}
 			// console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
 		}
+	}
+	private static _clearAcornNodes(oldClass: CustomUIClass) {
+		const allContent = AcornSyntaxAnalyzer.expandAllContent(oldClass.acornClassBody);
+		allContent.forEach((content: any) => {
+
+			delete content.expandedContent;
+		});
 	}
 
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
@@ -445,7 +455,7 @@ export class UIClassFactory {
 		});
 	}
 
-	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = [], removeDuplicates = true): IViewsAndFragments {
+	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = [], removeDuplicates = true, isRootClass = true): IViewsAndFragments {
 		if (checkedClasses.includes(CurrentUIClass.className)) {
 			return { fragments: [], views: [] };
 		}
@@ -453,12 +463,14 @@ export class UIClassFactory {
 		checkedClasses.push(CurrentUIClass.className);
 		const viewsAndFragments: IViewsAndFragments = this._getViewsAndFragmentsRelatedTo(CurrentUIClass);
 
-		const children = this._getAllChildrenOfClass(CurrentUIClass);
 		const parentUIClasses = this._getAllCustomUIClasses().filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && CurrentUIClass !== UIClass);
 		const whereMentioned = this._getAllClassesWhereClassIsImported(CurrentUIClass.className);
-		const relatedClasses = [...parentUIClasses, ...children, ...whereMentioned];
+		const relatedClasses = [...parentUIClasses, ...whereMentioned];
+		if (isRootClass) {
+			relatedClasses.push(...this._getAllChildrenOfClass(CurrentUIClass));
+		}
 		const relatedViewsAndFragments = relatedClasses.reduce((accumulator: IViewsAndFragments, relatedUIClass: CustomUIClass) => {
-			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false);
+			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false, false);
 			accumulator.fragments = accumulator.fragments.concat(relatedFragmentsAndViews.fragments);
 			accumulator.views = accumulator.views.concat(relatedFragmentsAndViews.views);
 			return accumulator;
@@ -469,10 +481,16 @@ export class UIClassFactory {
 		viewsAndFragments.fragments = viewsAndFragments.fragments.concat(relatedViewsAndFragments.fragments);
 		viewsAndFragments.views = viewsAndFragments.views.concat(relatedViewsAndFragments.views);
 		viewsAndFragments.views.forEach(view => {
-			viewsAndFragments.fragments.push(...this._getFragmentFromViewManifestExtensions(CurrentUIClass, view));
+			viewsAndFragments.fragments.push(...this._getFragmentFromViewManifestExtensions(CurrentUIClass.className, view));
 		});
 
 		if (removeDuplicates) {
+			viewsAndFragments.views.forEach(view => {
+				viewsAndFragments.fragments.push(...FileReader.getFragmentsInXMLFile(view));
+			});
+			viewsAndFragments.fragments.forEach(fragment => {
+				viewsAndFragments.fragments.push(...FileReader.getFragmentsInXMLFile(fragment));
+			});
 			viewsAndFragments.fragments = viewsAndFragments.fragments.reduce((accumulator: IFragment[], fragment) => {
 				if (!accumulator.find(accumulatorFragment => accumulatorFragment.fsPath === fragment.fsPath)) {
 					accumulator.push(fragment);
@@ -510,7 +528,7 @@ export class UIClassFactory {
 
 	private static _getAllClassesWhereClassIsImported(className: string) {
 		return this._getAllCustomUIClasses().filter(UIClass => {
-			return !!UIClass.UIDefine.find(UIDefine => {
+			return UIClass.parentClassNameDotNotation !== className && !!UIClass.UIDefine.find(UIDefine => {
 				return UIDefine.classNameDotNotation === className;
 			});
 		});
@@ -532,11 +550,11 @@ export class UIClassFactory {
 		}).map(UIClassName => allUIClasses[UIClassName] as CustomUIClass);
 	}
 
-	private static _getFragmentFromViewManifestExtensions(UIClass: CustomUIClass, view: IView) {
+	private static _getFragmentFromViewManifestExtensions(className: string, view: IView) {
 		const fragments: IFragment[] = [];
 		const viewName = FileReader.getClassNameFromPath(view.fsPath);
 		if (viewName) {
-			const extensions = FileReader.getManifestExtensionsForClass(UIClass.className);
+			const extensions = FileReader.getManifestExtensionsForClass(className);
 			const viewExtension = extensions && extensions["sap.ui.viewExtensions"] && extensions["sap.ui.viewExtensions"][viewName];
 			if (viewExtension) {
 				Object.keys(viewExtension).forEach(key => {
@@ -545,7 +563,7 @@ export class UIClassFactory {
 						const fragmentName = extension.fragmentName;
 						const fragment = FileReader.getFragment(fragmentName);
 						if (fragment) {
-							const fragmentsInFragment: IFragment[] = FileReader.getFragmentsInFragment(fragment);
+							const fragmentsInFragment: IFragment[] = FileReader.getFragmentsInXMLFile(fragment);
 							fragments.push(fragment, ...fragmentsInFragment);
 						}
 					}
@@ -616,5 +634,19 @@ export class UIClassFactory {
 
 	public static removeClass(className: string) {
 		delete this._UIClasses[className];
+	}
+
+	public static setNewNameForClass(oldName: string, newName: string) {
+		this._UIClasses[newName] = this._UIClasses[oldName];
+		this._UIClasses[newName].className = newName;
+		this.removeClass(oldName);
+
+		const UIClass = this._UIClasses[newName];
+		if (UIClass instanceof CustomUIClass && UIClass.classFSPath?.endsWith(".controller.js")) {
+			const view = FileReader.getViewForController(UIClass.className);
+			if (view) {
+				FileReader.replaceControllerNameForView(oldName, newName);
+			}
+		}
 	}
 }

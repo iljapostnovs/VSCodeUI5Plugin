@@ -107,15 +107,15 @@ export class DiagnosticsRegistrator {
 
 		if (isJSDiagnosticsEnabled && !this._timeoutId) {
 			const timeout = this._getTimeoutForDocument(document);
-			this._timeoutId = setTimeout(() => {
-				this._updateDiagnosticCollection(document, collection);
+			this._timeoutId = setTimeout(async () => {
+				await this._updateDiagnosticCollection(document, collection);
 				this._timeoutId = null;
 			}, timeout);
 		}
 	}
 
-	private static _updateDiagnosticCollection(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
-		const errors = JSLinter.getLintingErrors(document);
+	private static async _updateDiagnosticCollection(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+		const errors = await JSLinter.getLintingErrors(document);
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
 			const diagnostic = new CustomDiagnostics(error.range, error.message);

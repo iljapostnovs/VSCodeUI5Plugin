@@ -69,6 +69,8 @@ XML Linters available:<br/>
 >Checks if declared namespaces are used
 * Tag linter<br/>
 >Checks for class and aggregation existence
+* Wrong file path linter<br/>
+>Checks if any strings that contains app namespace have according fragment or view
 
 > Related preference entries:<br/>
 > *ui5.plugin.xmlDiagnostics*<br/>

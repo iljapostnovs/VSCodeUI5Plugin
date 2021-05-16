@@ -27,8 +27,9 @@ export class PublicMemberLinter extends Linter {
 						if (!isException) {
 							const methodIsUsed = this._checkIfMemberIsUsedElsewhere(customUIClasses, UIClass, method.name, method);
 							if (!methodIsUsed && method.position) {
-								const position = LineColumn(UIClass.classText).fromIndex(method.position);
-								if (position) {
+								const position = LineColumn(UIClass.classText).fromIndex(method.memberPropertyNode.start);
+								const positionEnd = LineColumn(UIClass.classText).fromIndex(method.memberPropertyNode.end);
+								if (position && positionEnd) {
 									errors.push({
 										source: "Public member linter",
 										acornNode: method.acornNode,
@@ -36,7 +37,7 @@ export class PublicMemberLinter extends Linter {
 										message: `Method "${method.name}" is possibly private, no references found in other classes`,
 										range: new vscode.Range(
 											new vscode.Position(position.line - 1, position.col - 1),
-											new vscode.Position(position.line - 1, position.col + method.name.length - 1)
+											new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
 										),
 										severity: vscode.DiagnosticSeverity.Information
 									});

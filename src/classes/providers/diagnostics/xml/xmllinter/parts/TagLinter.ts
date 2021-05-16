@@ -4,21 +4,22 @@ import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
 import { IUIAggregation } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { IXMLFile, XMLFileTransformer } from "../../../../../utils/FileReader";
+import { IXMLFile } from "../../../../../utils/FileReader";
+import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
 
 
 export class TagLinter extends Linter {
 	getErrors(document: vscode.TextDocument): IError[] {
 		const errors: IError[] = [];
-
-		// console.time("Tag linter");
-		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = TextDocumentTransformer.toXMLFile(document);
 		if (XMLFile) {
 			const tags = XMLParser.getAllTags(XMLFile);
 			tags.forEach(tag => {
 				errors.push(...this._getClassNameErrors(tag, XMLFile));
 			});
 		}
+
+		// console.time("Tag linter");
 		// console.timeEnd("Tag linter");
 
 		return errors;

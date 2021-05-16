@@ -4,7 +4,7 @@ import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { SwitchToControllerCommand } from "../../../vscommands/switchers/SwitchToControllerCommand";
 import { MethodInserter } from "../util/MethodInserter";
 import { CustomDiagnostics } from "../../../registrators/DiagnosticsRegistrator";
-import { XMLFileTransformer } from "../../../utils/FileReader";
+import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
 
 export class XMLCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -19,7 +19,7 @@ export class XMLCodeActionProvider {
 		const diagnostic: CustomDiagnostics | undefined = diagnostics.filter(diagnostic => diagnostic instanceof CustomDiagnostics).find(diagnostic => {
 			return diagnostic.range.contains(range);
 		});
-		const XMLFile = diagnostic?.attribute && XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = diagnostic?.attribute && TextDocumentTransformer.toXMLFile(document);
 		if (diagnostic?.attribute && XMLFile) {
 			const currentPositionOffset = document?.offsetAt(range.end);
 			const attributeData = XMLParser.getAttributeNameAndValue(diagnostic.attribute);

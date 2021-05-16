@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
-import { IXMLFile, XMLFileTransformer } from "./FileReader";
+import { IXMLFile } from "./FileReader";
+import { TextDocumentTransformer } from "./TextDocumentTransformer";
 import { XMLParser } from "./XMLParser";
 
 export class XMLFormatter {
@@ -8,7 +9,7 @@ export class XMLFormatter {
 		const textEdits: vscode.TextEdit[] = [];
 		const documentText = document.getText();
 
-		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = TextDocumentTransformer.toXMLFile(document, true);
 		if (XMLFile) {
 			const allTags = this._getAllTags(XMLFile);
 

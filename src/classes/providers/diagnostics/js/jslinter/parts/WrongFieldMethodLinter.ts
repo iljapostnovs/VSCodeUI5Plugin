@@ -11,41 +11,72 @@ import { ConfigHandler } from "./config/ConfigHandler";
 export class WrongFieldMethodLinter extends Linter {
 	protected className = "WrongFieldMethodLinter";
 	public static timePerChar = 0;
-	_getErrors(document: vscode.TextDocument): IError[] {
+	private _timeSpent = 0;
+	async _getErrors(document: vscode.TextDocument) {
 		let errors: IError[] = [];
 
 		if (vscode.workspace.getConfiguration("ui5.plugin").get("useWrongFieldMethodLinter")) {
 			// console.time("WrongFieldMethodLinter");
-			const start = new Date().getTime();
-			errors = this._getLintingErrors(document);
-			const end = new Date().getTime();
-			WrongFieldMethodLinter.timePerChar = (end - start) / document.getText().length;
+			errors = await this._getLintingErrors(document);
 			// console.timeEnd("WrongFieldMethodLinter");
+			WrongFieldMethodLinter.timePerChar = this._timeSpent / document.getText().length;
 		}
 
 		return errors;
 	}
 
-	private _getLintingErrors(document: vscode.TextDocument): IError[] {
+	private async _getLintingErrors(document: vscode.TextDocument) {
 		let errors: IError[] = [];
-
+		const approximateTime = WrongFieldMethodLinter.timePerChar * document.getText().length;
+		let partQuantity = 1;
+		const pauseBetweenParts = 100;
+		if (approximateTime > pauseBetweenParts) {
+			partQuantity = Math.ceil(approximateTime / pauseBetweenParts);
+		}
 		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 		if (currentClassName) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 			const acornMethods = UIClass.acornMethodsAndFields.filter(fieldOrMethod => fieldOrMethod.value.type === "FunctionExpression").map((node: any) => node.value.body);
 
-			acornMethods.forEach((method: any) => {
-				if (method.body) {
-					method.body.forEach((node: any) => {
-						const validationErrors = this._getErrorsForExpression(node, UIClass, document);
-						errors = errors.concat(validationErrors);
-					});
-				}
-			});
+			if (partQuantity > acornMethods.length) {
+				partQuantity = acornMethods.length;
+			}
+			let parts = [];
+			const methodContainerLength = Math.ceil(acornMethods.length / partQuantity);
+
+			for (let index = 0; index < partQuantity; index++) {
+				parts.push(acornMethods.slice(index * methodContainerLength, index * methodContainerLength + methodContainerLength));
+			}
+			parts = parts.filter(part => part.length > 0);
+
+			for (const part of parts) {
+				errors = await this._getLintingErrorsForMethods(part, UIClass, document, 0);
+			}
 
 		}
 
 		return errors;
+	}
+
+	private _getLintingErrorsForMethods(acornMethods: any[], UIClass: CustomUIClass, document: vscode.TextDocument, timeout: number): Promise<IError[]> {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				const start = new Date().getTime();
+				let errors: IError[] = [];
+				acornMethods.forEach((acornMethod: any) => {
+					if (acornMethod.body) {
+						acornMethod.body.forEach((node: any) => {
+							const validationErrors = this._getErrorsForExpression(node, UIClass, document);
+							errors = errors.concat(validationErrors);
+						});
+					}
+				});
+
+				const end = new Date().getTime();
+				this._timeSpent += end - start;
+				resolve(errors);
+			}, timeout);
+		});
 	}
 
 	private _getErrorsForExpression(node: any, UIClass: CustomUIClass, document: vscode.TextDocument, errors: IError[] = [], droppedNodes: any[] = [], errorNodes: any[] = []) {
@@ -104,16 +135,17 @@ export class WrongFieldMethodLinter extends Linter {
 								}
 								const isMethodException = ConfigHandler.checkIfMemberIsException(className, nextNodeName);
 								if (!isMethodException) {
-									const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
-									if (position) {
+									const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start);
+									const positionEnd = LineColumn(UIClass.classText).fromIndex(nextNode.property.end);
+									if (position && positionEnd) {
 										errorNodes.push(nextNode);
 										errors.push({
 											message: `"${nextNodeName}" does not exist in "${className}"`,
 											code: "UI5Plugin",
 											source: "Field/Method Linter",
 											range: new vscode.Range(
-												new vscode.Position(position.line - 1, position.col),
-												new vscode.Position(position.line - 1, position.col + nextNodeName.length)
+												new vscode.Position(position.line - 1, position.col - 1),
+												new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
 											),
 											acornNode: nextNode,
 											type: CustomDiagnosticType.NonExistentMethod,
@@ -141,16 +173,17 @@ export class WrongFieldMethodLinter extends Linter {
 									}
 
 									if (sErrorMessage) {
-										const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start - 1);
-										if (position) {
+										const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start);
+										const positionEnd = LineColumn(UIClass.classText).fromIndex(nextNode.property.end);
+										if (position && positionEnd) {
 											errorNodes.push(nextNode);
 											errors.push({
 												message: sErrorMessage,
 												code: "UI5Plugin",
 												source: "Field/Method Linter",
 												range: new vscode.Range(
-													new vscode.Position(position.line - 1, position.col),
-													new vscode.Position(position.line - 1, position.col + nextNodeName.length)
+													new vscode.Position(position.line - 1, position.col - 1),
+													new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
 												),
 												acornNode: nextNode,
 												methodName: nextNodeName,

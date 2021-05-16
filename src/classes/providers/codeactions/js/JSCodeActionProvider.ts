@@ -5,8 +5,8 @@ import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { CustomDiagnostics, CustomDiagnosticType } from "../../../registrators/DiagnosticsRegistrator";
 import { MethodInserter } from "../util/MethodInserter";
 import { FileReader } from "../../../utils/FileReader";
-import { SAPUIDefineFactory } from "../../completionitems/js/sapuidefine/SAPUIDefineFactory";
 import { ReusableMethods } from "../../reuse/ReusableMethods";
+import { SAPUIDefineFactory } from "../../completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {

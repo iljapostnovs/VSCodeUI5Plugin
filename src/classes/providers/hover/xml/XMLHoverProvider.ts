@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
+import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
+import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { XMLFileTransformer } from "../../../utils/FileReader";
+import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
 import { URLBuilder } from "../../../utils/URLBuilder";
 import { XMLParser } from "../../../utils/XMLParser";
 
@@ -11,7 +13,7 @@ export class XMLHoverProvider {
 		const offset = document.offsetAt(position);
 		let hover: vscode.Hover | undefined;
 
-		const XMLFile = XMLFileTransformer.transformFromVSCodeDocument(document);
+		const XMLFile = TextDocumentTransformer.toXMLFile(document);
 		if (XMLFile) {
 			const allTags = XMLParser.getAllTags(XMLFile);
 			const tag = allTags.find(tag => tag.positionBegin < offset && tag.positionEnd >= offset);
@@ -44,7 +46,11 @@ export class XMLHoverProvider {
 						const markdownString = new vscode.MarkdownString();
 						markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
 						const UIClass = UIClassFactory.getUIClass(classOfTheTag);
-						const text = `${URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass)}`;
+						const node = new SAPNodeDAO().findNode(UIClass.className);
+						let classDescription = node?.getMetadata()?.getRawMetadata()?.description || "";
+						classDescription = StandardUIClass.removeTags(classDescription);
+						const description = classDescription ? `  \n${classDescription}` : "";
+						const text = `${URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass)}${description}`;
 						markdownString.appendMarkdown(text);
 						hover = new vscode.Hover(markdownString);
 					} else {

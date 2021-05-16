@@ -1,21 +1,46 @@
 import * as vscode from "vscode";
-import { SAPNode } from "../../../librarydata/SAPNode";
-import { URLBuilder } from "../../../utils/URLBuilder";
-import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
-import { UI5Plugin } from "../../../../UI5Plugin";
-import { AbstractUIClass } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
-import { IPropertyGenerator } from "../codegenerators/property/interfaces/IPropertyGenerator";
-import { GeneratorFactory } from "../codegenerators/GeneratorFactory";
-import { IAggregationGenerator } from "../codegenerators/aggregation/interfaces/IAggregationGenerator";
-import { SAPNodePropertyGenerationStrategy } from "../codegenerators/property/strategies/SAPNodePropertyGetterStrategy";
-import { SAPClassAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
-import { SAPNodeAggregationGetterStrategy } from "../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
-import { SAPClassPropertyGetterStrategy } from "../codegenerators/property/strategies/SAPClassPropertyGetterStrategy";
-import { CustomCompletionItem } from "../CustomCompletionItem";
+import { UI5Plugin } from "../../../../../UI5Plugin";
+import { SAPNode } from "../../../../librarydata/SAPNode";
+import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
+import { UI5MetadataPreloader } from "../../../../librarydata/UI5MetadataDAO";
+import { ResourceModelData } from "../../../../UI5Classes/ResourceModelData";
+import { SAPIcons } from "../../../../UI5Classes/SAPIcons";
+import { AbstractUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { StandardUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
+import { URLBuilder } from "../../../../utils/URLBuilder";
+import { IAggregationGenerator } from "../../codegenerators/aggregation/interfaces/IAggregationGenerator";
+import { SAPClassAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
+import { SAPNodeAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
+import { GeneratorFactory } from "../../codegenerators/GeneratorFactory";
+import { IPropertyGenerator } from "../../codegenerators/property/interfaces/IPropertyGenerator";
+import { SAPClassPropertyGetterStrategy } from "../../codegenerators/property/strategies/SAPClassPropertyGetterStrategy";
+import { SAPNodePropertyGenerationStrategy } from "../../codegenerators/property/strategies/SAPNodePropertyGetterStrategy";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
+import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
-export class StandardXMLCompletionItemFactory {
+export class StandardXMLCompletionItemFactory implements ICompletionItemFactory {
+	static XMLStandardLibCompletionItems: CustomCompletionItem[] = [];
+	async createCompletionItems() {
+		return this.generateAggregationPropertyCompletionItems();
+	}
+
 	private readonly _nodeDAO = new SAPNodeDAO();
+
+	async preloadCompletionItems() {
+		const _nodeDAO = new SAPNodeDAO();
+		const SAPNodes = await _nodeDAO.getAllNodes();
+
+		const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
+		await Promise.all([
+			metadataPreloader.preloadLibs(),
+			SAPIcons.preloadIcons(),
+			ResourceModelData.readTexts()
+		]);
+		console.log("Libs are preloaded");
+
+		StandardXMLCompletionItemFactory.XMLStandardLibCompletionItems = await this.generateAggregationPropertyCompletionItems();
+		console.log("After the preload XML Completion Items are generated successfully");
+	}
 
 	async generateAggregationPropertyCompletionItems() {
 		const availableProgressLeft = 50;

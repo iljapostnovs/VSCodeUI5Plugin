@@ -1,16 +1,17 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { IUIField, IUIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { IFieldsAndMethods, UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../utils/FileReader";
-import { ReusableMethods } from "../../reuse/ReusableMethods";
-import { CustomCompletionItem } from "../CustomCompletionItem";
+import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { IUIMethod, IUIField } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { IFieldsAndMethods, UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
+import { FileReader } from "../../../../utils/FileReader";
+import { ReusableMethods } from "../../../reuse/ReusableMethods";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
+import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 import { ClassCompletionItemFactory } from "./ClassCompletionItemFactory";
 
-export class JSDynamicCompletionItemsFactory {
+export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 
-	public createUIClassCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 		const fieldsAndMethods = AcornSyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable(document, position);
 		if (fieldsAndMethods) {
@@ -18,7 +19,7 @@ export class JSDynamicCompletionItemsFactory {
 		}
 
 		if (completionItems.length === 0) {
-			completionItems = ClassCompletionItemFactory.createCompletionItems(document, position);
+			completionItems = await new ClassCompletionItemFactory().createCompletionItems(document, position);
 		}
 
 		//copy(JSON.stringify(completionItems.map(item => item.insertText.value || item.insertText)))
