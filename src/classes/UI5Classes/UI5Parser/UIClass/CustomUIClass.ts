@@ -422,24 +422,6 @@ export class CustomUIClass extends AbstractUIClass {
 	}
 	private _fillMethodsAndFields() {
 		if (this.acornClassBody?.properties) {
-			this.acornClassBody.properties?.forEach((property: any) => {
-				if (property.value?.type === "FunctionExpression" || property.value?.type === "ArrowFunctionExpression") {
-					const assignmentExpressions = AcornSyntaxAnalyzer.expandAllContent(property.value.body).filter((node: any) => node.type === "AssignmentExpression");
-					assignmentExpressions?.forEach((node: any) => {
-						if (this.isAssignmentStatementForThisVariable(node)) {
-							this.fields.push({
-								name: node.left.property.name,
-								type: node.left.property.name.jsType,
-								description: node.left.property.name.jsType || "",
-								visibility: node.left.property.name?.startsWith("_") ? "private" : "public",
-								acornNode: node.left,
-								owner: this.className,
-								memberPropertyNode: node.left.property
-							});
-						}
-					});
-				}
-			});
 
 			this.acornClassBody.properties.forEach((property: any) => {
 				if (property.value?.type === "FunctionExpression" || property.value?.type === "ArrowFunctionExpression") {
@@ -502,6 +484,30 @@ export class CustomUIClass extends AbstractUIClass {
 						memberPropertyNode: property.key
 					});
 					this.acornMethodsAndFields.push(property);
+				}
+			});
+			this.acornClassBody.properties?.forEach((property: any) => {
+				if (property.value?.type === "FunctionExpression" || property.value?.type === "ArrowFunctionExpression") {
+					const assignmentExpressions = AcornSyntaxAnalyzer.expandAllContent(property.value.body).filter((node: any) => node.type === "AssignmentExpression");
+					assignmentExpressions?.forEach((node: any) => {
+						if (this.isAssignmentStatementForThisVariable(node)) {
+							const field = this.fields.find(field => field.name === node.left.property.name);
+							if (field) {
+								field.type = field.type || node.left.property.name.jsType;
+								field.acornNode = node.left;
+							} else {
+								this.fields.push({
+									name: node.left.property.name,
+									type: node.left.property.name.jsType,
+									description: node.left.property.name.jsType || "",
+									visibility: node.left.property.name?.startsWith("_") ? "private" : "public",
+									acornNode: node.left,
+									owner: this.className,
+									memberPropertyNode: node.left.property
+								});
+							}
+						}
+					});
 				}
 			});
 
