@@ -491,15 +491,21 @@ export class CustomUIClass extends AbstractUIClass {
 					const assignmentExpressions = AcornSyntaxAnalyzer.expandAllContent(property.value.body).filter((node: any) => node.type === "AssignmentExpression");
 					assignmentExpressions?.forEach((node: any) => {
 						if (this.isAssignmentStatementForThisVariable(node)) {
-							this.fields.push({
-								name: node.left.property.name,
-								type: node.left.property.name.jsType,
-								description: node.left.property.name.jsType || "",
-								visibility: node.left.property.name?.startsWith("_") ? "private" : "public",
-								acornNode: node.left,
-								owner: this.className,
-								memberPropertyNode: node.left.property
-							});
+							const field = this.fields.find(field => field.name === node.left.property.name);
+							if (field) {
+								field.type = field.type || node.left.property.name.jsType;
+								field.acornNode = node.left;
+							} else {
+								this.fields.push({
+									name: node.left.property.name,
+									type: node.left.property.name.jsType,
+									description: node.left.property.name.jsType || "",
+									visibility: node.left.property.name?.startsWith("_") ? "private" : "public",
+									acornNode: node.left,
+									owner: this.className,
+									memberPropertyNode: node.left.property
+								});
+							}
 						}
 					});
 				}
