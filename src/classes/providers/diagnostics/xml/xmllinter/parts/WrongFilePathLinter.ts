@@ -49,18 +49,21 @@ export class WrongFilePathLinter extends Linter {
 
 	private _validateClassName(className: string) {
 		let isPathValid = !!FileReader.getXMLFile(className);
-		let UIClass = UIClassFactory.getUIClass(className);
-		if (UIClass && UIClass instanceof CustomUIClass) {
-			isPathValid = UIClass.classExists;
 
-			if (!isPathValid) {
-				const parts = className.split(".");
-				if (parts.length >= 2) {
-					const memberName = parts.pop();
-					const className = parts.join(".");
-					UIClass = UIClassFactory.getUIClass(className);
-					if (UIClass.classExists) {
-						isPathValid = !!UIClass.methods.find(method => method.name === memberName) || !!UIClass.fields.find(field => field.name === memberName);
+		if (!isPathValid) {
+			let UIClass = UIClassFactory.getUIClass(className);
+			if (UIClass && UIClass instanceof CustomUIClass) {
+				isPathValid = UIClass.classExists;
+
+				if (!isPathValid) {
+					const parts = className.split(".");
+					if (parts.length >= 2) {
+						const memberName = parts.pop();
+						const className = parts.join(".");
+						UIClass = UIClassFactory.getUIClass(className);
+						if (UIClass.classExists) {
+							isPathValid = !!UIClass.methods.find(method => method.name === memberName) || !!UIClass.fields.find(field => field.name === memberName);
+						}
 					}
 				}
 			}
