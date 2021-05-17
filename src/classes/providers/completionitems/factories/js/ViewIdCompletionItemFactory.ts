@@ -19,7 +19,7 @@ export class ViewIdCompletionItemFactory implements ICompletionItemFactory {
 			if (nodes.length === 1 && nodes[0].callee?.property?.name === "byId") {
 
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
-				const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+				const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, false);
 				const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
 				const viewIdResult: IXMLDocumentIdData[] = [];
 				XMLDocuments.forEach(XMLDocument => {
