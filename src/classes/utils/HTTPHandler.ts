@@ -29,7 +29,7 @@ export class HTTPHandler {
 		try {
 			data = (await axios.get(uri, options)).data;
 		} catch (error) {
-			console.error(error);
+			vscode.window.showErrorMessage(`Error occured sending HTTP Request. Message: "${error.message}". Response data: "${error.response?.data}"`);
 			throw error;
 		}
 
