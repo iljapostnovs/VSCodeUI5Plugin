@@ -4,6 +4,8 @@ import LineColumn = require("line-column");
 import { FileReader } from "../../../../../utils/FileReader";
 import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
 import * as fs from "fs";
+import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 export class WrongFilePathLinter extends Linter {
 	protected className = "WrongFilePathLinter";
@@ -47,6 +49,22 @@ export class WrongFilePathLinter extends Linter {
 
 	private _validateClassName(className: string) {
 		let isPathValid = !!FileReader.getXMLFile(className);
+		let UIClass = UIClassFactory.getUIClass(className);
+		if (UIClass && UIClass instanceof CustomUIClass) {
+			isPathValid = UIClass.classExists;
+
+			if (!isPathValid) {
+				const parts = className.split(".");
+				if (parts.length >= 2) {
+					const memberName = parts.pop();
+					const className = parts.join(".");
+					UIClass = UIClassFactory.getUIClass(className);
+					if (UIClass.classExists) {
+						isPathValid = !!UIClass.methods.find(method => method.name === memberName) || !!UIClass.fields.find(field => field.name === memberName);
+					}
+				}
+			}
+		}
 
 		if (!isPathValid) {
 			if (className.endsWith(".")) {
