@@ -1,3 +1,6 @@
+## 0.12.41 (17-05-2021)
+* JS Rename provider fix
+
 ## 0.12.40 (17-05-2021)
 * XML file path linter now also checks for classes
 

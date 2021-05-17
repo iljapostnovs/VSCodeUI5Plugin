@@ -33,8 +33,7 @@ export class JSRenameProvider {
 				this._addTextEditsForMembersInClassBodyRename(className, methodOrField.name, newName, workspaceEdits, document);
 			} else {
 				const methodOrField =
-					UIClass.methods.find(method => method.acornNode?.start <= offset && method.acornNode?.end >= offset) ||
-					UIClass.fields.find(field => field.acornNode?.start <= offset && field.acornNode?.end >= offset);
+					methodsAndFields.find(member => member.acornNode?.start <= offset && member.acornNode?.end >= offset);
 				if (methodOrField) {
 					const range = document.getWordRangeAtPosition(position);
 					const oldMethodName = range && document.getText(range);
