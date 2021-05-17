@@ -15,7 +15,7 @@ export class HTTPHandler {
 		};
 		const proxy = process.env.HTTPS_PROXY || process.env.HTTP_PROXY;
 		if (proxy) {
-			const parsedProxy = url.parse(proxy);
+			const parsedProxy = new url.URL(proxy);
 			if (parsedProxy.hostname) {
 				const port = this._getPort(parsedProxy);
 				options.proxy = {
@@ -36,7 +36,7 @@ export class HTTPHandler {
 		return data;
 	}
 
-	private static _getPort(uri: url.UrlWithStringQuery) {
+	private static _getPort(uri: url.URL) {
 		let port;
 
 		if (uri.port) {
