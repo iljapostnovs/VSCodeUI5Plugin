@@ -1,8 +1,11 @@
+## 0.12.40 (17-05-2021)
+* XML file path linter now also checks for classes
+
 ## 0.12.39 (17-05-2021)
 * Bugfixes
 * Wrong file path linter also added for XML Linter
-* Now you can click on fragment/view names to navigate into them
-* Now you can click on id of control to navigate into view/fragment
+* Now you can control-click on fragment/view names to navigate into them
+* Now you can control-click on id of control to navigate into view/fragment
 
 ## 0.12.38 (11-05-2021)
 * Added support for fragments defined in manifest extensions
