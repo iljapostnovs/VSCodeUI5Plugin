@@ -1,15 +1,16 @@
-import { FileRenameHandler } from "./abstraction/FileRenameHandler";
+import { FileRenameHandler, IFileChanges } from "./abstraction/FileRenameHandler";
 import * as vscode from "vscode";
 import { FileReader } from "../../utils/FileReader";
 import * as fs from "fs";
 import { XMLFileRenameHandler } from "./XMLFileRenameHandler";
 
 export class ControllerRenameHandler extends FileRenameHandler {
-	public handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
-		this._renameViewOfController(newUri);
+	public handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri, allFiles: IFileChanges[]): IFileChanges[] {
+		// this._renameViewOfController(newUri, allFiles);
+		return allFiles;
 	}
 
-	private _renameViewOfController(newControllerUri: vscode.Uri) {
+	private _renameViewOfController(newControllerUri: vscode.Uri, allFiles: IFileChanges[]) {
 		const controllerNameDotNotation = FileReader.getClassNameFromPath(newControllerUri.fsPath);
 		if (controllerNameDotNotation) {
 			const controllerName = controllerNameDotNotation.split(".")[controllerNameDotNotation.split(".").length - 1];
@@ -30,7 +31,7 @@ export class ControllerRenameHandler extends FileRenameHandler {
 							const newUri = vscode.Uri.file(newViewPath);
 
 							const viewRenameHandler = new XMLFileRenameHandler();
-							viewRenameHandler.handleFileRename(oldUri, newUri);
+							viewRenameHandler.handleFileRename(oldUri, newUri, allFiles);
 						} catch (error) {
 							console.log(`No ${newViewPath} found`);
 						}

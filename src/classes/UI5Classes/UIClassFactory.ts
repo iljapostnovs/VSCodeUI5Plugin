@@ -65,17 +65,15 @@ export class UIClassFactory {
 	}
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string, force = false) {
-		if (
-			force ||
-			!this._UIClasses[classNameDotNotation] ||
-			(<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length
-		) {
-			const oldClass = this._UIClasses[classNameDotNotation];
-			if (oldClass && oldClass instanceof CustomUIClass && oldClass.acornClassBody) {
-				this._clearAcornNodes(oldClass);
+		const classDoesntExist = !this._UIClasses[classNameDotNotation];
+		if (force || classDoesntExist) {
+			if (classDoesntExist || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText !== classFileText) {
+				const oldClass = this._UIClasses[classNameDotNotation];
+				if (oldClass && oldClass instanceof CustomUIClass && oldClass.acornClassBody) {
+					this._clearAcornNodes(oldClass);
+				}
+				this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 			}
-			// console.time(`Class parsing for ${classNameDotNotation} took`);
-			this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 
 			const UIClass = this._UIClasses[classNameDotNotation];
 			if (UIClass instanceof CustomUIClass) {
@@ -640,7 +638,7 @@ export class UIClassFactory {
 		const oldName = FileReader.getClassNameFromPath(oldPath);
 		const newName = FileReader.getClassNameFromPath(newPath);
 		if (oldName && newName) {
-			const oldClass = this._UIClasses[newName];
+			const oldClass = this._UIClasses[oldName];
 			this._UIClasses[newName] = oldClass;
 			oldClass.className = newName;
 

@@ -1,5 +1,6 @@
 ## 0.12.42 (17-05-2021)
 * Added error message for failed http requests
+* Bugfixes for file/folder rename handler
 
 ## 0.12.41 (17-05-2021)
 * JS Rename provider fix

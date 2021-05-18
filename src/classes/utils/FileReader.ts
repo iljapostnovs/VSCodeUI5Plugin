@@ -713,13 +713,16 @@ export class FileReader {
 
 	public static removeFromCache(path: string) {
 		const className = this.getClassNameFromPath(path);
-		if (path.endsWith(".view.xml") && className) {
-			if (this._viewCache[className]) {
-				this._viewCache[className].content = "";
-				this._viewCache[className].idClassMap = {};
-				this._viewCache[className].XMLParserData = undefined;
+		if (path.endsWith(".view.xml")) {
+			const viewKey = Object.keys(this._viewCache).find(key => {
+				return this._viewCache[key].fsPath === path;
+			});
+			if (viewKey) {
+				this._viewCache[viewKey].content = "";
+				this._viewCache[viewKey].idClassMap = {};
+				this._viewCache[viewKey].XMLParserData = undefined;
+				delete this._viewCache[viewKey];
 			}
-			delete this._viewCache[className];
 		} else if (path.endsWith(".fragment.xml") && className) {
 			if (this._fragmentCache[className]) {
 				this._fragmentCache[className].content = "";
@@ -767,6 +770,41 @@ export class FileReader {
 			delete this._fragmentCache[oldName];
 		}
 	}
+
+	static getAllFilesInAllWorkspaces() {
+		//TODO: Move to file reader
+		const workspace = vscode.workspace;
+		const wsFolders = workspace.workspaceFolders || [];
+		const files: FileData[] = [];
+
+		for (const wsFolder of wsFolders) {
+			const wsFolderFSPath = wsFolder.uri.fsPath;
+			const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
+			const exclusionPaths = exclusions.map(excludeString => {
+				return `${wsFolderFSPath}/${excludeString}`
+			});
+			const workspaceFilePaths = glob.sync(wsFolderFSPath.replace(/\\/g, "/") + "/**/*{.js,.xml,.json}", {
+				ignore: exclusionPaths
+			});
+			workspaceFilePaths.forEach(filePath => {
+				const fsPath = path.normalize(filePath);
+				const file = fs.readFileSync(fsPath, "utf-8");
+				if (file) {
+					files.push({
+						fsPath,
+						content: file
+					});
+				}
+			});
+		}
+
+		return files;
+	}
+}
+
+export interface FileData {
+	content: string;
+	fsPath: string;
 }
 
 export namespace FileReader {
