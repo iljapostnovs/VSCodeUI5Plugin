@@ -18,7 +18,7 @@ export class JSRenameProvider {
 
 		const className = FileReader.getClassNameFromPath(document.fileName);
 		if (className) {
-			UIClassFactory.setNewCodeForClass(className, document.getText());
+			UIClassFactory.setNewContentForClassUsingDocument(document);
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 			const offset = document.offsetAt(position);
 			const methodsAndFields = [

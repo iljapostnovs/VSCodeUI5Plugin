@@ -13,6 +13,7 @@ import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
 import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { WorkspaceCompletionItemFactory } from "../providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
+import { IFileChanges, IFileRenameData } from "../filerenaming/handlers/abstraction/FileRenameHandler";
 const fileSeparator = path.sep;
 const workspace = vscode.workspace;
 
@@ -23,7 +24,7 @@ export class FileWatcherMediator {
 
 			const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
 			if (currentClassNameDotNotation) {
-				UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText());
+				UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText(), true);
 			}
 		} else if (document.fileName.endsWith(".view.xml")) {
 
@@ -54,7 +55,6 @@ export class FileWatcherMediator {
 
 		disposable = watcher.onDidChange(this._onChange);
 		UI5Plugin.getInstance().addDisposable(disposable);
-
 		disposable = watcher.onDidCreate(uri => {
 			this._handleFileCreate(uri);
 		});
@@ -62,10 +62,15 @@ export class FileWatcherMediator {
 
 		disposable = workspace.onDidRenameFiles(event => {
 			event.files.forEach(file => {
+				let fileChanges: IFileChanges[] = [];
 				if (file.newUri.fsPath.indexOf(".") === -1) {
-					this._handleFolderRename(file.oldUri, file.newUri);
+					fileChanges = this._handleFolderRename(file.oldUri, file.newUri);
 				} else {
-					this._handleFileRename(file);
+					fileChanges = this._handleFileRename(file);
+				}
+
+				if (fileChanges) {
+					this._applyFileChanges(fileChanges);
 				}
 			});
 		});
@@ -96,18 +101,82 @@ export class FileWatcherMediator {
 
 				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(textEditor?.document.uri.fsPath);
 				if (currentClassNameDotNotation) {
-					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, textEditor?.document.getText(), true);
+					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, textEditor?.document.getText());
 				}
 			}
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 	}
 
+	private static async _applyFileChanges(fileChanges: IFileChanges[]) {
+		const edit = new vscode.WorkspaceEdit();
+		const changedTextDocuments: vscode.TextDocument[] = [];
+		const renames: IFileRenameData[] = [];
+
+		fileChanges.forEach(changedFile => {
+			if (changedFile.renames) {
+				renames.push(...changedFile.renames);
+			}
+		});
+
+		const changedFiles = fileChanges.filter(fileChange => fileChange.changed);
+		for (const changedFile of changedFiles) {
+			const document = await vscode.workspace.openTextDocument(changedFile.fileData.fsPath);
+			changedTextDocuments.push(document);
+			const positionBegin = document.positionAt(0);
+			const positionEnd = document.positionAt(document.getText().length);
+			const range = new vscode.Range(positionBegin, positionEnd);
+			edit.replace(document.uri, range, changedFile.fileData.content);
+
+			if (changedFile.fileData.fsPath.endsWith(".fragment.xml")) {
+				FileReader.setNewFragmentContentToCache(changedFile.fileData.content, changedFile.fileData.fsPath, true);
+			} else if (changedFile.fileData.fsPath.endsWith(".view.xml")) {
+				FileReader.setNewViewContentToCache(changedFile.fileData.content, changedFile.fileData.fsPath, true);
+			} else if (changedFile.fileData.fsPath.endsWith("manifest.json")) {
+				FileReader.rereadAllManifests();
+			}
+		}
+
+		changedFiles.forEach(changedFile => {
+			if (changedFile.fileData.fsPath.endsWith(".js")) {
+				const className = FileReader.getClassNameFromPath(changedFile.fileData.fsPath);
+				if (className) {
+					UIClassFactory.setNewCodeForClass(className, changedFile.fileData.content);
+				}
+			}
+		});
+
+		renames.forEach(rename => {
+			const oldUri = vscode.Uri.file(rename.oldFSPath);
+			const newUri = vscode.Uri.file(rename.newFSPath);
+			edit.renameFile(oldUri, newUri);
+		});
+
+		await vscode.workspace.applyEdit(edit);
+		setTimeout(() => {
+			const activeDocument = vscode.window.activeTextEditor?.document;
+			if (activeDocument) {
+				DiagnosticsRegistrator.updateDiagnosticCollection(activeDocument);
+			}
+		}, 100);
+
+	}
+
 	private static _handleFileRename(file: {
 		oldUri: vscode.Uri;
 		newUri: vscode.Uri;
-	}) {
-		FileRenameMediator.handleFileRename(file);
+	}, fileChanges = this._getFileChangeData()) {
+		return FileRenameMediator.handleFileRename(file, fileChanges);
+	}
+
+	private static _getFileChangeData(): IFileChanges[] {
+		return FileReader.getAllFilesInAllWorkspaces().map(fileData => {
+			return {
+				fileData,
+				changed: false,
+				renames: []
+			}
+		});
 	}
 
 	//TODO: Move to js completion items
@@ -163,6 +232,7 @@ export class FileWatcherMediator {
 	}
 
 	private static _handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
+		const fileChanges = this._getFileChangeData();
 		const newFilePaths = glob.sync(newUri.fsPath.replace(/\//g, fileSeparator) + "/**/*{.js,.xml}");
 		newFilePaths.forEach(filePath => {
 			const newFileUri = vscode.Uri.file(filePath);
@@ -178,7 +248,9 @@ export class FileWatcherMediator {
 			this._handleFileRename({
 				newUri: newFileUri,
 				oldUri: oldFileUri
-			});
+			}, fileChanges);
 		});
+
+		return fileChanges;
 	}
 }

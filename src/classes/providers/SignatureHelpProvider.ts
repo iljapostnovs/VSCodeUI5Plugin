@@ -10,7 +10,7 @@ export class SignatureHelpProvider {
 
 		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 		if (currentClassName) {
-			UIClassFactory.setNewCodeForClass(currentClassName, document.getText());
+			UIClassFactory.setNewContentForClassUsingDocument(document);
 		}
 
 		const offset = document.offsetAt(position);

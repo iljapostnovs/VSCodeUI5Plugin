@@ -12,7 +12,7 @@ export class SAPUIDefineCommand {
 			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
 
 			if (currentClassName) {
-				UIClassFactory.setNewCodeForClass(currentClassName, document.getText());
+				UIClassFactory.setNewContentForClassUsingDocument(document);
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
 				if (UIClass.fileContent) {
 					const mainFunction = UIClass.fileContent?.body[0]?.expression;

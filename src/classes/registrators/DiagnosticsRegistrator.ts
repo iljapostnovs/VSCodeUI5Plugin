@@ -73,6 +73,17 @@ export class DiagnosticsRegistrator {
 		}
 	}
 
+	static updateDiagnosticCollection(document: vscode.TextDocument) {
+		const fileName = document.fileName;
+		if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
+			this._updateXMLDiagnostics(document, xmlDiagnosticCollection);
+		}
+
+		if (fileName.endsWith(".js")) {
+			this._updateJSDiagnostics(document, jsDiagnosticCollection);
+		}
+	}
+
 	private static _timeoutId: NodeJS.Timeout | null;
 	private static _updateXMLDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
 		const isXMLDiagnosticsEnabled = vscode.workspace.getConfiguration("ui5.plugin").get("xmlDiagnostics");

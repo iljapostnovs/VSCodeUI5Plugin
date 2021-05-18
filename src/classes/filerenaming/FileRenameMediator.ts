@@ -2,24 +2,28 @@ import * as vscode from "vscode";
 import { JSFileRenameHandler } from "./handlers/JSFileRenameHandler";
 import { XMLFileRenameHandler } from "./handlers/XMLFileRenameHandler";
 import { ControllerRenameHandler } from "./handlers/ControllerRenameHandler";
+import { IFileChanges } from "./handlers/abstraction/FileRenameHandler";
 export class FileRenameMediator {
-	static handleFileRename(file: {
+	static handleFileRename(uri: {
 		oldUri: vscode.Uri;
 		newUri: vscode.Uri;
-	}) {
-		if (file.newUri.fsPath.endsWith(".js")) {
+	}, allFiles: IFileChanges[]): IFileChanges[] {
+
+		if (uri.newUri.fsPath.endsWith(".js")) {
 			const jsFileRenameHandler = new JSFileRenameHandler();
-			jsFileRenameHandler.handleFileRename(file.oldUri, file.newUri);
+			jsFileRenameHandler.handleFileRename(uri.oldUri, uri.newUri, allFiles);
 		}
 
-		if (file.newUri.fsPath.endsWith(".xml")) {
+		if (uri.newUri.fsPath.endsWith(".xml")) {
 			const xmlFileRenameHandler = new XMLFileRenameHandler();
-			xmlFileRenameHandler.handleFileRename(file.oldUri, file.newUri);
+			xmlFileRenameHandler.handleFileRename(uri.oldUri, uri.newUri, allFiles);
 		}
 
-		if (file.newUri.fsPath.endsWith(".controller.js")) {
+		if (uri.newUri.fsPath.endsWith(".controller.js")) {
 			const controllerFileRenameHandler = new ControllerRenameHandler();
-			controllerFileRenameHandler.handleFileRename(file.oldUri, file.newUri);
+			controllerFileRenameHandler.handleFileRename(uri.oldUri, uri.newUri, allFiles);
 		}
+
+		return allFiles;
 	}
 }

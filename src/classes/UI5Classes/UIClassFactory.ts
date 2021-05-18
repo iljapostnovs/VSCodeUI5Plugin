@@ -65,17 +65,15 @@ export class UIClassFactory {
 	}
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string, force = false) {
-		if (
-			force ||
-			!this._UIClasses[classNameDotNotation] ||
-			(<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length
-		) {
-			const oldClass = this._UIClasses[classNameDotNotation];
-			if (oldClass && oldClass instanceof CustomUIClass && oldClass.acornClassBody) {
-				this._clearAcornNodes(oldClass);
+		const classDoesntExist = !this._UIClasses[classNameDotNotation];
+		if (force || classDoesntExist) {
+			if (classDoesntExist || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText !== classFileText) {
+				const oldClass = this._UIClasses[classNameDotNotation];
+				if (oldClass && oldClass instanceof CustomUIClass && oldClass.acornClassBody) {
+					this._clearAcornNodes(oldClass);
+				}
+				this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 			}
-			// console.time(`Class parsing for ${classNameDotNotation} took`);
-			this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 
 			const UIClass = this._UIClasses[classNameDotNotation];
 			if (UIClass instanceof CustomUIClass) {
@@ -636,16 +634,34 @@ export class UIClassFactory {
 		delete this._UIClasses[className];
 	}
 
-	public static setNewNameForClass(oldName: string, newName: string) {
-		this._UIClasses[newName] = this._UIClasses[oldName];
-		this._UIClasses[newName].className = newName;
-		this.removeClass(oldName);
+	public static setNewNameForClass(oldPath: string, newPath: string) {
+		const oldName = FileReader.getClassNameFromPath(oldPath);
+		const newName = FileReader.getClassNameFromPath(newPath);
+		if (oldName && newName) {
+			const oldClass = this._UIClasses[oldName];
+			this._UIClasses[newName] = oldClass;
+			oldClass.className = newName;
 
-		const UIClass = this._UIClasses[newName];
-		if (UIClass instanceof CustomUIClass && UIClass.classFSPath?.endsWith(".controller.js")) {
-			const view = FileReader.getViewForController(UIClass.className);
-			if (view) {
-				FileReader.replaceControllerNameForView(oldName, newName);
+			if (oldClass instanceof CustomUIClass) {
+				const newClassFSPath = FileReader.convertClassNameToFSPath(newName, oldClass.classFSPath?.endsWith(".controller.js"));
+				if (newClassFSPath) {
+					oldClass.classFSPath = newClassFSPath;
+				}
+			}
+
+			this._getAllCustomUIClasses().forEach(UIClass => {
+				if (UIClass.parentClassNameDotNotation === oldName) {
+					UIClass.parentClassNameDotNotation = newName;
+				}
+			});
+			this.removeClass(oldName);
+
+			const UIClass = this._UIClasses[newName];
+			if (UIClass instanceof CustomUIClass && UIClass.classFSPath?.endsWith(".controller.js")) {
+				const view = FileReader.getViewForController(oldName);
+				if (view) {
+					FileReader.removeOldViewForController(oldName);
+				}
 			}
 		}
 	}
