@@ -1,4 +1,4 @@
-## 0.12.42 (17-05-2021)
+## 0.12.42 (19-05-2021)
 * Added error message for failed http requests
 * Bugfixes for file/folder rename handler
 
