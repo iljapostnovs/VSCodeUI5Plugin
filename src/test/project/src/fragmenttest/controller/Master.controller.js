@@ -13,11 +13,11 @@ sap.ui.define([
 			"com.test.fragmenttest.view.fragments.FragmentController1";
 		},
 		eventHandler2() {
-
+			this.getView().byId("")
 		},
-		eventHandler3() {},
-		eventHandler4() {},
-		eventHandler12() {},
-		unusedEventHandler() {}
+		eventHandler3() { },
+		eventHandler4() { },
+		eventHandler12() { },
+		unusedEventHandler() { }
 	});
 });

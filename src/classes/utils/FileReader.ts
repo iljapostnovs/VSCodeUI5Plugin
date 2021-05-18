@@ -712,21 +712,21 @@ export class FileReader {
 	}
 
 	public static removeFromCache(path: string) {
-		const classPath = this.getClassNameFromPath(path);
-		if (path.endsWith(".view.xml") && classPath) {
-			if (this._viewCache[classPath]) {
-				this._viewCache[classPath].content = "";
-				this._viewCache[classPath].idClassMap = {};
-				this._viewCache[classPath].XMLParserData = undefined;
+		const className = this.getClassNameFromPath(path);
+		if (path.endsWith(".view.xml") && className) {
+			if (this._viewCache[className]) {
+				this._viewCache[className].content = "";
+				this._viewCache[className].idClassMap = {};
+				this._viewCache[className].XMLParserData = undefined;
 			}
-			delete this._viewCache[classPath];
-		} else if (path.endsWith(".fragment.xml") && classPath) {
-			if (this._fragmentCache[classPath]) {
-				this._fragmentCache[classPath].content = "";
-				this._fragmentCache[classPath].idClassMap = {};
-				this._fragmentCache[classPath].XMLParserData = undefined;
+			delete this._viewCache[className];
+		} else if (path.endsWith(".fragment.xml") && className) {
+			if (this._fragmentCache[className]) {
+				this._fragmentCache[className].content = "";
+				this._fragmentCache[className].idClassMap = {};
+				this._fragmentCache[className].XMLParserData = undefined;
 			}
-			delete this._fragmentCache[classPath];
+			delete this._fragmentCache[className];
 		}
 	}
 
@@ -746,25 +746,20 @@ export class FileReader {
 	static replaceViewNames(oldName: string, newName: string) {
 		const XMLFile = this.getXMLFile(oldName, "view");
 		const newFSPath = this.convertClassNameToFSPath(newName, false, false, true);
-		const oldFSPath = this.convertClassNameToFSPath(oldName, false, false, true);
-		if (XMLFile && newFSPath && oldFSPath) {
+		if (XMLFile && newFSPath) {
 			XMLFile.fsPath = newFSPath;
 			XMLFile.name = newName;
-
-			// this.removeFromCache(oldFSPath);
 		}
 	}
 
-	static replaceControllerNameForView(oldName: string, newName: string) {
-		this._viewCache[newName] = this._viewCache[oldName];
+	static removeOldViewForController(oldName: string) {
 		delete this._viewCache[oldName];
 	}
 
 	static replaceFragmentNames(oldName: string, newName: string) {
 		const fragment = this._fragmentCache[oldName];
 		const newFSPath = this.convertClassNameToFSPath(newName, false, true);
-		const oldFSPath = this.convertClassNameToFSPath(oldName, false, true);
-		if (fragment && newFSPath && oldFSPath) {
+		if (fragment && newFSPath) {
 			fragment.fsPath = newFSPath;
 			fragment.name = newName;
 			this._fragmentCache[newName] = this._fragmentCache[oldName];

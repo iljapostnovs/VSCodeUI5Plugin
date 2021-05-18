@@ -14,6 +14,16 @@
 				"idTextExtensionFragment1",
 				"idButtonInFragmentInExtensionFragment1"
 			]
+		},
+		{
+			"className": "com.test.fragmenttest.controller.Master",
+			"textToFind": "this.getView().byId(\"",
+			"items": [
+				"idButtonMasterView",
+				"idButtonFragmentController1",
+				"idButtonFragmentView1",
+				"idButtonFragmentView2"
+			]
 		}
 	],
 	"UIDefine": [

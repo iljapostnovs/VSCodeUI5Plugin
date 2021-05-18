@@ -636,16 +636,34 @@ export class UIClassFactory {
 		delete this._UIClasses[className];
 	}
 
-	public static setNewNameForClass(oldName: string, newName: string) {
-		this._UIClasses[newName] = this._UIClasses[oldName];
-		this._UIClasses[newName].className = newName;
-		this.removeClass(oldName);
+	public static setNewNameForClass(oldPath: string, newPath: string) {
+		const oldName = FileReader.getClassNameFromPath(oldPath);
+		const newName = FileReader.getClassNameFromPath(newPath);
+		if (oldName && newName) {
+			const oldClass = this._UIClasses[newName];
+			this._UIClasses[newName] = oldClass;
+			oldClass.className = newName;
 
-		const UIClass = this._UIClasses[newName];
-		if (UIClass instanceof CustomUIClass && UIClass.classFSPath?.endsWith(".controller.js")) {
-			const view = FileReader.getViewForController(UIClass.className);
-			if (view) {
-				FileReader.replaceControllerNameForView(oldName, newName);
+			if (oldClass instanceof CustomUIClass) {
+				const newClassFSPath = FileReader.convertClassNameToFSPath(newName, oldClass.classFSPath?.endsWith(".controller.js"));
+				if (newClassFSPath) {
+					oldClass.classFSPath = newClassFSPath;
+				}
+			}
+
+			this._getAllCustomUIClasses().forEach(UIClass => {
+				if (UIClass.parentClassNameDotNotation === oldName) {
+					UIClass.parentClassNameDotNotation = newName;
+				}
+			});
+			this.removeClass(oldName);
+
+			const UIClass = this._UIClasses[newName];
+			if (UIClass instanceof CustomUIClass && UIClass.classFSPath?.endsWith(".controller.js")) {
+				const view = FileReader.getViewForController(oldName);
+				if (view) {
+					FileReader.removeOldViewForController(oldName);
+				}
 			}
 		}
 	}

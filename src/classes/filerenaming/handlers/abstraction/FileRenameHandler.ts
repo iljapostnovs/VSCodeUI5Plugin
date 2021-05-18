@@ -4,7 +4,6 @@ import * as glob from "glob";
 import * as fs from "fs";
 import * as path from "path";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-const fileSeparator = path.sep;
 
 export abstract class FileRenameHandler {
 	abstract handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri): void;
@@ -49,9 +48,10 @@ export abstract class FileRenameHandler {
 					//there might be multiple changes for the same file
 					fs.writeFileSync(filePath, fileContent);
 
+					filePath = path.normalize(filePath);
 					//TODO: Use observer pattern here
 					if (filePath.endsWith(".js")) {
-						const classNameOfTheReplacedFile = FileReader.getClassNameFromPath(filePath.replace(/\//g, fileSeparator));
+						const classNameOfTheReplacedFile = FileReader.getClassNameFromPath(filePath);
 						if (classNameOfTheReplacedFile) {
 							UIClassFactory.setNewCodeForClass(classNameOfTheReplacedFile, fileContent);
 						}
