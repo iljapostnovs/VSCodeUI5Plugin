@@ -10,14 +10,6 @@ export class JSFileRenameHandler extends FileRenameHandler {
 		DiagnosticsRegistrator.removeDiagnosticForUri(oldUri, "js");
 
 		UIClassFactory.setNewNameForClass(oldUri.fsPath, newUri.fsPath);
-		// const className = FileReader.getClassNameFromPath(oldUri.fsPath);
-		// if (className) {
-		// UIClassFactory.removeClass(className);
-		// }
-		// const newFile = allFiles.find(file => file.fileData.fsPath === newUri.fsPath);
-		// if (newFile) {
-		// 	newFile.changed = true;
-		// }
 
 		return allFiles;
 	}

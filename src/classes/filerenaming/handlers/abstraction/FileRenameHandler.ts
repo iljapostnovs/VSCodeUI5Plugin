@@ -1,9 +1,14 @@
 import { FileData, FileReader } from "../../../utils/FileReader";
 import * as vscode from "vscode";
+export interface IFileRenameData {
+	oldFSPath: string;
+	newFSPath: string;
+}
 
 export interface IFileChanges {
 	fileData: FileData,
 	changed: boolean;
+	renames: IFileRenameData[]
 }
 
 export abstract class FileRenameHandler {

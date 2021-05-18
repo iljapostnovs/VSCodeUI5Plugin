@@ -49,7 +49,7 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 		const textToReplaceToDotNotation = FileReader.getClassNameFromPath(newUri.fsPath)?.replace(".view.xml", "");
 
 		if (textToReplaceFromDotNotation && textToReplaceToDotNotation) {
-			// this._renameController(textToReplaceToDotNotation, allFiles);
+			this._renameController(textToReplaceToDotNotation, allFiles);
 			this._replaceViewNamesInManifests(textToReplaceFromDotNotation, textToReplaceToDotNotation, allFiles);
 			this.replaceAllOccurrencesInFiles(textToReplaceFromDotNotation, textToReplaceToDotNotation, allFiles);
 		}
@@ -68,11 +68,14 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 					newControllerNameParts[newControllerNameParts.length - 1] = viewNamePart;
 					const newControllerName = newControllerNameParts.join(".");
 					const newControllerPath = FileReader.convertClassNameToFSPath(newControllerName, true);
-					if (newControllerPath) {
-						fs.renameSync(controllerPath, newControllerPath);
-						const oldUri = vscode.Uri.file(controllerPath);
-						const newUri = vscode.Uri.file(newControllerPath);
-						this.replaceCurrentClassNameWithNewOne(oldUri, newUri, allFiles);
+					if (newControllerPath && controllerPath !== newControllerPath) {
+						const controllerFile = allFiles.find(file => file.fileData.fsPath === controllerPath);
+						if (controllerFile) {
+							controllerFile.renames.push({
+								oldFSPath: controllerPath,
+								newFSPath: newControllerPath
+							});
+						}
 					}
 				}
 			}

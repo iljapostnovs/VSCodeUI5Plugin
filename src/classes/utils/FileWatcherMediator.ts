@@ -13,7 +13,7 @@ import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
 import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { WorkspaceCompletionItemFactory } from "../providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
-import { IFileChanges } from "../filerenaming/handlers/abstraction/FileRenameHandler";
+import { IFileChanges, IFileRenameData } from "../filerenaming/handlers/abstraction/FileRenameHandler";
 const fileSeparator = path.sep;
 const workspace = vscode.workspace;
 
@@ -111,6 +111,14 @@ export class FileWatcherMediator {
 	private static async _applyFileChanges(fileChanges: IFileChanges[]) {
 		const edit = new vscode.WorkspaceEdit();
 		const changedTextDocuments: vscode.TextDocument[] = [];
+		const renames: IFileRenameData[] = [];
+
+		fileChanges.forEach(changedFile => {
+			if (changedFile.renames) {
+				renames.push(...changedFile.renames);
+			}
+		});
+
 		const changedFiles = fileChanges.filter(fileChange => fileChange.changed);
 		for (const changedFile of changedFiles) {
 			const document = await vscode.workspace.openTextDocument(changedFile.fileData.fsPath);
@@ -138,6 +146,12 @@ export class FileWatcherMediator {
 			}
 		});
 
+		renames.forEach(rename => {
+			const oldUri = vscode.Uri.file(rename.oldFSPath);
+			const newUri = vscode.Uri.file(rename.newFSPath);
+			edit.renameFile(oldUri, newUri);
+		});
+
 		await vscode.workspace.applyEdit(edit);
 		setTimeout(() => {
 			const activeDocument = vscode.window.activeTextEditor?.document;
@@ -159,7 +173,8 @@ export class FileWatcherMediator {
 		return FileReader.getAllFilesInAllWorkspaces().map(fileData => {
 			return {
 				fileData,
-				changed: false
+				changed: false,
+				renames: []
 			}
 		});
 	}
