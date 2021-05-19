@@ -66,7 +66,7 @@ export class UIClassFactory {
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string, force = false) {
 		const classDoesntExist = !this._UIClasses[classNameDotNotation];
-		if (force || classDoesntExist) {
+		if (force || classDoesntExist || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length) {
 			if (classDoesntExist || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText !== classFileText) {
 				const oldClass = this._UIClasses[classNameDotNotation];
 				if (oldClass && oldClass instanceof CustomUIClass && oldClass.acornClassBody) {
