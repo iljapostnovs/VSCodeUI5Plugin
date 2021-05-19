@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomUIClass, ICustomClassUIMethod } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
@@ -36,7 +36,7 @@ export class WrongParametersLinter extends Linter {
 									const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(classNameOfTheMethodCallee);
 									if (fieldsAndMethods) {
 										const method = fieldsAndMethods.methods.find(method => method.name === methodName);
-										if (method) {
+										if (method && !(<ICustomClassUIMethod>method).ui5ignored) {
 											const isException = ConfigHandler.checkIfMemberIsException(fieldsAndMethods.className, method.name);
 											if (!isException) {
 

@@ -1,3 +1,6 @@
+## 0.12.44 (19-05-2021)
+* Added support for @ui5ignore JSDoc tag, which will be ignored by Unused Member, Public Member, Wrong Field/Method linters.
+
 ## 0.12.43 (19-05-2021)
 * Bugfix for JS completion items
 

@@ -32,12 +32,15 @@ interface IComment {
 	end: number;
 	jsdoc: any;
 }
-export interface ICustomClassUIMethod extends IUIMethod, IAcornNodeBearer, IXMLDocumentMentionable {
+export interface UI5Ignoreable {
+	ui5ignored?: boolean;
+}
+export interface ICustomClassUIMethod extends IUIMethod, IAcornNodeBearer, IXMLDocumentMentionable, UI5Ignoreable {
 	position?: number;
 	isEventHandler: boolean;
 	acornParams?: any;
 }
-export interface ICustomClassUIField extends IUIField, IAcornNodeBearer, IXMLDocumentMentionable {
+export interface ICustomClassUIField extends IUIField, IAcornNodeBearer, IXMLDocumentMentionable, UI5Ignoreable {
 	customData?: ILooseObject;
 }
 export class CustomUIClass extends AbstractUIClass {
@@ -64,11 +67,11 @@ export class CustomUIClass extends AbstractUIClass {
 		this._fillParentClassNameDotNotation();
 		this._fillUI5Metadata();
 		this._fillMethodsAndFields();
-		this._enrichMethodInfoWithJSDocs();
+		this._enrichMemberInfoWithJSDocs();
 		this._enrichMethodParamsWithHungarianNotation();
 	}
 
-	private _enrichMethodInfoWithJSDocs() {
+	private _enrichMemberInfoWithJSDocs() {
 		if (this.acornClassBody) {
 			//instance methods
 			let methods = this.acornClassBody.properties?.filter((node: any) =>
@@ -129,6 +132,7 @@ export class CustomUIClass extends AbstractUIClass {
 					const isPrivate = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "private");
 					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
 					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
+					const isIgnored = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "ui5ignore");
 
 					const UIMethod = this.methods.find(method => method.name === methodName);
 					if (paramTags && UIMethod) {
@@ -148,6 +152,10 @@ export class CustomUIClass extends AbstractUIClass {
 						}
 						if (comment.jsdoc) {
 							UIMethod.description = comment.jsdoc.description;
+						}
+
+						if (isIgnored) {
+							UIMethod.ui5ignored = true;
 						}
 
 						if (paramTags) {
@@ -173,6 +181,7 @@ export class CustomUIClass extends AbstractUIClass {
 					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
 					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
 					const fieldType = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "type");
+					const ui5ignored = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "ui5ignore");
 					const UIField = this.fields.find(field => field.name === fieldName);
 					if (UIField) {
 						if (isPrivate || isPublic || isProtected) {
@@ -185,6 +194,10 @@ export class CustomUIClass extends AbstractUIClass {
 
 						if (fieldType) {
 							UIField.type = fieldType.type;
+						}
+
+						if (ui5ignored) {
+							UIField.ui5ignored = true;
 						}
 					}
 				}

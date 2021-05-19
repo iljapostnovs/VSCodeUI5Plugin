@@ -79,14 +79,18 @@ export class PublicMemberLinter extends Linter {
 	private _checkIfMemberIsUsedElsewhere(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, memberName: string, fieldOrMethod: ICustomClassUIField | ICustomClassUIMethod) {
 		let isMethodUsedElsewhere = false;
 
-		const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, memberName);
-		if (!isMethodOverriden) {
-			const isMethodUsedInOtherClasses = fieldOrMethod.mentionedInTheXMLDocument || this._isMemberUsedInOtherClasses(customUIClasses, UIClass, memberName);
-			if (isMethodUsedInOtherClasses) {
+		if (fieldOrMethod.ui5ignored) {
+			isMethodUsedElsewhere = true;
+		} else {
+			const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, memberName);
+			if (!isMethodOverriden) {
+				const isMethodUsedInOtherClasses = fieldOrMethod.mentionedInTheXMLDocument || this._isMemberUsedInOtherClasses(customUIClasses, UIClass, memberName);
+				if (isMethodUsedInOtherClasses) {
+					isMethodUsedElsewhere = true;
+				}
+			} else {
 				isMethodUsedElsewhere = true;
 			}
-		} else {
-			isMethodUsedElsewhere = true;
 		}
 
 		return isMethodUsedElsewhere;

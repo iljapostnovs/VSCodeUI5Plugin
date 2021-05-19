@@ -55,48 +55,54 @@ export class UnusedMemberLinter extends Linter {
 	}
 
 	private _checkIfMemberIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, methodOrField: ICustomClassUIMethod | ICustomClassUIField) {
-		const isException = this._checkIfMethodIsException(UIClass.className, methodOrField.name);
 		let memberIsUsed = false;
-		const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, methodOrField.name);
 
-		if (methodOrField.mentionedInTheXMLDocument || isMethodOverriden) {
+		if (methodOrField.ui5ignored) {
 			memberIsUsed = true;
-		} else if (!isException) {
-			const classOfTheMethod = UIClass.className;
-
-			customUIClasses.find(customUIClass => {
-				return !!customUIClass.methods.find(methodFromClass => {
-					if (methodFromClass.acornNode) {
-						const memberExpressions = AcornSyntaxAnalyzer.expandAllContent(methodFromClass.acornNode).filter((node: any) => node.type === "MemberExpression");
-						memberExpressions.find((memberExpression: any) => {
-							const propertyName = memberExpression.callee?.property?.name || memberExpression?.property?.name;
-							const currentMethodIsCalled = propertyName === methodOrField.name;
-							if (currentMethodIsCalled) {
-								const position = memberExpression.callee?.property?.start || memberExpression?.property?.start;
-								const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-								const classNameOfTheCallee = strategy.acornGetClassName(customUIClass.className, position, true);
-								if (
-									classNameOfTheCallee &&
-									(
-										classNameOfTheCallee === classOfTheMethod ||
-										UIClassFactory.isClassAChildOfClassB(classOfTheMethod, classNameOfTheCallee) ||
-										UIClassFactory.isClassAChildOfClassB(classNameOfTheCallee, classOfTheMethod)
-									)
-								) {
-									memberIsUsed = true;
-								}
-							}
-
-							return memberIsUsed;
-						});
-					}
-
-					return memberIsUsed;
-				});
-			});
 		} else {
-			memberIsUsed = true;
+			const isException = this._checkIfMethodIsException(UIClass.className, methodOrField.name);
+			const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, methodOrField.name);
+
+			if (methodOrField.mentionedInTheXMLDocument || isMethodOverriden) {
+				memberIsUsed = true;
+			} else if (!isException) {
+				const classOfTheMethod = UIClass.className;
+
+				customUIClasses.find(customUIClass => {
+					return !!customUIClass.methods.find(methodFromClass => {
+						if (methodFromClass.acornNode) {
+							const memberExpressions = AcornSyntaxAnalyzer.expandAllContent(methodFromClass.acornNode).filter((node: any) => node.type === "MemberExpression");
+							memberExpressions.find((memberExpression: any) => {
+								const propertyName = memberExpression.callee?.property?.name || memberExpression?.property?.name;
+								const currentMethodIsCalled = propertyName === methodOrField.name;
+								if (currentMethodIsCalled) {
+									const position = memberExpression.callee?.property?.start || memberExpression?.property?.start;
+									const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+									const classNameOfTheCallee = strategy.acornGetClassName(customUIClass.className, position, true);
+									if (
+										classNameOfTheCallee &&
+										(
+											classNameOfTheCallee === classOfTheMethod ||
+											UIClassFactory.isClassAChildOfClassB(classOfTheMethod, classNameOfTheCallee) ||
+											UIClassFactory.isClassAChildOfClassB(classNameOfTheCallee, classOfTheMethod)
+										)
+									) {
+										memberIsUsed = true;
+									}
+								}
+
+								return memberIsUsed;
+							});
+						}
+
+						return memberIsUsed;
+					});
+				});
+			} else {
+				memberIsUsed = true;
+			}
 		}
+
 
 		return memberIsUsed;
 	}
