@@ -1,3 +1,6 @@
+## 0.12.43 (19-05-2021)
+* Bugfix for JS completion items
+
 ## 0.12.42 (19-05-2021)
 * Added error message for failed http requests
 * Bugfixes for file/folder rename handler
