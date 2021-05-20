@@ -11,7 +11,7 @@ export class TemplateGeneratorFactory {
 		} else if (filePath.endsWith(".xml")) {
 			templateGenerator = new XMLTemplateGenerator();
 		}
-		
+
 		return templateGenerator;
 	}
 }
