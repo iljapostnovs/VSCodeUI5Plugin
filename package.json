@@ -156,6 +156,15 @@
 					"default": true,
 					"description": "Should sap.ui.define class names be moved to function parameters on sap.ui.define autocomplition"
 				},
+				"ui5.plugin.codeGeneratorStrategy": {
+					"type": "string",
+					"enum": [
+						"ES5",
+						"ES6"
+					],
+					"default": "ES5",
+					"description": "Strategy which should be used for code generation. E.g. you will get 'var' with ES5 strategy and 'let' with ES6 strategy when using override completion items."
+				},
 				"ui5.plugin.libsToLoad": {
 					"type": "array",
 					"default": [

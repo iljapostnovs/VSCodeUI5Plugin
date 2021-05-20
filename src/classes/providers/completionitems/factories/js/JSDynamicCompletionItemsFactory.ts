@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { CodeGeneratorFactory } from "../../../../templateinserters/codegenerationstrategies/CodeGeneratorFactory";
 import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { IUIMethod, IUIField } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
@@ -128,11 +129,14 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 			const parentClassName = UIClass.parentClassNameDotNotation;
 			const parentUIDefineClassName = UIClass.UIDefine.find(UIDefine => UIDefine.classNameDotNotation === parentClassName);
 			if (parentUIDefineClassName) {
-				const variableAssignment = methodReturnsAnything ? "var vReturn = " : "";
-				const returnStatement = methodReturnsAnything ? "\n\treturn vReturn;\n" : "";
+				const codeGenerationStrategy = CodeGeneratorFactory.createStrategy();
+				const variableAssignment = methodReturnsAnything ? `${codeGenerationStrategy.generateVariableDeclaration()} vReturn = ` : "";
+				const returnStatement = methodReturnsAnything ? "\n\treturn vReturn;" : "";
 				const jsDoc = this._generateJSDocForMethod(method);
 				const params = method.params.map(param => param.name.replace("?", "")).join(", ");
-				text = `${jsDoc}${method.name}: function(${params}) {\n\t${variableAssignment}${parentUIDefineClassName.className}.prototype.${method.name}.apply(this, arguments);\n\t$0\n${returnStatement}}`;
+				const functionBody = `${variableAssignment}${parentUIDefineClassName.className}.prototype.${method.name}.apply(this, arguments);\n\t$0\n${returnStatement}`;
+				const functionText = codeGenerationStrategy.generateFunction(method.name, params, functionBody);
+				text = `${jsDoc}${functionText}`;
 
 				const isMethodLastOne = ReusableMethods.getIfPositionIsInTheLastOrAfterLastMember(UIClass, position);
 				if (!isMethodLastOne) {

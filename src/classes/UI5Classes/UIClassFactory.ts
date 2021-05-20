@@ -73,7 +73,6 @@ export class UIClassFactory {
 			(<CustomUIClass>this._UIClasses[classNameDotNotation]).classText !== classFileText
 		) {
 			// console.time(`Class parsing for ${classNameDotNotation} took`);
-			console.log("Called setNewCodeForClass");
 			const oldClass = this._UIClasses[classNameDotNotation];
 			if (oldClass && oldClass instanceof CustomUIClass && oldClass.acornClassBody) {
 				this._clearAcornNodes(oldClass);
