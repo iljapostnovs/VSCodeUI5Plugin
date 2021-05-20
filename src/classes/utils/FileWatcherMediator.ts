@@ -1,19 +1,17 @@
 import * as vscode from "vscode";
 import { FileReader } from "./FileReader";
 import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import * as glob from "glob";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { ResourceModelData } from "../UI5Classes/ResourceModelData";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
-import * as path from "path";
 import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
 import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { WorkspaceCompletionItemFactory } from "../providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
 import { IFileChanges, IFileRenameData } from "../filerenaming/handlers/abstraction/FileRenameHandler";
 import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/TemplateGeneratorFactory";
-const fileSeparator = path.sep;
+
 const workspace = vscode.workspace;
 
 export class FileWatcherMediator {
@@ -260,23 +258,7 @@ export class FileWatcherMediator {
 
 	private static _handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
 		const fileChanges = this._getFileChangeData();
-		const newFilePaths = glob.sync(newUri.fsPath.replace(/\//g, fileSeparator) + "/**/*{.js,.xml}");
-		newFilePaths.forEach(filePath => {
-			const newFileUri = vscode.Uri.file(filePath);
-			const oldFileUri = vscode.Uri.file(
-				filePath
-					.replace(/\//g, fileSeparator)
-					.replace(
-						newUri.fsPath.replace(/\//g, fileSeparator),
-						oldUri.fsPath.replace(/\//g, fileSeparator)
-					)
-			);
-
-			this._handleFileRename({
-				newUri: newFileUri,
-				oldUri: oldFileUri
-			}, fileChanges);
-		});
+		FileRenameMediator.handleFolderRename(oldUri, newUri, fileChanges);
 
 		return fileChanges;
 	}
