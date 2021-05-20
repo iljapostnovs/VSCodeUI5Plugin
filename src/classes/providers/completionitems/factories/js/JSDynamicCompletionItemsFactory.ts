@@ -135,7 +135,7 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 				const jsDoc = this._generateJSDocForMethod(method);
 				const params = method.params.map(param => param.name.replace("?", "")).join(", ");
 				const functionBody = `${variableAssignment}${parentUIDefineClassName.className}.prototype.${method.name}.apply(this, arguments);\n\t$0\n${returnStatement}`;
-				const functionText = codeGenerationStrategy.generateFunction(method.name, params, functionBody);
+				const functionText = codeGenerationStrategy.generateFunction(method.name, params, functionBody, "");
 				text = `${jsDoc}${functionText}`;
 
 				const isMethodLastOne = ReusableMethods.getIfPositionIsInTheLastOrAfterLastMember(UIClass, position);

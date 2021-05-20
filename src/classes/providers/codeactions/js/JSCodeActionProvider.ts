@@ -3,7 +3,7 @@ import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAna
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { CustomDiagnostics, CustomDiagnosticType } from "../../../registrators/DiagnosticsRegistrator";
-import { MethodInserter } from "../util/MethodInserter";
+import { InsertType, MethodInserter } from "../util/MethodInserter";
 import { FileReader } from "../../../utils/FileReader";
 import { ReusableMethods } from "../../reuse/ReusableMethods";
 import { SAPUIDefineFactory } from "../../completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
@@ -23,7 +23,7 @@ export class JSCodeActionProvider {
 		const codeActions: vscode.CodeAction[] = nonExistendMethodDiagnostics.reduce((accumulator: vscode.CodeAction[], diagnostic: CustomDiagnostics) => {
 			const className = FileReader.getClassNameFromPath(document.fileName);
 			if (className && diagnostic.methodName && diagnostic.attribute && selectedVariableName === diagnostic.methodName) {
-				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.attribute, diagnostic.methodName, this._getInsertContentFromIdentifierName(diagnostic.methodName));
+				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.attribute, diagnostic.methodName, "", "", this._getInsertTypeFromIdentifierName(diagnostic.methodName));
 				if (insertCodeAction && !accumulator.find(accum => accum.title === insertCodeAction.title)) {
 					accumulator.push(insertCodeAction);
 				}
@@ -35,53 +35,21 @@ export class JSCodeActionProvider {
 		return codeActions;
 	}
 
-	private static _getInsertContentFromIdentifierName(name: string) {
-		let content = "";
-
+	private static _getInsertTypeFromIdentifierName(name: string) {
 		const type = CustomUIClass.getTypeFromHungarianNotation(name)?.toLowerCase();
-		switch (type) {
-			case "object":
-				content = "{}";
-				break;
-			case "array":
-				content = "[]";
-				break;
-			case "int":
-				content = "0";
-				break;
-			case "float":
-				content = "0";
-				break;
-			case "number":
-				content = "0";
-				break;
-			case "map":
-				content = "{}";
-				break;
-			case "string":
-				content = "\"\"";
-				break;
-			case "boolean":
-				content = "true";
-				break;
-			case "any":
-				content = "null";
-				break;
-			case "function":
-				content = "function() {\n\t\t\t\n\t\t}";
-				break;
-			default:
-				content = "function() {\n\t\t\t\n\t\t}";
+		if (type === "function" || !type) {
+			return InsertType.Method;
+		} else {
+			return InsertType.Field;
 		}
-
-		return content;
 	}
 
 	private static async _getImportClassCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const selectedVariableName = this._getCurrentVariable(document, range);
 		let providerResult: vscode.CodeAction[] = [];
+		const positionFits = this._getIfPositionIsNewExpressionOrExpressionStatement(document, range.start);
 
-		if (selectedVariableName) {
+		if (positionFits && selectedVariableName) {
 			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
 			if (currentClassName) {
 				UIClassFactory.setNewContentForClassUsingDocument(document);
@@ -115,6 +83,37 @@ export class JSCodeActionProvider {
 		});
 
 		return providerResult;
+	}
+	//TODO: reuse with Class completion items
+	private static _getIfPositionIsNewExpressionOrExpressionStatement(document: vscode.TextDocument, position: vscode.Position) {
+		let currentPositionIsNewExpressionOrExpressionStatement = false;
+
+		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
+		if (currentClassName) {
+			const offset = document.offsetAt(position);
+			const currentUIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+			const currentMethod = currentUIClass.methods.find(method => {
+				return method.acornNode?.start < offset && offset < method.acornNode?.end;
+			});
+			if (currentMethod) {
+				const allContent = AcornSyntaxAnalyzer.expandAllContent(currentMethod.acornNode);
+				const newExpressionOrExpressionStatement = allContent.find((node: any) => {
+					return (
+						node.type === "NewExpression" ||
+						(
+							node.type === "ExpressionStatement" &&
+							node.expression?.type === "Identifier"
+						)
+					) &&
+						node.start <= offset && node.end >= offset;
+				});
+
+				currentPositionIsNewExpressionOrExpressionStatement = !!newExpressionOrExpressionStatement;
+			}
+		}
+
+
+		return currentPositionIsNewExpressionOrExpressionStatement;
 	}
 
 	private static _calculatePriority(codeAction: vscode.CodeAction) {

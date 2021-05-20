@@ -4,20 +4,31 @@ import { FileReader } from "../../../utils/FileReader";
 import * as vscode from "vscode";
 import LineColumn = require("line-column");
 import { ReusableMethods } from "../../reuse/ReusableMethods";
+import { CodeGeneratorFactory } from "../../../templateinserters/codegenerationstrategies/CodeGeneratorFactory";
 
+export enum InsertType {
+	Method = "Method",
+	Field = "Field"
+}
 export class MethodInserter {
-	static createInsertMethodCodeAction(className: string, methodName: string, insertContent: string) {
+	static createInsertMethodCodeAction(className: string, memberName: string, params: string, body: string, type: InsertType, tabsToAdd = "\t\t") {
 		let insertMethodCodeAction: vscode.CodeAction | undefined;
 		const classPath = FileReader.getClassPathFromClassName(className);
 		if (classPath) {
 			const classUri = vscode.Uri.file(classPath);
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
-			const { offset, insertText } = this._getInsertTextAndOffset(insertContent, className, methodName);
+			let insertContent = "";
+			if (type === InsertType.Method) {
+				insertContent = CodeGeneratorFactory.createStrategy().generateFunction(memberName, params, body, tabsToAdd);
+			} else {
+				insertContent = `${memberName}: ${this._getInsertContentFromIdentifierName(memberName)}`;
+			}
+			const { offset, insertText } = this._getInsertTextAndOffset(insertContent, className);
 
 			const lineColumn = LineColumn(UIClass.classText).fromIndex(offset);
 
 			if (lineColumn) {
-				insertMethodCodeAction = new vscode.CodeAction(`Create "${methodName}" in "${className}" class`, vscode.CodeActionKind.QuickFix);
+				insertMethodCodeAction = new vscode.CodeAction(`Create "${memberName}" in "${className}" class`, vscode.CodeActionKind.QuickFix);
 				insertMethodCodeAction.isPreferred = true;
 				insertMethodCodeAction.edit = new vscode.WorkspaceEdit();
 				const position = new vscode.Position(lineColumn.line - 1, lineColumn.col);
@@ -38,13 +49,52 @@ export class MethodInserter {
 		return insertMethodCodeAction;
 	}
 
-	private static _getInsertTextAndOffset(insertContent: string, className: string, methodName: string) {
+	private static _getInsertContentFromIdentifierName(name: string) {
+		let content = "";
+
+		const type = CustomUIClass.getTypeFromHungarianNotation(name)?.toLowerCase();
+		switch (type) {
+			case "object":
+				content = "{}";
+				break;
+			case "array":
+				content = "[]";
+				break;
+			case "int":
+				content = "0";
+				break;
+			case "float":
+				content = "0";
+				break;
+			case "number":
+				content = "0";
+				break;
+			case "map":
+				content = "{}";
+				break;
+			case "string":
+				content = "\"\"";
+				break;
+			case "boolean":
+				content = "true";
+				break;
+			case "any":
+				content = "null";
+				break;
+			default:
+				content = "null";
+		}
+
+		return content;
+	}
+
+	private static _getInsertTextAndOffset(insertContent: string, className: string) {
 		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 		let offset = 0;
 		const classIsCurrentlyOpened = this._checkIfClassIsCurrentlyOpened(className);
 		const thereAreNoMethods = UIClass.acornClassBody.properties.length === 0;
 
-		let insertText = `\n\t\t${methodName}: ${insertContent}`;
+		let insertText = `\n\t\t${insertContent}`;
 
 		if (classIsCurrentlyOpened && vscode.window.activeTextEditor) {
 			const currentSelection = vscode.window.activeTextEditor.selection.start;
