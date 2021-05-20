@@ -66,20 +66,26 @@ export class UIClassFactory {
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string, force = false) {
 		const classDoesntExist = !this._UIClasses[classNameDotNotation];
-		if (force || classDoesntExist || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length) {
-			if (classDoesntExist || (<CustomUIClass>this._UIClasses[classNameDotNotation]).classText !== classFileText) {
-				const oldClass = this._UIClasses[classNameDotNotation];
-				if (oldClass && oldClass instanceof CustomUIClass && oldClass.acornClassBody) {
-					this._clearAcornNodes(oldClass);
-				}
-				this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
+		if (
+			force ||
+			classDoesntExist ||
+			(<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length ||
+			(<CustomUIClass>this._UIClasses[classNameDotNotation]).classText !== classFileText
+		) {
+			// console.time(`Class parsing for ${classNameDotNotation} took`);
+			console.log("Called setNewCodeForClass");
+			const oldClass = this._UIClasses[classNameDotNotation];
+			if (oldClass && oldClass instanceof CustomUIClass && oldClass.acornClassBody) {
+				this._clearAcornNodes(oldClass);
 			}
+			this._UIClasses[classNameDotNotation] = UIClassFactory._getInstance(classNameDotNotation, classFileText);
 
 			const UIClass = this._UIClasses[classNameDotNotation];
 			if (UIClass instanceof CustomUIClass) {
 				this.enrichTypesInCustomClass(UIClass);
 			}
 			// console.timeEnd(`Class parsing for ${classNameDotNotation} took`);
+
 		}
 	}
 	private static _clearAcornNodes(oldClass: CustomUIClass) {
