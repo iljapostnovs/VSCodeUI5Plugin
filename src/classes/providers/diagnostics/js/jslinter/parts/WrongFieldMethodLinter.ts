@@ -4,7 +4,7 @@ import LineColumn = require("line-column");
 import { CustomDiagnosticType } from "../../../../../registrators/DiagnosticsRegistrator";
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomUIClass, UI5Ignoreable } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import { ConfigHandler } from "./config/ConfigHandler";
@@ -156,9 +156,10 @@ export class WrongFieldMethodLinter extends Linter {
 									break;
 								}
 							} else {
+								const member = singleFieldsAndMethods.fields.find(field => field.name === nextNodeName) || singleFieldsAndMethods.methods.find(method => method.name === nextNodeName);
+								const isIgnored = !!(<UI5Ignoreable>member)?.ui5ignored;
 								const ignoreAccessLevelModifiers = vscode.workspace.getConfiguration("ui5.plugin").get("ignoreAccessLevelModifiers");
-								if (!ignoreAccessLevelModifiers) {
-									const member = singleFieldsAndMethods.fields.find(field => field.name === nextNodeName) || singleFieldsAndMethods.methods.find(method => method.name === nextNodeName);
+								if (!ignoreAccessLevelModifiers && !isIgnored) {
 									let sErrorMessage = "";
 									if (member?.visibility === "protected") {
 										const currentDocumentClassName = FileReader.getClassNameFromPath(document.fileName);

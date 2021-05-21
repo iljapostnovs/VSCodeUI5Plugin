@@ -95,10 +95,7 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 					const newPath = `"${textToReplaceToDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
 
 					if (JSON.stringify(content).indexOf(oldPath) > -1) {
-						// const fsPath = `${manifest.fsPath}${fileSeparator}manifest.json`;
-						// let manifestText = fs.readFileSync(fsPath, "utf8");
 						manifest.fileData.content = manifest.fileData.content.replace(new RegExp(`${escapeRegExp(oldPath)}`, "g"), newPath);
-						// fs.writeFileSync(fsPath, manifestText);
 						manifest.changed = true;
 					}
 				}

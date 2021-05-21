@@ -1,30 +1,54 @@
 import * as vscode from "vscode";
 import { FileReader } from "./FileReader";
 import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import * as glob from "glob";
-import * as fs from "fs";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { ResourceModelData } from "../UI5Classes/ResourceModelData";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
-import * as path from "path";
-import { TemplateGeneratorFactory } from "../templateinserters/TemplateGeneratorFactory";
 import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
 import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { WorkspaceCompletionItemFactory } from "../providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
 import { IFileChanges, IFileRenameData } from "../filerenaming/handlers/abstraction/FileRenameHandler";
-const fileSeparator = path.sep;
+import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/TemplateGeneratorFactory";
+
 const workspace = vscode.workspace;
 
 export class FileWatcherMediator {
-	private static async _onChange(uri: vscode.Uri) {
-		const document = await vscode.workspace.openTextDocument(uri);
+	private static _nextInQueue: { [key: string]: { timeoutId?: NodeJS.Timeout, classNameDotNotation: string, classFileText: string, force: boolean } } = {};
+	private static async _onChange(uri: vscode.Uri, document?: vscode.TextDocument, force = true) {
+		if (!document) {
+			document = await vscode.workspace.openTextDocument(uri);
+		}
 		if (document.fileName.endsWith(".js")) {
-
 			const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
 			if (currentClassNameDotNotation) {
-				UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText(), true);
+				if (!FileWatcherMediator._nextInQueue[currentClassNameDotNotation]?.timeoutId) {
+					FileWatcherMediator._nextInQueue[currentClassNameDotNotation] = { classFileText: document.getText(), classNameDotNotation: currentClassNameDotNotation, force: force };
+					FileWatcherMediator._nextInQueue[currentClassNameDotNotation].timeoutId = setTimeout(() => {
+						if (FileWatcherMediator._nextInQueue[currentClassNameDotNotation]) {
+							UIClassFactory.setNewCodeForClass(
+								FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classNameDotNotation,
+								FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classFileText,
+								FileWatcherMediator._nextInQueue[currentClassNameDotNotation].force
+							);
+							delete FileWatcherMediator._nextInQueue[currentClassNameDotNotation];
+						}
+					}, 50);
+
+					if (FileWatcherMediator._nextInQueue[currentClassNameDotNotation]) {
+						UIClassFactory.setNewCodeForClass(
+							FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classNameDotNotation,
+							FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classFileText,
+							FileWatcherMediator._nextInQueue[currentClassNameDotNotation].force
+						);
+					}
+				} else if (FileWatcherMediator._nextInQueue[currentClassNameDotNotation]) {
+					FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classFileText = document.getText();
+					FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classNameDotNotation = currentClassNameDotNotation;
+					FileWatcherMediator._nextInQueue[currentClassNameDotNotation].force = force
+				}
+
 			}
 		} else if (document.fileName.endsWith(".view.xml")) {
 
@@ -49,11 +73,13 @@ export class FileWatcherMediator {
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = vscode.workspace.onDidChangeTextDocument(event => {
-			this._onChange(event.document.uri);
+			this._onChange(event.document.uri, event.document, false);
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 
-		disposable = watcher.onDidChange(this._onChange);
+		disposable = watcher.onDidChange((uri: vscode.Uri) => {
+			this._onChange(uri, undefined, false);
+		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 		disposable = watcher.onDidCreate(uri => {
 			this._handleFileCreate(uri);
@@ -165,11 +191,11 @@ export class FileWatcherMediator {
 	private static _handleFileRename(file: {
 		oldUri: vscode.Uri;
 		newUri: vscode.Uri;
-	}, fileChanges = this._getFileChangeData()) {
+	}, fileChanges = this.getFileChangeData()) {
 		return FileRenameMediator.handleFileRename(file, fileChanges);
 	}
 
-	private static _getFileChangeData(): IFileChanges[] {
+	public static getFileChangeData(): IFileChanges[] {
 		return FileReader.getAllFilesInAllWorkspaces().map(fileData => {
 			return {
 				fileData,
@@ -214,42 +240,25 @@ export class FileWatcherMediator {
 	}
 
 	private static _handleFileCreate(uri: vscode.Uri) {
-		const changedFileText = fs.readFileSync(uri.fsPath, "utf8");
-
-		const thisFileIsEmpty = changedFileText.length === 0;
-
-		if (thisFileIsEmpty) {
-			this._insertCodeTemplate(uri);
-		}
+		this._insertCodeTemplate(uri);
 	}
 
-	private static _insertCodeTemplate(uri: vscode.Uri) {
-		const templateInserter = TemplateGeneratorFactory.createInstance(uri.fsPath);
-		const textToInsert = templateInserter?.generateTemplate(uri);
-		if (textToInsert) {
-			fs.writeFileSync(uri.fsPath, textToInsert);
+	private static async _insertCodeTemplate(uri: vscode.Uri) {
+		const document = await vscode.workspace.openTextDocument(uri);
+		if (document.getText().length === 0) {
+			const templateInserter = TemplateGeneratorFactory.createInstance(uri.fsPath);
+			const textToInsert = templateInserter?.generateTemplate(uri);
+			if (textToInsert) {
+				const edit = new vscode.WorkspaceEdit();
+				edit.insert(uri, new vscode.Position(0, 0), textToInsert);
+				vscode.workspace.applyEdit(edit);
+			}
 		}
 	}
 
 	private static _handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
-		const fileChanges = this._getFileChangeData();
-		const newFilePaths = glob.sync(newUri.fsPath.replace(/\//g, fileSeparator) + "/**/*{.js,.xml}");
-		newFilePaths.forEach(filePath => {
-			const newFileUri = vscode.Uri.file(filePath);
-			const oldFileUri = vscode.Uri.file(
-				filePath
-					.replace(/\//g, fileSeparator)
-					.replace(
-						newUri.fsPath.replace(/\//g, fileSeparator),
-						oldUri.fsPath.replace(/\//g, fileSeparator)
-					)
-			);
-
-			this._handleFileRename({
-				newUri: newFileUri,
-				oldUri: oldFileUri
-			}, fileChanges);
-		});
+		const fileChanges = this.getFileChangeData();
+		FileRenameMediator.handleFolderRename(oldUri, newUri, fileChanges);
 
 		return fileChanges;
 	}

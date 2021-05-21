@@ -959,6 +959,16 @@
 					"text": "Method \"unusedFormatValue\" is possibly private, no references found in other classes"
 				}
 			]
+		},
+		{
+			"className": "com.test.util.ui5ignoretest.UI5IgnoreTest",
+			"timeLimit": 100,
+			"errors": []
+		},
+		{
+			"className": "com.test.util.ui5ignoretest.UI5IgnoreTestClass",
+			"timeLimit": 100,
+			"errors": []
 		}
 	],
 	"XMLLinter": [

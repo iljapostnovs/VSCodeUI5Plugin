@@ -1,0 +1,32 @@
+<mvc:View
+	controllerName="com.test.renametest.controller.Master"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+	displayBlock="true"
+	height="100%"
+	busyIndicatorDelay="0"
+>
+	<Button
+		id="idButtonMasterView"
+		text="{
+			formatter: '.formatter.formatValueViewMaster'
+		}"
+		press="eventHandler1"
+		busy="true"
+		parseError="eventHandler11"
+	/>
+	<Bar>
+		<contentLeft>
+
+		</contentLeft>
+	</Bar>
+	<c:Fragment
+		fragmentName="com.test.renametest.view.fragments.FragmentView1"
+		type="XML"
+	/>
+	<c:Fragment
+		fragmentName="com.test.renametest.view.fragments.FragmentView2"
+		type="XML"
+	/>
+</mvc:View>

@@ -31,6 +31,8 @@
 			"className": "com.extend.fragmenttest.controller.MasterExtend",
 			"textToFind": "\"com/extend/",
 			"items": [
+				"\"com/test/util/ui5ignoretest/UI5IgnoreTestClass\"",
+				"\"com/test/util/ui5ignoretest/UI5IgnoreTest\"",
 				"\"sap/ushell/services/Configuration\"",
 				"\"jQuery\"",
 				"\"jQuery/device\"",
@@ -1197,7 +1199,13 @@
 				"\"com/test/util/IfLinterTest\"",
 				"\"com/test/util/JSDocTest\"",
 				"\"com/test/util/ObjectTest\"",
-				"\"com/test/util/TestModel\""
+				"\"com/test/util/TestModel\"",
+				"\"com/test/renametests/controller/Master/controller\"",
+				"\"com/test/renametests/util/Formatter\"",
+				"\"com/test/renametests/util/ExtendFormatter\"",
+				"\"com/test/renametest/controller/Master/controller\"",
+				"\"com/test/renametest/util/Formatter\"",
+				"\"com/test/renametest/util/ExtendFormatter\""
 			]
 		}
 	],

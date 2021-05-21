@@ -3,6 +3,9 @@ import { JSFileRenameHandler } from "./handlers/JSFileRenameHandler";
 import { XMLFileRenameHandler } from "./handlers/XMLFileRenameHandler";
 import { ControllerRenameHandler } from "./handlers/ControllerRenameHandler";
 import { IFileChanges } from "./handlers/abstraction/FileRenameHandler";
+import * as glob from "glob";
+import * as path from "path";
+const fileSeparator = path.sep;
 export class FileRenameMediator {
 	static handleFileRename(uri: {
 		oldUri: vscode.Uri;
@@ -25,5 +28,30 @@ export class FileRenameMediator {
 		}
 
 		return allFiles;
+	}
+
+	static handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri, fileChanges: IFileChanges[]): IFileChanges[] {
+		const newFilePaths = glob.sync(newUri.fsPath.replace(/\//g, fileSeparator) + "/**/*{.js,.xml}");
+		newFilePaths.forEach(filePath => {
+			const newFileUri = vscode.Uri.file(filePath);
+			const oldFileUri = vscode.Uri.file(
+				filePath
+					.replace(/\//g, fileSeparator)
+					.replace(
+						newUri.fsPath.replace(/\//g, fileSeparator),
+						oldUri.fsPath.replace(/\//g, fileSeparator)
+					)
+			);
+
+			this.handleFileRename({
+				newUri: newFileUri,
+				oldUri: oldFileUri
+			}, fileChanges);
+		});
+		// const FileReader = require("../utils/FileReader").FileReader;
+		// const changesEdited = (<any>fileChanges).filter((change: any) => change.changed).map((change: any) => { change.fileData.fsPath = FileReader.getClassNameFromPath(change.fileData.fsPath); return change; })
+		// copy(JSON.stringify(changesEdited))
+
+		return fileChanges;
 	}
 }

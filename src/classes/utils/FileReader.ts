@@ -22,7 +22,7 @@ export class FileReader {
 
 	public static setNewViewContentToCache(viewContent: string, fsPath: string, forceRefresh = false) {
 		const controllerName = this.getControllerNameFromView(viewContent);
-		if (controllerName && (this._viewCache[controllerName]?.content.length !== viewContent.length || forceRefresh)) {//TODO: What if there is no controller?
+		if (controllerName && (this._viewCache[controllerName]?.content.length !== viewContent.length || forceRefresh || !this._viewCache[controllerName])) {//TODO: What if there is no controller?
 			const viewName = this.getClassNameFromPath(fsPath);
 			if (this._viewCache[controllerName]) {
 				this._viewCache[controllerName].content = viewContent;
@@ -44,7 +44,7 @@ export class FileReader {
 
 	public static setNewFragmentContentToCache(text: string, fsPath: string, forceRefresh = false) {
 		const fragmentName = this.getClassNameFromPath(fsPath);
-		if (fragmentName && (this._fragmentCache[fragmentName]?.content.length !== text.length || forceRefresh)) {
+		if (fragmentName && (this._fragmentCache[fragmentName]?.content.length !== text.length || forceRefresh || !this._fragmentCache[fragmentName])) {
 			if (this._fragmentCache[fragmentName]) {
 				this._fragmentCache[fragmentName].content = text;
 				this._fragmentCache[fragmentName].fsPath = fsPath;
@@ -98,7 +98,7 @@ export class FileReader {
 		return classPath;
 	}
 
-	public static convertClassNameToFSPath(className: string, isController = false, isFragment = false, isView = false) {
+	public static convertClassNameToFSPath(className: string, isController = false, isFragment = false, isView = false, isFolder = false) {
 		let FSPath;
 		let extension = ".js";
 		const manifest = this.getManifestForClass(className);
@@ -109,6 +109,8 @@ export class FileReader {
 				extension = ".fragment.xml";
 			} else if (isView) {
 				extension = ".view.xml";
+			} else if (isFolder) {
+				extension = "";
 			}
 
 			const separator = path.sep;

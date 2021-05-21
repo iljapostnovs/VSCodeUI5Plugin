@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { XMLParser } from "../../../utils/XMLParser";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { SwitchToControllerCommand } from "../../../vscommands/switchers/SwitchToControllerCommand";
-import { MethodInserter } from "../util/MethodInserter";
+import { InsertType, MethodInserter } from "../util/MethodInserter";
 import { CustomDiagnostics } from "../../../registrators/DiagnosticsRegistrator";
 import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
 
@@ -34,7 +34,7 @@ export class XMLCodeActionProvider {
 			if (event) {
 				const controllerName = SwitchToControllerCommand.getResponsibleClassForCurrentView();
 				if (controllerName) {
-					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(controllerName, attributeData.attributeValue, "function(oEvent) {\n\t\t\t\n\t\t}");
+					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(controllerName, attributeData.attributeValue, "oEvent", "", InsertType.Method);
 					if (insertCodeAction) {
 						insertCodeAction.diagnostics = [diagnostic];
 

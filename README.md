@@ -117,6 +117,9 @@ JS Linters available:<br/>
 > *ui5.plugin.usePublicMemberLinter*<br/>
 > *ui5.plugin.useWrongOverrideLinter*<br/>
 
+> To make Unused method, public member, wrong parameter usage and wrong field/method linters ignore some methods or fields, you can use @ui5ignore JSDoc param
+> ![UI5IgnoreExample](/images/UI5IgnoreExample.png)
+
 ![DynamicCompletionItems](/images/JSDiagnostics.gif)
 
 ----------

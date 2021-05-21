@@ -1,3 +1,7 @@
+## 0.12.44 (21-05-2021)
+* Added support for @ui5ignore JSDoc tag, which will make ignore errors of Unused Member, Public Member, Wrong Field/Method linters.
+* New preference entry introduced: ui5.plugin.codeGeneratorStrategy
+
 ## 0.12.43 (19-05-2021)
 * Bugfix for JS completion items
 
