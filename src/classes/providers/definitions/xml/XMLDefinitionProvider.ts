@@ -81,7 +81,7 @@ export class XMLDefinitionProvider {
 		if (responsibleClassName) {
 			const controllerUIClass = UIClassFactory.getUIClass(responsibleClassName);
 			if (controllerUIClass instanceof CustomUIClass) {
-				const classPath = FileReader.getClassPathFromClassName(responsibleClassName);
+				const classPath = FileReader.getClassFSPathFromClassName(responsibleClassName);
 				const method = controllerUIClass.methods.find(method => method.name === eventHandlerName);
 				if (method?.position && classPath) {
 					const classUri = vscode.Uri.file(classPath);

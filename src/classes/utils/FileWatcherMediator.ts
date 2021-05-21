@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { FileReader } from "./FileReader";
-import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { ResourceModelData } from "../UI5Classes/ResourceModelData";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
@@ -21,7 +20,7 @@ export class FileWatcherMediator {
 			document = await vscode.workspace.openTextDocument(uri);
 		}
 		if (document.fileName.endsWith(".js")) {
-			const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
+			const currentClassNameDotNotation = FileReader.getClassNameFromPath(document.fileName);
 			if (currentClassNameDotNotation) {
 				if (!FileWatcherMediator._nextInQueue[currentClassNameDotNotation]?.timeoutId) {
 					FileWatcherMediator._nextInQueue[currentClassNameDotNotation] = { classFileText: document.getText(), classNameDotNotation: currentClassNameDotNotation, force: force };
@@ -112,7 +111,7 @@ export class FileWatcherMediator {
 
 			if (uri.fsPath.endsWith(".js")) {
 
-				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(uri.fsPath);
+				const currentClassNameDotNotation = FileReader.getClassNameFromPath(uri.fsPath);
 				if (currentClassNameDotNotation) {
 					UIClassFactory.removeClass(currentClassNameDotNotation);
 				}
@@ -125,9 +124,9 @@ export class FileWatcherMediator {
 		disposable = vscode.window.onDidChangeActiveTextEditor(textEditor => {
 			if (textEditor?.document.fileName.endsWith(".js")) {
 
-				const currentClassNameDotNotation = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(textEditor?.document.uri.fsPath);
+				const currentClassNameDotNotation = FileReader.getClassNameFromPath(textEditor.document.fileName);
 				if (currentClassNameDotNotation) {
-					UIClassFactory.setNewCodeForClass(currentClassNameDotNotation, textEditor?.document.getText());
+					UIClassFactory.setNewContentForClassUsingDocument(textEditor.document);
 				}
 			}
 		});

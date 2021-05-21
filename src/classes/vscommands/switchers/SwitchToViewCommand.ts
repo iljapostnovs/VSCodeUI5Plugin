@@ -15,7 +15,7 @@ export class SwitchToViewCommand {
 					const controllers = Object.keys(allUIClasses)
 						.filter(key => allUIClasses[key] instanceof CustomUIClass)
 						.map(key => <CustomUIClass>allUIClasses[key])
-						.filter(UIClass => FileReader.getClassPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
+						.filter(UIClass => FileReader.getClassFSPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
 
 					const controllersWithThisModelInUIDefine = controllers.filter(controller => {
 						const bControllerHasThisModelInUIDefine = !!controller.UIDefine.find(UIDefine => UIDefine.classNameDotNotation === currentClassName);

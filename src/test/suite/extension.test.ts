@@ -93,7 +93,7 @@ suite("Extension Test Suite", () => {
 		const testData = data.JSLinter;
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
@@ -179,7 +179,7 @@ suite("Extension Test Suite", () => {
 		for (const data of testData) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(data.className);
 
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const uri = vscode.Uri.file(filePath);
 				const document = await vscode.workspace.openTextDocument(uri);
@@ -204,7 +204,7 @@ suite("Extension Test Suite", () => {
 						}
 
 						for (const methodRename of data.renames.methods) {
-							const filePath = FileReader.getClassPathFromClassName(methodRename.className);
+							const filePath = FileReader.getClassFSPathFromClassName(methodRename.className);
 							const uri = filePath && vscode.Uri.file(filePath);
 							if (uri) {
 								const UIClass = <CustomUIClass>UIClassFactory.getUIClass(methodRename.className);
@@ -272,7 +272,7 @@ suite("Extension Test Suite", () => {
 		const factory = new ViewIdCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
@@ -291,7 +291,7 @@ suite("Extension Test Suite", () => {
 		const factory = new JSDynamicCompletionItemsFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
@@ -311,7 +311,7 @@ suite("Extension Test Suite", () => {
 		const factory = new SAPUIDefineFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const completionItems = await factory.generateUIDefineCompletionItems();
 
@@ -326,7 +326,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -344,7 +344,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -362,7 +362,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -380,7 +380,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;

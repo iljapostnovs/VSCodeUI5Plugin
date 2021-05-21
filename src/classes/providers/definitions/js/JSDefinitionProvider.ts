@@ -150,7 +150,7 @@ export class JSDefinitionProvider {
 		if (UIClass instanceof CustomUIClass) {
 			const currentMember = UIClass.methods.find(method => method.name === memberName) || UIClass.fields.find(field => field.name === memberName);
 			if (currentMember?.memberPropertyNode) {
-				const classPath = FileReader.getClassPathFromClassName(UIClass.className);
+				const classPath = FileReader.getClassFSPathFromClassName(UIClass.className);
 				if (classPath) {
 					const classUri = vscode.Uri.file(classPath);
 					if (currentMember.memberPropertyNode.start) {

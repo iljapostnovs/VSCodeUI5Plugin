@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
 import { SAPNode } from "../../../../librarydata/SAPNode";
+import { TextDocumentTransformer } from "../../../../utils/TextDocumentTransformer";
 
 export class UIDefineCompletionItemGenerator {
 
@@ -19,8 +19,7 @@ export class UIDefineCompletionItemGenerator {
 	public static getIfCurrentPositionIsInDefine(document: vscode.TextDocument, position: vscode.Position, tryToSetNewContentIfPositionIsNearUIDefine = true): boolean {
 		let isCurrentPositionInUIDefine = false;
 		const currentPositionOffset = document.offsetAt(position);
-		const currentClass = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-		const UIClass = currentClass && UIClassFactory.getUIClass(currentClass);
+		const UIClass = TextDocumentTransformer.toCustomUIClass(document);
 		if (UIClass instanceof CustomUIClass && currentPositionOffset) {
 			const args = UIClass.fileContent?.body[0]?.expression?.arguments;
 			if (args && args.length === 2) {

@@ -3,15 +3,14 @@ import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer"
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { FileReader } from "../utils/FileReader";
 
 export class SignatureHelpProvider {
 	static getSignature(document: vscode.TextDocument, position: vscode.Position) {
 		const signatureHelp = new vscode.SignatureHelp();
 
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-		if (currentClassName) {
-			UIClassFactory.setNewContentForClassUsingDocument(document);
-		}
+		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
+		UIClassFactory.setNewContentForClassUsingDocument(document);
 
 		const offset = document.offsetAt(position);
 
