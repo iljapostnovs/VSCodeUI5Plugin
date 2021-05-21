@@ -411,7 +411,7 @@ suite("Extension Test Suite", () => {
 				// copy(JSON.stringify(changesEdited))
 				assert.strictEqual(changedFiles.length, data.result.length, `Renaming from "${data.uriFrom}" to "${data.uriTo}" returned ${changedFiles.length} results, but expected ${data.result.length}`);
 				changedFiles.forEach(changedFile => {
-					const resultWithSameContent = data.result.find(result => result.fileData.content === changedFile.fileData.content);
+					const resultWithSameContent = data.result.find(result => result.fileData.content.replace(/(\r|\n|\t)/g, "") === changedFile.fileData.content.replace(/(\r|\n|\t)/g, ""));
 					assert.ok(!!resultWithSameContent, `File "${changedFile.fileData.fsPath}" was not found in the renaming result`);
 					assert.strictEqual(changedFile.renames.length, resultWithSameContent.renames.length, `File "${changedFile.fileData.fsPath}" must have ${resultWithSameContent.renames.length} renames, but got ${changedFile.renames.length}`);
 				});
