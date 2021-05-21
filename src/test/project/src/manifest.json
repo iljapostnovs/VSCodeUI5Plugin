@@ -71,7 +71,7 @@
 			"config": {
 				"routerClass": "sap.m.routing.Router",
 				"viewType": "XML",
-				"viewPath": "com.test.view",
+				"viewPath": "com.test",
 				"controlId": "idApp",
 				"controlAggregation": "detailPages",
 				"async": true
@@ -109,13 +109,17 @@
 			],
 			"targets": {
 				"Master": {
-					"viewName": "Master",
+					"viewName": "view.Master",
 					"viewLevel": 1,
 					"transition": "show",
 					"controlAggregation": "masterPages"
 				},
 				"Detail": {
-					"viewName": "Detail",
+					"viewName": "view.Detail",
+					"viewLevel": 2
+				},
+				"RenameTest": {
+					"viewName": "renametest.view.Master",
 					"viewLevel": 2
 				}
 			}

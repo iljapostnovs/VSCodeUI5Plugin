@@ -1,5 +1,5 @@
 sap.ui.define([
-	"com/test/renametest/util/Formatter"
+	"com/test/renametests/util/Formatter"
 ], function(
 	Formatter
 ) {

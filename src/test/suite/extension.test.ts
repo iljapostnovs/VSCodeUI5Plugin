@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import { AcornSyntaxAnalyzer } from "../../classes/UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
+import * as renameData from "./data/RenameData.json";
 import * as CompletionItemsData from "./data/completionitems/JSCompletionItems.json";
 import * as XMLCompletionItemData from "./data/completionitems/XMLCompletionItems.json";
 import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
@@ -19,6 +20,8 @@ import { JSDynamicCompletionItemsFactory } from "../../classes/providers/complet
 import { SAPUIDefineFactory } from "../../classes/providers/completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
 import { ViewIdCompletionItemFactory } from "../../classes/providers/completionitems/factories/js/ViewIdCompletionItemFactory";
 import { XMLDynamicCompletionItemFactory } from "../../classes/providers/completionitems/factories/xml/XMLDynamicCompletionItemFactory";
+import { FileRenameMediator } from "../../classes/filerenaming/FileRenameMediator";
+import { FileWatcherMediator } from "../../classes/utils/FileWatcherMediator";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -386,6 +389,33 @@ suite("Extension Test Suite", () => {
 
 				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
 				compareArrays(completionItemInsertTexts, data.items);
+			}
+		}
+	});
+
+	test("Folder rename working as expected", async () => {
+		const testData = renameData.folderRenames;
+
+		for (const data of testData) {
+			const pathFrom = FileReader.convertClassNameToFSPath(data.uriFrom, false, false, false, true);
+			const pathTo = FileReader.convertClassNameToFSPath(data.uriTo, false, false, false, true);
+			if (pathFrom && pathTo) {
+				const uriFrom = vscode.Uri.file(pathFrom);
+				const uriTo = vscode.Uri.file(pathTo);
+				const fileChanges = FileWatcherMediator.getFileChangeData();
+				FileRenameMediator.handleFolderRename(uriFrom, uriTo, fileChanges);
+				const changedFiles = fileChanges.filter(fileChange => fileChange.changed);
+
+				// const FileReader = require("../../classes/utils/FileReader").FileReader;
+				// const changesEdited = (<any>fileChanges).filter((change: any) => change.changed).map((change: any) => { change.fileData.fsPath = FileReader.getClassNameFromPath(change.fileData.fsPath); return change; })
+				// copy(JSON.stringify(changesEdited))
+				assert.strictEqual(changedFiles.length, data.result.length, `Renaming from "${data.uriFrom}" to "${data.uriTo}" returned ${changedFiles.length} results, but expected ${data.result.length}`);
+				changedFiles.forEach(changedFile => {
+					const resultWithSameContent = data.result.find(result => result.fileData.content === changedFile.fileData.content);
+					assert.ok(!!resultWithSameContent, `File "${changedFile.fileData.fsPath}" was not found in the renaming result`);
+					assert.strictEqual(changedFile.renames.length, resultWithSameContent.renames.length, `File "${changedFile.fileData.fsPath}" must have ${resultWithSameContent.renames.length} renames, but got ${changedFile.renames.length}`);
+				});
+
 			}
 		}
 	});

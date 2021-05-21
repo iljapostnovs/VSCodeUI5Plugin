@@ -1,5 +1,5 @@
 <mvc:View
-	controllerName="com.test.renametest.controller.Master"
+	controllerName="com.test.renametests.controller.Master"
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns="sap.m"
 	xmlns:c="sap.ui.core"
@@ -22,11 +22,11 @@
 		</contentLeft>
 	</Bar>
 	<c:Fragment
-		fragmentName="com.test.renametest.view.fragments.FragmentView1"
+		fragmentName="com.test.renametests.view.fragments.FragmentView1"
 		type="XML"
 	/>
 	<c:Fragment
-		fragmentName="com.test.renametest.view.fragments.FragmentView2"
+		fragmentName="com.test.renametests.view.fragments.FragmentView2"
 		type="XML"
 	/>
 </mvc:View>

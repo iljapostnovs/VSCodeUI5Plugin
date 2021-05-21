@@ -5,6 +5,6 @@ sap.ui.define([
 ) {
 	"use strict";
 
-	return ManagedObject.extend("com.test.renametest.util.Formatter", {
+	return ManagedObject.extend("com.test.renametests.util.Formatter", {
 	});
 });

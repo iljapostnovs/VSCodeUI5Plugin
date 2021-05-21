@@ -191,11 +191,11 @@ export class FileWatcherMediator {
 	private static _handleFileRename(file: {
 		oldUri: vscode.Uri;
 		newUri: vscode.Uri;
-	}, fileChanges = this._getFileChangeData()) {
+	}, fileChanges = this.getFileChangeData()) {
 		return FileRenameMediator.handleFileRename(file, fileChanges);
 	}
 
-	private static _getFileChangeData(): IFileChanges[] {
+	public static getFileChangeData(): IFileChanges[] {
 		return FileReader.getAllFilesInAllWorkspaces().map(fileData => {
 			return {
 				fileData,
@@ -257,7 +257,7 @@ export class FileWatcherMediator {
 	}
 
 	private static _handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
-		const fileChanges = this._getFileChangeData();
+		const fileChanges = this.getFileChangeData();
 		FileRenameMediator.handleFolderRename(oldUri, newUri, fileChanges);
 
 		return fileChanges;

@@ -1,6 +1,6 @@
 sap.ui.define([
 	"sap/ui/core/mvc/Controller",
-	"com/test/fragmenttest/util/Formatter"
+	"com/test/renametest/util/Formatter"
 ], function(
 	Controller,
 	Formatter
@@ -10,7 +10,7 @@ sap.ui.define([
 	return Controller.extend("com.test.renametest.controller.Master", {
 		formatter: Formatter,
 		eventHandler1() {
-			"com.test.fragmenttest.view.fragments.FragmentController1";
+			"com.test.renametest.view.fragments.FragmentController1";
 		},
 		eventHandler2() {
 			this.getView().byId("")
