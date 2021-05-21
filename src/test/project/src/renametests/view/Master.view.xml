@@ -1,5 +1,5 @@
 <mvc:View
-	controllerName="com.test.renametests.controller.Master"
+	controllerName="com.test.renametest.controller.Master"
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns="sap.m"
 	xmlns:c="sap.ui.core"
