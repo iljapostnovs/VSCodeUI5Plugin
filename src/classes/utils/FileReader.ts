@@ -706,26 +706,35 @@ export class FileReader {
 	}
 
 	public static removeFromCache(fsPath: string) {
+		return this._removeViewFromCache(fsPath) || this._removeFragmentFromCache(fsPath);
+	}
+	private static _removeViewFromCache(fsPath: string) {
 		const className = this.getClassNameFromPath(fsPath);
 		if (fsPath.endsWith(".view.xml")) {
-			const viewKey = Object.keys(this._viewCache).find(key => {
-				return this._viewCache[key].fsPath === fsPath;
-			});
-			if (viewKey) {
-				this._viewCache[viewKey].controllerName = "";
-				this._viewCache[viewKey].content = "";
-				this._viewCache[viewKey].idClassMap = {};
-				this._viewCache[viewKey].XMLParserData = undefined;
-				delete this._viewCache[viewKey];
+			if (className) {
+				this._viewCache[className].controllerName = "";
+				this._viewCache[className].content = "";
+				this._viewCache[className].idClassMap = {};
+				this._viewCache[className].XMLParserData = undefined;
+				delete this._viewCache[className];
+				return true;
 			}
-		} else if (fsPath.endsWith(".fragment.xml") && className) {
+		}
+		return false;
+	}
+
+	private static _removeFragmentFromCache(fsPath: string) {
+		const className = this.getClassNameFromPath(fsPath);
+		if (fsPath.endsWith(".fragment.xml") && className) {
 			if (this._fragmentCache[className]) {
 				this._fragmentCache[className].content = "";
 				this._fragmentCache[className].idClassMap = {};
 				this._fragmentCache[className].XMLParserData = undefined;
+				delete this._fragmentCache[className];
+				return true;
 			}
-			delete this._fragmentCache[className];
 		}
+		return false;
 	}
 
 	static getXMLFile(className: string, fileType?: string) {
