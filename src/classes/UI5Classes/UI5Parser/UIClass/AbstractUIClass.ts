@@ -33,6 +33,7 @@ export interface IUIProperty extends IName {
 	typeValues: ITypeValue[];
 	visibility: string;
 	description: string;
+	defaultValue?: string;
 }
 export interface IUIAggregation extends IName {
 	type: string;

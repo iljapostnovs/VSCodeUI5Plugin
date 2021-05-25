@@ -71,6 +71,9 @@ XML Linters available:<br/>
 >Checks for class and aggregation existence
 * Wrong file path linter<br/>
 >Checks if any strings that contains app namespace have according fragment or view
+* Default attribute value linter<br/>
+>Checks if  attribute values are the sames as default values
+
 
 > Related preference entries:<br/>
 > *ui5.plugin.xmlDiagnostics*<br/>

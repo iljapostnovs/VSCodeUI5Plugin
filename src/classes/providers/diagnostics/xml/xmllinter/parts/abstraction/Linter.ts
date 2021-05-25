@@ -7,12 +7,14 @@ export interface IError {
 	range: vscode.Range;
 	tags?: vscode.DiagnosticTag[];
 	attribute?: string;
+	severity?: vscode.DiagnosticSeverity;
 }
 
 export interface ITag {
 	text: string;
 	positionBegin: number;
 	positionEnd: number;
+	attributes?: string[];
 }
 
 export abstract class Linter {

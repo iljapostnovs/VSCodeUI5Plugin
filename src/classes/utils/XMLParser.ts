@@ -633,12 +633,22 @@ export class XMLParser {
 
 		let text = "";
 		if (tagOfTagInterface.text) {
-			text = tagOfTagInterface.text;
+			if (tagOfTagInterface.attributes) {
+				return tagOfTagInterface.attributes;
+			} else {
+				text = tagOfTagInterface.text;
+			}
 		} else {
 			text = tagAsString;
 		}
 
-		return text.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
+		const tags = text.match(/(?<=\s)(\w|:)*(\s?)=(\s?)"(\s|.)*?"/g);
+
+		if (tags && tagOfTagInterface.text && !tagOfTagInterface.attributes) {
+			tagOfTagInterface.attributes = tags;
+		}
+
+		return tags;
 	}
 	public static getAttributeNameAndValue(attribute: string) {
 		const indexOfEqualSign = attribute.indexOf("=");

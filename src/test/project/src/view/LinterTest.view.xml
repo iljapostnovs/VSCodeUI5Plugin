@@ -21,8 +21,7 @@
 				paste=".onPaste"
 				itemPress="_onItemPress(${$parameters>/value})"
 				busy="false"
-			>
-			</Table>
+			/>
 			<s:WrongNamespace/>
 			<NonExistantClass/>
 			<c:Fragment
