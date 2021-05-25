@@ -1,0 +1,8 @@
+{
+	"formatterData": [
+		{
+			"className": "com.test.formattertest.FormatterTest",
+			"formattedText": "<mvc:View\n\tcontrollerName=\"\"\n\txmlns:mvc=\"sap.ui.core.mvc\"\n\txmlns=\"sap.m\"\n\tdisplayBlock=\"true\"\n\theight=\"100%\"\n\tbusyIndicatorDelay=\"0\"\n>\n\t<Page>\n\t\t<Table\n\t\t\talternateRowColors=\"false\"\n\t\t\tbackgroundDesign=\"Translucent\"\n\t\t\tcontextualWidth=\"Inherit\"\n\t\t\tfixedLayout=\"true\"\n\t\t\tpopinLayout=\"Block\"\n\t\t\tshowOverlay=\"false\"\n\t\t>\n\t\t\t<columns>\n\t\t\t\t<!--sap.m.Column-->\n\t\t\t</columns>\n\t\t</Table>\n\t\t<Table\n\t\t\talternateRowColors=\"false\"\n\t\t\tbackgroundDesign=\"Translucent\"\n\t\t\tcontextualWidth=\"Inherit\"\n\t\t\tfixedLayout=\"true\"\n\t\t\tpopinLayout=\"Block\"\n\t\t\tshowOverlay=\"false\"\n\t\t>\n\t\t\t<columns>\n\t\t\t</columns>\n\t\t</Table>\n\t\t<Button\n\t\t\tactiveIcon=\"\"\n\t\t\tenabled=\"true\"\n\t\t\ticon=\"\"\n\t\t\ticonDensityAware=\"true\"\n\t\t\ticonFirst=\"true\"\n\t\t\ttext=\"\"\n\t\t\ttextDirection=\"Inherit\"\n\t\t\ttype=\"Default\"\n\t\t\twidth=\"\"\n\t\t/>\n\t\t<Text/>\n\t\t<content>\n\t\t</content>\n\t\t<footer>\n\t\t\t<Bar design=\"Auto\">\n\t\t\t\t<contentLeft>\n\t\t\t\t</contentLeft>\n\t\t\t\t<contentMiddle>\n\t\t\t\t</contentMiddle>\n\t\t\t\t<contentRight>\n\t\t\t\t\t<Label\n\t\t\t\t\t\tdesign=\"Standard\"\n\t\t\t\t\t\tdisplayOnly=\"false\"\n\t\t\t\t\t\trequired=\"false\"\n\t\t\t\t\t\ttext=\"\"\n\t\t\t\t\t\ttextAlign=\"Begin\"\n\t\t\t\t\t\ttextDirection=\"Inherit\"\n\t\t\t\t\t\tvAlign=\"Inherit\"\n\t\t\t\t\t\twidth=\"empty string\"\n\t\t\t\t\t\twrapping=\"false\"\n\t\t\t\t\t\twrappingType=\"Normal\"\n\t\t\t\t\t/>\n\t\t\t\t</contentRight>\n\t\t\t</Bar>\n\t\t</footer>\n\t</Page>\n</mvc:View>"
+		}
+	]
+}

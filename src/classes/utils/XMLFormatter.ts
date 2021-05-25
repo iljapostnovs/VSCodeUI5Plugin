@@ -91,7 +91,7 @@ export class XMLFormatter {
 				textEdits.push(textEdit);
 			}
 		}
-
+		// copy(JSON.stringify(textEdits[0].newText))
 		return textEdits;
 	}
 

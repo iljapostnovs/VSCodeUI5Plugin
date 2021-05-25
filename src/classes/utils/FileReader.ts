@@ -358,10 +358,10 @@ export class FileReader {
 				const fragments = this.getFragmentsFromXMLDocumentText(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				const viewName = this.getClassNameFromPath(viewFSPath);
-				if (controllerName && viewName) {
+				if (viewName) {
 					this._viewCache[viewName] = {
 						idClassMap: {},
-						controllerName: controllerName,
+						controllerName: controllerName || "",
 						name: viewName || "",
 						content: viewContent,
 						fsPath: viewFSPath,
