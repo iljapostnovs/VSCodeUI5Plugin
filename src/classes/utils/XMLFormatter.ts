@@ -65,7 +65,24 @@ export class XMLFormatter {
 
 						return newTag;
 					}
-				});
+				}).reduce((accumulator: string[], currentTag) => {
+					const lastTagInAccumulator = accumulator[accumulator.length - 1];
+					if (lastTagInAccumulator) {
+						const lastTagName = XMLParser.getClassNameFromTag(lastTagInAccumulator.trim());
+						const currentTagName = XMLParser.getClassNameFromTag(currentTag.trim());
+						const tagClassNamesAreTheSame = lastTagName && currentTagName && lastTagName === currentTagName;
+						const previousTagIsAClass = lastTagName && lastTagName[0] === lastTagName[0].toUpperCase();
+						if (previousTagIsAClass && tagClassNamesAreTheSame && currentTag.trim().startsWith("</") && lastTagInAccumulator.trim().endsWith(">") && !lastTagInAccumulator.trim().endsWith("/>")) {
+							accumulator[accumulator.length - 1] = `${lastTagInAccumulator.substring(0, lastTagInAccumulator.length - 1)}/>`;
+						} else {
+							accumulator.push(currentTag);
+						}
+					} else {
+						accumulator.push(currentTag);
+					}
+
+					return accumulator;
+				}, []);
 
 				const positionBegin = document.positionAt(0);
 				const positionEnd = document.positionAt(documentText.length);
