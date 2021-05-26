@@ -1,4 +1,4 @@
-## 0.12.45 (24-05-2021)
+## 0.12.45 (26-05-2021)
 * Bugfixes
 * XML Formatter now formats empty class tags. E.g. ```<Button></Button> -> <Button/>```
 * XML Attribute linter now checks if entered value is the same as default value

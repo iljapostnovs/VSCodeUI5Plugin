@@ -7,6 +7,21 @@
 	busyIndicatorDelay="0"
 >
 	<Page>
+	<HBox>
+				<HBox
+					alignItems="Start"
+					width="100%"
+					justifyContent="SpaceBetween"
+				>
+					<VBox class="sapUiSmallMarginBegin sapUiSmallMarginTopBottom">
+						<Label
+							text="test"
+							design="Bold"
+							wrapping="true"
+						/>
+					</VBox>
+				</HBox>
+			</HBox>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"

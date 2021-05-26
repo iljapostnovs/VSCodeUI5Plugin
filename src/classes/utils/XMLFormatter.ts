@@ -67,7 +67,7 @@ export class XMLFormatter {
 					}
 				}).reduce((accumulator: string[], currentTag) => {
 					const lastTagInAccumulator = accumulator[accumulator.length - 1];
-					if (lastTagInAccumulator) {
+					if (lastTagInAccumulator && !lastTagInAccumulator.trim().startsWith("</") && !lastTagInAccumulator.trim().endsWith("/>")) {
 						const lastTagName = XMLParser.getClassNameFromTag(lastTagInAccumulator.trim());
 						const currentTagName = XMLParser.getClassNameFromTag(currentTag.trim());
 						const tagClassNamesAreTheSame = lastTagName && currentTagName && lastTagName === currentTagName;
