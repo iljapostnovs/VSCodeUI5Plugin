@@ -922,6 +922,30 @@
 			]
 		},
 		{
+			"className": "com.test.util.AsyncAwaitTest",
+			"timeLimit": 100,
+			"errors": [
+				{
+					"text": "No references found for \"_testAsyncAwait\" class member"
+				},
+				{
+					"text": "No references found for \"_pPromise\" class member"
+				},
+				{
+					"text": "No references found for \"_oDialog\" class member"
+				},
+				{
+					"text": "No references found for \"_oDialogWOJSDoc\" class member"
+				},
+				{
+					"text": "No references found for \"_oDialogFromAnotherFN\" class member"
+				},
+				{
+					"text": "No references found for \"_oDialogAsyncFromAnotherFN\" class member"
+				}
+			]
+		},
+		{
 			"className": "com.test.controller.WrongFilePathLinterTest",
 			"timeLimit": 100,
 			"errors": [
