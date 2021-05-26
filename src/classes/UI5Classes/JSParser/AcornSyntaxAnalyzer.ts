@@ -365,12 +365,36 @@ export class AcornSyntaxAnalyzer {
 
 	public static getResultOfPromise(className: string) {
 		if (/Promise<.*?>/.test(className)) {
-			className = className.substring(8, className.length - 1);
+			className = this._removeOnePromiseLevel(className);
 		} else if (className === "Promise") {
 			className = "any";
 		}
 
 		return className;
+	}
+
+	private static _removeOnePromiseLevel(className: string) {
+		let openedLTCount = 0;
+		let closedLTCount = 0;
+		let startIndex = 0;
+		let endIndex = 0;
+
+		let i = 0;
+		while (i < className.length && !(openedLTCount > 0 && closedLTCount > 0 && openedLTCount - closedLTCount === 0)) {
+			if (className[i] === "<") {
+				openedLTCount++;
+				if (openedLTCount === 1) {
+					startIndex = i;
+				}
+
+			}
+			if (className[i] === ">") {
+				closedLTCount++;
+				endIndex = i;
+			}
+			i++;
+		}
+		return className.substring(startIndex + 1, endIndex) + className.substring(endIndex + 1, className.length);
 	}
 
 	public static getClassNameOfTheModelFromManifest(modelName: string, className: string, clearStack = false) {

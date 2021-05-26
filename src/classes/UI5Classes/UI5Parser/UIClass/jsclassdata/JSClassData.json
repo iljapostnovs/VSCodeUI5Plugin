@@ -57,7 +57,7 @@
 					}
 				],
 				"description": "Promise .all",
-				"returnType": "Promise",
+				"returnType": "Promise<any[]>",
 				"visibility": "public",
 				"owner": "Promise"
 			}
