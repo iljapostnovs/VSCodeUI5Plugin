@@ -66,6 +66,9 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 					fieldsAndMethods = this.destructueFieldsAndMethodsAccordingToMapParams(correspondingObject);
 				}
 			}
+		} else if (className.startsWith("Promise<")) {
+			fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass("Promise");
+			fieldsAndMethods.className = className;
 		} else {
 			if (className.endsWith("[]")) {
 				fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass("array");
@@ -137,7 +140,7 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 	}
 
 	private _generateStackOfNodes(node: any, position: number, stack: any[], checkForLastPosition = false) {
-		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "VariableDeclaration", "ThisExpression", "NewExpression", "Identifier"];
+		const nodeTypesToUnshift = ["CallExpression", "MemberExpression", "VariableDeclaration", "ThisExpression", "NewExpression", "Identifier", "AwaitExpression"];
 		const positionIsCorrect = node.end < position || checkForLastPosition && node.end === position;
 		if (node && positionIsCorrect && nodeTypesToUnshift.indexOf(node.type) > -1 && node.property?.name !== "✖" && node.property?.name !== "prototype") {
 			stack.unshift(node);

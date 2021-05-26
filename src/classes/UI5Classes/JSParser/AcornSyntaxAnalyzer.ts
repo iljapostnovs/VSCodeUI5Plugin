@@ -330,6 +330,11 @@ export class AcornSyntaxAnalyzer {
 					className = this.findClassNameForStack(newStack, currentClassName, primaryClassName, false);
 				}
 
+			} else if (currentNode.type === "AwaitExpression") {
+				// const nodesInPromise = this.getContent(currentNode.argument);
+				// stack = stack.filter((node: any) => !nodesInPromise.includes(node));
+				// const promiseClassName = this.findClassNameForStack(nodesInPromise, currentClassName, primaryClassName, false);
+				className = this.getResultOfPromise(currentClassName);
 			}
 
 			if (!currentNode._acornSyntaxAnalyserType && !stackWasModified && !className?.includes("__map__")) {
@@ -353,6 +358,16 @@ export class AcornSyntaxAnalyzer {
 
 		if (className === "array") {
 			className = "any[]";
+		}
+
+		return className;
+	}
+
+	public static getResultOfPromise(className: string) {
+		if (/Promise<.*?>/.test(className)) {
+			className = className.substring(8, className.length - 1);
+		} else if (className === "Promise") {
+			className = "any";
 		}
 
 		return className;
@@ -1181,11 +1196,12 @@ export class AcornSyntaxAnalyzer {
 				}
 			} else if (node?.type === "ThisExpression") {
 				className = UIClass.className;
-			} else if (node?.type === "AwaitExpression") {
-				const classNameInAwait = this.getClassNameFromSingleAcornNode(node.argument, UIClass, stack);
-				if (/Promise<.*?>/.test(classNameInAwait)) {
-					const result = /(?<=Promise<).*?(?=>)/.exec(classNameInAwait);
-					className = result ? result[0] : "";
+			} else if (node?.type === "AwaitExpression" && node.argument) {
+				const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+				const newStack = strategy.getStackOfNodesForPosition(UIClass.className, node.argument.end, true);
+				className = this.findClassNameForStack(newStack, UIClass.className);
+				if (node.argument.type === "AwaitExpression") {
+					className = this.getResultOfPromise(className);
 				}
 			} //else if (declaration?.type === "BinaryExpression") {
 			//className = "boolean";

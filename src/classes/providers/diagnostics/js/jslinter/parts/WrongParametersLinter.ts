@@ -124,6 +124,12 @@ export class WrongParametersLinter extends Linter {
 
 		expectedClass = this._swapClassNames(expectedClass);
 		actualClass = this._swapClassNames(actualClass);
+
+		if (expectedClass.startsWith("Promise<") && actualClass.startsWith("Promise<")) {
+			expectedClass = AcornSyntaxAnalyzer.getResultOfPromise(expectedClass);
+			actualClass = AcornSyntaxAnalyzer.getResultOfPromise(actualClass);
+		}
+
 		if (expectedClass.endsWith("[]") && actualClass.endsWith("[]")) {
 			expectedClass = expectedClass.replace("[]", "");
 			actualClass = actualClass.replace("[]", "");
@@ -166,6 +172,9 @@ export class WrongParametersLinter extends Linter {
 		}
 		if (className === "void" || !className) {
 			className = "any";
+		}
+		if (className === "Promise") {
+			className = "Promise<any>";
 		}
 
 		return className;

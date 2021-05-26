@@ -45,6 +45,21 @@
 				"returnType": "Promise",
 				"visibility": "public",
 				"owner": "Promise"
+			},
+			{
+				"name": "all",
+				"params": [
+					{
+						"name": "promises",
+						"description": "promise array to wait",
+						"type": "Promise<any>[]",
+						"isOptional": false
+					}
+				],
+				"description": "Promise .all",
+				"returnType": "Promise",
+				"visibility": "public",
+				"owner": "Promise"
 			}
 		],
 		"fields": []

@@ -117,6 +117,10 @@
 				{
 					"name": "_returnPromiseAsyncFromAnotherFN",
 					"returnType": "Promise<sap.m.Dialog>"
+				},
+				{
+					"name": "_returnPromiseAsyncWithoutAwaitFromAnotherFN",
+					"returnType": "Promise<Promise<Promise<sap.m.Dialog>>>"
 				}
 			],
 			"fields": [
@@ -138,6 +142,22 @@
 				},
 				{
 					"name": "_oDialogAsyncFromAnotherFN",
+					"type": "sap.m.Dialog"
+				},
+				{
+					"name": "_oDialogNestesPromiseThree",
+					"type": "Promise<Promise<Promise<sap.m.Dialog>>>"
+				},
+				{
+					"name": "_oDialogNestesPromiseTwo",
+					"type": "Promise<Promise<sap.m.Dialog>>"
+				},
+				{
+					"name": "_oDialogNestesPromiseOne",
+					"type": "Promise<sap.m.Dialog>"
+				},
+				{
+					"name": "_oDialogNestesPromiseZero",
 					"type": "sap.m.Dialog"
 				}
 			]
@@ -942,6 +962,18 @@
 				},
 				{
 					"text": "No references found for \"_oDialogAsyncFromAnotherFN\" class member"
+				},
+				{
+					"text": "No references found for \"_oDialogNestesPromiseThree\" class member"
+				},
+				{
+					"text": "No references found for \"_oDialogNestesPromiseTwo\" class member"
+				},
+				{
+					"text": "No references found for \"_oDialogNestesPromiseOne\" class member"
+				},
+				{
+					"text": "No references found for \"_oDialogNestesPromiseZero\" class member"
 				}
 			]
 		},
