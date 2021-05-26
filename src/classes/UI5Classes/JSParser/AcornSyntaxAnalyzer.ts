@@ -797,8 +797,8 @@ export class AcornSyntaxAnalyzer {
 		}
 		const UIClass = UIClassFactory.getUIClass(className);
 		if (method.returnType === "void") {
-
 			const innerMethod = UIClass.methods.find(innermethod => method.name === innermethod.name);
+
 			if (innerMethod && innerMethod.returnType !== "void") {
 				method.returnType = innerMethod.returnType;
 			} else if (UIClass instanceof CustomUIClass) {
@@ -815,6 +815,25 @@ export class AcornSyntaxAnalyzer {
 
 			if (includeParentMethods && (!method.returnType || method.returnType === "void") && UIClass.parentClassNameDotNotation) {
 				this.findMethodReturnType(method, UIClass.parentClassNameDotNotation);
+			}
+		} else if (method.returnType === "Promise") {
+			if (UIClass instanceof CustomUIClass) {
+				const UIMethod = UIClass.methods.find(innerMethod => innerMethod.name === method.name);
+				if (UIMethod) {
+					const methodBody = UIMethod.acornNode?.body?.body;
+					const returnStatement = methodBody?.find((bodyPart: any) => bodyPart.type === "ReturnStatement");
+
+					if (returnStatement) {
+						const returnType = this.getClassNameFromSingleAcornNode(returnStatement.argument, UIClass) || "void";
+						if (returnType) {
+							if (UIMethod.acornNode?.async) {
+								method.returnType = `Promise<${returnType}>`;
+							} else {
+								method.returnType = returnType;
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -1065,6 +1084,10 @@ export class AcornSyntaxAnalyzer {
 			innerNodes = node.properties.map((declaration: any) => declaration.value);
 		} else if (node.type === "FunctionDeclaration" || node.type === "FunctionExpression" || node.type === "ArrowFunctionExpression") {
 			innerNodes = [node.body].concat(node.params);
+		} else if (node.type === "UnaryExpression") {
+			if (node.argument) {
+				innerNodes.push(node.argument);
+			}
 		} else if (
 			node.type === "WhileStatement" ||
 			node.type === "DoWhileStatement" ||
@@ -1158,6 +1181,12 @@ export class AcornSyntaxAnalyzer {
 				}
 			} else if (node?.type === "ThisExpression") {
 				className = UIClass.className;
+			} else if (node?.type === "AwaitExpression") {
+				const classNameInAwait = this.getClassNameFromSingleAcornNode(node.argument, UIClass, stack);
+				if (/Promise<.*?>/.test(classNameInAwait)) {
+					const result = /(?<=Promise<).*?(?=>)/.exec(classNameInAwait);
+					className = result ? result[0] : "";
+				}
 			} //else if (declaration?.type === "BinaryExpression") {
 			//className = "boolean";
 			//} //else if (declaration?.type === "LogicalExpression") {
