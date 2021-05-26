@@ -98,7 +98,7 @@ export class DiagnosticsRegistrator {
 					diagnostic.code = error.code;
 					diagnostic.message = error.message;
 					diagnostic.range = error.range;
-					diagnostic.severity = vscode.DiagnosticSeverity.Error;
+					diagnostic.severity = error.severity || vscode.DiagnosticSeverity.Error;
 					diagnostic.source = error.source;
 					diagnostic.relatedInformation = [];
 					diagnostic.tags = error.tags || [];

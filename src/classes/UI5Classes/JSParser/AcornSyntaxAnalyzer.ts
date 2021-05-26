@@ -103,6 +103,10 @@ export class AcornSyntaxAnalyzer {
 			if (!innerNode) {
 				innerNode = this.findAcornNode(node.params, position);
 			}
+		} else if (node.type === "UnaryExpression") {
+			if (node.argument) {
+				innerNode = this.findAcornNode([node.argument], position);
+			}
 		} else if (
 			node.type === "WhileStatement" ||
 			node.type === "DoWhileStatement" ||

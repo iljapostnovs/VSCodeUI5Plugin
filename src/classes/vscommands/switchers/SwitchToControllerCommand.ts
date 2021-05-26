@@ -21,7 +21,7 @@ export class SwitchToControllerCommand {
 	}
 
 	private static async _switchToController(controllerName: string) {
-		const controlFSPath = FileReader.getClassPathFromClassName(controllerName);
+		const controlFSPath = FileReader.getClassFSPathFromClassName(controllerName);
 		const editor = vscode.window.activeTextEditor;
 		if (editor && controlFSPath) {
 			await vscode.window.showTextDocument(vscode.Uri.file(controlFSPath));

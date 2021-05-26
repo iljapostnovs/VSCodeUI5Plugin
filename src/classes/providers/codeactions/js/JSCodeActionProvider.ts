@@ -7,6 +7,7 @@ import { InsertType, MethodInserter } from "../util/MethodInserter";
 import { FileReader } from "../../../utils/FileReader";
 import { ReusableMethods } from "../../reuse/ReusableMethods";
 import { SAPUIDefineFactory } from "../../completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
+import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -50,7 +51,7 @@ export class JSCodeActionProvider {
 		const positionFits = this._getIfPositionIsNewExpressionOrExpressionStatement(document, range.start);
 
 		if (positionFits && selectedVariableName) {
-			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
+			const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 			if (currentClassName) {
 				UIClassFactory.setNewContentForClassUsingDocument(document);
 				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
@@ -136,9 +137,8 @@ export class JSCodeActionProvider {
 		let selectedVariableName = document.getText(range);
 
 		if (!selectedVariableName) {
-			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
-			if (currentClassName) {
-				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+			const UIClass = TextDocumentTransformer.toCustomUIClass(document);
+			if (UIClass) {
 				const currentPositionOffset = document?.offsetAt(range.end);
 				const node = AcornSyntaxAnalyzer.findAcornNode(UIClass.acornMethodsAndFields, currentPositionOffset);
 				if (node && node.value) {

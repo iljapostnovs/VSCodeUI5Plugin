@@ -293,14 +293,15 @@ export class StandardUIClass extends AbstractUIClass {
 	private _getStandardClassProperties(className: string) {
 		let classProperties: IUIProperty[] = [];
 		const SAPNode = this._findSAPNode(className);
-		classProperties = SAPNode?.getProperties().reduce((accumulator: IUIProperty[], { name, type, description, visibility }: any) => {
+		classProperties = SAPNode?.getProperties().reduce((accumulator: IUIProperty[], { defaultValue, name, type, description, visibility }: any) => {
 			const additionalDescription = this._generateAdditionalDescriptionFrom(type);
 			accumulator.push({
-				name: name,
-				type: type,
+				name,
+				defaultValue: defaultValue.toString(),
+				type,
 				typeValues: this.generateTypeValues(type),
 				description: `${additionalDescription}\n${StandardUIClass.removeTags(description)}`.trim(),
-				visibility: visibility
+				visibility
 			});
 			return accumulator;
 		}, []) || [];

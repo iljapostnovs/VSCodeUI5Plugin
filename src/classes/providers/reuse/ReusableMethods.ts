@@ -1,15 +1,14 @@
 
 import LineColumn = require("line-column");
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { ICustomClassUIMethod, CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
+
+import { TextDocumentTransformer } from "../../utils/TextDocumentTransformer";
 export class ReusableMethods {
 	static getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
 		let position: vscode.Position | undefined;
-		const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument(document.uri.fsPath);
-		if (currentClassName) {
-			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+		const UIClass = TextDocumentTransformer.toCustomUIClass(document);
+		if (UIClass) {
 			const mainFunction = UIClass.fileContent?.body[0]?.expression;
 			const definePaths: any[] = mainFunction?.arguments[0]?.elements;
 

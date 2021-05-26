@@ -60,7 +60,7 @@ export class CustomUIClass extends AbstractUIClass {
 	constructor(className: string, documentText?: string) {
 		super(className);
 
-		this.classFSPath = FileReader.getClassPathFromClassName(this.className);
+		this.classFSPath = FileReader.getClassFSPathFromClassName(this.className);
 		this._readFileContainingThisClassCode(documentText); //todo: rename. not always reading anyore.
 		this.UIDefine = this._getUIDefine();
 		this.acornClassBody = this._getThisClassBodyAcorn();

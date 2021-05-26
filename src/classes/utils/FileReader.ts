@@ -21,17 +21,18 @@ export class FileReader {
 	public static globalStoragePath: string | undefined;
 
 	public static setNewViewContentToCache(viewContent: string, fsPath: string, forceRefresh = false) {
-		const controllerName = this.getControllerNameFromView(viewContent);
-		if (controllerName && (this._viewCache[controllerName]?.content.length !== viewContent.length || forceRefresh || !this._viewCache[controllerName])) {//TODO: What if there is no controller?
-			const viewName = this.getClassNameFromPath(fsPath);
-			if (this._viewCache[controllerName]) {
-				this._viewCache[controllerName].content = viewContent;
-				this._viewCache[controllerName].idClassMap = {};
-				this._viewCache[controllerName].fsPath = fsPath;
-				this._viewCache[controllerName].fragments = this.getFragmentsFromXMLDocumentText(viewContent);
-				this._viewCache[controllerName].XMLParserData = undefined;
+		const viewName = this.getClassNameFromPath(fsPath);
+		if (viewName && (this._viewCache[viewName]?.content.length !== viewContent.length || forceRefresh || !this._viewCache[viewName])) {
+			if (this._viewCache[viewName]) {
+				this._viewCache[viewName].content = viewContent;
+				this._viewCache[viewName].controllerName = this.getControllerNameFromView(viewContent) || "";
+				this._viewCache[viewName].idClassMap = {};
+				this._viewCache[viewName].fsPath = fsPath;
+				this._viewCache[viewName].fragments = this.getFragmentsFromXMLDocumentText(viewContent);
+				this._viewCache[viewName].XMLParserData = undefined;
 			} else {
-				this._viewCache[controllerName] = {
+				this._viewCache[viewName] = {
+					controllerName: this.getControllerNameFromView(viewContent) || "",
 					idClassMap: {},
 					name: viewName || "",
 					content: viewContent,
@@ -64,17 +65,13 @@ export class FileReader {
 		}
 	}
 
-	static getViewCache() {
-		return this._viewCache;
-	}
-
 	static getAllViews() {
 		return Object.keys(this._viewCache).map(key => this._viewCache[key]);
 	}
 
 	public static getDocumentTextFromCustomClassName(className: string, isFragment?: boolean) {
 		let documentText;
-		const classPath = this.getClassPathFromClassName(className, isFragment);
+		const classPath = this.getClassFSPathFromClassName(className, isFragment);
 		if (classPath) {
 			documentText = fs.readFileSync(classPath, "utf8");
 		}
@@ -82,7 +79,7 @@ export class FileReader {
 		return documentText;
 	}
 
-	public static getClassPathFromClassName(className: string, isFragment?: boolean) {
+	public static getClassFSPathFromClassName(className: string, isFragment?: boolean) {
 		let classPath = this.convertClassNameToFSPath(className, false, isFragment);
 
 		if (classPath) {
@@ -146,7 +143,7 @@ export class FileReader {
 	private static _fetchAllWorkspaceManifests() {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
-			const manifests = this.getManifestPathsInWorkspaceFolder(wsFolder);
+			const manifests = this.getManifestFSPathsInWorkspaceFolder(wsFolder);
 			for (const manifest of manifests) {
 				try {
 					const UI5Manifest: any = JSON.parse(fs.readFileSync(manifest.fsPath, "utf8"));
@@ -165,7 +162,7 @@ export class FileReader {
 		}
 	}
 
-	public static getManifestPathsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
+	public static getManifestFSPathsInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
 		const timeStart = new Date().getTime();
 		const manifestPaths = this._readFilesInWorkspace(wsFolder, "**/manifest.json");
 		const timeEnd = new Date().getTime();
@@ -229,19 +226,13 @@ export class FileReader {
 	}
 
 	public static getViewForController(controllerName: string): IView | undefined {
-		let view: IView | undefined;
-
-		if (this._viewCache[controllerName]) {
-			view = this._viewCache[controllerName];
-		}
-
-		if (!this._viewCache[controllerName]) {
+		let view = this.getAllViews().find(view => view.controllerName === controllerName);
+		if (!view) {
 			const swappedControllerName = this._swapControllerNameIfItWasReplacedInManifest(controllerName);
 			if (swappedControllerName !== controllerName) {
 				view = this.getViewForController(swappedControllerName);
 			}
 		}
-
 		return view;
 	}
 
@@ -367,9 +358,10 @@ export class FileReader {
 				const fragments = this.getFragmentsFromXMLDocumentText(viewContent);
 				const controllerName = this.getControllerNameFromView(viewContent);
 				const viewName = this.getClassNameFromPath(viewFSPath);
-				if (controllerName) {
-					this._viewCache[controllerName] = {
+				if (viewName) {
+					this._viewCache[viewName] = {
 						idClassMap: {},
+						controllerName: controllerName || "",
 						name: viewName || "",
 						content: viewContent,
 						fsPath: viewFSPath,
@@ -553,7 +545,7 @@ export class FileReader {
 		fragmentTags.forEach(fragmentTag => {
 			const fragmentName = this._getFragmentNameFromTag(fragmentTag);
 			if (fragmentName) {
-				const fragmentPath = this.getClassPathFromClassName(fragmentName, true);
+				const fragmentPath = this.getClassFSPathFromClassName(fragmentName, true);
 				const fragment = this.getFragment(fragmentName);
 				if (fragment && fragmentPath) {
 					fragments.push(fragment);
@@ -713,26 +705,36 @@ export class FileReader {
 		}
 	}
 
-	public static removeFromCache(path: string) {
-		const className = this.getClassNameFromPath(path);
-		if (path.endsWith(".view.xml")) {
-			const viewKey = Object.keys(this._viewCache).find(key => {
-				return this._viewCache[key].fsPath === path;
-			});
-			if (viewKey) {
-				this._viewCache[viewKey].content = "";
-				this._viewCache[viewKey].idClassMap = {};
-				this._viewCache[viewKey].XMLParserData = undefined;
-				delete this._viewCache[viewKey];
+	public static removeFromCache(fsPath: string) {
+		return this._removeViewFromCache(fsPath) || this._removeFragmentFromCache(fsPath);
+	}
+	private static _removeViewFromCache(fsPath: string) {
+		const className = this.getClassNameFromPath(fsPath);
+		if (fsPath.endsWith(".view.xml")) {
+			if (className) {
+				this._viewCache[className].controllerName = "";
+				this._viewCache[className].content = "";
+				this._viewCache[className].idClassMap = {};
+				this._viewCache[className].XMLParserData = undefined;
+				delete this._viewCache[className];
+				return true;
 			}
-		} else if (path.endsWith(".fragment.xml") && className) {
+		}
+		return false;
+	}
+
+	private static _removeFragmentFromCache(fsPath: string) {
+		const className = this.getClassNameFromPath(fsPath);
+		if (fsPath.endsWith(".fragment.xml") && className) {
 			if (this._fragmentCache[className]) {
 				this._fragmentCache[className].content = "";
 				this._fragmentCache[className].idClassMap = {};
 				this._fragmentCache[className].XMLParserData = undefined;
+				delete this._fragmentCache[className];
+				return true;
 			}
-			delete this._fragmentCache[className];
 		}
+		return false;
 	}
 
 	static getXMLFile(className: string, fileType?: string) {
@@ -742,7 +744,7 @@ export class FileReader {
 		}
 
 		if (!xmlFile && (fileType === "view" || !fileType)) {
-			xmlFile = this._viewCache[className] || this.getAllViews().find(view => view.name === className);
+			xmlFile = this._viewCache[className] || this.getAllViews().find(view => view.controllerName === className);
 		}
 
 		return xmlFile;
@@ -757,8 +759,8 @@ export class FileReader {
 		}
 	}
 
-	static removeOldViewForController(oldName: string) {
-		delete this._viewCache[oldName];
+	static removeView(viewName: string) {
+		delete this._viewCache[viewName];
 	}
 
 	static replaceFragmentNames(oldName: string, newName: string) {
@@ -768,13 +770,11 @@ export class FileReader {
 			fragment.fsPath = newFSPath;
 			fragment.name = newName;
 			this._fragmentCache[newName] = this._fragmentCache[oldName];
-			// this.removeFromCache(oldFSPath);
 			delete this._fragmentCache[oldName];
 		}
 	}
 
 	static getAllFilesInAllWorkspaces() {
-		//TODO: Move to file reader
 		const workspace = vscode.workspace;
 		const wsFolders = workspace.workspaceFolders || [];
 		const files: FileData[] = [];
@@ -832,6 +832,7 @@ export interface IViews {
 }
 
 export interface IView extends IXMLFile, IIdClassMap {
+	controllerName: string;
 }
 export interface IFragment extends IXMLFile, IIdClassMap {
 }

@@ -1,3 +1,8 @@
+## 0.12.45 (26-05-2021)
+* Bugfixes
+* XML Formatter now formats empty class tags. E.g. ```<Button></Button> -> <Button/>```
+* XML Attribute linter now checks if entered value is the same as default value
+
 ## 0.12.44 (21-05-2021)
 * Added support for @ui5ignore JSDoc tag, which will make ignore errors of Unused Member, Public Member, Wrong Field/Method linters.
 * New preference entry introduced: ui5.plugin.codeGeneratorStrategy

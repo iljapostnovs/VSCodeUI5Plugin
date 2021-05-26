@@ -15,10 +15,7 @@ export class XMLLinter {
 			new WrongFilePathLinter()
 		];
 
-		let errors: IError[] = [];
-		linters.forEach(linter => {
-			errors = errors.concat(linter.getErrors(document));
-		});
+		const errors: IError[] = linters.flatMap(linter => linter.getErrors(document));
 		// copy(JSON.stringify(errors.map(error => ({text: error.message}))))
 		return errors;
 	}

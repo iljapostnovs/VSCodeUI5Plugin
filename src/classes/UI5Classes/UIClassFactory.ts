@@ -665,7 +665,7 @@ export class UIClassFactory {
 			if (UIClass instanceof CustomUIClass && UIClass.classFSPath?.endsWith(".controller.js")) {
 				const view = FileReader.getViewForController(oldName);
 				if (view) {
-					FileReader.removeOldViewForController(oldName);
+					FileReader.removeView(view.name);
 				}
 			}
 		}

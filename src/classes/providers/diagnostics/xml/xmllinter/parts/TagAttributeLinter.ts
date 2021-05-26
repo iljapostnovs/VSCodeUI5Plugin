@@ -9,6 +9,7 @@ import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransf
 interface IAttributeValidation {
 	valid: boolean;
 	message?: string;
+	severity: vscode.DiagnosticSeverity
 }
 
 function isNumeric(value: string) {
@@ -49,6 +50,7 @@ export class TagAttributeLinter extends Linter {
 											code: "UI5plugin",
 											message: attributeValidation.message || "Invalid attribute",
 											source: "Tag Attribute linter",
+											severity: attributeValidation.severity,
 											attribute: tagAttribute,
 											range: new vscode.Range(
 												new vscode.Position(position.line - 1, position.col - 1),
@@ -69,7 +71,8 @@ export class TagAttributeLinter extends Linter {
 	}
 	private _validateTagAttribute(className: string, attribute: string, attributes: string[], document: vscode.TextDocument): IAttributeValidation {
 		let attributeValidation: IAttributeValidation = {
-			valid: false
+			valid: false,
+			severity: vscode.DiagnosticSeverity.Error
 		};
 
 		const UIClass = UIClassFactory.getUIClass(className);
@@ -78,8 +81,8 @@ export class TagAttributeLinter extends Linter {
 		const isExclusion = attributeName.startsWith("xmlns") || this._isAttributeAlwaysValid(className, attributeName);
 		const isAttributeNameDuplicated = this._getIfAttributeNameIsDuplicated(attribute, attributes);
 		const attributeNameValid = !isAttributeNameDuplicated && (isExclusion || this._validateAttributeName(className, attribute));
-		const attributeValueValid = this._validateAttributeValue(className, attribute, document);
-		attributeValidation.valid = attributeNameValid && attributeValueValid;
+		const attributeValueValidData = this._validateAttributeValue(className, attribute, document);
+		attributeValidation.valid = attributeNameValid && attributeValueValidData.isValueValid;
 
 		if (!attributeNameValid && UIClass.parentClassNameDotNotation) {
 			attributeValidation = this._validateTagAttribute(UIClass.parentClassNameDotNotation, attribute, attributes, document);
@@ -89,8 +92,9 @@ export class TagAttributeLinter extends Linter {
 				message = `Duplicated attribute ${attributeName}`;
 			} else if (!attributeNameValid) {
 				message = `Invalid attribute name (${attributeName})`;
-			} else if (!attributeValueValid) {
-				message = `Invalid attribute value (${attributeValue})`;
+			} else if (!attributeValueValidData.isValueValid) {
+				message = attributeValueValidData.message || `Invalid attribute value (${attributeValue})`;
+				attributeValidation.severity = attributeValueValidData.severity;
 			}
 			attributeValidation.message = message;
 		}
@@ -108,6 +112,8 @@ export class TagAttributeLinter extends Linter {
 
 	private _validateAttributeValue(className: string, attribute: string, document: vscode.TextDocument) {
 		let isValueValid = true;
+		let message;
+		let severity: vscode.DiagnosticSeverity = vscode.DiagnosticSeverity.Error;
 		const { attributeName, attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 		const UIClass = UIClassFactory.getUIClass(className);
 		const property = UIClass.properties.find(property => property.name === attributeName);
@@ -132,9 +138,16 @@ export class TagAttributeLinter extends Linter {
 		} else if (event && responsibleControlName) {
 			const eventName = XMLParser.getEventHandlerNameFromAttributeValue(attributeValue);
 			isValueValid = !!XMLParser.getMethodsOfTheControl(responsibleControlName).find(method => method.name === eventName);
+			message = `Event handler "${eventName}" not found in "${responsibleControlName}".`
 		}
 
-		return isValueValid;
+		if (isValueValid && property?.defaultValue && attributeValue === property.defaultValue) {
+			isValueValid = false;
+			message = `Value "${attributeValue}" is unnecessary, it is the sames as default value of "${property.name}" property`;
+			severity = vscode.DiagnosticSeverity.Information
+		}
+
+		return { isValueValid, message, severity };
 	}
 
 	private _validateAttributeName(className: string, attribute: string) {

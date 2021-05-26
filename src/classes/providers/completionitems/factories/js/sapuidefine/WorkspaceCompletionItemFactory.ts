@@ -65,7 +65,7 @@ export class WorkspaceCompletionItemFactory implements ICompletionItemFactory {
 		const wsFolders = workspace.workspaceFolders || [];
 		const separator = path.sep;
 		for (const wsFolder of wsFolders) {
-			const manifests: any = FileReader.getManifestPathsInWorkspaceFolder(wsFolder);
+			const manifests: any = FileReader.getManifestFSPathsInWorkspaceFolder(wsFolder);
 
 			for (const manifest of manifests) {
 				const manifestPath = path.normalize(manifest.fsPath);

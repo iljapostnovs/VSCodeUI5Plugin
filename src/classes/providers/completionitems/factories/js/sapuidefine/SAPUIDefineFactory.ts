@@ -2,9 +2,9 @@ import * as vscode from "vscode";
 import { SAPNode } from "../../../../../librarydata/SAPNode";
 import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileWatcherMediator } from "../../../../../utils/FileWatcherMediator";
+import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
 import { URLBuilder } from "../../../../../utils/URLBuilder";
 import { GeneratorFactory } from "../../../codegenerators/GeneratorFactory";
 import { CustomCompletionItem } from "../../../CustomCompletionItem";
@@ -17,9 +17,8 @@ export class SAPUIDefineFactory implements ICompletionItemFactory {
 		if (document && position) {
 			UIClassFactory.setNewContentForClassUsingDocument(document);
 			const offset = document.offsetAt(position);
-			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
-			if (currentClassName) {
-				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+			const UIClass = TextDocumentTransformer.toCustomUIClass(document);
+			if (UIClass) {
 
 				if (UIClass.fileContent) {
 					const args = UIClass.fileContent?.body[0]?.expression?.arguments;

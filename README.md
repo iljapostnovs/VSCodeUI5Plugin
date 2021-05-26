@@ -64,13 +64,14 @@ Code Lens for Internalization Texts is provided<br/>
 XML Diagnostics is provided<br/>
 XML Linters available:<br/>
 * Attribute linter<br/>
->Checks for property existence, property value, prefix existence, event handler existence
+>Checks for property existence, property value, prefix existence, event handler existence and if default value is not the same as entered value
 * Unused namespace linter<br/>
 >Checks if declared namespaces are used
 * Tag linter<br/>
 >Checks for class and aggregation existence
 * Wrong file path linter<br/>
 >Checks if any strings that contains app namespace have according fragment or view
+
 
 > Related preference entries:<br/>
 > *ui5.plugin.xmlDiagnostics*<br/>

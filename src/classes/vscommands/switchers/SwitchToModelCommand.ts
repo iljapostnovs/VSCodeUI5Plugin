@@ -28,7 +28,7 @@ export class SwitchToModelCommand {
 	}
 
 	private static async _switchToModel(modelName: string) {
-		const modelFSPath = FileReader.getClassPathFromClassName(modelName);
+		const modelFSPath = FileReader.getClassFSPathFromClassName(modelName);
 		const editor = vscode.window.activeTextEditor;
 		if (editor && modelFSPath) {
 			await vscode.window.showTextDocument(vscode.Uri.file(modelFSPath));

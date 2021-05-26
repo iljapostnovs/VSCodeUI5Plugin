@@ -22,17 +22,17 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 			const positionType = XMLParser.getPositionType(XMLFile, currentPositionOffset);
 
 			if (positionType === PositionType.InTheTagAttributes) {
-				completionItems = this._getAttributeCompletionItems();
+				completionItems = this._getAttributeCompletionItems(document, position);
 
 			} else if (positionType === PositionType.InTheString) {
-				completionItems = this._getAttributeValuesCompletionItems();
+				completionItems = this._getAttributeValuesCompletionItems(document, position);
 
 			} else if (positionType === PositionType.InTheClassName) {
 
-				completionItems = this._getTagCompletionItems();
+				completionItems = this._getTagCompletionItems(document, position);
 			} else if (positionType === PositionType.InBodyOfTheClass) {
 
-				completionItems = this._getCompletionItemsFromClassBody();
+				completionItems = this._getCompletionItemsFromClassBody(document, position);
 
 			}
 
@@ -92,11 +92,10 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 	}
 
 
-	private _getAttributeValuesCompletionItems() {
+	private _getAttributeValuesCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
-		const document = vscode.window.activeTextEditor?.document;
-		const XMLFile = document && TextDocumentTransformer.toXMLFile(document);
-		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
+		const XMLFile = TextDocumentTransformer.toXMLFile(document);
+		const currentPositionOffset = document.offsetAt(position);
 
 		if (document && XMLFile && currentPositionOffset) {
 			const positionBeforeString = XMLParser.getPositionBeforeStringBegining(XMLFile.content, currentPositionOffset);
@@ -141,10 +140,10 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 		return completionItems;
 	}
 
-	private _getTagCompletionItems() {
+	private _getTagCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
-		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
-		const XMLFile = vscode.window.activeTextEditor?.document && TextDocumentTransformer.toXMLFile(vscode.window.activeTextEditor?.document);
+		const currentPositionOffset = document.offsetAt(position);
+		const XMLFile = TextDocumentTransformer.toXMLFile(document);
 
 		if (XMLFile && currentPositionOffset) {
 			try {
@@ -153,7 +152,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 				const isTagEmpty = !currentTagText[1].match(/[a-zA-Z]/);
 				if (isTagEmpty) {
 					const { positionBegin: currentTagPositionBegin } = XMLParser.getTagBeginEndPosition(XMLFile, currentPositionOffset - 1);
-					completionItems = this._getParentTagCompletionItems(currentTagPositionBegin - 1);
+					completionItems = this._getParentTagCompletionItems(document, position, currentTagPositionBegin - 1);
 					completionItems = this._convertToFileSpecificCompletionItems(completionItems, XMLFile.content);
 				} else if (libName) {
 					let tagPrefix = XMLParser.getTagPrefix(currentTagText);
@@ -161,7 +160,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 					const isThisClassFromAProject = !!FileReader.getManifestForClass(libName + ".");
 					if (!isThisClassFromAProject) {
 						completionItems = this._getStandardCompletionItemsFilteredByLibraryName(libName);
-						completionItems = this._filterCompletionItemsByAggregationsType(completionItems);
+						completionItems = this._filterCompletionItemsByAggregationsType(document, position, completionItems);
 					} else {
 						completionItems = this._getCompletionItemsForCustomClasses(libName, tagPrefix);
 					}
@@ -230,21 +229,21 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 		return completionItem;
 	}
 
-	private _filterCompletionItemsByAggregationsType(completionItems: CustomCompletionItem[]) {
+	private _filterCompletionItemsByAggregationsType(document: vscode.TextDocument, position: vscode.Position, completionItems: CustomCompletionItem[]) {
 		const XMLFile = vscode.window.activeTextEditor?.document && TextDocumentTransformer.toXMLFile(vscode.window.activeTextEditor?.document);
 		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
 
 		if (XMLFile && currentPositionOffset) {
 			const { positionBegin: currentTagPositionBegin } = XMLParser.getTagBeginEndPosition(XMLFile, currentPositionOffset);
-			completionItems = this._getParentTagCompletionItems(currentTagPositionBegin - 1, completionItems);
+			completionItems = this._getParentTagCompletionItems(document, position, currentTagPositionBegin - 1, completionItems);
 		}
 
 		return completionItems;
 	}
 
-	private _getParentTagCompletionItems(currentPosition: number, completionItems: CustomCompletionItem[] = this._getAllFileSpecificCompletionItems()) {
-		const XMLFile = vscode.window.activeTextEditor?.document && TextDocumentTransformer.toXMLFile(vscode.window.activeTextEditor?.document);
-		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
+	private _getParentTagCompletionItems(document: vscode.TextDocument, position: vscode.Position, currentPosition: number, completionItems: CustomCompletionItem[] = this._getAllFileSpecificCompletionItems()) {
+		const XMLFile = TextDocumentTransformer.toXMLFile(document);
+		const currentPositionOffset = document.offsetAt(position);
 
 		if (XMLFile && currentPositionOffset) {
 			const parentTagInfo = XMLParser.getParentTagAtPosition(XMLFile, currentPosition);
@@ -269,6 +268,11 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 							return nodeDAO.isInstanceOf(aggregationType, completionItem.className);
 						}));
 					}
+				} else if (classOfTheTag === "sap.ui.core.FragmentDefinition" && libraryPath) {
+					const nodeDAO = new SAPNodeDAO();
+					completionItems = completionItems.filter(completionItem => {
+						return nodeDAO.isInstanceOf("sap.ui.core.Control", completionItem.className);
+					});
 				} else {
 					completionItems = aggregationCompletionItems;
 				}
@@ -326,13 +330,13 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 		return clone;
 	}
 
-	private _getCompletionItemsFromClassBody() {
+	private _getCompletionItemsFromClassBody(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
-		const XMLText = vscode.window.activeTextEditor?.document.getText();
-		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
+		const XMLText = TextDocumentTransformer.toXMLFile(document)?.content;
+		const currentPositionOffset = document.offsetAt(position);
 
 		if (XMLText && currentPositionOffset) {
-			completionItems = this._getParentTagCompletionItems(currentPositionOffset);
+			completionItems = this._getParentTagCompletionItems(document, position, currentPositionOffset);
 			completionItems = completionItems.map(completionItem => {
 				completionItem = this._cloneCompletionItem(completionItem);
 				if (completionItem.insertText instanceof vscode.SnippetString) {
@@ -348,11 +352,11 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 		return completionItems;
 	}
 
-	private _getAttributeCompletionItems() {
+	private _getAttributeCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 
-		const XMLFile = vscode.window.activeTextEditor?.document && TextDocumentTransformer.toXMLFile(vscode.window.activeTextEditor?.document);
-		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(vscode.window.activeTextEditor?.selection.start);
+		const XMLFile = TextDocumentTransformer.toXMLFile(document);
+		const currentPositionOffset = document.offsetAt(position);
 
 		if (XMLFile && currentPositionOffset) {
 			const className = XMLParser.getClassNameInPosition(XMLFile, currentPositionOffset);

@@ -13,7 +13,7 @@ export enum InsertType {
 export class MethodInserter {
 	static createInsertMethodCodeAction(className: string, memberName: string, params: string, body: string, type: InsertType, tabsToAdd = "\t\t") {
 		let insertMethodCodeAction: vscode.CodeAction | undefined;
-		const classPath = FileReader.getClassPathFromClassName(className);
+		const classPath = FileReader.getClassFSPathFromClassName(className);
 		if (classPath) {
 			const classUri = vscode.Uri.file(classPath);
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);

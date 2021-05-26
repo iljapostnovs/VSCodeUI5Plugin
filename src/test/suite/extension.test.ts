@@ -7,6 +7,7 @@ import * as data from "./data/TestData.json";
 import * as renameData from "./data/RenameData.json";
 import * as CompletionItemsData from "./data/completionitems/JSCompletionItems.json";
 import * as XMLCompletionItemData from "./data/completionitems/XMLCompletionItems.json";
+import * as XMLFormatterData from "./data/XMLFormatterData.json";
 import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { FileReader } from "../../classes/utils/FileReader";
@@ -22,6 +23,7 @@ import { ViewIdCompletionItemFactory } from "../../classes/providers/completioni
 import { XMLDynamicCompletionItemFactory } from "../../classes/providers/completionitems/factories/xml/XMLDynamicCompletionItemFactory";
 import { FileRenameMediator } from "../../classes/filerenaming/FileRenameMediator";
 import { FileWatcherMediator } from "../../classes/utils/FileWatcherMediator";
+import { XMLFormatter } from "../../classes/utils/XMLFormatter";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -93,7 +95,7 @@ suite("Extension Test Suite", () => {
 		const testData = data.JSLinter;
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
@@ -179,7 +181,7 @@ suite("Extension Test Suite", () => {
 		for (const data of testData) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(data.className);
 
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const uri = vscode.Uri.file(filePath);
 				const document = await vscode.workspace.openTextDocument(uri);
@@ -204,7 +206,7 @@ suite("Extension Test Suite", () => {
 						}
 
 						for (const methodRename of data.renames.methods) {
-							const filePath = FileReader.getClassPathFromClassName(methodRename.className);
+							const filePath = FileReader.getClassFSPathFromClassName(methodRename.className);
 							const uri = filePath && vscode.Uri.file(filePath);
 							if (uri) {
 								const UIClass = <CustomUIClass>UIClassFactory.getUIClass(methodRename.className);
@@ -272,7 +274,7 @@ suite("Extension Test Suite", () => {
 		const factory = new ViewIdCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
@@ -291,7 +293,7 @@ suite("Extension Test Suite", () => {
 		const factory = new JSDynamicCompletionItemsFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
@@ -311,7 +313,7 @@ suite("Extension Test Suite", () => {
 		const factory = new SAPUIDefineFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const completionItems = await factory.generateUIDefineCompletionItems();
 
@@ -326,7 +328,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -344,7 +346,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -362,7 +364,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -380,7 +382,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassPathFromClassName(data.className);
+			const filePath = FileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -415,6 +417,21 @@ suite("Extension Test Suite", () => {
 					assert.ok(!!resultWithSameContent, `File "${changedFile.fileData.fsPath}" was not found in the renaming result`);
 					assert.strictEqual(changedFile.renames.length, resultWithSameContent.renames.length, `File "${changedFile.fileData.fsPath}" must have ${resultWithSameContent.renames.length} renames, but got ${changedFile.renames.length}`);
 				});
+
+			}
+		}
+	});
+
+	test("XML Formatter is working as expected", async () => {
+		const testData = XMLFormatterData.formatterData;
+
+		for (const data of testData) {
+			const fsPath = FileReader.convertClassNameToFSPath(data.className, false, false, true);
+			if (fsPath) {
+				const uri = vscode.Uri.file(fsPath);
+				const document = await vscode.workspace.openTextDocument(uri);
+				const textEdits = XMLFormatter.formatDocument(document);
+				assert.strictEqual(textEdits[0].newText, data.formattedText, `XML Formatter for "${data.className}" should have formatted to "${data.formattedText}", but result was "${textEdits[0].newText}"`);
 
 			}
 		}

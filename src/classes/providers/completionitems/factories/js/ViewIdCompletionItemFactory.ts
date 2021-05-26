@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { InnerPropertiesStrategy } from "../../../../UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
 import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
@@ -17,15 +18,19 @@ export class ViewIdCompletionItemFactory implements ICompletionItemFactory {
 		if (currentClassName) {
 			const nodes = strategy.getStackOfNodesForInnerParamsForPosition(currentClassName, offset, true);
 			if (nodes.length === 1 && nodes[0].callee?.property?.name === "byId") {
-
-				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
-				const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, false);
-				const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
-				const viewIdResult: IXMLDocumentIdData[] = [];
-				XMLDocuments.forEach(XMLDocument => {
-					viewIdResult.push(...XMLParser.getAllIDsInCurrentView(XMLDocument));
-				});
-				completionItems = this._generateCompletionItemsFromUICompletionItems(viewIdResult, document, position);
+				const positionStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+				const classNameAtById = positionStrategy.getClassNameOfTheVariableAtPosition(currentClassName, nodes[0].callee?.property?.start);
+				const isControl = classNameAtById && UIClassFactory.isClassAChildOfClassB(classNameAtById, "sap.ui.core.Control");
+				if (isControl) {
+					const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+					const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, false);
+					const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
+					const viewIdResult: IXMLDocumentIdData[] = [];
+					XMLDocuments.forEach(XMLDocument => {
+						viewIdResult.push(...XMLParser.getAllIDsInCurrentView(XMLDocument));
+					});
+					completionItems = this._generateCompletionItemsFromUICompletionItems(viewIdResult, document, position);
+				}
 			}
 		}
 		//copy(JSON.stringify(completionItems.map(item => item.insertText)))

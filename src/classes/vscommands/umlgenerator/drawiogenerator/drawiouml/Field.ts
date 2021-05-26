@@ -20,9 +20,10 @@ export class Field implements IUMLGenerator, ITextLengthGettable {
 	}
 
 	getValue() {
-		const isPrivate = this.UIField.name.startsWith("_");
-		const privateSign = isPrivate ? "-" : "+";
-		const value = `${privateSign} ${this.UIField.name}: ${this.UIField.type?.replace("__map__", "map") || "any"}`;
+		const isPrivate = this.UIField.visibility === "private";
+		const isProtected = this.UIField.visibility === "private";
+		const sign = isPrivate ? "-" : isProtected ? "#" : "+";
+		const value = `${sign} ${this.UIField.name}: ${this.UIField.type?.replace("__map__", "map") || "any"}`;
 
 		return value.replace(/"/g, "").replace(/&/g, "&amp;")
 			.replace(/</g, "&lt;")
