@@ -20,7 +20,8 @@ function escapeRegExp(string: string) {
 export interface IXMLDocumentIdData {
 	id: string,
 	className: string,
-	tagText: string
+	tagText: string,
+	sourceClassName: string
 }
 
 export class XMLParser {
@@ -79,7 +80,8 @@ export class XMLParser {
 				result.push({
 					className: className,
 					id: this.getAttributeNameAndValue(idAttribute).attributeValue,
-					tagText: tag.text
+					tagText: tag.text,
+					sourceClassName: XMLFile.name
 				});
 			}
 

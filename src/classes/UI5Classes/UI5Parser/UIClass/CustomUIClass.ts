@@ -147,7 +147,8 @@ export class CustomUIClass extends AbstractUIClass {
 						}
 						if (asyncTag) {
 							UIMethod.returnType = "Promise";
-						} else if (returnTag) {
+						}
+						if (returnTag) {
 							UIMethod.returnType = returnTag.type;
 						}
 						if (comment.jsdoc) {

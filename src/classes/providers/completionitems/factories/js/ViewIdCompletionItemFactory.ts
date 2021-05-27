@@ -44,8 +44,8 @@ export class ViewIdCompletionItemFactory implements ICompletionItemFactory {
 			const completionItem: CustomCompletionItem = new CustomCompletionItem(viewIdData.id);
 			completionItem.kind = vscode.CompletionItemKind.Keyword;
 			completionItem.insertText = viewIdData.id;
-			completionItem.detail = viewIdData.className;
-			completionItem.documentation = new vscode.MarkdownString(viewIdData.id + `  \n\`\`\`xml \n${viewIdData.tagText.substring(0, 200)}...\n\`\`\``);
+			completionItem.detail = viewIdData.sourceClassName;
+			completionItem.documentation = new vscode.MarkdownString(`\`\`\`xml \n${viewIdData.tagText.substring(0, 200)}...\n\`\`\``);
 			completionItem.sortText = "z";
 			completionItem.range = currentRange;
 

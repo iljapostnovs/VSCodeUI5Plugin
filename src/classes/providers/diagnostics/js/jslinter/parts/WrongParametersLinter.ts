@@ -65,8 +65,9 @@ export class WrongParametersLinter extends Linter {
 														const classNameOfTheParam = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(param, UIClass);
 
 														if (classNameOfTheParam && classNameOfTheParam !== paramFromMethod.type) {
-															const paramFromMethodTypes = paramFromMethod.type.split("|");
-															const classNamesOfTheParam = classNameOfTheParam.split("|");
+															const { expectedClass, actualClass } = this._swapClassNames(paramFromMethod.type, classNameOfTheParam);
+															const paramFromMethodTypes = expectedClass.split("|");
+															const classNamesOfTheParam = actualClass.split("|");
 															let typeMismatch = !this._getIfClassNameIntersects(paramFromMethodTypes, classNamesOfTheParam);
 															if (typeMismatch) {
 																typeMismatch = !paramFromMethodTypes.find(className => {
@@ -120,22 +121,14 @@ export class WrongParametersLinter extends Linter {
 
 	private _getIfClassesDiffers(expectedClass: string, actualClass: string) {
 		let classesDiffers = true;
-		const numbers = ["number", "float", "int", "integer"];
 
-		expectedClass = this._swapClassNames(expectedClass);
-		actualClass = this._swapClassNames(actualClass);
-		if (expectedClass.endsWith("[]") && actualClass.endsWith("[]")) {
-			expectedClass = expectedClass.replace("[]", "");
-			actualClass = actualClass.replace("[]", "");
-		}
+		({ expectedClass, actualClass } = this._swapClassNames(expectedClass, actualClass));
 
 		if (this._checkIfClassesAreEqual(expectedClass, actualClass, "map", "object")) {
 			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === "any" || actualClass.toLowerCase() === "any") {
 			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === actualClass.toLowerCase()) {
-			classesDiffers = false;
-		} else if (numbers.includes(expectedClass.toLowerCase()) && numbers.includes(actualClass.toLowerCase())) {
 			classesDiffers = false;
 		} else if (expectedClass.toLowerCase() === "object" && UIClassFactory.isClassAChildOfClassB(actualClass, "sap.ui.base.Object")) {
 			classesDiffers = false;
@@ -152,12 +145,30 @@ export class WrongParametersLinter extends Linter {
 		return classesDiffers;
 	}
 
+	private _swapClassNames(expectedClass: string, actualClass: string) {
+		expectedClass = this._swapClassName(expectedClass);
+		actualClass = this._swapClassName(actualClass);
+
+		if (expectedClass.startsWith("Promise<") && actualClass.startsWith("Promise<")) {
+			expectedClass = AcornSyntaxAnalyzer.getResultOfPromise(expectedClass);
+			actualClass = AcornSyntaxAnalyzer.getResultOfPromise(actualClass);
+		}
+
+		if (expectedClass.endsWith("[]") && actualClass.endsWith("[]")) {
+			expectedClass = expectedClass.replace("[]", "");
+			actualClass = actualClass.replace("[]", "");
+		}
+
+		return { expectedClass, actualClass };
+	}
+
 	private _checkIfClassesAreEqual(class1: string, class2: string, substitute1: string, substitute2: string) {
 		return class1.toLowerCase() === substitute1 && class2.toLowerCase() === substitute2 ||
 			class1.toLowerCase() === substitute2 && class2.toLowerCase() === substitute1;
 	}
 
-	private _swapClassNames(className: string) {
+	private _swapClassName(className: string) {
+		const numbers = ["number", "float", "int", "integer"];
 		if (className.endsWith("array")) {
 			className = "any[]";
 		}
@@ -166,6 +177,12 @@ export class WrongParametersLinter extends Linter {
 		}
 		if (className === "void" || !className) {
 			className = "any";
+		}
+		if (className === "Promise") {
+			className = "Promise<any>";
+		}
+		if (numbers.includes(className)) {
+			className = "number";
 		}
 
 		return className;

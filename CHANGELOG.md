@@ -1,3 +1,6 @@
+## 0.12.46 (27-05-2021)
+* Add parsing of async await
+
 ## 0.12.45 (26-05-2021)
 * Bugfixes
 * XML Formatter now formats empty class tags. E.g. ```<Button></Button> -> <Button/>```

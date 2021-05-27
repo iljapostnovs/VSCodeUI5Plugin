@@ -54,16 +54,16 @@ export class UnusedMemberLinter extends Linter {
 		return errors;
 	}
 
-	private _checkIfMemberIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, methodOrField: ICustomClassUIMethod | ICustomClassUIField) {
+	private _checkIfMemberIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, member: ICustomClassUIMethod | ICustomClassUIField) {
 		let memberIsUsed = false;
 
-		if (methodOrField.ui5ignored) {
+		if (member.ui5ignored) {
 			memberIsUsed = true;
 		} else {
-			const isException = this._checkIfMethodIsException(UIClass.className, methodOrField.name);
-			const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, methodOrField.name);
+			const isException = this._checkIfMethodIsException(UIClass.className, member.name);
+			const isMemberOverriden = UIClassFactory.isMethodOverriden(UIClass.className, member.name);
 
-			if (methodOrField.mentionedInTheXMLDocument || isMethodOverriden) {
+			if (member.mentionedInTheXMLDocument || isMemberOverriden) {
 				memberIsUsed = true;
 			} else if (!isException) {
 				const classOfTheMethod = UIClass.className;
@@ -71,10 +71,12 @@ export class UnusedMemberLinter extends Linter {
 				customUIClasses.find(customUIClass => {
 					return !!customUIClass.methods.find(methodFromClass => {
 						if (methodFromClass.acornNode) {
-							const memberExpressions = AcornSyntaxAnalyzer.expandAllContent(methodFromClass.acornNode).filter((node: any) => node.type === "MemberExpression");
+							const allContent = AcornSyntaxAnalyzer.expandAllContent(methodFromClass.acornNode);
+							const memberExpressions = allContent.filter((node: any) => node.type === "MemberExpression");
+							const assignmentExpression = allContent.filter((node: any) => node.type === "AssignmentExpression");
 							memberExpressions.find((memberExpression: any) => {
 								const propertyName = memberExpression.callee?.property?.name || memberExpression?.property?.name;
-								const currentMethodIsCalled = propertyName === methodOrField.name;
+								const currentMethodIsCalled = propertyName === member.name;
 								if (currentMethodIsCalled) {
 									const position = memberExpression.callee?.property?.start || memberExpression?.property?.start;
 									const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
@@ -85,7 +87,9 @@ export class UnusedMemberLinter extends Linter {
 											classNameOfTheCallee === classOfTheMethod ||
 											UIClassFactory.isClassAChildOfClassB(classOfTheMethod, classNameOfTheCallee) ||
 											UIClassFactory.isClassAChildOfClassB(classNameOfTheCallee, classOfTheMethod)
-										)
+										) &&
+										!assignmentExpression.find((expression: any) => expression.left === memberExpression)
+
 									) {
 										memberIsUsed = true;
 									}
