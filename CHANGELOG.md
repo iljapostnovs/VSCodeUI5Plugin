@@ -1,3 +1,6 @@
+## 0.12.47 (27-05-2021)
+* Add protected member support for UML Diagram generation
+
 ## 0.12.46 (27-05-2021)
 * Add parsing of async await
 
