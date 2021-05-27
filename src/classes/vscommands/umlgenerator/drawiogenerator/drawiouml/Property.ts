@@ -20,9 +20,10 @@ export class Property implements IUMLGenerator, ITextLengthGettable {
 	}
 
 	getValue() {
-		const isPrivate = this.UIProperty.name.startsWith("_");
-		const privateSign = isPrivate ? "-" : "+";
-		const value = `${privateSign} ${this.UIProperty.name}: ${this.UIProperty.type}`;
+		const isPrivate = this.UIProperty.visibility === "private";
+		const isProtected = this.UIProperty.visibility === "protected";
+		const sign = isPrivate ? "-" : isProtected ? "#" : "+";
+		const value = `${sign} ${this.UIProperty.name}: ${this.UIProperty.type}`;
 
 		return value
 			.replace(/"/g, "")

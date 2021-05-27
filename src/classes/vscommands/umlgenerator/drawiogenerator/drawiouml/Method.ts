@@ -21,7 +21,7 @@ export class Method implements IUMLGenerator, ITextLengthGettable {
 
 	getValue() {
 		const isPrivate = this.UIMethod.visibility === "private";
-		const isProtected = this.UIMethod.visibility === "private";
+		const isProtected = this.UIMethod.visibility === "protected";
 		const sign = isPrivate ? "-" : isProtected ? "#" : "+";
 		const value = `${sign} ${this.UIMethod.name}(${this.UIMethod.params.map(param => param.name).join(", ")}): ${this.UIMethod.returnType}`;
 		return value
