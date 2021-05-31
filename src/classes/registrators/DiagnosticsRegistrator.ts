@@ -4,6 +4,7 @@ import { JSLinter } from "../providers/diagnostics/js/jslinter/JSLinter";
 import { WrongFieldMethodLinter } from "../providers/diagnostics/js/jslinter/parts/WrongFieldMethodLinter";
 import { WrongParametersLinter } from "../providers/diagnostics/js/jslinter/parts/WrongParametersLinter";
 import { XMLLinter } from "../providers/diagnostics/xml/xmllinter/XMLLinter";
+import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 
 let xmlDiagnosticCollection: vscode.DiagnosticCollection;
 let jsDiagnosticCollection: vscode.DiagnosticCollection;
@@ -43,7 +44,7 @@ export class DiagnosticsRegistrator {
 				}
 
 				if (fileName.endsWith(".js")) {
-					this._updateJSDiagnostics(editor.document, jsDiagnosticCollection);
+					this._updateJSDiagnostics(editor.document, jsDiagnosticCollection, true);
 				}
 			}
 		});
@@ -113,19 +114,22 @@ export class DiagnosticsRegistrator {
 		}
 	}
 
-	private static _updateJSDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+	private static _updateJSDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection, bForce = false) {
 		const isJSDiagnosticsEnabled = vscode.workspace.getConfiguration("ui5.plugin").get("jsDiagnostics");
 
 		if (isJSDiagnosticsEnabled && !this._timeoutId) {
 			const timeout = this._getTimeoutForDocument(document);
 			this._timeoutId = setTimeout(async () => {
-				await this._updateDiagnosticCollection(document, collection);
+				await this._updateDiagnosticCollection(document, collection, bForce);
 				this._timeoutId = null;
 			}, timeout);
 		}
 	}
 
-	private static async _updateDiagnosticCollection(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+	private static async _updateDiagnosticCollection(document: vscode.TextDocument, collection: vscode.DiagnosticCollection, bForce = false) {
+		if (bForce) {
+			UIClassFactory.setNewContentForClassUsingDocument(document, true);
+		}
 		const errors = await JSLinter.getLintingErrors(document);
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {

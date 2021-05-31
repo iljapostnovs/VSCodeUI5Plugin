@@ -55,12 +55,12 @@ export class UIClassFactory {
 		return isExtendedBy;
 	}
 
-	public static setNewContentForClassUsingDocument(document: vscode.TextDocument) {
+	public static setNewContentForClassUsingDocument(document: vscode.TextDocument, force = false) {
 		const documentText = document.getText();
 		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 
 		if (currentClassName && documentText) {
-			this.setNewCodeForClass(currentClassName, documentText);
+			this.setNewCodeForClass(currentClassName, documentText, force);
 		}
 	}
 
