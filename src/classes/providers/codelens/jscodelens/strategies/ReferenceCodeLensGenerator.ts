@@ -50,7 +50,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 			if (UIClass.referenceCodeLensCache[method.owner] && UIClass.referenceCodeLensCache[method.owner][method.name]) {
 				locations.push(...UIClass.referenceCodeLensCache[method.owner][method.name]);
 			} else if (UIClass.classFSPath) {
-				const regexp = new RegExp(`(?<=\\.)${method.name}(\\(|\\,|\\.|\\s)`, "g");
+				const regexp = new RegExp(`(?<=\\.)${method.name}(\\(|\\)|\\,|\\.|\\s)`, "g");
 				const results: RegExpExecArray[] = [];
 				let result = regexp.exec(UIClass.classText);
 				while (result) {
