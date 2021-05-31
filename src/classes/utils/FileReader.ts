@@ -340,13 +340,24 @@ export class FileReader {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const classPaths = this._readFilesInWorkspace(wsFolder, "**/*.js");
-			classPaths.forEach(classPath => {
-				const className = FileReader.getClassNameFromPath(classPath);
+			const classNames = classPaths.map(path => FileReader.getClassNameFromPath(path));
+			classNames.forEach(className => {
 				if (className) {
 					try {
 						UIClassFactory.getUIClass(className);
 					} catch (error) {
 						vscode.window.showErrorMessage(`Error parsing ${className}: ${error.message}`);
+					}
+				}
+			});
+
+			classNames.forEach(className => {
+				if (className) {
+					const UIClass = UIClassFactory.getUIClass(className);
+					if (UIClass instanceof CustomUIClass) {
+						UIClass.referenceCodeLensCache = {};
+						UIClass.relatedViewsAndFragments = undefined;
+						UIClassFactory.enrichTypesInCustomClass(UIClass);
 					}
 				}
 			});
@@ -360,20 +371,7 @@ export class FileReader {
 			viewPaths.forEach(viewPath => {
 				const viewContent = fs.readFileSync(viewPath, "utf8");
 				const viewFSPath = viewPath.replace(/\//g, fileSeparator);
-				const fragments = this.getFragmentsFromXMLDocumentText(viewContent);
-				const controllerName = this.getControllerNameFromView(viewContent);
-				const viewName = this.getClassNameFromPath(viewFSPath);
-				if (viewName) {
-					this._viewCache[viewName] = {
-						idClassMap: {},
-						controllerName: controllerName || "",
-						name: viewName || "",
-						content: viewContent,
-						fsPath: viewFSPath,
-						fragments: fragments,
-						referenceCodeLensCache: {}
-					};
-				}
+				this.setNewViewContentToCache(viewContent, viewFSPath);
 			});
 		}
 	}
@@ -382,24 +380,15 @@ export class FileReader {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const fragmentPaths = this._readFilesInWorkspace(wsFolder, "**/*.fragment.xml");
-			fragmentPaths.forEach(fragmentPath => {
-				const fragmentContent = fs.readFileSync(fragmentPath, "utf8");
-				const fragmentFSPath = fragmentPath.replace(/\//g, fileSeparator);
-				const fragmentName = this.getClassNameFromPath(fragmentFSPath);
-				if (fragmentName) {
-					this._fragmentCache[fragmentName] = {
-						content: fragmentContent,
-						fsPath: fragmentFSPath,
-						name: fragmentName,
-						idClassMap: {},
-						fragments: [],
-						referenceCodeLensCache: {}
-					};
-				}
+			const fragmentData = fragmentPaths.map(path => {
+				const fragmentFSPath = path.replace(/\//g, fileSeparator);
+				return { fragmentFSPath, content: fs.readFileSync(fragmentFSPath, "utf8") };
 			});
-
-			this.getAllFragments().forEach(fragment => {
-				fragment.fragments = this.getFragmentsFromXMLDocumentText(fragment.content);
+			fragmentData.forEach(fragmentData => {
+				this.setNewFragmentContentToCache(fragmentData.content, fragmentData.fragmentFSPath);
+			});
+			fragmentData.forEach(fragmentData => {
+				this.setNewFragmentContentToCache(fragmentData.content, fragmentData.fragmentFSPath, true);
 			});
 		}
 	}

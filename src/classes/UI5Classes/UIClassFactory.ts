@@ -121,7 +121,7 @@ export class UIClassFactory {
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.fields.forEach(field => {
 				if (!field.mentionedInTheXMLDocument) {
-					const regex = new RegExp(`(\\.|"|')${field.name}"`);
+					const regex = new RegExp(`(\\.|"|')${field.name}("|'|\\.)`);
 					if (viewOfTheControl) {
 						const isFieldMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isFieldMentionedInTheView) {
@@ -139,21 +139,14 @@ export class UIClassFactory {
 					}
 
 					if (!field.mentionedInTheXMLDocument) {
-						const regex = new RegExp(`(\\.|"|')${field.name}`);
-						const isFieldMentionedInTheView = regex.test(viewOfTheControl.content);
-						if (isFieldMentionedInTheView) {
-							field.mentionedInTheXMLDocument = true;
+						viewOfTheControl.fragments.find(fragment => {
+							const isMethodMentionedInTheFragment = regex.test(fragment.content);
+							if (isMethodMentionedInTheFragment) {
+								field.mentionedInTheXMLDocument = true;
+							}
 
-						} else {
-							viewOfTheControl.fragments.find(fragment => {
-								const isMethodMentionedInTheFragment = regex.test(fragment.content);
-								if (isMethodMentionedInTheFragment) {
-									field.mentionedInTheXMLDocument = true;
-								}
-
-								return isMethodMentionedInTheFragment;
-							});
-						}
+							return isMethodMentionedInTheFragment;
+						});
 					}
 				}
 			});
@@ -162,7 +155,7 @@ export class UIClassFactory {
 		viewsAndFragments.fragments.forEach(fragment => {
 			CurrentUIClass.methods.forEach(method => {
 				if (!method.isEventHandler) {
-					const regex = new RegExp(`(\\.|"|')${method.name}"`);
+					const regex = new RegExp(`("\\.|")${method.name}"`);
 					const isMethodMentionedInTheFragment = regex.test(fragment.content);
 					if (isMethodMentionedInTheFragment) {
 						method.isEventHandler = true;
@@ -173,7 +166,7 @@ export class UIClassFactory {
 					}
 				}
 				if (!method.isEventHandler) {
-					const regex = new RegExp(`(\\.|"|')${method.name}'`);
+					const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
 					const isMethodMentionedInTheFragment = regex.test(fragment.content);
 					if (isMethodMentionedInTheFragment) {
 						method.mentionedInTheXMLDocument = true;
@@ -394,7 +387,7 @@ export class UIClassFactory {
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.methods.forEach(method => {
 				if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
-					const regex = new RegExp(`(\\.|"|')${method.name}"`);
+					const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
 					if (viewOfTheControl) {
 						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isMethodMentionedInTheView) {
@@ -420,7 +413,7 @@ export class UIClassFactory {
 					}
 
 					if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
-						const regex = new RegExp(`(\\.|"|')${method.name}`);
+						const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
 						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isMethodMentionedInTheView) {
 							method.mentionedInTheXMLDocument = true;

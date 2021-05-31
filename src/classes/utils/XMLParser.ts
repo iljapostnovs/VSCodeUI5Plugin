@@ -38,7 +38,7 @@ export class XMLParser {
 						let currentEventHandlerName = this.getEventHandlerNameFromAttributeValue(attributeValue);
 
 						if (currentEventHandlerName !== eventHandlerName && currentEventHandlerName.includes(eventHandlerName)) {
-							const results = new RegExp(`((\\..*?\\.)|("))${eventHandlerName}("|')`).exec(currentEventHandlerName);
+							const results = new RegExp(`((\\..*?\\.)|("))${eventHandlerName}("|'|\\()`).exec(currentEventHandlerName);
 							if (results && results[0].split(".").length > 2) {
 								const result = results[0].substring(0, results[0].length - 1).split(".").slice(1);
 								if (functionCallClassName) {
@@ -667,7 +667,7 @@ export class XMLParser {
 	public static getPositionsOfFunctionCallInXMLText(functionCallName: string, XMLText: string) {
 		const positions: number[] = [];
 
-		const regExpString = `\\.?${functionCallName}("|')`;
+		const regExpString = `\\.?${functionCallName}("|'|\\()`;
 		const regex = new RegExp(regExpString, "g");
 		let result = regex.exec(XMLText);
 		while (result) {
