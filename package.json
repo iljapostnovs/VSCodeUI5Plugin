@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.47",
+	"version": "0.12.48",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -75,9 +75,9 @@
 						"pattern": "^.+$"
 					},
 					"default": [
-						"resources/**",
-						"dist/**",
-						"node_modules/**"
+						"**/resources/**",
+						"**/dist/**/**",
+						"**/node_modules/**"
 					]
 				},
 				"ui5.plugin.ui5version": {
@@ -90,6 +90,11 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Should javascript CodeLens be enabled"
+				},
+				"ui5.plugin.jsReferenceCodeLens": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should javascript Reference CodeLens be enabled"
 				},
 				"ui5.plugin.xmlCodeLens": {
 					"type": "boolean",

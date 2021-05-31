@@ -8,6 +8,7 @@ import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import { TextDocumentTransformer } from "./TextDocumentTransformer";
 import { XMLParser } from "./XMLParser";
+import { IReferenceCodeLensCacheable } from "../providers/codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
@@ -30,6 +31,7 @@ export class FileReader {
 				this._viewCache[viewName].fsPath = fsPath;
 				this._viewCache[viewName].fragments = this.getFragmentsFromXMLDocumentText(viewContent);
 				this._viewCache[viewName].XMLParserData = undefined;
+				this._viewCache[viewName].referenceCodeLensCache = {};
 			} else {
 				this._viewCache[viewName] = {
 					controllerName: this.getControllerNameFromView(viewContent) || "",
@@ -37,7 +39,8 @@ export class FileReader {
 					name: viewName || "",
 					content: viewContent,
 					fsPath: fsPath,
-					fragments: this.getFragmentsFromXMLDocumentText(viewContent)
+					fragments: this.getFragmentsFromXMLDocumentText(viewContent),
+					referenceCodeLensCache: {}
 				};
 			}
 		}
@@ -53,13 +56,15 @@ export class FileReader {
 				this._fragmentCache[fragmentName].idClassMap = {};
 				this._fragmentCache[fragmentName].fragments = this.getFragmentsFromXMLDocumentText(text);
 				this._fragmentCache[fragmentName].XMLParserData = undefined;
+				this._fragmentCache[fragmentName].referenceCodeLensCache = {};
 			} else {
 				this._fragmentCache[fragmentName] = {
 					content: text,
 					fsPath: fsPath,
 					name: fragmentName,
 					idClassMap: {},
-					fragments: this.getFragmentsFromXMLDocumentText(text)
+					fragments: this.getFragmentsFromXMLDocumentText(text),
+					referenceCodeLensCache: {}
 				};
 			}
 		}
@@ -365,7 +370,8 @@ export class FileReader {
 						name: viewName || "",
 						content: viewContent,
 						fsPath: viewFSPath,
-						fragments: fragments
+						fragments: fragments,
+						referenceCodeLensCache: {}
 					};
 				}
 			});
@@ -386,7 +392,8 @@ export class FileReader {
 						fsPath: fragmentFSPath,
 						name: fragmentName,
 						idClassMap: {},
-						fragments: []
+						fragments: [],
+						referenceCodeLensCache: {}
 					};
 				}
 			});
@@ -716,6 +723,9 @@ export class FileReader {
 				this._viewCache[className].content = "";
 				this._viewCache[className].idClassMap = {};
 				this._viewCache[className].XMLParserData = undefined;
+				this._viewCache[className].fragments = [];
+				this._viewCache[className].fsPath = "";
+				this._viewCache[className].referenceCodeLensCache = {};
 				delete this._viewCache[className];
 				return true;
 			}
@@ -730,6 +740,9 @@ export class FileReader {
 				this._fragmentCache[className].content = "";
 				this._fragmentCache[className].idClassMap = {};
 				this._fragmentCache[className].XMLParserData = undefined;
+				this._fragmentCache[className].fragments = [];
+				this._fragmentCache[className].fsPath = "";
+				this._fragmentCache[className].referenceCodeLensCache = {};
 				delete this._fragmentCache[className];
 				return true;
 			}
@@ -840,6 +853,7 @@ export interface IXMLFile extends IXMLParserCacheable, IHasFragments {
 	content: string;
 	fsPath: string;
 	name: string;
+	referenceCodeLensCache: IReferenceCodeLensCacheable;
 }
 export interface IHasFragments {
 	fragments: IFragment[];

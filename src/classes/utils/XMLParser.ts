@@ -31,38 +31,38 @@ export class XMLParser {
 		if (positions.length > 0) {
 			positions.forEach(position => {
 				const tag = this.getTagInPosition(viewOrFragment, position);
-				const attributes = this.getAttributesOfTheTag(tag);
-				const eventHandlerAttributes = attributes?.filter(attribute => {
-					const { attributeValue } = this.getAttributeNameAndValue(attribute);
-					let currentEventHandlerName = this.getEventHandlerNameFromAttributeValue(attributeValue);
+				if (!tagAndAttributes.find(tagAndAttribute => tagAndAttribute.tag.positionBegin === tag.positionBegin)) {
+					const attributes = this.getAttributesOfTheTag(tag);
+					const eventHandlerAttributes = attributes?.filter(attribute => {
+						const { attributeValue } = this.getAttributeNameAndValue(attribute);
+						let currentEventHandlerName = this.getEventHandlerNameFromAttributeValue(attributeValue);
 
-					if (currentEventHandlerName !== eventHandlerName && currentEventHandlerName.includes(eventHandlerName)) {
-						const results = new RegExp(`((\\..*?\\.)|("))${eventHandlerName}("|')`).exec(currentEventHandlerName);
-						if (results && results[0].split(".").length > 2) {
-							const result = results[0].substring(0, results[0].length - 1).split(".").slice(1);
-							if (functionCallClassName) {
-								const handlerField = result[0];
-								const responsibleClassName = FileReader.getResponsibleClassNameForViewOrFragment(viewOrFragment);
-								if (responsibleClassName) {
-									const fields = UIClassFactory.getClassFields(responsibleClassName);
-									const field = fields.find(field => field.name === handlerField);
-									if (field && field.type && !UIClassFactory.isClassAChildOfClassB(field.type, functionCallClassName)) {
-										return false;
+						if (currentEventHandlerName !== eventHandlerName && currentEventHandlerName.includes(eventHandlerName)) {
+							const results = new RegExp(`((\\..*?\\.)|("))${eventHandlerName}("|')`).exec(currentEventHandlerName);
+							if (results && results[0].split(".").length > 2) {
+								const result = results[0].substring(0, results[0].length - 1).split(".").slice(1);
+								if (functionCallClassName) {
+									const handlerField = result[0];
+									const responsibleClassName = FileReader.getResponsibleClassNameForViewOrFragment(viewOrFragment);
+									if (responsibleClassName) {
+										const fields = UIClassFactory.getClassFields(responsibleClassName);
+										const field = fields.find(field => field.name === handlerField);
+										if (field && field.type && !UIClassFactory.isClassAChildOfClassB(field.type, functionCallClassName)) {
+											return false;
+										}
 									}
 								}
+								currentEventHandlerName = result[1];
 							}
-							currentEventHandlerName = result[1];
-						} else {
-							currentEventHandlerName = eventHandlerName;
 						}
-					}
 
-					return currentEventHandlerName === eventHandlerName;
-				});
-				if (eventHandlerAttributes && eventHandlerAttributes.length > 0) {
-					tagAndAttributes.push({ tag, attributes: eventHandlerAttributes });
+						return currentEventHandlerName === eventHandlerName;
+					});
+					if (eventHandlerAttributes && eventHandlerAttributes.length > 0) {
+						tagAndAttributes.push({ tag, attributes: eventHandlerAttributes });
+					}
 				}
-			})
+			});
 		}
 
 		return tagAndAttributes;
