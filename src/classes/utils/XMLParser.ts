@@ -54,6 +54,12 @@ export class XMLParser {
 								}
 								currentEventHandlerName = result[1];
 							}
+							if (currentEventHandlerName !== eventHandlerName && currentEventHandlerName.includes(eventHandlerName)) {
+								const results = new RegExp(`(\\.|"|')${eventHandlerName}("|'|\\()`).test(currentEventHandlerName);
+								if (results) {
+									currentEventHandlerName = eventHandlerName;
+								}
+							}
 						}
 
 						return currentEventHandlerName === eventHandlerName;
@@ -567,33 +573,6 @@ export class XMLParser {
 		XMLFile.XMLParserData.areAllStringsClosed = stringData.areAllStringsClosed;
 	}
 
-	public static setCurrentDocument() {
-		// const className = FileReader.getClassNameFromPath(XMLFile.fsPath);
-		// if (className) {
-		// 	const xmlType = className?.endsWith(".fragment.xml") ? "fragment" : "view";
-		// 	const XMLFile: IXMLParserCacheable | undefined = FileReader.getXMLFile(className, xmlType);
-		// 	if (XMLFile) {
-		// 		// XMLFile.areAllStringsClosed
-		// 	}
-		// }
-	}
-
-	// public static setCurrentDocument(document: string | undefined) {
-	// 	if (!document) {
-	// 		this._currentDocument.isMarkedAsUndefined = true;
-	// 	} else {
-	// 		if (document !== this._currentDocument.document) {
-	// 			this._currentDocument.document = document;
-	// 			const stringData = this._getStringPositionMapping(document);
-	// 			this._currentDocument.strings = stringData.positionMapping;
-	// 			this._currentDocument.areAllStringsClosed = stringData.areAllStringsClosed;
-	// 			this._currentDocument.tags = [];
-	// 			this._currentDocument.prefixResults = {};
-	// 		}
-	// 		this._currentDocument.isMarkedAsUndefined = false;
-	// 	}
-	// }
-
 	static getStringPositionMapping(document: string) {
 		const positionMapping: boolean[] = [];
 		let quotionMarkCount = 0;
@@ -679,19 +658,23 @@ export class XMLParser {
 	}
 
 	public static getEventHandlerNameFromAttributeValue(attributeValue: string) {
-		let eventName = attributeValue;
+		let eventHandlerName = attributeValue;
 
-		if (eventName.startsWith(".")) {
-			eventName = eventName.replace(".", "");
+		if (eventHandlerName.startsWith(".")) {
+			eventHandlerName = eventHandlerName.replace(".", "");
 		}
-		if (eventName.includes("(")) {
-			const result = /.*(?=\(.*\))/.exec(eventName);
+		if (eventHandlerName.includes("(")) {
+			const result = /.*(?=\(.*\))/.exec(eventHandlerName);
 			if (result) {
-				eventName = result[0];
+				eventHandlerName = result[0];
 			}
 		}
 
-		return eventName;
+		if (!eventHandlerName && attributeValue.startsWith("{") && attributeValue.endsWith("}")) {
+			eventHandlerName = attributeValue;
+		}
+
+		return eventHandlerName;
 	}
 
 }

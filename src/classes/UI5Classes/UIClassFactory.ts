@@ -387,7 +387,7 @@ export class UIClassFactory {
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.methods.forEach(method => {
 				if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
-					const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
+					const regex = new RegExp(`(\\.|"|')${method.name}"`);
 					if (viewOfTheControl) {
 						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isMethodMentionedInTheView) {
