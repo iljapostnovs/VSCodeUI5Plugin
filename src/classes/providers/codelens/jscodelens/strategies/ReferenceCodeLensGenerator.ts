@@ -63,7 +63,18 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 				const uri = vscode.Uri.file(UIClass.classFSPath);
 				results.forEach(result => {
 					const calleeClassName = strategy.acornGetClassName(UIClass.className, result.index);
-					if (calleeClassName && UIClassFactory.isClassAChildOfClassB(calleeClassName, method.owner)) {
+					const calleeUIClass = calleeClassName && UIClassFactory.getUIClass(calleeClassName);
+					if (
+						calleeUIClass && calleeUIClass instanceof CustomUIClass &&
+						calleeClassName &&
+						(
+							UIClassFactory.isClassAChildOfClassB(calleeClassName, method.owner) ||
+							(
+								UIClassFactory.isClassAChildOfClassB(method.owner, calleeClassName) &&
+								UIClassFactory.isClassAChildOfClassB(method.owner, UIClass.className)
+							)
+						)
+					) {
 						const lineColumnBegin = LineColumn(UIClass.classText).fromIndex(result.index);
 						const lineColumnEnd = LineColumn(UIClass.classText).fromIndex(result.index + method.name.length);
 						if (lineColumnBegin && lineColumnEnd) {
