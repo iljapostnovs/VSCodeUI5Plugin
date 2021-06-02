@@ -96,6 +96,24 @@
 			]
 		},
 		{
+			"className": "com.test.util.SequenceTest",
+			"methods": [
+				{
+					"name": "init",
+					"returnType": "void"
+				},
+				{
+					"name": "_testSequence1",
+					"returnType": "Promise<any[]>"
+				},
+				{
+					"name": "_testSequence2",
+					"returnType": "Promise<any[]>"
+				}
+			],
+			"fields": []
+		},
+		{
 			"className": "com.test.util.AsyncAwaitTest",
 			"methods": [
 				{

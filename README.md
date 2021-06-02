@@ -55,9 +55,13 @@ Definitions for event handlers are provided.<br/>
 ![Definition](/images/XMLDefinition.gif)
 
 ----------
-## Code Lens
-Code Lens for Internalization Texts is provided<br/>
+## CodeLens
+CodeLens for Internalization Texts, overriden methods, event handlers and references is provided
 ![DynamicCompletionItems](/images/XMLResourceModel.gif)
+> Related preference entries:<br/>
+> *ui5.plugin.jsCodeLens*<br/>
+> *ui5.plugin.jsReferenceCodeLens*<br/>
+> *ui5.plugin.xmlCodeLens*<br/>
 
 ----------
 ## XML Diagnostics
@@ -216,46 +220,6 @@ The generated diagram can be imported to draw.io<br/>
 | F6            | Insert custom class name                 |
 
 ----------
-## Settings
-16 settings are available for extension configuration:<br/>
-![Settings](/images/Settings.png)
-
-----------
-# How it works
-## SAPUI5 Metadata
-* Standard SAPUI5 Library Metadata is fetched from ui5.sap.com and saved locally
-* Extension is working for 1.60+ UI5 library versions
-> If you are using different versions, you might meet an unexpected behavior if the structure of the standard lib metadata is different
-
-## Custom class metadata
-Custom class metadata is dynamically generated using .js and view.xml files of the project.<br/>
-There are several types of variable definitions:<br/>
-* Class Fields<br/>
-```javascript
-this.variable
-```
-<br/>
-Algorithm looks for all definitions in the functions of the object which is returned in
-
-```javascript
-return AnyUI5Class.extend("name", {/*here*/})
-```
-* Function parameters<br/>
-
-```javascript
-function(oEvent) {}
-```
-<br/>
-
-> Only way to find out the data type of the function parameter is JSDoc. Use `@param {UI5Class} UI5ClassParameter - description` if you want completion items to work for function params.<br/>
-The same goes for function return data type. Use `@returns {UI5Class} UI5ClassVariable - description` if you want completion items to work for function return.<br/>
-* Local variables<br/>
-
-```javascript
-function() {
-    var oList = new List();
-}
-```
 
 ### Assumptions
 * File starts with sap.ui.define
@@ -263,8 +227,8 @@ function() {
 * You have manifest.json with app/lib id
 * App ID (Component name) and i18n paths are defined in manifest.json
 * File is without syntax errors
-* Name of the class of the UI5Class is the same as file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
-* You have an access to ui5.sap.com for standard lib metadata preload
+* Name of the UI5Class is written accordingly to file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
+* You have an access to https://ui5.sap.com for standard lib metadata preload
 
 ### Proxy
 If HTTP_PROXY or HTTPS_PROXY environment variables are set, ui5.sap.com will be requested using the proxy.

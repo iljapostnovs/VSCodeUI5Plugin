@@ -8,6 +8,7 @@ import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import { TextDocumentTransformer } from "./TextDocumentTransformer";
 import { XMLParser } from "./XMLParser";
+import { IReferenceCodeLensCacheable } from "../providers/codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
@@ -30,6 +31,7 @@ export class FileReader {
 				this._viewCache[viewName].fsPath = fsPath;
 				this._viewCache[viewName].fragments = this.getFragmentsFromXMLDocumentText(viewContent);
 				this._viewCache[viewName].XMLParserData = undefined;
+				this._viewCache[viewName].referenceCodeLensCache = {};
 			} else {
 				this._viewCache[viewName] = {
 					controllerName: this.getControllerNameFromView(viewContent) || "",
@@ -37,7 +39,8 @@ export class FileReader {
 					name: viewName || "",
 					content: viewContent,
 					fsPath: fsPath,
-					fragments: this.getFragmentsFromXMLDocumentText(viewContent)
+					fragments: this.getFragmentsFromXMLDocumentText(viewContent),
+					referenceCodeLensCache: {}
 				};
 			}
 		}
@@ -53,13 +56,15 @@ export class FileReader {
 				this._fragmentCache[fragmentName].idClassMap = {};
 				this._fragmentCache[fragmentName].fragments = this.getFragmentsFromXMLDocumentText(text);
 				this._fragmentCache[fragmentName].XMLParserData = undefined;
+				this._fragmentCache[fragmentName].referenceCodeLensCache = {};
 			} else {
 				this._fragmentCache[fragmentName] = {
 					content: text,
 					fsPath: fsPath,
 					name: fragmentName,
 					idClassMap: {},
-					fragments: this.getFragmentsFromXMLDocumentText(text)
+					fragments: this.getFragmentsFromXMLDocumentText(text),
+					referenceCodeLensCache: {}
 				};
 			}
 		}
@@ -335,13 +340,24 @@ export class FileReader {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const classPaths = this._readFilesInWorkspace(wsFolder, "**/*.js");
-			classPaths.forEach(classPath => {
-				const className = FileReader.getClassNameFromPath(classPath);
+			const classNames = classPaths.map(path => FileReader.getClassNameFromPath(path));
+			classNames.forEach(className => {
 				if (className) {
 					try {
 						UIClassFactory.getUIClass(className);
 					} catch (error) {
 						vscode.window.showErrorMessage(`Error parsing ${className}: ${error.message}`);
+					}
+				}
+			});
+
+			classNames.forEach(className => {
+				if (className) {
+					const UIClass = UIClassFactory.getUIClass(className);
+					if (UIClass instanceof CustomUIClass) {
+						UIClass.referenceCodeLensCache = {};
+						UIClass.relatedViewsAndFragments = undefined;
+						UIClassFactory.enrichTypesInCustomClass(UIClass);
 					}
 				}
 			});
@@ -355,19 +371,7 @@ export class FileReader {
 			viewPaths.forEach(viewPath => {
 				const viewContent = fs.readFileSync(viewPath, "utf8");
 				const viewFSPath = viewPath.replace(/\//g, fileSeparator);
-				const fragments = this.getFragmentsFromXMLDocumentText(viewContent);
-				const controllerName = this.getControllerNameFromView(viewContent);
-				const viewName = this.getClassNameFromPath(viewFSPath);
-				if (viewName) {
-					this._viewCache[viewName] = {
-						idClassMap: {},
-						controllerName: controllerName || "",
-						name: viewName || "",
-						content: viewContent,
-						fsPath: viewFSPath,
-						fragments: fragments
-					};
-				}
+				this.setNewViewContentToCache(viewContent, viewFSPath);
 			});
 		}
 	}
@@ -376,23 +380,15 @@ export class FileReader {
 		const wsFolders = workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const fragmentPaths = this._readFilesInWorkspace(wsFolder, "**/*.fragment.xml");
-			fragmentPaths.forEach(fragmentPath => {
-				const fragmentContent = fs.readFileSync(fragmentPath, "utf8");
-				const fragmentFSPath = fragmentPath.replace(/\//g, fileSeparator);
-				const fragmentName = this.getClassNameFromPath(fragmentFSPath);
-				if (fragmentName) {
-					this._fragmentCache[fragmentName] = {
-						content: fragmentContent,
-						fsPath: fragmentFSPath,
-						name: fragmentName,
-						idClassMap: {},
-						fragments: []
-					};
-				}
+			const fragmentData = fragmentPaths.map(path => {
+				const fragmentFSPath = path.replace(/\//g, fileSeparator);
+				return { fragmentFSPath, content: fs.readFileSync(fragmentFSPath, "utf8") };
 			});
-
-			this.getAllFragments().forEach(fragment => {
-				fragment.fragments = this.getFragmentsFromXMLDocumentText(fragment.content);
+			fragmentData.forEach(fragmentData => {
+				this.setNewFragmentContentToCache(fragmentData.content, fragmentData.fragmentFSPath);
+			});
+			fragmentData.forEach(fragmentData => {
+				this.setNewFragmentContentToCache(fragmentData.content, fragmentData.fragmentFSPath, true);
 			});
 		}
 	}
@@ -716,6 +712,9 @@ export class FileReader {
 				this._viewCache[className].content = "";
 				this._viewCache[className].idClassMap = {};
 				this._viewCache[className].XMLParserData = undefined;
+				this._viewCache[className].fragments = [];
+				this._viewCache[className].fsPath = "";
+				this._viewCache[className].referenceCodeLensCache = {};
 				delete this._viewCache[className];
 				return true;
 			}
@@ -730,6 +729,9 @@ export class FileReader {
 				this._fragmentCache[className].content = "";
 				this._fragmentCache[className].idClassMap = {};
 				this._fragmentCache[className].XMLParserData = undefined;
+				this._fragmentCache[className].fragments = [];
+				this._fragmentCache[className].fsPath = "";
+				this._fragmentCache[className].referenceCodeLensCache = {};
 				delete this._fragmentCache[className];
 				return true;
 			}
@@ -840,6 +842,7 @@ export interface IXMLFile extends IXMLParserCacheable, IHasFragments {
 	content: string;
 	fsPath: string;
 	name: string;
+	referenceCodeLensCache: IReferenceCodeLensCacheable;
 }
 export interface IHasFragments {
 	fragments: IFragment[];

@@ -13,7 +13,7 @@ export interface IFieldsAndMethods {
 	methods: IUIMethod[];
 }
 
-interface IViewsAndFragments {
+export interface IViewsAndFragments {
 	views: IView[];
 	fragments: IFragment[];
 }
@@ -55,12 +55,12 @@ export class UIClassFactory {
 		return isExtendedBy;
 	}
 
-	public static setNewContentForClassUsingDocument(document: vscode.TextDocument) {
+	public static setNewContentForClassUsingDocument(document: vscode.TextDocument, force = false) {
 		const documentText = document.getText();
 		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
 
 		if (currentClassName && documentText) {
-			this.setNewCodeForClass(currentClassName, documentText);
+			this.setNewCodeForClass(currentClassName, documentText, force);
 		}
 	}
 
@@ -97,6 +97,7 @@ export class UIClassFactory {
 
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
 		// console.time(`Enriching ${UIClass.className} took`);
+		this._preloadParentIfNecessary(UIClass);
 		this._enrichVariablesWithJSDocTypes(UIClass);
 		this._enrichMethodParamsWithEventType(UIClass);
 		this._checkIfFieldIsUsedInXMLDocuments(UIClass);
@@ -108,6 +109,11 @@ export class UIClassFactory {
 		});
 		// console.timeEnd(`Enriching ${UIClass.className} took`);
 	}
+	private static _preloadParentIfNecessary(UIClass: CustomUIClass) {
+		if (UIClass.parentClassNameDotNotation) {
+			this.getUIClass(UIClass.parentClassNameDotNotation);
+		}
+	}
 
 	//TODO: Refactor this mess
 	private static _checkIfFieldIsUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
@@ -115,7 +121,7 @@ export class UIClassFactory {
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.fields.forEach(field => {
 				if (!field.mentionedInTheXMLDocument) {
-					const regex = new RegExp(`(\\.|"|')${field.name}"`);
+					const regex = new RegExp(`(\\.|"|')${field.name}("|'|\\.)`);
 					if (viewOfTheControl) {
 						const isFieldMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isFieldMentionedInTheView) {
@@ -133,21 +139,14 @@ export class UIClassFactory {
 					}
 
 					if (!field.mentionedInTheXMLDocument) {
-						const regex = new RegExp(`(\\.|"|')${field.name}`);
-						const isFieldMentionedInTheView = regex.test(viewOfTheControl.content);
-						if (isFieldMentionedInTheView) {
-							field.mentionedInTheXMLDocument = true;
+						viewOfTheControl.fragments.find(fragment => {
+							const isMethodMentionedInTheFragment = regex.test(fragment.content);
+							if (isMethodMentionedInTheFragment) {
+								field.mentionedInTheXMLDocument = true;
+							}
 
-						} else {
-							viewOfTheControl.fragments.find(fragment => {
-								const isMethodMentionedInTheFragment = regex.test(fragment.content);
-								if (isMethodMentionedInTheFragment) {
-									field.mentionedInTheXMLDocument = true;
-								}
-
-								return isMethodMentionedInTheFragment;
-							});
-						}
+							return isMethodMentionedInTheFragment;
+						});
 					}
 				}
 			});
@@ -156,7 +155,7 @@ export class UIClassFactory {
 		viewsAndFragments.fragments.forEach(fragment => {
 			CurrentUIClass.methods.forEach(method => {
 				if (!method.isEventHandler) {
-					const regex = new RegExp(`(\\.|"|')${method.name}"`);
+					const regex = new RegExp(`("\\.|")${method.name}"`);
 					const isMethodMentionedInTheFragment = regex.test(fragment.content);
 					if (isMethodMentionedInTheFragment) {
 						method.isEventHandler = true;
@@ -167,7 +166,7 @@ export class UIClassFactory {
 					}
 				}
 				if (!method.isEventHandler) {
-					const regex = new RegExp(`(\\.|"|')${method.name}'`);
+					const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
 					const isMethodMentionedInTheFragment = regex.test(fragment.content);
 					if (isMethodMentionedInTheFragment) {
 						method.mentionedInTheXMLDocument = true;
@@ -414,7 +413,7 @@ export class UIClassFactory {
 					}
 
 					if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
-						const regex = new RegExp(`(\\.|"|')${method.name}`);
+						const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
 						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
 						if (isMethodMentionedInTheView) {
 							method.mentionedInTheXMLDocument = true;
@@ -459,6 +458,10 @@ export class UIClassFactory {
 	}
 
 	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = [], removeDuplicates = true, isRootClass = true): IViewsAndFragments {
+		if (CurrentUIClass.relatedViewsAndFragments && isRootClass) {
+			return CurrentUIClass.relatedViewsAndFragments;
+		}
+
 		if (checkedClasses.includes(CurrentUIClass.className)) {
 			return { fragments: [], views: [] };
 		}
@@ -466,14 +469,14 @@ export class UIClassFactory {
 		checkedClasses.push(CurrentUIClass.className);
 		const viewsAndFragments: IViewsAndFragments = this._getViewsAndFragmentsRelatedTo(CurrentUIClass);
 
-		const parentUIClasses = this._getAllCustomUIClasses().filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && CurrentUIClass !== UIClass);
+		const parentUIClasses = this.getAllCustomUIClasses().filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && CurrentUIClass !== UIClass);
 		const whereMentioned = this._getAllClassesWhereClassIsImported(CurrentUIClass.className);
 		const relatedClasses = [...parentUIClasses, ...whereMentioned];
 		if (isRootClass) {
 			relatedClasses.push(...this._getAllChildrenOfClass(CurrentUIClass));
 		}
 		const relatedViewsAndFragments = relatedClasses.reduce((accumulator: IViewsAndFragments, relatedUIClass: CustomUIClass) => {
-			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false, false);
+			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false, isRootClass);
 			accumulator.fragments = accumulator.fragments.concat(relatedFragmentsAndViews.fragments);
 			accumulator.views = accumulator.views.concat(relatedFragmentsAndViews.views);
 			return accumulator;
@@ -488,27 +491,38 @@ export class UIClassFactory {
 		});
 
 		if (removeDuplicates) {
-			viewsAndFragments.views.forEach(view => {
-				viewsAndFragments.fragments.push(...FileReader.getFragmentsInXMLFile(view));
-			});
-			viewsAndFragments.fragments.forEach(fragment => {
-				viewsAndFragments.fragments.push(...FileReader.getFragmentsInXMLFile(fragment));
-			});
-			viewsAndFragments.fragments = viewsAndFragments.fragments.reduce((accumulator: IFragment[], fragment) => {
-				if (!accumulator.find(accumulatorFragment => accumulatorFragment.fsPath === fragment.fsPath)) {
-					accumulator.push(fragment);
-				}
-				return accumulator;
-			}, []);
-			viewsAndFragments.views = viewsAndFragments.views.reduce((accumulator: IView[], view) => {
-				if (!accumulator.find(accumulatorFragment => accumulatorFragment.fsPath === view.fsPath)) {
-					accumulator.push(view);
-				}
-				return accumulator;
-			}, []);
+			this._removeDuplicatesForViewsAndFragments(viewsAndFragments);
+			if (!CurrentUIClass.relatedViewsAndFragments && isRootClass) {
+				CurrentUIClass.relatedViewsAndFragments = viewsAndFragments;
+			}
 		}
 
 		return viewsAndFragments;
+	}
+
+	private static _removeDuplicatesForViewsAndFragments(viewsAndFragments: IViewsAndFragments) {
+		viewsAndFragments.views.forEach(view => {
+			viewsAndFragments.fragments.push(...FileReader.getFragmentsInXMLFile(view));
+		});
+
+		viewsAndFragments.fragments.forEach(fragment => {
+			viewsAndFragments.fragments.push(...FileReader.getFragmentsInXMLFile(fragment));
+		});
+
+		viewsAndFragments.fragments = viewsAndFragments.fragments.reduce((accumulator: IFragment[], fragment) => {
+			if (!accumulator.find(accumulatorFragment => accumulatorFragment.fsPath === fragment.fsPath)) {
+				accumulator.push(fragment);
+			}
+			return accumulator;
+		}, []);
+
+		viewsAndFragments.views = viewsAndFragments.views.reduce((accumulator: IView[], view) => {
+			if (!accumulator.find(accumulatorFragment => accumulatorFragment.fsPath === view.fsPath)) {
+				accumulator.push(view);
+			}
+			return accumulator;
+		}, []);
+
 	}
 
 	private static _getViewsAndFragmentsRelatedTo(CurrentUIClass: CustomUIClass) {
@@ -530,7 +544,7 @@ export class UIClassFactory {
 	}
 
 	private static _getAllClassesWhereClassIsImported(className: string) {
-		return this._getAllCustomUIClasses().filter(UIClass => {
+		return this.getAllCustomUIClasses().filter(UIClass => {
 			return UIClass.parentClassNameDotNotation !== className && !!UIClass.UIDefine.find(UIDefine => {
 				return UIDefine.classNameDotNotation === className;
 			});
@@ -538,14 +552,14 @@ export class UIClassFactory {
 	}
 
 	private static _getAllChildrenOfClass(UIClass: CustomUIClass, bFirstLevelinheritance = false) {
-		return bFirstLevelinheritance ? this._getAllCustomUIClasses().filter(CurrentUIClass => {
+		return bFirstLevelinheritance ? this.getAllCustomUIClasses().filter(CurrentUIClass => {
 			return CurrentUIClass.parentClassNameDotNotation === UIClass.className;
-		}) : this._getAllCustomUIClasses().filter(CurrentUIClass => {
+		}) : this.getAllCustomUIClasses().filter(CurrentUIClass => {
 			return this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && UIClass.className !== CurrentUIClass.className;
 		});
 	}
 
-	private static _getAllCustomUIClasses(): CustomUIClass[] {
+	public static getAllCustomUIClasses(): CustomUIClass[] {
 		const allUIClasses = this.getAllExistentUIClasses();
 
 		return Object.keys(allUIClasses).filter(UIClassName => {
@@ -654,7 +668,7 @@ export class UIClassFactory {
 				}
 			}
 
-			this._getAllCustomUIClasses().forEach(UIClass => {
+			this.getAllCustomUIClasses().forEach(UIClass => {
 				if (UIClass.parentClassNameDotNotation === oldName) {
 					UIClass.parentClassNameDotNotation = newName;
 				}

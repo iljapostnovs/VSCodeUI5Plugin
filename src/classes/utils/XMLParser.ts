@@ -31,38 +31,44 @@ export class XMLParser {
 		if (positions.length > 0) {
 			positions.forEach(position => {
 				const tag = this.getTagInPosition(viewOrFragment, position);
-				const attributes = this.getAttributesOfTheTag(tag);
-				const eventHandlerAttributes = attributes?.filter(attribute => {
-					const { attributeValue } = this.getAttributeNameAndValue(attribute);
-					let currentEventHandlerName = this.getEventHandlerNameFromAttributeValue(attributeValue);
+				if (!tagAndAttributes.find(tagAndAttribute => tagAndAttribute.tag.positionBegin === tag.positionBegin)) {
+					const attributes = this.getAttributesOfTheTag(tag);
+					const eventHandlerAttributes = attributes?.filter(attribute => {
+						const { attributeValue } = this.getAttributeNameAndValue(attribute);
+						let currentEventHandlerName = this.getEventHandlerNameFromAttributeValue(attributeValue);
 
-					if (currentEventHandlerName !== eventHandlerName && currentEventHandlerName.includes(eventHandlerName)) {
-						const results = new RegExp(`((\\..*?\\.)|("))${eventHandlerName}("|')`).exec(currentEventHandlerName);
-						if (results && results[0].split(".").length > 2) {
-							const result = results[0].substring(0, results[0].length - 1).split(".").slice(1);
-							if (functionCallClassName) {
-								const handlerField = result[0];
-								const responsibleClassName = FileReader.getResponsibleClassNameForViewOrFragment(viewOrFragment);
-								if (responsibleClassName) {
-									const fields = UIClassFactory.getClassFields(responsibleClassName);
-									const field = fields.find(field => field.name === handlerField);
-									if (field && field.type && !UIClassFactory.isClassAChildOfClassB(field.type, functionCallClassName)) {
-										return false;
+						if (currentEventHandlerName !== eventHandlerName && currentEventHandlerName.includes(eventHandlerName)) {
+							const results = new RegExp(`((\\..*?\\.)|("))${eventHandlerName}("|'|\\()`).exec(currentEventHandlerName);
+							if (results && results[0].split(".").length > 2) {
+								const result = results[0].substring(0, results[0].length - 1).split(".").slice(1);
+								if (functionCallClassName) {
+									const handlerField = result[0];
+									const responsibleClassName = FileReader.getResponsibleClassNameForViewOrFragment(viewOrFragment);
+									if (responsibleClassName) {
+										const fields = UIClassFactory.getClassFields(responsibleClassName);
+										const field = fields.find(field => field.name === handlerField);
+										if (field && field.type && !UIClassFactory.isClassAChildOfClassB(field.type, functionCallClassName)) {
+											return false;
+										}
 									}
 								}
+								currentEventHandlerName = result[1];
 							}
-							currentEventHandlerName = result[1];
-						} else {
-							currentEventHandlerName = eventHandlerName;
+							if (currentEventHandlerName !== eventHandlerName && currentEventHandlerName.includes(eventHandlerName)) {
+								const results = new RegExp(`(\\.|"|')${eventHandlerName}("|'|\\()`).test(currentEventHandlerName);
+								if (results) {
+									currentEventHandlerName = eventHandlerName;
+								}
+							}
 						}
-					}
 
-					return currentEventHandlerName === eventHandlerName;
-				});
-				if (eventHandlerAttributes && eventHandlerAttributes.length > 0) {
-					tagAndAttributes.push({ tag, attributes: eventHandlerAttributes });
+						return currentEventHandlerName === eventHandlerName;
+					});
+					if (eventHandlerAttributes && eventHandlerAttributes.length > 0) {
+						tagAndAttributes.push({ tag, attributes: eventHandlerAttributes });
+					}
 				}
-			})
+			});
 		}
 
 		return tagAndAttributes;
@@ -567,33 +573,6 @@ export class XMLParser {
 		XMLFile.XMLParserData.areAllStringsClosed = stringData.areAllStringsClosed;
 	}
 
-	public static setCurrentDocument() {
-		// const className = FileReader.getClassNameFromPath(XMLFile.fsPath);
-		// if (className) {
-		// 	const xmlType = className?.endsWith(".fragment.xml") ? "fragment" : "view";
-		// 	const XMLFile: IXMLParserCacheable | undefined = FileReader.getXMLFile(className, xmlType);
-		// 	if (XMLFile) {
-		// 		// XMLFile.areAllStringsClosed
-		// 	}
-		// }
-	}
-
-	// public static setCurrentDocument(document: string | undefined) {
-	// 	if (!document) {
-	// 		this._currentDocument.isMarkedAsUndefined = true;
-	// 	} else {
-	// 		if (document !== this._currentDocument.document) {
-	// 			this._currentDocument.document = document;
-	// 			const stringData = this._getStringPositionMapping(document);
-	// 			this._currentDocument.strings = stringData.positionMapping;
-	// 			this._currentDocument.areAllStringsClosed = stringData.areAllStringsClosed;
-	// 			this._currentDocument.tags = [];
-	// 			this._currentDocument.prefixResults = {};
-	// 		}
-	// 		this._currentDocument.isMarkedAsUndefined = false;
-	// 	}
-	// }
-
 	static getStringPositionMapping(document: string) {
 		const positionMapping: boolean[] = [];
 		let quotionMarkCount = 0;
@@ -667,7 +646,7 @@ export class XMLParser {
 	public static getPositionsOfFunctionCallInXMLText(functionCallName: string, XMLText: string) {
 		const positions: number[] = [];
 
-		const regExpString = `\\.?${functionCallName}("|')`;
+		const regExpString = `\\.?${functionCallName}("|'|\\()`;
 		const regex = new RegExp(regExpString, "g");
 		let result = regex.exec(XMLText);
 		while (result) {
@@ -679,19 +658,23 @@ export class XMLParser {
 	}
 
 	public static getEventHandlerNameFromAttributeValue(attributeValue: string) {
-		let eventName = attributeValue;
+		let eventHandlerName = attributeValue;
 
-		if (eventName.startsWith(".")) {
-			eventName = eventName.replace(".", "");
+		if (eventHandlerName.startsWith(".")) {
+			eventHandlerName = eventHandlerName.replace(".", "");
 		}
-		if (eventName.includes("(")) {
-			const result = /.*(?=\(.*\))/.exec(eventName);
+		if (eventHandlerName.includes("(")) {
+			const result = /.*(?=\(.*\))/.exec(eventHandlerName);
 			if (result) {
-				eventName = result[0];
+				eventHandlerName = result[0];
 			}
 		}
 
-		return eventName;
+		if (!eventHandlerName && attributeValue.startsWith("{") && attributeValue.endsWith("}")) {
+			eventHandlerName = attributeValue;
+		}
+
+		return eventHandlerName;
 	}
 
 }

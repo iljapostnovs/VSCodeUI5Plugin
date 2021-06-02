@@ -17,7 +17,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 		let completionItems: CustomCompletionItem[] = [];
 		const XMLFile = document && TextDocumentTransformer.toXMLFile(document);
 
-		if (XMLFile) {
+		if (XMLFile && XMLFile.XMLParserData?.areAllStringsClosed) {
 			const currentPositionOffset = document.offsetAt(position);
 			const positionType = XMLParser.getPositionType(XMLFile, currentPositionOffset);
 

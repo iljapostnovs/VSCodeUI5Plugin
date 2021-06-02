@@ -1,28 +1,25 @@
 import * as vscode from "vscode";
-import { ICustomClassUIMethod, CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { ICustomClassUIMethod } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../../utils/FileReader";
+import { TextDocumentTransformer } from "../../../../utils/TextDocumentTransformer";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 
 export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {
 	getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
 		let codeLens: vscode.CodeLens[] = [];
-		const currentClass = FileReader.getClassNameFromPath(document.fileName);
-		if (currentClass) {
-			const UIClass = UIClassFactory.getUIClass(currentClass);
-			if (UIClass instanceof CustomUIClass && UIClass.parentClassNameDotNotation) {
-				const rootMethods = UIClass.methods;
-				const overriddenMethods: ICustomClassUIMethod[] = [];
-				const parentMethods = this._getAllParentMethods(UIClass.parentClassNameDotNotation);
+		const UIClass = TextDocumentTransformer.toCustomUIClass(document);
+		if (UIClass?.parentClassNameDotNotation) {
+			const rootMethods = UIClass.methods;
+			const overriddenMethods: ICustomClassUIMethod[] = [];
+			const parentMethods = this._getAllParentMethods(UIClass.parentClassNameDotNotation);
 
-				rootMethods.forEach(method => {
-					const methodFromParent = parentMethods.find(methodFromparent => methodFromparent.name === method.name);
-					if (methodFromParent) {
-						overriddenMethods.push(method);
-					}
-				});
-				codeLens = this._generateCodeLensesForMethods(document, overriddenMethods);
-			}
+			rootMethods.forEach(method => {
+				const methodFromParent = parentMethods.find(methodFromparent => methodFromparent.name === method.name);
+				if (methodFromParent) {
+					overriddenMethods.push(method);
+				}
+			});
+			codeLens = this._generateCodeLensesForMethods(document, overriddenMethods);
 		}
 
 		return codeLens;
