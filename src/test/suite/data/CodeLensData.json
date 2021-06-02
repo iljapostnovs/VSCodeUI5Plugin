@@ -61,6 +61,13 @@
 		{
 			"className": "com.test.library.control.BaseController",
 			"result": [
+				"2 references",
+				"0 references"
+			]
+		},
+		{
+			"className": "com.test.controller.ExtendControllerTest",
+			"result": [
 				"1 reference"
 			]
 		}

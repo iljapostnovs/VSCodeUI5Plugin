@@ -70,6 +70,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 						(
 							UIClassFactory.isClassAChildOfClassB(calleeClassName, method.owner) ||
 							(
+								UIClass.className === calleeClassName &&
 								UIClassFactory.isClassAChildOfClassB(method.owner, calleeClassName) &&
 								UIClassFactory.isClassAChildOfClassB(method.owner, UIClass.className)
 							)
