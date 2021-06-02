@@ -214,7 +214,7 @@ export class AcornSyntaxAnalyzer {
 								className = this._handleBaseEventException(currentNode, stack, primaryClassName);
 							}
 							if (!className) {
-								if (!method.returnType || method.returnType === "void") {
+								if (!method.returnType || method.returnType === "void" || method.returnType === "Promise") {
 									this.findMethodReturnType(method, currentClassName);
 								}
 								className = method.returnType;
