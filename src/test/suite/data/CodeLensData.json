@@ -50,6 +50,19 @@
 				"Event handler of \"sap.ui.core.routing.Route~matched\"",
 				"override"
 			]
+		},
+		{
+			"className": "com.test.controller.BaseController",
+			"result": [
+				"0 references",
+				"3 references"
+			]
+		},
+		{
+			"className": "com.test.library.control.BaseController",
+			"result": [
+				"1 reference"
+			]
 		}
 	]
 }
