@@ -1,5 +1,6 @@
-## 0.12.48 (31-05-2021)
+## 0.12.48 (02-06-2021)
 * Update default folder exclude patterns
+* Reference code lens introduced
 
 ## 0.12.47 (27-05-2021)
 * Add protected member support for UML Diagram generation

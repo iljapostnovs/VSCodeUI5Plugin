@@ -476,7 +476,7 @@ export class UIClassFactory {
 			relatedClasses.push(...this._getAllChildrenOfClass(CurrentUIClass));
 		}
 		const relatedViewsAndFragments = relatedClasses.reduce((accumulator: IViewsAndFragments, relatedUIClass: CustomUIClass) => {
-			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false, false);
+			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false, isRootClass);
 			accumulator.fragments = accumulator.fragments.concat(relatedFragmentsAndViews.fragments);
 			accumulator.views = accumulator.views.concat(relatedFragmentsAndViews.views);
 			return accumulator;
