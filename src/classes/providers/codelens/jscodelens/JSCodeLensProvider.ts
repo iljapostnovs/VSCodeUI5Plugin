@@ -26,6 +26,7 @@ export class JSCodeLensProvider {
 			// console.timeEnd("Code lens");
 
 			resolve(codeLenses);
+			// copy(JSON.stringify(codeLenses.map(codeLens => codeLens.command.title)))
 			// }, 0);
 		});
 	}

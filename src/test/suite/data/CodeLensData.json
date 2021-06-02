@@ -1,0 +1,55 @@
+{
+	"jsCodeLenses": [
+		{
+			"className": "com.test.fragmenttest.util.Formatter",
+			"result": [
+				"1 reference",
+				"1 reference",
+				"1 reference",
+				"1 reference",
+				"0 references",
+				"6 references"
+			]
+		},
+		{
+			"className": "com.extend.fragmenttest.util.FormatterExtension",
+			"result": [
+				"1 reference",
+				"1 reference",
+				"0 references"
+			]
+		},
+		{
+			"className": "com.test.controller.LinterTest",
+			"result": [
+				"1 reference",
+				"1 reference",
+				"0 references",
+				"1 reference",
+				"1 reference",
+				"1 reference",
+				"10 references",
+				"5 references",
+				"1 reference",
+				"1 reference",
+				"1 reference",
+				"3 references",
+				"0 references",
+				"1 reference",
+				"1 reference",
+				"1 reference",
+				"1 reference",
+				"1 reference",
+				"Event handler of \"sap.m.Table (idTableFromView)~delete\"",
+				"Event handler of \"sap.m.Table (idTableFromView)~paste\"",
+				"Event handler of \"sap.m.Button (idButtonFromFragment)~press\"",
+				"Event handler of \"sap.m.List (idListFromSecondFragment)~selectionChange\"",
+				"Event handler of \"sap.m.List (idListFromThirdFragment)~selectionChange\"",
+				"Event handler of \"sap.ui.core.routing.Route~matched\"",
+				"Event handler of \"sap.ui.core.routing.Route~matched\"",
+				"Event handler of \"sap.ui.core.routing.Route~matched\"",
+				"override"
+			]
+		}
+	]
+}

@@ -8,6 +8,7 @@ import * as renameData from "./data/RenameData.json";
 import * as CompletionItemsData from "./data/completionitems/JSCompletionItems.json";
 import * as XMLCompletionItemData from "./data/completionitems/XMLCompletionItems.json";
 import * as XMLFormatterData from "./data/XMLFormatterData.json";
+import * as CodeLensData from "./data/CodeLensData.json";
 import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { FileReader } from "../../classes/utils/FileReader";
@@ -24,6 +25,7 @@ import { XMLDynamicCompletionItemFactory } from "../../classes/providers/complet
 import { FileRenameMediator } from "../../classes/filerenaming/FileRenameMediator";
 import { FileWatcherMediator } from "../../classes/utils/FileWatcherMediator";
 import { XMLFormatter } from "../../classes/utils/XMLFormatter";
+import { JSCodeLensProvider } from "../../classes/providers/codelens/jscodelens/JSCodeLensProvider";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -436,7 +438,28 @@ suite("Extension Test Suite", () => {
 			}
 		}
 	});
+
+	test("JS CodeLens is working as expected", async () => {
+		const testData = CodeLensData.jsCodeLenses;
+
+		for (const data of testData) {
+			const fsPath = FileReader.getClassFSPathFromClassName(data.className);
+			if (fsPath) {
+				const uri = vscode.Uri.file(fsPath);
+				const document = await vscode.workspace.openTextDocument(uri);
+				const codeLens = await JSCodeLensProvider.getCodeLenses(document);
+				const actualCodeLens = codeLens.map(codeLens => codeLens.command?.title || "");
+				compareStringArrays(actualCodeLens, data.result, `JS Code Lens for class "${data.className}"`);
+			}
+		}
+	});
 });
+
+function compareStringArrays(actualArray: string[], expectedArray: string[], assertText: string) {
+	expectedArray.forEach((expectedValue, index) => {
+		assert.strictEqual(actualArray[index], expectedValue, `${assertText}, expected: "${expectedValue}", but got "${actualArray[index]}"`);
+	});
+}
 
 async function assertEntry(entries: [vscode.Uri, vscode.TextEdit[]][], uri: vscode.Uri, offsetBegin: number, offsetEnd: number) {
 	let necessaryEntry: [vscode.Uri, vscode.TextEdit[]] | undefined;
