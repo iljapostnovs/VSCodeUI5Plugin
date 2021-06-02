@@ -1,4 +1,4 @@
-## 0.12.48 (02-06-2021)
+## 0.12.48 (03-06-2021)
 * Update default folder exclude patterns
 * Reference code lens introduced
 
