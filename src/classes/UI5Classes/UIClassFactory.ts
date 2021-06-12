@@ -204,6 +204,7 @@ export class UIClassFactory {
 		});
 	}
 
+	//TODO: Move to acorn syntax analyser
 	private static _getAcornVariableDeclarationAtIndex(UIClass: CustomUIClass, index: number) {
 		let variableDeclaration: any | undefined;
 		const method = UIClass.methods.find(method => {
@@ -651,6 +652,12 @@ export class UIClassFactory {
 
 	public static removeClass(className: string) {
 		delete this._UIClasses[className];
+	}
+
+	public static getParent(UIClass: AbstractUIClass) {
+		if (UIClass.parentClassNameDotNotation) {
+			return this.getUIClass(UIClass.parentClassNameDotNotation);
+		}
 	}
 
 	public static setNewNameForClass(oldPath: string, newPath: string) {

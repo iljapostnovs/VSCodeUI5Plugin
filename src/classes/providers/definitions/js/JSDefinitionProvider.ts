@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomUIClass, ICustomClassUIField, ICustomClassUIMethod } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FileReader } from "../../../utils/FileReader";
 import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { URLBuilder } from "../../../utils/URLBuilder";
@@ -28,8 +28,52 @@ export class JSDefinitionProvider {
 			location = this._getXMLFileLocation(document, position);
 		}
 
+		if (!location) {
+			location = this._getParentMethodLocation(document, position);
+		}
+
 		return location;
 	}
+
+	private static _getParentMethodLocation(document: vscode.TextDocument, position: vscode.Position) {
+		let location: vscode.Location | undefined;
+		const UIClass = TextDocumentTransformer.toCustomUIClass(document);
+		const parentUIClass = UIClass && UIClassFactory.getParent(UIClass);
+		if (UIClass && parentUIClass && parentUIClass instanceof CustomUIClass) {
+			const offset = document.offsetAt(position);
+			const members = [...UIClass.methods, ...UIClass.fields];
+			const member = members.find(member => member.memberPropertyNode?.start <= offset && member.memberPropertyNode?.end >= offset);
+			const parentMember = member && this._getParentMember(parentUIClass.className, member.name);
+			if (parentMember) {
+				const parentMemberClass = UIClassFactory.getUIClass(parentMember.owner);
+				const classUri = parentMemberClass && parentMemberClass instanceof CustomUIClass && parentMemberClass.classFSPath && vscode.Uri.file(parentMemberClass.classFSPath);
+				if (classUri && parentMemberClass instanceof CustomUIClass) {
+					const position = LineColumn(parentMemberClass.classText).fromIndex(parentMember.memberPropertyNode.start);
+					if (position) {
+						const vscodePosition = new vscode.Position(position.line - 1, position.col - 1);
+						location = new vscode.Location(classUri, vscodePosition);
+					}
+				}
+			}
+		}
+		return location;
+	}
+
+	private static _getParentMember(className: string, memberName: string): ICustomClassUIMethod | ICustomClassUIField | undefined {
+		let parentMember: ICustomClassUIMethod | ICustomClassUIField | undefined;
+		const UIClass = UIClassFactory.getUIClass(className);
+		if (UIClass instanceof CustomUIClass) {
+			const members = [...UIClass.methods, ...UIClass.fields];
+			parentMember = members.find(parentMember => parentMember.name === memberName);
+
+			if (!parentMember && UIClass.parentClassNameDotNotation) {
+				parentMember = this._getParentMember(UIClass.parentClassNameDotNotation, memberName);
+			}
+		}
+
+		return parentMember;
+	}
+
 	private static _getClassLocation(document: vscode.TextDocument, position: vscode.Position): vscode.Location | undefined {
 		let location: vscode.Location | undefined;
 		const UIClass = TextDocumentTransformer.toCustomUIClass(document);
@@ -80,6 +124,7 @@ export class JSDefinitionProvider {
 
 		return location;
 	}
+
 	private static _getXMLFileLocation(document: vscode.TextDocument, position: vscode.Position) {
 		let location: vscode.LocationLink[] | undefined;
 
