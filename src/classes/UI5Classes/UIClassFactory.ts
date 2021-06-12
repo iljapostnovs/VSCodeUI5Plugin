@@ -98,7 +98,7 @@ export class UIClassFactory {
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
 		// console.time(`Enriching ${UIClass.className} took`);
 		this._preloadParentIfNecessary(UIClass);
-		this._enrichVariablesWithJSDocTypes(UIClass);
+		this._enrichVariablesWithJSDocTypesAndVisibility(UIClass);
 		this._enrichMethodParamsWithEventType(UIClass);
 		this._checkIfFieldIsUsedInXMLDocuments(UIClass);
 		UIClass.methods.forEach(method => {
@@ -182,22 +182,49 @@ export class UIClassFactory {
 		});
 	}
 
-	private static _enrichVariablesWithJSDocTypes(UIClass: CustomUIClass) {
+	private static _enrichVariablesWithJSDocTypesAndVisibility(UIClass: CustomUIClass) {
 		const classLineColumn = LineColumn(UIClass.classText);
 		UIClass.comments.forEach(comment => {
 			const typeDoc = comment.jsdoc?.tags?.find((tag: any) => {
 				return tag.tag === "type";
 			});
-			if (typeDoc) {
+			const visibility = ["protected", "public", "private"];
+			const visibilityDoc = comment.jsdoc?.tags?.find((tag: any) => {
+				return visibility.includes(tag.tag);
+			});
+			if (typeDoc || visibilityDoc) {
 				const commentLineColumnEnd = classLineColumn.fromIndex(comment.end);
 				const commentLineColumnStart = classLineColumn.fromIndex(comment.start);
 				if (commentLineColumnStart && commentLineColumnEnd) {
 					const lineDifference = commentLineColumnEnd.line - commentLineColumnStart.line;
 					commentLineColumnStart.line += lineDifference + 1;
 					const indexOfBottomLine = classLineColumn.toIndex(commentLineColumnStart);
-					const variableDeclaration = this._getAcornVariableDeclarationAtIndex(UIClass, indexOfBottomLine);
-					if (variableDeclaration?.declarations && variableDeclaration.declarations[0]) {
-						variableDeclaration.declarations[0]._acornSyntaxAnalyserType = typeDoc.type;
+
+					if (typeDoc) {
+						const variableDeclaration = this._getAcornVariableDeclarationAtIndex(UIClass, indexOfBottomLine);
+						if (variableDeclaration?.declarations && variableDeclaration.declarations[0]) {
+							variableDeclaration.declarations[0]._acornSyntaxAnalyserType = typeDoc.type;
+						}
+					}
+
+					if (typeDoc || visibilityDoc) {
+						const assignmentExpression = this._getAcornAssignmentExpressionAtIndex(UIClass, indexOfBottomLine);
+						if (assignmentExpression) {
+							const leftNode = assignmentExpression.left;
+							if (leftNode?.object?.type === "ThisExpression" && leftNode?.property?.type === "Identifier") {
+								const members = [...UIClass.methods, ...UIClass.fields];
+								const member = members.find(member => member.name === leftNode.property.name);
+								if (member) {
+									if (visibilityDoc) {
+										member.visibility = visibilityDoc.tag;
+									}
+									if (typeDoc && member.acornNode) {
+										const field = (member as IUIField);
+										field.type = typeDoc.type;
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -218,6 +245,22 @@ export class UIClassFactory {
 		}
 
 		return variableDeclaration;
+	}
+
+	//TODO: Move to acorn syntax analyser
+	private static _getAcornAssignmentExpressionAtIndex(UIClass: CustomUIClass, index: number) {
+		let assignmentExpression: any | undefined;
+		const method = UIClass.methods.find(method => {
+			return method.acornNode?.start <= index && method.acornNode?.end >= index;
+		});
+
+		if (method && method.acornNode) {
+			assignmentExpression = AcornSyntaxAnalyzer.expandAllContent(method.acornNode).find((node: any) => {
+				return node.start === index && node.type === "AssignmentExpression";
+			});
+		}
+
+		return assignmentExpression;
 	}
 
 	public static getFieldsAndMethodsForClass(className: string, returnDuplicates = true) {

@@ -68,6 +68,23 @@ suite("Extension Test Suite", () => {
 		});
 	});
 
+	test("Visibility is correct", async () => {
+		const testData = data.VisibilityTest;
+		testData.forEach(data => {
+			data.fields.forEach(testFieldData => {
+				const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
+				const field = fieldsAndMethods.fields.find(method => method.name === testFieldData.name);
+				assert.strictEqual(field?.visibility, testFieldData.visibility, `${data.className} -> ${testFieldData.name} visibility is "${field?.visibility}" but expected "${testFieldData.visibility}"`);
+			});
+
+			data.methods.forEach(testMethodData => {
+				const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
+				const field = fieldsAndMethods.methods.find(method => method.name === testMethodData.name);
+				assert.strictEqual(field?.visibility, testMethodData.visibility, `${data.className} -> ${testMethodData.name} visibility is "${field?.visibility}" but expected "${testMethodData.visibility}"`);
+			});
+		});
+	});
+
 	test("Syntax Analyser finds correct types at positions", async () => {
 		const testData = data.SyntaxAnalyser;
 		testData.forEach(data => {
