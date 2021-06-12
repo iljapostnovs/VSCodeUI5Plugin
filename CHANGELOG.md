@@ -1,4 +1,5 @@
-## 0.12.49 (05-06-2021)
+## 0.12.49 (13-06-2021)
+* Now it is possible to ctrl+click on overriden method to go to the parent implementation
 * Bugfixes
 
 ## 0.12.48 (03-06-2021)
