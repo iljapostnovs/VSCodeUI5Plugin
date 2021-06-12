@@ -1,3 +1,6 @@
+## 0.12.49 (05-06-2021)
+* Bugfixes
+
 ## 0.12.48 (03-06-2021)
 * Update default folder exclude patterns
 * Reference code lens introduced
