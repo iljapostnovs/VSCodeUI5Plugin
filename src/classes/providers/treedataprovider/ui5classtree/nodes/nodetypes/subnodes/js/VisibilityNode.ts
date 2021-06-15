@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { ICustomClassUIField, ICustomClassUIMethod } from "../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { Node } from "../../abstraction/Node";
+import { ICustomClassUIMethod, ICustomClassUIField } from "../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { Node } from "../../../abstraction/Node";
 
 
 export class VisibilityNode extends Node {

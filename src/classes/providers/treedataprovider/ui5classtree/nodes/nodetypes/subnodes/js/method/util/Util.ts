@@ -1,6 +1,6 @@
-import { CustomUIClass, ICustomClassUIMethod } from "../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import LineColumn = require("line-column");
-import { UIClassFactory } from "../../../../../../../../UI5Classes/UIClassFactory";
+import { CustomUIClass, ICustomClassUIMethod } from "../../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../../../../../../UI5Classes/UIClassFactory";
 
 export class Util {
 	static getMethodLines(UIMethod: ICustomClassUIMethod) {

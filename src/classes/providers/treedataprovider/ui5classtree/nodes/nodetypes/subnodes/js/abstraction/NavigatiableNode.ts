@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { CustomUIClass } from "../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../../../../UI5Classes/UIClassFactory";
-import { Node } from "../../../abstraction/Node";
 import LineColumn = require("line-column");
+import { UIClassFactory } from "../../../../../../../../UI5Classes/UIClassFactory";
+import { CustomUIClass } from "../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { Node } from "../../../../abstraction/Node";
 
 export abstract class NavigatiableNode extends Node {
 	protected _addNavigationCommand(className: string, start: number, end: number) {

@@ -1,15 +1,16 @@
 import { Node } from "./abstraction/Node";
 import * as vscode from "vscode";
 import { TextDocumentTransformer } from "../../../../utils/TextDocumentTransformer";
-import { ClassNameNode } from "./nodetypes/rootnodes/ClassNameNode";
-import { MethodsNode } from "./nodetypes/rootnodes/MethodsNode";
-import { FieldsNode } from "./nodetypes/rootnodes/FieldsNode";
+import { ClassNameNode } from "./nodetypes/rootnodes/js/ClassNameNode";
 import { RootNode } from "./abstraction/RootNode";
-import { MethodNode } from "./nodetypes/subnodes/method/MethodNode";
-import { MethodLinesNode } from "./nodetypes/subnodes/method/MethodLinesNode";
-import { MethodReferencesNode } from "./nodetypes/subnodes/method/MethodReferencesNode";
-import { FieldNode } from "./nodetypes/subnodes/field/FieldNode";
-import { VisibilityNode } from "./nodetypes/subnodes/VisibilityNode";
+import { XMLParser } from "../../../../utils/XMLParser";
+import { FieldsNode } from "./nodetypes/rootnodes/js/FieldsNode";
+import { MethodsNode } from "./nodetypes/rootnodes/js/MethodsNode";
+import { FieldNode } from "./nodetypes/subnodes/js/field/FieldNode";
+import { MethodLinesNode } from "./nodetypes/subnodes/js/method/MethodLinesNode";
+import { MethodNode } from "./nodetypes/subnodes/js/method/MethodNode";
+import { MethodReferencesNode } from "./nodetypes/subnodes/js/method/MethodReferencesNode";
+import { VisibilityNode } from "./nodetypes/subnodes/js/VisibilityNode";
 
 export class NodeFactory {
 	static getNodes(node?: (Node | RootNode)) {
@@ -33,6 +34,15 @@ export class NodeFactory {
 				rootNodes.push(new ClassNameNode(UIClass));
 				rootNodes.push(new MethodsNode(UIClass));
 				rootNodes.push(new FieldsNode(UIClass));
+			}
+		} else if (currentDocument?.fileName.endsWith(".xml")) {
+			const XMLDocument = TextDocumentTransformer.toXMLFile(currentDocument);
+			if (XMLDocument) {
+				const allTags = XMLParser.getAllTags(XMLDocument);
+				const allOpenedTags = allTags.filter(tag => {
+					return !tag.text.startsWith("</")
+				});
+				
 			}
 		}
 

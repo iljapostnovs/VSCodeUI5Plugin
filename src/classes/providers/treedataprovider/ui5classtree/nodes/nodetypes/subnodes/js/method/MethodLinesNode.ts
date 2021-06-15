@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { ICustomClassUIMethod } from "../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { Node } from "../../../abstraction/Node";
+import { ICustomClassUIMethod } from "../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { Node } from "../../../../abstraction/Node";
 import { Util } from "./util/Util";
 
 

@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
-import { ICustomClassUIMethod } from "../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { NavigatiableNode } from "../abstraction/NavigatiableNode";
 import * as path from "path";
-import { ReferenceCodeLensGenerator } from "../../../../../../codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 import { Util } from "./util/Util";
-import { UIClassFactory } from "../../../../../../../UI5Classes/UIClassFactory";
+import { ICustomClassUIMethod } from "../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../../../../../UI5Classes/UIClassFactory";
+import { ReferenceCodeLensGenerator } from "../../../../../../../codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
+import { NavigatiableNode } from "../abstraction/NavigatiableNode";
 
 
 export class MethodNode extends NavigatiableNode {
@@ -33,7 +33,7 @@ export class MethodNode extends NavigatiableNode {
 			iconName = "protected";
 		}
 
-		return path.join(__filename, "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "icons", `symbol-method-${iconName}.svg`);
+		return path.join(__filename, "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "icons", `symbol-method-${iconName}.svg`);
 	}
 
 	private _getReferences() {

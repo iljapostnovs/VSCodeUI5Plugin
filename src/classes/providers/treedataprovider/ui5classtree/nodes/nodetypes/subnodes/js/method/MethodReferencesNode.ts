@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { CustomUIClass, ICustomClassUIMethod } from "../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../../../../UI5Classes/UIClassFactory";
-import { ReferenceCodeLensGenerator } from "../../../../../../codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
-import { Node } from "../../../abstraction/Node";
 import LineColumn = require("line-column");
+import { ICustomClassUIMethod, CustomUIClass } from "../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UIClassFactory } from "../../../../../../../../UI5Classes/UIClassFactory";
+import { ReferenceCodeLensGenerator } from "../../../../../../../codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
+import { Node } from "../../../../abstraction/Node";
 
 
 export class MethodReferencesNode extends Node {
