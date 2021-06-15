@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import * as path from "path";
 import { Util } from "./util/Util";
 import { ICustomClassUIMethod } from "../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../../../../UI5Classes/UIClassFactory";
@@ -33,7 +32,7 @@ export class MethodNode extends NavigatiableNode {
 			iconName = "protected";
 		}
 
-		return path.join(__filename, "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "icons", `symbol-method-${iconName}.svg`);
+		return this._buildIconPath(`symbol-method-${iconName}.svg`);
 	}
 
 	private _getReferences() {

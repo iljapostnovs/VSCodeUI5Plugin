@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { NavigatiableNode } from "../abstraction/NavigatiableNode";
-import * as path from "path";
 import { ICustomClassUIField } from "../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 
@@ -9,7 +8,7 @@ export class FieldNode extends NavigatiableNode {
 	constructor(UIField: ICustomClassUIField) {
 		super();
 		this.UIField = UIField;
-		this.iconPath = path.join(__filename, "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "..", "icons", "icon-variable.svg");
+		this.iconPath = this._buildIconPath("icon-variable.svg");
 		const label = `${UIField.name}: ${UIField.type}`;
 		this.label = label;
 

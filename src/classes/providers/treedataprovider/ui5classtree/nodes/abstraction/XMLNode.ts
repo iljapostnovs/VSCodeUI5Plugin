@@ -2,16 +2,16 @@ import * as vscode from "vscode";
 import { IXMLFile } from "../../../../../utils/FileReader";
 import { ITag } from "../../../../diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import LineColumn = require("line-column");
-import * as path from "path";
+import { Node } from "./Node";
 
-export abstract class XMLNode extends vscode.TreeItem {
+export abstract class XMLNode extends Node {
 	readonly tag: ITag;
 	readonly XMLFile: IXMLFile;
 	constructor(tag: ITag, XMLFile: IXMLFile) {
-		super("");
+		super();
 		this.tag = tag;
 		this.XMLFile = XMLFile;
-		this.iconPath = path.join(__filename, "..", "..", "..", "..", "..", "..", "..", "..", "icons", "icon-variable.svg");
+		this.iconPath = this._buildIconPath("icon-variable.svg");
 	}
 	protected _addNavigationCommand() {
 		const classUri = vscode.Uri.file(this.XMLFile.fsPath);

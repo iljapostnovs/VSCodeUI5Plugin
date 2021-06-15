@@ -15,8 +15,8 @@ import { XMLNode } from "./abstraction/XMLNode";
 import { TagNode } from "./nodetypes/rootnodes/xml/TagNode";
 
 export class NodeFactory {
-	static getNodes(node?: (Node | RootNode | XMLNode)) {
-		const nodes: (Node | RootNode | XMLNode)[] = [];
+	static getNodes(node?: Node) {
+		const nodes: Node[] = [];
 
 		if (!node) {
 			nodes.push(...this._getRootNodes());
@@ -54,7 +54,7 @@ export class NodeFactory {
 		return rootNodes;
 	}
 
-	private static _getSubNodes(node: Node | RootNode | XMLNode) {
+	private static _getSubNodes(node: Node) {
 		const nodes: Node[] = [];
 
 		if (node instanceof MethodsNode) {
