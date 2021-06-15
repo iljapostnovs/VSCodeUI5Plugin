@@ -204,6 +204,19 @@ Extension listens for .js file creation event (rename technically is file deleti
 ![AutomaticClassNameReplacingOnRename](/images/AutomaticClassNameReplacingOnRename.gif)
 
 ----------
+## UI5 Explorer
+Custom UI5 Explorer in VSCode panel is available<br/>
+1) For JS files tree view contains fields and methods<br/>
+![JSTreeView](/images/JSTreeView.png)
+	> Coloring for methods is based on lines count and references count.
+	> * Red color appears if there are more than 100 lines in one method
+	> * Orange color appears if there are more than 50 lines in one method or there are 0 references (reference count is ignored if method is overriden)
+	> * Green color appears for the rest of the cases
+
+2) For XML files tree view contains class tag list<br/>
+![XMLTreeView](/images/XMLTreeView.png)
+
+----------
 ## UML Class Diagram generation
 UML Class diagram can be generated either for currently active document or for the whole project.<br/>
 The generated diagram can be imported to draw.io<br/>

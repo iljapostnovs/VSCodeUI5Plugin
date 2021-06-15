@@ -9,7 +9,11 @@ export class Util {
 			const positionBegin = LineColumn(UIClass.classText).fromIndex(UIMethod.acornNode.start);
 			const positionEnd = LineColumn(UIClass.classText).fromIndex(UIMethod.acornNode.end);
 			if (positionBegin && positionEnd) {
-				return positionEnd.line - positionBegin.line - 1;
+				let lines = positionEnd.line - positionBegin.line - 1;
+				if (lines === -1) {
+					lines = 0;
+				}
+				return lines;
 			}
 		}
 	}
