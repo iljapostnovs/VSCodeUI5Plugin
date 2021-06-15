@@ -1,3 +1,8 @@
+## 0.12.49 (16-06-2021)
+* Now it is possible to ctrl+click on overriden method to go to the parent implementation
+* UI5 Explorer introduced
+* Bugfixes
+
 ## 0.12.48 (03-06-2021)
 * Update default folder exclude patterns
 * Reference code lens introduced

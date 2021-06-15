@@ -1,6 +1,25 @@
 {
 	"data": [
 		{
+			"className": "com.test.util.JSDocTest",
+			"methods": [
+				{
+					"name": "init",
+					"returnType": "void"
+				}
+			],
+			"fields": [
+				{
+					"name": "_testVariable1",
+					"type": "string"
+				},
+				{
+					"name": "_testVariable2",
+					"type": "number"
+				}
+			]
+		},
+		{
 			"className": "com.test.controller.Master",
 			"methods": [
 				{
@@ -7829,6 +7848,27 @@
 			"className": "*",
 			"methodName": "onTest",
 			"result": false
+		}
+	],
+	"VisibilityTest": [
+		{
+			"className": "com.test.util.JSDocTest",
+			"methods": [
+				{
+					"name": "init",
+					"visibility": "public"
+				}
+			],
+			"fields": [
+				{
+					"name": "_testVariable1",
+					"visibility": "protected"
+				},
+				{
+					"name": "_testVariable2",
+					"visibility": "public"
+				}
+			]
 		}
 	]
 }

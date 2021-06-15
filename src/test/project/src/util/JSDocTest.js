@@ -10,6 +10,15 @@ sap.ui.define([
 			/**@type {sap.m.List} */
 			const myVariable;
 			myVariable.getItems();
+
+			/**
+			 * @protected
+			 * @type {string}
+			 */
+			this._testVariable1 = 123;
+
+			/**@public */
+			this._testVariable2 = 123;
 		}
 	});
 });

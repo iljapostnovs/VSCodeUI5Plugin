@@ -11,6 +11,7 @@ import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
 import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
 import { FileReader } from "./classes/utils/FileReader";
 import { JSRenameRegistrator } from "./classes/registrators/RenameRegistreator";
+import { TreeDataProviderRegistrator } from "./classes/registrators/TreeDataProviderRegistrator";
 export class UI5Plugin {
 	private static _instance?: UI5Plugin;
 	public static pWhenPluginInitialized: Promise<void> | undefined;
@@ -67,6 +68,7 @@ export class UI5Plugin {
 		HoverRegistrator.register();
 		XMLFormatterRegistrator.register();
 		JSRenameRegistrator.register();
+		TreeDataProviderRegistrator.register();
 	}
 
 	static registerFallbackCommands() {

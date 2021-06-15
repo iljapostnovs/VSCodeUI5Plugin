@@ -268,7 +268,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 							return nodeDAO.isInstanceOf(aggregationType, completionItem.className);
 						}));
 					}
-				} else if (classOfTheTag === "sap.ui.core.FragmentDefinition" && libraryPath) {
+				} else if ((classOfTheTag === "sap.ui.core.FragmentDefinition" || classOfTheTag === "sap.ui.core.mvc.View") && libraryPath) {
 					const nodeDAO = new SAPNodeDAO();
 					completionItems = completionItems.filter(completionItem => {
 						return nodeDAO.isInstanceOf("sap.ui.core.Control", completionItem.className);
