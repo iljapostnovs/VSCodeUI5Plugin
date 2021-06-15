@@ -11,10 +11,12 @@ import { MethodLinesNode } from "./nodetypes/subnodes/js/method/MethodLinesNode"
 import { MethodNode } from "./nodetypes/subnodes/js/method/MethodNode";
 import { MethodReferencesNode } from "./nodetypes/subnodes/js/method/MethodReferencesNode";
 import { VisibilityNode } from "./nodetypes/subnodes/js/VisibilityNode";
+import { XMLNode } from "./abstraction/XMLNode";
+import { TagNode } from "./nodetypes/rootnodes/xml/TagNode";
 
 export class NodeFactory {
-	static getNodes(node?: (Node | RootNode)) {
-		const nodes: (Node | RootNode)[] = [];
+	static getNodes(node?: (Node | RootNode | XMLNode)) {
+		const nodes: (Node | RootNode | XMLNode)[] = [];
 
 		if (!node) {
 			nodes.push(...this._getRootNodes());
@@ -25,7 +27,7 @@ export class NodeFactory {
 		return nodes;
 	}
 	private static _getRootNodes() {
-		const rootNodes: RootNode[] = [];
+		const rootNodes: (RootNode | XMLNode)[] = [];
 
 		const currentDocument = vscode.window.activeTextEditor?.document;
 		if (currentDocument?.fileName.endsWith(".js")) {
@@ -35,21 +37,24 @@ export class NodeFactory {
 				rootNodes.push(new MethodsNode(UIClass));
 				rootNodes.push(new FieldsNode(UIClass));
 			}
-		} else if (currentDocument?.fileName.endsWith(".xml")) {
-			const XMLDocument = TextDocumentTransformer.toXMLFile(currentDocument);
-			if (XMLDocument) {
-				const allTags = XMLParser.getAllTags(XMLDocument);
-				const allOpenedTags = allTags.filter(tag => {
-					return !tag.text.startsWith("</")
+		} else if (currentDocument?.fileName.endsWith(".fragment.xml") || currentDocument?.fileName.endsWith(".view.xml")) {
+			const XMLFile = TextDocumentTransformer.toXMLFile(currentDocument);
+			if (XMLFile) {
+				const allTags = XMLParser.getAllTags(XMLFile);
+				const allClassTags = allTags.filter(tag => {
+					const tagName = XMLParser.getClassNameFromTag(tag.text);
+					const isAggregation = tagName[0] ? tagName[0].toLowerCase() === tagName[0] : false;
+					return !tag.text.startsWith("</") && !isAggregation;
 				});
-				
+				const tagNodes = allClassTags.map(tag => new TagNode(tag, XMLFile));
+				rootNodes.push(...tagNodes);
 			}
 		}
 
 		return rootNodes;
 	}
 
-	private static _getSubNodes(node: Node | RootNode) {
+	private static _getSubNodes(node: Node | RootNode | XMLNode) {
 		const nodes: Node[] = [];
 
 		if (node instanceof MethodsNode) {

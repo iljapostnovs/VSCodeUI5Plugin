@@ -5,7 +5,7 @@ import { UI5ClassTreeDataProvider } from "../providers/treedataprovider/ui5class
 export class TreeDataProviderRegistrator {
 	static register() {
 		const treeProvider = new UI5ClassTreeDataProvider();
-		const treeView = vscode.window.createTreeView("ui5ClassExplorer", {
+		const treeView = vscode.window.createTreeView("ui5Explorer", {
 			treeDataProvider: treeProvider,
 			showCollapseAll: true
 		});

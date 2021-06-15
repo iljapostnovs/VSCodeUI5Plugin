@@ -36,8 +36,8 @@
 		"views": {
 			"explorer": [
 				{
-					"id": "ui5ClassExplorer",
-					"name": "UI5 Class Explorer"
+					"id": "ui5Explorer",
+					"name": "UI5 Explorer"
 				}
 			]
 		},
@@ -45,12 +45,12 @@
 			"view/title": [
 				{
 					"command": "ui5plugin.refreshClassTree",
-					"when": "view == ui5ClassExplorer",
+					"when": "view == ui5Explorer",
 					"group": "navigation"
 				},
 				{
 					"command": "ui5plugin.expandClassTree",
-					"when": "view == ui5ClassExplorer",
+					"when": "view == ui5Explorer",
 					"group": "navigation"
 				}
 			]
