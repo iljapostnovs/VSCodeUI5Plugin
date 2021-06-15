@@ -24,7 +24,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 
 				methods.forEach(method => {
 					if (method.memberPropertyNode) {
-						const locations = this._getReferenceLocations(method);
+						const locations = this.getReferenceLocations(method);
 						const positionBegin = document.positionAt(method.memberPropertyNode.start);
 						const positionEnd = document.positionAt(method.memberPropertyNode.end);
 						const range = new vscode.Range(positionBegin, positionEnd);
@@ -42,7 +42,8 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 
 		return codeLenses;
 	}
-	private _getReferenceLocations(method: ICustomClassUIMethod) {
+
+	public getReferenceLocations(method: ICustomClassUIMethod) {
 		const locations: vscode.Location[] = [];
 
 		const UIClasses = UIClassFactory.getAllCustomUIClasses();

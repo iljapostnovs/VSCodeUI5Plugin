@@ -33,6 +33,28 @@
 		"sap"
 	],
 	"contributes": {
+		"views": {
+			"explorer": [
+				{
+					"id": "ui5ClassExplorer",
+					"name": "UI5 Class Explorer"
+				}
+			]
+		},
+		"menus": {
+			"view/title": [
+				{
+					"command": "ui5plugin.refreshClassTree",
+					"when": "view == ui5ClassExplorer",
+					"group": "navigation"
+				},
+				{
+					"command": "ui5plugin.expandClassTree",
+					"when": "view == ui5ClassExplorer",
+					"group": "navigation"
+				}
+			]
+		},
 		"jsonValidation": [
 			{
 				"fileMatch": [
@@ -326,6 +348,22 @@
 			}
 		},
 		"commands": [
+			{
+				"command": "ui5plugin.refreshClassTree",
+				"title": "UI5: Refresh class tree",
+				"icon": {
+					"light": "icons/light/refresh.svg",
+					"dark": "icons/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "ui5plugin.expandClassTree",
+				"title": "UI5: Expand class tree",
+				"icon": {
+					"light": "icons/light/expand-all.svg",
+					"dark": "icons/dark/expand-all.svg"
+				}
+			},
 			{
 				"command": "ui5plugin.moveDefineToFunctionParameters",
 				"title": "UI5: Move sap.ui.define to parameters"
