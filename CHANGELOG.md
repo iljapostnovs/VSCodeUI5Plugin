@@ -1,5 +1,6 @@
 ## 0.12.49 (16-06-2021)
 * Now it is possible to generate PlantUML diagram
+* Abstract class linter introduced
 
 ## 0.12.49 (16-06-2021)
 * Now it is possible to ctrl+click on overriden method to go to the parent implementation

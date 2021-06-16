@@ -102,6 +102,8 @@ JS Linters available:<br/>
 >Checks if class members should be public. Warning is generated if member is public, but there are no references for it in other classes
 * Wrong override linter<br/>
 >Checks if overriden members are not protected/private
+* Abstract class linter<br/>
+>Checks if all abstract members are defined
 * Wrong parameter usage in the methods linter, which checks for parameter quantity and data type<br/>
 	> Use jsdoc to make your parameters optional, e.g.
 	```javascript
