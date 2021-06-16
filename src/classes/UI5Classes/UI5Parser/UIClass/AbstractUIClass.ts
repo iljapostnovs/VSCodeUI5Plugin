@@ -10,7 +10,16 @@ export interface IUIMethodParam {
 export interface IName {
 	readonly name: string;
 }
-export interface IUIMethod extends IName {
+
+export interface IAbstract {
+	abstract: boolean;
+}
+
+export interface IStatic {
+	static: boolean;
+}
+
+export interface IUIMethod extends IName, IAbstract, IStatic {
 	readonly params: IUIMethodParam[];
 	returnType: string;
 	description: string;
@@ -18,7 +27,7 @@ export interface IUIMethod extends IName {
 	owner: string;
 	api?: string;
 }
-export interface IUIField extends IName {
+export interface IUIField extends IName, IAbstract, IStatic {
 	type: string | undefined;
 	visibility: string;
 	owner: string;
@@ -58,8 +67,9 @@ export interface IUIAssociation extends IName {
 	multiple: boolean;
 	singularName: string;
 }
-export abstract class AbstractUIClass {
+export abstract class AbstractUIClass implements IAbstract {
 	public classExists: boolean;
+	public abstract: boolean;
 	public className: string;
 	public methods: IUIMethod[] = [];
 	public fields: IUIField[] = [];
@@ -74,6 +84,7 @@ export abstract class AbstractUIClass {
 	constructor(className: string, documentText?: string) {
 		this.className = className;
 		this.classExists = true;
+		this.abstract = false;
 	}
 
 	protected generateTypeValues(type: string) {

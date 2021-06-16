@@ -9,6 +9,7 @@ import { UnusedMemberLinter } from "./parts/UnusedMemberLinter";
 import { WrongFilePathLinter } from "./parts/WrongFilePathLinter";
 import { PublicMemberLinter } from "./parts/PublicMemberLinter";
 import { WrongOverrideLinter } from "./parts/WrongOverrideLinter";
+import { AbstractClassLinter } from "./parts/AbstractClassLinter";
 
 export class JSLinter {
 	static timePerchar = 0;
@@ -21,7 +22,8 @@ export class JSLinter {
 			new UnusedMemberLinter(),
 			new WrongFilePathLinter(),
 			new PublicMemberLinter(),
-			new WrongOverrideLinter()
+			new WrongOverrideLinter(),
+			new AbstractClassLinter()
 		];
 
 		let errors: IError[] = [];

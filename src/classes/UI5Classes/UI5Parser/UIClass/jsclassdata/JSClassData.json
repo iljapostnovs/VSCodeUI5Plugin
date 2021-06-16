@@ -14,7 +14,9 @@
 				"description": "Promise .then",
 				"returnType": "Promise",
 				"visibility": "public",
-				"owner": "Promise"
+				"owner": "Promise",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "catch",
@@ -29,7 +31,9 @@
 				"description": "Promise .catch",
 				"returnType": "Promise",
 				"visibility": "public",
-				"owner": "Promise"
+				"owner": "Promise",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "finally",
@@ -44,7 +48,9 @@
 				"description": "Promise .finally",
 				"returnType": "Promise",
 				"visibility": "public",
-				"owner": "Promise"
+				"owner": "Promise",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "all",
@@ -59,7 +65,9 @@
 				"description": "Promise .all",
 				"returnType": "Promise<any[]>",
 				"visibility": "public",
-				"owner": "Promise"
+				"owner": "Promise",
+				"abstract": false,
+				"static": false
 			}
 		],
 		"fields": []
@@ -79,7 +87,9 @@
 				"description": "The concat() method is used to merge two or more arrays. This method does not change the existing arrays, but instead returns a new array.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "copyWithin",
@@ -106,7 +116,9 @@
 				"description": "The copyWithin() method shallow copies part of an array to another location in the same array and returns it without modifying its length.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "entries",
@@ -114,7 +126,9 @@
 				"description": "The entries() method returns a new Array Iterator object that contains the key/value pairs for each index in the array.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "every",
@@ -135,7 +149,9 @@
 				"description": "The every() method tests whether all elements in the array pass the test implemented by the provided function. It returns a Boolean value.",
 				"returnType": "boolean",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "fill",
@@ -162,7 +178,9 @@
 				"description": "The fill() method changes all elements in an array to a static value, from a start index (default 0) to an end index (default array.length). It returns the modified array.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "filter",
@@ -183,7 +201,9 @@
 				"description": "The filter() method creates a new array with all elements that pass the test implemented by the provided function.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "find",
@@ -204,7 +224,9 @@
 				"description": "The find() method returns the value of the first element in the provided array that satisfies the provided testing function. If no values satisfies the testing function, undefined is returned.",
 				"returnType": "any",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "findIndex",
@@ -225,7 +247,9 @@
 				"description": "The findIndex() method returns the index of the first element in the array that satisfies the provided testing function. Otherwise, it returns -1, indicating that no element passed the test",
 				"returnType": "number",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "flat",
@@ -240,7 +264,9 @@
 				"description": "The flat() method creates a new array with all sub-array elements concatenated into it recursively up to the specified depth.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "flatMap",
@@ -261,7 +287,9 @@
 				"description": "The flatMap() method returns a new array formed by applying a given callback function to each element of the array, and then flattening the result by one level. It is identical to a map() followed by a flat() of depth 1, but slightly more efficient than calling those two methods separately.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "forEach",
@@ -282,7 +310,9 @@
 				"description": "The forEach() method executes a provided function once for each array element.",
 				"returnType": "void",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "includes",
@@ -303,7 +333,9 @@
 				"description": "The includes() method determines whether an array includes a certain value among its entries, returning true or false as appropriate.",
 				"returnType": "boolean",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "isArray",
@@ -318,7 +350,9 @@
 				"description": "The Array.isArray() method determines whether the passed value is an Array.",
 				"returnType": "boolean",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "indexOf",
@@ -339,7 +373,9 @@
 				"description": "The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.",
 				"returnType": "number",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "join",
@@ -354,7 +390,9 @@
 				"description": "The join() method creates and returns a new string by concatenating all of the elements in an array (or an array-like object), separated by commas or a specified separator string. If the array has only one item, then that item will be returned without using the separator.",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "keys",
@@ -362,7 +400,9 @@
 				"description": "The keys() method returns a new Array Iterator object that contains the keys for each index in the array.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "lastIndexOf",
@@ -383,7 +423,9 @@
 				"description": "The lastIndexOf() method returns the last index at which a given element can be found in the array, or -1 if it is not present. The array is searched backwards, starting at fromIndex.",
 				"returnType": "number",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "map",
@@ -404,7 +446,9 @@
 				"description": "The map() method creates a new array populated with the results of calling a provided function on every element in the calling array.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "pop",
@@ -412,7 +456,9 @@
 				"description": "The pop() method removes the last element from an array and returns that element. This method changes the length of the array.",
 				"returnType": "any",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "push",
@@ -427,7 +473,9 @@
 				"description": "push",
 				"returnType": "number",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "reduce",
@@ -448,7 +496,9 @@
 				"description": "The reduce() method executes a reducer function (that you provide) on each element of the array, resulting in single output value.",
 				"returnType": "any",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "reduceRight",
@@ -469,7 +519,9 @@
 				"description": "The reduceRight() method applies a function against an accumulator and each value of the array (from right-to-left) to reduce it to a single value.",
 				"returnType": "any",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "reverse",
@@ -477,7 +529,9 @@
 				"description": "The reverse() method reverses an array in place. The first array element becomes the last, and the last array element becomes the first.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "shift",
@@ -485,7 +539,9 @@
 				"description": "The shift() method removes the first element from an array and returns that removed element. This method changes the length of the array.",
 				"returnType": "any",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "slice",
@@ -506,7 +562,9 @@
 				"description": "The slice() method returns a shallow copy of a portion of an array into a new array object selected from start to end (end not included) where start and end represent the index of items in that array. The original array will not be modified.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "some",
@@ -527,7 +585,9 @@
 				"description": "The some() method tests whether at least one element in the array passes the test implemented by the provided function. It returns a Boolean value.",
 				"returnType": "boolean",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "sort",
@@ -542,7 +602,9 @@
 				"description": "The sort() method sorts the elements of an array in place and returns the sorted array. The default sort order is ascending, built upon converting the elements into strings, then comparing their sequences of UTF-16 code units values.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "splice",
@@ -563,7 +625,9 @@
 				"description": "The splice() method changes the contents of an array by removing or replacing existing elements and/or adding new elements in place.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "unshift",
@@ -578,7 +642,9 @@
 				"description": "The unshift() method adds one or more elements to the beginning of an array and returns the new length of the array.",
 				"returnType": "number",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "values",
@@ -586,7 +652,9 @@
 				"description": "The values() method returns a new Array Iterator object that contains the values for each index in the array.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			}
 		],
 		"fields": [
@@ -595,7 +663,9 @@
 				"description": "Length of an array",
 				"type": "number",
 				"visibility": "public",
-				"owner": "Array"
+				"owner": "Array",
+				"abstract": false,
+				"static": false
 			}
 		]
 	},
@@ -614,7 +684,9 @@
 				"description": "The concat() method concatenates the string arguments to the calling string and returns a new string.",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "includes",
@@ -635,7 +707,9 @@
 				"description": "The includes() method determines whether one string may be found within another string, returning true or false as appropriate.",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "endsWith",
@@ -656,7 +730,9 @@
 				"description": "The endsWith() method determines whether a string ends with the characters of a specified string, returning true or false as appropriate.",
 				"returnType": "boolean",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "indexOf",
@@ -677,7 +753,9 @@
 				"description": "The indexOf() method returns the index within the calling String object of the first occurrence of the specified value, starting the search at fromIndex. Returns -1 if the value is not found.",
 				"returnType": "number",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "slice",
@@ -698,7 +776,9 @@
 				"description": "The slice() method extracts a section of a string and returns it as a new string, without modifying the original string.",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "replace",
@@ -719,7 +799,9 @@
 				"description": "The replace() method returns a new string with some or all matches of a pattern replaced by a replacement. The pattern can be a string or a RegExp, and the replacement can be a string or a function to be called for each match. If pattern is a string, only the first occurrence will be replaced.",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "replaceAll",
@@ -740,7 +822,9 @@
 				"description": "The replaceAll() method returns a new string with all matches of a pattern replaced by a replacement. The pattern can be a string or a RegExp, and the replacement can be a string or a function to be called for each match.",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "split",
@@ -761,7 +845,9 @@
 				"description": "The split() method divides a String into an ordered list of substrings, puts these substrings into an array, and returns the array.  The division is done by searching for a pattern; where the pattern is provided as the first parameter in the method's call.",
 				"returnType": "array",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "substring",
@@ -782,7 +868,9 @@
 				"description": "The substring() method returns the part of the string between the start and end indexes, or to the end of the string.",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "toUpperCase",
@@ -790,7 +878,9 @@
 				"description": "The toUpperCase() method returns the calling string value converted to uppercase (the value will be converted to a string if it isn't one).",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "toLowerCase",
@@ -798,7 +888,9 @@
 				"description": "The toLowerCase() method returns the calling string value converted to lower case.",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "trim",
@@ -806,7 +898,9 @@
 				"description": "The trim() method removes whitespace from both ends of a string. Whitespace in this context is all the whitespace characters (space, tab, no-break space, etc.) and all the line terminator characters (LF, CR, etc.).",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "trimEnd",
@@ -814,7 +908,9 @@
 				"description": "The trimEnd() method removes whitespace from the end of a string. trimRight() is an alias of this method.",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			},
 			{
 				"name": "trimStart",
@@ -822,7 +918,9 @@
 				"description": "The trimStart() method removes whitespace from the beginning of a string. trimLeft() is an alias of this method.",
 				"returnType": "string",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			}
 		],
 		"fields": [
@@ -831,7 +929,9 @@
 				"description": "Length of a string",
 				"type": "number",
 				"visibility": "public",
-				"owner": "String"
+				"owner": "String",
+				"abstract": false,
+				"static": false
 			}
 		]
 	}

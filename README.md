@@ -102,6 +102,8 @@ JS Linters available:<br/>
 >Checks if class members should be public. Warning is generated if member is public, but there are no references for it in other classes
 * Wrong override linter<br/>
 >Checks if overriden members are not protected/private
+* Abstract class linter<br/>
+>Checks if all abstract members are defined
 * Wrong parameter usage in the methods linter, which checks for parameter quantity and data type<br/>
 	> Use jsdoc to make your parameters optional, e.g.
 	```javascript
@@ -219,7 +221,11 @@ Custom UI5 Explorer in VSCode panel is available<br/>
 ----------
 ## UML Class Diagram generation
 UML Class diagram can be generated either for currently active document or for the whole project.<br/>
-The generated diagram can be imported to draw.io<br/>
+It is possible to select in preferences which type of diagram to generate: DrawIO or PlantUML.
+> Recommended VSCode extensions:
+> DrawIO: *hediet.vscode-drawio-insiders-build*
+> Plantuml: *jebbs.plantuml*
+
 ![UML.png](/images/UML.png)
 
 ----------

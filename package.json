@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.49",
+	"version": "0.12.50",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -210,6 +210,15 @@
 						"sap.suite.ui.microchart"
 					],
 					"description": "List of libs to be loaded"
+				},
+				"ui5.plugin.UMLDiagramGenerationStrategy": {
+					"type": "string",
+					"enum": [
+						"DrawIO",
+						"PlantUML"
+					],
+					"default": "PlantUML",
+					"description": "Which format should be used for UML diagram generation"
 				},
 				"ui5.plugin.addI18nTextLengthLimitation": {
 					"type": "boolean",

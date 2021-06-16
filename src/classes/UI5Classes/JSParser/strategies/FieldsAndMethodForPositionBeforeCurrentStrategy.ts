@@ -38,7 +38,9 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 					description: field,
 					type: "any",
 					visibility: "public",
-					owner: ""
+					owner: "",
+					abstract: false,
+					static: false
 				}))
 			};
 		} else if (classNamePartsFromMapParam.length > 1) {
@@ -57,7 +59,9 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 							name: key,
 							visibility: "public",
 							type: typeof paramStructure[key] === "string" ? paramStructure[key] : typeof paramStructure[key],
-							owner: ""
+							owner: "",
+							abstract: false,
+							static: false
 						};
 					}) : [],
 					methods: []

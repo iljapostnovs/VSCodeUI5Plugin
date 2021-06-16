@@ -183,16 +183,20 @@ export class UIClassFactory {
 	}
 
 	private static _enrichVariablesWithJSDocTypesAndVisibility(UIClass: CustomUIClass) {
+		//TODO: merge this with logic in custom ui class?
 		const classLineColumn = LineColumn(UIClass.classText);
 		UIClass.comments.forEach(comment => {
 			const typeDoc = comment.jsdoc?.tags?.find((tag: any) => {
 				return tag.tag === "type";
 			});
 			const visibility = ["protected", "public", "private"];
+			const ui5ignored = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "ui5ignore");
+			const isAbstract = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "abstract");
+			const isStatic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "static");
 			const visibilityDoc = comment.jsdoc?.tags?.find((tag: any) => {
 				return visibility.includes(tag.tag);
 			});
-			if (typeDoc || visibilityDoc) {
+			if (typeDoc || visibilityDoc || ui5ignored || isAbstract || isStatic) {
 				const commentLineColumnEnd = classLineColumn.fromIndex(comment.end);
 				const commentLineColumnStart = classLineColumn.fromIndex(comment.start);
 				if (commentLineColumnStart && commentLineColumnEnd) {
@@ -207,7 +211,7 @@ export class UIClassFactory {
 						}
 					}
 
-					if (typeDoc || visibilityDoc) {
+					if (typeDoc || visibilityDoc || ui5ignored || isAbstract || isStatic) {
 						const assignmentExpression = this._getAcornAssignmentExpressionAtIndex(UIClass, indexOfBottomLine);
 						if (assignmentExpression) {
 							const leftNode = assignmentExpression.left;
@@ -221,6 +225,16 @@ export class UIClassFactory {
 									if (typeDoc && member.acornNode) {
 										const field = (member as IUIField);
 										field.type = typeDoc.type;
+									}
+									if (isStatic) {
+										member.static = isStatic;
+									}
+									if (ui5ignored) {
+										member.ui5ignored = true;
+									}
+									if (isAbstract) {
+										member.abstract = true;
+										UIClass.abstract = true;
 									}
 								}
 							}

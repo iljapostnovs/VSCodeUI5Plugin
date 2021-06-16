@@ -119,7 +119,9 @@ export class StandardUIClass extends AbstractUIClass {
 						}) || [],
 						returnType: method.returnValue?.types?.map((type: any) => type.value).join("|") || method.returnValue?.type || "void",
 						isFromParent: false,
-						owner: this.className
+						owner: this.className,
+						abstract: false,
+						static: false
 					};
 
 					return standardMethod;
@@ -135,7 +137,9 @@ export class StandardUIClass extends AbstractUIClass {
 					description: SAPNode.getMetadata()?.getRawMetadata()?.description ? StandardUIClass.removeTags(SAPNode.getMetadata().getRawMetadata().description) : "Extension API",
 					type: neededClassForFields,
 					visibility: "public",
-					owner: this.className
+					owner: this.className,
+					abstract: false,
+					static: false
 				}];
 			}
 		}
@@ -188,7 +192,9 @@ export class StandardUIClass extends AbstractUIClass {
 				isFromParent: !isParent,
 				api: URLBuilder.getInstance().getMarkupUrlForMethodApi(SAPNode, method.name),
 				visibility: method.visibility,
-				owner: this.className
+				owner: this.className,
+				abstract: false,
+				static: false
 			};
 
 			this._removeFirstArgumentIfItIsEvent(classMethod);
@@ -264,9 +270,10 @@ export class StandardUIClass extends AbstractUIClass {
 	private _fillParentClassName() {
 		const SAPNode = this._findSAPNode(this.className);
 		if (SAPNode) {
-			const metadata = SAPNode.getMetadata();
+			const metadata = SAPNode.getMetadata()?.getRawMetadata();
 			if (metadata) {
-				this.parentClassNameDotNotation = metadata.rawMetadata.extends;
+				this.parentClassNameDotNotation = metadata.extends;
+				this.abstract = !!metadata.abstract;
 			}
 		}
 	}
@@ -280,7 +287,9 @@ export class StandardUIClass extends AbstractUIClass {
 				type: type,
 				description: `${additionalDescription}\n${StandardUIClass.removeTags(description)}`.trim(),
 				visibility: visibility,
-				owner: this.className
+				owner: this.className,
+				abstract: false,
+				static: false
 			});
 			return accumulator;
 		}, []) || [];
@@ -438,7 +447,9 @@ export class StandardUIClass extends AbstractUIClass {
 				isFromParent: false,
 				api: URLBuilder.getInstance().getUrlForClassApi(this),
 				visibility: "public",
-				owner: this.className
+				owner: this.className,
+				abstract: false,
+				static: false
 			});
 		}
 	}

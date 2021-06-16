@@ -8,6 +8,7 @@ import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUICla
 import { DependencyLine } from "./drawiouml/lines/DependencyLine";
 import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
 import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
+import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 
 interface IUsedClassMap {
 	[key: string]: {
@@ -24,8 +25,11 @@ interface IUsageMap {
 		column: number;
 	};
 }
-export class MassDrawIOUMLDiagram {
-	static generateUMLClassDiagrams(wsFolder: vscode.WorkspaceFolder): Promise<string> {
+export class MassDrawIOUMLDiagram extends DiagramGenerator {
+	getFileExtension() {
+		return ".drawio"
+	}
+	generateUMLClassDiagrams(wsFolder: vscode.WorkspaceFolder): Promise<string> {
 		return new Promise(resolve => {
 
 			const header = new Header();
@@ -62,7 +66,7 @@ export class MassDrawIOUMLDiagram {
 				});
 				await Promise.all(promises);
 
-				this._calculatePositionsFor(UMLDiagrams);
+				MassDrawIOUMLDiagram._calculatePositionsFor(UMLDiagrams);
 
 				const body = UMLDiagrams.reduce((accumulator, UMLDiagram) => {
 					accumulator += UMLDiagram.generateBody();
@@ -150,7 +154,7 @@ export class MassDrawIOUMLDiagram {
 	}
 
 	private static _getDiagramXAxis(usageMap: IUsageMap, UMLDiagram: DrawIOUMLDiagram, rootUMLDiagram: DrawIOUMLDiagram, previousRootDiagrams: DrawIOUMLDiagram[]) {
-		const previousDiagramColumnCount =  previousRootDiagrams.reduce((accumulator, diagram) => {
+		const previousDiagramColumnCount = previousRootDiagrams.reduce((accumulator, diagram) => {
 			accumulator += this._getLeavesCount(usageMap, diagram);
 			return accumulator;
 		}, 0);
