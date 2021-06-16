@@ -663,13 +663,14 @@ export class CustomUIClass extends AbstractUIClass {
 			});
 
 			thisClassVariableAssignments?.forEach(node => {
-				const assignmentBody = node.expression.right;
-				const isMethod = assignmentBody.type === "ArrowFunctionExpression" || assignmentBody.type === "FunctionExpression";
+				const assignmentBody = node.expression?.right;
+				const isMethod = assignmentBody?.type === "ArrowFunctionExpression" || assignmentBody?.type === "FunctionExpression";
 				const isField = !isMethod;
 
-				const name = node.expression.left.property.name;
+				const name = node?.expression?.left?.property?.name;
+				const isStatic = node.expression?.left?.object?.property?.name !== "prototype";
 				if (isMethod) {
-					const method: ICustomClassUIMethod = {
+					const method: ICustomClassUIMethod ={
 						name: name,
 						params: assignmentBody.params.map((param: any) => ({
 							name: param.name,
@@ -685,7 +686,7 @@ export class CustomUIClass extends AbstractUIClass {
 						isEventHandler: false,
 						owner: this.className,
 						memberPropertyNode: node.expression.left.property,
-						static: false,
+						static: isStatic,
 						abstract: false
 					};
 					this.methods.push(method);
@@ -698,7 +699,7 @@ export class CustomUIClass extends AbstractUIClass {
 						acornNode: node.expression.left,
 						owner: this.className,
 						memberPropertyNode: node.expression.left.property,
-						static: false,
+						static: isStatic,
 						abstract: false
 					});
 				}

@@ -34,15 +34,26 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	private _generateRelationships(UIClass: CustomUIClass) {
 		let diagram = "";
 		if (UIClass.parentClassNameDotNotation && UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation) instanceof CustomUIClass) {
-			diagram += `${UIClass.parentClassNameDotNotation.replace("-", "_")} <|-- ${UIClass.className.replace("-", "_")}\n`;
+			const parentIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, UIClass.parentClassNameDotNotation);
+			if (parentIsFromSameProject) {
+				diagram += `${UIClass.parentClassNameDotNotation.replace("-", "_")} <|-- ${UIClass.className.replace("-", "_")}\n`;
+			}
 		}
 		UIClass.UIDefine.forEach(UIDefine => {
 			if (UIDefine.classNameDotNotation !== UIClass.parentClassNameDotNotation && UIClassFactory.getUIClass(UIDefine.classNameDotNotation) instanceof CustomUIClass) {
-				diagram += `${UIClass.className.replace("-", "_")} --> ${UIDefine.classNameDotNotation.replace("-", "_")}\n`;
+				const parentIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, UIDefine.classNameDotNotation);
+				if (parentIsFromSameProject) {
+					diagram += `${UIClass.className.replace("-", "_")} --> ${UIDefine.classNameDotNotation.replace("-", "_")}\n`;
+				}
 			}
 		});
 
 		return diagram;
+	}
+	private _getIfClassesAreWithinSameProject(className1: string, className2: string) {
+		const thisClassManifest = FileReader.getManifestForClass(className1);
+		const parentClassManifest = FileReader.getManifestForClass(className2);
+		return thisClassManifest?.fsPath === parentClassManifest?.fsPath;
 	}
 
 	private _generateClassDiagram(UIClass: CustomUIClass) {
