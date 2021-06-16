@@ -3,8 +3,8 @@ import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
 import { DrawIOUMLDiagram } from "./drawiogenerator/DrawIOUMLDiagram";
 import * as vscode from "vscode";
 import * as fs from "fs";
-import { MassDrawIOUMLDiagram } from "./drawiogenerator/MassDrawIOUMLDiagram";
 import * as path from "path";
+import { UMLGeneratorFactory } from "./UMLGeneratorFactory";
 const fileSeparator = path.sep;
 
 export class UMLGeneratorCommand {
@@ -43,8 +43,9 @@ export class UMLGeneratorCommand {
 	static async generateUMLForWholeProject() {
 		const wsFolders = vscode.workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
-			const diagramXML = await MassDrawIOUMLDiagram.generateUMLClassDiagrams(wsFolder);
-			fs.writeFileSync(`${wsFolder.uri.fsPath}${fileSeparator}ProjectUML.drawio`, diagramXML, {
+			const generator = UMLGeneratorFactory.createUMLGenerator();
+			const diagram = await generator.generateUMLClassDiagrams(wsFolder);
+			fs.writeFileSync(`${wsFolder.uri.fsPath}${fileSeparator}ProjectUML${generator.getFileExtension()}`, diagram, {
 				encoding: "utf8"
 			});
 		}
