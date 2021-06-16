@@ -1,4 +1,6 @@
 import { WorkspaceFolder } from "vscode";
+import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { IAbstract, IStatic } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
@@ -32,6 +34,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 		return diagram;
 	}
 	private _generateRelationships(UIClass: CustomUIClass) {
+		const dependencies = this._gatherAllDependencies(UIClass);
 		let diagram = "";
 		if (UIClass.parentClassNameDotNotation && UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation) instanceof CustomUIClass) {
 			const parentIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, UIClass.parentClassNameDotNotation);
@@ -39,16 +42,33 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 				diagram += `${UIClass.parentClassNameDotNotation.replace("-", "_")} <|-- ${UIClass.className.replace("-", "_")}\n`;
 			}
 		}
-		UIClass.UIDefine.forEach(UIDefine => {
-			if (UIDefine.classNameDotNotation !== UIClass.parentClassNameDotNotation && UIClassFactory.getUIClass(UIDefine.classNameDotNotation) instanceof CustomUIClass) {
-				const parentIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, UIDefine.classNameDotNotation);
-				if (parentIsFromSameProject) {
-					diagram += `${UIClass.className.replace("-", "_")} --> ${UIDefine.classNameDotNotation.replace("-", "_")}\n`;
+		dependencies.forEach(dependency => {
+			if (dependency !== UIClass.parentClassNameDotNotation && UIClassFactory.getUIClass(dependency) instanceof CustomUIClass) {
+				const dependencyIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, dependency);
+				if (dependencyIsFromSameProject) {
+					diagram += `${UIClass.className.replace("-", "_")} --> ${dependency.replace("-", "_")}\n`;
 				}
 			}
 		});
 
 		return diagram;
+	}
+	private _gatherAllDependencies(UIClass: CustomUIClass) {
+		const dependencies: string[] = [];
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+		UIClass.methods.forEach(UIMethod => {
+			if (UIMethod.acornNode) {
+				const memberExpressions = AcornSyntaxAnalyzer.expandAllContent(UIMethod.acornNode).filter((node: any) => node.type === "MemberExpression");
+				memberExpressions.forEach((memberExpression: any) => {
+					const className = strategy.acornGetClassName(UIClass.className, memberExpression.property.start);
+					if (className && !className.includes("__map__") && className !== UIClass.className && !dependencies.includes(className)) {
+						dependencies.push(className);
+					}
+				});
+			}
+		});
+
+		return dependencies;
 	}
 	private _getIfClassesAreWithinSameProject(className1: string, className2: string) {
 		const thisClassManifest = FileReader.getManifestForClass(className1);

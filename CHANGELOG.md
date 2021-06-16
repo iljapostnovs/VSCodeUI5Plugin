@@ -1,3 +1,7 @@
+## 0.12.51 (17-06-2021)
+* Add support for spread element
+* Improve dependency detection for PlantUML
+
 ## 0.12.50 (17-06-2021)
 * Now it is possible to generate PlantUML diagram
 * Abstract class linter introduced

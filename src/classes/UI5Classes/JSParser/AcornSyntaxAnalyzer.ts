@@ -66,6 +66,8 @@ export class AcornSyntaxAnalyzer {
 			innerNode = this.findAcornNode(node.elements, position);
 		} else if (node.type === "ReturnStatement") {
 			innerNode = node.argument;
+		} else if (node.type === "SpreadElement") {
+			innerNode = node.argument;
 		} else if (node.type === "IfStatement") {
 			innerNode = this._getIfStatementPart(node, position);
 		} else if (node.type === "SwitchStatement") {
@@ -1061,6 +1063,8 @@ export class AcornSyntaxAnalyzer {
 		} else if (node.type === "ThisExpression") {
 			//
 		} else if (node.type === "AwaitExpression") {
+			innerNodes.push(node.argument);
+		} else if (node.type === "SpreadElement") {
 			innerNodes.push(node.argument);
 		} else if (node.type === "ArrayExpression") {
 			innerNodes = [...node.elements];
