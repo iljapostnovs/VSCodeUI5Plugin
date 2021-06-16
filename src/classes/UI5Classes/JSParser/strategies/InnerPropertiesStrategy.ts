@@ -96,7 +96,9 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 											name: key,
 											type: typeof objectForCompletionItems[key] === "string" ? objectForCompletionItems[key] : typeof objectForCompletionItems[key],
 											visibility: "public",
-											owner: ""
+											owner: "",
+											abstract: false,
+											static: false
 										};
 									})
 								};
@@ -121,7 +123,9 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 										description: `${eventHandlerData.eventName} - ${parameter.name}: ${parameter.type}`,
 										type: parameter.type,
 										visibility: "public",
-										owner: ""
+										owner: "",
+										abstract: false,
+										static: false
 									};
 								})
 							};
@@ -149,7 +153,9 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 								description: model.type,
 								type: "string",
 								visibility: "public",
-								owner: ""
+								owner: "",
+								abstract: false,
+								static: false
 							};
 						})
 					};
@@ -252,7 +258,9 @@ export class InnerPropertiesStrategy extends FieldPropertyMethodGetterStrategy {
 			type: property.type,
 			description: property.description,
 			visibility: property.visibility,
-			owner: ""
+			owner: "",
+			abstract: false,
+			static: false
 		})));
 
 		if (UIClass.parentClassNameDotNotation) {

@@ -74,6 +74,10 @@ export class CustomUIClass extends AbstractUIClass {
 		this._fillMethodsAndFields();
 		this._enrichMemberInfoWithJSDocs();
 		this._enrichMethodParamsWithHungarianNotation();
+		this._fillIsAbstract();
+	}
+	private _fillIsAbstract() {
+		this.abstract = !!this.methods.find(method => method.abstract) || !!this.fields.find(field => field.abstract);
 	}
 
 	private _enrichMemberInfoWithJSDocs() {
@@ -138,6 +142,8 @@ export class CustomUIClass extends AbstractUIClass {
 					const isPublic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "public");
 					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
 					const isIgnored = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "ui5ignore");
+					const isAbstract = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "abstract");
+					const isStatic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "static");
 
 					const UIMethod = this.methods.find(method => method.name === methodName);
 					if (paramTags && UIMethod) {
@@ -164,6 +170,14 @@ export class CustomUIClass extends AbstractUIClass {
 							UIMethod.ui5ignored = true;
 						}
 
+						if (isAbstract) {
+							UIMethod.abstract = true;
+						}
+
+						if (isStatic) {
+							UIMethod.static = true;
+						}
+
 						if (paramTags) {
 							UIMethod.params.forEach((param, i) => {
 								const jsDocParam = paramTags[i];
@@ -188,6 +202,8 @@ export class CustomUIClass extends AbstractUIClass {
 					const isProtected = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "protected");
 					const fieldType = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "type");
 					const ui5ignored = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "ui5ignore");
+					const isAbstract = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "abstract");
+					const isStatic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "static");
 					const UIField = this.fields.find(field => field.name === fieldName);
 					if (UIField) {
 						if (isPrivate || isPublic || isProtected) {
@@ -204,6 +220,14 @@ export class CustomUIClass extends AbstractUIClass {
 
 						if (ui5ignored) {
 							UIField.ui5ignored = true;
+						}
+
+						if (isAbstract) {
+							UIField.abstract = true;
+						}
+
+						if (isStatic) {
+							UIField.static = true;
 						}
 					}
 				}
@@ -455,7 +479,9 @@ export class CustomUIClass extends AbstractUIClass {
 						acornNode: property.value,
 						isEventHandler: false,
 						owner: this.className,
-						memberPropertyNode: property.key
+						memberPropertyNode: property.key,
+						static: false,
+						abstract: false
 					};
 					this.methods.push(method);
 				} else if (property.value?.type === "Identifier" || property.value?.type === "Literal") {
@@ -466,7 +492,9 @@ export class CustomUIClass extends AbstractUIClass {
 						description: property.jsType || "",
 						visibility: property.key.name?.startsWith("_") ? "private" : "public",
 						owner: this.className,
-						memberPropertyNode: property.key
+						memberPropertyNode: property.key,
+						static: false,
+						abstract: false
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value?.type === "ObjectExpression") {
@@ -478,7 +506,9 @@ export class CustomUIClass extends AbstractUIClass {
 						customData: this._generateCustomDataForObject(property.value),
 						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
 						owner: this.className,
-						memberPropertyNode: property.key
+						memberPropertyNode: property.key,
+						static: false,
+						abstract: false
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value?.type === "MemberExpression") {
@@ -489,7 +519,9 @@ export class CustomUIClass extends AbstractUIClass {
 						acornNode: property,
 						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
 						owner: this.className,
-						memberPropertyNode: property.key
+						memberPropertyNode: property.key,
+						static: false,
+						abstract: false
 					});
 					this.acornMethodsAndFields.push(property);
 				} else if (property.value?.type === "ArrayExpression") {
@@ -500,7 +532,9 @@ export class CustomUIClass extends AbstractUIClass {
 						acornNode: property,
 						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
 						owner: this.className,
-						memberPropertyNode: property.key
+						memberPropertyNode: property.key,
+						static: false,
+						abstract: false
 					});
 					this.acornMethodsAndFields.push(property);
 				}
@@ -522,7 +556,9 @@ export class CustomUIClass extends AbstractUIClass {
 									visibility: node.left.property.name?.startsWith("_") ? "private" : "public",
 									acornNode: node.left,
 									owner: this.className,
-									memberPropertyNode: node.left.property
+									memberPropertyNode: node.left.property,
+									static: false,
+									abstract: false
 								});
 							}
 						}
@@ -548,7 +584,9 @@ export class CustomUIClass extends AbstractUIClass {
 				description: "Prototype of the class",
 				type: this.className,
 				visibility: "public",
-				owner: this.className
+				owner: this.className,
+				static: false,
+				abstract: false
 			});
 		}
 
@@ -646,7 +684,9 @@ export class CustomUIClass extends AbstractUIClass {
 						acornNode: assignmentBody,
 						isEventHandler: false,
 						owner: this.className,
-						memberPropertyNode: node.expression.left.property
+						memberPropertyNode: node.expression.left.property,
+						static: false,
+						abstract: false
 					};
 					this.methods.push(method);
 				} else if (isField) {
@@ -657,7 +697,9 @@ export class CustomUIClass extends AbstractUIClass {
 						description: assignmentBody.jsType || "",
 						acornNode: node.expression.left,
 						owner: this.className,
-						memberPropertyNode: node.expression.left.property
+						memberPropertyNode: node.expression.left.property,
+						static: false,
+						abstract: false
 					});
 				}
 			});
@@ -731,7 +773,9 @@ export class CustomUIClass extends AbstractUIClass {
 				returnType: property.type || "void",
 				visibility: property.visibility,
 				isEventHandler: false,
-				owner: this.className
+				owner: this.className,
+				static: false,
+				abstract: false
 			});
 
 			aMethods.push({
@@ -746,7 +790,9 @@ export class CustomUIClass extends AbstractUIClass {
 				returnType: this.className,
 				visibility: property.visibility,
 				isEventHandler: false,
-				owner: this.className
+				owner: this.className,
+				static: false,
+				abstract: false
 			});
 		});
 	}
@@ -883,7 +929,9 @@ export class CustomUIClass extends AbstractUIClass {
 					returnType: method.returnType,
 					visibility: aggregation.visibility,
 					isEventHandler: false,
-					owner: this.className
+					owner: this.className,
+					static: false,
+					abstract: false
 				});
 			});
 
@@ -939,7 +987,9 @@ export class CustomUIClass extends AbstractUIClass {
 					returnType: this.className,
 					visibility: event.visibility,
 					isEventHandler: false,
-					owner: this.className
+					owner: this.className,
+					static: false,
+					abstract: false
 				});
 			});
 		});
@@ -1005,7 +1055,9 @@ export class CustomUIClass extends AbstractUIClass {
 					returnType: association.type || this.className,
 					visibility: association.visibility,
 					isEventHandler: false,
-					owner: this.className
+					owner: this.className,
+					static: false,
+					abstract: false
 				});
 			});
 

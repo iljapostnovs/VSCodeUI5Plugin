@@ -926,7 +926,9 @@ export class AcornSyntaxAnalyzer {
 									params: methodFromAnotherClass.params,
 									returnType: methodFromAnotherClass.returnType,
 									visibility: field.visibility,
-									owner: UIClass.className
+									owner: UIClass.className,
+									static: field.static,
+									abstract: field.abstract
 								});
 							}
 						}
