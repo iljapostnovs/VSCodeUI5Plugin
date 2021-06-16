@@ -1,4 +1,5 @@
 import { WorkspaceFolder } from "vscode";
+import { IAbstract, IStatic } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../utils/FileReader";
@@ -45,28 +46,43 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	}
 
 	private _generateClassDiagram(UIClass: CustomUIClass) {
-		let classDiagram = `class ${UIClass.className.replace("-", "_")} {\n`;
+		let classDiagram = `${UIClass.abstract ? "abstract " : ""}class ${UIClass.className.replace("-", "_")} {\n`;
 
-		UIClass.fields.forEach(UIField => {
+		UIClass.fields.filter(field => field.name !== "prototype").forEach(UIField => {
 			const visibilitySign = this._getVisibilitySign(UIField.visibility);
-			classDiagram += `\t${visibilitySign}${UIField.name}: ${UIField.type?.replace("-", "_")}\n`;
+			const abstractStaticModifier = this._getAbstractOrStaticModifier(UIField);
+			classDiagram += `\t${visibilitySign}${abstractStaticModifier}${UIField.name}: ${UIField.type?.replace("-", "_")}\n`;
 		});
 		UIClass.methods.forEach(UIMethod => {
 			const visibilitySign = this._getVisibilitySign(UIMethod.visibility);
+			const abstractStaticModifier = this._getAbstractOrStaticModifier(UIMethod);
 			const params = UIMethod.params.map(param => `${param.name}${param.isOptional ? "?" : ""}: ${param.type.replace("-", "_")}`).join(", ");
-			classDiagram += `\t${visibilitySign}${UIMethod.name}(${params}): ${UIMethod.returnType.replace("-", "_")}\n`;
+			classDiagram += `\t${visibilitySign}${abstractStaticModifier}${UIMethod.name}(${params}): ${UIMethod.returnType.replace("-", "_")}\n`;
 		});
 
 		classDiagram += "}\n";
 		return classDiagram;
 	}
 
+	private _getAbstractOrStaticModifier(member: IAbstract & IStatic) {
+		let modifier = "";
+
+		if (member.abstract) {
+			modifier = "{abstract} ";
+		}
+		if (member.static) {
+			modifier = "{static} ";
+		}
+
+		return modifier;
+	}
+
 	private _getVisibilitySign(visibility: string) {
-		let visibilitySign = "+"
+		let visibilitySign = "+ "
 		if (visibility === "protected") {
-			visibilitySign = "#";
+			visibilitySign = "# ";
 		} else if (visibility === "private") {
-			visibilitySign = "-";
+			visibilitySign = "- ";
 		}
 
 		return visibilitySign;
