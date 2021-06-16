@@ -23,6 +23,28 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 			}
 		});
 
+		const views = FileReader.getAllViews();
+		const fragments = FileReader.getAllFragments();
+		const XMLFiles = [...views, ...fragments];
+		XMLFiles.forEach(XMLFile => {
+			const manifest = FileReader.getManifestForClass(XMLFile.name);
+			const dependencyIsFromSameProject = manifest && manifest.fsPath.startsWith(wsFolder.uri.fsPath);
+			if (dependencyIsFromSameProject) {
+				const isView = XMLFile.fsPath.endsWith(".view.xml");
+				diagram += `class ${XMLFile.name}${isView ? "View" : "Fragment"} << (${isView ? "V" : "F"},orchid) >> #gainsboro ##grey {}\n`
+			}
+		});
+		XMLFiles.forEach(XMLFile => {
+			const manifest = FileReader.getManifestForClass(XMLFile.name);
+			const dependencyIsFromSameProject = manifest && manifest.fsPath.startsWith(wsFolder.uri.fsPath);
+			if (dependencyIsFromSameProject) {
+				const isView = XMLFile.fsPath.endsWith(".view.xml");
+				XMLFile.fragments.forEach(fragment => {
+					diagram += `${XMLFile.name}${isView ? "View" : "Fragment"} --> ${fragment.name}Fragment\n`;
+				});
+			}
+		});
+
 		classNames.forEach(className => {
 			const UIClass = UIClassFactory.getUIClass(className);
 			if (UIClass instanceof CustomUIClass) {
@@ -51,11 +73,40 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 			}
 		});
 
+		// const views = FileReader.getAllViews();
+		// const fragments = FileReader.getAllFragments();
+		// const XMLFiles = [...views, ...fragments];
+		// XMLFiles.forEach(XMLFile => {
+		// 	const isView = XMLFile.fsPath.endsWith(".view.xml");
+		// 	diagram += `class ${XMLFile.name} << (${isView ? "V" : "F"},orchid) >> #gainsboro ##grey {}`
+		// });
+		const fragments = FileReader.getFragmentsMentionedInClass(UIClass.className);
+		const view = FileReader.getViewForController(UIClass.className);
+		const XMLDocDependencies = [...fragments];
+		if (view) {
+			XMLDocDependencies.push(view);
+		}
+
+		XMLDocDependencies.forEach(dependency => {
+			const dependencyIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, dependency.name);
+			if (dependencyIsFromSameProject) {
+				const isView = dependency.fsPath.endsWith(".view.xml");
+				diagram += `${UIClass.className} --> ${dependency.name}${isView ? "View" : "Fragment"}\n`;
+			}
+		});
+
 		return diagram;
 	}
 	private _gatherAllDependencies(UIClass: CustomUIClass) {
 		const dependencies: string[] = [];
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+
+		UIClass.UIDefine.forEach(UIDefine => {
+			if (UIDefine.classNameDotNotation !== UIClass.className && !UIClass.interfaces.includes(UIDefine.classNameDotNotation)) {
+				dependencies.push(UIDefine.classNameDotNotation);
+			}
+		});
+
 		UIClass.methods.forEach(UIMethod => {
 			if (UIMethod.acornNode) {
 				const memberExpressions = AcornSyntaxAnalyzer.expandAllContent(UIMethod.acornNode).filter((node: any) => node.type === "MemberExpression");
@@ -77,7 +128,9 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	}
 
 	private _generateClassDiagram(UIClass: CustomUIClass) {
-		let classDiagram = `${UIClass.abstract ? "abstract " : ""}class ${UIClass.className.replace("-", "_")} {\n`;
+		const classColor = this._getClassColor(UIClass);
+		const implementations = UIClass.interfaces.length > 0 ? ` implements ${UIClass.interfaces.join(", ")}` : "";
+		let classDiagram = `${UIClass.abstract ? "abstract " : ""}class ${UIClass.className.replace("-", "_")}${implementations} ${classColor}{\n`;
 
 		UIClass.fields.filter(field => field.name !== "prototype").forEach(UIField => {
 			const visibilitySign = this._getVisibilitySign(UIField.visibility);
@@ -93,6 +146,19 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 
 		classDiagram += "}\n";
 		return classDiagram;
+	}
+	private _getClassColor(UIClass: CustomUIClass) {
+		let color = "";
+		const isModel = UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.model.Model");
+		const isController = UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller");
+
+		if (isModel) {
+			color = "#aliceblue ##lightsteelblue "
+		} else if (isController) {
+			color = "#honeydew ##green ";
+		}
+
+		return color;
 	}
 
 	private _getAbstractOrStaticModifier(member: IAbstract & IStatic) {

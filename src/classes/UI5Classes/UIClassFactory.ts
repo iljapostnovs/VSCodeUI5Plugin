@@ -65,10 +65,10 @@ export class UIClassFactory {
 	}
 
 	public static setNewCodeForClass(classNameDotNotation: string, classFileText: string, force = false) {
-		const classDoesntExist = !this._UIClasses[classNameDotNotation];
+		const classDoesNotExist = !this._UIClasses[classNameDotNotation];
 		if (
 			force ||
-			classDoesntExist ||
+			classDoesNotExist ||
 			(<CustomUIClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length ||
 			(<CustomUIClass>this._UIClasses[classNameDotNotation]).classText !== classFileText
 		) {
@@ -525,7 +525,7 @@ export class UIClassFactory {
 		}
 
 		checkedClasses.push(CurrentUIClass.className);
-		const viewsAndFragments: IViewsAndFragments = this._getViewsAndFragmentsRelatedTo(CurrentUIClass);
+		const viewsAndFragments: IViewsAndFragments = this.getViewsAndFragmentsRelatedTo(CurrentUIClass);
 
 		const parentUIClasses = this.getAllCustomUIClasses().filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && CurrentUIClass !== UIClass);
 		const whereMentioned = this._getAllClassesWhereClassIsImported(CurrentUIClass.className);
@@ -583,7 +583,7 @@ export class UIClassFactory {
 
 	}
 
-	private static _getViewsAndFragmentsRelatedTo(CurrentUIClass: CustomUIClass) {
+	static getViewsAndFragmentsRelatedTo(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments: IViewsAndFragments = {
 			views: [],
 			fragments: []
