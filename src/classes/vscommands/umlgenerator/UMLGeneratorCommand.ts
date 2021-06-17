@@ -4,8 +4,8 @@ import { DrawIOUMLDiagram } from "./drawiogenerator/DrawIOUMLDiagram";
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { UMLGeneratorFactory } from "./UMLGeneratorFactory";
 const fileSeparator = path.sep;
+import { UMLGeneratorFactory } from "./UMLGeneratorFactory";
 
 export class UMLGeneratorCommand {
 	static generateUMLForCurrentClass() {
@@ -45,9 +45,13 @@ export class UMLGeneratorCommand {
 		for (const wsFolder of wsFolders) {
 			const generator = UMLGeneratorFactory.createUMLGenerator();
 			const diagram = await generator.generateUMLClassDiagrams(wsFolder);
-			fs.writeFileSync(`${wsFolder.uri.fsPath}${fileSeparator}ProjectUML${generator.getFileExtension()}`, diagram, {
+			const path = `${wsFolder.uri.fsPath}${fileSeparator}ProjectUML${generator.getFileExtension()}`;
+			fs.writeFileSync(path, diagram, {
 				encoding: "utf8"
 			});
+			const uri = vscode.Uri.file(path);
+			const document = await vscode.workspace.openTextDocument(uri);
+			vscode.window.showTextDocument(document);
 		}
 
 		vscode.window.showInformationMessage("UML Diagram generated successfully");

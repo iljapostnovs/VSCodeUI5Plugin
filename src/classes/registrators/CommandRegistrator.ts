@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
 import { FallbackCommand } from "../vscommands/FallbackCommand";
+import { GenerateERDiagramCommand } from "../vscommands/umlgenerator/GenerateERDiagramCommand";
 import { ExportToI18NCommand } from "../vscommands/i18ncommand/ExportToI18NCommand";
 import { InsertCustomClassNameCommand } from "../vscommands/InsertCustomClassNameCommand";
 import { SAPUIDefineCommand } from "../vscommands/SAPUIDefineCommand";
@@ -18,6 +19,7 @@ export class CommandRegistrator {
 			const insertCustomClassNameCommand = vscode.commands.registerCommand("ui5plugin.insertCustomClassName", InsertCustomClassNameCommand.insertCustomClassName);
 			const generateUMLClassDiagramCommand = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagram", UMLGeneratorCommand.generateUMLForCurrentClass);
 			const generateUMLClassDiagramForWholeProject = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagramsForWholeProject", UMLGeneratorCommand.generateUMLForWholeProject);
+			const generateERDiagram = vscode.commands.registerCommand("ui5plugin.generateERDiagramFromMetadata", GenerateERDiagramCommand.generateERDiagram);
 
 			UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
 			UI5Plugin.getInstance().addDisposable(switcherCommand);
@@ -25,6 +27,7 @@ export class CommandRegistrator {
 			UI5Plugin.getInstance().addDisposable(insertCustomClassNameCommand);
 			UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramCommand);
 			UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramForWholeProject);
+			UI5Plugin.getInstance().addDisposable(generateERDiagram);
 		} else {
 			const clearCacheCommand = vscode.commands.registerCommand("ui5plugin.clearCache", ClearCacheCommand.clearCache);
 			UI5Plugin.getInstance().addDisposable(clearCacheCommand);
@@ -44,6 +47,7 @@ export class CommandRegistrator {
 		const generateUMLClassDiagramCommand = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagram", FallbackCommand.notifyUserThatThisIsNotUI5Project);
 		const generateUMLClassDiagramForWholeProject = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagramsForWholeProject", FallbackCommand.notifyUserThatThisIsNotUI5Project);
 		const clearCacheCommand = vscode.commands.registerCommand("ui5plugin.clearCache", FallbackCommand.notifyUserThatThisIsNotUI5Project);
+		const generateERDiagram = vscode.commands.registerCommand("ui5plugin.generateERDiagramFromMetadata", FallbackCommand.notifyUserThatThisIsNotUI5Project);
 
 		UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
 		UI5Plugin.getInstance().addDisposable(switcherCommand);
@@ -52,5 +56,6 @@ export class CommandRegistrator {
 		UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramCommand);
 		UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramForWholeProject);
 		UI5Plugin.getInstance().addDisposable(clearCacheCommand);
+		UI5Plugin.getInstance().addDisposable(generateERDiagram);
 	}
 }
