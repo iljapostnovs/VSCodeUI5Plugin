@@ -50,7 +50,7 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 		return diagram;
 	}
 	private _buildPlantUMLDiagram(XMLData: { entityTypes: IEntityType[]; complexTypes: IEntityType[]; associations: IAssociation[]; }) {
-		let diagram = "@startuml ERDiagram {\n";
+		let diagram = "@startuml ERDiagram \nskinparam dpi 600\n";
 
 		diagram += this._buildDiagramForEntityTypes(XMLData.entityTypes);
 		diagram += this._buildDiagramForEntityTypes(XMLData.complexTypes, "<<Complex Type>> ");

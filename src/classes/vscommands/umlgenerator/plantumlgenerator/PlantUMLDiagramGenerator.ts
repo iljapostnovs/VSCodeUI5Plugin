@@ -13,7 +13,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	}
 
 	async generateUMLClassDiagrams(wsFolder: WorkspaceFolder) {
-		let diagram = "@startuml ClassDiagram\nskinparam linetype ortho\nset namespaceSeparator none\n";
+		let diagram = "@startuml ClassDiagram\nskinparam linetype ortho\nset namespaceSeparator none\nskinparam dpi 600\n";
 
 		const classNames = FileReader.getAllJSClassNamesFromProject(wsFolder)
 			.filter(className => !className.includes("-"));
