@@ -4,7 +4,7 @@ import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../UI5Cla
 import { IAbstract, IStatic } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../utils/FileReader";
+import { FileReader, IFragment, IView, IXMLFile } from "../../../utils/FileReader";
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 
 export class PlantUMLDiagramGenerator extends DiagramGenerator {
@@ -13,36 +13,45 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	}
 
 	async generateUMLClassDiagrams(wsFolder: WorkspaceFolder) {
-		let diagram = "@startuml ClassDiagram\nskinparam linetype ortho\n";
+		let diagram = "@startuml ClassDiagram\nskinparam linetype ortho\nset namespaceSeparator none\n";
 
-		const classNames = FileReader.getAllJSClassNamesFromProject(wsFolder).filter(className => !className.includes("test-resources"));
-		classNames.forEach(className => {
+		const classNames = FileReader.getAllJSClassNamesFromProject(wsFolder)
+			.filter(className => !className.includes("-"));
+		const groupedClassNames = this._groupClassNamesToPackages([...classNames]);
+		Object.keys(groupedClassNames.packages).forEach(packageName => {
+			const classPackage = groupedClassNames.packages[packageName];
+			diagram += `namespace ${packageName} <<Rectangle>> {\n`;
+			classPackage.UIClasses.forEach(UIClass => {
+				diagram += this._generateClassDiagram(UIClass);
+			});
+			classPackage.views.forEach(view => {
+				diagram += this._generateClassDiagramForXMLFile(view);
+			});
+			diagram += "}\n";
+		});
+		groupedClassNames.unpackagedClasses.forEach(className => {
 			const UIClass = UIClassFactory.getUIClass(className);
 			if (UIClass instanceof CustomUIClass) {
 				diagram += this._generateClassDiagram(UIClass);
 			}
 		});
 
-		const views = FileReader.getAllViews();
+		const views = FileReader.getAllViews().filter(XMLFile => !groupedClassNames.viewsUsed.includes(XMLFile));
 		const fragments = FileReader.getAllFragments();
-		const XMLFiles = [...views, ...fragments];
-		XMLFiles.forEach(XMLFile => {
+		const XMLFiles = [...views, ...fragments].filter((XMLFile: IXMLFile) => {
 			const manifest = FileReader.getManifestForClass(XMLFile.name);
 			const dependencyIsFromSameProject = manifest && manifest.fsPath.startsWith(wsFolder.uri.fsPath);
-			if (dependencyIsFromSameProject) {
-				const isView = XMLFile.fsPath.endsWith(".view.xml");
-				diagram += `class ${XMLFile.name}${isView ? "View" : "Fragment"} << (${isView ? "V" : "F"},orchid) >> #gainsboro ##grey {}\n`
-			}
+			return dependencyIsFromSameProject;
 		});
+
 		XMLFiles.forEach(XMLFile => {
-			const manifest = FileReader.getManifestForClass(XMLFile.name);
-			const dependencyIsFromSameProject = manifest && manifest.fsPath.startsWith(wsFolder.uri.fsPath);
-			if (dependencyIsFromSameProject) {
-				const isView = XMLFile.fsPath.endsWith(".view.xml");
-				XMLFile.fragments.forEach(fragment => {
-					diagram += `${XMLFile.name}${isView ? "View" : "Fragment"} --> ${fragment.name}Fragment\n`;
-				});
-			}
+			diagram += this._generateClassDiagramForXMLFile(XMLFile);
+		});
+		XMLFiles.concat(groupedClassNames.viewsUsed).forEach(XMLFile => {
+			const isView = XMLFile.fsPath.endsWith(".view.xml");
+			XMLFile.fragments.forEach(fragment => {
+				diagram += `${XMLFile.name}${isView ? "View" : "Fragment"} --> ${fragment.name}Fragment\n`;
+			});
 		});
 
 		classNames.forEach(className => {
@@ -55,31 +64,112 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 		diagram += "\n@enduml";
 		return diagram;
 	}
+	private _generateClassDiagramForXMLFile(XMLFile: IFragment) {
+		const isView = XMLFile.fsPath.endsWith(".view.xml");
+		return `class ${XMLFile.name}${isView ? "View" : "Fragment"} << (${isView ? "V" : "F"},${isView ? "orchid" : "sandybrown"}) >> #gainsboro ##grey {}\n`;
+	}
+	private _groupClassNamesToPackages(classNames: string[]) {
+		const data: {
+			packages: {
+				[packageName: string]: {
+					UIClasses: CustomUIClass[],
+					views: IView[]
+				}
+			},
+			viewsUsed: IView[],
+			unpackagedClasses: string[]
+		} = {
+			packages: {},
+			viewsUsed: [],
+			unpackagedClasses: []
+		};
+
+		let className = classNames.pop();
+		while (className) {
+			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+			if (UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller")) {
+				const view = FileReader.getViewForController(className);
+				if (view) {
+					const UIClasses: CustomUIClass[] = [UIClass];
+					data.viewsUsed.push(view);
+					const viewName = view.name;
+					const controllerName = UIClass.className;
+					const classNames = [viewName, controllerName];
+
+					const modelName = UIClassFactory.getDefaultModelForClass(UIClass.className);
+					if (modelName) {
+						const model = UIClassFactory.getUIClass(modelName);
+						if (model instanceof CustomUIClass) {
+							UIClasses.push(model);
+							if (classNames.includes(modelName)) {
+								classNames.splice(classNames.indexOf(className), 1);
+							}
+						}
+					}
+					const packageName = this._findCommonPart(classNames);
+					if (data.packages[packageName]) {
+						data.packages[packageName].UIClasses.push(...UIClasses);
+						data.packages[packageName].views.push(view);
+					} else {
+						data.packages[packageName] = {
+							UIClasses: UIClasses,
+							views: [view]
+						};
+					}
+				} else {
+					data.unpackagedClasses.push(className);
+				}
+			} else {
+				data.unpackagedClasses.push(className);
+			}
+
+			className = classNames.pop();
+		}
+
+		return data;
+	}
+	private _findCommonPart(strings: string[]) {
+		let commonPart = "";
+
+		if (strings.length > 0) {
+			let i = 0;
+			const minLength = Math.min(...strings.map(str => str.length));
+			while (i < minLength && this._getIfCharsAreIdentical(strings, i)) {
+				commonPart += strings[0][i];
+				i++;
+			}
+		}
+
+		if (commonPart.endsWith(".")) {
+			commonPart = commonPart.substring(0, commonPart.length - 1);
+		}
+
+		return commonPart;
+	}
+
+	private _getIfCharsAreIdentical(strings: string[], i: number) {
+		const charsAtIndex = strings.map(string => string[i]);
+		return !charsAtIndex.some(char => char !== charsAtIndex[0]);
+	}
+
 	private _generateRelationships(UIClass: CustomUIClass) {
 		const dependencies = this._gatherAllDependencies(UIClass);
 		let diagram = "";
 		if (UIClass.parentClassNameDotNotation && UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation) instanceof CustomUIClass) {
 			const parentIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, UIClass.parentClassNameDotNotation);
 			if (parentIsFromSameProject) {
-				diagram += `${UIClass.parentClassNameDotNotation.replace("-", "_")} <|-- ${UIClass.className.replace("-", "_")}\n`;
+				diagram += `${UIClass.parentClassNameDotNotation} <|-- ${UIClass.className}\n`;
 			}
 		}
 		dependencies.forEach(dependency => {
 			if (dependency !== UIClass.parentClassNameDotNotation && UIClassFactory.getUIClass(dependency) instanceof CustomUIClass) {
 				const dependencyIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, dependency);
 				if (dependencyIsFromSameProject) {
-					diagram += `${UIClass.className.replace("-", "_")} --> ${dependency.replace("-", "_")}\n`;
+					diagram += `${UIClass.className} --> ${dependency}\n`;
 				}
 			}
 		});
 
-		// const views = FileReader.getAllViews();
-		// const fragments = FileReader.getAllFragments();
-		// const XMLFiles = [...views, ...fragments];
-		// XMLFiles.forEach(XMLFile => {
-		// 	const isView = XMLFile.fsPath.endsWith(".view.xml");
-		// 	diagram += `class ${XMLFile.name} << (${isView ? "V" : "F"},orchid) >> #gainsboro ##grey {}`
-		// });
 		const fragments = FileReader.getFragmentsMentionedInClass(UIClass.className);
 		const view = FileReader.getViewForController(UIClass.className);
 		const XMLDocDependencies = [...fragments];
@@ -129,23 +219,48 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 
 	private _generateClassDiagram(UIClass: CustomUIClass) {
 		const classColor = this._getClassColor(UIClass);
+		const classOrInterface = this._getClassOrInterfaceKeyword(UIClass);
 		const implementations = UIClass.interfaces.length > 0 ? ` implements ${UIClass.interfaces.join(", ")}` : "";
-		let classDiagram = `${UIClass.abstract ? "abstract " : ""}class ${UIClass.className.replace("-", "_")}${implementations} ${classColor}{\n`;
+		const stereotype = this._getStereotype(UIClass);
+		const isAbstract = UIClass.abstract ? "abstract " : "";
+		let classDiagram = `${isAbstract}${classOrInterface} ${UIClass.className}${stereotype}${implementations} ${classColor}{\n`;
 
 		UIClass.fields.filter(field => field.name !== "prototype").forEach(UIField => {
 			const visibilitySign = this._getVisibilitySign(UIField.visibility);
 			const abstractStaticModifier = this._getAbstractOrStaticModifier(UIField);
-			classDiagram += `\t${visibilitySign}${abstractStaticModifier}${UIField.name}: ${UIField.type?.replace("-", "_")}\n`;
+			classDiagram += `\t${visibilitySign}${abstractStaticModifier}${UIField.name}: ${UIField.type}\n`;
 		});
 		UIClass.methods.forEach(UIMethod => {
 			const visibilitySign = this._getVisibilitySign(UIMethod.visibility);
 			const abstractStaticModifier = this._getAbstractOrStaticModifier(UIMethod);
-			const params = UIMethod.params.map(param => `${param.name}${param.isOptional ? "?" : ""}: ${param.type.replace("-", "_")}`).join(", ");
-			classDiagram += `\t${visibilitySign}${abstractStaticModifier}${UIMethod.name}(${params}): ${UIMethod.returnType.replace("-", "_")}\n`;
+			const params = UIMethod.params.map(param => `${param.name}${param.isOptional ? "?" : ""}: ${param.type}`).join(", ");
+			classDiagram += `\t${visibilitySign}${abstractStaticModifier}${UIMethod.name}(${params}): ${UIMethod.returnType}\n`;
 		});
 
 		classDiagram += "}\n";
 		return classDiagram;
+	}
+	private _getStereotype(UIClass: CustomUIClass) {
+		let stereotype = "";
+
+		if (UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.model.Model")) {
+			stereotype = " <<Model>>";
+		} else if (UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller")) {
+			stereotype = " <<Controller>>";
+		} else if (UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.Control")) {
+			stereotype = " <<Control>>";
+		}
+
+		return stereotype;
+	}
+	private _getClassOrInterfaceKeyword(UIClass: CustomUIClass) {
+		let keyword = "class";
+		const isInterface = !!UIClassFactory.getAllCustomUIClasses().find(CustomUIClass => CustomUIClass.interfaces.includes(UIClass.className));
+		if (isInterface) {
+			keyword = "interface";
+		}
+
+		return keyword;
 	}
 	private _getClassColor(UIClass: CustomUIClass) {
 		let color = "";
