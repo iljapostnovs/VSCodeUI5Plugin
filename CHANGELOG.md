@@ -1,6 +1,6 @@
 ## 0.12.51 (17-06-2021)
 * Add support for spread element
-* Improve dependency detection for PlantUML
+* Improve dependency detection for PlantUML. Also views and fragments are added to the UML diagram as well
 
 ## 0.12.50 (17-06-2021)
 * Now it is possible to generate PlantUML diagram
