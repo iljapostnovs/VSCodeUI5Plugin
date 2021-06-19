@@ -1207,7 +1207,8 @@
 				"\"com/test/renametests/util/ExtendFormatter\"",
 				"\"com/test/renametest/controller/Master/controller\"",
 				"\"com/test/renametest/util/Formatter\"",
-				"\"com/test/renametest/util/ExtendFormatter\""
+				"\"com/test/renametest/util/ExtendFormatter\"",
+				"\"com/test/util/MapTest\""
 			]
 		}
 	],

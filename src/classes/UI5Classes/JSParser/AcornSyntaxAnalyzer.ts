@@ -878,7 +878,11 @@ export class AcornSyntaxAnalyzer {
 		}
 
 		if (method.returnType?.includes("__map__")) {
-			method.returnType = "map";
+			if (method.returnType.endsWith("[]")) {
+				method.returnType = "map[]";
+			} else {
+				method.returnType = "map";
+			}
 		}
 	}
 

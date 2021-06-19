@@ -2,7 +2,7 @@
 import { FileReader } from "../../../utils/FileReader";
 import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
-import { AbstractUIClass, IUIField, IUIAggregation, IUIEvent, IUIMethod, IUIProperty, IUIAssociation, IUIEventParam, IUIMethodParam } from "./AbstractUIClass";
+import { AbstractUIClass, IUIField, IUIAggregation, IUIEvent, IUIMethod, IUIProperty, IUIAssociation, IUIEventParam, IUIMethodParam, IMember } from "./AbstractUIClass";
 import * as commentParser from "comment-parser";
 import { IReferenceCodeLensCacheable } from "../../../providers/codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 import { IViewsAndFragments } from "../../UIClassFactory";
@@ -23,6 +23,9 @@ interface ILooseObject {
 export interface IAcornNodeBearer {
 	acornNode?: any;
 	memberPropertyNode?: any;
+}
+
+export interface ICustomMember extends IMember, IAcornNodeBearer, IXMLDocumentMentionable, UI5Ignoreable {
 }
 
 export interface IXMLDocumentMentionable {
@@ -76,6 +79,11 @@ export class CustomUIClass extends AbstractUIClass {
 		this._enrichMethodParamsWithHungarianNotation();
 		this._fillIsAbstract();
 	}
+
+	getMembers(): ICustomMember[] {
+		return super.getMembers();
+	}
+
 	private _fillIsAbstract() {
 		this.abstract = !!this.methods.find(method => method.abstract) || !!this.fields.find(field => field.abstract);
 	}

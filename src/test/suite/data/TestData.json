@@ -1,6 +1,20 @@
 {
 	"data": [
 		{
+			"className": "com.test.util.MapTest",
+			"methods": [
+				{
+					"name": "_getMapArray",
+					"returnType": "map[]"
+				},
+				{
+					"name": "_getMapArray2",
+					"returnType": "map[]"
+				}
+			],
+			"fields": []
+		},
+		{
 			"className": "com.test.util.JSDocTest",
 			"methods": [
 				{
