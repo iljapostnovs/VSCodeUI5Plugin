@@ -527,7 +527,7 @@ export class CustomUIClass extends AbstractUIClass {
 				} else if (property.value?.type === "ArrayExpression") {
 					this.fields.push({
 						name: property.key?.name,
-						type: "array",
+						type: "any[]",
 						description: "",
 						acornNode: property,
 						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
@@ -670,7 +670,7 @@ export class CustomUIClass extends AbstractUIClass {
 				const name = node?.expression?.left?.property?.name;
 				const isStatic = node.expression?.left?.object?.property?.name !== "prototype";
 				if (isMethod) {
-					const method: ICustomClassUIMethod ={
+					const method: ICustomClassUIMethod = {
 						name: name,
 						params: assignmentBody.params.map((param: any) => ({
 							name: param.name,
@@ -726,7 +726,7 @@ export class CustomUIClass extends AbstractUIClass {
 			const map: ILooseObject = {
 				$: "Element",
 				o: "object",
-				a: "array",
+				a: "any[]",
 				i: "int",
 				f: "float",
 				m: "map",
