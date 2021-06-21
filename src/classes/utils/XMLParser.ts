@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { FileReader, IXMLFile } from "./FileReader";
 import { IUIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { IHierarchicalTag, ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 
 export enum PositionType {
 	InTheTagAttributes = "1",
@@ -525,6 +525,39 @@ export class XMLParser {
 		}
 
 		return prefix;
+	}
+
+	public static getTagHierarchy(XMLFile: IXMLFile) {
+		const tags = this.getAllTags(XMLFile).filter(tag => !tag.text.startsWith("<!--"));
+		const tagHierarchy: IHierarchicalTag[] = [];
+
+		let tag = tags.shift();
+		while (tag) {
+			const hierarchicalTag = { ...tag, tags: [] };
+			tagHierarchy.push(hierarchicalTag);
+
+			this._fillSubTags(tags, hierarchicalTag);
+			tag = tags.shift();
+		}
+
+		return tagHierarchy;
+	}
+
+	private static _fillSubTags(tags: ITag[], hierarchicalTag: IHierarchicalTag) {
+		let tag = tags.shift();
+
+		while (tag) {
+			if (!tag.text.startsWith("</")) { //<asd> <asd/>
+				const hierarchicalSubTag: IHierarchicalTag = { ...tag, tags: [] };
+				hierarchicalTag.tags.push(hierarchicalSubTag);
+				if (!tag.text.endsWith("/>")) { // <asd>
+					this._fillSubTags(tags, hierarchicalSubTag);
+				}
+			} else { //</asd>
+				break;
+			}
+			tag = tags.shift();
+		}
 	}
 
 	public static getAllTags(XMLFile: IXMLFile) {

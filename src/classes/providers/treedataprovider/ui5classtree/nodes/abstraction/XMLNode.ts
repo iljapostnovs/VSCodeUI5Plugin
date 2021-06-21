@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
 import { IXMLFile } from "../../../../../utils/FileReader";
-import { ITag } from "../../../../diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { IHierarchicalTag } from "../../../../diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import LineColumn = require("line-column");
 import { Node } from "./Node";
 
 export abstract class XMLNode extends Node {
-	readonly tag: ITag;
+	readonly tag: IHierarchicalTag;
 	readonly XMLFile: IXMLFile;
-	constructor(tag: ITag, XMLFile: IXMLFile) {
+	constructor(tag: IHierarchicalTag, XMLFile: IXMLFile) {
 		super();
 		this.tag = tag;
 		this.XMLFile = XMLFile;

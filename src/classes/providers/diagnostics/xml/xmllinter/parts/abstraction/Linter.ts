@@ -17,6 +17,10 @@ export interface ITag {
 	attributes?: string[];
 }
 
+export interface IHierarchicalTag extends ITag {
+	tags: IHierarchicalTag[]
+}
+
 export abstract class Linter {
 	abstract getErrors(document: vscode.TextDocument): IError[];
 }

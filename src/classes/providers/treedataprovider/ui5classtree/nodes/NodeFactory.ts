@@ -40,13 +40,8 @@ export class NodeFactory {
 		} else if (currentDocument?.fileName.endsWith(".fragment.xml") || currentDocument?.fileName.endsWith(".view.xml")) {
 			const XMLFile = TextDocumentTransformer.toXMLFile(currentDocument);
 			if (XMLFile) {
-				const allTags = XMLParser.getAllTags(XMLFile);
-				const allClassTags = allTags.filter(tag => {
-					const tagName = XMLParser.getClassNameFromTag(tag.text);
-					const isAggregation = tagName[0] ? tagName[0].toLowerCase() === tagName[0] : false;
-					return !tag.text.startsWith("</") && !isAggregation;
-				});
-				const tagNodes = allClassTags.map(tag => new TagNode(tag, XMLFile));
+				const hierarchicalTags = XMLParser.getTagHierarchy(XMLFile);
+				const tagNodes = hierarchicalTags.map(tag => new TagNode(tag, XMLFile));
 				rootNodes.push(...tagNodes);
 			}
 		}
@@ -72,6 +67,9 @@ export class NodeFactory {
 			const childNodes = [
 				new VisibilityNode(node.UIField)
 			];
+			nodes.push(...childNodes);
+		} else if (node instanceof TagNode) {
+			const childNodes = node.tag.tags.map(tag => new TagNode(tag, node.XMLFile));
 			nodes.push(...childNodes);
 		}
 
