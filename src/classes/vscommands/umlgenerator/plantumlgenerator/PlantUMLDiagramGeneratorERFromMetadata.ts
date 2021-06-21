@@ -1,6 +1,7 @@
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 import * as vscode from "vscode";
 import { IEntityType, IAssociation, XMLMetadata, IProperty } from "./parser/XMLMetadata";
+import { HTTPHandler } from "../../../utils/HTTPHandler";
 
 export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 	getFileExtension() {
@@ -9,24 +10,37 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 
 	async generateUMLClassDiagrams() {
 		let diagram = "";
-		const activeDocument = vscode.window.activeTextEditor?.document;
-		if (activeDocument && activeDocument.fileName.endsWith("metadata.xml")) {
 
-			try {
-				const XMLData = this._getCurrentXMLData();
-				diagram = this._buildPlantUMLDiagram(XMLData);
-			} catch (error) {
-				vscode.window.showErrorMessage(`Error in metadata parsing. Details: ${JSON.stringify(error.message || error)}`);
-			}
-		} else {
-			vscode.window.showErrorMessage("Current active document is not metadata.xml");
+		try {
+			const XMLData = await this._getCurrentXMLData();
+			diagram = this._buildPlantUMLDiagram(XMLData);
+		} catch (error) {
+			vscode.window.showErrorMessage(`Error in metadata parsing. Details: ${JSON.stringify(error.message || error)}`);
 		}
 
 		return diagram;
 	}
-	private _getCurrentXMLData() {
+
+	private async _getXMLMetadataText() {
+		let XMLMetadata = "";
 		const activeDocument = vscode.window.activeTextEditor?.document;
-		const xmlText = activeDocument?.getText() || "";
+		if (activeDocument && activeDocument.fileName.endsWith("metadata.xml")) {
+			XMLMetadata = activeDocument.getText();
+		} else {
+			const uri = await vscode.window.showInputBox({
+				prompt: "Please define url to metadata"
+			});
+			if (uri) {
+				XMLMetadata = await HTTPHandler.get(uri);
+			}
+		}
+
+		return XMLMetadata;
+	}
+
+	private async _getCurrentXMLData() {
+		const xmlText = await this._getXMLMetadataText();
+
 		const metadata = new XMLMetadata(xmlText);
 		return metadata;
 	}

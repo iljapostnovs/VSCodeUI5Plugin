@@ -55,16 +55,25 @@ export class XMLMetadata {
 		const parsedXML = XMLParser.parse(xmlText, {
 			ignoreAttributes: false
 		});
-		const schema = parsedXML["edmx:Edmx"]["edmx:DataServices"].Schema;
-		const namespace = schema["@_Namespace"];
-		const entityTypes = schema.EntityType && (Array.isArray(schema.EntityType) ? schema.EntityType : [schema.EntityType]) || [];
-		const complexTypes = schema.ComplexType && (Array.isArray(schema.ComplexType) ? schema.ComplexType : [schema.ComplexType]) || [];
-		const associations = schema.Association && (Array.isArray(schema.Association) ? schema.Association : [schema.Association]) || [];
-		const entitySets = schema.EntityContainer?.EntitySet && (Array.isArray(schema.EntityContainer.EntitySet) ? schema.EntityContainer.EntitySet : [schema.EntityContainer.EntitySet]) || [];
+		let schemas = parsedXML["edmx:Edmx"]["edmx:DataServices"].Schema;
+		if (!Array.isArray(schemas)) {
+			schemas = [schemas];
+		}
 
-		const parsedEntityTypes = this._parseEntityTypes(entityTypes, namespace, entitySets);
-		const parsedComplexTypes = this._parseEntityTypes(complexTypes, namespace, entitySets);
-		const parsedAssociations = this._parseAssociations(associations, namespace);
+		const parsedEntityTypes: IEntityType[] = [];
+		const parsedComplexTypes: IEntityType[] = [];
+		const parsedAssociations: IAssociation[] = [];
+		schemas.forEach((schema: any) => {
+			const namespace = schema["@_Namespace"];
+			const entityTypes = schema.EntityType && (Array.isArray(schema.EntityType) ? schema.EntityType : [schema.EntityType]) || [];
+			const complexTypes = schema.ComplexType && (Array.isArray(schema.ComplexType) ? schema.ComplexType : [schema.ComplexType]) || [];
+			const associations = schema.Association && (Array.isArray(schema.Association) ? schema.Association : [schema.Association]) || [];
+			const entitySets = schema.EntityContainer?.EntitySet && (Array.isArray(schema.EntityContainer.EntitySet) ? schema.EntityContainer.EntitySet : [schema.EntityContainer.EntitySet]) || [];
+
+			parsedEntityTypes.push(...this._parseEntityTypes(entityTypes, namespace, entitySets));
+			parsedComplexTypes.push(...this._parseEntityTypes(complexTypes, namespace, entitySets));
+			parsedAssociations.push(...this._parseAssociations(associations, namespace));
+		});
 
 		return {
 			entityTypes: parsedEntityTypes,
@@ -77,7 +86,7 @@ export class XMLMetadata {
 		return entityTypes.map((entityType: any) => {
 			const name = entityType["@_Name"];
 			const keys = entityType.Key?.PropertyRef["@_Name"] ? [entityType.Key.PropertyRef["@_Name"]] : (entityType.Key?.PropertyRef.map((propertyRef: any) => propertyRef["@_Name"]) || []);
-			let properties: IProperty[] = entityType.Property.map((property: any) => {
+			let properties: IProperty[] = entityType.Property?.map((property: any) => {
 				return {
 					name: property["@_Name"],
 					type: property["@_Type"].replace(`${namespace}.`, ""),
@@ -85,7 +94,7 @@ export class XMLMetadata {
 					precision: property["@_Precision"],
 					scale: property["@_Scale"]
 				}
-			});
+			}) || [];
 			properties = properties.sort((a, b) => {
 				const aValue = keys.includes(a.name) ? 1 : 0;
 				const bValue = keys.includes(b.name) ? 1 : 0;
