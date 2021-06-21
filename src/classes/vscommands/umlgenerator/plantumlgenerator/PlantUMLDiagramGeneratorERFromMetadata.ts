@@ -30,8 +30,21 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 			const uri = await vscode.window.showInputBox({
 				prompt: "Please define url to metadata"
 			});
-			if (uri) {
-				XMLMetadata = await HTTPHandler.get(uri);
+			const username = await vscode.window.showInputBox({
+				prompt: "Please enter username"
+			});
+			const password = await vscode.window.showInputBox({
+				prompt: "Please enter password",
+				password: true
+			});
+
+			if (uri && username && password) {
+				XMLMetadata = await HTTPHandler.get(uri, {
+					auth: {
+						username: username,
+						password: password
+					}
+				});
 			}
 		}
 
@@ -99,6 +112,12 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 				multiplicitySymbolic = "}|";
 			} else {
 				multiplicitySymbolic = "|{";
+			}
+		} else if (multiplicity === "0..1") {
+			if (isFrom) {
+				multiplicitySymbolic = "|o";
+			} else {
+				multiplicitySymbolic = "o|";
 			}
 		}
 

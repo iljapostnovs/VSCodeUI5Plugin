@@ -65,10 +65,10 @@ export class XMLMetadata {
 		const parsedAssociations: IAssociation[] = [];
 		schemas.forEach((schema: any) => {
 			const namespace = schema["@_Namespace"];
-			const entityTypes = schema.EntityType && (Array.isArray(schema.EntityType) ? schema.EntityType : [schema.EntityType]) || [];
-			const complexTypes = schema.ComplexType && (Array.isArray(schema.ComplexType) ? schema.ComplexType : [schema.ComplexType]) || [];
-			const associations = schema.Association && (Array.isArray(schema.Association) ? schema.Association : [schema.Association]) || [];
-			const entitySets = schema.EntityContainer?.EntitySet && (Array.isArray(schema.EntityContainer.EntitySet) ? schema.EntityContainer.EntitySet : [schema.EntityContainer.EntitySet]) || [];
+			const entityTypes = this._getArray(schema.EntityType);
+			const complexTypes = this._getArray(schema.ComplexType);
+			const associations = this._getArray(schema.Association);
+			const entitySets = schema.EntityContainer?.EntitySet && this._getArray(schema.EntityContainer.EntitySet);
 
 			parsedEntityTypes.push(...this._parseEntityTypes(entityTypes, namespace, entitySets));
 			parsedComplexTypes.push(...this._parseEntityTypes(complexTypes, namespace, entitySets));
@@ -86,7 +86,8 @@ export class XMLMetadata {
 		return entityTypes.map((entityType: any) => {
 			const name = entityType["@_Name"];
 			const keys = entityType.Key?.PropertyRef["@_Name"] ? [entityType.Key.PropertyRef["@_Name"]] : (entityType.Key?.PropertyRef.map((propertyRef: any) => propertyRef["@_Name"]) || []);
-			let properties: IProperty[] = entityType.Property?.map((property: any) => {
+			const XMLProperties = this._getArray(entityType.Property);
+			let properties: IProperty[] = XMLProperties.map((property: any) => {
 				return {
 					name: property["@_Name"],
 					type: property["@_Type"].replace(`${namespace}.`, ""),
@@ -101,7 +102,7 @@ export class XMLMetadata {
 				return bValue - aValue;
 			});
 
-			const navigationData = entityType.NavigationProperty && (Array.isArray(entityType.NavigationProperty) ? entityType.NavigationProperty : [entityType.NavigationProperty]) || [];
+			const navigationData = this._getArray(entityType.NavigationProperty);
 			const navigations: INavigation[] = navigationData.map((data: any): INavigation => {
 				return {
 					name: data["@_Name"],
@@ -116,6 +117,21 @@ export class XMLMetadata {
 			return { name, properties, keys, navigations, entitySetName };
 		});
 	}
+
+	private _getArray(something: any) {
+		const myArray: any[] = [];
+
+		if (something) {
+			if (Array.isArray(something)) {
+				myArray.push(...something);
+			} else {
+				myArray.push(something);
+			}
+		}
+
+		return myArray;
+	}
+
 	private _getEntitySetName(name: any, entitySets: any[], namespace: string): string | undefined {
 		const entitySet = entitySets.find((entitySet: any) => {
 			return entitySet["@_EntityType"].replace(`${namespace}.`, "") === name
