@@ -604,7 +604,7 @@
 	"JSLinter": [
 		{
 			"className": "com.test.controller.LargeFile",
-			"timeLimit": 2000,
+			"timeLimit": 2200,
 			"errors": [
 				{
 					"text": "No references found for \"method1\" class member"
