@@ -1,31 +1,7 @@
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
-import * as XMLParser from "fast-xml-parser";
 import * as vscode from "vscode";
-
-interface IProperty {
-	name: string,
-	type: string,
-	length?: string,
-	precision?: string,
-	scale?: string
-}
-
-interface IEntityType {
-	name: string,
-	properties: IProperty[],
-	keys: string[]
-}
-
-interface IAssociation {
-	from: {
-		type: string,
-		multiplicity: string
-	},
-	to: {
-		type: string,
-		multiplicity: string
-	}
-}
+import { IEntityType, IAssociation, XMLMetadata, IProperty } from "./parser/XMLMetadata";
+import { HTTPHandler } from "../../../utils/HTTPHandler";
 
 export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 	getFileExtension() {
@@ -34,27 +10,60 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 
 	async generateUMLClassDiagrams() {
 		let diagram = "";
-		const activeDocument = vscode.window.activeTextEditor?.document;
-		if (activeDocument && activeDocument.fileName.endsWith("metadata.xml")) {
 
-			try {
-				const XMLData = this._getCurrentXMLData();
-				diagram = this._buildPlantUMLDiagram(XMLData);
-			} catch (error) {
-				vscode.window.showErrorMessage(`Error in metadata parsing. Details: ${JSON.stringify(error.message || error)}`);
-			}
-		} else {
-			vscode.window.showErrorMessage("Current active document is not metadata.xml");
+		try {
+			const XMLData = await this._getCurrentXMLData();
+			diagram = this._buildPlantUMLDiagram(XMLData);
+		} catch (error) {
+			vscode.window.showErrorMessage(`Error in metadata parsing. Details: ${JSON.stringify(error.message || error)}`);
 		}
 
 		return diagram;
 	}
-	private _buildPlantUMLDiagram(XMLData: { entityTypes: IEntityType[]; complexTypes: IEntityType[]; associations: IAssociation[]; }) {
+
+	private async _getXMLMetadataText() {
+		let XMLMetadata = "";
+		const activeDocument = vscode.window.activeTextEditor?.document;
+		if (activeDocument && activeDocument.fileName.endsWith("metadata.xml")) {
+			XMLMetadata = activeDocument.getText();
+		} else {
+			const uri = await vscode.window.showInputBox({
+				prompt: "Please define url to metadata"
+			});
+			const username = await vscode.window.showInputBox({
+				prompt: "Please enter username"
+			});
+			const password = await vscode.window.showInputBox({
+				prompt: "Please enter password",
+				password: true
+			});
+
+			if (uri && username && password) {
+				XMLMetadata = await HTTPHandler.get(uri, {
+					auth: {
+						username: username,
+						password: password
+					}
+				});
+			}
+		}
+
+		return XMLMetadata;
+	}
+
+	private async _getCurrentXMLData() {
+		const xmlText = await this._getXMLMetadataText();
+
+		const metadata = new XMLMetadata(xmlText);
+		return metadata;
+	}
+
+	private _buildPlantUMLDiagram(XMLData: XMLMetadata) {
 		let diagram = "@startuml ERDiagram \nskinparam dpi 600\n";
 
 		diagram += this._buildDiagramForEntityTypes(XMLData.entityTypes);
 		diagram += this._buildDiagramForEntityTypes(XMLData.complexTypes, "<<Complex Type>> ");
-		diagram += this._buildDiagramForAssociations(XMLData.associations);
+		diagram += this._buildDiagramForAssociations(XMLData.associations, XMLData.entityTypes);
 		diagram += this._buildAssociationsBetweenPropertiesAndComplexTypes(XMLData.complexTypes, XMLData.entityTypes.concat(XMLData.complexTypes));
 
 		diagram += "@enduml";
@@ -74,14 +83,25 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 		}).join("\n") + "\n";
 	}
 
-	private _buildDiagramForAssociations(associations: IAssociation[]) {
+	private _buildDiagramForAssociations(associations: IAssociation[], entityTypes: IEntityType[]) {
 		return associations.map(association => {
 			const multiplicityFrom = this._getMultiplicity(association.from.multiplicity, true);
 			const multiplicityTo = this._getMultiplicity(association.to.multiplicity, false);
+			const navigationName = this._getNavigationName(association, entityTypes);
 
-			return `${association.from.type} ${multiplicityFrom}--${multiplicityTo} ${association.to.type}`;
+			return `${association.from.type} ${multiplicityFrom}--${multiplicityTo} ${association.to.type}${navigationName}`;
 		}).join("\n") + "\n";
 	}
+
+	private _getNavigationName(association: IAssociation, entityTypes: IEntityType[]) {
+		const entityTypeFrom = entityTypes.find(entityType => entityType.name === association.from.type);
+		const navigation = entityTypeFrom?.navigations.find(navigation => {
+			return navigation.relationship === association.name;
+		});
+
+		return navigation ? `: ${navigation.name}` : "";
+	}
+
 	private _getMultiplicity(multiplicity: string, isFrom: boolean) {
 		let multiplicitySymbolic = "";
 
@@ -93,6 +113,12 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 			} else {
 				multiplicitySymbolic = "|{";
 			}
+		} else if (multiplicity === "0..1") {
+			if (isFrom) {
+				multiplicitySymbolic = "|o";
+			} else {
+				multiplicitySymbolic = "o|";
+			}
 		}
 
 		return multiplicitySymbolic;
@@ -100,73 +126,42 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 
 	private _buildDiagramForEntityTypes(entityTypes: IEntityType[], addition = "") {
 		return "together {\n" + entityTypes.map(entityType => {
-			let diagram = `entity ${entityType.name} ${addition}{\n`;
+			let setName = "";
+			if (!addition && entityType.entitySetName) {
+				setName = `<<${entityType.entitySetName}>> `;
+			}
+
+			let diagram = `entity ${entityType.name} ${addition}${setName}{\n`;
 			entityType.properties.forEach(property => {
 				const isKey = entityType.keys.includes(property.name);
 				const keySymbolic = isKey ? "**" : "";
-				diagram += `\t${keySymbolic}${property.name}: ${property.type}${keySymbolic}\n`;
+				const additionalTypeNumbers = this._getAdditionalTypeNumbers(property);
+				diagram += `\t${keySymbolic}${property.name}: ${property.type}${additionalTypeNumbers}${keySymbolic}\n`;
 
 			});
 			diagram += "}";
+
 			return diagram;
 		}).join("\n") + "\n}\n";
 	}
 
-	private _getCurrentXMLData() {
-		const activeDocument = vscode.window.activeTextEditor?.document;
-		const xmlText = activeDocument?.getText() || "";
-		const parsedXML = XMLParser.parse(xmlText, {
-			ignoreAttributes: false
-		});
-		const schema = parsedXML["edmx:Edmx"]["edmx:DataServices"].Schema;
-		const namespace = schema["@_Namespace"];
-		const entityTypes = schema.EntityType && (Array.isArray(schema.EntityType) ? schema.EntityType : [schema.EntityType]) || [];
-		const complexTypes = schema.ComplexType && (Array.isArray(schema.ComplexType) ? schema.ComplexType : [schema.ComplexType]) || [];
-		const associations = schema.Association && (Array.isArray(schema.Association) ? schema.Association : [schema.Association]) || [];
+	private _getAdditionalTypeNumbers(property: IProperty) {
+		let additionalTypeNumbers = "";
+		if (property.precision || property.scale || property.length) {
+			const numbers = [];
+			if (property.precision) {
+				numbers.push(property.precision);
+			}
+			if (property.scale) {
+				numbers.push(property.scale);
+			}
+			if (property.length) {
+				numbers.push(property.length);
+			}
 
-		const parsedEntityTypes = this._parseEntityTypes(entityTypes, namespace);
-		const parsedComplexTypes = this._parseEntityTypes(complexTypes, namespace);
-		const parsedAssociations = this._parseAssociations(associations, namespace);
+			additionalTypeNumbers = `(${numbers.join(", ")})`;
+		}
 
-		return {
-			entityTypes: parsedEntityTypes,
-			complexTypes: parsedComplexTypes,
-			associations: parsedAssociations
-		};
-	}
-	private _parseEntityTypes(entityTypes: any[], namespace: string): IEntityType[] {
-		return entityTypes.map((entityType: any) => {
-			const name = entityType["@_Name"];
-			const keys = entityType.Key?.PropertyRef["@_Name"] ? [entityType.Key.PropertyRef["@_Name"]] : (entityType.Key?.PropertyRef.map((propertyRef: any) => propertyRef["@_Name"]) || []);
-			let properties: IProperty[] = entityType.Property.map((property: any) => {
-				return {
-					name: property["@_Name"],
-					type: property["@_Type"].replace(`${namespace}.`, ""),
-					length: property["@_MaxLength"],
-					precision: property["@_Precision"],
-					scale: property["@_Scale"]
-				}
-			});
-			properties = properties.sort((a, b) => {
-				const aValue = keys.includes(a.name) ? 1 : 0;
-				const bValue = keys.includes(b.name) ? 1 : 0;
-				return bValue - aValue;
-			});
-
-			return { name, properties, keys };
-		});
-	}
-	private _parseAssociations(associations: any[], namespace: string): IAssociation[] {
-		return associations.map((association: any) => {
-			const from = {
-				type: association.End[0]["@_Type"].replace(`${namespace}.`, ""),
-				multiplicity: association.End[0]["@_Multiplicity"]
-			};
-			const to = {
-				type: association.End[1]["@_Type"].replace(`${namespace}.`, ""),
-				multiplicity: association.End[1]["@_Multiplicity"]
-			};
-			return { from, to };
-		});
+		return additionalTypeNumbers;
 	}
 }

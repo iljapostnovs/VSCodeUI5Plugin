@@ -1,3 +1,7 @@
+## 0.12.55 (21-06-2021)
+* Entity set names and navigation names added to the PlantUML ER diagram
+* Now it is possible to provide source for metadata.xml via url
+
 ## 0.12.54 (21-06-2021)
 * Bugfix for tree view
 

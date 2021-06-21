@@ -2,16 +2,14 @@ import axios, { AxiosRequestConfig } from "axios";
 import * as https from "https";
 import * as vscode from "vscode";
 export class HTTPHandler {
-	static async get(uri: string) {
+	static async get(uri: string, options: AxiosRequestConfig = {}): Promise<any> {
 		let data = {};
 
 		const rejectUnauthorized = vscode.workspace.getConfiguration("ui5.plugin").get("rejectUnauthorized");
 		const agent = new https.Agent({
 			rejectUnauthorized: !!rejectUnauthorized
 		});
-		const options: AxiosRequestConfig = {
-			httpsAgent: agent
-		};
+		options.httpsAgent = agent;
 
 		try {
 			data = (await axios.get(uri, options)).data;
