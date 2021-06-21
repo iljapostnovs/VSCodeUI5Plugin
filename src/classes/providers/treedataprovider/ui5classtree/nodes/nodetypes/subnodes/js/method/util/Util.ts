@@ -5,7 +5,7 @@ import { UIClassFactory } from "../../../../../../../../../UI5Classes/UIClassFac
 export class Util {
 	static getMethodLines(UIMethod: ICustomClassUIMethod) {
 		const UIClass = UIClassFactory.getUIClass(UIMethod.owner);
-		if (UIClass instanceof CustomUIClass) {
+		if (UIClass instanceof CustomUIClass && UIMethod.acornNode) {
 			const positionBegin = LineColumn(UIClass.classText).fromIndex(UIMethod.acornNode.start);
 			const positionEnd = LineColumn(UIClass.classText).fromIndex(UIMethod.acornNode.end);
 			if (positionBegin && positionEnd) {

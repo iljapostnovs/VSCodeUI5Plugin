@@ -1,3 +1,6 @@
+## 0.12.54 (21-06-2021)
+* Bugfix for tree view
+
 ## 0.12.53 (21-06-2021)
 * ER diagram generation bugfix
 
