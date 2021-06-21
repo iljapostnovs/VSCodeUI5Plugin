@@ -41,7 +41,7 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 				const XMLData = this._getCurrentXMLData();
 				diagram = this._buildPlantUMLDiagram(XMLData);
 			} catch (error) {
-				vscode.window.showErrorMessage(`Error in metadata parsing. Details: ${JSON.stringify(error)}`);
+				vscode.window.showErrorMessage(`Error in metadata parsing. Details: ${JSON.stringify(error.message || error)}`);
 			}
 		} else {
 			vscode.window.showErrorMessage("Current active document is not metadata.xml");
@@ -120,9 +120,9 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 		});
 		const schema = parsedXML["edmx:Edmx"]["edmx:DataServices"].Schema;
 		const namespace = schema["@_Namespace"];
-		const entityTypes = (schema.EntityType && Array.isArray(schema.EntityType) ? schema.EntityType : [schema.EntityType]) || [];
-		const complexTypes = (schema.ComplexType && Array.isArray(schema.ComplexType) ? schema.ComplexType : [schema.ComplexType]) || [];
-		const associations = (schema.Association && Array.isArray(schema.Association) ? schema.Association : [schema.Association]) || [];
+		const entityTypes = schema.EntityType && (Array.isArray(schema.EntityType) ? schema.EntityType : [schema.EntityType]) || [];
+		const complexTypes = schema.ComplexType && (Array.isArray(schema.ComplexType) ? schema.ComplexType : [schema.ComplexType]) || [];
+		const associations = schema.Association && (Array.isArray(schema.Association) ? schema.Association : [schema.Association]) || [];
 
 		const parsedEntityTypes = this._parseEntityTypes(entityTypes, namespace);
 		const parsedComplexTypes = this._parseEntityTypes(complexTypes, namespace);
