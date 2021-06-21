@@ -1,6 +1,6 @@
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 import * as vscode from "vscode";
-import { IEntityType, IAssociation, XMLMetadata } from "./parser/XMLMetadata";
+import { IEntityType, IAssociation, XMLMetadata, IProperty } from "./parser/XMLMetadata";
 
 export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 	getFileExtension() {
@@ -102,11 +102,33 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 			entityType.properties.forEach(property => {
 				const isKey = entityType.keys.includes(property.name);
 				const keySymbolic = isKey ? "**" : "";
-				diagram += `\t${keySymbolic}${property.name}: ${property.type}${keySymbolic}\n`;
+				const additionalTypeNumbers = this._getAdditionalTypeNumbers(property);
+				diagram += `\t${keySymbolic}${property.name}: ${property.type}${additionalTypeNumbers}${keySymbolic}\n`;
 
 			});
 			diagram += "}";
+
 			return diagram;
 		}).join("\n") + "\n}\n";
+	}
+
+	private _getAdditionalTypeNumbers(property: IProperty) {
+		let additionalTypeNumbers = "";
+		if (property.precision || property.scale || property.length) {
+			const numbers = [];
+			if (property.precision) {
+				numbers.push(property.precision);
+			}
+			if (property.scale) {
+				numbers.push(property.scale);
+			}
+			if (property.length) {
+				numbers.push(property.length);
+			}
+
+			additionalTypeNumbers = `(${numbers.join(", ")})`;
+		}
+
+		return additionalTypeNumbers;
 	}
 }
