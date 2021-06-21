@@ -1,3 +1,6 @@
+## 0.12.55 (21-06-2021)
+* Entity set names and navigation names added to the PlantUML ER diagram
+
 ## 0.12.54 (21-06-2021)
 * Bugfix for tree view
 
