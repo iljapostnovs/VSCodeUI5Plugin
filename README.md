@@ -221,10 +221,11 @@ Custom UI5 Explorer in VSCode panel is available<br/>
 ----------
 ## UML Class Diagram generation
 UML Class diagram can be generated either for currently active document or for the whole project.<br/>
+Also it is possible to generate ER diagram for opened metadata.xml file.<br/>
 It is possible to select in preferences which type of diagram to generate: DrawIO or PlantUML.
 > Recommended VSCode extensions:
 > DrawIO: *hediet.vscode-drawio-insiders-build*
-> Plantuml: *jebbs.plantuml*
+> PlantUML: *jebbs.plantuml*
 
 ![UML.png](/images/UML.png)
 

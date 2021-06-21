@@ -28,10 +28,14 @@ export class FieldsAndMethodForPositionBeforeCurrentStrategy extends FieldMethod
 		const classNamePartsFromMapParam = className.split("__mapparam__");
 
 		if (isMap) {
+			const isArray = className.endsWith("[]");
+			if (isArray) {
+				className = className.substring(0, className.length - 2);
+			}
 			const mapFields = className.split("__map__");
 			mapFields.shift(); //remove class name
 			fieldsAndMethods = {
-				className: "map",
+				className: `map${isArray ? "[]" : ""}`,
 				methods: [],
 				fields: mapFields.map(field => ({
 					name: field,

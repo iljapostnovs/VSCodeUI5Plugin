@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.51",
+	"version": "0.12.52",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -400,6 +400,10 @@
 			{
 				"command": "ui5plugin.generateUMLClassDiagramsForWholeProject",
 				"title": "UI5: Generate UML Class diagram for whole project"
+			},
+			{
+				"command": "ui5plugin.generateERDiagramFromMetadata",
+				"title": "UI5: Generate ER diagram from metadata.xml"
 			}
 		]
 	},
@@ -439,6 +443,7 @@
 		"acorn-loose": "^8.1.0",
 		"axios": "^0.21.1",
 		"comment-parser": "^1.1.5",
+		"fast-xml-parser": "^3.19.0",
 		"glob": "^7.1.7",
 		"line-column": "^1.0.2"
 	}

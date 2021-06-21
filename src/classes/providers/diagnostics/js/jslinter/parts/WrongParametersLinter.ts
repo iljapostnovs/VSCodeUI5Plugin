@@ -173,7 +173,11 @@ export class WrongParametersLinter extends Linter {
 			className = "any[]";
 		}
 		if (className.includes("__map__") || className.includes("__mapparam__")) {
-			className = "map";
+			if (className.endsWith("[]")) {
+				className = "map[]";
+			} else {
+				className = "map";
+			}
 		}
 		if (className === "void" || !className) {
 			className = "any";

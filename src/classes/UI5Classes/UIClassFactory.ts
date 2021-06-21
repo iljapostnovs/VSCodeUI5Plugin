@@ -216,7 +216,7 @@ export class UIClassFactory {
 						if (assignmentExpression) {
 							const leftNode = assignmentExpression.left;
 							if (leftNode?.object?.type === "ThisExpression" && leftNode?.property?.type === "Identifier") {
-								const members = [...UIClass.methods, ...UIClass.fields];
+								const members = UIClass.getMembers();
 								const member = members.find(member => member.name === leftNode.property.name);
 								if (member) {
 									if (visibilityDoc) {

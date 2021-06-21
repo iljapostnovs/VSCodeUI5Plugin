@@ -878,7 +878,11 @@ export class AcornSyntaxAnalyzer {
 		}
 
 		if (method.returnType?.includes("__map__")) {
-			method.returnType = "map";
+			if (method.returnType.endsWith("[]")) {
+				method.returnType = "map[]";
+			} else {
+				method.returnType = "map";
+			}
 		}
 	}
 
@@ -1211,7 +1215,9 @@ export class AcornSyntaxAnalyzer {
 
 				} else {
 					const fields = node.properties.map((property: any) => property.key?.name);
-					className = `${UIClass.className}__map__${fields.join("__map__")}`;
+					if (fields.length > 0) {
+						className = `${UIClass.className}__map__${fields.join("__map__")}`;
+					}
 					if (!className) {
 						className = "map"
 					}

@@ -2,7 +2,7 @@
 import { FileReader } from "../../../utils/FileReader";
 import { AcornSyntaxAnalyzer } from "../../JSParser/AcornSyntaxAnalyzer";
 import * as path from "path";
-import { AbstractUIClass, IUIField, IUIAggregation, IUIEvent, IUIMethod, IUIProperty, IUIAssociation, IUIEventParam, IUIMethodParam } from "./AbstractUIClass";
+import { AbstractUIClass, IUIField, IUIAggregation, IUIEvent, IUIMethod, IUIProperty, IUIAssociation, IUIEventParam, IUIMethodParam, IMember } from "./AbstractUIClass";
 import * as commentParser from "comment-parser";
 import { IReferenceCodeLensCacheable } from "../../../providers/codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 import { IViewsAndFragments } from "../../UIClassFactory";
@@ -23,6 +23,9 @@ interface ILooseObject {
 export interface IAcornNodeBearer {
 	acornNode?: any;
 	memberPropertyNode?: any;
+}
+
+export interface ICustomMember extends IMember, IAcornNodeBearer, IXMLDocumentMentionable, UI5Ignoreable {
 }
 
 export interface IXMLDocumentMentionable {
@@ -76,6 +79,11 @@ export class CustomUIClass extends AbstractUIClass {
 		this._enrichMethodParamsWithHungarianNotation();
 		this._fillIsAbstract();
 	}
+
+	getMembers(): ICustomMember[] {
+		return super.getMembers();
+	}
+
 	private _fillIsAbstract() {
 		this.abstract = !!this.methods.find(method => method.abstract) || !!this.fields.find(field => field.abstract);
 	}
@@ -527,7 +535,7 @@ export class CustomUIClass extends AbstractUIClass {
 				} else if (property.value?.type === "ArrayExpression") {
 					this.fields.push({
 						name: property.key?.name,
-						type: "array",
+						type: "any[]",
 						description: "",
 						acornNode: property,
 						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
@@ -670,7 +678,7 @@ export class CustomUIClass extends AbstractUIClass {
 				const name = node?.expression?.left?.property?.name;
 				const isStatic = node.expression?.left?.object?.property?.name !== "prototype";
 				if (isMethod) {
-					const method: ICustomClassUIMethod ={
+					const method: ICustomClassUIMethod = {
 						name: name,
 						params: assignmentBody.params.map((param: any) => ({
 							name: param.name,
@@ -726,7 +734,7 @@ export class CustomUIClass extends AbstractUIClass {
 			const map: ILooseObject = {
 				$: "Element",
 				o: "object",
-				a: "array",
+				a: "any[]",
 				i: "int",
 				f: "float",
 				m: "map",

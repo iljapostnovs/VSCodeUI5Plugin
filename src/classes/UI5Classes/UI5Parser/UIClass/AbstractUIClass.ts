@@ -19,51 +19,49 @@ export interface IStatic {
 	static: boolean;
 }
 
-export interface IUIMethod extends IName, IAbstract, IStatic {
+export interface IMember extends IName, IAbstract, IStatic, IVisibility {
+	description: string;
+	owner: string;
+}
+
+export interface IVisibility {
+	visibility: string;
+}
+export interface IUIMethod extends IMember {
 	readonly params: IUIMethodParam[];
 	returnType: string;
-	description: string;
-	visibility: string;
-	owner: string;
 	api?: string;
 }
-export interface IUIField extends IName, IAbstract, IStatic {
+export interface IUIField extends IMember {
 	type: string | undefined;
-	visibility: string;
-	owner: string;
-	description: string;
 }
 export interface ITypeValue {
 	text: string;
 	description: string;
 }
-export interface IUIProperty extends IName {
+export interface IUIProperty extends IName, IVisibility {
 	type: string | undefined;
 	typeValues: ITypeValue[];
-	visibility: string;
 	description: string;
 	defaultValue?: string;
 }
-export interface IUIAggregation extends IName {
+export interface IUIAggregation extends IName, IVisibility {
 	type: string;
 	multiple: boolean;
 	singularName: string;
-	visibility: string;
 	description: string;
 	default: boolean;
 }
 export interface IUIEventParam extends IName {
 	type: string;
 }
-export interface IUIEvent extends IName {
-	visibility: string;
+export interface IUIEvent extends IName, IVisibility {
 	description: string;
 	params: IUIEventParam[];
 }
-export interface IUIAssociation extends IName {
+export interface IUIAssociation extends IName, IVisibility {
 	type: string | undefined;
 	description: string;
-	visibility: string;
 	multiple: boolean;
 	singularName: string;
 }
@@ -80,11 +78,14 @@ export abstract class AbstractUIClass implements IAbstract {
 	public interfaces: string[] = [];
 	public parentClassNameDotNotation = "";
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	constructor(className: string, documentText?: string) {
+	constructor(className: string) {
 		this.className = className;
 		this.classExists = true;
 		this.abstract = false;
+	}
+
+	getMembers(): IMember[] {
+		return [...this.methods, ...this.fields];
 	}
 
 	protected generateTypeValues(type: string) {
