@@ -1,5 +1,6 @@
-## 0.12.52 (17-06-2021)
+## 0.12.52 (21-06-2021)
 * PlantUML diagram generation improvements
+* Now there is possibility to generate ER PlantUML diagram for opened metadata.xml file
 
 ## 0.12.51 (17-06-2021)
 * Add support for spread element
