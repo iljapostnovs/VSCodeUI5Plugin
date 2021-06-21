@@ -1,3 +1,6 @@
+## 0.12.53 (21-06-2021)
+* ER diagram generation bugfix
+
 ## 0.12.52 (21-06-2021)
 * PlantUML diagram generation improvements
 * Now there is possibility to generate ER PlantUML diagram for opened metadata.xml file
