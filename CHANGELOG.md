@@ -1,4 +1,7 @@
-## 0.12.55 (21-06-2021)
+## 0.12.57 (22-06-2021)
+* ER diagram fields are now set always defined as fields
+
+## 0.12.56 (21-06-2021)
 * Tree view for fragments and view is now hierarchical
 
 ## 0.12.55 (21-06-2021)
