@@ -1,3 +1,6 @@
+## 0.12.58 (22-06-2021)
+* ER diagram complex types are now located separately from fields
+
 ## 0.12.57 (22-06-2021)
 * ER diagram fields are now set always defined as fields
 
