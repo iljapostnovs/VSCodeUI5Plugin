@@ -1,3 +1,6 @@
+## 0.12.59 (22-06-2021)
+* Bugfixes
+
 ## 0.12.58 (22-06-2021)
 * ER diagram complex types are now located separately from fields
 
