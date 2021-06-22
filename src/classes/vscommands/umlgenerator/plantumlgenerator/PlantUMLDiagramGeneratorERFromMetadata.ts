@@ -136,7 +136,7 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 				const isKey = entityType.keys.includes(property.name);
 				const keySymbolic = isKey ? "**" : "";
 				const additionalTypeNumbers = this._getAdditionalTypeNumbers(property);
-				diagram += `\t${keySymbolic}${property.name}: ${property.type}${additionalTypeNumbers}${keySymbolic}\n`;
+				diagram += `\t{field} ${keySymbolic}${property.name}: ${property.type}${additionalTypeNumbers}${keySymbolic}\n`;
 
 			});
 			diagram += "}";
