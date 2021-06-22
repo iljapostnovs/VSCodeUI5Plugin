@@ -551,7 +551,7 @@ export class AcornSyntaxAnalyzer {
 				// const fragmentsOfTheController = FileReader.getFragmentsForClass(className);
 				const UIClass = UIClassFactory.getUIClass(className);
 				if (UIClass instanceof CustomUIClass) {
-					const fragmentsOfTheController = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass).fragments;
+					const fragmentsOfTheController = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, true, true).fragments;
 					fragmentsOfTheController.find(fragmentOfTheController => {
 						eventHandlerData = this._getEventHandlerDataFromXMLText(fragmentOfTheController, currentClassEventHandlerName);
 

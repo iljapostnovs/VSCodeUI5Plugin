@@ -18,9 +18,7 @@ export class UnusedMemberLinter extends Linter {
 			if (className) {
 				const UIClass = UIClassFactory.getUIClass(className);
 				if (UIClass instanceof CustomUIClass) {
-					const allUIClassesMap = UIClassFactory.getAllExistentUIClasses();
-					const allUIClasses = Object.keys(allUIClassesMap).map(key => allUIClassesMap[key]);
-					const customUIClasses = allUIClasses.filter(UIClass => UIClass instanceof CustomUIClass) as CustomUIClass[];
+					const customUIClasses = UIClassFactory.getAllCustomUIClasses();
 					const methodsAndFields: (ICustomClassUIField | ICustomClassUIMethod)[] = [
 						...UIClass.methods,
 						...UIClass.fields

@@ -23,7 +23,7 @@ export class ViewIdCompletionItemFactory implements ICompletionItemFactory {
 				const isControl = classNameAtById && UIClassFactory.isClassAChildOfClassB(classNameAtById, "sap.ui.core.Control");
 				if (isControl) {
 					const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
-					const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, false);
+					const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
 					const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
 					const viewIdResult: IXMLDocumentIdData[] = [];
 					XMLDocuments.forEach(XMLDocument => {

@@ -28,7 +28,7 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		if (className) {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 			const eventHandlers = UIClass.methods.filter(method => method.isEventHandler);
-			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, true, true);
 			viewsAndFragments.views.forEach(XMLView => {
 				codeLenses.push(...this._getCodeLensesForEventsFromXMLText(XMLView, eventHandlers, document));
 
