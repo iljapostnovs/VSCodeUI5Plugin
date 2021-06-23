@@ -48,6 +48,15 @@ export interface ICustomClassUIMethod extends IUIMethod, IAcornNodeBearer, IXMLD
 export interface ICustomClassUIField extends IUIField, IAcornNodeBearer, IXMLDocumentMentionable, UI5Ignoreable {
 	customData?: ILooseObject;
 }
+
+export interface IViewsAndFragmentsCache extends IViewsAndFragments {
+	flags: {
+		removeDuplicates: boolean,
+		includeChildren: boolean,
+		includeMentioned: boolean,
+		includeParents: boolean
+	}
+}
 export class CustomUIClass extends AbstractUIClass {
 	public methods: ICustomClassUIMethod[] = [];
 	public fields: ICustomClassUIField[] = [];
@@ -62,7 +71,7 @@ export class CustomUIClass extends AbstractUIClass {
 	public classBodyAcornVariableName: string | undefined;
 	public classFSPath: string | undefined;
 	referenceCodeLensCache: IReferenceCodeLensCacheable;
-	relatedViewsAndFragments?: IViewsAndFragments;
+	relatedViewsAndFragments?: IViewsAndFragmentsCache[];
 
 	constructor(className: string, documentText?: string) {
 		super(className);

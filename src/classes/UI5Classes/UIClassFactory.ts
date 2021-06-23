@@ -117,7 +117,7 @@ export class UIClassFactory {
 
 	//TODO: Refactor this mess
 	private static _checkIfFieldIsUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
-		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
+		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass, [], true, true, true);
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.fields.forEach(field => {
 				if (!field.mentionedInTheXMLDocument) {
@@ -441,7 +441,7 @@ export class UIClassFactory {
 	}
 
 	private static _enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass: CustomUIClass) {
-		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass);
+		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass, [], true, true, true);
 		viewsAndFragments.views.forEach(viewOfTheControl => {
 			CurrentUIClass.methods.forEach(method => {
 				if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
@@ -515,26 +515,41 @@ export class UIClassFactory {
 		});
 	}
 
-	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = [], removeDuplicates = true, isRootClass = true): IViewsAndFragments {
-		if (CurrentUIClass.relatedViewsAndFragments && isRootClass) {
-			return CurrentUIClass.relatedViewsAndFragments;
-		}
-
+	static getViewsAndFragmentsOfControlHierarchically(CurrentUIClass: CustomUIClass, checkedClasses: string[] = [], removeDuplicates = true, includeChildren = false, includeMentioned = false, includeParents = true): IViewsAndFragments {
 		if (checkedClasses.includes(CurrentUIClass.className)) {
 			return { fragments: [], views: [] };
+		}
+
+		if (CurrentUIClass.relatedViewsAndFragments) {
+			const cache = CurrentUIClass.relatedViewsAndFragments.find(viewAndFragment => {
+				const flags = viewAndFragment.flags;
+				return flags.removeDuplicates === removeDuplicates &&
+					flags.includeChildren === includeChildren &&
+					flags.includeMentioned === includeMentioned &&
+					flags.includeParents === includeParents
+			});
+
+			if (cache) {
+				return cache;
+			}
 		}
 
 		checkedClasses.push(CurrentUIClass.className);
 		const viewsAndFragments: IViewsAndFragments = this.getViewsAndFragmentsRelatedTo(CurrentUIClass);
 
-		const parentUIClasses = this.getAllCustomUIClasses().filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && CurrentUIClass !== UIClass);
-		const whereMentioned = this._getAllClassesWhereClassIsImported(CurrentUIClass.className);
-		const relatedClasses = [...parentUIClasses, ...whereMentioned];
-		if (isRootClass) {
+		const relatedClasses: CustomUIClass[] = [];
+		if (includeParents) {
+			const parentUIClasses = this.getAllCustomUIClasses().filter(UIClass => this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) && CurrentUIClass !== UIClass);
+			relatedClasses.push(...parentUIClasses);
+		}
+		if (includeChildren) {
 			relatedClasses.push(...this._getAllChildrenOfClass(CurrentUIClass));
 		}
+		if (includeMentioned) {
+			relatedClasses.push(...this._getAllClassesWhereClassIsImported(CurrentUIClass.className));
+		}
 		const relatedViewsAndFragments = relatedClasses.reduce((accumulator: IViewsAndFragments, relatedUIClass: CustomUIClass) => {
-			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false, isRootClass);
+			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false, includeChildren, includeMentioned, false);
 			accumulator.fragments = accumulator.fragments.concat(relatedFragmentsAndViews.fragments);
 			accumulator.views = accumulator.views.concat(relatedFragmentsAndViews.views);
 			return accumulator;
@@ -550,9 +565,18 @@ export class UIClassFactory {
 
 		if (removeDuplicates) {
 			this._removeDuplicatesForViewsAndFragments(viewsAndFragments);
-			if (!CurrentUIClass.relatedViewsAndFragments && isRootClass) {
-				CurrentUIClass.relatedViewsAndFragments = viewsAndFragments;
-			}
+		}
+
+		if (!CurrentUIClass.relatedViewsAndFragments) {
+			CurrentUIClass.relatedViewsAndFragments = [{
+				...viewsAndFragments,
+				flags: {
+					removeDuplicates,
+					includeChildren,
+					includeMentioned,
+					includeParents
+				}
+			}];
 		}
 
 		return viewsAndFragments;

@@ -143,7 +143,7 @@ export class JSRenameProvider {
 			UIClass.methods.find(method => method.name === oldMemberName) ||
 			UIClass.fields.find(field => field.name === oldMemberName);
 		if (methodOrField?.mentionedInTheXMLDocument) {
-			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, true, true);
 			const viewAndFragmentArray = [...viewsAndFragments.fragments, ...viewsAndFragments.views];
 			viewAndFragmentArray.forEach(viewOrFragment => {
 				const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(viewOrFragment, oldMemberName, className);

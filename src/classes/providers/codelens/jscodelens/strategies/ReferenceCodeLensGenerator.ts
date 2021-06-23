@@ -99,7 +99,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 
 		const UIClass = UIClassFactory.getUIClass(method.owner);
 		if (UIClass instanceof CustomUIClass) {
-			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, true, true);
 			const viewAndFragmentArray = [...viewsAndFragments.fragments, ...viewsAndFragments.views];
 			viewAndFragmentArray.forEach(XMLDoc => {
 				if (XMLDoc.referenceCodeLensCache[method.owner] && XMLDoc.referenceCodeLensCache[method.owner][method.name]) {
