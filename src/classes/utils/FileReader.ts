@@ -431,11 +431,11 @@ export class FileReader {
 			responsibleClassName = this.getControllerNameFromView(viewOrFragment.content);
 		} else if (isFragment) {
 			const fragmentName = this.getClassNameFromPath(viewOrFragment.fsPath);
-			const responsibleViewKey = Object.keys(this._viewCache).find(key => {
-				return !!this._viewCache[key].fragments.find(fragmentFromView => fragmentFromView.name === fragmentName);
-			});
-			if (responsibleViewKey) {
-				const responsibleView = this._viewCache[responsibleViewKey];
+			const responsibleView = this.getAllViews().find(view => {
+				return !!view.fragments.find(fragmentFromView => fragmentFromView.name === fragmentName);
+			})
+
+			if (responsibleView) {
 				responsibleClassName = this.getControllerNameFromView(responsibleView.content);
 			} else {
 				responsibleClassName = this._getResponsibleClassNameForFragmentFromCustomUIClasses(viewOrFragment);

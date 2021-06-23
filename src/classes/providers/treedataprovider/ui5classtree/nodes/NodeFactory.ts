@@ -79,6 +79,6 @@ export class NodeFactory {
 		return nodes;
 	}
 	private static _getMethodNodes(node: MethodsNode) {
-		return node.UIClass.methods.map(UIMethod => new MethodNode(UIMethod));
+		return node.UIClass.methods.filter(method => !!method.acornNode).map(UIMethod => new MethodNode(UIMethod));
 	}
 }

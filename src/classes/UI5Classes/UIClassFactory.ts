@@ -568,16 +568,18 @@ export class UIClassFactory {
 		}
 
 		if (!CurrentUIClass.relatedViewsAndFragments) {
-			CurrentUIClass.relatedViewsAndFragments = [{
-				...viewsAndFragments,
-				flags: {
-					removeDuplicates,
-					includeChildren,
-					includeMentioned,
-					includeParents
-				}
-			}];
+			CurrentUIClass.relatedViewsAndFragments = [];
 		}
+
+		CurrentUIClass.relatedViewsAndFragments.push({
+			...viewsAndFragments,
+			flags: {
+				removeDuplicates,
+				includeChildren,
+				includeMentioned,
+				includeParents
+			}
+		});
 
 		return viewsAndFragments;
 	}
