@@ -519,20 +519,13 @@ export class FileReader {
 	}
 
 	private static _getResponsibleClassNameForFragmentFromCustomUIClasses(viewOrFragment: IXMLFile) {
-		const allUIClasses = UIClassFactory.getAllExistentUIClasses();
+		const allUIClasses = UIClassFactory.getAllCustomUIClasses();
 		const fragmentName = this.getClassNameFromPath(viewOrFragment.fsPath);
-		const responsibleClassName = Object.keys(allUIClasses).find(key => {
-			let classFound = false;
-			const UIClass = allUIClasses[key];
-			if (UIClass instanceof CustomUIClass) {
-				if (UIClass.classText.indexOf(`${fragmentName}`) > -1) {
-					classFound = true;
-				}
-			}
-			return classFound;
+		const responsibleClass = allUIClasses.find(UIClass => {
+			return UIClass.classText.includes(`${fragmentName}`);
 		});
 
-		return responsibleClassName;
+		return responsibleClass?.className;
 	}
 
 	public static getFragmentsFromXMLDocumentText(documentText: string) {
