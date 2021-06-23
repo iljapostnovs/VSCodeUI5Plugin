@@ -1,3 +1,7 @@
+## 0.12.60 (23-06-2021)
+* Bugfixes
+* Unused properties linter added for .properties files
+
 ## 0.12.59 (23-06-2021)
 * Bugfixes
 

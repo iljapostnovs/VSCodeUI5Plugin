@@ -124,10 +124,17 @@ JS Linters available:<br/>
 > *ui5.plugin.usePublicMemberLinter*<br/>
 > *ui5.plugin.useWrongOverrideLinter*<br/>
 
-> To make Unused method, public member, wrong parameter usage and wrong field/method linters ignore some methods or fields, you can use @ui5ignore JSDoc param
+> To make Unused method, public member, wrong parameter usage and wrong field/method linters ignore some methods or fields, you can use @ui5ignore JSDoc param<br/>
 > ![UI5IgnoreExample](/images/UI5IgnoreExample.png)
 
 ![DynamicCompletionItems](/images/JSDiagnostics.gif)
+
+----------
+## Properties (i18n) Diagnostics
+Properties Diagnostics is provided<br/>
+Properties Linters available:<br/>
+* Unused translations linter<br/>
+>Checks if translations are used
 
 ----------
 ## Code Action Provider

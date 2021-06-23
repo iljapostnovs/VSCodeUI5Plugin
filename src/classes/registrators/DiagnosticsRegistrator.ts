@@ -3,11 +3,13 @@ import { UI5Plugin } from "../../UI5Plugin";
 import { JSLinter } from "../providers/diagnostics/js/jslinter/JSLinter";
 import { WrongFieldMethodLinter } from "../providers/diagnostics/js/jslinter/parts/WrongFieldMethodLinter";
 import { WrongParametersLinter } from "../providers/diagnostics/js/jslinter/parts/WrongParametersLinter";
+import { PropertiesLinter } from "../providers/diagnostics/properties/PropertiesLinter";
 import { XMLLinter } from "../providers/diagnostics/xml/xmllinter/XMLLinter";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 
 let xmlDiagnosticCollection: vscode.DiagnosticCollection;
 let jsDiagnosticCollection: vscode.DiagnosticCollection;
+let propertiesDiagnosticCollection: vscode.DiagnosticCollection;
 export class CustomDiagnostics extends vscode.Diagnostic {
 	type?: CustomDiagnosticType;
 	fieldName?: string;
@@ -24,6 +26,7 @@ export class DiagnosticsRegistrator {
 	static register() {
 		xmlDiagnosticCollection = vscode.languages.createDiagnosticCollection("XML");
 		jsDiagnosticCollection = vscode.languages.createDiagnosticCollection("javascript");
+		propertiesDiagnosticCollection = vscode.languages.createDiagnosticCollection("properties");
 
 		if (vscode.window.activeTextEditor) {
 			const fileName = vscode.window.activeTextEditor.document.fileName;
@@ -33,6 +36,10 @@ export class DiagnosticsRegistrator {
 
 			if (fileName.endsWith(".js")) {
 				this._updateJSDiagnostics(vscode.window.activeTextEditor.document, jsDiagnosticCollection);
+			}
+
+			if (fileName.endsWith(".properties")) {
+				this._updatePropertiesDiagnostics(vscode.window.activeTextEditor.document, propertiesDiagnosticCollection);
 			}
 		}
 
@@ -45,6 +52,10 @@ export class DiagnosticsRegistrator {
 
 				if (fileName.endsWith(".js")) {
 					this._updateJSDiagnostics(editor.document, jsDiagnosticCollection, true);
+				}
+
+				if (fileName.endsWith(".properties")) {
+					this._updatePropertiesDiagnostics(editor.document, propertiesDiagnosticCollection);
 				}
 			}
 		});
@@ -59,11 +70,33 @@ export class DiagnosticsRegistrator {
 				if (fileName.endsWith(".js")) {
 					this._updateJSDiagnostics(event.document, jsDiagnosticCollection);
 				}
+
+				if (fileName.endsWith(".properties")) {
+					this._updatePropertiesDiagnostics(event.document, propertiesDiagnosticCollection);
+				}
 			}
 		});
 
 		UI5Plugin.getInstance().addDisposable(changeActiveTextEditor);
 		UI5Plugin.getInstance().addDisposable(textDocumentChange);
+	}
+	private static async _updatePropertiesDiagnostics(document: vscode.TextDocument, propertiesDiagnosticCollection: vscode.DiagnosticCollection) {
+		const errors = await PropertiesLinter.getLintingErrors(document);
+
+		const diagnostics: CustomDiagnostics[] = errors.map(error => {
+			const diagnostic = new CustomDiagnostics(error.range, error.message);
+
+			diagnostic.code = error.code;
+			diagnostic.severity = vscode.DiagnosticSeverity.Hint;
+			diagnostic.type = error.type;
+			diagnostic.source = error.source;
+			diagnostic.tags = error.tags;
+			diagnostic.severity = error.severity !== undefined ? error.severity : vscode.DiagnosticSeverity.Warning;
+
+			return diagnostic;
+		});
+
+		propertiesDiagnosticCollection.set(document.uri, diagnostics);
 	}
 
 	public static removeDiagnosticForUri(uri: vscode.Uri, type: string) {
@@ -71,6 +104,8 @@ export class DiagnosticsRegistrator {
 			jsDiagnosticCollection.delete(uri);
 		} else if (type === "xml") {
 			xmlDiagnosticCollection.delete(uri);
+		} else if (type === "properties") {
+			propertiesDiagnosticCollection.delete(uri);
 		}
 	}
 
@@ -78,10 +113,10 @@ export class DiagnosticsRegistrator {
 		const fileName = document.fileName;
 		if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
 			this._updateXMLDiagnostics(document, xmlDiagnosticCollection);
-		}
-
-		if (fileName.endsWith(".js")) {
+		} else if (fileName.endsWith(".js")) {
 			this._updateJSDiagnostics(document, jsDiagnosticCollection);
+		} else if (fileName.endsWith(".properties")) {
+			this._updatePropertiesDiagnostics(document, propertiesDiagnosticCollection);
 		}
 	}
 
