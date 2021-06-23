@@ -108,6 +108,9 @@ export class FileWatcherMediator {
 			if (uri.fsPath.endsWith(".xml")) {
 				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "xml");
 			}
+			if (uri.fsPath.endsWith(".properties")) {
+				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "properties");
+			}
 
 			if (uri.fsPath.endsWith(".js")) {
 
