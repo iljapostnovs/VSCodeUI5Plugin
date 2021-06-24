@@ -1,9 +1,9 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
+import { Util } from "../../../../../utils/Util";
 export class WrongImportLinter extends Linter {
 	protected className = "WrongImportLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -17,17 +17,14 @@ export class WrongImportLinter extends Linter {
 					UIClass.UIDefine.forEach(UIDefine => {
 						const UIDefineClass = UIClassFactory.getUIClass(UIDefine.classNameDotNotation);
 						if (!UIDefineClass.classExists) {
-							const position = LineColumn(UIClass.classText).fromIndex(UIDefine.start);
-							if (position) {
+							const range = Util.positionsToVSCodeRange(UIClass.classText, UIDefine.start, UIDefine.start + UIDefine.path.length);
+							if (range) {
 								errors.push({
 									acornNode: UIDefine.acornNode,
 									code: "UI5Plugin",
 									source: "Import path Linter",
 									message: `Class "${UIDefine.classNameDotNotation}" doesn't exist`,
-									range: new vscode.Range(
-										new vscode.Position(position.line - 1, position.col),
-										new vscode.Position(position.line - 1, position.col + UIDefine.path.length)
-									)
+									range: range
 								});
 							}
 						}

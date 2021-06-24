@@ -1,12 +1,12 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { FileReader } from "../../../../../utils/FileReader";
 import { ICustomClassUIField, ICustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
+import { Util } from "../../../../../utils/Util";
 export class UnusedMemberLinter extends Linter {
 	protected className = "UnusedMemberLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -26,18 +26,14 @@ export class UnusedMemberLinter extends Linter {
 					methodsAndFields.forEach((methodOrField: any) => {
 						const methodIsUsed = this._checkIfMemberIsUsed(customUIClasses, UIClass, methodOrField);
 						if (!methodIsUsed && methodOrField.memberPropertyNode) {
-							const positionBegin = LineColumn(UIClass.classText).fromIndex(methodOrField.memberPropertyNode.start);
-							const positionEnd = LineColumn(UIClass.classText).fromIndex(methodOrField.memberPropertyNode.end);
-							if (positionBegin && positionEnd) {
+							const range = Util.positionsToVSCodeRange(UIClass.classText, methodOrField.memberPropertyNode.start, methodOrField.memberPropertyNode.end);
+							if (range) {
 								errors.push({
 									source: "Unused method Linter",
 									acornNode: methodOrField.acornNode,
 									code: "UI5Plugin",
 									message: `No references found for "${methodOrField.name}" class member`,
-									range: new vscode.Range(
-										new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
-										new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-									),
+									range: range,
 									tags: [vscode.DiagnosticTag.Unnecessary],
 									severity: vscode.DiagnosticSeverity.Hint
 								});

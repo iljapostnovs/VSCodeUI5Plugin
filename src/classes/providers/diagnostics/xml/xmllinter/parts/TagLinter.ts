@@ -1,11 +1,11 @@
 import { IError, Linter, ITag } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
 import { IUIAggregation } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { IXMLFile } from "../../../../../utils/FileReader";
 import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
+import { Util } from "../../../../../utils/Util";
 
 
 export class TagLinter extends Linter {
@@ -30,19 +30,15 @@ export class TagLinter extends Linter {
 		const errors: IError[] = [];
 		const tagClass = XMLParser.getFullClassNameFromTag(tag, XMLFile);
 		if (!tagClass) {
-			const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
-			const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
+			const range = Util.positionsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
 
-			if (positionBegin && positionEnd) {
+			if (range) {
 				const prefix = XMLParser.getTagPrefix(tag.text);
 				errors.push({
 					code: "UI5plugin",
 					message: `"${prefix}" prefix is not defined`,
 					source: "Tag Linter",
-					range: new vscode.Range(
-						new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
-						new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-					)
+					range: range
 				});
 			}
 		} else {
@@ -52,17 +48,13 @@ export class TagLinter extends Linter {
 			if (!isAggregation) {
 				const UIClass = UIClassFactory.getUIClass(tagClass);
 				if (!UIClass.classExists && !this._isClassException(tagClass)) {
-					const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
-					const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
-					if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
+					const range = Util.positionsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
+					if (range && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
 						errors.push({
 							code: "UI5plugin",
 							message: `"${tagClass}" class doesn't exist`,
 							source: "Tag Linter",
-							range: new vscode.Range(
-								new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
-								new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-							)
+							range: range
 						});
 					}
 				}
@@ -77,17 +69,13 @@ export class TagLinter extends Linter {
 					if (tagClass) {
 						const aggregation = this._findAggregation(tagClass, tagName);
 						if (!aggregation) {
-							const positionBegin = LineColumn(documentText).fromIndex(tag.positionBegin);
-							const positionEnd = LineColumn(documentText).fromIndex(tag.positionEnd);
-							if (positionBegin && positionEnd && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
+							const range = Util.positionsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
+							if (range && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
 								errors.push({
 									code: "UI5plugin",
 									message: `"${tagName}" aggregation doesn't exist in "${tagClass}"`,
 									source: "Tag Linter",
-									range: new vscode.Range(
-										new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
-										new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-									)
+									range: range
 								});
 							}
 						}

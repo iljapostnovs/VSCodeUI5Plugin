@@ -4,8 +4,8 @@ import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
 import { FileReader, IXMLFile } from "../../../../utils/FileReader";
 import { XMLParser } from "../../../../utils/XMLParser";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
-import LineColumn = require("line-column");
 import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { Util } from "../../../../utils/Util";
 
 interface IEventHandlerData {
 	name: string;
@@ -29,15 +29,9 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
 			const eventHandlers = UIClass.methods.filter(method => method.isEventHandler);
 			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, true, true);
-			viewsAndFragments.views.forEach(XMLView => {
-				codeLenses.push(...this._getCodeLensesForEventsFromXMLText(XMLView, eventHandlers, document));
-
-				XMLView.fragments.forEach(fragment => {
-					codeLenses.push(...this._getCodeLensesForEventsFromXMLText(fragment, eventHandlers, document));
-				});
-			});
-			viewsAndFragments.fragments.forEach(fragment => {
-				codeLenses.push(...this._getCodeLensesForEventsFromXMLText(fragment, eventHandlers, document));
+			const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
+			XMLDocuments.forEach(XMLDocument => {
+				codeLenses.push(...this._getCodeLensesForEventsFromXMLText(XMLDocument, eventHandlers, document));
 			});
 
 			codeLenses.push(...this._getCodeLensesForEventsFromJSClass(eventHandlers, document));
@@ -55,10 +49,9 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 				const positionBegin = document.positionAt(eventHandler.position);
 				const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
 				const range = new vscode.Range(positionBegin, positionEnd);
-				const positionInViewStart = LineColumn(XMLText.content).fromIndex(eventHandlerXMLData.start);
-				const positionInViewEnd = LineColumn(XMLText.content).fromIndex(eventHandlerXMLData.end);
+				const rangeInView = Util.positionsToVSCodeRange(XMLText.content, eventHandlerXMLData.start, eventHandlerXMLData.end);
 
-				if (positionInViewStart && positionInViewEnd) {
+				if (rangeInView) {
 					const classUri = vscode.Uri.file(XMLText.fsPath);
 					const controlIdText = eventHandlerXMLData.controlId ? ` (${eventHandlerXMLData.controlId})` : "";
 					const description = `Event handler of "${eventHandlerXMLData.className}${controlIdText}~${eventHandlerXMLData.name}"`;
@@ -67,10 +60,7 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 						title: description,
 						command: "vscode.open",
 						arguments: [classUri, {
-							selection: new vscode.Range(
-								positionInViewStart.line - 1, positionInViewStart.col - 1,
-								positionInViewEnd.line - 1, positionInViewEnd.col - 1
-							)
+							selection: rangeInView
 						}]
 					});
 					codeLenses.push(codeLens);
@@ -134,10 +124,9 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 					const positionBegin = document.positionAt(eventHandler.position);
 					const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
 					const range = new vscode.Range(positionBegin, positionEnd);
-					const positionInViewStart = LineColumn(UIClass.classText).fromIndex(eventData.node.start);
-					const positionInViewEnd = LineColumn(UIClass.classText).fromIndex(eventData.node.end);
+					const rangeInView = Util.positionsToVSCodeRange(UIClass.classText, eventData.node.start, eventData.node.end);
 
-					if (positionInViewStart && positionInViewEnd) {
+					if (rangeInView) {
 						const classUri = document.uri;
 						const description = `Event handler of "${eventData.className}~${eventData.eventName}"`;
 						const codeLens = new vscode.CodeLens(range, {
@@ -145,10 +134,7 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 							title: description,
 							command: "vscode.open",
 							arguments: [classUri, {
-								selection: new vscode.Range(
-									positionInViewStart.line - 1, positionInViewStart.col - 1,
-									positionInViewEnd.line - 1, positionInViewEnd.col - 1
-								)
+								selection: rangeInView
 							}]
 						});
 						codeLenses.push(codeLens);

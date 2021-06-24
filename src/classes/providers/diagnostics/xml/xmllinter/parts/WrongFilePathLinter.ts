@@ -1,11 +1,11 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { FileReader } from "../../../../../utils/FileReader";
 import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
 import * as fs from "fs";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { Util } from "../../../../../utils/Util";
 
 export class WrongFilePathLinter extends Linter {
 	protected className = "WrongFilePathLinter";
@@ -24,16 +24,13 @@ export class WrongFilePathLinter extends Linter {
 							const sClassName = result[0];
 							const isClassNameValid = this._validateClassName(sClassName);
 							if (!isClassNameValid) {
-								const position = LineColumn(XMLFile.content).fromIndex(result.index);
-								if (position) {
+								const range = Util.positionsToVSCodeRange(XMLFile.content, result.index, result.index + sClassName.length);
+								if (range) {
 									errors.push({
 										code: "UI5Plugin",
 										source: "Wrong File Path Linter",
 										message: `View or fragment "${sClassName}" doesn't exist`,
-										range: new vscode.Range(
-											new vscode.Position(position.line - 1, position.col - 1),
-											new vscode.Position(position.line - 1, position.col + sClassName.length - 1)
-										)
+										range: range
 									});
 								}
 							}

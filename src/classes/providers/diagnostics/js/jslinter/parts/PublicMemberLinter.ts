@@ -1,12 +1,12 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { FileReader } from "../../../../../utils/FileReader";
 import { ICustomClassUIField, ICustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
+import { Util } from "../../../../../utils/Util";
 export class PublicMemberLinter extends Linter {
 	protected className = "PublicMemberLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -27,18 +27,14 @@ export class PublicMemberLinter extends Linter {
 						if (!isException) {
 							const methodIsUsed = this._checkIfMemberIsUsedElsewhere(customUIClasses, UIClass, method.name, method);
 							if (!methodIsUsed && method.position) {
-								const position = LineColumn(UIClass.classText).fromIndex(method.memberPropertyNode.start);
-								const positionEnd = LineColumn(UIClass.classText).fromIndex(method.memberPropertyNode.end);
-								if (position && positionEnd) {
+								const range = Util.positionsToVSCodeRange(UIClass.classText, method.memberPropertyNode.start, method.memberPropertyNode.end);
+								if (range) {
 									errors.push({
 										source: "Public member linter",
 										acornNode: method.acornNode,
 										code: "UI5Plugin",
 										message: `Method "${method.name}" is possibly private, no references found in other classes`,
-										range: new vscode.Range(
-											new vscode.Position(position.line - 1, position.col - 1),
-											new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-										),
+										range: range,
 										severity: vscode.DiagnosticSeverity.Information
 									});
 								}
@@ -51,18 +47,14 @@ export class PublicMemberLinter extends Linter {
 						if (!isException) {
 							const fieldIsUsed = this._checkIfMemberIsUsedElsewhere(customUIClasses, UIClass, field.name, field);
 							if (!fieldIsUsed && field.memberPropertyNode) {
-								const positionBegin = LineColumn(UIClass.classText).fromIndex(field.memberPropertyNode.start);
-								const positionEnd = LineColumn(UIClass.classText).fromIndex(field.memberPropertyNode.end);
-								if (positionBegin && positionEnd) {
+								const range = Util.positionsToVSCodeRange(UIClass.classText, field.memberPropertyNode.start, field.memberPropertyNode.end);
+								if (range) {
 									errors.push({
 										source: "Public member linter",
 										acornNode: field.acornNode,
 										code: "UI5Plugin",
 										message: `Field "${field.name}" is possibly private, no references found in other classes`,
-										range: new vscode.Range(
-											new vscode.Position(positionBegin.line - 1, positionBegin.col - 1),
-											new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-										),
+										range: range,
 										severity: vscode.DiagnosticSeverity.Information
 									});
 								}

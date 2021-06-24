@@ -1,10 +1,10 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
 import { FileReader } from "../../../../../utils/FileReader";
 import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
+import { Util } from "../../../../../utils/Util";
 
 interface IAttributeValidation {
 	valid: boolean;
@@ -44,18 +44,17 @@ export class TagAttributeLinter extends Linter {
 								const attributeValidation = this._validateTagAttribute(classOfTheTag, tagAttribute, tagAttributes, document);
 								if (!attributeValidation.valid) {
 									const indexOfTagBegining = tag.text.indexOf(tagAttribute);
-									const position = LineColumn(documentText).fromIndex(tag.positionBegin + indexOfTagBegining);
-									if (position && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
+									const positionBegin = tag.positionBegin + indexOfTagBegining;
+									const positionEnd = positionBegin + tagAttribute.length;
+									const range = Util.positionsToVSCodeRange(documentText, positionBegin, positionEnd);
+									if (range && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
 										errors.push({
 											code: "UI5plugin",
 											message: attributeValidation.message || "Invalid attribute",
 											source: "Tag Attribute linter",
 											severity: attributeValidation.severity,
 											attribute: tagAttribute,
-											range: new vscode.Range(
-												new vscode.Position(position.line - 1, position.col - 1),
-												new vscode.Position(position.line - 1, position.col + tagAttribute.length - 1)
-											)
+											range: range
 										});
 									}
 								}

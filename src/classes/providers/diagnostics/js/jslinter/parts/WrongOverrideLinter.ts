@@ -1,10 +1,10 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { ICustomClassUIField, ICustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import { AbstractUIClass, IUIField, IUIMethod } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { Util } from "../../../../../utils/Util";
 export class WrongOverrideLinter extends Linter {
 	protected className = "WrongOverrideLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -36,17 +36,13 @@ export class WrongOverrideLinter extends Linter {
 		let error: IError | undefined;
 		const parentMember = this._getMemberFromParent(UIClass, UIMember);
 		if (parentMember && parentMember.visibility === "private" && UIMember.memberPropertyNode) {
-			const positionStart = LineColumn(UIClass.classText).fromIndex(UIMember.memberPropertyNode.start);
-			const positionEnd = LineColumn(UIClass.classText).fromIndex(UIMember.memberPropertyNode.end);
-			if (positionStart && positionEnd) {
+			const range = Util.positionsToVSCodeRange(UIClass.classText, UIMember.memberPropertyNode.start, UIMember.memberPropertyNode.end);
+			if (range) {
 				error = {
 					message: `You can't override "${UIMember.name}" because it is a private member of class "${parentMember.owner}"`,
 					code: "UI5Plugin",
 					source: "Wrong Override Linter",
-					range: new vscode.Range(
-						new vscode.Position(positionStart.line - 1, positionStart.col - 1),
-						new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-					),
+					range: range,
 					acornNode: UIMember.acornNode,
 					methodName: UIMember.name,
 					sourceClassName: UIClass.className,

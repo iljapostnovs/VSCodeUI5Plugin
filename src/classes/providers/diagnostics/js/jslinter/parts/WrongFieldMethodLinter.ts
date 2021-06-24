@@ -1,6 +1,5 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { CustomDiagnosticType } from "../../../../../registrators/DiagnosticsRegistrator";
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
@@ -8,6 +7,7 @@ import { CustomUIClass, UI5Ignoreable } from "../../../../../UI5Classes/UI5Parse
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import { ConfigHandler } from "./config/ConfigHandler";
+import { Util } from "../../../../../utils/Util";
 export class WrongFieldMethodLinter extends Linter {
 	protected className = "WrongFieldMethodLinter";
 	public static timePerChar = 0;
@@ -135,18 +135,14 @@ export class WrongFieldMethodLinter extends Linter {
 								}
 								const isMethodException = ConfigHandler.checkIfMemberIsException(className, nextNodeName);
 								if (!isMethodException) {
-									const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start);
-									const positionEnd = LineColumn(UIClass.classText).fromIndex(nextNode.property.end);
-									if (position && positionEnd) {
+									const range = Util.positionsToVSCodeRange(UIClass.classText, nextNode.property.start, nextNode.property.end);
+									if (range) {
 										errorNodes.push(nextNode);
 										errors.push({
 											message: `"${nextNodeName}" does not exist in "${className}"`,
 											code: "UI5Plugin",
 											source: "Field/Method Linter",
-											range: new vscode.Range(
-												new vscode.Position(position.line - 1, position.col - 1),
-												new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-											),
+											range: range,
 											acornNode: nextNode,
 											type: CustomDiagnosticType.NonExistentMethod,
 											methodName: nextNodeName,
@@ -174,18 +170,14 @@ export class WrongFieldMethodLinter extends Linter {
 									}
 
 									if (sErrorMessage) {
-										const position = LineColumn(UIClass.classText).fromIndex(nextNode.property.start);
-										const positionEnd = LineColumn(UIClass.classText).fromIndex(nextNode.property.end);
-										if (position && positionEnd) {
+										const range = Util.positionsToVSCodeRange(UIClass.classText, nextNode.property.start, nextNode.property.end);
+										if (range) {
 											errorNodes.push(nextNode);
 											errors.push({
 												message: sErrorMessage,
 												code: "UI5Plugin",
 												source: "Field/Method Linter",
-												range: new vscode.Range(
-													new vscode.Position(position.line - 1, position.col - 1),
-													new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-												),
+												range: range,
 												acornNode: nextNode,
 												methodName: nextNodeName,
 												sourceClassName: className,

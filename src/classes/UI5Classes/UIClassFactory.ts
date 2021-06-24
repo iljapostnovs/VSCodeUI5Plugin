@@ -319,11 +319,6 @@ export class UIClassFactory {
 		methods.push(...UIClass.methods);
 		if (UIClass.parentClassNameDotNotation) {
 			this.getClassMethods(UIClass.parentClassNameDotNotation, true, methods);
-			// methods.forEach(parentMethod => {
-			// 	if (parentMethod.returnType === UIClass.parentClassNameDotNotation) {
-			// 		parentMethod.returnType = className;
-			// 	}
-			// });
 		}
 
 		//remove duplicates

@@ -4,8 +4,8 @@ import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../UI5Classe
 import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../utils/FileReader";
-import LineColumn = require("line-column");
 import { XMLParser } from "../../utils/XMLParser";
+import { Util } from "../../utils/Util";
 
 interface IWorkspaceEdit {
 	uri: vscode.Uri;
@@ -118,14 +118,11 @@ export class JSRenameProvider {
 							const memberExpressionClassName = strategy.acornGetClassName(UIClass.className, memberExpression.property.start, true);
 							if (memberExpressionClassName === className && UIClass.classFSPath) {
 								const classUri = vscode.Uri.file(UIClass.classFSPath);
-								const lineColumnStart = LineColumn(UIClass.classText).fromIndex(memberExpression.property.start);
-								const lineColumnEnd = LineColumn(UIClass.classText).fromIndex(memberExpression.property.end);
-								if (lineColumnStart && lineColumnEnd) {
-									const positionStart = new vscode.Position(lineColumnStart.line - 1, lineColumnStart.col - 1);
-									const positionEnd = new vscode.Position(lineColumnEnd.line - 1, lineColumnEnd.col - 1);
+								const range = Util.positionsToVSCodeRange(UIClass.classText, memberExpression.property.start, memberExpression.property.end);
+								if (range) {
 									workspaceEdits.push({
 										uri: classUri,
-										range: new vscode.Range(positionStart, positionEnd),
+										range: range,
 										newValue: newMemberName
 									});
 								}
@@ -157,14 +154,11 @@ export class JSRenameProvider {
 						const positionOfEventHandlerInAttributeValueBegin = positionOfValueBegin + attributeValue.indexOf(oldMemberName);
 						const positionOfEventHandlerInAttributeValueEnd = positionOfEventHandlerInAttributeValueBegin + oldMemberName.length;
 						const classUri = vscode.Uri.file(viewOrFragment.fsPath);
-						const lineColumnStart = LineColumn(viewOrFragment.content).fromIndex(positionOfEventHandlerInAttributeValueBegin);
-						const lineColumnEnd = LineColumn(viewOrFragment.content).fromIndex(positionOfEventHandlerInAttributeValueEnd);
-						if (lineColumnStart && lineColumnEnd) {
-							const positionStart = new vscode.Position(lineColumnStart.line - 1, lineColumnStart.col - 1);
-							const positionEnd = new vscode.Position(lineColumnEnd.line - 1, lineColumnEnd.col - 1);
+						const range = Util.positionsToVSCodeRange(viewOrFragment.content, positionOfEventHandlerInAttributeValueBegin, positionOfEventHandlerInAttributeValueEnd);
+						if (range) {
 							workspaceEdits.push({
 								uri: classUri,
-								range: new vscode.Range(positionStart, positionEnd),
+								range: range,
 								newValue: newMemberName
 							});
 						}
