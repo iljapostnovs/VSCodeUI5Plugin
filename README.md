@@ -238,7 +238,11 @@ It is possible to select in preferences which type of diagram to generate: DrawI
 > DrawIO: *hediet.vscode-drawio-insiders-build*<br/>
 > PlantUML: *jebbs.plantuml*<br/>
 
-![UML.png](/images/UML.png)
+>UML Diagram example:<br/>
+>![UML.png](/images/UML.png)
+
+>ER Diagram example:<br/>
+>![ERDiagram.png](/images/ERDiagram.png)
 
 ----------
 ## Hotkeys
