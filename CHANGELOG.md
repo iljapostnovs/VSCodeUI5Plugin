@@ -1,5 +1,6 @@
-## 0.12.63 (24-06-2021)
+## 0.12.63 (25-06-2021)
 * Refactoring
+* Fix comment parsing in XML
 
 ## 0.12.62 (24-06-2021)
 * Update readme

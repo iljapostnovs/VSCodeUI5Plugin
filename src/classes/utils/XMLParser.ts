@@ -245,7 +245,7 @@ export class XMLParser {
 		let isPositionNotInComments = true;
 		let comments: RegExpExecArray[] = [];
 
-		if (this._lastDocument.length !== document.length) {
+		if (this._lastDocument !== document) {
 			const regExp = new RegExp("<!--(.|\\s)*?-->", "g");
 
 			let result = regExp.exec(document);
@@ -615,10 +615,10 @@ export class XMLParser {
 		while (i < document.length) {
 			const isInString = quotionMarkCount % 2 === 1 || secondTypeQuotionMarkCount % 2 === 1;
 			positionMapping.push(isInString);
-			if (document[i] === "\"") {
+			if (document[i] === "\"" && this.getIfPositionIsNotInComments(document, i)) {
 				quotionMarkCount++;
 			}
-			if (document[i] === "'") {
+			if (document[i] === "'" && this.getIfPositionIsNotInComments(document, i)) {
 				secondTypeQuotionMarkCount++;
 			}
 			i++;
