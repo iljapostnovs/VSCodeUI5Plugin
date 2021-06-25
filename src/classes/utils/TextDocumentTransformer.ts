@@ -11,13 +11,7 @@ export class TextDocumentTransformer {
 			const xmlType = document.fileName.endsWith(".fragment.xml") ? "fragment" : "view";
 			const XMLFile = FileReader.getXMLFile(className, xmlType);
 			if (XMLFile && !XMLFile.XMLParserData) {
-				const stringData = XMLParser.getStringPositionMapping(document.getText());
-				XMLFile.XMLParserData = {
-					tags: [],
-					strings: stringData.positionMapping,
-					prefixResults: {},
-					areAllStringsClosed: stringData.areAllStringsClosed
-				};
+				XMLParser.fillXMLParsedData(XMLFile);
 			}
 			if (XMLFile && (XMLFile.content.length !== document.getText().length || forceRefresh)) {
 				if (xmlType === "view") {

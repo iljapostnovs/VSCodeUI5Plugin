@@ -8,9 +8,9 @@ import { FileReader, IXMLFile } from "../../../../utils/FileReader";
 import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
 import { StandardXMLCompletionItemFactory } from "./StandardXMLCompletionItemFactory";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
-import LineColumn = require("line-column");
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 import { TextDocumentTransformer } from "../../../../utils/TextDocumentTransformer";
+import { Util } from "../../../../utils/Util";
 
 export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
@@ -66,11 +66,9 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 				if (attributeValue) {
 					const indexOfValue = attribute.indexOf(attributeValue);
-					const lineColumnBegin = LineColumn(XMLFile.content).fromIndex(tagPosition.positionBegin + indexOfAttribute + indexOfValue);
-					const lineColumnEnd = LineColumn(XMLFile.content).fromIndex(tagPosition.positionBegin + indexOfAttribute + indexOfValue + attributeValue.length);
-					if (lineColumnBegin && lineColumnEnd && lineColumnBegin.line === lineColumnEnd.line) {
-						range = new vscode.Range(lineColumnBegin.line - 1, lineColumnBegin.col - 1, lineColumnEnd.line - 1, lineColumnEnd.col - 1);
-					}
+					const positionBegin = tagPosition.positionBegin + indexOfAttribute + indexOfValue;
+					const positionEnd = positionBegin + attributeValue.length;
+					range = Util.positionsToVSCodeRange(XMLFile.content, positionBegin, positionEnd);
 				}
 			}
 		}

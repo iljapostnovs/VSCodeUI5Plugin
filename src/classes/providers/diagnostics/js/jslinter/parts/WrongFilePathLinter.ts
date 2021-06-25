@@ -1,10 +1,10 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import * as fs from "fs";
+import { Util } from "../../../../../utils/Util";
 
 export class WrongFilePathLinter extends Linter {
 	protected className = "WrongFilePathLinter";
@@ -25,17 +25,16 @@ export class WrongFilePathLinter extends Linter {
 								const sClassName = result[0];
 								const isClassNameValid = this._validateClassName(sClassName);
 								if (!isClassNameValid) {
-									const position = LineColumn(UIClass.classText).fromIndex(result.index);
-									if (position) {
+									const positionBegin = result.index;
+									const positionEnd = positionBegin + sClassName.length;
+									const range = Util.positionsToVSCodeRange(UIClass.classText, positionBegin, positionEnd);
+									if (range) {
 										errors.push({
 											acornNode: UIClass.acornClassBody,
 											code: "UI5Plugin",
 											source: "Wrong File Path Linter",
 											message: `Class "${sClassName}" doesn't exist`,
-											range: new vscode.Range(
-												new vscode.Position(position.line - 1, position.col - 1),
-												new vscode.Position(position.line - 1, position.col + sClassName.length - 1)
-											)
+											range: range
 										});
 									}
 								}

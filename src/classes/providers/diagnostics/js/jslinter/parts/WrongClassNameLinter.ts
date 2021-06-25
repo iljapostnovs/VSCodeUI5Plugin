@@ -1,9 +1,9 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { FileReader } from "../../../../../utils/FileReader";
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import { Util } from "../../../../../utils/Util";
 export class WrongClassNameLinter extends Linter {
 	protected className = "WrongClassNameLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -17,17 +17,16 @@ export class WrongClassNameLinter extends Linter {
 					if (UIClass.acornReturnedClassExtendBody) {
 						const classNameFromFile = UIClass.acornReturnedClassExtendBody && UIClass.acornReturnedClassExtendBody.arguments && UIClass.acornReturnedClassExtendBody.arguments[0]?.value;
 						if (classNameFromFile && className !== classNameFromFile) {
-							const position = LineColumn(UIClass.classText).fromIndex(UIClass.acornReturnedClassExtendBody?.arguments[0].start);
-							if (position) {
+							const positionBegin = UIClass.acornReturnedClassExtendBody?.arguments[0].start;
+							const positionEnd = UIClass.acornReturnedClassExtendBody?.arguments[0].end;
+							const range = Util.positionsToVSCodeRange(UIClass.classText, positionBegin, positionEnd);
+							if (range) {
 								errors.push({
 									source: "Class Name Linter",
 									acornNode: UIClass.acornReturnedClassExtendBody.arguments[0],
 									code: "UI5Plugin",
 									message: `Invalid class name. Expected: "${className}", actual: "${classNameFromFile}"`,
-									range: new vscode.Range(
-										new vscode.Position(position.line - 1, position.col),
-										new vscode.Position(position.line - 1, position.col + classNameFromFile.length)
-									)
+									range: range
 								});
 							}
 						}

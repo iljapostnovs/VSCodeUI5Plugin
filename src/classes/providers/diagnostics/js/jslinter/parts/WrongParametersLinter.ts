@@ -1,6 +1,5 @@
 import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { CustomUIClass, ICustomClassUIMethod } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
@@ -8,6 +7,7 @@ import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
 import { ConfigHandler } from "./config/ConfigHandler";
+import { Util } from "../../../../../utils/Util";
 export class WrongParametersLinter extends Linter {
 	protected className = "WrongParametersLinter";
 	public static timePerChar = 0;
@@ -43,18 +43,14 @@ export class WrongParametersLinter extends Linter {
 												const methodParams = method.params;
 												const mandatoryMethodParams = methodParams.filter(param => !param.isOptional && param.type !== "boolean");
 												if (params.length < mandatoryMethodParams.length || params.length > methodParams.length) {
-													const positionStart = LineColumn(UIClass.classText).fromIndex(call.callee.property.start);
-													const positionEnd = LineColumn(UIClass.classText).fromIndex(call.callee.property.end);
-													if (positionStart && positionEnd) {
+													const range = Util.positionsToVSCodeRange(UIClass.classText, call.callee.property.start, call.callee.property.end);
+													if (range) {
 														errors.push({
 															acornNode: call,
 															code: "UI5Plugin",
 															source: "Parameter Linter",
 															message: `Method "${methodName}" has ${methodParams.length} (${mandatoryMethodParams.length} mandatory) param(s), but you provided ${params.length}`,
-															range: new vscode.Range(
-																new vscode.Position(positionStart.line - 1, positionStart.col - 1),
-																new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-															)
+															range: range
 														});
 													}
 												}
@@ -77,18 +73,14 @@ export class WrongParametersLinter extends Linter {
 																});
 															}
 															if (typeMismatch) {
-																const positionStart = LineColumn(UIClass.classText).fromIndex(param.start);
-																const positionEnd = LineColumn(UIClass.classText).fromIndex(param.end);
-																if (positionStart && positionEnd) {
+																const range = Util.positionsToVSCodeRange(UIClass.classText, param.start, param.end);
+																if (range) {
 																	errors.push({
 																		acornNode: param,
 																		code: "UI5Plugin",
 																		source: "Parameter Linter",
 																		message: `"${paramFromMethod.name}" param is of type "${paramFromMethod.type}", but provided "${classNameOfTheParam}"`,
-																		range: new vscode.Range(
-																			new vscode.Position(positionStart.line - 1, positionStart.col - 1),
-																			new vscode.Position(positionEnd.line - 1, positionEnd.col - 1)
-																		)
+																		range: range
 																	});
 																}
 															}

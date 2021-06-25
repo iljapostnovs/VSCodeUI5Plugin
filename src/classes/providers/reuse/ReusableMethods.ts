@@ -1,5 +1,3 @@
-
-import LineColumn = require("line-column");
 import * as vscode from "vscode";
 import { ICustomClassUIMethod, CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
@@ -20,12 +18,7 @@ export class ReusableMethods {
 				insertPosition = mainFunction?.arguments[0]?.start;
 			}
 
-			const lineColumn = LineColumn(document.getText()).fromIndex(insertPosition);
-
-			if (lineColumn) {
-				position = new vscode.Position(lineColumn.line - 1, lineColumn.col);
-			}
-
+			position = document.positionAt(insertPosition);
 		}
 
 		return position;
