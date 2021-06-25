@@ -10,6 +10,7 @@
 >
 	<Page>
 		<nonExistantAggregation>
+		<!-- Don't shrink below minimum size. Fills space if savailable. -->
 		</nonExistantAggregation>
 		<content>
 			<Table
