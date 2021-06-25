@@ -853,6 +853,7 @@ interface IXMLParserData {
 	tags: ITag[];
 	prefixResults: IPrefixResults;
 	areAllStringsClosed: boolean;
+	comments?: RegExpExecArray[];
 }
 export interface IXMLParserCacheable {
 	XMLParserData?: IXMLParserData

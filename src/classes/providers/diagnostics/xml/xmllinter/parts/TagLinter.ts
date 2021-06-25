@@ -49,7 +49,7 @@ export class TagLinter extends Linter {
 				const UIClass = UIClassFactory.getUIClass(tagClass);
 				if (!UIClass.classExists && !this._isClassException(tagClass)) {
 					const range = Util.positionsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
-					if (range && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
+					if (range && XMLParser.getIfPositionIsNotInComments(XMLFile, tag.positionBegin)) {
 						errors.push({
 							code: "UI5plugin",
 							message: `"${tagClass}" class doesn't exist`,
@@ -70,7 +70,7 @@ export class TagLinter extends Linter {
 						const aggregation = this._findAggregation(tagClass, tagName);
 						if (!aggregation) {
 							const range = Util.positionsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
-							if (range && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
+							if (range && XMLParser.getIfPositionIsNotInComments(XMLFile, tag.positionBegin)) {
 								errors.push({
 									code: "UI5plugin",
 									message: `"${tagName}" aggregation doesn't exist in "${tagClass}"`,

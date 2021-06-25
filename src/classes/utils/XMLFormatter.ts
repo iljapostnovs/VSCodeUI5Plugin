@@ -150,12 +150,12 @@ export class XMLFormatter {
 					document.content[i] === ">" &&
 					!XMLParser.getIfPositionIsInString(document, i) &&
 					(
-						XMLParser.getIfPositionIsNotInComments(document.content, i) ||
+						XMLParser.getIfPositionIsNotInComments(document, i) ||
 						document.content.substring(i - 2, i + 1) === "-->"
 					)
 					;
 				if (thisIsTagEnd) {
-					const indexOfTagBegining = this._getTagBeginingIndex(document.content, i);
+					const indexOfTagBegining = this._getTagBeginingIndex(document, i);
 					tags.push({
 						text: document.content.substring(indexOfTagBegining, i + 1),
 						positionBegin: indexOfTagBegining,
@@ -187,14 +187,14 @@ export class XMLFormatter {
 		return quotionMarkCount % 2 === 0 && secondTypeQuotionMarkCount % 2 === 0;
 	}
 
-	private static _getTagBeginingIndex(document: string, position: number) {
+	private static _getTagBeginingIndex(document: IXMLFile, position: number) {
 		let i = position;
 		let shouldStop = i < 0;
 		let isThisTagBegining =
-			document[i] === "<" &&
+			document.content[i] === "<" &&
 			(
 				XMLParser.getIfPositionIsNotInComments(document, i) ||
-				document.substring(i, i + 4) === "<!--"
+				document.content.substring(i, i + 4) === "<!--"
 			);
 		shouldStop ||= isThisTagBegining;
 
@@ -203,10 +203,10 @@ export class XMLFormatter {
 
 			shouldStop = i < 0;
 			isThisTagBegining =
-				document[i] === "<" &&
+				document.content[i] === "<" &&
 				(
 					XMLParser.getIfPositionIsNotInComments(document, i) ||
-					document.substring(i, i + 4) === "<!--"
+					document.content.substring(i, i + 4) === "<!--"
 				);
 			shouldStop ||= isThisTagBegining;
 		}

@@ -47,7 +47,7 @@ export class TagAttributeLinter extends Linter {
 									const positionBegin = tag.positionBegin + indexOfTagBegining;
 									const positionEnd = positionBegin + tagAttribute.length;
 									const range = Util.positionsToVSCodeRange(documentText, positionBegin, positionEnd);
-									if (range && XMLParser.getIfPositionIsNotInComments(documentText, tag.positionBegin)) {
+									if (range && XMLParser.getIfPositionIsNotInComments(XMLFile, tag.positionBegin)) {
 										errors.push({
 											code: "UI5plugin",
 											message: attributeValidation.message || "Invalid attribute",

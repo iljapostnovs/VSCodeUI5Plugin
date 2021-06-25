@@ -222,12 +222,12 @@ export class XMLParser {
 		let tagPositionEnd = 0;
 
 		const XMLText = XMLFile.content;
-		while (i > 0 && (XMLText[i] !== "<" || !this.getIfPositionIsNotInComments(XMLText, i) || this.getIfPositionIsInString(XMLFile, i))) {
+		while (i > 0 && (XMLText[i] !== "<" || !this.getIfPositionIsNotInComments(XMLFile, i) || this.getIfPositionIsInString(XMLFile, i))) {
 			i--;
 		}
 		tagPositionBegin = i;
 
-		while (i < XMLText.length && (XMLText[i] !== ">" || !this.getIfPositionIsNotInComments(XMLText, i) || this.getIfPositionIsInString(XMLFile, i))) {
+		while (i < XMLText.length && (XMLText[i] !== ">" || !this.getIfPositionIsNotInComments(XMLFile, i) || this.getIfPositionIsInString(XMLFile, i))) {
 			i++;
 		}
 		tagPositionEnd = i + 1;
@@ -238,33 +238,30 @@ export class XMLParser {
 		};
 	}
 
-	private static _lastDocument = "";
-	private static _lastComments: RegExpExecArray[] = [];
-
-	public static getIfPositionIsNotInComments(document: string, position: number) {
-		let isPositionNotInComments = true;
+	public static getIfPositionIsNotInComments(document: IXMLFile, position: number) {
 		let comments: RegExpExecArray[] = [];
 
-		if (this._lastDocument !== document) {
+		if (document.XMLParserData?.comments) {
+			comments = document.XMLParserData.comments;
+		} else {
 			const regExp = new RegExp("<!--(.|\\s)*?-->", "g");
 
-			let result = regExp.exec(document);
+			let result = regExp.exec(document.content);
 			while (result) {
 				comments.push(result);
-				result = regExp.exec(document);
+				result = regExp.exec(document.content);
 			}
 
-			this._lastComments = comments;
-			this._lastDocument = document;
-		} else {
-			comments = this._lastComments;
+			if (!document.XMLParserData) {
+				this.fillXMLParsedData(document);
+			}
+			if (document.XMLParserData) {
+				document.XMLParserData.comments = comments;
+			}
 		}
-
 		const comment = comments.find(comment => comment.index <= position && comment.index + comment[0].length > position);
 
-		isPositionNotInComments = !comment;
-
-		return isPositionNotInComments;
+		return !comment;
 	}
 
 	static getIfPositionIsInString(XMLFile: IXMLFile, position: number) {
@@ -272,7 +269,7 @@ export class XMLParser {
 		let isInString = false;
 
 		if (!XMLFile.XMLParserData) {
-			this._fillXMLParsedData(XMLFile);
+			this.fillXMLParsedData(XMLFile);
 		}
 
 		if (XMLFile.XMLParserData?.strings) {
@@ -283,10 +280,10 @@ export class XMLParser {
 
 			let i = 0;
 			while (i < position) {
-				if (XMLText[i] === "\"") {
+				if (XMLText[i] === "\"" && this.getIfPositionIsNotInComments(XMLFile, i)) {
 					quotionMarkCount++;
 				}
-				if (XMLText[i] === "'") {
+				if (XMLText[i] === "'" && this.getIfPositionIsNotInComments(XMLFile, i)) {
 					secondTypeQuotionMarkCount++;
 				}
 
@@ -394,7 +391,7 @@ export class XMLParser {
 			}
 
 			if (!XMLFile.XMLParserData) {
-				this._fillXMLParsedData(XMLFile);
+				this.fillXMLParsedData(XMLFile);
 			}
 			if (XMLFile.XMLParserData) {
 				XMLFile.XMLParserData.prefixResults[tagPrefix] = results;
@@ -585,7 +582,7 @@ export class XMLParser {
 		}
 
 		if (!XMLFile.XMLParserData) {
-			this._fillXMLParsedData(XMLFile);
+			this.fillXMLParsedData(XMLFile);
 		}
 		if (XMLFile.XMLParserData) {
 			XMLFile.XMLParserData.tags = tags;
@@ -594,31 +591,32 @@ export class XMLParser {
 		return tags;
 	}
 
-	private static _fillXMLParsedData(XMLFile: IXMLFile) {
+	static fillXMLParsedData(XMLFile: IXMLFile) {
 		XMLFile.XMLParserData = {
 			areAllStringsClosed: false,
 			prefixResults: {},
 			tags: [],
-			strings: []
+			strings: [],
+			comments: undefined
 		};
-		const stringData = this.getStringPositionMapping(XMLFile.content);
+		const stringData = this._getStringPositionMapping(XMLFile);
 		XMLFile.XMLParserData.strings = stringData.positionMapping;
 		XMLFile.XMLParserData.areAllStringsClosed = stringData.areAllStringsClosed;
 	}
 
-	static getStringPositionMapping(document: string) {
+	private static _getStringPositionMapping(document: IXMLFile) {
 		const positionMapping: boolean[] = [];
 		let quotionMarkCount = 0;
 		let secondTypeQuotionMarkCount = 0;
 
 		let i = 0;
-		while (i < document.length) {
+		while (i < document.content.length) {
 			const isInString = quotionMarkCount % 2 === 1 || secondTypeQuotionMarkCount % 2 === 1;
 			positionMapping.push(isInString);
-			if (document[i] === "\"" && this.getIfPositionIsNotInComments(document, i)) {
+			if (document.content[i] === "\"" && this.getIfPositionIsNotInComments(document, i)) {
 				quotionMarkCount++;
 			}
-			if (document[i] === "'" && this.getIfPositionIsNotInComments(document, i)) {
+			if (document.content[i] === "'" && this.getIfPositionIsNotInComments(document, i)) {
 				secondTypeQuotionMarkCount++;
 			}
 			i++;
