@@ -848,12 +848,15 @@ export interface IIdClassMap {
 interface IPrefixResults {
 	[key: string]: any[]
 }
+export interface ICommentPositions {
+	[key: number]: boolean
+}
 interface IXMLParserData {
 	strings: boolean[];
 	tags: ITag[];
 	prefixResults: IPrefixResults;
 	areAllStringsClosed: boolean;
-	comments?: RegExpExecArray[];
+	comments?: ICommentPositions;
 }
 export interface IXMLParserCacheable {
 	XMLParserData?: IXMLParserData

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { FileReader, IXMLFile } from "./FileReader";
+import { FileReader, ICommentPositions, IXMLFile } from "./FileReader";
 import { IUIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { IHierarchicalTag, ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
@@ -239,29 +239,44 @@ export class XMLParser {
 	}
 
 	public static getIfPositionIsNotInComments(document: IXMLFile, position: number) {
-		let comments: RegExpExecArray[] = [];
+		let comments: ICommentPositions = {};
 
 		if (document.XMLParserData?.comments) {
 			comments = document.XMLParserData.comments;
 		} else {
 			const regExp = new RegExp("<!--(.|\\s)*?-->", "g");
 
+			const commentResults: RegExpExecArray[] = [];
 			let result = regExp.exec(document.content);
 			while (result) {
-				comments.push(result);
+				commentResults.push(result);
 				result = regExp.exec(document.content);
 			}
 
+			let i = 0;
+			while (i < document.content.length) {
+				comments[i] = true;
+				i++;
+			}
+
+			commentResults.forEach(commentResult => {
+				const indexBegin = commentResult.index;
+				const indexEnd = indexBegin + commentResult[0].length;
+
+				for (let i = indexBegin; i <= indexEnd; i++) {
+					comments[i] = false;
+				}
+			});
 			if (!document.XMLParserData) {
 				this.fillXMLParsedData(document);
 			}
 			if (document.XMLParserData) {
 				document.XMLParserData.comments = comments;
 			}
-		}
-		const comment = comments.find(comment => comment.index <= position && comment.index + comment[0].length > position);
 
-		return !comment;
+		}
+
+		return comments[position];
 	}
 
 	static getIfPositionIsInString(XMLFile: IXMLFile, position: number) {
