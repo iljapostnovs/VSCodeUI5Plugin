@@ -1,4 +1,3 @@
-
 import LineColumn = require("line-column");
 import * as vscode from "vscode";
 
