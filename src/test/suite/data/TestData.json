@@ -604,7 +604,7 @@
 	"JSLinter": [
 		{
 			"className": "com.test.controller.LargeFile",
-			"timeLimit": 2200,
+			"timeLimit": 1300,
 			"errors": [
 				{
 					"text": "No references found for \"method1\" class member"
@@ -919,7 +919,7 @@
 		},
 		{
 			"className": "com.test.controller.LinterTest",
-			"timeLimit": 600,
+			"timeLimit": 300,
 			"errors": [
 				{
 					"text": "\"_nonExistentMethod\" does not exist in \"com.test.controller.LinterTest\""
@@ -7598,7 +7598,7 @@
 					"text": "Value \"true\" is unnecessary, it is the sames as default value of \"visible\" property"
 				}
 			],
-			"timeLimit": 2200
+			"timeLimit": 1200
 		},
 		{
 			"className": "com.test.view.LinterTest",
