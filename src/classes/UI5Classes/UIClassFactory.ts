@@ -115,68 +115,25 @@ export class UIClassFactory {
 		}
 	}
 
-	//TODO: Refactor this mess
 	private static _checkIfFieldIsUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass, [], true, true, true);
-		viewsAndFragments.views.forEach(viewOfTheControl => {
+		const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
+		XMLDocuments.forEach(XMLDocument => {
+			CurrentUIClass.methods.forEach(method => {
+				if (!method.mentionedInTheXMLDocument) {
+					const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
+					method.mentionedInTheXMLDocument = regex.test(XMLDocument.content);
+				}
+			});
 			CurrentUIClass.fields.forEach(field => {
 				if (!field.mentionedInTheXMLDocument) {
 					const regex = new RegExp(`(\\.|"|')${field.name}("|'|\\.)`);
-					if (viewOfTheControl) {
-						const isFieldMentionedInTheView = regex.test(viewOfTheControl.content);
+					if (XMLDocument) {
+						const isFieldMentionedInTheView = regex.test(XMLDocument.content);
 						if (isFieldMentionedInTheView) {
 							field.mentionedInTheXMLDocument = true;
-						} else {
-							viewOfTheControl.fragments.find(fragment => {
-								const isFieldMentionedInTheFragment = regex.test(fragment.content);
-								if (isFieldMentionedInTheFragment) {
-									field.mentionedInTheXMLDocument = true;
-								}
-
-								return isFieldMentionedInTheFragment;
-							});
 						}
 					}
-
-					if (!field.mentionedInTheXMLDocument) {
-						viewOfTheControl.fragments.find(fragment => {
-							const isMethodMentionedInTheFragment = regex.test(fragment.content);
-							if (isMethodMentionedInTheFragment) {
-								field.mentionedInTheXMLDocument = true;
-							}
-
-							return isMethodMentionedInTheFragment;
-						});
-					}
-				}
-			});
-		});
-
-		viewsAndFragments.fragments.forEach(fragment => {
-			CurrentUIClass.methods.forEach(method => {
-				if (!method.isEventHandler) {
-					const regex = new RegExp(`("\\.|")${method.name}"`);
-					const isMethodMentionedInTheFragment = regex.test(fragment.content);
-					if (isMethodMentionedInTheFragment) {
-						method.isEventHandler = true;
-						method.mentionedInTheXMLDocument = true;
-						if (method?.acornNode?.params && method?.acornNode?.params[0]) {
-							method.acornNode.params[0].jsType = "sap.ui.base.Event";
-						}
-					}
-				}
-				if (!method.isEventHandler) {
-					const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
-					const isMethodMentionedInTheFragment = regex.test(fragment.content);
-					if (isMethodMentionedInTheFragment) {
-						method.mentionedInTheXMLDocument = true;
-					}
-				}
-			});
-			CurrentUIClass.fields.forEach(field => {
-				if (!field.mentionedInTheXMLDocument) {
-					const regex = new RegExp(`\\.${field.name}\\.`);
-					field.mentionedInTheXMLDocument = regex.test(fragment.content);
 				}
 			});
 		});
@@ -408,73 +365,20 @@ export class UIClassFactory {
 
 	private static _enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass, [], true, true, true);
-		viewsAndFragments.views.forEach(viewOfTheControl => {
+		const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
+		XMLDocuments.forEach(XMLDocument => {
 			CurrentUIClass.methods.forEach(method => {
 				if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
 					const regex = new RegExp(`(\\.|"|')${method.name}"`);
-					if (viewOfTheControl) {
-						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
+					if (XMLDocument) {
+						const isMethodMentionedInTheView = regex.test(XMLDocument.content);
 						if (isMethodMentionedInTheView) {
 							method.mentionedInTheXMLDocument = true;
 							method.isEventHandler = true;
 							if (method?.acornNode?.params && method?.acornNode?.params[0]) {
 								method.acornNode.params[0].jsType = "sap.ui.base.Event";
 							}
-						} else {
-							viewOfTheControl.fragments.find(fragment => {
-								const isMethodMentionedInTheFragment = regex.test(fragment.content);
-								if (isMethodMentionedInTheFragment) {
-									method.isEventHandler = true;
-									method.mentionedInTheXMLDocument = true;
-									if (method?.acornNode?.params && method?.acornNode?.params[0]) {
-										method.acornNode.params[0].jsType = "sap.ui.base.Event";
-									}
-								}
-
-								return isMethodMentionedInTheFragment;
-							});
 						}
-					}
-
-					if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
-						const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
-						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
-						if (isMethodMentionedInTheView) {
-							method.mentionedInTheXMLDocument = true;
-
-						} else {
-							viewOfTheControl.fragments.find(fragment => {
-								const isMethodMentionedInTheFragment = regex.test(fragment.content);
-								if (isMethodMentionedInTheFragment) {
-									method.mentionedInTheXMLDocument = true;
-								}
-
-								return isMethodMentionedInTheFragment;
-							});
-						}
-					}
-				}
-			});
-		});
-
-		viewsAndFragments.fragments.forEach(fragment => {
-			CurrentUIClass.methods.forEach(method => {
-				if (!method.isEventHandler) {
-					const regex = new RegExp(`(\\.|"|')${method.name}"`);
-					const isMethodMentionedInTheFragment = regex.test(fragment.content);
-					if (isMethodMentionedInTheFragment) {
-						method.isEventHandler = true;
-						method.mentionedInTheXMLDocument = true;
-						if (method?.acornNode?.params && method?.acornNode?.params[0]) {
-							method.acornNode.params[0].jsType = "sap.ui.base.Event";
-						}
-					}
-				}
-				if (!method.isEventHandler) {
-					const regex = new RegExp(`(\\.|"|')${method.name}'`);
-					const isMethodMentionedInTheFragment = regex.test(fragment.content);
-					if (isMethodMentionedInTheFragment) {
-						method.mentionedInTheXMLDocument = true;
 					}
 				}
 			});
