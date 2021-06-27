@@ -13,7 +13,7 @@ export class FieldNode extends NavigatiableNode {
 		this.label = label;
 
 		if (UIField.memberPropertyNode) {
-			this._addNavigationCommand(UIField.owner, UIField.memberPropertyNode.start, UIField.memberPropertyNode.end);
+			this._addNavigationCommand(UIField.owner, UIField.memberPropertyNode.loc);
 		}
 
 	}

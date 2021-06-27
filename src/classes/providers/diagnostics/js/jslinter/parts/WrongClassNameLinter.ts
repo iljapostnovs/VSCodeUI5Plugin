@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { FileReader } from "../../../../../utils/FileReader";
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 export class WrongClassNameLinter extends Linter {
 	protected className = "WrongClassNameLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -17,18 +17,14 @@ export class WrongClassNameLinter extends Linter {
 					if (UIClass.acornReturnedClassExtendBody) {
 						const classNameFromFile = UIClass.acornReturnedClassExtendBody && UIClass.acornReturnedClassExtendBody.arguments && UIClass.acornReturnedClassExtendBody.arguments[0]?.value;
 						if (classNameFromFile && className !== classNameFromFile) {
-							const positionBegin = UIClass.acornReturnedClassExtendBody?.arguments[0].start;
-							const positionEnd = UIClass.acornReturnedClassExtendBody?.arguments[0].end;
-							const range = Util.positionsToVSCodeRange(UIClass.classText, positionBegin, positionEnd);
-							if (range) {
-								errors.push({
-									source: "Class Name Linter",
-									acornNode: UIClass.acornReturnedClassExtendBody.arguments[0],
-									code: "UI5Plugin",
-									message: `Invalid class name. Expected: "${className}", actual: "${classNameFromFile}"`,
-									range: range
-								});
-							}
+							const range = RangeAdapter.acornLocationToVSCodeRange(UIClass.acornReturnedClassExtendBody?.arguments[0].loc);
+							errors.push({
+								source: "Class Name Linter",
+								acornNode: UIClass.acornReturnedClassExtendBody.arguments[0],
+								code: "UI5Plugin",
+								message: `Invalid class name. Expected: "${className}", actual: "${classNameFromFile}"`,
+								range: range
+							});
 						}
 					}
 				}

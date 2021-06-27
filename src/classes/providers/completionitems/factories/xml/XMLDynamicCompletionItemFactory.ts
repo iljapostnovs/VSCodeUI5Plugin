@@ -10,7 +10,7 @@ import { StandardXMLCompletionItemFactory } from "./StandardXMLCompletionItemFac
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 import { TextDocumentTransformer } from "../../../../utils/TextDocumentTransformer";
-import { Util } from "../../../../utils/Util";
+import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
 
 export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
@@ -68,7 +68,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 					const indexOfValue = attribute.indexOf(attributeValue);
 					const positionBegin = tagPosition.positionBegin + indexOfAttribute + indexOfValue;
 					const positionEnd = positionBegin + attributeValue.length;
-					range = Util.positionsToVSCodeRange(XMLFile.content, positionBegin, positionEnd);
+					range = RangeAdapter.offsetsToVSCodeRange(XMLFile.content, positionBegin, positionEnd);
 				}
 			}
 		}

@@ -5,7 +5,7 @@ import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransf
 import * as fs from "fs";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 
 export class WrongFilePathLinter extends Linter {
 	protected className = "WrongFilePathLinter";
@@ -24,7 +24,7 @@ export class WrongFilePathLinter extends Linter {
 							const sClassName = result[0];
 							const isClassNameValid = this._validateClassName(sClassName);
 							if (!isClassNameValid) {
-								const range = Util.positionsToVSCodeRange(XMLFile.content, result.index, result.index + sClassName.length);
+								const range = RangeAdapter.offsetsToVSCodeRange(XMLFile.content, result.index, result.index + sClassName.length);
 								if (range) {
 									errors.push({
 										code: "UI5Plugin",

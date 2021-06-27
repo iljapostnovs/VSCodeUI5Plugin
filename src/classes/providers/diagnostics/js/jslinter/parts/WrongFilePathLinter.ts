@@ -4,7 +4,7 @@ import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/Custo
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import * as fs from "fs";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 
 export class WrongFilePathLinter extends Linter {
 	protected className = "WrongFilePathLinter";
@@ -27,7 +27,7 @@ export class WrongFilePathLinter extends Linter {
 								if (!isClassNameValid) {
 									const positionBegin = result.index;
 									const positionEnd = positionBegin + sClassName.length;
-									const range = Util.positionsToVSCodeRange(UIClass.classText, positionBegin, positionEnd);
+									const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, positionBegin, positionEnd);
 									if (range) {
 										errors.push({
 											acornNode: UIClass.acornClassBody,

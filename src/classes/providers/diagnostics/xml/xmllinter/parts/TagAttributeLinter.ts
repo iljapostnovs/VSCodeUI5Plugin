@@ -4,7 +4,7 @@ import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { XMLParser } from "../../../../../utils/XMLParser";
 import { FileReader } from "../../../../../utils/FileReader";
 import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 
 interface IAttributeValidation {
 	valid: boolean;
@@ -46,7 +46,7 @@ export class TagAttributeLinter extends Linter {
 									const indexOfTagBegining = tag.text.indexOf(tagAttribute);
 									const positionBegin = tag.positionBegin + indexOfTagBegining;
 									const positionEnd = positionBegin + tagAttribute.length;
-									const range = Util.positionsToVSCodeRange(documentText, positionBegin, positionEnd);
+									const range = RangeAdapter.offsetsToVSCodeRange(documentText, positionBegin, positionEnd);
 									if (range && XMLParser.getIfPositionIsNotInComments(XMLFile, tag.positionBegin)) {
 										errors.push({
 											code: "UI5plugin",

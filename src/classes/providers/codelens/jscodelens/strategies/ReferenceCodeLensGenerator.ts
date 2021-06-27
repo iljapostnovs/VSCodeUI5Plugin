@@ -6,7 +6,7 @@ import { TextDocumentTransformer } from "../../../../utils/TextDocumentTransform
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 import { XMLParser } from "../../../../utils/XMLParser";
 import { IXMLFile } from "../../../../utils/FileReader";
-import { Util } from "../../../../utils/Util";
+import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
 
 export interface IReferenceCodeLensCacheable {
 	[className: string]: {
@@ -75,7 +75,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 				tagAndAttribute.attributes.forEach(attribute => {
 					const positionBegin = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute) + attribute.indexOf(method.name);
 					const positionEnd = positionBegin + method.name.length;
-					const range = Util.positionsToVSCodeRange(XMLDoc.content, positionBegin, positionEnd);
+					const range = RangeAdapter.offsetsToVSCodeRange(XMLDoc.content, positionBegin, positionEnd);
 					if (range) {
 						const uri = vscode.Uri.file(XMLDoc.fsPath);
 						currentLocations.push(new vscode.Location(uri, range));
@@ -122,7 +122,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 						)
 					)
 				) {
-					const range = Util.positionsToVSCodeRange(UIClass.classText, result.index, result.index + method.name.length);
+					const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, result.index, result.index + method.name.length);
 					if (range) {
 						currentLocations.push(new vscode.Location(uri, range));
 					}

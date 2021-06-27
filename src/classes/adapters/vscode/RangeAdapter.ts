@@ -2,7 +2,7 @@ import LineColumn = require("line-column");
 import * as vscode from "vscode";
 import { IAcornPosition, PositionAdapter } from "./PositionAdapter";
 
-interface IAcornLocation {
+export interface IAcornLocation {
 	start: IAcornPosition,
 	end: IAcornPosition
 }

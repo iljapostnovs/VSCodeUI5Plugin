@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 export class WrongImportLinter extends Linter {
 	protected className = "WrongImportLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -17,7 +17,7 @@ export class WrongImportLinter extends Linter {
 					UIClass.UIDefine.forEach(UIDefine => {
 						const UIDefineClass = UIClassFactory.getUIClass(UIDefine.classNameDotNotation);
 						if (!UIDefineClass.classExists) {
-							const range = Util.positionsToVSCodeRange(UIClass.classText, UIDefine.start, UIDefine.start + UIDefine.path.length);
+							const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, UIDefine.start, UIDefine.start + UIDefine.path.length);
 							if (range) {
 								errors.push({
 									acornNode: UIDefine.acornNode,

@@ -20,7 +20,7 @@ export class MethodNode extends NavigatiableNode {
 		this.iconPath = this._generateIconPath();
 
 		if (UIMethod.memberPropertyNode) {
-			this._addNavigationCommand(UIMethod.owner, UIMethod.memberPropertyNode.start, UIMethod.memberPropertyNode.end);
+			this._addNavigationCommand(UIMethod.owner, UIMethod.memberPropertyNode.loc);
 		}
 	}
 	private _generateIconPath() {

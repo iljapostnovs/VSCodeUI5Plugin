@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { IXMLFile } from "../../../../../utils/FileReader";
 import { IHierarchicalTag } from "../../../../diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import { Node } from "./Node";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 
 export abstract class XMLNode extends Node {
 	readonly tag: IHierarchicalTag;
@@ -15,7 +15,7 @@ export abstract class XMLNode extends Node {
 	}
 	protected _addNavigationCommand() {
 		const classUri = vscode.Uri.file(this.XMLFile.fsPath);
-		const range = Util.positionsToVSCodeRange(this.XMLFile.content, this.tag.positionBegin, this.tag.positionEnd);
+		const range = RangeAdapter.offsetsToVSCodeRange(this.XMLFile.content, this.tag.positionBegin, this.tag.positionEnd);
 		if (range) {
 			this.command = {
 				command: "vscode.open",
