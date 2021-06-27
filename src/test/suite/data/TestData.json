@@ -7598,7 +7598,7 @@
 					"text": "Value \"true\" is unnecessary, it is the sames as default value of \"visible\" property"
 				}
 			],
-			"timeLimit": 2100
+			"timeLimit": 2200
 		},
 		{
 			"className": "com.test.view.LinterTest",
