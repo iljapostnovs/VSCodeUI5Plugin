@@ -5,7 +5,6 @@ import { JSClass } from "./UI5Parser/UIClass/JSClass";
 import { AcornSyntaxAnalyzer } from "./JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
 import { FileReader, IFragment, IView } from "../utils/FileReader";
-import LineColumn = require("line-column");
 
 export interface IFieldsAndMethods {
 	className: string;
@@ -98,9 +97,8 @@ export class UIClassFactory {
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
 		// console.time(`Enriching ${UIClass.className} took`);
 		this._preloadParentIfNecessary(UIClass);
-		this._enrichVariablesWithJSDocTypesAndVisibility(UIClass);
 		this._enrichMethodParamsWithEventType(UIClass);
-		this._checkIfFieldIsUsedInXMLDocuments(UIClass);
+		this._checkIfMembersAreUsedInXMLDocuments(UIClass);
 		UIClass.methods.forEach(method => {
 			AcornSyntaxAnalyzer.findMethodReturnType(method, UIClass.className, false, true);
 		});
@@ -115,7 +113,7 @@ export class UIClassFactory {
 		}
 	}
 
-	private static _checkIfFieldIsUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
+	private static _checkIfMembersAreUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass, [], true, true, true);
 		const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
 		XMLDocuments.forEach(XMLDocument => {
@@ -139,71 +137,6 @@ export class UIClassFactory {
 		});
 	}
 
-	private static _enrichVariablesWithJSDocTypesAndVisibility(UIClass: CustomUIClass) {
-		//TODO: merge this with logic in custom ui class?
-		if (UIClass.comments.length > 0) {
-
-			const classLineColumn = LineColumn(UIClass.classText);
-			UIClass.comments.forEach(comment => {
-				const typeDoc = comment.jsdoc?.tags?.find((tag: any) => {
-					return tag.tag === "type";
-				});
-				const visibility = ["protected", "public", "private"];
-				const ui5ignored = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "ui5ignore");
-				const isAbstract = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "abstract");
-				const isStatic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "static");
-				const visibilityDoc = comment.jsdoc?.tags?.find((tag: any) => {
-					return visibility.includes(tag.tag);
-				});
-				if (typeDoc || visibilityDoc || ui5ignored || isAbstract || isStatic) {
-					const lineDifference = comment.loc.end.line - comment.loc.start.line;
-					const nextLine = comment.loc.start.line + lineDifference + 1;
-					const indexOfBottomLine = classLineColumn.toIndex({
-						line: nextLine,
-						col: comment.loc.start.column + 1
-					});
-
-					if (typeDoc) {
-						const variableDeclaration = AcornSyntaxAnalyzer.getAcornVariableDeclarationAtIndex(UIClass, indexOfBottomLine);
-						if (variableDeclaration?.declarations && variableDeclaration.declarations[0]) {
-							variableDeclaration.declarations[0]._acornSyntaxAnalyserType = typeDoc.type;
-						}
-					}
-
-					if (typeDoc || visibilityDoc || ui5ignored || isAbstract || isStatic) {
-						const assignmentExpression = AcornSyntaxAnalyzer.getAcornAssignmentExpressionAtIndex(UIClass, indexOfBottomLine);
-						if (assignmentExpression) {
-							const leftNode = assignmentExpression.left;
-							if (leftNode?.object?.type === "ThisExpression" && leftNode?.property?.type === "Identifier") {
-								const members = UIClass.getMembers();
-								const member = members.find(member => member.name === leftNode.property.name);
-								if (member) {
-									if (visibilityDoc) {
-										member.visibility = visibilityDoc.tag;
-									}
-									if (typeDoc && member.acornNode) {
-										const field = (member as IUIField);
-										field.type = typeDoc.type;
-									}
-									if (isStatic) {
-										member.static = isStatic;
-									}
-									if (ui5ignored) {
-										member.ui5ignored = true;
-									}
-									if (isAbstract) {
-										member.abstract = true;
-										UIClass.abstract = true;
-									}
-								}
-							}
-
-						}
-					}
-				}
-			});
-		}
-	}
 
 	public static getFieldsAndMethodsForClass(className: string, returnDuplicates = true) {
 		const fieldsAndMethods: IFieldsAndMethods = {
@@ -358,12 +291,12 @@ export class UIClassFactory {
 
 	private static _enrichMethodParamsWithEventType(CurrentUIClass: CustomUIClass) {
 		// console.time(`Enriching types ${CurrentUIClass.className}`);
-		this._enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass);
+		this._enrichMethodParamsWithEventTypeFromViewsAndFragments(CurrentUIClass);
 		this._enrichMethodParamsWithEventTypeFromAttachEvents(CurrentUIClass);
 		// console.timeEnd(`Enriching types ${CurrentUIClass.className}`);
 	}
 
-	private static _enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass: CustomUIClass) {
+	private static _enrichMethodParamsWithEventTypeFromViewsAndFragments(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass, [], true, true, true);
 		const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
 		XMLDocuments.forEach(XMLDocument => {
