@@ -1,7 +1,7 @@
-import { IError, Linter, ITag } from "./abstraction/Linter";
+import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
-import { XMLParser } from "../../../../../utils/XMLParser";
+import { ITag, XMLParser } from "../../../../../utils/XMLParser";
 import { IUIAggregation } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { IXMLFile } from "../../../../../utils/FileReader";
 import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";

@@ -2,8 +2,7 @@ import * as vscode from "vscode";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FileReader } from "../../../utils/FileReader";
-import { XMLParser } from "../../../utils/XMLParser";
-import { ITag } from "../../diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { ITag, XMLParser } from "../../../utils/XMLParser";
 import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
 import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
 export class XMLDefinitionProvider {

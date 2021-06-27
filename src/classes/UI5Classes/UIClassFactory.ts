@@ -207,14 +207,14 @@ export class UIClassFactory {
 					});
 
 					if (typeDoc) {
-						const variableDeclaration = this._getAcornVariableDeclarationAtIndex(UIClass, indexOfBottomLine);
+						const variableDeclaration = AcornSyntaxAnalyzer.getAcornVariableDeclarationAtIndex(UIClass, indexOfBottomLine);
 						if (variableDeclaration?.declarations && variableDeclaration.declarations[0]) {
 							variableDeclaration.declarations[0]._acornSyntaxAnalyserType = typeDoc.type;
 						}
 					}
 
 					if (typeDoc || visibilityDoc || ui5ignored || isAbstract || isStatic) {
-						const assignmentExpression = this._getAcornAssignmentExpressionAtIndex(UIClass, indexOfBottomLine);
+						const assignmentExpression = AcornSyntaxAnalyzer.getAcornAssignmentExpressionAtIndex(UIClass, indexOfBottomLine);
 						if (assignmentExpression) {
 							const leftNode = assignmentExpression.left;
 							if (leftNode?.object?.type === "ThisExpression" && leftNode?.property?.type === "Identifier") {
@@ -246,38 +246,6 @@ export class UIClassFactory {
 				}
 			});
 		}
-	}
-
-	//TODO: Move to acorn syntax analyser
-	private static _getAcornVariableDeclarationAtIndex(UIClass: CustomUIClass, index: number) {
-		let variableDeclaration: any | undefined;
-		const method = UIClass.methods.find(method => {
-			return method.acornNode?.start <= index && method.acornNode?.end >= index;
-		});
-
-		if (method && method.acornNode) {
-			variableDeclaration = AcornSyntaxAnalyzer.expandAllContent(method.acornNode).find((node: any) => {
-				return node.start === index && node.type === "VariableDeclaration";
-			});
-		}
-
-		return variableDeclaration;
-	}
-
-	//TODO: Move to acorn syntax analyser
-	private static _getAcornAssignmentExpressionAtIndex(UIClass: CustomUIClass, index: number) {
-		let assignmentExpression: any | undefined;
-		const method = UIClass.methods.find(method => {
-			return method.acornNode?.start <= index && method.acornNode?.end >= index;
-		});
-
-		if (method && method.acornNode) {
-			assignmentExpression = AcornSyntaxAnalyzer.expandAllContent(method.acornNode).find((node: any) => {
-				return node.start === index && node.type === "AssignmentExpression";
-			});
-		}
-
-		return assignmentExpression;
 	}
 
 	public static getFieldsAndMethodsForClass(className: string, returnDuplicates = true) {

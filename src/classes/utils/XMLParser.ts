@@ -2,8 +2,19 @@ import * as vscode from "vscode";
 import { FileReader, ICommentPositions, IXMLFile } from "./FileReader";
 import { IUIMethod } from "../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { IHierarchicalTag, ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 
+
+//TODO: Move to xml parser
+export interface ITag {
+	text: string;
+	positionBegin: number;
+	positionEnd: number;
+	attributes?: string[];
+}
+
+export interface IHierarchicalTag extends ITag {
+	tags: IHierarchicalTag[]
+}
 export enum PositionType {
 	InTheTagAttributes = "1",
 	Content = "2",

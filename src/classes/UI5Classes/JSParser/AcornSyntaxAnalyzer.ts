@@ -1327,4 +1327,34 @@ export class AcornSyntaxAnalyzer {
 
 		return returnClassName;
 	}
+
+	static getAcornVariableDeclarationAtIndex(UIClass: CustomUIClass, index: number) {
+		let variableDeclaration: any | undefined;
+		const method = UIClass.methods.find(method => {
+			return method.acornNode?.start <= index && method.acornNode?.end >= index;
+		});
+
+		if (method && method.acornNode) {
+			variableDeclaration = AcornSyntaxAnalyzer.expandAllContent(method.acornNode).find((node: any) => {
+				return node.start === index && node.type === "VariableDeclaration";
+			});
+		}
+
+		return variableDeclaration;
+	}
+
+	static getAcornAssignmentExpressionAtIndex(UIClass: CustomUIClass, index: number) {
+		let assignmentExpression: any | undefined;
+		const method = UIClass.methods.find(method => {
+			return method.acornNode?.start <= index && method.acornNode?.end >= index;
+		});
+
+		if (method && method.acornNode) {
+			assignmentExpression = AcornSyntaxAnalyzer.expandAllContent(method.acornNode).find((node: any) => {
+				return node.start === index && node.type === "AssignmentExpression";
+			});
+		}
+
+		return assignmentExpression;
+	}
 }

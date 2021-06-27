@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { IXMLFile } from "../../../../../utils/FileReader";
-import { IHierarchicalTag } from "../../../../diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import { Node } from "./Node";
 import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
+import { IHierarchicalTag } from "../../../../../utils/XMLParser";
 
 export abstract class XMLNode extends Node {
 	readonly tag: IHierarchicalTag;

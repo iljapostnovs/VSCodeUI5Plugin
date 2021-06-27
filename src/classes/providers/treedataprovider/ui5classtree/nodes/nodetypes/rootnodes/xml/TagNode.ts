@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import { IXMLFile } from "../../../../../../../utils/FileReader";
-import { XMLParser } from "../../../../../../../utils/XMLParser";
-import { IHierarchicalTag } from "../../../../../../diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { IHierarchicalTag, XMLParser } from "../../../../../../../utils/XMLParser";
 import { XMLNode } from "../../../abstraction/XMLNode";
 
 export class TagNode extends XMLNode {

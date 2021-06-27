@@ -5,9 +5,8 @@ import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer"
 import * as path from "path";
 import { UIClassFactory } from "../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import { TextDocumentTransformer } from "./TextDocumentTransformer";
-import { XMLParser } from "./XMLParser";
+import { ITag, XMLParser } from "./XMLParser";
 import { IReferenceCodeLensCacheable } from "../providers/codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 import { ResourceModelData } from "../UI5Classes/ResourceModelData";
 const fileSeparator = path.sep;
