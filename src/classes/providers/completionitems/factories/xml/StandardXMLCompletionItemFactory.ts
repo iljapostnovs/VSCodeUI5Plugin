@@ -3,7 +3,6 @@ import { UI5Plugin } from "../../../../../UI5Plugin";
 import { SAPNode } from "../../../../librarydata/SAPNode";
 import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
 import { UI5MetadataPreloader } from "../../../../librarydata/UI5MetadataDAO";
-import { ResourceModelData } from "../../../../UI5Classes/ResourceModelData";
 import { SAPIcons } from "../../../../UI5Classes/SAPIcons";
 import { AbstractUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { StandardUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
@@ -33,8 +32,7 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 		const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
 		await Promise.all([
 			metadataPreloader.preloadLibs(),
-			SAPIcons.preloadIcons(),
-			ResourceModelData.readTexts()
+			SAPIcons.preloadIcons()
 		]);
 		console.log("Libs are preloaded");
 

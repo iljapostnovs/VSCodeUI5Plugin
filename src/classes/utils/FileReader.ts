@@ -9,6 +9,7 @@ import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/L
 import { TextDocumentTransformer } from "./TextDocumentTransformer";
 import { XMLParser } from "./XMLParser";
 import { IReferenceCodeLensCacheable } from "../providers/codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
+import { ResourceModelData } from "../UI5Classes/ResourceModelData";
 const fileSeparator = path.sep;
 const escapedFileSeparator = "\\" + path.sep;
 
@@ -313,7 +314,7 @@ export class FileReader {
 		return XMLFile.idClassMap[controlId];
 	}
 
-	static readAllViewsAndFragments() {
+	static readAllFiles() {
 		return vscode.window.withProgress({
 			location: vscode.ProgressLocation.Window,
 			title: "Parsing project files",
@@ -333,6 +334,7 @@ export class FileReader {
 				increment: 33
 			});
 			this._readAllJSFiles();
+			ResourceModelData.readTexts();
 		});
 	}
 

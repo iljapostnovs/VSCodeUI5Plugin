@@ -6,6 +6,8 @@ import { AbstractUIClass, IUIField, IUIAggregation, IUIEvent, IUIMethod, IUIProp
 import * as commentParser from "comment-parser";
 import { IReferenceCodeLensCacheable } from "../../../providers/codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 import { IViewsAndFragments } from "../../UIClassFactory";
+import { IAcornLocation } from "../../../adapters/vscode/RangeAdapter";
+import { IAcornPosition } from "../../../adapters/vscode/PositionAdapter";
 const acornLoose = require("acorn-loose");
 
 interface IUIDefine {
@@ -36,6 +38,7 @@ interface IComment {
 	start: number;
 	end: number;
 	jsdoc: any;
+	loc: IAcornLocation
 }
 export interface UI5Ignoreable {
 	ui5ignored?: boolean;
@@ -310,13 +313,17 @@ export class CustomUIClass extends AbstractUIClass {
 				this.fileContent = acornLoose.parse(documentText, {
 					ecmaVersion: 11,
 					locations: true,
-					onComment: (isBlock: boolean, text: string, start: number, end: number) => {
+					onComment: (isBlock: boolean, text: string, start: number, end: number, startLoc: IAcornPosition, endLoc: IAcornPosition) => {
 						if (isBlock && text?.startsWith("*")) {
 							this.comments.push({
 								text: text,
 								start: start,
 								end: end,
-								jsdoc: commentParser.parse(`/*${text}*/`)[0]
+								jsdoc: commentParser.parse(`/*${text}*/`)[0],
+								loc: {
+									start: startLoc,
+									end: endLoc
+								}
 							});
 						}
 
