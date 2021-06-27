@@ -135,31 +135,6 @@ suite("Extension Test Suite", () => {
 		}
 	});
 
-	test("JS Linter working properly - second run", async () => {
-		const testData = data.JSLinter;
-
-		for (const data of testData) {
-			const filePath = FileReader.getClassFSPathFromClassName(data.className);
-			if (filePath) {
-				const document = await vscode.workspace.openTextDocument(filePath);
-				const startTime = new Date().getTime();
-				const errors = await JSLinter.getLintingErrors(document);
-				const endTime = new Date().getTime();
-				const timeSpent = endTime - startTime;
-
-				assert.strictEqual(errors.length, data.errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
-				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
-				console.log(`JS Linter for ${data.className} spent ${timeSpent}ms`);
-
-				data.errors.forEach(dataError => {
-					const errorInDocument = errors.find(error => error.message === dataError.text);
-					assert.ok(!!errorInDocument, `"${data.className}" class should have "${dataError.text}" error, but it doesn't`);
-				});
-			}
-
-		}
-	});
-
 	test("XML View Linter working properly", async () => {
 		const testData = data.XMLLinter;
 
