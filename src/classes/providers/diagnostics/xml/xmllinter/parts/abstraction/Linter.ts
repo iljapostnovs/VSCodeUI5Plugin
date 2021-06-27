@@ -10,6 +10,7 @@ export interface IError {
 	severity?: vscode.DiagnosticSeverity;
 }
 
+//TODO: Move to xml parser
 export interface ITag {
 	text: string;
 	positionBegin: number;

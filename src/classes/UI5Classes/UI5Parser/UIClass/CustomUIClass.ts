@@ -309,6 +309,7 @@ export class CustomUIClass extends AbstractUIClass {
 			try {
 				this.fileContent = acornLoose.parse(documentText, {
 					ecmaVersion: 11,
+					locations: true,
 					onComment: (isBlock: boolean, text: string, start: number, end: number) => {
 						if (isBlock && text?.startsWith("*")) {
 							this.comments.push({

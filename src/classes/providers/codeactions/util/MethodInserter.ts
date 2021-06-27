@@ -2,9 +2,9 @@ import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUICla
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../utils/FileReader";
 import * as vscode from "vscode";
-import LineColumn = require("line-column");
 import { ReusableMethods } from "../../reuse/ReusableMethods";
 import { CodeGeneratorFactory } from "../../../templateinserters/codegenerationstrategies/CodeGeneratorFactory";
+import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
 
 export enum InsertType {
 	Method = "Method",
@@ -25,21 +25,20 @@ export class MethodInserter {
 			}
 			const { offset, insertText } = this._getInsertTextAndOffset(insertContent, className);
 
-			const lineColumn = LineColumn(UIClass.classText).fromIndex(offset);
+			const position = PositionAdapter.offsetToPosition(UIClass.classText, offset);
 
-			if (lineColumn) {
+			if (position) {
 				insertMethodCodeAction = new vscode.CodeAction(`Create "${memberName}" in "${className}" class`, vscode.CodeActionKind.QuickFix);
 				insertMethodCodeAction.isPreferred = true;
 				insertMethodCodeAction.edit = new vscode.WorkspaceEdit();
-				const position = new vscode.Position(lineColumn.line - 1, lineColumn.col);
 				insertMethodCodeAction.edit.insert(classUri, position, insertText);
 				insertMethodCodeAction.command = {
 					command: "vscode.open",
 					title: "Open file",
 					arguments: [classUri, {
 						selection: new vscode.Range(
-							lineColumn.line + 2, 3,
-							lineColumn.line + 2, 3
+							position.line + 3, 3,
+							position.line + 3, 3
 						)
 					}]
 				};

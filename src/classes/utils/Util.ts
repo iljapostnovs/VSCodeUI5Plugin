@@ -1,6 +1,5 @@
 import LineColumn = require("line-column");
 import * as vscode from "vscode";
-
 export class Util {
 	static positionsToVSCodeRange(content: string, positionBegin: number, positionEnd: number) {
 		const lineColumnBegin = LineColumn(content).fromIndex(positionBegin);

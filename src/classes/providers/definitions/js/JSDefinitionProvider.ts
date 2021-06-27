@@ -4,11 +4,11 @@ import { CustomUIClass, ICustomClassUIField, ICustomClassUIMethod } from "../../
 import { FileReader } from "../../../utils/FileReader";
 import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { URLBuilder } from "../../../utils/URLBuilder";
-import LineColumn = require("line-column");
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
 import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { XMLParser } from "../../../utils/XMLParser";
+import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
 export class JSDefinitionProvider {
 	public static getPositionAndUriOfCurrentVariableDefinition(document: vscode.TextDocument, position: vscode.Position, openInBrowserIfStandardMethod = false) {
 		let location: vscode.Location | vscode.LocationLink[] | undefined;
@@ -48,11 +48,8 @@ export class JSDefinitionProvider {
 				const parentMemberClass = UIClassFactory.getUIClass(parentMember.owner);
 				const classUri = parentMemberClass && parentMemberClass instanceof CustomUIClass && parentMemberClass.classFSPath && vscode.Uri.file(parentMemberClass.classFSPath);
 				if (classUri && parentMemberClass instanceof CustomUIClass) {
-					const position = LineColumn(parentMemberClass.classText).fromIndex(parentMember.memberPropertyNode.start);
-					if (position) {
-						const vscodePosition = new vscode.Position(position.line - 1, position.col - 1);
-						location = new vscode.Location(classUri, vscodePosition);
-					}
+					const vscodePosition = PositionAdapter.acornPositionToVSCodePosition(parentMember.memberPropertyNode.loc.start);
+					location = new vscode.Location(classUri, vscodePosition);
 				}
 			}
 		}
@@ -164,13 +161,12 @@ export class JSDefinitionProvider {
 
 							if (tag) {
 								const classUri = vscode.Uri.file(XMLDocument.fsPath);
-								const position = LineColumn(XMLDocument.content).fromIndex(tag.positionBegin);
+								const position = PositionAdapter.offsetToPosition(XMLDocument.content, tag.positionBegin);
 								if (position) {
-									const vscodePosition = new vscode.Position(position.line - 1, position.col - 1);
 									const originSelectionPositionBegin = document.positionAt(literal.start + 1);
 									const originSelectionPositionEnd = document.positionAt(literal.end - 1);
 									location = [{
-										targetRange: new vscode.Range(vscodePosition, vscodePosition),
+										targetRange: new vscode.Range(position, position),
 										targetUri: classUri,
 										originSelectionRange: new vscode.Range(originSelectionPositionBegin, originSelectionPositionEnd)
 									}];
@@ -199,17 +195,15 @@ export class JSDefinitionProvider {
 				if (classPath) {
 					const classUri = vscode.Uri.file(classPath);
 					if (currentMember.memberPropertyNode.start) {
-						const position = LineColumn(UIClass.classText).fromIndex(currentMember.memberPropertyNode.start);
-						if (position) {
-							const methodPosition = new vscode.Position(position.line - 1, position.col - 1);
-							location = new vscode.Location(classUri, methodPosition);
-						}
+						const position = PositionAdapter.acornPositionToVSCodePosition(currentMember.memberPropertyNode.loc.start);
+						location = new vscode.Location(classUri, position);
+
 					}
 				}
 			}
-		}
 
-		return location;
+			return location;
+		}
 	}
 
 	private static _openClassMethodInTheBrowser(classNameDotNotation: string, methodName: string) {
