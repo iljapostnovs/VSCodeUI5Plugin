@@ -5,7 +5,6 @@ import { JSClass } from "./UI5Parser/UIClass/JSClass";
 import { AcornSyntaxAnalyzer } from "./JSParser/AcornSyntaxAnalyzer";
 import * as vscode from "vscode";
 import { FileReader, IFragment, IView } from "../utils/FileReader";
-import LineColumn = require("line-column");
 
 export interface IFieldsAndMethods {
 	className: string;
@@ -98,9 +97,8 @@ export class UIClassFactory {
 	public static enrichTypesInCustomClass(UIClass: CustomUIClass) {
 		// console.time(`Enriching ${UIClass.className} took`);
 		this._preloadParentIfNecessary(UIClass);
-		this._enrichVariablesWithJSDocTypesAndVisibility(UIClass);
 		this._enrichMethodParamsWithEventType(UIClass);
-		this._checkIfFieldIsUsedInXMLDocuments(UIClass);
+		this._checkIfMembersAreUsedInXMLDocuments(UIClass);
 		UIClass.methods.forEach(method => {
 			AcornSyntaxAnalyzer.findMethodReturnType(method, UIClass.className, false, true);
 		});
@@ -115,167 +113,30 @@ export class UIClassFactory {
 		}
 	}
 
-	//TODO: Refactor this mess
-	private static _checkIfFieldIsUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
+	private static _checkIfMembersAreUsedInXMLDocuments(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass, [], true, true, true);
-		viewsAndFragments.views.forEach(viewOfTheControl => {
+		const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
+		XMLDocuments.forEach(XMLDocument => {
+			CurrentUIClass.methods.forEach(method => {
+				if (!method.mentionedInTheXMLDocument) {
+					const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
+					method.mentionedInTheXMLDocument = regex.test(XMLDocument.content);
+				}
+			});
 			CurrentUIClass.fields.forEach(field => {
 				if (!field.mentionedInTheXMLDocument) {
 					const regex = new RegExp(`(\\.|"|')${field.name}("|'|\\.)`);
-					if (viewOfTheControl) {
-						const isFieldMentionedInTheView = regex.test(viewOfTheControl.content);
+					if (XMLDocument) {
+						const isFieldMentionedInTheView = regex.test(XMLDocument.content);
 						if (isFieldMentionedInTheView) {
 							field.mentionedInTheXMLDocument = true;
-						} else {
-							viewOfTheControl.fragments.find(fragment => {
-								const isFieldMentionedInTheFragment = regex.test(fragment.content);
-								if (isFieldMentionedInTheFragment) {
-									field.mentionedInTheXMLDocument = true;
-								}
-
-								return isFieldMentionedInTheFragment;
-							});
 						}
 					}
-
-					if (!field.mentionedInTheXMLDocument) {
-						viewOfTheControl.fragments.find(fragment => {
-							const isMethodMentionedInTheFragment = regex.test(fragment.content);
-							if (isMethodMentionedInTheFragment) {
-								field.mentionedInTheXMLDocument = true;
-							}
-
-							return isMethodMentionedInTheFragment;
-						});
-					}
-				}
-			});
-		});
-
-		viewsAndFragments.fragments.forEach(fragment => {
-			CurrentUIClass.methods.forEach(method => {
-				if (!method.isEventHandler) {
-					const regex = new RegExp(`("\\.|")${method.name}"`);
-					const isMethodMentionedInTheFragment = regex.test(fragment.content);
-					if (isMethodMentionedInTheFragment) {
-						method.isEventHandler = true;
-						method.mentionedInTheXMLDocument = true;
-						if (method?.acornNode?.params && method?.acornNode?.params[0]) {
-							method.acornNode.params[0].jsType = "sap.ui.base.Event";
-						}
-					}
-				}
-				if (!method.isEventHandler) {
-					const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
-					const isMethodMentionedInTheFragment = regex.test(fragment.content);
-					if (isMethodMentionedInTheFragment) {
-						method.mentionedInTheXMLDocument = true;
-					}
-				}
-			});
-			CurrentUIClass.fields.forEach(field => {
-				if (!field.mentionedInTheXMLDocument) {
-					const regex = new RegExp(`\\.${field.name}\\.`);
-					field.mentionedInTheXMLDocument = regex.test(fragment.content);
 				}
 			});
 		});
 	}
 
-	private static _enrichVariablesWithJSDocTypesAndVisibility(UIClass: CustomUIClass) {
-		//TODO: merge this with logic in custom ui class?
-		const classLineColumn = LineColumn(UIClass.classText);
-		UIClass.comments.forEach(comment => {
-			const typeDoc = comment.jsdoc?.tags?.find((tag: any) => {
-				return tag.tag === "type";
-			});
-			const visibility = ["protected", "public", "private"];
-			const ui5ignored = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "ui5ignore");
-			const isAbstract = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "abstract");
-			const isStatic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "static");
-			const visibilityDoc = comment.jsdoc?.tags?.find((tag: any) => {
-				return visibility.includes(tag.tag);
-			});
-			if (typeDoc || visibilityDoc || ui5ignored || isAbstract || isStatic) {
-				const commentLineColumnEnd = classLineColumn.fromIndex(comment.end);
-				const commentLineColumnStart = classLineColumn.fromIndex(comment.start);
-				if (commentLineColumnStart && commentLineColumnEnd) {
-					const lineDifference = commentLineColumnEnd.line - commentLineColumnStart.line;
-					commentLineColumnStart.line += lineDifference + 1;
-					const indexOfBottomLine = classLineColumn.toIndex(commentLineColumnStart);
-
-					if (typeDoc) {
-						const variableDeclaration = this._getAcornVariableDeclarationAtIndex(UIClass, indexOfBottomLine);
-						if (variableDeclaration?.declarations && variableDeclaration.declarations[0]) {
-							variableDeclaration.declarations[0]._acornSyntaxAnalyserType = typeDoc.type;
-						}
-					}
-
-					if (typeDoc || visibilityDoc || ui5ignored || isAbstract || isStatic) {
-						const assignmentExpression = this._getAcornAssignmentExpressionAtIndex(UIClass, indexOfBottomLine);
-						if (assignmentExpression) {
-							const leftNode = assignmentExpression.left;
-							if (leftNode?.object?.type === "ThisExpression" && leftNode?.property?.type === "Identifier") {
-								const members = UIClass.getMembers();
-								const member = members.find(member => member.name === leftNode.property.name);
-								if (member) {
-									if (visibilityDoc) {
-										member.visibility = visibilityDoc.tag;
-									}
-									if (typeDoc && member.acornNode) {
-										const field = (member as IUIField);
-										field.type = typeDoc.type;
-									}
-									if (isStatic) {
-										member.static = isStatic;
-									}
-									if (ui5ignored) {
-										member.ui5ignored = true;
-									}
-									if (isAbstract) {
-										member.abstract = true;
-										UIClass.abstract = true;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		});
-	}
-
-	//TODO: Move to acorn syntax analyser
-	private static _getAcornVariableDeclarationAtIndex(UIClass: CustomUIClass, index: number) {
-		let variableDeclaration: any | undefined;
-		const method = UIClass.methods.find(method => {
-			return method.acornNode?.start <= index && method.acornNode?.end >= index;
-		});
-
-		if (method && method.acornNode) {
-			variableDeclaration = AcornSyntaxAnalyzer.expandAllContent(method.acornNode).find((node: any) => {
-				return node.start === index && node.type === "VariableDeclaration";
-			});
-		}
-
-		return variableDeclaration;
-	}
-
-	//TODO: Move to acorn syntax analyser
-	private static _getAcornAssignmentExpressionAtIndex(UIClass: CustomUIClass, index: number) {
-		let assignmentExpression: any | undefined;
-		const method = UIClass.methods.find(method => {
-			return method.acornNode?.start <= index && method.acornNode?.end >= index;
-		});
-
-		if (method && method.acornNode) {
-			assignmentExpression = AcornSyntaxAnalyzer.expandAllContent(method.acornNode).find((node: any) => {
-				return node.start === index && node.type === "AssignmentExpression";
-			});
-		}
-
-		return assignmentExpression;
-	}
 
 	public static getFieldsAndMethodsForClass(className: string, returnDuplicates = true) {
 		const fieldsAndMethods: IFieldsAndMethods = {
@@ -430,80 +291,27 @@ export class UIClassFactory {
 
 	private static _enrichMethodParamsWithEventType(CurrentUIClass: CustomUIClass) {
 		// console.time(`Enriching types ${CurrentUIClass.className}`);
-		this._enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass);
+		this._enrichMethodParamsWithEventTypeFromViewsAndFragments(CurrentUIClass);
 		this._enrichMethodParamsWithEventTypeFromAttachEvents(CurrentUIClass);
 		// console.timeEnd(`Enriching types ${CurrentUIClass.className}`);
 	}
 
-	private static _enrichMethodParamsWithEventTypeFromViewAndFragments(CurrentUIClass: CustomUIClass) {
+	private static _enrichMethodParamsWithEventTypeFromViewsAndFragments(CurrentUIClass: CustomUIClass) {
 		const viewsAndFragments = this.getViewsAndFragmentsOfControlHierarchically(CurrentUIClass, [], true, true, true);
-		viewsAndFragments.views.forEach(viewOfTheControl => {
+		const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
+		XMLDocuments.forEach(XMLDocument => {
 			CurrentUIClass.methods.forEach(method => {
 				if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
 					const regex = new RegExp(`(\\.|"|')${method.name}"`);
-					if (viewOfTheControl) {
-						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
+					if (XMLDocument) {
+						const isMethodMentionedInTheView = regex.test(XMLDocument.content);
 						if (isMethodMentionedInTheView) {
 							method.mentionedInTheXMLDocument = true;
 							method.isEventHandler = true;
 							if (method?.acornNode?.params && method?.acornNode?.params[0]) {
 								method.acornNode.params[0].jsType = "sap.ui.base.Event";
 							}
-						} else {
-							viewOfTheControl.fragments.find(fragment => {
-								const isMethodMentionedInTheFragment = regex.test(fragment.content);
-								if (isMethodMentionedInTheFragment) {
-									method.isEventHandler = true;
-									method.mentionedInTheXMLDocument = true;
-									if (method?.acornNode?.params && method?.acornNode?.params[0]) {
-										method.acornNode.params[0].jsType = "sap.ui.base.Event";
-									}
-								}
-
-								return isMethodMentionedInTheFragment;
-							});
 						}
-					}
-
-					if (!method.isEventHandler && !method.mentionedInTheXMLDocument) {
-						const regex = new RegExp(`(\\.|"|')${method.name}(\\.|"|'|\\()`);
-						const isMethodMentionedInTheView = regex.test(viewOfTheControl.content);
-						if (isMethodMentionedInTheView) {
-							method.mentionedInTheXMLDocument = true;
-
-						} else {
-							viewOfTheControl.fragments.find(fragment => {
-								const isMethodMentionedInTheFragment = regex.test(fragment.content);
-								if (isMethodMentionedInTheFragment) {
-									method.mentionedInTheXMLDocument = true;
-								}
-
-								return isMethodMentionedInTheFragment;
-							});
-						}
-					}
-				}
-			});
-		});
-
-		viewsAndFragments.fragments.forEach(fragment => {
-			CurrentUIClass.methods.forEach(method => {
-				if (!method.isEventHandler) {
-					const regex = new RegExp(`(\\.|"|')${method.name}"`);
-					const isMethodMentionedInTheFragment = regex.test(fragment.content);
-					if (isMethodMentionedInTheFragment) {
-						method.isEventHandler = true;
-						method.mentionedInTheXMLDocument = true;
-						if (method?.acornNode?.params && method?.acornNode?.params[0]) {
-							method.acornNode.params[0].jsType = "sap.ui.base.Event";
-						}
-					}
-				}
-				if (!method.isEventHandler) {
-					const regex = new RegExp(`(\\.|"|')${method.name}'`);
-					const isMethodMentionedInTheFragment = regex.test(fragment.content);
-					if (isMethodMentionedInTheFragment) {
-						method.mentionedInTheXMLDocument = true;
 					}
 				}
 			});

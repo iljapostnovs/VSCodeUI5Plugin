@@ -5,7 +5,7 @@ import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass"
 import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../utils/FileReader";
 import { XMLParser } from "../../utils/XMLParser";
-import { Util } from "../../utils/Util";
+import { RangeAdapter } from "../../adapters/vscode/RangeAdapter";
 
 interface IWorkspaceEdit {
 	uri: vscode.Uri;
@@ -118,14 +118,12 @@ export class JSRenameProvider {
 							const memberExpressionClassName = strategy.acornGetClassName(UIClass.className, memberExpression.property.start, true);
 							if (memberExpressionClassName === className && UIClass.classFSPath) {
 								const classUri = vscode.Uri.file(UIClass.classFSPath);
-								const range = Util.positionsToVSCodeRange(UIClass.classText, memberExpression.property.start, memberExpression.property.end);
-								if (range) {
-									workspaceEdits.push({
-										uri: classUri,
-										range: range,
-										newValue: newMemberName
-									});
-								}
+								const range = RangeAdapter.acornLocationToVSCodeRange(memberExpression.property.loc);
+								workspaceEdits.push({
+									uri: classUri,
+									range: range,
+									newValue: newMemberName
+								});
 							}
 						});
 					}
@@ -154,7 +152,7 @@ export class JSRenameProvider {
 						const positionOfEventHandlerInAttributeValueBegin = positionOfValueBegin + attributeValue.indexOf(oldMemberName);
 						const positionOfEventHandlerInAttributeValueEnd = positionOfEventHandlerInAttributeValueBegin + oldMemberName.length;
 						const classUri = vscode.Uri.file(viewOrFragment.fsPath);
-						const range = Util.positionsToVSCodeRange(viewOrFragment.content, positionOfEventHandlerInAttributeValueBegin, positionOfEventHandlerInAttributeValueEnd);
+						const range = RangeAdapter.offsetsToVSCodeRange(viewOrFragment.content, positionOfEventHandlerInAttributeValueBegin, positionOfEventHandlerInAttributeValueEnd);
 						if (range) {
 							workspaceEdits.push({
 								uri: classUri,

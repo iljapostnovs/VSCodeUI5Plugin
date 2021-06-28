@@ -4,7 +4,7 @@ import { ICustomClassUIField, ICustomClassUIMethod, CustomUIClass } from "../../
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import { AbstractUIClass, IUIField, IUIMethod } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 export class WrongOverrideLinter extends Linter {
 	protected className = "WrongOverrideLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -36,19 +36,17 @@ export class WrongOverrideLinter extends Linter {
 		let error: IError | undefined;
 		const parentMember = this._getMemberFromParent(UIClass, UIMember);
 		if (parentMember && parentMember.visibility === "private" && UIMember.memberPropertyNode) {
-			const range = Util.positionsToVSCodeRange(UIClass.classText, UIMember.memberPropertyNode.start, UIMember.memberPropertyNode.end);
-			if (range) {
-				error = {
-					message: `You can't override "${UIMember.name}" because it is a private member of class "${parentMember.owner}"`,
-					code: "UI5Plugin",
-					source: "Wrong Override Linter",
-					range: range,
-					acornNode: UIMember.acornNode,
-					methodName: UIMember.name,
-					sourceClassName: UIClass.className,
-					severity: vscode.DiagnosticSeverity.Error
-				};
-			}
+			const range = RangeAdapter.acornLocationToVSCodeRange(UIMember.memberPropertyNode.loc);
+			error = {
+				message: `You can't override "${UIMember.name}" because it is a private member of class "${parentMember.owner}"`,
+				code: "UI5Plugin",
+				source: "Wrong Override Linter",
+				range: range,
+				acornNode: UIMember.acornNode,
+				methodName: UIMember.name,
+				sourceClassName: UIClass.className,
+				severity: vscode.DiagnosticSeverity.Error
+			};
 		}
 
 		return error;

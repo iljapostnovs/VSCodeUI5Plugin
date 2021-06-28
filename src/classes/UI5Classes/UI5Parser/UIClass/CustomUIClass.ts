@@ -6,6 +6,9 @@ import { AbstractUIClass, IUIField, IUIAggregation, IUIEvent, IUIMethod, IUIProp
 import * as commentParser from "comment-parser";
 import { IReferenceCodeLensCacheable } from "../../../providers/codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 import { IViewsAndFragments } from "../../UIClassFactory";
+import { IAcornLocation } from "../../../adapters/vscode/RangeAdapter";
+import { IAcornPosition } from "../../../adapters/vscode/PositionAdapter";
+import LineColumn = require("line-column");
 const acornLoose = require("acorn-loose");
 
 interface IUIDefine {
@@ -36,6 +39,7 @@ interface IComment {
 	start: number;
 	end: number;
 	jsdoc: any;
+	loc: IAcornLocation
 }
 export interface UI5Ignoreable {
 	ui5ignored?: boolean;
@@ -87,6 +91,7 @@ export class CustomUIClass extends AbstractUIClass {
 		this._enrichMemberInfoWithJSDocs();
 		this._enrichMethodParamsWithHungarianNotation();
 		this._fillIsAbstract();
+		this._enrichVariablesWithJSDocTypesAndVisibility();
 	}
 
 	getMembers(): ICustomMember[] {
@@ -309,13 +314,18 @@ export class CustomUIClass extends AbstractUIClass {
 			try {
 				this.fileContent = acornLoose.parse(documentText, {
 					ecmaVersion: 11,
-					onComment: (isBlock: boolean, text: string, start: number, end: number) => {
+					locations: true,
+					onComment: (isBlock: boolean, text: string, start: number, end: number, startLoc: IAcornPosition, endLoc: IAcornPosition) => {
 						if (isBlock && text?.startsWith("*")) {
 							this.comments.push({
 								text: text,
 								start: start,
 								end: end,
-								jsdoc: commentParser.parse(`/*${text}*/`)[0]
+								jsdoc: commentParser.parse(`/*${text}*/`)[0],
+								loc: {
+									start: startLoc,
+									end: endLoc
+								}
 							});
 						}
 
@@ -1311,4 +1321,70 @@ export class CustomUIClass extends AbstractUIClass {
 			}));
 		}
 	}
+	private _enrichVariablesWithJSDocTypesAndVisibility() {
+		//TODO: merge this with logic in custom ui class?
+		if (this.comments.length > 0) {
+
+			const classLineColumn = LineColumn(this.classText);
+			this.comments.forEach(comment => {
+				const typeDoc = comment.jsdoc?.tags?.find((tag: any) => {
+					return tag.tag === "type";
+				});
+				const visibility = ["protected", "public", "private"];
+				const ui5ignored = comment.jsdoc?.tags?.find((tag: any) => tag.tag === "ui5ignore");
+				const isAbstract = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "abstract");
+				const isStatic = !!comment.jsdoc?.tags?.find((tag: any) => tag.tag === "static");
+				const visibilityDoc = comment.jsdoc?.tags?.find((tag: any) => {
+					return visibility.includes(tag.tag);
+				});
+				if (typeDoc || visibilityDoc || ui5ignored || isAbstract || isStatic) {
+					const lineDifference = comment.loc.end.line - comment.loc.start.line;
+					const nextLine = comment.loc.start.line + lineDifference + 1;
+					const indexOfBottomLine = classLineColumn.toIndex({
+						line: nextLine,
+						col: comment.loc.start.column + 1
+					});
+
+					if (typeDoc) {
+						const variableDeclaration = AcornSyntaxAnalyzer.getAcornVariableDeclarationAtIndex(this, indexOfBottomLine);
+						if (variableDeclaration?.declarations && variableDeclaration.declarations[0]) {
+							variableDeclaration.declarations[0]._acornSyntaxAnalyserType = typeDoc.type;
+						}
+					}
+
+					if (typeDoc || visibilityDoc || ui5ignored || isAbstract || isStatic) {
+						const assignmentExpression = AcornSyntaxAnalyzer.getAcornAssignmentExpressionAtIndex(this, indexOfBottomLine);
+						if (assignmentExpression) {
+							const leftNode = assignmentExpression.left;
+							if (leftNode?.object?.type === "ThisExpression" && leftNode?.property?.type === "Identifier") {
+								const members = this.getMembers();
+								const member = members.find(member => member.name === leftNode.property.name);
+								if (member) {
+									if (visibilityDoc) {
+										member.visibility = visibilityDoc.tag;
+									}
+									if (typeDoc && member.acornNode) {
+										const field = (member as IUIField);
+										field.type = typeDoc.type;
+									}
+									if (isStatic) {
+										member.static = isStatic;
+									}
+									if (ui5ignored) {
+										member.ui5ignored = true;
+									}
+									if (isAbstract) {
+										member.abstract = true;
+										this.abstract = true;
+									}
+								}
+							}
+
+						}
+					}
+				}
+			});
+		}
+	}
+
 }

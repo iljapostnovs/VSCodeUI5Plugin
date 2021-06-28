@@ -13,7 +13,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	}
 
 	async generateUMLClassDiagrams(wsFolder: WorkspaceFolder) {
-		let diagram = "@startuml ClassDiagram\nskinparam linetype ortho\nset namespaceSeparator none\nskinparam dpi 600\n";
+		let diagram = "@startuml ClassDiagram\nskinparam linetype ortho\nset namespaceSeparator none\nskinparam dpi 300\n";
 
 		const classNames = FileReader.getAllJSClassNamesFromProject(wsFolder)
 			.filter(className => !className.includes("-"));
@@ -50,7 +50,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 		XMLFiles.concat(groupedClassNames.viewsUsed).forEach(XMLFile => {
 			const isView = XMLFile.fsPath.endsWith(".view.xml");
 			XMLFile.fragments.forEach(fragment => {
-				diagram += `${XMLFile.name}${isView ? "View" : "Fragment"} --> ${fragment.name}Fragment\n`;
+				diagram += `${XMLFile.name}${isView ? "View" : "Fragment"} ..> ${fragment.name}Fragment\n`;
 			});
 		});
 
@@ -165,7 +165,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 			if (dependency !== UIClass.parentClassNameDotNotation && UIClassFactory.getUIClass(dependency) instanceof CustomUIClass) {
 				const dependencyIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, dependency);
 				if (dependencyIsFromSameProject) {
-					diagram += `${UIClass.className} --> ${dependency}\n`;
+					diagram += `${UIClass.className} ..> ${dependency}\n`;
 				}
 			}
 		});
@@ -181,7 +181,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 			const dependencyIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, dependency.name);
 			if (dependencyIsFromSameProject) {
 				const isView = dependency.fsPath.endsWith(".view.xml");
-				diagram += `${UIClass.className} --> ${dependency.name}${isView ? "View" : "Fragment"}\n`;
+				diagram += `${UIClass.className} ..> ${dependency.name}${isView ? "View" : "Fragment"}\n`;
 			}
 		});
 

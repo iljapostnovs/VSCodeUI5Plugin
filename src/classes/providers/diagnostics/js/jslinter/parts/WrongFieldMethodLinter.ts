@@ -7,7 +7,7 @@ import { CustomUIClass, UI5Ignoreable } from "../../../../../UI5Classes/UI5Parse
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import { ConfigHandler } from "./config/ConfigHandler";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 export class WrongFieldMethodLinter extends Linter {
 	protected className = "WrongFieldMethodLinter";
 	public static timePerChar = 0;
@@ -135,20 +135,18 @@ export class WrongFieldMethodLinter extends Linter {
 								}
 								const isMethodException = ConfigHandler.checkIfMemberIsException(className, nextNodeName);
 								if (!isMethodException) {
-									const range = Util.positionsToVSCodeRange(UIClass.classText, nextNode.property.start, nextNode.property.end);
-									if (range) {
-										errorNodes.push(nextNode);
-										errors.push({
-											message: `"${nextNodeName}" does not exist in "${className}"`,
-											code: "UI5Plugin",
-											source: "Field/Method Linter",
-											range: range,
-											acornNode: nextNode,
-											type: CustomDiagnosticType.NonExistentMethod,
-											methodName: nextNodeName,
-											sourceClassName: className
-										});
-									}
+									const range = RangeAdapter.acornLocationToVSCodeRange(nextNode.property.loc);
+									errorNodes.push(nextNode);
+									errors.push({
+										message: `"${nextNodeName}" does not exist in "${className}"`,
+										code: "UI5Plugin",
+										source: "Field/Method Linter",
+										range: range,
+										acornNode: nextNode,
+										type: CustomDiagnosticType.NonExistentMethod,
+										methodName: nextNodeName,
+										sourceClassName: className
+									});
 									break;
 								}
 							} else {
@@ -170,20 +168,18 @@ export class WrongFieldMethodLinter extends Linter {
 									}
 
 									if (sErrorMessage) {
-										const range = Util.positionsToVSCodeRange(UIClass.classText, nextNode.property.start, nextNode.property.end);
-										if (range) {
-											errorNodes.push(nextNode);
-											errors.push({
-												message: sErrorMessage,
-												code: "UI5Plugin",
-												source: "Field/Method Linter",
-												range: range,
-												acornNode: nextNode,
-												methodName: nextNodeName,
-												sourceClassName: className,
-												severity: vscode.DiagnosticSeverity.Error
-											});
-										}
+										const range = RangeAdapter.acornLocationToVSCodeRange(nextNode.property.loc);
+										errorNodes.push(nextNode);
+										errors.push({
+											message: sErrorMessage,
+											code: "UI5Plugin",
+											source: "Field/Method Linter",
+											range: range,
+											acornNode: nextNode,
+											methodName: nextNodeName,
+											sourceClassName: className,
+											severity: vscode.DiagnosticSeverity.Error
+										});
 										break;
 									}
 								}

@@ -57,7 +57,7 @@ export class UI5Plugin {
 	private async _registerProviders() {
 		CommandRegistrator.register(false);
 		await CompletionItemRegistrator.register();
-		await FileReader.readAllViewsAndFragments();
+		await FileReader.readAllFiles();
 		FileWatcherMediator.register();
 		CommandRegistrator.register(true);
 		DefinitionProviderRegistrator.register();

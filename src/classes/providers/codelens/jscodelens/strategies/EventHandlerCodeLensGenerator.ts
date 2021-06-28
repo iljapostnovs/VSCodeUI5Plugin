@@ -5,7 +5,7 @@ import { FileReader, IXMLFile } from "../../../../utils/FileReader";
 import { XMLParser } from "../../../../utils/XMLParser";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { Util } from "../../../../utils/Util";
+import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
 
 interface IEventHandlerData {
 	name: string;
@@ -49,7 +49,7 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 				const positionBegin = document.positionAt(eventHandler.position);
 				const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
 				const range = new vscode.Range(positionBegin, positionEnd);
-				const rangeInView = Util.positionsToVSCodeRange(XMLText.content, eventHandlerXMLData.start, eventHandlerXMLData.end);
+				const rangeInView = RangeAdapter.offsetsToVSCodeRange(XMLText.content, eventHandlerXMLData.start, eventHandlerXMLData.end);
 
 				if (rangeInView) {
 					const classUri = vscode.Uri.file(XMLText.fsPath);
@@ -124,7 +124,7 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 					const positionBegin = document.positionAt(eventHandler.position);
 					const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
 					const range = new vscode.Range(positionBegin, positionEnd);
-					const rangeInView = Util.positionsToVSCodeRange(UIClass.classText, eventData.node.start, eventData.node.end);
+					const rangeInView = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, eventData.node.start, eventData.node.end);
 
 					if (rangeInView) {
 						const classUri = document.uri;

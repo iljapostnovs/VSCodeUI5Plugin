@@ -6,7 +6,7 @@ import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 export class UnusedMemberLinter extends Linter {
 	protected className = "UnusedMemberLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -26,18 +26,16 @@ export class UnusedMemberLinter extends Linter {
 					methodsAndFields.forEach((methodOrField: any) => {
 						const methodIsUsed = this._checkIfMemberIsUsed(customUIClasses, UIClass, methodOrField);
 						if (!methodIsUsed && methodOrField.memberPropertyNode) {
-							const range = Util.positionsToVSCodeRange(UIClass.classText, methodOrField.memberPropertyNode.start, methodOrField.memberPropertyNode.end);
-							if (range) {
-								errors.push({
-									source: "Unused method Linter",
-									acornNode: methodOrField.acornNode,
-									code: "UI5Plugin",
-									message: `No references found for "${methodOrField.name}" class member`,
-									range: range,
-									tags: [vscode.DiagnosticTag.Unnecessary],
-									severity: vscode.DiagnosticSeverity.Hint
-								});
-							}
+							const range = RangeAdapter.acornLocationToVSCodeRange(methodOrField.memberPropertyNode.loc);
+							errors.push({
+								source: "Unused method Linter",
+								acornNode: methodOrField.acornNode,
+								code: "UI5Plugin",
+								message: `No references found for "${methodOrField.name}" class member`,
+								range: range,
+								tags: [vscode.DiagnosticTag.Unnecessary],
+								severity: vscode.DiagnosticSeverity.Hint
+							});
 						}
 					});
 				}

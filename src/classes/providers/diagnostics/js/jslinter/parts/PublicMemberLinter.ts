@@ -6,7 +6,7 @@ import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 export class PublicMemberLinter extends Linter {
 	protected className = "PublicMemberLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -27,17 +27,15 @@ export class PublicMemberLinter extends Linter {
 						if (!isException) {
 							const methodIsUsed = this._checkIfMemberIsUsedElsewhere(customUIClasses, UIClass, method.name, method);
 							if (!methodIsUsed && method.position) {
-								const range = Util.positionsToVSCodeRange(UIClass.classText, method.memberPropertyNode.start, method.memberPropertyNode.end);
-								if (range) {
-									errors.push({
-										source: "Public member linter",
-										acornNode: method.acornNode,
-										code: "UI5Plugin",
-										message: `Method "${method.name}" is possibly private, no references found in other classes`,
-										range: range,
-										severity: vscode.DiagnosticSeverity.Information
-									});
-								}
+								const range = RangeAdapter.acornLocationToVSCodeRange(method.memberPropertyNode.loc);
+								errors.push({
+									source: "Public member linter",
+									acornNode: method.acornNode,
+									code: "UI5Plugin",
+									message: `Method "${method.name}" is possibly private, no references found in other classes`,
+									range: range,
+									severity: vscode.DiagnosticSeverity.Information
+								});
 							}
 						}
 					});
@@ -47,17 +45,15 @@ export class PublicMemberLinter extends Linter {
 						if (!isException) {
 							const fieldIsUsed = this._checkIfMemberIsUsedElsewhere(customUIClasses, UIClass, field.name, field);
 							if (!fieldIsUsed && field.memberPropertyNode) {
-								const range = Util.positionsToVSCodeRange(UIClass.classText, field.memberPropertyNode.start, field.memberPropertyNode.end);
-								if (range) {
-									errors.push({
-										source: "Public member linter",
-										acornNode: field.acornNode,
-										code: "UI5Plugin",
-										message: `Field "${field.name}" is possibly private, no references found in other classes`,
-										range: range,
-										severity: vscode.DiagnosticSeverity.Information
-									});
-								}
+								const range = RangeAdapter.acornLocationToVSCodeRange(field.memberPropertyNode.loc);
+								errors.push({
+									source: "Public member linter",
+									acornNode: field.acornNode,
+									code: "UI5Plugin",
+									message: `Field "${field.name}" is possibly private, no references found in other classes`,
+									range: range,
+									severity: vscode.DiagnosticSeverity.Information
+								});
 							}
 						}
 					});

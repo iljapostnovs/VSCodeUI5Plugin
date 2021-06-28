@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
-import { ITag } from "../providers/diagnostics/xml/xmllinter/parts/abstraction/Linter";
 import { IXMLFile } from "./FileReader";
 import { TextDocumentTransformer } from "./TextDocumentTransformer";
-import { XMLParser } from "./XMLParser";
+import { ITag, XMLParser } from "./XMLParser";
 
 export class XMLFormatter {
 	static formatDocument(document: vscode.TextDocument) {

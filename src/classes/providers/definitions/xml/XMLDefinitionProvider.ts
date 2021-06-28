@@ -2,10 +2,9 @@ import * as vscode from "vscode";
 import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FileReader } from "../../../utils/FileReader";
-import LineColumn = require("line-column");
-import { XMLParser } from "../../../utils/XMLParser";
-import { ITag } from "../../diagnostics/xml/xmllinter/parts/abstraction/Linter";
+import { ITag, XMLParser } from "../../../utils/XMLParser";
 import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
+import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
 export class XMLDefinitionProvider {
 	public static provideDefinitionsFor(document: vscode.TextDocument, position: vscode.Position) {
 		let location: vscode.Location | vscode.LocationLink[] | undefined;
@@ -85,10 +84,9 @@ export class XMLDefinitionProvider {
 				const method = controllerUIClass.methods.find(method => method.name === eventHandlerName);
 				if (method?.position && classPath) {
 					const classUri = vscode.Uri.file(classPath);
-					const methodPosition = LineColumn(controllerUIClass.classText).fromIndex(method.position);
-					if (methodPosition) {
-						const vscodePosition = new vscode.Position(methodPosition.line - 1, methodPosition.col - 1);
-						location = new vscode.Location(classUri, vscodePosition);
+					const position = PositionAdapter.acornPositionToVSCodePosition(method.memberPropertyNode.loc.start);
+					if (position) {
+						location = new vscode.Location(classUri, position);
 					}
 				}
 			}

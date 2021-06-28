@@ -7,7 +7,7 @@ import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../../utils/FileReader";
 import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
 import { ConfigHandler } from "./config/ConfigHandler";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 export class WrongParametersLinter extends Linter {
 	protected className = "WrongParametersLinter";
 	public static timePerChar = 0;
@@ -43,16 +43,14 @@ export class WrongParametersLinter extends Linter {
 												const methodParams = method.params;
 												const mandatoryMethodParams = methodParams.filter(param => !param.isOptional && param.type !== "boolean");
 												if (params.length < mandatoryMethodParams.length || params.length > methodParams.length) {
-													const range = Util.positionsToVSCodeRange(UIClass.classText, call.callee.property.start, call.callee.property.end);
-													if (range) {
-														errors.push({
-															acornNode: call,
-															code: "UI5Plugin",
-															source: "Parameter Linter",
-															message: `Method "${methodName}" has ${methodParams.length} (${mandatoryMethodParams.length} mandatory) param(s), but you provided ${params.length}`,
-															range: range
-														});
-													}
+													const range = RangeAdapter.acornLocationToVSCodeRange(call.callee.property.loc);
+													errors.push({
+														acornNode: call,
+														code: "UI5Plugin",
+														source: "Parameter Linter",
+														message: `Method "${methodName}" has ${methodParams.length} (${mandatoryMethodParams.length} mandatory) param(s), but you provided ${params.length}`,
+														range: range
+													});
 												}
 
 												params.forEach((param: any, i: number) => {
@@ -73,16 +71,14 @@ export class WrongParametersLinter extends Linter {
 																});
 															}
 															if (typeMismatch) {
-																const range = Util.positionsToVSCodeRange(UIClass.classText, param.start, param.end);
-																if (range) {
-																	errors.push({
-																		acornNode: param,
-																		code: "UI5Plugin",
-																		source: "Parameter Linter",
-																		message: `"${paramFromMethod.name}" param is of type "${paramFromMethod.type}", but provided "${classNameOfTheParam}"`,
-																		range: range
-																	});
-																}
+																const range = RangeAdapter.acornLocationToVSCodeRange(param.loc);
+																errors.push({
+																	acornNode: param,
+																	code: "UI5Plugin",
+																	source: "Parameter Linter",
+																	message: `"${paramFromMethod.name}" param is of type "${paramFromMethod.type}", but provided "${classNameOfTheParam}"`,
+																	range: range
+																});
 															}
 														}
 													}

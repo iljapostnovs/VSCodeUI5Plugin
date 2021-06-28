@@ -1,11 +1,11 @@
-import { IError, Linter, ITag } from "./abstraction/Linter";
+import { IError, Linter } from "./abstraction/Linter";
 import * as vscode from "vscode";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
-import { XMLParser } from "../../../../../utils/XMLParser";
+import { ITag, XMLParser } from "../../../../../utils/XMLParser";
 import { IUIAggregation } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { IXMLFile } from "../../../../../utils/FileReader";
 import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
-import { Util } from "../../../../../utils/Util";
+import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
 
 
 export class TagLinter extends Linter {
@@ -30,7 +30,7 @@ export class TagLinter extends Linter {
 		const errors: IError[] = [];
 		const tagClass = XMLParser.getFullClassNameFromTag(tag, XMLFile);
 		if (!tagClass) {
-			const range = Util.positionsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
+			const range = RangeAdapter.offsetsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
 
 			if (range) {
 				const prefix = XMLParser.getTagPrefix(tag.text);
@@ -48,7 +48,7 @@ export class TagLinter extends Linter {
 			if (!isAggregation) {
 				const UIClass = UIClassFactory.getUIClass(tagClass);
 				if (!UIClass.classExists && !this._isClassException(tagClass)) {
-					const range = Util.positionsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
+					const range = RangeAdapter.offsetsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
 					if (range && XMLParser.getIfPositionIsNotInComments(XMLFile, tag.positionBegin)) {
 						errors.push({
 							code: "UI5plugin",
@@ -69,7 +69,7 @@ export class TagLinter extends Linter {
 					if (tagClass) {
 						const aggregation = this._findAggregation(tagClass, tagName);
 						if (!aggregation) {
-							const range = Util.positionsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
+							const range = RangeAdapter.offsetsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
 							if (range && XMLParser.getIfPositionIsNotInComments(XMLFile, tag.positionBegin)) {
 								errors.push({
 									code: "UI5plugin",
