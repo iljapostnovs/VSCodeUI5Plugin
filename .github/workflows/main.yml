@@ -5,7 +5,7 @@ on:
 jobs:
   test:
     name: Test Extension
-    runs-on: windows-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - name: Launch tests
@@ -14,14 +14,11 @@ jobs:
           npm test
   build_artifact:
     name: Build Extension
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
       - name: npm install and build
-        env:
-          NPM_CONFIG_PREFIX: "~/.npm-global"
         run: |
-          export PATH=~/.npm-global/bin:$PATH
           npm install
           npm install -g vsce
           vsce package
