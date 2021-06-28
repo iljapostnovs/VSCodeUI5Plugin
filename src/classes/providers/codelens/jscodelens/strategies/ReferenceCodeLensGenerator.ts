@@ -93,8 +93,8 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 	}
 
 	private _addLocationsFromUIClass(method: ICustomClassUIMethod, UIClass: CustomUIClass, locations: vscode.Location[]) {
-		if (UIClass.referenceCodeLensCache[method.owner] && UIClass.referenceCodeLensCache[method.owner][method.name]) {
-			locations.push(...UIClass.referenceCodeLensCache[method.owner][method.name]);
+		if (UIClass.referenceCodeLensCache[method.owner] && UIClass.referenceCodeLensCache[method.owner][`_${method.name}`]) {
+			locations.push(...UIClass.referenceCodeLensCache[method.owner][`_${method.name}`]);
 		} else if (UIClass.classFSPath) {
 			const regexp = new RegExp(`(?<=\\.)${method.name}(\\(|\\)|\\,|\\.|\\s)`, "g");
 			const results: RegExpExecArray[] = [];
@@ -134,7 +134,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 			if (!UIClass.referenceCodeLensCache[method.owner]) {
 				UIClass.referenceCodeLensCache[method.owner] = {};
 			}
-			UIClass.referenceCodeLensCache[method.owner][method.name] = currentLocations;
+			UIClass.referenceCodeLensCache[method.owner][`_${method.name}`] = currentLocations;
 		}
 	}
 }
