@@ -25,7 +25,7 @@ export class MethodInserter {
 			}
 			const { offset, insertText } = this._getInsertTextAndOffset(insertContent, className);
 
-			const position = PositionAdapter.offsetToPosition(UIClass.classText, offset);
+			const position = PositionAdapter.offsetToPosition(UIClass.classText, offset + 1);
 
 			if (position) {
 				insertMethodCodeAction = new vscode.CodeAction(`Create "${memberName}" in "${className}" class`, vscode.CodeActionKind.QuickFix);
