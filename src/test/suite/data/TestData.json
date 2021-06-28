@@ -1123,6 +1123,39 @@
 			"className": "com.test.util.ui5ignoretest.UI5IgnoreTestClass",
 			"timeLimit": 100,
 			"errors": []
+		},
+		{
+			"className": "com.test.util.interfacetest.InterfaceImplementer",
+			"timeLimit": 100,
+			"errors": [
+				{
+					"text": "Interface \"com.test.util.interfacetest.interfaces.Interface3\" requires \"interface3Method1\" member implementation"
+				},
+				{
+					"text": "Interface \"com.test.util.interfacetest.interfaces.Interface3\" requires \"interface3Field1\" member implementation"
+				},
+				{
+					"text": "Interface \"com.test.util.interfacetest.interfaces.Interface3\" requires \"interface3Field2\" member implementation"
+				},
+				{
+					"text": "Interface \"com.test.util.interfacetest.interfaces.Interface1\" requires \"interface1Method1\" member implementation"
+				},
+				{
+					"text": "Interface \"com.test.util.interfacetest.interfaces.Interface1\" requires \"interface1Method2\" member implementation"
+				},
+				{
+					"text": "Interface \"com.test.util.interfacetest.interfaces.Interface1\" requires \"interface1Method3\" member implementation"
+				},
+				{
+					"text": "Interface \"com.test.util.interfacetest.interfaces.Interface2\" requires \"interface2Method1\" member implementation"
+				},
+				{
+					"text": "Interface \"com.test.util.interfacetest.interfaces.Interface2\" requires \"interface2Method2\" member implementation"
+				},
+				{
+					"text": "Interface \"com.test.util.interfacetest.interfaces.Interface2\" requires \"interface2Method3\" member implementation"
+				}
+			]
 		}
 	],
 	"XMLLinter": [

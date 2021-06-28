@@ -8,15 +8,13 @@ import { FieldPropertyMethodGetterStrategy } from "./strategies/abstraction/Fiel
 import { InnerPropertiesStrategy } from "./strategies/InnerPropertiesStrategy";
 import { XMLParser } from "../../utils/XMLParser";
 import { SAPNodeDAO } from "../../librarydata/SAPNodeDAO";
-import { ParentMethodStrategy } from "./strategies/ParentMethodStrategy";
 export class AcornSyntaxAnalyzer {
 	static getFieldsAndMethodsOfTheCurrentVariable(document: vscode.TextDocument, position: vscode.Position) {
 		let fieldsAndMethods: IFieldsAndMethods | undefined;
 
 		const aStrategies: FieldPropertyMethodGetterStrategy[] = [
 			new FieldsAndMethodForPositionBeforeCurrentStrategy(),
-			new InnerPropertiesStrategy(),
-			new ParentMethodStrategy()
+			new InnerPropertiesStrategy()
 		];
 
 		aStrategies.find(strategy => {

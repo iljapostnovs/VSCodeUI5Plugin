@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import { CodeGeneratorFactory } from "../../../../templateinserters/codegenerationstrategies/CodeGeneratorFactory";
 import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
+import { InterfaceMemberStrategy } from "../../../../UI5Classes/JSParser/strategies/InterfaceMemberStrategy";
+import { ParentMethodStrategy } from "../../../../UI5Classes/JSParser/strategies/ParentMethodStrategy";
 import { IUIMethod, IUIField } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { IFieldsAndMethods, UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
@@ -14,9 +16,19 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
-		const fieldsAndMethods = AcornSyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable(document, position);
+		let fieldsAndMethods = AcornSyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable(document, position);
+		if (!fieldsAndMethods) {
+			fieldsAndMethods = new ParentMethodStrategy().getFieldsAndMethods(document, position);
+		}
+
+		const interfaceFieldsAndMethods = new InterfaceMemberStrategy().getFieldsAndMethods(document, position);
+
 		if (fieldsAndMethods) {
 			completionItems = this._generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods, document, position);
+		}
+
+		if (interfaceFieldsAndMethods) {
+			completionItems.push(...this._generateCompletionItemsFromInterfaceFieldsAndMethods(interfaceFieldsAndMethods, document, position));
 		}
 
 		if (completionItems.length === 0) {
@@ -25,6 +37,52 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 
 		//copy(JSON.stringify(completionItems.map(item => item.insertText.value || item.insertText)))
 		return completionItems;
+	}
+	private _generateCompletionItemsFromInterfaceFieldsAndMethods(fieldsAndMethods: IFieldsAndMethods, document: vscode.TextDocument, position: vscode.Position) {
+		let completionItems: CustomCompletionItem[] = [];
+		completionItems = completionItems.concat(fieldsAndMethods.fields.map(classField => {
+			const completionItem: CustomCompletionItem = new CustomCompletionItem(classField.name);
+			completionItem.kind = vscode.CompletionItemKind.Field;
+			completionItem.insertText = classField.name;
+			completionItem.detail = `(${classField.visibility}) ${classField.name}: ${classField.type ? classField.type : "any"}`;
+			completionItem.documentation = classField.description;
+
+			return completionItem;
+		}));
+		const offset = document.offsetAt(position);
+		completionItems = completionItems.concat(fieldsAndMethods.methods.map(method => {
+			const completionItem: CustomCompletionItem = new CustomCompletionItem(method.name);
+			completionItem.kind = vscode.CompletionItemKind.Method;
+			completionItem.insertText = this._generateInsertTextForInterfaceMethod(method, document, offset);
+			completionItem.detail = `(${method.visibility}) ${method.name}: ${method.returnType ? method.returnType : "void"}`;
+			completionItem.sortText = "0";
+			completionItem.documentation = method.description;
+
+			return completionItem;
+		}));
+
+		return completionItems;
+	}
+
+	private _generateInsertTextForInterfaceMethod(method: IUIMethod, document: vscode.TextDocument, position: number) {
+		let text = method.name;
+		const className = FileReader.getClassNameFromPath(document.fileName);
+		if (className) {
+			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+			const codeGenerationStrategy = CodeGeneratorFactory.createStrategy();
+			const jsDoc = this._generateJSDocForMethod(method, `implements {${method.owner}}`);
+			const params = method.params.map(param => param.name.replace("?", "")).join(", ");
+			const functionText = codeGenerationStrategy.generateFunction(method.name, params, "", "");
+			text = `${jsDoc}${functionText}`;
+
+			const isMethodLastOne = ReusableMethods.getIfPositionIsInTheLastOrAfterLastMember(UIClass, position);
+			if (!isMethodLastOne) {
+				text += ",";
+			}
+
+		}
+
+		return new vscode.SnippetString(text);
 	}
 
 	private _generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods: IFieldsAndMethods, document: vscode.TextDocument, position: vscode.Position) {
@@ -48,7 +106,29 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 		const word = range && document.getText(range);
 		let completionItems: CustomCompletionItem[] = [];
 
-		if (fieldsAndMethods.className !== "__override__") {
+		if (fieldsAndMethods.className === "__override__") {
+			//completion items for overriden methods/fields
+			completionItems = completionItems.concat(fieldsAndMethods.fields.map(classField => {
+				const completionItem: CustomCompletionItem = new CustomCompletionItem(classField.name);
+				completionItem.kind = vscode.CompletionItemKind.Field;
+				completionItem.insertText = classField.name;
+				completionItem.detail = `(${classField.visibility}) ${classField.name}: ${classField.type ? classField.type : "any"}`;
+				completionItem.documentation = classField.description;
+
+				return completionItem;
+			}));
+			const offset = document.offsetAt(position);
+			completionItems = completionItems.concat(fieldsAndMethods.methods.map(method => {
+				const completionItem: CustomCompletionItem = new CustomCompletionItem(method.name);
+				completionItem.kind = vscode.CompletionItemKind.Method;
+				completionItem.insertText = this._generateInsertTextForOverridenMethod(method, document, offset);
+				completionItem.detail = `(${method.visibility}) ${method.name}: ${method.returnType ? method.returnType : "void"}`;
+				completionItem.sortText = "0";
+				completionItem.documentation = method.description;
+
+				return completionItem;
+			}));
+		} else {
 			completionItems = fieldsAndMethods.methods.map(classMethod => {
 				const completionItem: CustomCompletionItem = new CustomCompletionItem(classMethod.name);
 				completionItem.kind = vscode.CompletionItemKind.Method;
@@ -92,29 +172,6 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 			if (fieldsAndMethods.className !== "generic") {
 				this._addRangesToCompletionItems(completionItems, document, position);
 			}
-		} else {
-
-			//completion items for overriden methods/fields
-			completionItems = completionItems.concat(fieldsAndMethods.fields.map(classField => {
-				const completionItem: CustomCompletionItem = new CustomCompletionItem(classField.name);
-				completionItem.kind = vscode.CompletionItemKind.Field;
-				completionItem.insertText = classField.name;
-				completionItem.detail = `(${classField.visibility}) ${classField.name}: ${classField.type ? classField.type : "any"}`;
-				completionItem.documentation = classField.description;
-
-				return completionItem;
-			}));
-			const offset = document.offsetAt(position);
-			completionItems = completionItems.concat(fieldsAndMethods.methods.map(method => {
-				const completionItem: CustomCompletionItem = new CustomCompletionItem(method.name);
-				completionItem.kind = vscode.CompletionItemKind.Method;
-				completionItem.insertText = this._generateInsertTextForOverridenMethod(method, document, offset);
-				completionItem.detail = `(${method.visibility}) ${method.name}: ${method.returnType ? method.returnType : "void"}`;
-				completionItem.sortText = "0";
-				completionItem.documentation = method.description;
-
-				return completionItem;
-			}));
 		}
 
 		return completionItems;
@@ -132,7 +189,7 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 				const codeGenerationStrategy = CodeGeneratorFactory.createStrategy();
 				const variableAssignment = methodReturnsAnything ? `${codeGenerationStrategy.generateVariableDeclaration()} vReturn = ` : "";
 				const returnStatement = methodReturnsAnything ? "\n\treturn vReturn;" : "";
-				const jsDoc = this._generateJSDocForMethod(method);
+				const jsDoc = this._generateJSDocForMethod(method, "override");
 				const params = method.params.map(param => param.name.replace("?", "")).join(", ");
 				const functionBody = `${variableAssignment}${parentUIDefineClassName.className}.prototype.${method.name}.apply(this, arguments);\n\t$0\n${returnStatement}`;
 				const functionText = codeGenerationStrategy.generateFunction(method.name, params, functionBody, "");
@@ -148,9 +205,9 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 		return new vscode.SnippetString(text);
 	}
 
-	private _generateJSDocForMethod(method: IUIMethod) {
+	private _generateJSDocForMethod(method: IUIMethod, overrideOrImplements: string) {
 		let jsDoc = "/**\n";
-		jsDoc += " * @override\n";
+		jsDoc += ` * @${overrideOrImplements}\n`;
 
 		const paramTags = method.params.map(param => {
 			return ` * @param {${param.type}} ${param.isOptional ? "[" : ""}${param.name.replace("?", "")}${param.isOptional ? "]" : ""} ${param.description}\n`;

@@ -1,3 +1,6 @@
+## 0.12.65 (28-06-2021)
+* Interface linter introduced
+
 ## 0.12.64 (28-06-2021)
 * Refactoring and bugfixes
 
