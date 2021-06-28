@@ -128,8 +128,8 @@ suite("Extension Test Suite", () => {
 				const timeSpent = endTime - startTime;
 
 				assert.strictEqual(errors.length, data.errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
-				assert.ok(timeSpent < data.timeLimit / cpuSpeedRelation, `"${data.className}" linters should run less than ${data.timeLimit / cpuSpeedRelation}ms, but it ran ${timeSpent} ms`);
-				console.log(`JS Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit / cpuSpeedRelation}`);
+				assert.ok(timeSpent < data.timeLimit * 2 / cpuSpeedRelation, `"${data.className}" linters should run less than ${data.timeLimit * 2 / cpuSpeedRelation}ms, but it ran ${timeSpent} ms`);
+				console.log(`JS Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit * 2 / cpuSpeedRelation}`);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
@@ -154,9 +154,9 @@ suite("Extension Test Suite", () => {
 				const errors = XMLLinter.getLintingErrors(document);
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
-				console.log(`XML Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit / cpuSpeedRelation}`);
+				console.log(`XML Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit * 2 / cpuSpeedRelation}`);
 				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
-				assert.ok(timeSpent < data.timeLimit / cpuSpeedRelation, `"${data.className}" linters should run less than ${data.timeLimit / cpuSpeedRelation}ms, but it ran ${timeSpent} ms`);
+				assert.ok(timeSpent < data.timeLimit * 2 / cpuSpeedRelation, `"${data.className}" linters should run less than ${data.timeLimit * 2 / cpuSpeedRelation}ms, but it ran ${timeSpent} ms`);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
