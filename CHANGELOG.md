@@ -1,5 +1,5 @@
-## 0.12.63 (25-06-2021)
-* Refactoring
+## 0.12.64 (28-06-2021)
+* Refactoring and bugfixes
 
 ## 0.12.63 (25-06-2021)
 * Refactoring
