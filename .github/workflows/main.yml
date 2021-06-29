@@ -12,7 +12,7 @@ jobs:
         run: |
           yarn install
           npm run test
-          Remove-Item -LiteralPath ".vscode-test" -Force -Recurse
+          &cmd.exe /c rd /s /q .vscode-test
   build_artifact:
     name: Build Extension
     runs-on: ubuntu-latest
