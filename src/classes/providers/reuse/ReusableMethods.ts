@@ -55,4 +55,26 @@ export class ReusableMethods {
 
 		return currentMethodIsLastMethod;
 	}
+
+	static getIfPositionIsInPropertyName(UIClass: CustomUIClass, position: number) {
+		let bPositionIsInPropertyName = true;
+		const positionIsBetweenProperties = !!UIClass.acornClassBody.properties?.find((node: any, index: number) => {
+			let correctNode = false;
+			const nextNode = UIClass.acornClassBody.properties[index + 1];
+			if (nextNode && node.end < position && nextNode.start > position) {
+				correctNode = true;
+			}
+
+			return correctNode;
+		});
+
+		const positionIsInPropertyKey = !!UIClass.acornClassBody.properties?.find((node: any) => {
+			return node.key?.start <= position && node.key?.end >= position;
+		});
+
+
+		bPositionIsInPropertyName = positionIsBetweenProperties || positionIsInPropertyKey;
+
+		return bPositionIsInPropertyName;
+	}
 }

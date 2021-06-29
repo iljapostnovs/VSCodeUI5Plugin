@@ -22,6 +22,15 @@
 		{
 			"className": "com.test.controller.LinterTest",
 			"result": [
+				"override",
+				"Event handler of \"sap.m.Table (idTableFromView)~delete\"",
+				"Event handler of \"sap.m.Table (idTableFromView)~paste\"",
+				"Event handler of \"sap.m.List (idListFromSecondFragment)~selectionChange\"",
+				"Event handler of \"sap.m.List (idListFromThirdFragment)~selectionChange\"",
+				"Event handler of \"sap.m.Button (idButtonFromFragment)~press\"",
+				"Event handler of \"sap.ui.core.routing.Route~matched\"",
+				"Event handler of \"sap.ui.core.routing.Route~matched\"",
+				"Event handler of \"sap.ui.core.routing.Route~matched\"",
 				"1 reference",
 				"1 reference",
 				"0 references",
@@ -39,21 +48,13 @@
 				"1 reference",
 				"1 reference",
 				"1 reference",
-				"1 reference",
-				"Event handler of \"sap.m.Table (idTableFromView)~delete\"",
-				"Event handler of \"sap.m.Table (idTableFromView)~paste\"",
-				"Event handler of \"sap.m.List (idListFromSecondFragment)~selectionChange\"",
-				"Event handler of \"sap.m.List (idListFromThirdFragment)~selectionChange\"",
-				"Event handler of \"sap.m.Button (idButtonFromFragment)~press\"",
-				"Event handler of \"sap.ui.core.routing.Route~matched\"",
-				"Event handler of \"sap.ui.core.routing.Route~matched\"",
-				"Event handler of \"sap.ui.core.routing.Route~matched\"",
-				"override"
+				"1 reference"
 			]
 		},
 		{
 			"className": "com.test.controller.BaseController",
 			"result": [
+				"override",
 				"0 references",
 				"3 references"
 			]
@@ -68,6 +69,7 @@
 		{
 			"className": "com.test.controller.ExtendControllerTest",
 			"result": [
+				"override",
 				"1 reference"
 			]
 		}

@@ -103,7 +103,9 @@ JS Linters available:<br/>
 * Wrong override linter<br/>
 >Checks if overriden members are not protected/private
 * Abstract class linter<br/>
->Checks if all abstract members are defined
+>Checks if all abstract members are implemented
+* Interface linter<br/>
+>Checks if all interface members are implemented
 * Wrong parameter usage in the methods linter, which checks for parameter quantity and data type<br/>
 	> Use jsdoc to make your parameters optional, e.g.
 	```javascript

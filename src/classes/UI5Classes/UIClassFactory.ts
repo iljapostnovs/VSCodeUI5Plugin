@@ -107,6 +107,7 @@ export class UIClassFactory {
 		});
 		// console.timeEnd(`Enriching ${UIClass.className} took`);
 	}
+
 	private static _preloadParentIfNecessary(UIClass: CustomUIClass) {
 		if (UIClass.parentClassNameDotNotation) {
 			this.getUIClass(UIClass.parentClassNameDotNotation);

@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.64",
+	"version": "0.12.65",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -141,7 +141,7 @@
 				"ui5.plugin.useWrongFieldMethodLinter": {
 					"type": "boolean",
 					"default": true,
-					"description": "JS Linter: Should Wrong Field and Method validator be used. It checks if used fields and methods exists and if they are used correctly according to access level modifiers (Access level modifiers are checked only if ignoreAccessLevelModifiers is set to false)."
+					"description": "JS Linter: Should Wrong Field and Method validator be used. It checks if used fields and methods exists and if they are used correctly according to access level modifiers."
 				},
 				"ui5.plugin.useWrongClassNameLinter": {
 					"type": "boolean",
@@ -248,11 +248,6 @@
 					"type": "string",
 					"default": "https://ui5.sap.com/",
 					"description": "UI5 metadata source URL"
-				},
-				"ui5.plugin.ignoreAccessLevelModifiers": {
-					"type": "boolean",
-					"default": false,
-					"description": "Should JS completion items ignore access modifiers (private, protected, public). If flag is set to true, all of the completion items for methods and fields will be shown, however, if set to false, completion items will be generated according to access modifiers."
 				},
 				"ui5.plugin.rejectUnauthorized": {
 					"type": "boolean",

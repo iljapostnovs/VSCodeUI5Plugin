@@ -26,7 +26,7 @@ import { FileRenameMediator } from "../../classes/filerenaming/FileRenameMediato
 import { FileWatcherMediator } from "../../classes/utils/FileWatcherMediator";
 import { XMLFormatter } from "../../classes/utils/XMLFormatter";
 import { JSCodeLensProvider } from "../../classes/providers/codelens/jscodelens/JSCodeLensProvider";
-import * as os from "os";
+// import * as os from "os";
 
 suite("Extension Test Suite", () => {
 	after(() => {
@@ -112,11 +112,11 @@ suite("Extension Test Suite", () => {
 	});
 
 	test("JS Linter working properly", async () => {
-		const cpuSpeed = os.cpus()[0].speed;
-		const cpuSpeedTarget = 3700;
-		const cpuSpeedRelation = cpuSpeed / cpuSpeedTarget;
+		// const cpuSpeed = os.cpus()[0].speed;
+		// const cpuSpeedTarget = 3700;
+		// const cpuSpeedRelation = cpuSpeed / cpuSpeedTarget;
 		const testData = data.JSLinter;
-		console.log(`CPU SPeed: ${cpuSpeed}`);
+		// console.log(`CPU SPeed: ${cpuSpeed}`);
 
 		for (const data of testData) {
 			const filePath = FileReader.getClassFSPathFromClassName(data.className);
@@ -128,8 +128,8 @@ suite("Extension Test Suite", () => {
 				const timeSpent = endTime - startTime;
 
 				assert.strictEqual(errors.length, data.errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
-				assert.ok(timeSpent < data.timeLimit / cpuSpeedRelation, `"${data.className}" linters should run less than ${data.timeLimit / cpuSpeedRelation}ms, but it ran ${timeSpent} ms`);
-				console.log(`JS Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit / cpuSpeedRelation}`);
+				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
+				console.log(`JS Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit}`);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
@@ -141,9 +141,9 @@ suite("Extension Test Suite", () => {
 	});
 
 	test("XML View Linter working properly", async () => {
-		const cpuSpeed = os.cpus()[0].speed;
-		const cpuSpeedTarget = 3700;
-		const cpuSpeedRelation = cpuSpeed / cpuSpeedTarget;
+		// const cpuSpeed = os.cpus()[0].speed;
+		// const cpuSpeedTarget = 3700;
+		// const cpuSpeedRelation = cpuSpeed / cpuSpeedTarget;
 		const testData = data.XMLLinter;
 
 		for (const data of testData) {
@@ -154,9 +154,9 @@ suite("Extension Test Suite", () => {
 				const errors = XMLLinter.getLintingErrors(document);
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
-				console.log(`XML Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit / cpuSpeedRelation}`);
+				console.log(`XML Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit}`);
 				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
-				assert.ok(timeSpent < data.timeLimit / cpuSpeedRelation, `"${data.className}" linters should run less than ${data.timeLimit / cpuSpeedRelation}ms, but it ran ${timeSpent} ms`);
+				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);

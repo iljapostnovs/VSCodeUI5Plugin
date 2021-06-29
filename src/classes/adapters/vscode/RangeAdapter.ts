@@ -9,8 +9,9 @@ export interface IAcornLocation {
 
 export class RangeAdapter {
 	static offsetsToVSCodeRange(content: string, positionBegin: number, positionEnd: number) {
-		const lineColumnBegin = LineColumn(content).fromIndex(positionBegin);
-		const lineColumnEnd = LineColumn(content).fromIndex(positionEnd);
+		const lineColumn = LineColumn(content);
+		const lineColumnBegin = lineColumn.fromIndex(positionBegin);
+		const lineColumnEnd = lineColumn.fromIndex(positionEnd);
 		if (lineColumnBegin && lineColumnEnd) {
 			const positionBegin = new vscode.Position(lineColumnBegin.line - 1, lineColumnBegin.col - 1);
 			const positionEnd = new vscode.Position(lineColumnEnd.line - 1, lineColumnEnd.col - 1);

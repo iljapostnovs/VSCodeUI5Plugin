@@ -1208,7 +1208,11 @@
 				"\"com/test/renametest/controller/Master/controller\"",
 				"\"com/test/renametest/util/Formatter\"",
 				"\"com/test/renametest/util/ExtendFormatter\"",
-				"\"com/test/util/MapTest\""
+				"\"com/test/util/MapTest\"",
+				"\"com/test/util/interfacetest/InterfaceImplementer\"",
+				"\"com/test/util/interfacetest/interfaces/Interface1\"",
+				"\"com/test/util/interfacetest/interfaces/Interface2\"",
+				"\"com/test/util/interfacetest/interfaces/Interface3\""
 			]
 		}
 	],

@@ -18,8 +18,8 @@ export interface IError {
 export abstract class Linter {
 	protected abstract className: string;
 	timePerChar = 0;
-	protected abstract _getErrors(document: vscode.TextDocument): Promise<IError[]> | IError[];
-	getErrors(document: vscode.TextDocument): Promise<IError[]> | IError[] {
+	protected abstract _getErrors(document: vscode.TextDocument): IError[];
+	getErrors(document: vscode.TextDocument): IError[] {
 		const timeStart = new Date().getTime();
 		const errors = this._getErrors(document);
 		if (errors instanceof Promise) {

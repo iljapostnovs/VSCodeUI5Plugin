@@ -10,6 +10,7 @@ import { WrongFilePathLinter } from "./parts/WrongFilePathLinter";
 import { PublicMemberLinter } from "./parts/PublicMemberLinter";
 import { WrongOverrideLinter } from "./parts/WrongOverrideLinter";
 import { AbstractClassLinter } from "./parts/AbstractClassLinter";
+import { InterfaceLinter } from "./parts/InterfaceLinter";
 
 export class JSLinter {
 	static timePerchar = 0;
@@ -23,14 +24,13 @@ export class JSLinter {
 			new WrongFilePathLinter(),
 			new PublicMemberLinter(),
 			new WrongOverrideLinter(),
-			new AbstractClassLinter()
+			new AbstractClassLinter(),
+			new InterfaceLinter()
 		];
 
 		let errors: IError[] = [];
 		try {
-			for (const linter of linters) {
-				errors = errors.concat(await linter.getErrors(document));
-			}
+			errors = (linters.map(linter => linter.getErrors(document))).flat();
 		} catch (error) {
 			console.error(error);
 		}
