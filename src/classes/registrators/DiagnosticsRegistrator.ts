@@ -172,9 +172,7 @@ export class DiagnosticsRegistrator {
 		if (bForce) {
 			UIClassFactory.setNewContentForClassUsingDocument(document, true);
 		}
-		console.time("JS Linting");
 		const errors = await JSLinter.getLintingErrors(document);
-		console.timeEnd("JS Linting");
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
 			const diagnostic = new CustomDiagnostics(error.range, error.message);
