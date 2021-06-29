@@ -12,6 +12,7 @@ jobs:
         run: |
           yarn install
           npm run test
+          rd /s /q .vscode-test
   build_artifact:
     name: Build Extension
     runs-on: ubuntu-latest
