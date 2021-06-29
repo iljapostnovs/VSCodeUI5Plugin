@@ -1,5 +1,6 @@
-## 0.12.65 (28-06-2021)
+## 0.12.65 (29-06-2021)
 * Interface linter introduced
+* Ignore access level modifiers property removed. Access level modifiers should always be taking into account.
 
 ## 0.12.64 (28-06-2021)
 * Refactoring and bugfixes

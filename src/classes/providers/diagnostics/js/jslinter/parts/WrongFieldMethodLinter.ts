@@ -121,8 +121,7 @@ export class WrongFieldMethodLinter extends Linter {
 							} else {
 								const member = singleFieldsAndMethods.fields.find(field => field.name === nextNodeName) || singleFieldsAndMethods.methods.find(method => method.name === nextNodeName);
 								const isIgnored = !!(<UI5Ignoreable>member)?.ui5ignored;
-								const ignoreAccessLevelModifiers = vscode.workspace.getConfiguration("ui5.plugin").get("ignoreAccessLevelModifiers");
-								if (!ignoreAccessLevelModifiers && !isIgnored) {
+								if (!isIgnored) {
 									let sErrorMessage = "";
 									if (member?.visibility === "protected") {
 										const currentDocumentClassName = FileReader.getClassNameFromPath(document.fileName);
