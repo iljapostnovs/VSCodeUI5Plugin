@@ -30,9 +30,8 @@ export class JSLinter {
 
 		let errors: IError[] = [];
 		try {
-			for (const linter of linters) {
-				errors = errors.concat(await linter.getErrors(document));
-			}
+			const aPromises = linters.map(linter => linter.getErrors(document));
+			errors = (await Promise.all(aPromises)).flat();
 		} catch (error) {
 			console.error(error);
 		}

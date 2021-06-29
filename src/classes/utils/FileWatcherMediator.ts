@@ -72,7 +72,9 @@ export class FileWatcherMediator {
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = vscode.workspace.onDidChangeTextDocument(event => {
-			this._onChange(event.document.uri, event.document, false);
+			if (event.contentChanges.length) {
+				this._onChange(event.document.uri, event.document, false);
+			}
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 

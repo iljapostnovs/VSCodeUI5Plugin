@@ -61,7 +61,7 @@ export class DiagnosticsRegistrator {
 		});
 
 		const textDocumentChange = vscode.workspace.onDidChangeTextDocument(event => {
-			if (event) {
+			if (event.contentChanges.length > 0) {
 				const fileName = event.document.fileName;
 				if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
 					this._updateXMLDiagnostics(event.document, xmlDiagnosticCollection);
@@ -149,15 +149,22 @@ export class DiagnosticsRegistrator {
 		}
 	}
 
-	private static _updateJSDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection, bForce = false) {
+	private static async _updateJSDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection, bForce = false) {
 		const isJSDiagnosticsEnabled = vscode.workspace.getConfiguration("ui5.plugin").get("jsDiagnostics");
 
 		if (isJSDiagnosticsEnabled && !this._timeoutId) {
 			const timeout = this._getTimeoutForDocument(document);
-			this._timeoutId = setTimeout(async () => {
+			if (!timeout) {
+				this._timeoutId = setTimeout(() => {/**dummy timeout*/ });
 				await this._updateDiagnosticCollection(document, collection, bForce);
 				this._timeoutId = null;
-			}, timeout);
+			} else {
+				this._timeoutId = setTimeout(async () => {
+					await this._updateDiagnosticCollection(document, collection, bForce);
+					this._timeoutId = null;
+				}, timeout);
+
+			}
 		}
 	}
 
@@ -165,7 +172,9 @@ export class DiagnosticsRegistrator {
 		if (bForce) {
 			UIClassFactory.setNewContentForClassUsingDocument(document, true);
 		}
+		console.time("JS Linting");
 		const errors = await JSLinter.getLintingErrors(document);
+		console.timeEnd("JS Linting");
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
 			const diagnostic = new CustomDiagnostics(error.range, error.message);
