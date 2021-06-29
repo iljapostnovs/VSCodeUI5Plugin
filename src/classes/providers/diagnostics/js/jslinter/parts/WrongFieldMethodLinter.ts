@@ -23,7 +23,6 @@ export class WrongFieldMethodLinter extends Linter {
 			// console.timeEnd("WrongFieldMethodLinter");
 		}
 
-
 		return errors;
 	}
 	private _getLintingErrors(document: vscode.TextDocument): IError[] {
