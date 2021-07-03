@@ -1166,7 +1166,6 @@ export class AcornSyntaxAnalyzer {
 			}
 		}
 
-
 		return className;
 	}
 
@@ -1175,7 +1174,7 @@ export class AcornSyntaxAnalyzer {
 	public static getClassNameFromSingleAcornNode(node: any, UIClass: CustomUIClass, stack: any[] = []) {
 		let className = "";
 		if (this.declarationStack.indexOf(node) > -1) {
-			this.declarationStack = [];
+			// this.declarationStack = [];
 		} else {
 			this.declarationStack.push(node);
 			if (node?.type === "NewExpression") {
