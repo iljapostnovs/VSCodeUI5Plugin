@@ -17,7 +17,9 @@ sap.ui.define([
 ) {
 	"use strict";
 	const test = Controller.extend("com.test.controller.Master", {
+		_oPropertyTest: new Filter(),
 		onInit: function() {
+			this._oPropertyTest;
 			const oModel = this.getView().getModel("TestModel");
 			this.getView().setModel(oModel, "MyModel");
 			this.getView().setModel(oModel);

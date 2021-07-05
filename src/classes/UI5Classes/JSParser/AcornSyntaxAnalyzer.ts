@@ -937,6 +937,8 @@ export class AcornSyntaxAnalyzer {
 							}
 						}
 					}
+				} else if (property.value.type === "NewExpression" && property.key.name === field.name) {
+					field.type = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(property.value, UIClass);
 				}
 				if (field.type) {
 					typeFound = true;

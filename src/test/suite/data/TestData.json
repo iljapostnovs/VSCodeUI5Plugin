@@ -99,6 +99,10 @@
 			],
 			"fields": [
 				{
+					"name": "_oPropertyTest",
+					"type": "sap.ui.model.Filter"
+				},
+				{
 					"name": "formatter",
 					"type": "com.test.util.Formatter"
 				},
