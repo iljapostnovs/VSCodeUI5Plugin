@@ -937,6 +937,8 @@ export class AcornSyntaxAnalyzer {
 							}
 						}
 					}
+				} else if (property.value.type === "NewExpression" && property.key.name === field.name) {
+					field.type = AcornSyntaxAnalyzer.getClassNameFromSingleAcornNode(property.value, UIClass);
 				}
 				if (field.type) {
 					typeFound = true;
@@ -1166,7 +1168,6 @@ export class AcornSyntaxAnalyzer {
 			}
 		}
 
-
 		return className;
 	}
 
@@ -1175,7 +1176,7 @@ export class AcornSyntaxAnalyzer {
 	public static getClassNameFromSingleAcornNode(node: any, UIClass: CustomUIClass, stack: any[] = []) {
 		let className = "";
 		if (this.declarationStack.indexOf(node) > -1) {
-			this.declarationStack = [];
+			// this.declarationStack = [];
 		} else {
 			this.declarationStack.push(node);
 			if (node?.type === "NewExpression") {

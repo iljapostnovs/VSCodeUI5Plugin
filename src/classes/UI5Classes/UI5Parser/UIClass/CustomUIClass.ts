@@ -564,6 +564,19 @@ export class CustomUIClass extends AbstractUIClass {
 						abstract: false
 					});
 					this.acornMethodsAndFields.push(property);
+				} else if (property.value?.type === "NewExpression") {
+					this.fields.push({
+						name: property.key?.name,
+						type: undefined,
+						description: "",
+						acornNode: property,
+						visibility: property.key?.name?.startsWith("_") ? "private" : "public",
+						owner: this.className,
+						memberPropertyNode: property.key,
+						static: false,
+						abstract: false
+					});
+					this.acornMethodsAndFields.push(property);
 				}
 			});
 			this.acornClassBody.properties?.forEach((property: any) => {

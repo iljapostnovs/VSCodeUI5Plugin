@@ -17,7 +17,8 @@ export class WrongImportLinter extends Linter {
 					UIClass.UIDefine.forEach(UIDefine => {
 						const UIDefineClass = UIClassFactory.getUIClass(UIDefine.classNameDotNotation);
 						if (!UIDefineClass.classExists) {
-							const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, UIDefine.start, UIDefine.start + UIDefine.path.length);
+							//TODO: check location generation
+							const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, UIDefine.start + 1, UIDefine.start + 1 + UIDefine.path.length);
 							if (range) {
 								errors.push({
 									acornNode: UIDefine.acornNode,
