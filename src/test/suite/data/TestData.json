@@ -607,6 +607,11 @@
 	],
 	"JSLinter": [
 		{
+			"className": "com.statictest.StaticClass",
+			"timeLimit": 100,
+			"errors": []
+		},
+		{
 			"className": "com.test.controller.LargeFile",
 			"timeLimit": 1400,
 			"errors": [
@@ -7669,6 +7674,11 @@
 					"text": "\"sap.m.NonExistantClass\" class doesn't exist"
 				}
 			]
+		},
+		{
+			"className": "com.statictest.StaticTest",
+			"timeLimit": 100,
+			"errors": []
 		},
 		{
 			"className": "com.test.fragmenttest.view.Master",

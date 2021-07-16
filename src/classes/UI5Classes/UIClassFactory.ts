@@ -428,6 +428,21 @@ export class UIClassFactory {
 		}
 		viewsAndFragments.views = views;
 
+		const fragments = FileReader.getAllFragments();
+		const allViews = FileReader.getAllViews();
+
+		//check for static mentioning
+		fragments.forEach(fragment => {
+			if (fragment.content.includes(`${CurrentUIClass.className}.`)) {
+				viewsAndFragments.fragments.push(fragment);
+			}
+		});
+		allViews.forEach(view => {
+			if (view.content.includes(`${CurrentUIClass.className}.`)) {
+				viewsAndFragments.views.push(view);
+			}
+		});
+
 		return viewsAndFragments;
 	}
 

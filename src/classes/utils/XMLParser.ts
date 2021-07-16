@@ -69,6 +69,12 @@ export class XMLParser {
 								const results = new RegExp(`(\\.|"|')${eventHandlerName}("|'|\\()`).test(currentEventHandlerName);
 								if (results) {
 									currentEventHandlerName = eventHandlerName;
+								} else {
+									const manifest = FileReader.getManifestForClass(currentEventHandlerName);
+									if (manifest) {
+										const parts = currentEventHandlerName.split(".");
+										currentEventHandlerName = parts.pop() || "";
+									}
 								}
 							}
 						}

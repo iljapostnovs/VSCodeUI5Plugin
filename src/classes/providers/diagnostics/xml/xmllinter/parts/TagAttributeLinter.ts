@@ -137,6 +137,15 @@ export class TagAttributeLinter extends Linter {
 		} else if (event && responsibleControlName) {
 			const eventName = XMLParser.getEventHandlerNameFromAttributeValue(attributeValue);
 			isValueValid = !!XMLParser.getMethodsOfTheControl(responsibleControlName).find(method => method.name === eventName);
+			if (!isValueValid) {
+				const manifest = FileReader.getManifestForClass(eventName);
+				if (manifest) {
+					const parts = eventName.split(".");
+					const formattedEventName = parts.pop();
+					const className = parts.join(".");
+					isValueValid = !!XMLParser.getMethodsOfTheControl(className).find(method => method.name === formattedEventName);
+				}
+			}
 			message = `Event handler "${eventName}" not found in "${responsibleControlName}".`
 		}
 
