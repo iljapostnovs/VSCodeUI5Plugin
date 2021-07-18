@@ -1,0 +1,6 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button press="com.test.statictest.StaticClass.staticMethod"/>
+</c:FragmentDefinition>
