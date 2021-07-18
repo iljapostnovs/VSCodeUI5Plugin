@@ -1,3 +1,6 @@
+## 0.12.67 (18-07-2021)
+* Add support of static event handlers in views/fragments
+
 ## 0.12.66 (05-07-2021)
 * Bugfixes
 
