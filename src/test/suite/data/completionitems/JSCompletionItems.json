@@ -1213,7 +1213,8 @@
 				"\"com/test/util/interfacetest/interfaces/Interface1\"",
 				"\"com/test/util/interfacetest/interfaces/Interface2\"",
 				"\"com/test/util/interfacetest/interfaces/Interface3\"",
-				"\"com/test/statictest/StaticClass\""
+				"\"com/test/statictest/StaticClass\"",
+				"\"com/test/xmllintertest/UI5IgnoreTest\""
 			]
 		}
 	],

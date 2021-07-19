@@ -41,7 +41,7 @@ export class WorkspaceCompletionItemFactory implements ICompletionItemFactory {
 		const fileFsPath = textDocument.fsPath;
 		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
 		if (defineString) {
-			const deletedCompletionItem = completionItems.find(completionItem => completionItem.label.substring(1, completionItem.label.length - 1) === defineString);
+			const deletedCompletionItem = completionItems.find(completionItem => (completionItem.label as string).substring(1, (completionItem.label as string).length - 1) === defineString);
 			if (deletedCompletionItem) {
 				completionItems.splice(completionItems.indexOf(deletedCompletionItem), 1);
 			}

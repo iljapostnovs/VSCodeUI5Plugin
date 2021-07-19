@@ -1,0 +1,18 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<!-- @ui5ignore -->
+	<Button
+		id="idButton1"
+		press="wrongEventHandler"
+	>
+		<customData>
+			<Text validationError="wrongEventHandler"/>
+		</customData>
+	</Button>
+	<Button
+		id="idButton2"
+		press="notWrongEventHandler"
+	/>
+</c:FragmentDefinition>

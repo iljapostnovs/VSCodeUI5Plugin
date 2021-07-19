@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.67",
+	"version": "0.12.68",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -19,7 +19,7 @@
 	"icon": "images/ui5.png",
 	"homepage": "https://github.com/iljapostnovs/VSCodeUI5Plugin/blob/master/README.md",
 	"engines": {
-		"vscode": "^1.57.0"
+		"vscode": "^1.58.1"
 	},
 	"categories": [
 		"Extension Packs"
@@ -417,21 +417,21 @@
 	},
 	"devDependencies": {
 		"@types/axios": "^0.14.0",
-		"@types/glob": "^7.1.3",
+		"@types/glob": "^7.1.4",
 		"@types/line-column": "^1.0.0",
-		"@types/mocha": "^8.2.2",
-		"@types/node": "^14.17.3",
-		"@types/vscode": "^1.57.0",
+		"@types/mocha": "^8.2.3",
+		"@types/node": "^14.17.5",
+		"@types/vscode": "^1.58.1",
 		"@types/webpack": "^5.28.0",
-		"@typescript-eslint/eslint-plugin": "^4.26.1",
-		"@typescript-eslint/parser": "^4.26.1",
+		"@typescript-eslint/eslint-plugin": "^4.28.4",
+		"@typescript-eslint/parser": "^4.28.4",
 		"clean-webpack-plugin": "^3.0.0",
-		"eslint": "^7.28.0",
-		"mocha": "^9.0.0",
+		"eslint": "^7.31.0",
+		"mocha": "^9.0.2",
 		"ts-loader": "^9.2.3",
-		"typescript": "^4.3.2",
-		"vscode-test": "^1.5.2",
-		"webpack": "^5.38.1",
+		"typescript": "^4.3.5",
+		"vscode-test": "^1.6.1",
+		"webpack": "^5.45.1",
 		"webpack-cli": "^4.7.2"
 	},
 	"dependencies": {

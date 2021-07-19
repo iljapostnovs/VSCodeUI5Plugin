@@ -27,10 +27,10 @@ export class TagAttributeLinter extends Linter {
 		const XMLFile = TextDocumentTransformer.toXMLFile(document);
 		if (XMLFile) {
 			const tags = XMLParser.getAllTags(XMLFile);
-			tags.forEach(tag => {
+			tags.forEach((tag, index) => {
+				const previousTag = tags[index - 1];
 				const tagAttributes = XMLParser.getAttributesOfTheTag(tag);
-				if (tagAttributes) {
-
+				if (tagAttributes && previousTag?.text !== "<!-- @ui5ignore -->") {
 					const tagPrefix = XMLParser.getTagPrefix(tag.text);
 					const className = XMLParser.getClassNameFromTag(tag.text);
 

@@ -7692,6 +7692,15 @@
 	],
 	"FragmentLinter": [
 		{
+			"className": "com.test.xmllintertest.UI5IgnoreTest",
+			"timeLimit": 100,
+			"errors": [
+				{
+					"text": "Event handler \"wrongEventHandler\" not found in \"com.test.xmllintertest.UI5IgnoreTest\"."
+				}
+			]
+		},
+		{
 			"className": "com.test.view.fragments.LinterTest",
 			"errors": [
 				{

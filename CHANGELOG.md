@@ -1,3 +1,6 @@
+## 0.12.68 (19-07-2021)
+* Add support for @ui5ignore comment in xml files
+
 ## 0.12.67 (18-07-2021)
 * Add support of static event handlers in views/fragments
 
