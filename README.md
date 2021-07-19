@@ -80,6 +80,8 @@ XML Linters available:<br/>
 > Related preference entries:<br/>
 > *ui5.plugin.xmlDiagnostics*<br/>
 
+> To make XML Linter ignore attribute errors of next tag, you can use ```<-- @ui5ignore -->``` comment right above the tag<br/>
+
 ![DynamicCompletionItems](/images/XMLDiagnostics.gif)
 
 ----------
