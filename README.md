@@ -7,6 +7,7 @@ Before you start working with the plugin, it will be useful to set formatOnSave 
 ```json
 "editor.formatOnSave": true
 ```
+As well it's recommended to install ```hookyqr.beautify``` extension for formatting JS files.
 The reason for it is described in [Known limitations](#known-limitations)
 
 Make sure that you have ```ui5.plugin.excludeFolderPattern``` property set correctly. This property is critical if you have SAPUI5 libraries in your workspace.
@@ -288,4 +289,10 @@ Keep your code clean, it will help you to have the plugin working correctly :)<b
 It's highly recommended to set formatting on save in your VS Code preferences, it will help to avoid such issues.
 ```json
 "editor.formatOnSave": true
+```
+Standard VSCode JS Formatter is not handling all formatting issues, however ```hookyqr.beautify``` plugin does. It's highly recommended to install it and use as JS formatter.
+```json
+    "[javascript]": {
+        "editor.defaultFormatter": "HookyQR.beautify"
+    }
 ```
