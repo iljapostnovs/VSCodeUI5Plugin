@@ -292,7 +292,7 @@ It's highly recommended to set formatting on save in your VS Code preferences, i
 ```
 Standard VSCode JS Formatter is not handling all formatting issues, however ```hookyqr.beautify``` plugin does. It's highly recommended to install it and use as JS formatter.
 ```json
-    "[javascript]": {
-        "editor.defaultFormatter": "HookyQR.beautify"
-    }
+"[javascript]": {
+	"editor.defaultFormatter": "HookyQR.beautify"
+}
 ```
