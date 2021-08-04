@@ -1392,7 +1392,6 @@ export class CustomUIClass extends AbstractUIClass {
 									}
 								}
 							}
-
 						}
 					}
 				}

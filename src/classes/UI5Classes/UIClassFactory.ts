@@ -29,6 +29,27 @@ export class UIClassFactory {
 		String: new JSClass("String")
 	};
 
+	private static _createTypeDefDocClass(jsdoc: any) {
+		const typedefDoc = jsdoc.tags?.find((tag: any) => {
+			return tag.tag === "typedef";
+		});
+		const className = typedefDoc.name;
+		const properties = jsdoc.tags.filter((tag: any) => tag.tag === "property");
+		const typeDefClass = new JSClass(className);
+		typeDefClass.fields = properties.map((property: any): IUIField => {
+			return {
+				description: property.description,
+				name: property.name,
+				visibility: "public",
+				type: property.type,
+				abstract: false,
+				owner: className,
+				static: false
+			}
+		});
+		this._UIClasses[className] = typeDefClass;
+	}
+
 	private static _getInstance(className: string, documentText?: string) {
 		let returnClass: AbstractUIClass;
 		const isThisClassFromAProject = !!FileReader.getManifestForClass(className);
@@ -36,6 +57,14 @@ export class UIClassFactory {
 			returnClass = new StandardUIClass(className);
 		} else {
 			returnClass = new CustomUIClass(className, documentText);
+			(returnClass as CustomUIClass).comments?.forEach(comment => {
+				const typedefDoc = comment.jsdoc?.tags?.find((tag: any) => {
+					return tag.tag === "typedef";
+				});
+				if (typedefDoc) {
+					this._createTypeDefDocClass(comment.jsdoc);
+				}
+			});
 		}
 
 		return returnClass;
