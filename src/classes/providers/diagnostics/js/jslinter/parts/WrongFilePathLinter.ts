@@ -18,7 +18,7 @@ export class WrongFilePathLinter extends Linter {
 				if (UIClass instanceof CustomUIClass && UIClass.classText) {
 					const manifest = FileReader.getManifestForClass(UIClass.className);
 					if (manifest) {
-						const rClassNamesRegex = new RegExp(`${manifest.componentName.replace(/\./, "\\.")}\\..*?(?="|'|})`, "g");
+						const rClassNamesRegex = new RegExp(`${manifest.componentName.replace(/\./, "\\.")}\\..*?(?="|'|}|]|>|\\|)`, "g");
 						if (rClassNamesRegex) {
 							let result = rClassNamesRegex.exec(UIClass.classText);
 							while (result) {

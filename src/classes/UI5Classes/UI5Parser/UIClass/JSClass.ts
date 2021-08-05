@@ -10,7 +10,7 @@ export class JSClass extends AbstractUIClass {
 	constructor(className: string) {
 		super(className);
 
-		this.methods = classData[className].methods;
-		this.fields = classData[className].fields;
+		this.methods = classData[className]?.methods || [];
+		this.fields = classData[className]?.fields || [];
 	}
 }

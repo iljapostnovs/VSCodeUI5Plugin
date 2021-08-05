@@ -1,3 +1,7 @@
+## 0.12.69 (04-08-2021)
+* Bugfixes for Wrong filepath linter.
+* Support for typedef jsdoc tag added
+
 ## 0.12.68 (19-07-2021)
 * Add support for @ui5ignore comment in xml files
 

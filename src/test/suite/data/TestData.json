@@ -389,6 +389,42 @@
 	],
 	"SyntaxAnalyser": [
 		{
+			"className": "com.test.util.TypeDefTest",
+			"methodName": "myCustomMethod",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "Field2"
+				}
+			},
+			"type": "MyCustomType"
+		},
+		{
+			"className": "com.test.util.TypeDefTest",
+			"methodName": "myCustomMethod",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "customMethod"
+				}
+			},
+			"type": "com.test.util.CustomClass"
+		},
+		{
+			"className": "com.test.util.TypeDefTest",
+			"methodName": "myCustomMethod",
+			"positionAddition": 0,
+			"node": {
+				"type": "MemberExpression",
+				"property": {
+					"name": "toLowerCase"
+				}
+			},
+			"type": "string"
+		},
+		{
 			"className": "com.test.controller.Master",
 			"methodName": "onShowHello",
 			"positionAddition": 0,
@@ -606,6 +642,11 @@
 		}
 	],
 	"JSLinter": [
+		{
+			"className": "com.test.util.TypeDefTest",
+			"timeLimit": 100,
+			"errors": []
+		},
 		{
 			"className": "com.statictest.StaticClass",
 			"timeLimit": 100,
