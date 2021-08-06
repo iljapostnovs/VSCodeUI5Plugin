@@ -1,4 +1,5 @@
 import { DiagnosticSeverity, DiagnosticTag, Range, TextDocument } from "vscode";
+import { IInternalizationText, ResourceModelData } from "../../../../UI5Classes/ResourceModelData";
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
 import { FileReader } from "../../../../utils/FileReader";
 import { IError, Linter } from "./abstraction/Linter";
@@ -7,36 +8,38 @@ export class UnusedTranslationsLinter extends Linter {
 	protected className = "UnusedTranslationsLinter";
 	protected _getErrors(document: TextDocument): IError[] | Promise<IError[]> {
 		const errors: IError[] = [];
-		const text = document.getText();
-		const translations = text.match(/.*=.*/g);
-		if (translations) {
-			translations.forEach(translation => {
-				errors.push(...this._getTranslationErrors(translation, document));
-			});
+		const className = FileReader.getClassNameFromPath(document.fileName);
+		if (className) {
+			ResourceModelData.updateCache(document);
+			const manifest = FileReader.getManifestForClass(className);
+			const componentName = manifest?.componentName;
+			if (componentName && ResourceModelData.resourceModels[componentName]) {
+				const translations = ResourceModelData.resourceModels[componentName];
+				translations.forEach(translation => {
+					errors.push(...this._getTranslationErrors(translation, document));
+				});
+			}
 		}
 		return errors;
 	}
-	private _getTranslationErrors(translation: string, document: TextDocument) {
+	private _getTranslationErrors(translation: IInternalizationText, document: TextDocument) {
 		const errors: IError[] = [];
 
-		const translationIdRegexpResult = /.*(?==)/.exec(translation);
-		if (translationIdRegexpResult) {
-			const translationId = translationIdRegexpResult[0].trim();
-			if (!this._getIfTranslationIsUsed(translationId)) {
-				const positionBegin = document.positionAt(document.getText().indexOf(translation));
-				const positionEnd = document.positionAt(document.getText().indexOf(translation) + translation.length);
-				errors.push({
-					code: "UI5plugin",
-					message: `Translation "${translationId}" is never used`,
-					source: "Unused Translations Linter",
-					severity: DiagnosticSeverity.Information,
-					tags: [DiagnosticTag.Unnecessary],
-					range: new Range(
-						positionBegin,
-						positionEnd
-					)
-				})
-			}
+		const translationId = translation.id;
+		if (!this._getIfTranslationIsUsed(translationId)) {
+			const positionBegin = document.positionAt(translation.positionBegin);
+			const positionEnd = document.positionAt(translation.positionEnd);
+			errors.push({
+				code: "UI5plugin",
+				message: `Translation "${translationId}" is never used`,
+				source: "Unused Translations Linter",
+				severity: DiagnosticSeverity.Information,
+				tags: [DiagnosticTag.Unnecessary],
+				range: new Range(
+					positionBegin,
+					positionEnd
+				)
+			})
 		}
 
 		return errors;

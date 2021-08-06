@@ -26,6 +26,7 @@ import { FileRenameMediator } from "../../classes/filerenaming/FileRenameMediato
 import { FileWatcherMediator } from "../../classes/utils/FileWatcherMediator";
 import { XMLFormatter } from "../../classes/utils/XMLFormatter";
 import { JSCodeLensProvider } from "../../classes/providers/codelens/jscodelens/JSCodeLensProvider";
+import { PropertiesLinter } from "../../classes/providers/diagnostics/properties/PropertiesLinter";
 // import * as os from "os";
 
 suite("Extension Test Suite", () => {
@@ -124,6 +125,35 @@ suite("Extension Test Suite", () => {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
 				const errors = await JSLinter.getLintingErrors(document);
+				const endTime = new Date().getTime();
+				const timeSpent = endTime - startTime;
+
+				assert.strictEqual(errors.length, data.errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
+				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
+				console.log(`JS Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit}`);
+
+				data.errors.forEach(dataError => {
+					const errorInDocument = errors.find(error => error.message === dataError.text);
+					assert.ok(!!errorInDocument, `"${data.className}" class should have "${dataError.text}" error, but it doesn't`);
+				});
+			}
+
+		}
+	});
+
+	test("Properties Linter working properly", async () => {
+		// const cpuSpeed = os.cpus()[0].speed;
+		// const cpuSpeedTarget = 3700;
+		// const cpuSpeedRelation = cpuSpeed / cpuSpeedTarget;
+		const testData = data.PropertiesLinter;
+		// console.log(`CPU SPeed: ${cpuSpeed}`);
+
+		for (const data of testData) {
+			const filePath = FileReader.convertClassNameToFSPath(data.className)?.replace(".js", ".properties");
+			if (filePath) {
+				const document = await vscode.workspace.openTextDocument(filePath);
+				const startTime = new Date().getTime();
+				const errors = await PropertiesLinter.getLintingErrors(document);
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
 

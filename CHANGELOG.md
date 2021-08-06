@@ -1,3 +1,6 @@
+## 0.12.70 (06-08-2021)
+* Bugfix for i18n properties file parsing
+
 ## 0.12.69 (04-08-2021)
 * Bugfixes for Wrong filepath linter.
 * Support for typedef jsdoc tag added
