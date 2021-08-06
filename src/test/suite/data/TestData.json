@@ -641,6 +641,17 @@
 			"type": "sap.m.Button"
 		}
 	],
+	"PropertiesLinter": [
+		{
+			"className": "com.test.i18n.i18n",
+			"timeLimit": 100,
+			"errors": [
+				{
+					"text": "Translation \"UnusedTranslation\" is never used"
+				}
+			]
+		}
+	],
 	"JSLinter": [
 		{
 			"className": "com.test.util.TypeDefTest",

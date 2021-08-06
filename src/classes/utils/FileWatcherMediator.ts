@@ -58,7 +58,7 @@ export class FileWatcherMediator {
 			FileReader.setNewFragmentContentToCache(document.getText(), document.fileName, true);
 		} else if (document.fileName.endsWith(".properties")) {
 
-			ResourceModelData.readTexts();
+			ResourceModelData.updateCache(document);
 		} else if (document.fileName.endsWith("manifest.json")) {
 
 			FileReader.rereadAllManifests();
