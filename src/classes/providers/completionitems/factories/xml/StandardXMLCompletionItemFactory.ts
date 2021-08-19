@@ -151,9 +151,18 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 
 	private _generateInsertStringFrom(className: string, properties: string, aggregations: string, classPrefix: string, prefixBeforeClassName = "") {
 		let insertText = `${prefixBeforeClassName}${className}\n`;
-		insertText += properties;
+
+		const shouldAttributesBeAdded = vscode.workspace.getConfiguration("ui5.plugin").get("addTagAttributes");
+		const shouldAggregationsBeAdded = vscode.workspace.getConfiguration("ui5.plugin").get("addTagAggregations");
+
+		if (shouldAttributesBeAdded) {
+			insertText += properties;
+		}
 		insertText += ">\n";
-		insertText += aggregations;
+
+		if (shouldAggregationsBeAdded) {
+			insertText += aggregations;
+		}
 
 		insertText += `</${classPrefix}${className}>`;
 

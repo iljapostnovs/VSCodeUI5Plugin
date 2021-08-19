@@ -244,6 +244,16 @@
 					"default": true,
 					"description": "Should inherited properties/aggregations be added in XML completion items"
 				},
+				"ui5.plugin.addTagAttributes": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should tag attributes be added in XML completion items"
+				},
+				"ui5.plugin.addTagAggregations": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should tag aggregations be added in XML completion items"
+				},
 				"ui5.plugin.dataSource": {
 					"type": "string",
 					"default": "https://ui5.sap.com/",

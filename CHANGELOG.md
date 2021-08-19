@@ -1,5 +1,6 @@
-## 0.12.70 (19-08-2021)
+## 0.12.71 (19-08-2021)
 * Bugfixes
+* Two preference entries added: ui5.plugin.addTagAttributes and ui5.plugin.addTagAggregations
 
 ## 0.12.70 (06-08-2021)
 * Bugfix for i18n properties file parsing
