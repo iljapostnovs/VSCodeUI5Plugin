@@ -45,7 +45,7 @@ export class TagAttributeLinter extends Linter {
 								if (!attributeValidation.valid) {
 									const indexOfTagBegining = tag.text.indexOf(tagAttribute);
 									const positionBegin = tag.positionBegin + indexOfTagBegining;
-									const positionEnd = positionBegin + tagAttribute.length;
+									const positionEnd = positionBegin + tagAttribute.length - 1;
 									const range = RangeAdapter.offsetsToVSCodeRange(documentText, positionBegin, positionEnd);
 									if (range && XMLParser.getIfPositionIsNotInComments(XMLFile, tag.positionBegin)) {
 										errors.push({
@@ -175,7 +175,7 @@ export class TagAttributeLinter extends Linter {
 
 	private _isAttributeAlwaysValid(className: string, attribute: string) {
 		const exclusions: any = {
-			"*": ["id", "class"],
+			"*": ["id", "class", "binding"],
 			"sap.ui.core.mvc.View": ["controllerName"],
 			"sap.ui.core.mvc.XMLView": ["async"],
 			"sap.ui.core.Fragment": ["fragmentName"],

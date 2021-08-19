@@ -30,7 +30,7 @@
 				fragmentName="com.test.view.fragments.LinterTest"
 				type="XML"
 			/>
-			<Input>
+			<Input binding="{test}">
 				<f:customData>
 
 				</f:customData>
