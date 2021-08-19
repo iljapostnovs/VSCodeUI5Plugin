@@ -1,3 +1,6 @@
+## 0.12.70 (19-08-2021)
+* Bugfixes
+
 ## 0.12.70 (06-08-2021)
 * Bugfix for i18n properties file parsing
 

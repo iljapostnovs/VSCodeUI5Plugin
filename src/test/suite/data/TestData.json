@@ -7724,6 +7724,12 @@
 				},
 				{
 					"text": "\"sap.m.NonExistantClass\" class doesn't exist"
+				},
+				{
+					"text": "Library \"sap.m\" of class \"sap.m.Input\" doesn't match with aggregation tag library \"sap.f\""
+				},
+				{
+					"text": "Library \"sap.m\" of class \"sap.m.Input\" doesn't match with aggregation tag library \"sap.f\""
 				}
 			]
 		},
