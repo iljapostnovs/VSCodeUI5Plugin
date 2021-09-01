@@ -163,7 +163,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 						completionItems = this._getCompletionItemsForCustomClasses(libName, tagPrefix);
 					}
 				}
-			} catch (error) {
+			} catch (error: any) {
 				if (error.name === "LibraryPathException") {
 					completionItems = [];
 				}
@@ -178,7 +178,8 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 		return completionItems.reduce((accumulator: CustomCompletionItem[], completionItem: CustomCompletionItem) => {
 			const node = nodeDAO.findNode(completionItem.className);
 			if (node) {
-				const tagPrefix = XMLParser.getPrefixForLibraryName(node.getLib(), XMLText);
+				const libName = node.getName().replace(`.${node.getDisplayName()}`, "");
+				const tagPrefix = XMLParser.getPrefixForLibraryName(libName, XMLText);
 				if (tagPrefix !== undefined) {
 					let classPrefix = "";
 					if (addPrefix) {
