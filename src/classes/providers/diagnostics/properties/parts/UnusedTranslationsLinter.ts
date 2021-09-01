@@ -46,7 +46,7 @@ export class UnusedTranslationsLinter extends Linter {
 	}
 	private _getIfTranslationIsUsed(translationId: string) {
 		const UIClasses = UIClassFactory.getAllCustomUIClasses();
-		let isUsed = !!UIClasses.find(UIClass => UIClass.classText.includes(translationId));
+		let isUsed = !!UIClasses.find(UIClass => this._checkIfUsed(UIClass.classText, translationId));
 		isUsed = isUsed || !!FileReader.getAllViews().find(view => this._checkIfUsed(view.content, translationId));
 		isUsed = isUsed || !!FileReader.getAllFragments().find(fragment => this._checkIfUsed(fragment.content, translationId));
 		isUsed = isUsed || !!FileReader.getAllManifests().find(manifest => this._checkIfUsed(JSON.stringify(manifest.content), `{{${translationId}}}`));

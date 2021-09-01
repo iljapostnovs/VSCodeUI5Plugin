@@ -25,7 +25,7 @@ export class ResourceModelData {
 	private static _updateResourceModelData(resourceModelFile: { content: string, componentName: string }) {
 		this.resourceModels[resourceModelFile.componentName] = [];
 
-		const texts = resourceModelFile.content.match(/.*=.*/g);
+		const texts = resourceModelFile.content.match(/.*?([a-zA-Z]|\s)=.*([a-zA-Z]|\s)/g);
 		texts?.forEach(text => {
 			const textParts = text.split("=");
 			const textId = textParts.shift()?.trim();

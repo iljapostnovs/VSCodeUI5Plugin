@@ -3,6 +3,7 @@
 	xmlns:c="sap.ui.core"
 >
 	<Text text="{i18n>UsedTranslationWithEqualSign} {i18n>UsedTranslation}"/>
+	<Text text="{i18n>MultilineTranslation}"/>
 	<Button
 		id="idButtonFragmentController1"
 		text="{
