@@ -241,7 +241,7 @@
 				},
 				"ui5.plugin.addInheritedPropertiesAndAggregations": {
 					"type": "boolean",
-					"default": true,
+					"default": false,
 					"description": "Should inherited properties/aggregations be added in XML completion items"
 				},
 				"ui5.plugin.addTagAttributes": {

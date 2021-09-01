@@ -112,7 +112,7 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 		const className = data.className.split(".")[data.className.split(".").length - 1];
 		const completionItem: CustomCompletionItem = new CustomCompletionItem(className);
 		completionItem.kind = vscode.CompletionItemKind.Class;
-		completionItem.insertText = data.insertText;
+		completionItem.insertText = new vscode.SnippetString(data.insertText);
 		completionItem.className = data.className;
 		completionItem.detail = data.detail;
 		completionItem.documentation = data.markdown;
@@ -162,6 +162,8 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 
 		if (shouldAggregationsBeAdded) {
 			insertText += aggregations;
+		} else {
+			insertText += "    $0\n";
 		}
 
 		insertText += `</${classPrefix}${className}>`;
