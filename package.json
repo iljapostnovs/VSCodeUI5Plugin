@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.70",
+	"version": "0.12.71",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -241,8 +241,18 @@
 				},
 				"ui5.plugin.addInheritedPropertiesAndAggregations": {
 					"type": "boolean",
-					"default": true,
+					"default": false,
 					"description": "Should inherited properties/aggregations be added in XML completion items"
+				},
+				"ui5.plugin.addTagAttributes": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should tag attributes be added in XML completion items"
+				},
+				"ui5.plugin.addTagAggregations": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should tag aggregations be added in XML completion items"
 				},
 				"ui5.plugin.dataSource": {
 					"type": "string",

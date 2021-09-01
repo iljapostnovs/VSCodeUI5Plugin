@@ -14,7 +14,7 @@ export class RangeAdapter {
 		const lineColumnEnd = lineColumn.fromIndex(positionEnd);
 		if (lineColumnBegin && lineColumnEnd) {
 			const positionBegin = new vscode.Position(lineColumnBegin.line - 1, lineColumnBegin.col - 1);
-			const positionEnd = new vscode.Position(lineColumnEnd.line - 1, lineColumnEnd.col - 1);
+			const positionEnd = new vscode.Position(lineColumnEnd.line - 1, lineColumnEnd.col);
 			return new vscode.Range(positionBegin, positionEnd);
 		}
 	}

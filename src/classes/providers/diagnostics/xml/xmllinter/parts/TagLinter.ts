@@ -42,8 +42,10 @@ export class TagLinter extends Linter {
 				});
 			}
 		} else {
-			const tagName = tagClass.split(".")[tagClass.split(".").length - 1];
-			const isAggregation = tagName[0] ? tagName[0].toLowerCase() === tagName[0] : false;
+			const tagParts = tagClass.split(".");
+			const tagName = tagParts.pop();
+			const tagPrefixLibrary = tagParts.join(".");
+			const isAggregation = tagName && tagName[0] ? tagName[0].toLowerCase() === tagName[0] : false;
 
 			if (!isAggregation) {
 				const UIClass = UIClassFactory.getUIClass(tagClass);
@@ -64,16 +66,25 @@ export class TagLinter extends Linter {
 					position = tag.positionEnd;
 				}
 				const parentTag = XMLParser.getParentTagAtPosition(XMLFile, position - 1);
-				if (parentTag.text) {
+				if (parentTag.text && tagName) {
+					const parentTagPrefix = XMLParser.getTagPrefix(parentTag.text);
 					const tagClass = XMLParser.getFullClassNameFromTag(parentTag, XMLFile);
 					if (tagClass) {
+						let errorText: string | undefined;
+						const parentTagPrefixLibrary = XMLParser.getLibraryPathFromTagPrefix(XMLFile, parentTagPrefix, parentTag.positionBegin);
 						const aggregation = this._findAggregation(tagClass, tagName);
 						if (!aggregation) {
+							errorText = `"${tagName}" aggregation doesn't exist in "${tagClass}"`;
+						} else if (parentTagPrefixLibrary !== tagPrefixLibrary) {
+							errorText = `Library "${parentTagPrefixLibrary}" of class "${tagClass}" doesn't match with aggregation tag library "${tagPrefixLibrary}"`;
+						}
+
+						if (errorText) {
 							const range = RangeAdapter.offsetsToVSCodeRange(documentText, tag.positionBegin, tag.positionEnd);
 							if (range && XMLParser.getIfPositionIsNotInComments(XMLFile, tag.positionBegin)) {
 								errors.push({
 									code: "UI5plugin",
-									message: `"${tagName}" aggregation doesn't exist in "${tagClass}"`,
+									message: errorText,
 									source: "Tag Linter",
 									range: range
 								});

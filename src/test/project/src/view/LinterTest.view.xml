@@ -2,6 +2,7 @@
 	controllerName="com.test.controller.LinterTest"
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns="sap.m"
+	xmlns:f="sap.f"
 	xmlns:c="sap.ui.core"
 	xmlns:l="sap.ui.layout"
 	displayBlock="true"
@@ -29,6 +30,11 @@
 				fragmentName="com.test.view.fragments.LinterTest"
 				type="XML"
 			/>
+			<Input binding="{test}">
+				<f:customData>
+
+				</f:customData>
+			</Input>
 		</content>
 	</Page>
 </mvc:View>

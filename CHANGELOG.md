@@ -1,3 +1,9 @@
+## 0.12.71 (02-09-2021)
+* Bugfixes
+* Two preference entries added: ui5.plugin.addTagAttributes and ui5.plugin.addTagAggregations
+* XML Completion items doesn't generate comments about aggregation type anymore
+* Default value for ui5.plugin.addInheritedPropertiesAndAggregations preference entry is changed to false
+
 ## 0.12.70 (06-08-2021)
 * Bugfix for i18n properties file parsing
 

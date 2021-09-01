@@ -3,14 +3,16 @@ import { IAggregationGetterStrategy } from "./interfaces/IAggregationGetterStrat
 import * as vscode from "vscode";
 
 export class XMLAggregationGenerator implements IAggregationGenerator {
-	public generateAggregations(strategy: IAggregationGetterStrategy, classPrefix: string) {
+	public generateAggregations(strategy: IAggregationGetterStrategy, classPrefix: string, isRecursive = false) {
 		let aggregationString = "";
-		const aggregations: any = strategy.getAggregations();
+		const aggregations: any[] = strategy.getAggregations();
 
-		aggregations.forEach((aggregation: any) => {
+		aggregations.forEach((aggregation: any, index) => {
 			const parsedAggregation = strategy.getAggregation(aggregation);
 			aggregationString += `    <${classPrefix}${parsedAggregation.name}>\n`;
-			aggregationString += `        <!--${parsedAggregation.type}-->\n`;
+			if (!isRecursive && index === 0) {
+				aggregationString += "        $0\n";
+			}
 			aggregationString += `    </${classPrefix}${parsedAggregation.name}>\n`;
 		});
 
@@ -20,8 +22,12 @@ export class XMLAggregationGenerator implements IAggregationGenerator {
 		if (shouldAddInheritedProperties) {
 			const parent = strategy.getParent();
 			if (parent) {
-				aggregationString += this.generateAggregations(parent, classPrefix);
+				aggregationString += this.generateAggregations(parent, classPrefix, true);
 			}
+		}
+
+		if (!isRecursive && aggregationString.length === 0) {
+			aggregationString += "    $0\n";
 		}
 
 		return aggregationString;
