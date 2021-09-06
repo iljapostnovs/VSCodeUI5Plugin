@@ -9,6 +9,6 @@
 		id="idPage"
 		backgroundDesign="Transparent"
 	>
-		<Text text="Hello World!"/>
+		<Text text="{path: '', formatter: '.formatter.testUsage'}"/>
 	</Page>
 </mvc:View>

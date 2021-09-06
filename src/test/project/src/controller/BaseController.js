@@ -1,10 +1,13 @@
 sap.ui.define([
-	"com/test/library/control/BaseController"
+	"com/test/library/control/BaseController",
+	"com/test/util/Formatter"
 ], function(
-	BaseController
+	BaseController,
+	Formatter
 ) {
 	"use strict";
 	return BaseController.extend("com.test.controller.BaseController", {
+		formatter: Formatter,
 		_test: function() {
 			//
 		},

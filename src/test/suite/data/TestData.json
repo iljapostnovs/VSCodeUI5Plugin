@@ -330,6 +330,10 @@
 				{
 					"name": "anotherCustomMethod",
 					"returnType": "sap.m.Label"
+				},
+				{
+					"name": "testUsage",
+					"returnType": "void"
 				}
 			],
 			"fields": []
@@ -653,6 +657,30 @@
 		}
 	],
 	"JSLinter": [
+		{
+			"className": "com.test.util.Formatter",
+			"timeLimit": 100,
+			"errors": [
+				{
+					"text": "No references found for \"customMethod\" class member"
+				},
+				{
+					"text": "No references found for \"asyncCustomMethod\" class member"
+				},
+				{
+					"text": "No references found for \"anotherCustomMethod\" class member"
+				},
+				{
+					"text": "Method \"customMethod\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"asyncCustomMethod\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "Method \"anotherCustomMethod\" is possibly private, no references found in other classes"
+				}
+			]
+		},
 		{
 			"className": "com.test.util.TypeDefTest",
 			"timeLimit": 100,
