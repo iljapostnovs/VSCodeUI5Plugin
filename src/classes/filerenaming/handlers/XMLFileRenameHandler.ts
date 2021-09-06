@@ -99,7 +99,7 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 						manifest.changed = true;
 					}
 				}
-			} catch (error) {
+			} catch (error: any) {
 				console.error(error.message);
 			}
 		});

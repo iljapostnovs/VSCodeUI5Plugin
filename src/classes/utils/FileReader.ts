@@ -159,7 +159,7 @@ export class FileReader {
 						content: UI5Manifest
 					};
 					this._manifests.push(UIManifest);
-				} catch (error) {
+				} catch (error: any) {
 					vscode.window.showErrorMessage(`Couldn't read manifest.json. Error message: ${error?.message || ""}`);
 					throw error;
 				}
@@ -346,7 +346,7 @@ export class FileReader {
 				if (className) {
 					try {
 						UIClassFactory.getUIClass(className);
-					} catch (error) {
+					} catch (error: any) {
 						vscode.window.showErrorMessage(`Error parsing ${className}: ${error.message}`);
 					}
 				}

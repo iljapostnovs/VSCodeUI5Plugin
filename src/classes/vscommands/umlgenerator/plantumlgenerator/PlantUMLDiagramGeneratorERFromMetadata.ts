@@ -14,7 +14,7 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 		try {
 			const XMLData = await this._getCurrentXMLData();
 			diagram = this._buildPlantUMLDiagram(XMLData);
-		} catch (error) {
+		} catch (error: any) {
 			vscode.window.showErrorMessage(`Error in metadata parsing. Details: ${JSON.stringify(error.message || error)}`);
 		}
 
