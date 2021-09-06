@@ -1,3 +1,6 @@
+## 0.12.72 (07-09-2021)
+* UI5 Parser bugfix
+
 ## 0.12.71 (02-09-2021)
 * Bugfixes
 * Two preference entries added: ui5.plugin.addTagAttributes and ui5.plugin.addTagAggregations

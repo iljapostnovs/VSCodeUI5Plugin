@@ -379,7 +379,11 @@ export class UIClassFactory {
 			relatedClasses.push(...this._getAllChildrenOfClass(CurrentUIClass));
 		}
 		if (includeMentioned) {
-			relatedClasses.push(...this._getAllClassesWhereClassIsImported(CurrentUIClass.className));
+			const importingClasses = this._getAllClassesWhereClassIsImported(CurrentUIClass.className);
+			importingClasses.forEach(importinClass => {
+				relatedClasses.push(importinClass);
+				relatedClasses.push(...this._getAllChildrenOfClass(importinClass));
+			});
 		}
 		const relatedViewsAndFragments = relatedClasses.reduce((accumulator: IViewsAndFragments, relatedUIClass: CustomUIClass) => {
 			const relatedFragmentsAndViews = this.getViewsAndFragmentsOfControlHierarchically(relatedUIClass, checkedClasses, false, false, includeMentioned, false);
