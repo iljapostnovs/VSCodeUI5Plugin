@@ -1,7 +1,6 @@
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import * as vscode from "vscode";
-import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../utils/FileReader";
+import { UI5Plugin } from "../../../UI5Plugin";
 
 export class SwitchToViewCommand {
 	static async switchToView() {
@@ -9,21 +8,21 @@ export class SwitchToViewCommand {
 			const currentClassName = this._getCurrentClassName();
 			if (currentClassName) {
 
-				const isModel = UIClassFactory.isClassAChildOfClassB(currentClassName, "sap.ui.model.Model");
+				const isModel = UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(currentClassName, "sap.ui.model.Model");
 				if (isModel) {
-					const allUIClasses = UIClassFactory.getAllExistentUIClasses();
+					const allUIClasses = UI5Plugin.getInstance().parser.classFactory.getAllExistentUIClasses();
 					const controllers = Object.keys(allUIClasses)
 						.filter(key => allUIClasses[key] instanceof CustomUIClass)
 						.map(key => <CustomUIClass>allUIClasses[key])
-						.filter(UIClass => FileReader.getClassFSPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
+						.filter(UIClass => UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
 
 					const controllersWithThisModelInUIDefine = controllers.filter(controller => {
 						const bControllerHasThisModelInUIDefine = !!controller.UIDefine.find(UIDefine => UIDefine.classNameDotNotation === currentClassName);
 						return bControllerHasThisModelInUIDefine;
 					});
 					const controllerOfThisModel =
-						controllersWithThisModelInUIDefine.find(controller => UIClassFactory.getDefaultModelForClass(controller.className) === currentClassName) ||
-						controllers.find(controller => UIClassFactory.getDefaultModelForClass(controller.className) === currentClassName);
+						controllersWithThisModelInUIDefine.find(controller => UI5Plugin.getInstance().parser.classFactory.getDefaultModelForClass(controller.className) === currentClassName) ||
+						controllers.find(controller => UI5Plugin.getInstance().parser.classFactory.getDefaultModelForClass(controller.className) === currentClassName);
 					if (controllerOfThisModel) {
 						await this._switchToViewOrFragmentFromUIClass(controllerOfThisModel.className);
 					}
@@ -39,9 +38,9 @@ export class SwitchToViewCommand {
 	}
 
 	private static async _switchToViewOrFragmentFromUIClass(currentClassName: string) {
-		const view = FileReader.getViewForController(currentClassName);
+		const view = UI5Plugin.getInstance().parser.fileReader.getViewForController(currentClassName);
 		if (!view) {
-			const fragment = FileReader.getFirstFragmentForClass(currentClassName);
+			const fragment = UI5Plugin.getInstance().parser.fileReader.getFirstFragmentForClass(currentClassName);
 			if (fragment) {
 				await vscode.window.showTextDocument(vscode.Uri.file(fragment.fsPath));
 			}
@@ -54,7 +53,7 @@ export class SwitchToViewCommand {
 		let controllerName: string | undefined;
 		const document = vscode.window.activeTextEditor?.document;
 		if (document) {
-			controllerName = FileReader.getClassNameFromPath(document.fileName);
+			controllerName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 		}
 		return controllerName;
 	}

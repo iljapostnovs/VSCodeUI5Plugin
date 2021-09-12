@@ -1,10 +1,9 @@
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { IAbstract, IStatic } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { IXMLFile, IFragment, IView } from "ui5plugin-parser/dist/classes/utils/FileReader";
 import { WorkspaceFolder } from "vscode";
-import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { IAbstract, IStatic } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { FileReader, IFragment, IView, IXMLFile } from "../../../utils/FileReader";
+import { UI5Plugin } from "../../../../UI5Plugin";
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 
 export class PlantUMLDiagramGenerator extends DiagramGenerator {
@@ -15,7 +14,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	async generateUMLClassDiagrams(wsFolder: WorkspaceFolder) {
 		let diagram = "@startuml ClassDiagram\nskinparam linetype ortho\nset namespaceSeparator none\nskinparam dpi 300\n";
 
-		const classNames = FileReader.getAllJSClassNamesFromProject(wsFolder)
+		const classNames = UI5Plugin.getInstance().parser.fileReader.getAllJSClassNamesFromProject({ fsPath: wsFolder.uri.fsPath })
 			.filter(className => !className.includes("-"));
 		const groupedClassNames = this._groupClassNamesToPackages([...classNames]);
 		Object.keys(groupedClassNames.packages).forEach(packageName => {
@@ -30,16 +29,16 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 			diagram += "}\n";
 		});
 		groupedClassNames.unpackagedClasses.forEach(className => {
-			const UIClass = UIClassFactory.getUIClass(className);
+			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 			if (UIClass instanceof CustomUIClass) {
 				diagram += this._generateClassDiagram(UIClass);
 			}
 		});
 
-		const views = FileReader.getAllViews().filter(XMLFile => !groupedClassNames.viewsUsed.includes(XMLFile));
-		const fragments = FileReader.getAllFragments();
+		const views = UI5Plugin.getInstance().parser.fileReader.getAllViews().filter(XMLFile => !groupedClassNames.viewsUsed.includes(XMLFile));
+		const fragments = UI5Plugin.getInstance().parser.fileReader.getAllFragments();
 		const XMLFiles = [...views, ...fragments].filter((XMLFile: IXMLFile) => {
-			const manifest = FileReader.getManifestForClass(XMLFile.name);
+			const manifest = UI5Plugin.getInstance().parser.fileReader.getManifestForClass(XMLFile.name);
 			const dependencyIsFromSameProject = manifest && manifest.fsPath.startsWith(wsFolder.uri.fsPath);
 			return dependencyIsFromSameProject;
 		});
@@ -55,7 +54,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 		});
 
 		classNames.forEach(className => {
-			const UIClass = UIClassFactory.getUIClass(className);
+			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 			if (UIClass instanceof CustomUIClass) {
 				diagram += this._generateRelationships(UIClass);
 			}
@@ -86,9 +85,9 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 
 		let className = classNames.pop();
 		while (className) {
-			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
-			if (UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller")) {
-				const view = FileReader.getViewForController(className);
+			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			if (UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller")) {
+				const view = UI5Plugin.getInstance().parser.fileReader.getViewForController(className);
 				if (view) {
 					const UIClasses: CustomUIClass[] = [UIClass];
 					data.viewsUsed.push(view);
@@ -96,9 +95,9 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 					const controllerName = UIClass.className;
 					const classNames = [viewName, controllerName];
 
-					const modelName = UIClassFactory.getDefaultModelForClass(UIClass.className);
+					const modelName = UI5Plugin.getInstance().parser.classFactory.getDefaultModelForClass(UIClass.className);
 					if (modelName) {
-						const model = UIClassFactory.getUIClass(modelName);
+						const model = UI5Plugin.getInstance().parser.classFactory.getUIClass(modelName);
 						if (model instanceof CustomUIClass) {
 							UIClasses.push(model);
 							if (classNames.includes(modelName)) {
@@ -155,14 +154,14 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	private _generateRelationships(UIClass: CustomUIClass) {
 		const dependencies = this._gatherAllDependencies(UIClass);
 		let diagram = "";
-		if (UIClass.parentClassNameDotNotation && UIClassFactory.getUIClass(UIClass.parentClassNameDotNotation) instanceof CustomUIClass) {
+		if (UIClass.parentClassNameDotNotation && UI5Plugin.getInstance().parser.classFactory.getUIClass(UIClass.parentClassNameDotNotation) instanceof CustomUIClass) {
 			const parentIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, UIClass.parentClassNameDotNotation);
 			if (parentIsFromSameProject) {
 				diagram += `${UIClass.parentClassNameDotNotation} <|-- ${UIClass.className}\n`;
 			}
 		}
 		dependencies.forEach(dependency => {
-			if (dependency !== UIClass.parentClassNameDotNotation && UIClassFactory.getUIClass(dependency) instanceof CustomUIClass) {
+			if (dependency !== UIClass.parentClassNameDotNotation && UI5Plugin.getInstance().parser.classFactory.getUIClass(dependency) instanceof CustomUIClass) {
 				const dependencyIsFromSameProject = this._getIfClassesAreWithinSameProject(UIClass.className, dependency);
 				if (dependencyIsFromSameProject) {
 					diagram += `${UIClass.className} ..> ${dependency}\n`;
@@ -170,8 +169,8 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 			}
 		});
 
-		const fragments = FileReader.getFragmentsMentionedInClass(UIClass.className);
-		const view = FileReader.getViewForController(UIClass.className);
+		const fragments = UI5Plugin.getInstance().parser.fileReader.getFragmentsMentionedInClass(UIClass.className);
+		const view = UI5Plugin.getInstance().parser.fileReader.getViewForController(UIClass.className);
 		const XMLDocDependencies = [...fragments];
 		if (view) {
 			XMLDocDependencies.push(view);
@@ -189,7 +188,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	}
 	private _gatherAllDependencies(UIClass: CustomUIClass) {
 		const dependencies: string[] = [];
-		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
 
 		UIClass.UIDefine.forEach(UIDefine => {
 			if (UIDefine.classNameDotNotation !== UIClass.className && !UIClass.interfaces.includes(UIDefine.classNameDotNotation)) {
@@ -199,7 +198,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 
 		UIClass.methods.forEach(UIMethod => {
 			if (UIMethod.acornNode) {
-				const memberExpressions = AcornSyntaxAnalyzer.expandAllContent(UIMethod.acornNode).filter((node: any) => node.type === "MemberExpression");
+				const memberExpressions = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(UIMethod.acornNode).filter((node: any) => node.type === "MemberExpression");
 				memberExpressions.forEach((memberExpression: any) => {
 					const className = strategy.acornGetClassName(UIClass.className, memberExpression.property.start);
 					if (className && !className.includes("__map__") && className !== UIClass.className && !dependencies.includes(className)) {
@@ -212,8 +211,8 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 		return dependencies;
 	}
 	private _getIfClassesAreWithinSameProject(className1: string, className2: string) {
-		const thisClassManifest = FileReader.getManifestForClass(className1);
-		const parentClassManifest = FileReader.getManifestForClass(className2);
+		const thisClassManifest = UI5Plugin.getInstance().parser.fileReader.getManifestForClass(className1);
+		const parentClassManifest = UI5Plugin.getInstance().parser.fileReader.getManifestForClass(className2);
 		return thisClassManifest?.fsPath === parentClassManifest?.fsPath;
 	}
 
@@ -243,11 +242,11 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	private _getStereotype(UIClass: CustomUIClass) {
 		let stereotype = "";
 
-		if (UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.model.Model")) {
+		if (UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.model.Model")) {
 			stereotype = " <<Model>>";
-		} else if (UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller")) {
+		} else if (UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller")) {
 			stereotype = " <<Controller>>";
-		} else if (UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.Control")) {
+		} else if (UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.Control")) {
 			stereotype = " <<Control>>";
 		}
 
@@ -255,7 +254,7 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	}
 	private _getClassOrInterfaceKeyword(UIClass: CustomUIClass) {
 		let keyword = "class";
-		const isInterface = !!UIClassFactory.getAllCustomUIClasses().find(CustomUIClass => CustomUIClass.interfaces.includes(UIClass.className));
+		const isInterface = !!UI5Plugin.getInstance().parser.classFactory.getAllCustomUIClasses().find(CustomUIClass => CustomUIClass.interfaces.includes(UIClass.className));
 		if (isInterface) {
 			keyword = "interface";
 		}
@@ -264,8 +263,8 @@ export class PlantUMLDiagramGenerator extends DiagramGenerator {
 	}
 	private _getClassColor(UIClass: CustomUIClass) {
 		let color = "";
-		const isModel = UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.model.Model");
-		const isController = UIClassFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller");
+		const isModel = UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.model.Model");
+		const isController = UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller");
 
 		if (isModel) {
 			color = "#aliceblue ##lightsteelblue "

@@ -1,14 +1,16 @@
+import { UI5Parser, WorkspaceFolder } from "ui5plugin-parser";
+import { VSCodeConfigHandler } from "./classes/ui5parser/VSCodeConfigHandler";
+const parser = UI5Parser.getInstance({
+	configHandler: new VSCodeConfigHandler()
+});
 import * as vscode from "vscode";
 import { UI5Plugin } from "./UI5Plugin";
-import { FileReader } from "./classes/utils/FileReader";
 
 export async function activate(context: vscode.ExtensionContext) {
-	FileReader.globalStoragePath = context.globalStorageUri.fsPath;
-	const manifests = FileReader.getAllManifests();
-
-	if (manifests.length > 0) {
-		await UI5Plugin.getInstance().initialize(context);
-	} else {
-		UI5Plugin.registerFallbackCommands();
-	}
+	const globalStoragePath = context.globalStorageUri.fsPath;
+	const workspaceFolders = vscode.workspace.workspaceFolders?.map(wsFolder => {
+		return new WorkspaceFolder(wsFolder.uri.fsPath);
+	})
+	await parser.initialize(workspaceFolders, globalStoragePath);
+	await UI5Plugin.getInstance().initialize();
 }

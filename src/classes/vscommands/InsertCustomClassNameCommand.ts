@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { FileReader } from "../utils/FileReader";
+import { UI5Plugin } from "../../UI5Plugin";
 export class InsertCustomClassNameCommand {
 	static insertCustomClassName() {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
 			const document = editor.document;
-			const classNameDotNotationToInsert = FileReader.getClassNameFromPath(document.uri.fsPath);
+			const classNameDotNotationToInsert = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.uri.fsPath);
 			if (classNameDotNotationToInsert) {
 				editor.edit(editBuilder => {
 					if (editor) {

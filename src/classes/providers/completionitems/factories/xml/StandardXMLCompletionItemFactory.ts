@@ -1,12 +1,10 @@
+import { SAPNode } from "ui5plugin-parser/dist/classes/librarydata/SAPNode";
+import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
+import { AbstractUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { StandardUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/StandardUIClass";
+import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../../../../UI5Plugin";
-import { SAPNode } from "../../../../librarydata/SAPNode";
-import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
-import { UI5MetadataPreloader } from "../../../../librarydata/UI5MetadataDAO";
-import { SAPIcons } from "../../../../UI5Classes/SAPIcons";
-import { AbstractUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { StandardUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
-import { URLBuilder } from "../../../../utils/URLBuilder";
 import { IAggregationGenerator } from "../../codegenerators/aggregation/interfaces/IAggregationGenerator";
 import { SAPClassAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
 import { SAPNodeAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
@@ -26,18 +24,7 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 	private readonly _nodeDAO = new SAPNodeDAO();
 
 	async preloadCompletionItems() {
-		const _nodeDAO = new SAPNodeDAO();
-		const SAPNodes = await _nodeDAO.getAllNodes();
-
-		const metadataPreloader: UI5MetadataPreloader = new UI5MetadataPreloader(SAPNodes);
-		await Promise.all([
-			metadataPreloader.preloadLibs(),
-			SAPIcons.preloadIcons()
-		]);
-		console.log("Libs are preloaded");
-
 		StandardXMLCompletionItemFactory.XMLStandardLibCompletionItems = await this.generateAggregationPropertyCompletionItems();
-		console.log("After the preload XML Completion Items are generated successfully");
 	}
 
 	async generateAggregationPropertyCompletionItems() {

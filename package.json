@@ -450,6 +450,8 @@
 		"comment-parser": "^1.2.4",
 		"fast-xml-parser": "^3.19.0",
 		"glob": "^7.1.7",
-		"line-column": "^1.0.2"
+		"line-column": "^1.0.2",
+		"ui5plugin-linter": "^0.0.9",
+		"ui5plugin-parser": "^0.1.9"
 	}
 }

@@ -1,8 +1,8 @@
 import { IUMLGenerator } from "./interfaces/IUMLGenerator";
-import { IUIMethod } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 import { ClassHead } from "./ClassHead";
 import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
+import { IUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 
 export class Method implements IUMLGenerator, ITextLengthGettable {
 	id: number;

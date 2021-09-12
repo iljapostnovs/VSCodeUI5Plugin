@@ -1,14 +1,13 @@
 import { Header } from "./drawiouml/Header";
 import { Footer } from "./drawiouml/Footer";
-import { FileReader } from "../../../utils/FileReader";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { DrawIOUMLDiagram } from "./DrawIOUMLDiagram";
 import * as vscode from "vscode";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { DependencyLine } from "./drawiouml/lines/DependencyLine";
 import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
 import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UI5Plugin } from "../../../../UI5Plugin";
 
 interface IUsedClassMap {
 	[key: string]: {
@@ -41,7 +40,7 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 				title: "Generating UML",
 				cancellable: false
 			}, async progress => {
-				const classNames = FileReader.getAllJSClassNamesFromProject(wsFolder);
+				const classNames = UI5Plugin.getInstance().parser.fileReader.getAllJSClassNamesFromProject({ fsPath: wsFolder.uri.fsPath });
 				const classQuantity = classNames.length;
 
 				const UMLDiagrams: DrawIOUMLDiagram[] = [];
@@ -49,7 +48,7 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 					return new Promise<void>(resolve => {
 						setTimeout(() => {
 							try {
-								const UIClass = UIClassFactory.getUIClass(className);
+								const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 								const UMLDiagram = new DrawIOUMLDiagram(UIClass, header);
 								UMLDiagrams.push(UMLDiagram);
 								// UMLDiagram.xAxis = xAxis;

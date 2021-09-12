@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import { Util } from "./util/Util";
-import { ICustomClassUIMethod } from "../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../../../../../UI5Classes/UIClassFactory";
 import { ReferenceCodeLensGenerator } from "../../../../../../../codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 import { NavigatiableNode } from "../abstraction/NavigatiableNode";
+import { ICustomClassUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UI5Plugin } from "../../../../../../../../../UI5Plugin";
 
 
 export class MethodNode extends NavigatiableNode {
@@ -28,7 +28,7 @@ export class MethodNode extends NavigatiableNode {
 
 		if (this.lines > 100) {
 			iconName = "private";
-		} else if (this.lines > 50 || (this.references === 0 && !UIClassFactory.isMethodOverriden(this.UIMethod.owner, this.UIMethod.name))) {
+		} else if (this.lines > 50 || (this.references === 0 && !UI5Plugin.getInstance().parser.classFactory.isMethodOverriden(this.UIMethod.owner, this.UIMethod.name))) {
 			iconName = "protected";
 		}
 

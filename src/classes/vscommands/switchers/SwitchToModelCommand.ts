@@ -1,19 +1,18 @@
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import * as vscode from "vscode";
-import { CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../utils/FileReader";
+import { UI5Plugin } from "../../../UI5Plugin";
 
 export class SwitchToModelCommand {
 	static async switchToModel() {
 		const document = vscode.window.activeTextEditor?.document;
 		if (document) {
-			const currentClassName = FileReader.getClassNameFromPath(document.fileName);
+			const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassName) {
-				const isController = UIClassFactory.isClassAChildOfClassB(currentClassName, "sap.ui.core.mvc.Controller");
+				const isController = UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(currentClassName, "sap.ui.core.mvc.Controller");
 				if (isController) {
-					const modelName = UIClassFactory.getDefaultModelForClass(currentClassName);
+					const modelName = UI5Plugin.getInstance().parser.classFactory.getDefaultModelForClass(currentClassName);
 					if (modelName) {
-						const UIModelClass = UIClassFactory.getUIClass(modelName);
+						const UIModelClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(modelName);
 						if (UIModelClass instanceof CustomUIClass) {
 							await this._switchToModel(UIModelClass.className);
 						}
@@ -28,7 +27,7 @@ export class SwitchToModelCommand {
 	}
 
 	private static async _switchToModel(modelName: string) {
-		const modelFSPath = FileReader.getClassFSPathFromClassName(modelName);
+		const modelFSPath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(modelName);
 		const editor = vscode.window.activeTextEditor;
 		if (editor && modelFSPath) {
 			await vscode.window.showTextDocument(vscode.Uri.file(modelFSPath));

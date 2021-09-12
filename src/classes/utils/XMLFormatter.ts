@@ -1,14 +1,16 @@
+import { XMLParser } from "ui5plugin-parser";
+import { IXMLFile } from "ui5plugin-parser/dist/classes/utils/FileReader";
+import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
+import { ITag } from "ui5plugin-parser/dist/classes/utils/XMLParser";
 import * as vscode from "vscode";
-import { IXMLFile } from "./FileReader";
-import { TextDocumentTransformer } from "./TextDocumentTransformer";
-import { ITag, XMLParser } from "./XMLParser";
+import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 
 export class XMLFormatter {
 	static formatDocument(document: vscode.TextDocument) {
 		const textEdits: vscode.TextEdit[] = [];
 		const documentText = document.getText();
 
-		const XMLFile = TextDocumentTransformer.toXMLFile(document, true);
+		const XMLFile = TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(document), true);
 		if (XMLFile) {
 			const allTags = this._getAllTags(XMLFile);
 
@@ -195,7 +197,7 @@ export class XMLFormatter {
 				XMLParser.getIfPositionIsNotInComments(document, i) ||
 				document.content.substring(i, i + 4) === "<!--"
 			);
-		shouldStop ||= isThisTagBegining;
+		shouldStop = shouldStop || isThisTagBegining;
 
 		while (!shouldStop) {
 			i--;
@@ -207,7 +209,7 @@ export class XMLFormatter {
 					XMLParser.getIfPositionIsNotInComments(document, i) ||
 					document.content.substring(i, i + 4) === "<!--"
 				);
-			shouldStop ||= isThisTagBegining;
+			shouldStop = shouldStop || isThisTagBegining;
 		}
 
 		return i;

@@ -1,5 +1,5 @@
-import { AbstractUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import { AbstractUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { UI5Plugin } from "../../../../../../UI5Plugin";
 import { IPropertyGetterStrategy } from "../interfaces/IPropertyGetterStrategy";
 
 export class SAPClassPropertyGetterStrategy implements IPropertyGetterStrategy {
@@ -11,7 +11,7 @@ export class SAPClassPropertyGetterStrategy implements IPropertyGetterStrategy {
 	getParent(): IPropertyGetterStrategy | undefined {
 		let theParent: SAPClassPropertyGetterStrategy | undefined;
 		if (this._UIClass.parentClassNameDotNotation) {
-			const parentClass = UIClassFactory.getUIClass(this._UIClass.parentClassNameDotNotation);
+			const parentClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(this._UIClass.parentClassNameDotNotation);
 			theParent = new SAPClassPropertyGetterStrategy(parentClass);
 		}
 
