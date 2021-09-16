@@ -1,3 +1,6 @@
+## 0.12.73 (16-09-2021)
+* Bugfixes in determinating positions
+
 ## 0.12.72 (07-09-2021)
 * UI5 Parser bugfix
 
