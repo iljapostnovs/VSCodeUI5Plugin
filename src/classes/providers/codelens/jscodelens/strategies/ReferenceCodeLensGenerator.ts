@@ -26,9 +26,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 				methods.forEach(method => {
 					if (method.memberPropertyNode) {
 						const locations = this.getReferenceLocations(method);
-						const positionBegin = document.positionAt(method.memberPropertyNode.start);
-						const positionEnd = document.positionAt(method.memberPropertyNode.end);
-						const range = new vscode.Range(positionBegin, positionEnd);
+						const range = RangeAdapter.acornLocationToVSCodeRange(method.memberPropertyNode.loc);
 						const codeLens = new vscode.CodeLens(range);
 						codeLens.command = {
 							title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
@@ -75,7 +73,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 				tagAndAttribute.attributes.forEach(attribute => {
 					const positionBegin = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute) + attribute.indexOf(method.name);
 					const positionEnd = positionBegin + method.name.length;
-					const range = RangeAdapter.offsetsToVSCodeRange(XMLDoc.content, positionBegin, positionEnd);
+					const range = RangeAdapter.offsetsToVSCodeRange(XMLDoc.content, positionBegin, positionEnd - 1);
 					if (range) {
 						const uri = vscode.Uri.file(XMLDoc.fsPath);
 						currentLocations.push(new vscode.Location(uri, range));
@@ -122,7 +120,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 						)
 					)
 				) {
-					const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, result.index, result.index + method.name.length);
+					const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, result.index, result.index + method.name.length - 1);
 					if (range) {
 						currentLocations.push(new vscode.Location(uri, range));
 					}
