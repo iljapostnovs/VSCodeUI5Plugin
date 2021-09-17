@@ -9,6 +9,12 @@
 						"description": "Function if promise is resolved",
 						"type": "function",
 						"isOptional": false
+					},
+					{
+						"name": "fnReject",
+						"description": "Function if promise is rejected",
+						"type": "function",
+						"isOptional": true
 					}
 				],
 				"description": "Promise .then",

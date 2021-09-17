@@ -1,3 +1,6 @@
+## 0.12.74 (17-09-2021)
+* Bugfixes
+
 ## 0.12.73 (16-09-2021)
 * Bugfixes in determinating positions
 

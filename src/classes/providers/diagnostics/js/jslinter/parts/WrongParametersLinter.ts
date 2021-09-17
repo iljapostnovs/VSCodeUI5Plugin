@@ -71,12 +71,16 @@ export class WrongParametersLinter extends Linter {
 																});
 															}
 															if (typeMismatch) {
+																const [className1, className2] = [
+																	paramFromMethod.type.includes("__map__") ? "map" : paramFromMethod.type,
+																	classNameOfTheParam.includes("__map__") ? "map" : classNameOfTheParam
+																];
 																const range = RangeAdapter.acornLocationToVSCodeRange(param.loc);
 																errors.push({
 																	acornNode: param,
 																	code: "UI5Plugin",
 																	source: "Parameter Linter",
-																	message: `"${paramFromMethod.name}" param is of type "${paramFromMethod.type}", but provided "${classNameOfTheParam}"`,
+																	message: `"${paramFromMethod.name}" param is of type "${className1}", but provided "${className2}"`,
 																	range: range
 																});
 															}
@@ -107,7 +111,7 @@ export class WrongParametersLinter extends Linter {
 		});
 	}
 
-	private _getIfClassesDiffers(expectedClass: string, actualClass: string) {
+	private _getIfClassesDiffers(expectedClass: string, actualClass: string): boolean {
 		let classesDiffers = true;
 
 		({ expectedClass, actualClass } = this._swapClassNames(expectedClass, actualClass));
@@ -126,6 +130,8 @@ export class WrongParametersLinter extends Linter {
 			classesDiffers = false;
 		} else if (WrongParametersLinter._sapNodeDAO.findNode(expectedClass)?.getKind() === "enum" && actualClass === "string") {
 			classesDiffers = false;
+		} else if (WrongParametersLinter._sapNodeDAO.findNode(expectedClass)?.getKind() === "typedef") {
+			classesDiffers = this._getIfClassesDiffers("map", actualClass);
 		} else {
 			classesDiffers = !UIClassFactory.isClassAChildOfClassB(actualClass, expectedClass);
 		}
