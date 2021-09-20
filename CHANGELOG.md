@@ -1,3 +1,6 @@
+## 0.12.75 (20-09-2021)
+* Method insertion position bugfixes
+
 ## 0.12.74 (17-09-2021)
 * Bugfixes
 

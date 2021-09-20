@@ -110,6 +110,7 @@ export class MethodInserter {
 
 					if (!currentMethodIsLastMethod) {
 						insertText += ","
+						offset++;
 					} else {
 						insertText = `,${insertText}`;
 					}
