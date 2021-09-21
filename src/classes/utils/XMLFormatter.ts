@@ -114,7 +114,10 @@ export class XMLFormatter {
 		const keys = Object.keys(anyObject);
 		keys.forEach(key => {
 			const value = anyObject[key];
-			if (typeof value === "object") {
+			if (Array.isArray(value)) {
+				const arrayString = "[" + value.map(value => `'${value}'`).join(", ") + "]"
+				formattedAttribute += `${indentation}\t${key}: ${arrayString}`;
+			} else if (typeof value === "object") {
 				formattedAttribute += `${indentation}\t${key}: ${this._formatAttributeObject(value, indentation + "\t")}`;
 			} else if (typeof value === "string") {
 				formattedAttribute += `${indentation}\t${key}: '${value}'`;
