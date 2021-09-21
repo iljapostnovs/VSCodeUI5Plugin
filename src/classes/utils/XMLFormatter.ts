@@ -111,15 +111,21 @@ export class XMLFormatter {
 	private static _formatAttributeObject(anyObject: any, indentation: string) {
 		let formattedAttribute = "{\n";
 
-		Object.keys(anyObject).forEach(key => {
+		const keys = Object.keys(anyObject);
+		keys.forEach(key => {
 			const value = anyObject[key];
 			if (typeof value === "object") {
-				formattedAttribute += `${indentation}\t${key}: ${this._formatAttributeObject(value, indentation + "\t")}\n`;
+				formattedAttribute += `${indentation}\t${key}: ${this._formatAttributeObject(value, indentation + "\t")}`;
 			} else if (typeof value === "string") {
-				formattedAttribute += `${indentation}\t${key}: '${value}'\n`;
+				formattedAttribute += `${indentation}\t${key}: '${value}'`;
 			} else {
-				formattedAttribute += `${indentation}\t${key}: ${value}\n`;
+				formattedAttribute += `${indentation}\t${key}: ${value}`;
 			}
+			const isLastKey = keys.indexOf(key) === keys.length - 1;
+			if (!isLastKey) {
+				formattedAttribute += ","
+			}
+			formattedAttribute += "\n"
 		});
 
 		formattedAttribute += `${indentation}}`;
