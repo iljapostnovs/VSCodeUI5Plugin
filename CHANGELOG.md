@@ -1,3 +1,6 @@
+## 0.12.76 (21-09-2021)
+* XML formatter improvements
+
 ## 0.12.75 (20-09-2021)
 * Method insertion position bugfixes
 
@@ -5,7 +8,7 @@
 * Bugfixes
 
 ## 0.12.73 (16-09-2021)
-* Bugfixes in determinating positions
+* Bugfixes in position determination
 
 ## 0.12.72 (07-09-2021)
 * UI5 Parser bugfix

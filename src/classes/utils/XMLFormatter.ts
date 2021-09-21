@@ -46,7 +46,8 @@ export class XMLFormatter {
 						}
 						newTag += tagAttributes.reduce((accumulator, tagAttribute) => {
 							const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
-							accumulator += `${indentation}\t${tagData.attributeName}="${tagData.attributeValue}"\n`;
+							const formattedAttributeValue = this._formatAttributeValue(tagData.attributeValue, indentation + "\t");
+							accumulator += `${indentation}\t${tagData.attributeName}="${formattedAttributeValue}"\n`;
 							if (tagAttributes.length === 1) {
 								accumulator = ` ${accumulator.trimLeft()}`;
 							}
@@ -92,6 +93,38 @@ export class XMLFormatter {
 		}
 		// copy(JSON.stringify(textEdits[0].newText))
 		return textEdits;
+	}
+	private static _formatAttributeValue(attributeValue: string, indentation: string) {
+		const isBinding = attributeValue.startsWith("{") && attributeValue.endsWith("}");
+		if (isBinding) {
+			try {
+				const evaluatedValue = eval(`(${attributeValue})`);
+				if (typeof evaluatedValue === "object") {
+					attributeValue = this._formatAttributeObject(evaluatedValue, indentation);
+				}
+			} catch (error) {
+				//do nothing
+			}
+		}
+		return attributeValue;
+	}
+	private static _formatAttributeObject(anyObject: any, indentation: string) {
+		let formattedAttribute = "{\n";
+
+		Object.keys(anyObject).forEach(key => {
+			const value = anyObject[key];
+			if (typeof value === "object") {
+				formattedAttribute += `${indentation}\t${key}: ${this._formatAttributeObject(value, indentation + "\t")}\n`;
+			} else if (typeof value === "string") {
+				formattedAttribute += `${indentation}\t${key}: '${value}'\n`;
+			} else {
+				formattedAttribute += `${indentation}\t${key}: ${value}\n`;
+			}
+		});
+
+		formattedAttribute += `${indentation}}`;
+
+		return formattedAttribute;
 	}
 
 	private static _modifyIndentationLevel(currentTag: ITag, indentationLevel: number, beforeTagGeneration: boolean) {
