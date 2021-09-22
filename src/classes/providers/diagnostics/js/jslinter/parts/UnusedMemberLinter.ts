@@ -61,9 +61,9 @@ export class UnusedMemberLinter extends Linter {
 				const classOfTheMethod = UIClass.className;
 
 				customUIClasses.find(customUIClass => {
-					return !!customUIClass.methods.find(methodFromClass => {
-						if (methodFromClass.acornNode) {
-							const allContent = AcornSyntaxAnalyzer.expandAllContent(methodFromClass.acornNode);
+					return !![...customUIClass.methods, ...customUIClass.fields].find(classMember => {
+						if (classMember.acornNode) {
+							const allContent = AcornSyntaxAnalyzer.expandAllContent(classMember.acornNode);
 							const memberExpressions = allContent.filter((node: any) => node.type === "MemberExpression");
 							const assignmentExpression = allContent.filter((node: any) => node.type === "AssignmentExpression");
 							memberExpressions.find((memberExpression: any) => {

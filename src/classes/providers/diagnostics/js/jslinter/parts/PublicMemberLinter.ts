@@ -87,10 +87,10 @@ export class PublicMemberLinter extends Linter {
 	private _isMemberUsedInOtherClasses(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, memberName: string) {
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
 		const isMemberUsedInOtherClasses = !!customUIClasses.find(customUIClass => {
-			return customUIClass.className !== UIClass.className && !!customUIClass.methods.find(customMethod => {
+			return customUIClass.className !== UIClass.className && !![...customUIClass.methods, ...customUIClass.fields].find(classMember => {
 				let isMemberUsedInOtherClasses = false;
-				if (customMethod.acornNode) {
-					const content = AcornSyntaxAnalyzer.expandAllContent(customMethod.acornNode);
+				if (classMember.acornNode) {
+					const content = AcornSyntaxAnalyzer.expandAllContent(classMember.acornNode);
 					const memberExpressions = content.filter((node: any) => {
 						return node.type === "MemberExpression" && node.property?.name === memberName;
 					});
