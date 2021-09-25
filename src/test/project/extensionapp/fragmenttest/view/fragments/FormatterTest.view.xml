@@ -62,4 +62,19 @@
 			formatter: '.documentStatusMapping.getPhInvGroupIsPostingAllowed'
 		}
 	}"/>
+	<Button
+	visible="{=
+								((
+								${viewModel>IS_SINGLE_PRODUCT_OFFER}
+								) || (
+								(
+								${viewModel>LEVEL} === 'STORE_FORMAT_LEVEL' ||
+								${viewModel>LEVEL} === 'PRODUCT_LEVEL'
+								) &amp;&amp;
+								!${viewModel>IS_SINGLE_PRODUCT_OFFER}
+								))
+							}"
+	>
+
+	</Button>
 </c:FragmentDefinition>

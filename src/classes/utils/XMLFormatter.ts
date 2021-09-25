@@ -100,7 +100,18 @@ export class XMLFormatter {
 		let formattedValue = "";
 		while (i < attributeValue.length) {
 			const currentChar = attributeValue[i];
-			if (currentChar === "{") {
+			if (currentChar === "(") {
+				indentation += "\t";
+				const nextChar = attributeValue[i + 1];
+				const nextLine = nextChar === "(" ? `\n${indentation}\t` : "";
+				formattedValue += `${currentChar}${nextLine}`;
+			} else if (currentChar === ")") {
+				indentation = indentation.substring(0, indentation.length - 1);
+				const nextChar = attributeValue[i + 1];
+				const nextLine = !["\n", "\r", " "].includes(nextChar) ? `\n${indentation}\t` : "";
+				formattedValue = formattedValue.substring(0, formattedValue.length - 1);
+				formattedValue += `${currentChar}${nextLine}`;
+			} else if (currentChar === "{") {
 				const positionEnd = this._getPositionOfObjectEnd(attributeValue, i);
 				const currentBindingValue = attributeValue.substring(i, positionEnd);
 				try {
@@ -122,6 +133,7 @@ export class XMLFormatter {
 			} else {
 				formattedValue += currentChar;
 			}
+
 			i++;
 		}
 
