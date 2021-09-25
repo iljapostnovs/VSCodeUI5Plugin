@@ -46,7 +46,8 @@ export class XMLFormatter {
 						}
 						newTag += tagAttributes.reduce((accumulator, tagAttribute) => {
 							const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
-							const formattedAttributeValue = this._formatAttributeValue(tagData.attributeValue, indentation + "\t");
+							const attributeValueIndentation = tagAttributes.length === 1 ? indentation : indentation + "\t";
+							const formattedAttributeValue = this._formatAttributeValue(tagData.attributeValue, attributeValueIndentation);
 							accumulator += `${indentation}\t${tagData.attributeName}="${formattedAttributeValue}"\n`;
 							if (tagAttributes.length === 1) {
 								accumulator = ` ${accumulator.trimLeft()}`;
@@ -95,35 +96,79 @@ export class XMLFormatter {
 		return textEdits;
 	}
 	private static _formatAttributeValue(attributeValue: string, indentation: string) {
-		const isBinding = attributeValue.startsWith("{") && attributeValue.endsWith("}");
-		if (isBinding) {
-			try {
-				const evaluatedValue = eval(`(${attributeValue})`);
-				if (typeof evaluatedValue === "object") {
-					attributeValue = this._formatAttributeObject(evaluatedValue, indentation);
+		let i = 0;
+		let formattedValue = "";
+		while (i < attributeValue.length) {
+			const currentChar = attributeValue[i];
+			if (currentChar === "{") {
+				const positionEnd = this._getPositionOfObjectEnd(attributeValue, i);
+				const currentBindingValue = attributeValue.substring(i, positionEnd);
+				try {
+					const evaluatedValue = eval(`(${currentBindingValue})`);
+					if (typeof evaluatedValue === "object") {
+						const necessaryIndentation = this._getCurvyBracketsCount(attributeValue, i + 1) === 1 ? indentation : indentation + "\t";
+						const formattedBinding = this._formatAttributeObject(evaluatedValue, necessaryIndentation);
+						formattedValue += formattedBinding;
+					}
+					i = positionEnd - 1;
+				} catch (error) {
+					formattedValue += currentChar;
 				}
-			} catch (error) {
-				//do nothing
+			} else if (currentChar === "\n") {
+				const positionEnd = this._getPositionOfIndentationEnd(attributeValue, i);
+				const necessaryIndentation = attributeValue[positionEnd] === "}" ? indentation : indentation + "\t";
+				formattedValue += "\n" + necessaryIndentation;
+				i = positionEnd - 1;
+			} else {
+				formattedValue += currentChar;
 			}
+			i++;
 		}
-		return attributeValue;
+
+		return formattedValue;
 	}
+	private static _getCurvyBracketsCount(attributeValue: string, positionAt: number) {
+		let curvedBracketsCount = 0;
+		let i = 0;
+		while (i < attributeValue.length && i < positionAt) {
+			if (attributeValue[i] === "{") {
+				curvedBracketsCount++;
+			} else if (attributeValue[i] === "}") {
+				curvedBracketsCount--;
+			}
+			i++;
+		}
+		return curvedBracketsCount;
+	}
+	private static _getPositionOfObjectEnd(attributeValue: string, i: number) {
+		let curvedBracketsCount = 1;
+		i++;
+		while (i < attributeValue.length && curvedBracketsCount !== 0) {
+			if (attributeValue[i] === "{") {
+				curvedBracketsCount++;
+			} else if (attributeValue[i] === "}") {
+				curvedBracketsCount--;
+			}
+			i++;
+		}
+		return i;
+	}
+	private static _getPositionOfIndentationEnd(attributeValue: string, i: number) {
+		i++;
+		while (i < attributeValue.length && /\s/.test(attributeValue[i])) {
+			i++;
+		}
+		return i;
+	}
+
 	private static _formatAttributeObject(anyObject: any, indentation: string) {
 		let formattedAttribute = "{\n";
 
 		const keys = Object.keys(anyObject);
 		keys.forEach(key => {
 			const value = anyObject[key];
-			if (Array.isArray(value)) {
-				const arrayString = "[" + value.map(value => `'${value}'`).join(", ") + "]"
-				formattedAttribute += `${indentation}\t${key}: ${arrayString}`;
-			} else if (typeof value === "object") {
-				formattedAttribute += `${indentation}\t${key}: ${this._formatAttributeObject(value, indentation + "\t")}`;
-			} else if (typeof value === "string") {
-				formattedAttribute += `${indentation}\t${key}: '${value}'`;
-			} else {
-				formattedAttribute += `${indentation}\t${key}: ${value}`;
-			}
+			formattedAttribute += `${indentation}\t${key}: `;
+			formattedAttribute += this._formatAttributeValuePart(value, indentation);
 			const isLastKey = keys.indexOf(key) === keys.length - 1;
 			if (!isLastKey) {
 				formattedAttribute += ","
@@ -133,6 +178,21 @@ export class XMLFormatter {
 
 		formattedAttribute += `${indentation}}`;
 
+		return formattedAttribute;
+	}
+
+	private static _formatAttributeValuePart(value: any, indentation: string) {
+		let formattedAttribute = "";
+		if (Array.isArray(value)) {
+			const arrayString = "[" + value.map(value => `${this._formatAttributeValuePart(value, indentation)}`).join(", ") + "]";
+			formattedAttribute += `${arrayString}`;
+		} else if (typeof value === "object") {
+			formattedAttribute += `${this._formatAttributeObject(value, indentation + "\t")}`;
+		} else if (typeof value === "string") {
+			formattedAttribute += `'${value}'`;
+		} else {
+			formattedAttribute += `${value}`;
+		}
 		return formattedAttribute;
 	}
 
