@@ -76,5 +76,13 @@
 							}"
 	>
 
+
+	</Button>
+	<Button
+	visible="{=
+								!(${SupportModel>/Layout}).startsWith('Three')
+							}"
+	>
+
 	</Button>
 </c:FragmentDefinition>

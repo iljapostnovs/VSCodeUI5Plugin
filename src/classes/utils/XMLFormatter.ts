@@ -106,10 +106,11 @@ export class XMLFormatter {
 				const nextLine = nextChar === "(" ? `\n${indentation}\t` : "";
 				formattedValue += `${currentChar}${nextLine}`;
 			} else if (currentChar === ")") {
+				const lastFormattedValueChar = formattedValue[formattedValue.length -1];
 				indentation = indentation.substring(0, indentation.length - 1);
 				const nextChar = attributeValue[i + 1];
 				const nextLine = !["\n", "\r", " "].includes(nextChar) ? `\n${indentation}\t` : "";
-				formattedValue = formattedValue.substring(0, formattedValue.length - 1);
+				formattedValue = lastFormattedValueChar === "\t" ? formattedValue.substring(0, formattedValue.length - 1) : formattedValue;
 				formattedValue += `${currentChar}${nextLine}`;
 			} else if (currentChar === "{") {
 				const positionEnd = this._getPositionOfObjectEnd(attributeValue, i);
