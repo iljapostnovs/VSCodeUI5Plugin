@@ -85,4 +85,14 @@
 	>
 
 	</Button>
+	<Button
+	text="({viewModel>PreviousSimulationPlaceholder/FORECASTED_UNITS})"
+
+							icon="({path: 'viewModel>PreviousSimulationPlaceholder/PROMO_REVENUE',
+										formatter: 'window.sir.Util.setFormatNumberCCY2'
+								})"
+
+	>
+
+	</Button>
 </c:FragmentDefinition>
