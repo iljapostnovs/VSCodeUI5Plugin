@@ -19,71 +19,11 @@ export class XMLFormatter {
 						const indentation = this._getIndentation(indentationLevel);
 						return `${indentation}${currentTag.text}`;
 					} else {
-						const tagName = this._getTagName(currentTag.text);
-						const tagAttributes = this._getTagAttributes(currentTag.text);
-						let endSubstraction = 1;
-						if (currentTag.text.endsWith("/>")) {
-							endSubstraction = 2;
-						}
-						const tagEnd = currentTag.text.substring(
-							currentTag.text.length - endSubstraction,
-							currentTag.text.length
-						);
-
-						let beginAddition = 1;
-						if (currentTag.text.startsWith("</")) {
-							beginAddition = 2;
-						}
-						const tagBegin = currentTag.text.substring(0, beginAddition);
-
-						indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, true);
-						let indentation = this._getIndentation(indentationLevel);
-
-						let newTag = `${indentation}${tagBegin}${tagName}\n`;
-
-						if (tagAttributes.length === 1) {
-							newTag = newTag.trimRight();
-						}
-						newTag += tagAttributes.reduce((accumulator, tagAttribute) => {
-							const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
-							const attributeValueIndentation = tagAttributes.length === 1 ? indentation : indentation + "\t";
-							const formattedAttributeValue = this._formatAttributeValue(tagData.attributeValue, attributeValueIndentation);
-							accumulator += `${indentation}\t${tagData.attributeName}="${formattedAttributeValue}"\n`;
-							if (tagAttributes.length === 1) {
-								accumulator = ` ${accumulator.trimLeft()}`;
-							}
-							return accumulator;
-						}, "");
-
-						if (tagAttributes.length <= 1) {
-							newTag = newTag.trimRight();
-							indentation = "";
-						}
-
-						newTag += `${indentation}${tagEnd}`;
-
-						indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, false);
-
-						return newTag;
+						let formattedTag;
+						({ formattedTag, indentationLevel } = this._formatNonCommentTag(currentTag, indentationLevel));
+						return formattedTag;
 					}
-				}).reduce((accumulator: string[], currentTag) => {
-					const lastTagInAccumulator = accumulator[accumulator.length - 1];
-					if (lastTagInAccumulator && !lastTagInAccumulator.trim().startsWith("</") && !lastTagInAccumulator.trim().endsWith("/>")) {
-						const lastTagName = XMLParser.getClassNameFromTag(lastTagInAccumulator.trim());
-						const currentTagName = XMLParser.getClassNameFromTag(currentTag.trim());
-						const tagClassNamesAreTheSame = lastTagName && currentTagName && lastTagName === currentTagName;
-						const previousTagIsAClass = lastTagName && lastTagName[0] === lastTagName[0].toUpperCase();
-						if (previousTagIsAClass && tagClassNamesAreTheSame && currentTag.trim().startsWith("</") && lastTagInAccumulator.trim().endsWith(">") && !lastTagInAccumulator.trim().endsWith("/>")) {
-							accumulator[accumulator.length - 1] = `${lastTagInAccumulator.substring(0, lastTagInAccumulator.length - 1)}/>`;
-						} else {
-							accumulator.push(currentTag);
-						}
-					} else {
-						accumulator.push(currentTag);
-					}
-
-					return accumulator;
-				}, []);
+				}).reduce(this._removeUnnecessaryTags, []);
 
 				const positionBegin = document.positionAt(0);
 				const positionEnd = document.positionAt(documentText.length);
@@ -95,6 +35,81 @@ export class XMLFormatter {
 		// copy(JSON.stringify(textEdits[0].newText))
 		return textEdits;
 	}
+
+	private static _removeUnnecessaryTags(accumulator: string[], currentTag: string): string[] {
+		//<Button></Button> -> <Button/>
+		const lastTagInAccumulator = accumulator[accumulator.length - 1];
+		if (lastTagInAccumulator && !lastTagInAccumulator.trim().startsWith("</") && !lastTagInAccumulator.trim().endsWith("/>")) {
+			const lastTagName = XMLParser.getClassNameFromTag(lastTagInAccumulator.trim());
+			const currentTagName = XMLParser.getClassNameFromTag(currentTag.trim());
+			const tagClassNamesAreTheSame = lastTagName && currentTagName && lastTagName === currentTagName;
+			const previousTagIsAClass = lastTagName && lastTagName[0] === lastTagName[0].toUpperCase();
+			const nextTagClosesCurrentOne = previousTagIsAClass &&
+				tagClassNamesAreTheSame &&
+				currentTag.trim().startsWith("</") &&
+				lastTagInAccumulator.trim().endsWith(">") &&
+				!lastTagInAccumulator.trim().endsWith("/>");
+
+			if (nextTagClosesCurrentOne) {
+				accumulator[accumulator.length - 1] = `${lastTagInAccumulator.substring(0, lastTagInAccumulator.length - 1)}/>`;
+			} else {
+				accumulator.push(currentTag);
+			}
+		} else {
+			accumulator.push(currentTag);
+		}
+
+		return accumulator;
+	}
+
+	private static _formatNonCommentTag(currentTag: ITag, indentationLevel: number) {
+		const tagName = this._getTagName(currentTag.text);
+		const tagAttributes = this._getTagAttributes(currentTag.text);
+		let endSubstraction = 1;
+		if (currentTag.text.endsWith("/>")) {
+			endSubstraction = 2;
+		}
+		const tagEnd = currentTag.text.substring(
+			currentTag.text.length - endSubstraction,
+			currentTag.text.length
+		);
+
+		let beginAddition = 1;
+		if (currentTag.text.startsWith("</")) {
+			beginAddition = 2;
+		}
+		const tagBegin = currentTag.text.substring(0, beginAddition);
+
+		indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, true);
+		let indentation = this._getIndentation(indentationLevel);
+
+		let newTag = `${indentation}${tagBegin}${tagName}\n`;
+
+		if (tagAttributes.length === 1) {
+			newTag = newTag.trimRight();
+		}
+		newTag += tagAttributes.reduce((accumulator, tagAttribute) => {
+			const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
+			const attributeValueIndentation = tagAttributes.length === 1 ? indentation : indentation + "\t";
+			const formattedAttributeValue = this._formatAttributeValue(tagData.attributeValue, attributeValueIndentation);
+			accumulator += `${indentation}\t${tagData.attributeName}="${formattedAttributeValue}"\n`;
+			if (tagAttributes.length === 1) {
+				accumulator = ` ${accumulator.trimLeft()}`;
+			}
+			return accumulator;
+		}, "");
+
+		if (tagAttributes.length <= 1) {
+			newTag = newTag.trimRight();
+			indentation = "";
+		}
+
+		newTag += `${indentation}${tagEnd}`;
+
+		indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, false);
+		return { formattedTag: newTag, indentationLevel };
+	}
+
 	private static _formatAttributeValue(attributeValue: string, indentation: string) {
 		let i = 0;
 		let formattedValue = "";
@@ -142,6 +157,7 @@ export class XMLFormatter {
 
 		return formattedValue;
 	}
+
 	private static _getCurvyBracketsCount(attributeValue: string, positionAt: number) {
 		let curvedBracketsCount = 0;
 		let i = 0;
@@ -155,6 +171,7 @@ export class XMLFormatter {
 		}
 		return curvedBracketsCount;
 	}
+
 	private static _getPositionOfObjectEnd(attributeValue: string, i: number) {
 		let curvedBracketsCount = 1;
 		i++;
@@ -168,6 +185,7 @@ export class XMLFormatter {
 		}
 		return i;
 	}
+
 	private static _getPositionOfIndentationEnd(attributeValue: string, i: number) {
 		i++;
 		while (i < attributeValue.length && /\s/.test(attributeValue[i])) {
