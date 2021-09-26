@@ -83,12 +83,12 @@ export class XMLFormatter {
 		indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, true);
 		let indentation = this._getIndentation(indentationLevel);
 
-		let newTag = `${indentation}${tagBegin}${tagName}\n`;
+		let formattedTag = `${indentation}${tagBegin}${tagName}\n`;
 
 		if (tagAttributes.length === 1) {
-			newTag = newTag.trimRight();
+			formattedTag = formattedTag.trimRight();
 		}
-		newTag += tagAttributes.reduce((accumulator, tagAttribute) => {
+		formattedTag += tagAttributes.reduce((accumulator, tagAttribute) => {
 			const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
 			const attributeValueIndentation = tagAttributes.length === 1 ? indentation : indentation + "\t";
 			const formattedAttributeValue = this._formatAttributeValue(tagData.attributeValue, attributeValueIndentation);
@@ -100,14 +100,14 @@ export class XMLFormatter {
 		}, "");
 
 		if (tagAttributes.length <= 1) {
-			newTag = newTag.trimRight();
+			formattedTag = formattedTag.trimRight();
 			indentation = "";
 		}
 
-		newTag += `${indentation}${tagEnd}`;
+		formattedTag += `${indentation}${tagEnd}`;
 
 		indentationLevel = this._modifyIndentationLevel(currentTag, indentationLevel, false);
-		return { formattedTag: newTag, indentationLevel };
+		return { formattedTag, indentationLevel };
 	}
 
 	private static _formatAttributeValue(attributeValue: string, indentation: string) {
