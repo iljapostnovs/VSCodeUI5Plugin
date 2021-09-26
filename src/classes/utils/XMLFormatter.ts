@@ -14,8 +14,9 @@ export class XMLFormatter {
 
 			if (allTags.length > 0) {
 				let indentationLevel = 0;
-				const aTagTexts = allTags.map(currentTag => {
-					if (currentTag.text.startsWith("<!--")) {
+				const formattedTags = allTags.map(currentTag => {
+					const isComment = currentTag.text.startsWith("<!--");
+					if (isComment) {
 						const indentation = this._getIndentation(indentationLevel);
 						return `${indentation}${currentTag.text}`;
 					} else {
@@ -28,7 +29,7 @@ export class XMLFormatter {
 				const positionBegin = document.positionAt(0);
 				const positionEnd = document.positionAt(documentText.length);
 				const range = new vscode.Range(positionBegin, positionEnd);
-				const textEdit = new vscode.TextEdit(range, aTagTexts.join("\n"));
+				const textEdit = new vscode.TextEdit(range, formattedTags.join("\n"));
 				textEdits.push(textEdit);
 			}
 		}
@@ -39,16 +40,19 @@ export class XMLFormatter {
 	private static _removeUnnecessaryTags(accumulator: string[], currentTag: string): string[] {
 		//<Button></Button> -> <Button/>
 		const lastTagInAccumulator = accumulator[accumulator.length - 1];
-		if (lastTagInAccumulator && !lastTagInAccumulator.trim().startsWith("</") && !lastTagInAccumulator.trim().endsWith("/>")) {
+		const lastTagIsAnOpener = lastTagInAccumulator && !lastTagInAccumulator.trim().startsWith("</") && !lastTagInAccumulator.trim().endsWith("/>");
+		if (lastTagIsAnOpener) {
 			const lastTagName = XMLParser.getClassNameFromTag(lastTagInAccumulator.trim());
 			const currentTagName = XMLParser.getClassNameFromTag(currentTag.trim());
-			const tagClassNamesAreTheSame = lastTagName && currentTagName && lastTagName === currentTagName;
+			const bothTagsAreSameClass = lastTagName && currentTagName && lastTagName === currentTagName;
 			const previousTagIsAClass = lastTagName && lastTagName[0] === lastTagName[0].toUpperCase();
-			const nextTagClosesCurrentOne = previousTagIsAClass &&
-				tagClassNamesAreTheSame &&
-				currentTag.trim().startsWith("</") &&
-				lastTagInAccumulator.trim().endsWith(">") &&
-				!lastTagInAccumulator.trim().endsWith("/>");
+			const currentTagIsClosure = currentTag.trim().startsWith("</");
+			const lastTagIsNotSelfClosed = !lastTagInAccumulator.trim().endsWith("/>");
+			const nextTagClosesCurrentOne =
+				previousTagIsAClass &&
+				bothTagsAreSameClass &&
+				currentTagIsClosure &&
+				lastTagIsNotSelfClosed;
 
 			if (nextTagClosesCurrentOne) {
 				accumulator[accumulator.length - 1] = `${lastTagInAccumulator.substring(0, lastTagInAccumulator.length - 1)}/>`;
