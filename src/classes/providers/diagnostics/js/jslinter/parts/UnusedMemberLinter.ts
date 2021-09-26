@@ -3,10 +3,9 @@ import * as vscode from "vscode";
 import { FileReader } from "../../../../../utils/FileReader";
 import { ICustomClassUIField, ICustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
-import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
 import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
+import { ReferenceCodeLensGenerator } from "../../../../codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 export class UnusedMemberLinter extends Linter {
 	protected className = "UnusedMemberLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -18,13 +17,12 @@ export class UnusedMemberLinter extends Linter {
 			if (className) {
 				const UIClass = UIClassFactory.getUIClass(className);
 				if (UIClass instanceof CustomUIClass) {
-					const customUIClasses = UIClassFactory.getAllCustomUIClasses();
 					const methodsAndFields: (ICustomClassUIField | ICustomClassUIMethod)[] = [
 						...UIClass.methods,
 						...UIClass.fields
 					];
 					methodsAndFields.forEach((methodOrField: any) => {
-						const methodIsUsed = this._checkIfMemberIsUsed(customUIClasses, UIClass, methodOrField);
+						const methodIsUsed = this._checkIfMemberIsUsed(UIClass, methodOrField);
 						if (!methodIsUsed && methodOrField.memberPropertyNode) {
 							const range = RangeAdapter.acornLocationToVSCodeRange(methodOrField.memberPropertyNode.loc);
 							errors.push({
@@ -46,59 +44,18 @@ export class UnusedMemberLinter extends Linter {
 		return errors;
 	}
 
-	private _checkIfMemberIsUsed(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, member: ICustomClassUIMethod | ICustomClassUIField) {
-		let memberIsUsed = false;
+	private _checkIfMemberIsUsed(UIClass: CustomUIClass, member: ICustomClassUIMethod | ICustomClassUIField) {
+		let memberIsUsed =
+			member.ui5ignored ||
+			member.mentionedInTheXMLDocument ||
+			UIClassFactory.isMethodOverriden(UIClass.className, member.name) ||
+			this._checkIfMethodIsException(UIClass.className, member.name);
 
-		if (member.ui5ignored) {
-			memberIsUsed = true;
-		} else {
-			const isException = this._checkIfMethodIsException(UIClass.className, member.name);
-			const isMemberOverriden = UIClassFactory.isMethodOverriden(UIClass.className, member.name);
-
-			if (member.mentionedInTheXMLDocument || isMemberOverriden) {
-				memberIsUsed = true;
-			} else if (!isException) {
-				const classOfTheMethod = UIClass.className;
-
-				customUIClasses.find(customUIClass => {
-					return !![...customUIClass.methods, ...customUIClass.fields].find(classMember => {
-						if (classMember.acornNode) {
-							const allContent = AcornSyntaxAnalyzer.expandAllContent(classMember.acornNode);
-							const memberExpressions = allContent.filter((node: any) => node.type === "MemberExpression");
-							const assignmentExpression = allContent.filter((node: any) => node.type === "AssignmentExpression");
-							memberExpressions.find((memberExpression: any) => {
-								const propertyName = memberExpression.callee?.property?.name || memberExpression?.property?.name;
-								const currentMethodIsCalled = propertyName === member.name;
-								if (currentMethodIsCalled) {
-									const position = memberExpression.callee?.property?.start || memberExpression?.property?.start;
-									const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-									const classNameOfTheCallee = strategy.acornGetClassName(customUIClass.className, position, true);
-									if (
-										classNameOfTheCallee &&
-										(
-											classNameOfTheCallee === classOfTheMethod ||
-											UIClassFactory.isClassAChildOfClassB(classOfTheMethod, classNameOfTheCallee) ||
-											UIClassFactory.isClassAChildOfClassB(classNameOfTheCallee, classOfTheMethod)
-										) &&
-										!assignmentExpression.find((expression: any) => expression.left === memberExpression)
-
-									) {
-										memberIsUsed = true;
-									}
-								}
-
-								return memberIsUsed;
-							});
-						}
-
-						return memberIsUsed;
-					});
-				});
-			} else {
-				memberIsUsed = true;
-			}
+		if (!memberIsUsed) {
+			const referenceCodeLens = new ReferenceCodeLensGenerator();
+			const references = referenceCodeLens.getReferenceLocations(member);
+			memberIsUsed = references.length > 0;
 		}
-
 
 		return memberIsUsed;
 	}
