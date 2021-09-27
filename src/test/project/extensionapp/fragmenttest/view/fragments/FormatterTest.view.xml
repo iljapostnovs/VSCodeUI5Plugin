@@ -65,13 +65,13 @@
 	<Button
 	visible="{=
 								((
-								${viewModel>IS_SINGLE_PRODUCT_OFFER}
+								${TestModel>IS_SINGLE_PRODUCT_OFFER}
 								) || (
 								(
-								${viewModel>LEVEL} === 'STORE_FORMAT_LEVEL' ||
-								${viewModel>LEVEL} === 'PRODUCT_LEVEL'
+								${TestModel>LEVEL} === 'STORE_FORMAT_LEVEL' ||
+								${TestModel>LEVEL} === 'PRODUCT_LEVEL'
 								) &amp;&amp;
-								!${viewModel>IS_SINGLE_PRODUCT_OFFER}
+								!${TestModel>IS_SINGLE_PRODUCT_OFFER}
 								))
 							}"
 	>
@@ -86,14 +86,14 @@
 
 	</Button>
 	<Button
-	text="({viewModel>PreviousSimulationPlaceholder/FORECASTED_UNITS})"
+	text="({TestModel>Test/Test})"
 
-							icon="({path: 'viewModel>PreviousSimulationPlaceholder/PROMO_REVENUE',
-										formatter: 'window.sir.Util.setFormatNumberCCY2'
+							icon="({path: 'TestModel>Test/Test',
+										formatter: 'hello.Test'
 								})"
 								tooltip="{=
-							parseFloat(${viewModel>PROMO_PURCHASE_PRICE_WITHOUT_VAT}) &gt; parseFloat(${viewModel>REGULAR_PURCHASE_PRICE}) ?
-							'Promo Purchase Price (' + ${viewModel>PROMO_PURCHASE_PRICE_WITHOUT_VAT} + ') is greater than Regular Purchase Price (' + ${viewModel>REGULAR_PURCHASE_PRICE} + ')' :
+							parseFloat(${TestModel>Test}) &gt; parseFloat(${TestModel>Test}) ?
+							'random text (' + ${TestModel>Test} + ') random text (' + ${TestModel>Test} + ')' :
 							''
 						}"
 
