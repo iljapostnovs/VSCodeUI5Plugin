@@ -91,6 +91,11 @@
 							icon="({path: 'viewModel>PreviousSimulationPlaceholder/PROMO_REVENUE',
 										formatter: 'window.sir.Util.setFormatNumberCCY2'
 								})"
+								tooltip="{=
+							parseFloat(${viewModel>PROMO_PURCHASE_PRICE_WITHOUT_VAT}) &gt; parseFloat(${viewModel>REGULAR_PURCHASE_PRICE}) ?
+							'Promo Purchase Price (' + ${viewModel>PROMO_PURCHASE_PRICE_WITHOUT_VAT} + ') is greater than Regular Purchase Price (' + ${viewModel>REGULAR_PURCHASE_PRICE} + ')' :
+							''
+						}"
 
 	>
 

@@ -61,6 +61,7 @@ export class PublicMemberLinter extends Linter {
 	}
 
 	private _checkIfMemberIsUsedElsewhere(UIClass: CustomUIClass, member: ICustomClassUIField | ICustomClassUIMethod) {
+		//TODO: Sync with Unused member linter
 		let memberIsUsed =
 			member.ui5ignored ||
 			member.mentionedInTheXMLDocument ||

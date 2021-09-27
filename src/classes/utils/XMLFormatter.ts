@@ -119,7 +119,9 @@ export class XMLFormatter {
 		let formattedValue = "";
 		while (i < attributeValue.length) {
 			const currentChar = attributeValue[i];
-			if (currentChar === "(") {
+			if (this._charIsInString(i, attributeValue)) {
+				formattedValue += currentChar;
+			} else if (currentChar === "(") {
 				const nextChar = attributeValue[i + 1];
 				if (nextChar !== "{") {
 					indentation += "\t";
@@ -160,6 +162,16 @@ export class XMLFormatter {
 		}
 
 		return formattedValue;
+	}
+	private static _charIsInString(index: number, attributeValue: string) {
+		let i = 0;
+		let quotesQuantity = 0;
+		while (i < index) {
+			if (attributeValue[i] === "'") quotesQuantity++;
+			i++;
+		}
+
+		return quotesQuantity % 2 === 1;
 	}
 
 	private static _getCurvyBracketsCount(attributeValue: string, positionAt: number) {
