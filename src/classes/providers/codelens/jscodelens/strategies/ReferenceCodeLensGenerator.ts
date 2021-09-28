@@ -63,8 +63,8 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 	}
 
 	private _addLocationsFromXMLDocument(XMLDoc: IXMLFile, member: ICustomClassUIMethod | ICustomClassUIField, locations: vscode.Location[]) {
-		if (XMLDoc.referenceCodeLensCache[member.owner] && XMLDoc.referenceCodeLensCache[member.owner][member.name]) {
-			locations.push(...XMLDoc.referenceCodeLensCache[member.owner][member.name]);
+		if (XMLDoc.referenceCodeLensCache[member.owner] && XMLDoc.referenceCodeLensCache[member.owner][`_${member.name}`]) {
+			locations.push(...XMLDoc.referenceCodeLensCache[member.owner][`_${member.name}`]);
 		} else {
 			const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(XMLDoc, member.name, member.owner);
 
@@ -86,7 +86,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 			if (!XMLDoc.referenceCodeLensCache[member.owner]) {
 				XMLDoc.referenceCodeLensCache[member.owner] = {};
 			}
-			XMLDoc.referenceCodeLensCache[member.owner][member.name] = currentLocations;
+			XMLDoc.referenceCodeLensCache[member.owner][`_${member.name}`] = currentLocations;
 		}
 	}
 
