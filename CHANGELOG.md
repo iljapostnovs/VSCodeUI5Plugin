@@ -1,5 +1,6 @@
-## 0.12.76 (21-09-2021)
-* XML formatter improvements
+## 0.12.76 (28-09-2021)
+* XML formatter improvements, now it formats the attribute value
+* Bugfixes for unused member linter and public member linter
 
 ## 0.12.75 (20-09-2021)
 * Method insertion position bugfixes
