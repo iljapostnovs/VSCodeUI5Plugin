@@ -1,4 +1,5 @@
 import LineColumn = require("line-column");
+import { IRange } from "ui5plugin-linter/dist/classes/Linter";
 import * as vscode from "vscode";
 import { IAcornPosition, PositionAdapter } from "./PositionAdapter";
 
@@ -8,6 +9,12 @@ export interface IAcornLocation {
 }
 
 export class RangeAdapter {
+	static rangeToVSCodeRange(range: IRange) {
+		const positionBegin = new vscode.Position(range.start.line - 1, range.start.column);
+		const positionEnd = new vscode.Position(range.end.line - 1, range.end.column);
+		return new vscode.Range(positionBegin, positionEnd);
+	}
+
 	static offsetsToVSCodeRange(content: string, positionBegin: number, positionEnd: number) {
 		const lineColumn = LineColumn(content);
 		const lineColumnBegin = lineColumn.fromIndex(positionBegin);
