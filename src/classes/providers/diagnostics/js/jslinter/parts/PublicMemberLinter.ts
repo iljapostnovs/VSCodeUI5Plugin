@@ -3,10 +3,9 @@ import * as vscode from "vscode";
 import { FileReader } from "../../../../../utils/FileReader";
 import { ICustomClassUIField, ICustomClassUIMethod, CustomUIClass } from "../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
-import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { ConfigHandler } from "./config/ConfigHandler";
 import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
+import { ReferenceCodeLensGenerator } from "../../../../codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 export class PublicMemberLinter extends Linter {
 	protected className = "PublicMemberLinter";
 	_getErrors(document: vscode.TextDocument): IError[] {
@@ -17,15 +16,12 @@ export class PublicMemberLinter extends Linter {
 			if (className) {
 				const UIClass = UIClassFactory.getUIClass(className);
 				if (UIClass instanceof CustomUIClass) {
-					const allUIClassesMap = UIClassFactory.getAllExistentUIClasses();
-					const allUIClasses = Object.keys(allUIClassesMap).map(key => allUIClassesMap[key]);
-					const customUIClasses = allUIClasses.filter(UIClass => UIClass instanceof CustomUIClass) as CustomUIClass[];
 					const publicMethods = UIClass.methods.filter(method => method.visibility === "public");
 					const publicFields = UIClass.fields.filter(field => field.visibility === "public");
 					publicMethods.forEach(method => {
 						const isException = this._checkIfMemberIsException(UIClass.className, method.name);
 						if (!isException) {
-							const methodIsUsed = this._checkIfMemberIsUsedElsewhere(customUIClasses, UIClass, method.name, method);
+							const methodIsUsed = this._checkIfMemberIsUsedElsewhere(UIClass, method);
 							if (!methodIsUsed && method.position) {
 								const range = RangeAdapter.acornLocationToVSCodeRange(method.memberPropertyNode.loc);
 								errors.push({
@@ -43,7 +39,7 @@ export class PublicMemberLinter extends Linter {
 					publicFields.forEach(field => {
 						const isException = this._checkIfMemberIsException(UIClass.className, field.name);
 						if (!isException) {
-							const fieldIsUsed = this._checkIfMemberIsUsedElsewhere(customUIClasses, UIClass, field.name, field);
+							const fieldIsUsed = this._checkIfMemberIsUsedElsewhere(UIClass, field);
 							if (!fieldIsUsed && field.memberPropertyNode) {
 								const range = RangeAdapter.acornLocationToVSCodeRange(field.memberPropertyNode.loc);
 								errors.push({
@@ -64,53 +60,23 @@ export class PublicMemberLinter extends Linter {
 		return errors;
 	}
 
-	private _checkIfMemberIsUsedElsewhere(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, memberName: string, fieldOrMethod: ICustomClassUIField | ICustomClassUIMethod) {
-		let isMethodUsedElsewhere = false;
+	private _checkIfMemberIsUsedElsewhere(UIClass: CustomUIClass, member: ICustomClassUIField | ICustomClassUIMethod) {
+		//TODO: Sync with Unused member linter
+		let memberIsUsed =
+			member.ui5ignored ||
+			member.mentionedInTheXMLDocument ||
+			UIClassFactory.isMethodOverriden(UIClass.className, member.name) ||
+			this._checkIfMemberIsException(UIClass.className, member.name);
 
-		if (fieldOrMethod.ui5ignored) {
-			isMethodUsedElsewhere = true;
-		} else {
-			const isMethodOverriden = UIClassFactory.isMethodOverriden(UIClass.className, memberName);
-			if (!isMethodOverriden) {
-				const isMethodUsedInOtherClasses = fieldOrMethod.mentionedInTheXMLDocument || this._isMemberUsedInOtherClasses(customUIClasses, UIClass, memberName);
-				if (isMethodUsedInOtherClasses) {
-					isMethodUsedElsewhere = true;
-				}
-			} else {
-				isMethodUsedElsewhere = true;
-			}
+		if (!memberIsUsed) {
+			const referenceCodeLens = new ReferenceCodeLensGenerator();
+			const references = referenceCodeLens.getReferenceLocations(member).filter(reference => {
+				return reference.uri.fsPath !== UIClass.classFSPath;
+			});
+			memberIsUsed = references.length > 0;
 		}
 
-		return isMethodUsedElsewhere;
-	}
-
-	private _isMemberUsedInOtherClasses(customUIClasses: CustomUIClass[], UIClass: CustomUIClass, memberName: string) {
-		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
-		const isMemberUsedInOtherClasses = !!customUIClasses.find(customUIClass => {
-			return customUIClass.className !== UIClass.className && !!customUIClass.methods.find(customMethod => {
-				let isMemberUsedInOtherClasses = false;
-				if (customMethod.acornNode) {
-					const content = AcornSyntaxAnalyzer.expandAllContent(customMethod.acornNode);
-					const memberExpressions = content.filter((node: any) => {
-						return node.type === "MemberExpression" && node.property?.name === memberName;
-					});
-
-					if (memberExpressions.length > 0) {
-						isMemberUsedInOtherClasses = !!memberExpressions.find((memberExpression: any) => {
-							const calleeClassName = strategy.acornGetClassName(customUIClass.className, memberExpression.end, true);
-
-							return calleeClassName && (
-								UIClassFactory.isClassAChildOfClassB(calleeClassName, UIClass.className) ||
-								UIClassFactory.isClassAChildOfClassB(UIClass.className, calleeClassName)
-							);
-						});
-					}
-				}
-				return isMemberUsedInOtherClasses;
-			});
-		});
-
-		return isMemberUsedInOtherClasses;
+		return memberIsUsed;
 	}
 
 	private _checkIfMemberIsException(className: string, memberName: string) {

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { CustomUIClass, ICustomClassUIMethod } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomUIClass, ICustomClassUIField, ICustomClassUIMethod } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
 import { TextDocumentTransformer } from "../../../../utils/TextDocumentTransformer";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
@@ -42,37 +42,37 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 		return codeLenses;
 	}
 
-	public getReferenceLocations(method: ICustomClassUIMethod) {
+	public getReferenceLocations(member: ICustomClassUIMethod | ICustomClassUIField) {
 		const locations: vscode.Location[] = [];
 
 		const UIClasses = UIClassFactory.getAllCustomUIClasses();
 		UIClasses.forEach(UIClass => {
-			this._addLocationsFromUIClass(method, UIClass, locations);
+			this._addLocationsFromUIClass(member, UIClass, locations);
 		});
 
-		const UIClass = UIClassFactory.getUIClass(method.owner);
+		const UIClass = UIClassFactory.getUIClass(member.owner);
 		if (UIClass instanceof CustomUIClass) {
 			const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, true, true);
 			const viewAndFragmentArray = [...viewsAndFragments.fragments, ...viewsAndFragments.views];
 			viewAndFragmentArray.forEach(XMLDoc => {
-				this._addLocationsFromXMLDocument(XMLDoc, method, locations);
+				this._addLocationsFromXMLDocument(XMLDoc, member, locations);
 			});
 		}
 
 		return locations;
 	}
 
-	private _addLocationsFromXMLDocument(XMLDoc: IXMLFile, method: ICustomClassUIMethod, locations: vscode.Location[]) {
-		if (XMLDoc.referenceCodeLensCache[method.owner] && XMLDoc.referenceCodeLensCache[method.owner][method.name]) {
-			locations.push(...XMLDoc.referenceCodeLensCache[method.owner][method.name]);
+	private _addLocationsFromXMLDocument(XMLDoc: IXMLFile, member: ICustomClassUIMethod | ICustomClassUIField, locations: vscode.Location[]) {
+		if (XMLDoc.referenceCodeLensCache[member.owner] && XMLDoc.referenceCodeLensCache[member.owner][`_${member.name}`]) {
+			locations.push(...XMLDoc.referenceCodeLensCache[member.owner][`_${member.name}`]);
 		} else {
-			const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(XMLDoc, method.name, method.owner);
+			const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(XMLDoc, member.name, member.owner);
 
 			const currentLocations: vscode.Location[] = [];
 			tagsAndAttributes.forEach(tagAndAttribute => {
 				tagAndAttribute.attributes.forEach(attribute => {
-					const positionBegin = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute) + attribute.indexOf(method.name);
-					const positionEnd = positionBegin + method.name.length;
+					const positionBegin = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute) + attribute.indexOf(member.name);
+					const positionEnd = positionBegin + member.name.length;
 					const range = RangeAdapter.offsetsToVSCodeRange(XMLDoc.content, positionBegin, positionEnd - 1);
 					if (range) {
 						const uri = vscode.Uri.file(XMLDoc.fsPath);
@@ -83,24 +83,18 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 			if (currentLocations.length > 0) {
 				locations.push(...currentLocations);
 			}
-			if (!XMLDoc.referenceCodeLensCache[method.owner]) {
-				XMLDoc.referenceCodeLensCache[method.owner] = {};
+			if (!XMLDoc.referenceCodeLensCache[member.owner]) {
+				XMLDoc.referenceCodeLensCache[member.owner] = {};
 			}
-			XMLDoc.referenceCodeLensCache[method.owner][method.name] = currentLocations;
+			XMLDoc.referenceCodeLensCache[member.owner][`_${member.name}`] = currentLocations;
 		}
 	}
 
-	private _addLocationsFromUIClass(method: ICustomClassUIMethod, UIClass: CustomUIClass, locations: vscode.Location[]) {
-		if (UIClass.referenceCodeLensCache[method.owner] && UIClass.referenceCodeLensCache[method.owner][`_${method.name}`]) {
-			locations.push(...UIClass.referenceCodeLensCache[method.owner][`_${method.name}`]);
+	private _addLocationsFromUIClass(member: ICustomClassUIMethod | ICustomClassUIField, UIClass: CustomUIClass, locations: vscode.Location[]) {
+		if (UIClass.referenceCodeLensCache[member.owner] && UIClass.referenceCodeLensCache[member.owner][`_${member.name}`]) {
+			locations.push(...UIClass.referenceCodeLensCache[member.owner][`_${member.name}`]);
 		} else if (UIClass.classFSPath) {
-			const regexp = new RegExp(`(?<=\\.)${method.name}(\\(|\\)|\\,|\\.|\\s)`, "g");
-			const results: RegExpExecArray[] = [];
-			let result = regexp.exec(UIClass.classText);
-			while (result) {
-				results.push(result);
-				result = regexp.exec(UIClass.classText);
-			}
+			const results: RegExpExecArray[] = this._getCurrentMethodMentioning(member, UIClass);
 
 			const currentLocations: vscode.Location[] = [];
 			const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
@@ -110,17 +104,16 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 				const calleeUIClass = calleeClassName && UIClassFactory.getUIClass(calleeClassName);
 				if (
 					calleeUIClass && calleeUIClass instanceof CustomUIClass &&
-					calleeClassName &&
 					(
-						UIClassFactory.isClassAChildOfClassB(calleeClassName, method.owner) ||
+						UIClassFactory.isClassAChildOfClassB(calleeClassName, member.owner) ||
 						(
 							UIClass.className === calleeClassName &&
-							UIClassFactory.isClassAChildOfClassB(method.owner, calleeClassName) &&
-							UIClassFactory.isClassAChildOfClassB(method.owner, UIClass.className)
+							UIClassFactory.isClassAChildOfClassB(member.owner, calleeClassName) &&
+							UIClassFactory.isClassAChildOfClassB(member.owner, UIClass.className)
 						)
 					)
 				) {
-					const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, result.index, result.index + method.name.length - 1);
+					const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, result.index, result.index + member.name.length - 1);
 					if (range) {
 						currentLocations.push(new vscode.Location(uri, range));
 					}
@@ -129,10 +122,21 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 			if (currentLocations.length > 0) {
 				locations.push(...currentLocations);
 			}
-			if (!UIClass.referenceCodeLensCache[method.owner]) {
-				UIClass.referenceCodeLensCache[method.owner] = {};
+			if (!UIClass.referenceCodeLensCache[member.owner]) {
+				UIClass.referenceCodeLensCache[member.owner] = {};
 			}
-			UIClass.referenceCodeLensCache[method.owner][`_${method.name}`] = currentLocations;
+			UIClass.referenceCodeLensCache[member.owner][`_${member.name}`] = currentLocations;
 		}
+	}
+
+	private _getCurrentMethodMentioning(member: ICustomClassUIMethod | ICustomClassUIField, UIClass: CustomUIClass) {
+		const regexp = new RegExp(`(?<=\\.)${member.name}(\\(|\\)|\\,|\\.|\\s)(?!=)`, "g");
+		const results: RegExpExecArray[] = [];
+		let result = regexp.exec(UIClass.classText);
+		while (result) {
+			results.push(result);
+			result = regexp.exec(UIClass.classText);
+		}
+		return results;
 	}
 }
