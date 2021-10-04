@@ -580,6 +580,25 @@ export class UIClassFactory {
 			}
 
 			isMethodOverriden = sameMethod || sameField;
+
+			if (!isMethodOverriden && UIClass.interfaces.length > 0) {
+				isMethodOverriden = !!UIClass.interfaces.find(theInterface => {
+					const fieldsAndMethods = this.getFieldsAndMethodsForClass(theInterface);
+					const allMethods = fieldsAndMethods.methods;
+					const allFields = fieldsAndMethods.fields;
+					const sameMethod = !!allMethods.find(methodFromParent => {
+						return methodFromParent.name === methodName;
+					});
+
+					if (!sameMethod) {
+						sameField = !!allFields.find(fieldFromParent => {
+							return fieldFromParent.name === methodName;
+						});
+					}
+
+					return sameMethod || sameField;
+				});
+			}
 		}
 
 		return isMethodOverriden;

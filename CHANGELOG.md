@@ -1,3 +1,6 @@
+## 0.12.77 (04-10-2021)
+* Minor bugfixes
+
 ## 0.12.76 (28-09-2021)
 * XML formatter improvements, now it formats the attribute value
 * Bugfixes for unused member linter and public member linter
