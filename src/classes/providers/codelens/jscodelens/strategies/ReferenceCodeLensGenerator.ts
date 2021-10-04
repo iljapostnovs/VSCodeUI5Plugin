@@ -65,37 +65,40 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 	}
 
 	private _addLocationsFromXMLDocument(XMLDoc: IXMLFile, method: ICustomClassUIMethod, locations: vscode.Location[]) {
-		// if (XMLDoc.referenceCodeLensCache[method.owner] && XMLDoc.referenceCodeLensCache[method.owner][method.name]) {
-		// 	locations.push(...XMLDoc.referenceCodeLensCache[method.owner][method.name]);
-		// } else {
-		const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(XMLDoc, method.name, method.owner);
+		const cache = XMLDoc.getCache<IReferenceCodeLensCacheable>("referenceCodeLensCache") || {};
+		if (cache[method.owner]?.[`_${method.name}`]) {
+			locations.push(...cache[method.owner][`_${method.name}`]);
+		} else {
+			const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(XMLDoc, method.name, method.owner);
 
-		const currentLocations: vscode.Location[] = [];
-		tagsAndAttributes.forEach(tagAndAttribute => {
-			tagAndAttribute.attributes.forEach(attribute => {
-				const positionBegin = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute) + attribute.indexOf(method.name);
-				const positionEnd = positionBegin + method.name.length;
-				const range = RangeAdapter.offsetsToVSCodeRange(XMLDoc.content, positionBegin, positionEnd);
-				if (range) {
-					const uri = vscode.Uri.file(XMLDoc.fsPath);
-					currentLocations.push(new vscode.Location(uri, range));
-				}
+			const currentLocations: vscode.Location[] = [];
+			tagsAndAttributes.forEach(tagAndAttribute => {
+				tagAndAttribute.attributes.forEach(attribute => {
+					const positionBegin = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute) + attribute.indexOf(method.name);
+					const positionEnd = positionBegin + method.name.length - 1;
+					const range = RangeAdapter.offsetsToVSCodeRange(XMLDoc.content, positionBegin, positionEnd);
+					if (range) {
+						const uri = vscode.Uri.file(XMLDoc.fsPath);
+						currentLocations.push(new vscode.Location(uri, range));
+					}
+				});
 			});
-		});
-		if (currentLocations.length > 0) {
-			locations.push(...currentLocations);
+			if (currentLocations.length > 0) {
+				locations.push(...currentLocations);
+			}
+			if (!cache[method.owner]) {
+				cache[method.owner] = {};
+			}
+			cache[method.owner][`_${method.name}`] = currentLocations;
+			XMLDoc.setCache("referenceCodeLensCache", cache);
 		}
-		// if (!XMLDoc.referenceCodeLensCache[method.owner]) {
-		// 	XMLDoc.referenceCodeLensCache[method.owner] = {};
-		// }
-		// XMLDoc.referenceCodeLensCache[method.owner][method.name] = currentLocations;
-		// }
 	}
 
 	private _addLocationsFromUIClass(method: ICustomClassUIMethod, UIClass: CustomUIClass, locations: vscode.Location[]) {
-		// if (UIClass.referenceCodeLensCache[method.owner] && UIClass.referenceCodeLensCache[method.owner][`_${method.name}`]) {
-		// 	locations.push(...UIClass.referenceCodeLensCache[method.owner][`_${method.name}`]);
-		if (UIClass.classFSPath) {
+		const cache = UIClass.getCache<IReferenceCodeLensCacheable>("referenceCodeLensCache") || {};
+		if (cache[method.owner]?.[`_${method.name}`]) {
+			locations.push(...cache[method.owner][`_${method.name}`]);
+		} else if (UIClass.classFSPath) {
 			const regexp = new RegExp(`(?<=\\.)${method.name}(\\(|\\)|\\,|\\.|\\s)`, "g");
 			const results: RegExpExecArray[] = [];
 			let result = regexp.exec(UIClass.classText);
@@ -122,7 +125,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 						)
 					)
 				) {
-					const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, result.index, result.index + method.name.length);
+					const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, result.index, result.index + method.name.length - 1);
 					if (range) {
 						currentLocations.push(new vscode.Location(uri, range));
 					}
@@ -131,10 +134,11 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 			if (currentLocations.length > 0) {
 				locations.push(...currentLocations);
 			}
-			// if (!UIClass.referenceCodeLensCache[method.owner]) {
-			// 	UIClass.referenceCodeLensCache[method.owner] = {};
-			// }
-			// UIClass.referenceCodeLensCache[method.owner][`_${method.name}`] = currentLocations;
+			if (!cache[method.owner]) {
+				cache[method.owner] = {};
+			}
+			cache[method.owner][`_${method.name}`] = currentLocations;
+			UIClass.setCache("referenceCodeLensCache", cache);
 		}
 	}
 }

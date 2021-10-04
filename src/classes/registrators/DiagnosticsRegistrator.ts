@@ -127,7 +127,9 @@ export class DiagnosticsRegistrator {
 
 		if (isXMLDiagnosticsEnabled && !this._timeoutId) {
 			this._timeoutId = setTimeout(() => {
+				console.time("XML Linter");
 				const errors = new XMLLinter().getLintingErrors(new TextDocumentAdapter(document));
+				console.timeEnd("XML Linter");
 
 				const diagnostics: CustomDiagnostics[] = errors.map(error => {
 					const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);
@@ -173,7 +175,9 @@ export class DiagnosticsRegistrator {
 		if (bForce) {
 			UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document), true);
 		}
+		console.time("JS Linter");
 		const errors = new JSLinter().getLintingErrors(new TextDocumentAdapter(document));
+		console.timeEnd("JS Linter");
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
 			const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);

@@ -1,7 +1,7 @@
 import { IParserConfigHandler } from "ui5plugin-parser";
 import * as vscode from "vscode";
 
-export class VSCodeConfigHandler implements IParserConfigHandler {
+export class VSCodeParserConfigHandler implements IParserConfigHandler {
 	getUI5Version(): string {
 		return vscode.workspace.getConfiguration("ui5.plugin").get("ui5version") || "1.60.11";
 	}

@@ -10,6 +10,7 @@ import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/Tem
 import { ResourceModelData } from "ui5plugin-parser/dist/classes/UI5Classes/ResourceModelData";
 import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 import { VSCodeFileReader } from "./VSCodeFileReader";
+import path = require("path");
 
 const workspace = vscode.workspace;
 
@@ -64,6 +65,8 @@ export class FileWatcherMediator {
 			UI5Plugin.getInstance().parser.fileReader.rereadAllManifests(vscode.workspace.workspaceFolders?.map(wsFolder => {
 				return { fsPath: wsFolder.uri.fsPath };
 			}) || []);
+		} else if (document.fileName.endsWith("package.json")) {
+			delete require.cache[path.normalize(document.fileName)];
 		}
 	}
 	static register() {

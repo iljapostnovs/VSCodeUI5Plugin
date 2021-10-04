@@ -12,7 +12,7 @@ export class InternalizationTextCodeLenseGenerator extends CodeLensGenerator {
 		const codeLenses: vscode.CodeLens[] = [];
 
 		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
-		const componentName = UI5Plugin.getInstance().parser.fileReader.getManifestForClass(className)?.componentName;
+		const componentName = className && UI5Plugin.getInstance().parser.fileReader.getManifestForClass(className)?.componentName;
 		if (componentName && document) {
 			const currentResourceModelTexts = ResourceModelData.resourceModels[componentName];
 			const XMLText = document.getText();
