@@ -1,5 +1,5 @@
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import * as vscode from "vscode";
-import { CustomUIClass } from "../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { RootNode } from "../../../abstraction/RootNode";
 
 export class FieldsNode extends RootNode {

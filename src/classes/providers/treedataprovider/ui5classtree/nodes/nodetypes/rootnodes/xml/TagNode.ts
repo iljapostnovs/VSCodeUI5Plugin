@@ -1,6 +1,7 @@
+import { XMLParser } from "ui5plugin-parser";
+import { IXMLFile } from "ui5plugin-parser/dist/classes/utils/FileReader";
+import { IHierarchicalTag } from "ui5plugin-parser/dist/classes/utils/XMLParser";
 import * as vscode from "vscode";
-import { IXMLFile } from "../../../../../../../utils/FileReader";
-import { IHierarchicalTag, XMLParser } from "../../../../../../../utils/XMLParser";
 import { XMLNode } from "../../../abstraction/XMLNode";
 
 export class TagNode extends XMLNode {

@@ -1,27 +1,27 @@
+import { IFieldsAndMethods } from "ui5plugin-parser/dist/classes/UI5Classes/interfaces/IUIClassFactory";
+import { IUIMethod, IUIField } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import * as vscode from "vscode";
+import { UI5Plugin } from "../../../../../UI5Plugin";
 import { CodeGeneratorFactory } from "../../../../templateinserters/codegenerationstrategies/CodeGeneratorFactory";
-import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { InterfaceMemberStrategy } from "../../../../UI5Classes/JSParser/strategies/InterfaceMemberStrategy";
-import { ParentMethodStrategy } from "../../../../UI5Classes/JSParser/strategies/ParentMethodStrategy";
-import { IUIMethod, IUIField } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { IFieldsAndMethods, UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../../utils/FileReader";
 import { ReusableMethods } from "../../../reuse/ReusableMethods";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 import { ClassCompletionItemFactory } from "./ClassCompletionItemFactory";
+import { InterfaceMemberStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/InterfaceMemberStrategy";
+import { ParentMethodStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/ParentMethodStrategy";
+import { TextDocumentAdapter } from "../../../../adapters/vscode/TextDocumentAdapter";
 
 export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
-		let fieldsAndMethods = AcornSyntaxAnalyzer.getFieldsAndMethodsOfTheCurrentVariable(document, position);
+		let fieldsAndMethods = UI5Plugin.getInstance().parser.syntaxAnalyser.getFieldsAndMethodsOfTheCurrentVariable(new TextDocumentAdapter(document), document.offsetAt(position));
 		if (!fieldsAndMethods) {
-			fieldsAndMethods = new ParentMethodStrategy().getFieldsAndMethods(document, position);
+			fieldsAndMethods = new ParentMethodStrategy().getFieldsAndMethods(new TextDocumentAdapter(document), document.offsetAt(position));
 		}
 
-		const interfaceFieldsAndMethods = new InterfaceMemberStrategy().getFieldsAndMethods(document, position);
+		const interfaceFieldsAndMethods = new InterfaceMemberStrategy().getFieldsAndMethods(new TextDocumentAdapter(document), document.offsetAt(position));
 
 		if (fieldsAndMethods) {
 			completionItems = this._generateCompletionItemsFromFieldsAndMethods(fieldsAndMethods, document, position);
@@ -66,9 +66,9 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 
 	private _generateInsertTextForInterfaceMethod(method: IUIMethod, document: vscode.TextDocument, position: number) {
 		let text = method.name;
-		const className = FileReader.getClassNameFromPath(document.fileName);
+		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 		if (className) {
-			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 			const codeGenerationStrategy = CodeGeneratorFactory.createStrategy();
 			const jsDoc = this._generateJSDocForMethod(method, `implements {${method.owner}}`);
 			const params = method.params.map(param => param.name.replace("?", "")).join(", ");
@@ -179,10 +179,10 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 
 	private _generateInsertTextForOverridenMethod(method: IUIMethod, document: vscode.TextDocument, position: number) {
 		let text = method.name;
-		const className = FileReader.getClassNameFromPath(document.fileName);
+		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 		const methodReturnsAnything = method.returnType !== "void";
 		if (className) {
-			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 			const parentClassName = UIClass.parentClassNameDotNotation;
 			const parentUIDefineClassName = UIClass.UIDefine.find(UIDefine => UIDefine.classNameDotNotation === parentClassName);
 			if (parentUIDefineClassName) {

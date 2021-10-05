@@ -1,9 +1,7 @@
+import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import * as vscode from "vscode";
-import { SAPNodeDAO } from "../../../../librarydata/SAPNodeDAO";
-import { AcornSyntaxAnalyzer } from "../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../../utils/FileReader";
+import { UI5Plugin } from "../../../../../UI5Plugin";
 import { ReusableMethods } from "../../../reuse/ReusableMethods";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
@@ -15,13 +13,13 @@ export class ClassCompletionItemFactory implements ICompletionItemFactory {
 		const ifPositionIsNewExpressionOrExprStatement = this._getIfPositionIsNewExpressionOrExpressionStatement(document, position);
 
 		if (ifPositionIsNewExpressionOrExprStatement) {
-			const classes = UIClassFactory.getAllExistentUIClasses();
-			const currentClassName = FileReader.getClassNameFromPath(document.fileName);
+			const classes = UI5Plugin.getInstance().parser.classFactory.getAllExistentUIClasses();
+			const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassName) {
 
-				const currentUIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+				const currentUIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName);
 				const classNames = Object.keys(classes);
-				const customUIClassNames = classNames.filter(className => UIClassFactory.getUIClass(className) instanceof CustomUIClass);
+				const customUIClassNames = classNames.filter(className => UI5Plugin.getInstance().parser.classFactory.getUIClass(className) instanceof CustomUIClass);
 				const flatNodes = new SAPNodeDAO().getFlatNodes();
 				const standardUIClassNames = Object.keys(flatNodes).filter(className => {
 					const node = flatNodes[className];
@@ -58,15 +56,15 @@ export class ClassCompletionItemFactory implements ICompletionItemFactory {
 	private _getIfPositionIsNewExpressionOrExpressionStatement(document: vscode.TextDocument, position: vscode.Position) {
 		let currentPositionIsNewExpressionOrExpressionStatement = false;
 
-		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
+		const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 		if (currentClassName) {
 			const offset = document.offsetAt(position);
-			const currentUIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+			const currentUIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName);
 			const currentMethod = currentUIClass.methods.find(method => {
 				return method.acornNode?.start < offset && offset < method.acornNode?.end;
 			});
 			if (currentMethod) {
-				const allContent = AcornSyntaxAnalyzer.expandAllContent(currentMethod.acornNode);
+				const allContent = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(currentMethod.acornNode);
 				const newExpressionOrExpressionStatement = allContent.find((node: any) => {
 					return (
 						node.type === "NewExpression" ||

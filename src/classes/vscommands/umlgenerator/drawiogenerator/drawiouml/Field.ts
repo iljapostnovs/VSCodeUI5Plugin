@@ -1,8 +1,8 @@
 import { IUMLGenerator } from "./interfaces/IUMLGenerator";
-import { IUIField } from "../../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 import { ClassHead } from "./ClassHead";
 import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
+import { IUIField } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 
 export class Field implements IUMLGenerator, ITextLengthGettable {
 	id: number;

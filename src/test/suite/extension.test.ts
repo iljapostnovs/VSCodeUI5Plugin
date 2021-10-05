@@ -1,32 +1,28 @@
 import assert = require("assert");
 import { after, test } from "mocha";
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../../classes/UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { UIClassFactory } from "../../classes/UI5Classes/UIClassFactory";
 import * as data from "./data/TestData.json";
 import * as renameData from "./data/RenameData.json";
 import * as CompletionItemsData from "./data/completionitems/JSCompletionItems.json";
 import * as XMLCompletionItemData from "./data/completionitems/XMLCompletionItems.json";
 import * as XMLFormatterData from "./data/XMLFormatterData.json";
 import * as CodeLensData from "./data/CodeLensData.json";
-import { CustomUIClass } from "../../classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { FileReader } from "../../classes/utils/FileReader";
-import { JSLinter } from "../../classes/providers/diagnostics/js/jslinter/JSLinter";
-import { XMLLinter } from "../../classes/providers/diagnostics/xml/xmllinter/XMLLinter";
-import { UI5Plugin } from "../../UI5Plugin";
-import { JSRenameProvider } from "../../classes/providers/rename/JSRenameProvider";
-import { ConfigHandler } from "../../classes/providers/diagnostics/js/jslinter/parts/config/ConfigHandler";
-import { XMLParser } from "../../classes/utils/XMLParser";
+import { JSLinterErrorFactory, PropertiesLinterErrorFactory, XMLLinterErrorFactory } from "ui5plugin-linter";
+import { XMLParser } from "ui5plugin-parser";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { FileRenameMediator } from "../../classes/filerenaming/FileRenameMediator";
+import { JSCodeLensProvider } from "../../classes/providers/codelens/jscodelens/JSCodeLensProvider";
 import { JSDynamicCompletionItemsFactory } from "../../classes/providers/completionitems/factories/js/JSDynamicCompletionItemsFactory";
 import { SAPUIDefineFactory } from "../../classes/providers/completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
 import { ViewIdCompletionItemFactory } from "../../classes/providers/completionitems/factories/js/ViewIdCompletionItemFactory";
 import { XMLDynamicCompletionItemFactory } from "../../classes/providers/completionitems/factories/xml/XMLDynamicCompletionItemFactory";
-import { FileRenameMediator } from "../../classes/filerenaming/FileRenameMediator";
+import { JSRenameProvider } from "../../classes/providers/rename/JSRenameProvider";
 import { FileWatcherMediator } from "../../classes/utils/FileWatcherMediator";
 import { XMLFormatter } from "../../classes/utils/XMLFormatter";
-import { JSCodeLensProvider } from "../../classes/providers/codelens/jscodelens/JSCodeLensProvider";
-import { PropertiesLinter } from "../../classes/providers/diagnostics/properties/PropertiesLinter";
+import { UI5Plugin } from "../../UI5Plugin";
+import { TextDocumentAdapter } from "../../classes/adapters/vscode/TextDocumentAdapter";
+import { VSCodeLinterConfigHandler } from "../../classes/ui5linter/config/VSCodeLinterConfigHandler";
 // import * as os from "os";
 
 suite("Extension Test Suite", () => {
@@ -46,10 +42,10 @@ suite("Extension Test Suite", () => {
 		const testData = data.data;
 		testData.forEach(data => {
 			data.methods.forEach(testMethodData => {
-				const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
+				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(data.className);
 				const method = fieldsAndMethods.methods.find(method => method.name === testMethodData.name);
 				if (method?.returnType === "void") {
-					AcornSyntaxAnalyzer.findMethodReturnType(method, data.className, true, true);
+					UI5Plugin.getInstance().parser.syntaxAnalyser.findMethodReturnType(method, data.className, true, true);
 				}
 				assert.strictEqual(method?.returnType, testMethodData.returnType, `${data.className} -> ${testMethodData.name} return type is "${method?.returnType}" but expected "${testMethodData.returnType}"`);
 			});
@@ -60,10 +56,10 @@ suite("Extension Test Suite", () => {
 		const testData = data.data;
 		testData.forEach(data => {
 			data.fields.forEach(testFieldData => {
-				const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
+				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(data.className);
 				const field = fieldsAndMethods.fields.find(method => method.name === testFieldData.name);
 				if (field && !field?.type) {
-					AcornSyntaxAnalyzer.findFieldType(field, data.className, true, true);
+					UI5Plugin.getInstance().parser.syntaxAnalyser.findFieldType(field, data.className, true, true);
 				}
 				assert.strictEqual(field?.type, testFieldData.type, `${data.className} -> ${testFieldData.name} return type is "${field?.type}" but expected "${testFieldData.type}"`);
 			});
@@ -74,13 +70,13 @@ suite("Extension Test Suite", () => {
 		const testData = data.VisibilityTest;
 		testData.forEach(data => {
 			data.fields.forEach(testFieldData => {
-				const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
+				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(data.className);
 				const field = fieldsAndMethods.fields.find(method => method.name === testFieldData.name);
 				assert.strictEqual(field?.visibility, testFieldData.visibility, `${data.className} -> ${testFieldData.name} visibility is "${field?.visibility}" but expected "${testFieldData.visibility}"`);
 			});
 
 			data.methods.forEach(testMethodData => {
-				const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
+				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(data.className);
 				const field = fieldsAndMethods.methods.find(method => method.name === testMethodData.name);
 				assert.strictEqual(field?.visibility, testMethodData.visibility, `${data.className} -> ${testMethodData.name} visibility is "${field?.visibility}" but expected "${testMethodData.visibility}"`);
 			});
@@ -90,9 +86,9 @@ suite("Extension Test Suite", () => {
 	test("Syntax Analyser finds correct types at positions", async () => {
 		const testData = data.SyntaxAnalyser;
 		testData.forEach(data => {
-			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(data.className);
+			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(data.className);
 			const method = UIClass.acornMethodsAndFields.find(methodOrField => methodOrField.key?.name === data.methodName);
-			const methodContent = AcornSyntaxAnalyzer.expandAllContent(method.value.body);
+			const methodContent = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(method.value.body);
 			const searchedNode = methodContent.find(node => {
 				return compareProperties(data.node, node);
 			});
@@ -102,7 +98,7 @@ suite("Extension Test Suite", () => {
 			}
 
 			const position = searchedNode.property?.start || searchedNode.start + data.positionAddition;
-			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
 			let classNameAtPosition = positionBeforeCurrentStrategy.acornGetClassName(data.className, position);
 			if (classNameAtPosition) {
 				const fieldsAndMethods = positionBeforeCurrentStrategy.destructueFieldsAndMethodsAccordingToMapParams(classNameAtPosition);
@@ -120,11 +116,11 @@ suite("Extension Test Suite", () => {
 		// console.log(`CPU SPeed: ${cpuSpeed}`);
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassFSPathFromClassName(data.className);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
-				const errors = await JSLinter.getLintingErrors(document);
+				const errors = new JSLinterErrorFactory(UI5Plugin.getInstance().parser).getLintingErrors(new TextDocumentAdapter(document));
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
 
@@ -149,11 +145,11 @@ suite("Extension Test Suite", () => {
 		// console.log(`CPU SPeed: ${cpuSpeed}`);
 
 		for (const data of testData) {
-			const filePath = FileReader.convertClassNameToFSPath(data.className)?.replace(".js", ".properties");
+			const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.className)?.replace(".js", ".properties");
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
-				const errors = await PropertiesLinter.getLintingErrors(document);
+				const errors = new PropertiesLinterErrorFactory(UI5Plugin.getInstance().parser).getLintingErrors(new TextDocumentAdapter(document));
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
 
@@ -177,11 +173,11 @@ suite("Extension Test Suite", () => {
 		const testData = data.XMLLinter;
 
 		for (const data of testData) {
-			const filePath = FileReader.convertClassNameToFSPath(data.className, false, false, true);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.className, false, false, true);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
-				const errors = XMLLinter.getLintingErrors(document);
+				const errors = new XMLLinterErrorFactory(UI5Plugin.getInstance().parser).getLintingErrors(new TextDocumentAdapter(document));
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
 				console.log(`XML Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit}`);
@@ -201,10 +197,10 @@ suite("Extension Test Suite", () => {
 		const testData = data.FragmentLinter;
 
 		for (const data of testData) {
-			const filePath = FileReader.convertClassNameToFSPath(data.className, false, true);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.className, false, true);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
-				const errors = XMLLinter.getLintingErrors(document);
+				const errors = new XMLLinterErrorFactory(UI5Plugin.getInstance().parser).getLintingErrors(new TextDocumentAdapter(document));
 				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
 
 				data.errors.forEach(dataError => {
@@ -220,7 +216,7 @@ suite("Extension Test Suite", () => {
 		const testData = data.EventHandlers;
 
 		for (const data of testData) {
-			const fieldsAndMethods = UIClassFactory.getFieldsAndMethodsForClass(data.className);
+			const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(data.className);
 			data.eventHandlers.forEach(eventHandlerName => {
 				const eventHandlerMethod: any = fieldsAndMethods.methods.find((method: any) => {
 					return method.name === eventHandlerName;
@@ -233,12 +229,12 @@ suite("Extension Test Suite", () => {
 
 	test("JS Rename Handler working properly", async () => {
 		const testData = data.RenameProvider;
-		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
 
 		for (const data of testData) {
-			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(data.className);
+			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(data.className);
 
-			const filePath = FileReader.getClassFSPathFromClassName(data.className);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const uri = vscode.Uri.file(filePath);
 				const document = await vscode.workspace.openTextDocument(uri);
@@ -263,12 +259,12 @@ suite("Extension Test Suite", () => {
 						}
 
 						for (const methodRename of data.renames.methods) {
-							const filePath = FileReader.getClassFSPathFromClassName(methodRename.className);
+							const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(methodRename.className);
 							const uri = filePath && vscode.Uri.file(filePath);
 							if (uri) {
-								const UIClass = <CustomUIClass>UIClassFactory.getUIClass(methodRename.className);
+								const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(methodRename.className);
 								const containerMethod = UIClass.methods.find(method => method.name === methodRename.containerMethod);
-								const allNodes = AcornSyntaxAnalyzer.expandAllContent(containerMethod?.acornNode);
+								const allNodes = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(containerMethod?.acornNode);
 								const allNodesWithCurrentMethod = allNodes.filter((node: any) => node.type === "MemberExpression" && node.property?.name === data.methodName);
 								const allNodesFromCurrentClass = allNodesWithCurrentMethod.filter((node: any) => {
 									const ownerClassName = strategy.acornGetClassName(methodRename.className, node.end, true);
@@ -284,10 +280,10 @@ suite("Extension Test Suite", () => {
 						}
 
 						for (const XMLDocEdit of data.renames.XMLDocEdits) {
-							const filePath = FileReader.convertClassNameToFSPath(XMLDocEdit.className, false, XMLDocEdit.type === "fragment", XMLDocEdit.type === "view");
+							const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(XMLDocEdit.className, false, XMLDocEdit.type === "fragment", XMLDocEdit.type === "view");
 							if (filePath) {
 								const uri = vscode.Uri.file(filePath);
-								const viewOrFragment = XMLDocEdit.type === "fragment" ? FileReader.getAllFragments().find(fragment => fragment.fsPath === filePath) : FileReader.getAllViews().find(view => view.fsPath === filePath);
+								const viewOrFragment = XMLDocEdit.type === "fragment" ? UI5Plugin.getInstance().parser.fileReader.getAllFragments().find(fragment => fragment.fsPath === filePath) : UI5Plugin.getInstance().parser.fileReader.getAllViews().find(view => view.fsPath === filePath);
 								if (viewOrFragment) {
 									const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(viewOrFragment, data.methodName);
 									const tagAndAttribute = tagsAndAttributes.find(tagAndAttribute => {
@@ -320,7 +316,7 @@ suite("Extension Test Suite", () => {
 	test("Check config handler", () => {
 		const testData = data.ConfigHandler;
 		testData.forEach(config => {
-			const isException = ConfigHandler.checkIfMemberIsException(config.className, config.methodName);
+			const isException = new VSCodeLinterConfigHandler().checkIfMemberIsException(config.className, config.methodName);
 
 			assert.strictEqual(isException, config.result, `"${config.className}" -> "${config.methodName}" should have exception value "${config.result}", but it has "${isException}"`);
 		});
@@ -331,7 +327,7 @@ suite("Extension Test Suite", () => {
 		const factory = new ViewIdCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassFSPathFromClassName(data.className);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
@@ -350,7 +346,7 @@ suite("Extension Test Suite", () => {
 		const factory = new JSDynamicCompletionItemsFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassFSPathFromClassName(data.className);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.textToFind) + data.textToFind.length;
@@ -370,7 +366,7 @@ suite("Extension Test Suite", () => {
 		const factory = new SAPUIDefineFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassFSPathFromClassName(data.className);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const completionItems = await factory.generateUIDefineCompletionItems();
 
@@ -385,7 +381,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassFSPathFromClassName(data.className);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -403,7 +399,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassFSPathFromClassName(data.className);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -421,7 +417,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassFSPathFromClassName(data.className);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -439,7 +435,7 @@ suite("Extension Test Suite", () => {
 		const factory = new XMLDynamicCompletionItemFactory();
 
 		for (const data of testData) {
-			const filePath = FileReader.getClassFSPathFromClassName(data.className);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(data.className);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const offset = document.getText().indexOf(data.searchText) + data.searchText.length;
@@ -456,8 +452,8 @@ suite("Extension Test Suite", () => {
 		const testData = renameData.folderRenames;
 
 		for (const data of testData) {
-			const pathFrom = FileReader.convertClassNameToFSPath(data.uriFrom, false, false, false, true);
-			const pathTo = FileReader.convertClassNameToFSPath(data.uriTo, false, false, false, true);
+			const pathFrom = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.uriFrom, false, false, false, true);
+			const pathTo = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.uriTo, false, false, false, true);
 			if (pathFrom && pathTo) {
 				const uriFrom = vscode.Uri.file(pathFrom);
 				const uriTo = vscode.Uri.file(pathTo);
@@ -465,9 +461,6 @@ suite("Extension Test Suite", () => {
 				FileRenameMediator.handleFolderRename(uriFrom, uriTo, fileChanges);
 				const changedFiles = fileChanges.filter(fileChange => fileChange.changed);
 
-				// const FileReader = require("../../classes/utils/FileReader").FileReader;
-				// const changesEdited = (<any>fileChanges).filter((change: any) => change.changed).map((change: any) => { change.fileData.fsPath = FileReader.getClassNameFromPath(change.fileData.fsPath); return change; })
-				// copy(JSON.stringify(changesEdited))
 				assert.strictEqual(changedFiles.length, data.result.length, `Renaming from "${data.uriFrom}" to "${data.uriTo}" returned ${changedFiles.length} results, but expected ${data.result.length}`);
 				changedFiles.forEach(changedFile => {
 					const resultWithSameContent = data.result.find(result => result.fileData.content.replace(/(\r|\n|\t)/g, "") === changedFile.fileData.content.replace(/(\r|\n|\t)/g, ""));
@@ -483,7 +476,7 @@ suite("Extension Test Suite", () => {
 		const testData = XMLFormatterData.formatterData;
 
 		for (const data of testData) {
-			const fsPath = FileReader.convertClassNameToFSPath(data.className, false, false, true);
+			const fsPath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.className, false, false, true);
 			if (fsPath) {
 				const uri = vscode.Uri.file(fsPath);
 				const document = await vscode.workspace.openTextDocument(uri);
@@ -498,7 +491,7 @@ suite("Extension Test Suite", () => {
 		const testData = CodeLensData.jsCodeLenses;
 
 		for (const data of testData) {
-			const fsPath = FileReader.getClassFSPathFromClassName(data.className);
+			const fsPath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(data.className);
 			if (fsPath) {
 				const uri = vscode.Uri.file(fsPath);
 				const document = await vscode.workspace.openTextDocument(uri);

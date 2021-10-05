@@ -6,7 +6,7 @@ import { ICompletionItemFactory } from "../providers/completionitems/factories/a
 import { AbstractCompletionItemFactory } from "../providers/completionitems/factories/AbstractCompletionItemFactory";
 import { StandardXMLCompletionItemFactory } from "../providers/completionitems/factories/xml/StandardXMLCompletionItemFactory";
 import { SAPUIDefineFactory } from "../providers/completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
-import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 
 export class CompletionItemRegistrator {
 	static async register() {
@@ -19,7 +19,7 @@ export class CompletionItemRegistrator {
 			async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 				let itemsToReturn: CustomCompletionItem[] = [];
 				let completionItemFactory: ICompletionItemFactory | undefined;
-				UIClassFactory.setNewContentForClassUsingDocument(document);
+				UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
 				try {
 					if (UIDefineCompletionItemGenerator.getIfCurrentPositionIsInDefine(document, position)) {
 						completionItemFactory = AbstractCompletionItemFactory.getFactory(AbstractCompletionItemFactory.javascript.sapUiDefine);

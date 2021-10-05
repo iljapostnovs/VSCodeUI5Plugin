@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { FileReader } from "../../utils/FileReader";
-import { ResourceModelData } from "../../UI5Classes/ResourceModelData";
 import { TextTransformationFactory, CaseType } from "./TextTransformationFactory";
 import * as jsClassData from "./i18nIDs.json";
+import { ResourceModelData } from "ui5plugin-parser/dist/classes/UI5Classes/ResourceModelData";
+import { VSCodeFileReader } from "../../utils/VSCodeFileReader";
 
 export class ExportToI18NCommand {
 	public static async export() {
@@ -200,7 +200,7 @@ export class ExportToI18NCommand {
 	}
 
 	private static async _insertIntoI18NFile(stringToInsert: string) {
-		const manifest = FileReader.getCurrentWorkspaceFoldersManifest();
+		const manifest = VSCodeFileReader.getCurrentWorkspaceFoldersManifest();
 		const manifestFsPath = manifest?.fsPath;
 		const i18nRelativePath = manifest?.content["sap.app"]?.i18n;
 		if (manifestFsPath && i18nRelativePath) {

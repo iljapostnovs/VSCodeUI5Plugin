@@ -1,10 +1,11 @@
+import { XMLParser } from "ui5plugin-parser";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
+import { ITag } from "ui5plugin-parser/dist/classes/utils/XMLParser";
 import * as vscode from "vscode";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { FileReader } from "../../../utils/FileReader";
-import { ITag, XMLParser } from "../../../utils/XMLParser";
-import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
+import { UI5Plugin } from "../../../../UI5Plugin";
 import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
+import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 export class XMLDefinitionProvider {
 	public static provideDefinitionsFor(document: vscode.TextDocument, position: vscode.Position) {
 		let location: vscode.Location | vscode.LocationLink[] | undefined;
@@ -12,7 +13,7 @@ export class XMLDefinitionProvider {
 		const range = document.getWordRangeAtPosition(position);
 		const word = document.getText(range);
 
-		const XMLFile = TextDocumentTransformer.toXMLFile(document);
+		const XMLFile = TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
 		if (XMLFile) {
 			const tag = XMLParser.getTagInPosition(XMLFile, offset);
 			const attributes = XMLParser.getAttributesOfTheTag(tag);
@@ -26,7 +27,7 @@ export class XMLDefinitionProvider {
 			if (attribute) {
 				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 				const eventHandlerName = XMLParser.getEventHandlerNameFromAttributeValue(attributeValue);
-				const responsibleClassName = FileReader.getResponsibleClassForXMLDocument(document);
+				const responsibleClassName = UI5Plugin.getInstance().parser.fileReader.getResponsibleClassForXMLDocument(new TextDocumentAdapter(document));
 				if (responsibleClassName) {
 					location = this._getLocationFor(responsibleClassName, eventHandlerName);
 				}
@@ -56,7 +57,7 @@ export class XMLDefinitionProvider {
 				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 				const attributeValueOffsetBegin = tag.positionBegin + tag.text.indexOf(attribute) + attribute.indexOf(attributeValue);
 				const attributeValueOffsetEnd = attributeValueOffsetBegin + attributeValue.length;
-				const XMLFile = FileReader.getXMLFile(attributeValue);
+				const XMLFile = UI5Plugin.getInstance().parser.fileReader.getXMLFile(attributeValue);
 				if (XMLFile) {
 					const classUri = vscode.Uri.file(XMLFile.fsPath);
 					const vscodePosition = new vscode.Position(0, 0);
@@ -78,9 +79,9 @@ export class XMLDefinitionProvider {
 		let location: vscode.Location | undefined;
 		const responsibleClassName = this._findClassNameOfEventHandler(jsUIClassName, eventHandlerName)
 		if (responsibleClassName) {
-			const controllerUIClass = UIClassFactory.getUIClass(responsibleClassName);
+			const controllerUIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(responsibleClassName);
 			if (controllerUIClass instanceof CustomUIClass) {
-				const classPath = FileReader.getClassFSPathFromClassName(responsibleClassName);
+				const classPath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(responsibleClassName);
 				const method = controllerUIClass.methods.find(method => method.name === eventHandlerName);
 				if (method?.position && classPath) {
 					const classUri = vscode.Uri.file(classPath);
@@ -96,7 +97,7 @@ export class XMLDefinitionProvider {
 	}
 
 	private static _findClassNameOfEventHandler(className: string, methodName: string): string | undefined {
-		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+		const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 		const method = UIClass.methods.find(method => method.name === methodName);
 		if (method) {
 			return className;

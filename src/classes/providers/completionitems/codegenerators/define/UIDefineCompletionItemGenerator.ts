@@ -1,8 +1,9 @@
+import { SAPNode } from "ui5plugin-parser/dist/classes/librarydata/SAPNode";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
 import * as vscode from "vscode";
-import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
-import { SAPNode } from "../../../../librarydata/SAPNode";
-import { TextDocumentTransformer } from "../../../../utils/TextDocumentTransformer";
+import { UI5Plugin } from "../../../../../UI5Plugin";
+import { TextDocumentAdapter } from "../../../../adapters/vscode/TextDocumentAdapter";
 
 export class UIDefineCompletionItemGenerator {
 
@@ -19,7 +20,7 @@ export class UIDefineCompletionItemGenerator {
 	public static getIfCurrentPositionIsInDefine(document: vscode.TextDocument, position: vscode.Position, tryToSetNewContentIfPositionIsNearUIDefine = true): boolean {
 		let isCurrentPositionInUIDefine = false;
 		const currentPositionOffset = document.offsetAt(position);
-		const UIClass = TextDocumentTransformer.toCustomUIClass(document);
+		const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
 		if (UIClass instanceof CustomUIClass && currentPositionOffset) {
 			const args = UIClass.fileContent?.body[0]?.expression?.arguments;
 			if (args && args.length === 2) {
@@ -30,7 +31,7 @@ export class UIDefineCompletionItemGenerator {
 				if (tryToSetNewContentIfPositionIsNearUIDefine && !isCurrentPositionInUIDefine) {
 					const isCurrentPositionNearEndOfTheUIDefine = currentPositionOffset > UIDefinePaths.start && Math.abs(currentPositionOffset - UIDefinePaths.end) < 10;
 					if (isCurrentPositionNearEndOfTheUIDefine) {
-						UIClassFactory.setNewCodeForClass(UIClass.className, document.getText());
+						UI5Plugin.getInstance().parser.classFactory.setNewCodeForClass(UIClass.className, document.getText());
 						isCurrentPositionInUIDefine = this.getIfCurrentPositionIsInDefine(document, position, false);
 					}
 				}

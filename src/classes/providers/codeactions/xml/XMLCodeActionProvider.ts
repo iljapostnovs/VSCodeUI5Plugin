@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
-import { XMLParser } from "../../../utils/XMLParser";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
 import { SwitchToControllerCommand } from "../../../vscommands/switchers/SwitchToControllerCommand";
 import { InsertType, MethodInserter } from "../util/MethodInserter";
 import { CustomDiagnostics } from "../../../registrators/DiagnosticsRegistrator";
-import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
+import { XMLParser } from "ui5plugin-parser";
+import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
+import { UI5Plugin } from "../../../../UI5Plugin";
+import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 
 export class XMLCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -19,7 +20,7 @@ export class XMLCodeActionProvider {
 		const diagnostic: CustomDiagnostics | undefined = diagnostics.filter(diagnostic => diagnostic instanceof CustomDiagnostics).find(diagnostic => {
 			return diagnostic.range.contains(range);
 		});
-		const XMLFile = diagnostic?.attribute && TextDocumentTransformer.toXMLFile(document);
+		const XMLFile = diagnostic?.attribute && TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
 		if (diagnostic?.attribute && XMLFile) {
 			const currentPositionOffset = document?.offsetAt(range.end);
 			const attributeData = XMLParser.getAttributeNameAndValue(diagnostic.attribute);
@@ -29,7 +30,7 @@ export class XMLCodeActionProvider {
 			const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
 			const libraryPath = XMLParser.getLibraryPathFromTagPrefix(XMLFile, tagPrefix, currentPositionOffset);
 			const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
-			const events = UIClassFactory.getClassEvents(classOfTheTag);
+			const events = UI5Plugin.getInstance().parser.classFactory.getClassEvents(classOfTheTag);
 			const event = events.find(event => event.name === attributeData.attributeName);
 			if (event) {
 				const controllerName = SwitchToControllerCommand.getResponsibleClassForCurrentView();

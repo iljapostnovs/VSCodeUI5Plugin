@@ -1,5 +1,5 @@
-import { SAPNode } from "../../../../../librarydata/SAPNode";
-import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
+import { SAPNode } from "ui5plugin-parser/dist/classes/librarydata/SAPNode";
+import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
 import { IPropertyGetterStrategy } from "../interfaces/IPropertyGetterStrategy";
 
 export class SAPNodePropertyGenerationStrategy implements IPropertyGetterStrategy {

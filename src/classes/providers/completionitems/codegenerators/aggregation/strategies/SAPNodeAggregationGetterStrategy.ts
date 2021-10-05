@@ -1,7 +1,6 @@
-import { SAPNode } from "../../../../../librarydata/SAPNode";
-import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
 import { IAggregationGetterStrategy } from "../interfaces/IAggregationGetterStrategy";
-
+import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
+import { SAPNode } from "ui5plugin-parser/dist/classes/librarydata/SAPNode";
 export class SAPNodeAggregationGetterStrategy implements IAggregationGetterStrategy {
 	private static readonly _nodeDAO = new SAPNodeDAO();
 	private readonly _node: SAPNode;

@@ -1,6 +1,6 @@
+import { ICustomClassUIField } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import * as vscode from "vscode";
 import { NavigatiableNode } from "../abstraction/NavigatiableNode";
-import { ICustomClassUIField } from "../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 
 export class FieldNode extends NavigatiableNode {

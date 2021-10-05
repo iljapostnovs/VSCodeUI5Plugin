@@ -49,7 +49,7 @@ export class FileRenameMediator {
 			}, fileChanges);
 		});
 		// const FileReader = require("../utils/FileReader").FileReader;
-		// const changesEdited = (<any>fileChanges).filter((change: any) => change.changed).map((change: any) => { change.fileData.fsPath = FileReader.getClassNameFromPath(change.fileData.fsPath); return change; })
+		// const changesEdited = (<any>fileChanges).filter((change: any) => change.changed).map((change: any) => { change.fileData.fsPath = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(change.fileData.fsPath); return change; })
 		// copy(JSON.stringify(changesEdited))
 
 		return fileChanges;

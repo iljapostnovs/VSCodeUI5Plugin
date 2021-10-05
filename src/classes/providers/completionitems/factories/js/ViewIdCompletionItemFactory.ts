@@ -1,10 +1,10 @@
+import { XMLParser } from "ui5plugin-parser";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { InnerPropertiesStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { IXMLDocumentIdData } from "ui5plugin-parser/dist/classes/utils/XMLParser";
 import * as vscode from "vscode";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../../../../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { InnerPropertiesStrategy } from "../../../../UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
-import { CustomUIClass } from "../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../../utils/FileReader";
-import { IXMLDocumentIdData, XMLParser } from "../../../../utils/XMLParser";
+import { UI5Plugin } from "../../../../../UI5Plugin";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
@@ -12,18 +12,18 @@ export class ViewIdCompletionItemFactory implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 
-		const strategy = new InnerPropertiesStrategy();
+		const strategy = new InnerPropertiesStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
 		const offset = document.offsetAt(position);
-		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
+		const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 		if (currentClassName) {
 			const nodes = strategy.getStackOfNodesForInnerParamsForPosition(currentClassName, offset, true);
 			if (nodes.length === 1 && nodes[0].callee?.property?.name === "byId") {
-				const positionStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+				const positionStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
 				const classNameAtById = positionStrategy.getClassNameOfTheVariableAtPosition(currentClassName, nodes[0].callee?.property?.start);
-				const isControl = classNameAtById && UIClassFactory.isClassAChildOfClassB(classNameAtById, "sap.ui.core.Control");
+				const isControl = classNameAtById && UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(classNameAtById, "sap.ui.core.Control");
 				if (isControl) {
-					const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
-					const viewsAndFragments = UIClassFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+					const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName);
+					const viewsAndFragments = UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
 					const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
 					const viewIdResult: IXMLDocumentIdData[] = [];
 					XMLDocuments.forEach(XMLDocument => {

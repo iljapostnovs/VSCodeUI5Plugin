@@ -1,9 +1,7 @@
 import { Node } from "./abstraction/Node";
 import * as vscode from "vscode";
-import { TextDocumentTransformer } from "../../../../utils/TextDocumentTransformer";
 import { ClassNameNode } from "./nodetypes/rootnodes/js/ClassNameNode";
 import { RootNode } from "./abstraction/RootNode";
-import { XMLParser } from "../../../../utils/XMLParser";
 import { FieldsNode } from "./nodetypes/rootnodes/js/FieldsNode";
 import { MethodsNode } from "./nodetypes/rootnodes/js/MethodsNode";
 import { FieldNode } from "./nodetypes/subnodes/js/field/FieldNode";
@@ -13,6 +11,9 @@ import { MethodReferencesNode } from "./nodetypes/subnodes/js/method/MethodRefer
 import { VisibilityNode } from "./nodetypes/subnodes/js/VisibilityNode";
 import { XMLNode } from "./abstraction/XMLNode";
 import { TagNode } from "./nodetypes/rootnodes/xml/TagNode";
+import { XMLParser } from "ui5plugin-parser";
+import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
+import { TextDocumentAdapter } from "../../../../adapters/vscode/TextDocumentAdapter";
 
 export class NodeFactory {
 	static getNodes(node?: Node) {
@@ -31,14 +32,14 @@ export class NodeFactory {
 
 		const currentDocument = vscode.window.activeTextEditor?.document;
 		if (currentDocument?.fileName.endsWith(".js")) {
-			const UIClass = TextDocumentTransformer.toCustomUIClass(currentDocument);
+			const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(currentDocument));
 			if (UIClass) {
 				rootNodes.push(new ClassNameNode(UIClass));
 				rootNodes.push(new MethodsNode(UIClass));
 				rootNodes.push(new FieldsNode(UIClass));
 			}
 		} else if (currentDocument?.fileName.endsWith(".fragment.xml") || currentDocument?.fileName.endsWith(".view.xml")) {
-			const XMLFile = TextDocumentTransformer.toXMLFile(currentDocument);
+			const XMLFile = TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(currentDocument));
 			if (XMLFile) {
 				const hierarchicalTags = XMLParser.getTagHierarchy(XMLFile);
 				const tagNodes = hierarchicalTags.map(tag => new TagNode(tag, XMLFile));

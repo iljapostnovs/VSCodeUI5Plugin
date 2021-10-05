@@ -1,21 +1,20 @@
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import * as vscode from "vscode";
-import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "../UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { FileReader } from "../utils/FileReader";
+import { UI5Plugin } from "../../UI5Plugin";
+import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 
 export class SignatureHelpProvider {
 	static getSignature(document: vscode.TextDocument, position: vscode.Position) {
 		const signatureHelp = new vscode.SignatureHelp();
 
-		const currentClassName = FileReader.getClassNameFromPath(document.fileName);
-		UIClassFactory.setNewContentForClassUsingDocument(document);
+		const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+		UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
 
 		const offset = document.offsetAt(position);
 
 		if (currentClassName && offset) {
-			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy();
+			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
 			const stackOfNodes = positionBeforeCurrentStrategy.getStackOfNodesForPosition(currentClassName, offset + 1, true);
 
 			if (stackOfNodes.length > 0) {
@@ -28,10 +27,10 @@ export class SignatureHelpProvider {
 					methodName = "constructor";
 				}
 
-				const className = AcornSyntaxAnalyzer.findClassNameForStack(stackOfNodes, currentClassName);
+				const className = UI5Plugin.getInstance().parser.syntaxAnalyser.findClassNameForStack(stackOfNodes, currentClassName);
 
 				if (methodName && className) {
-					const method = AcornSyntaxAnalyzer.findMethodHierarchically(className, methodName);
+					const method = UI5Plugin.getInstance().parser.syntaxAnalyser.findMethodHierarchically(className, methodName);
 					if (method && method.params.length > 0) {
 						const activeParameter = callExpression?.arguments.length - 1 < 0 ? 0 : callExpression?.arguments.length - 1;
 						signatureHelp.activeParameter = activeParameter;

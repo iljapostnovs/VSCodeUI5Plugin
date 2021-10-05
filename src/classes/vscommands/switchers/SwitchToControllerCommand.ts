@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { FileReader } from "../../utils/FileReader";
+import { UI5Plugin } from "../../../UI5Plugin";
+import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";
 
 export class SwitchToControllerCommand {
 	static async switchToController() {
@@ -21,7 +22,7 @@ export class SwitchToControllerCommand {
 	}
 
 	private static async _switchToController(controllerName: string) {
-		const controlFSPath = FileReader.getClassFSPathFromClassName(controllerName);
+		const controlFSPath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(controllerName);
 		const editor = vscode.window.activeTextEditor;
 		if (editor && controlFSPath) {
 			await vscode.window.showTextDocument(vscode.Uri.file(controlFSPath));
@@ -30,7 +31,7 @@ export class SwitchToControllerCommand {
 
 	public static getResponsibleClassForCurrentView() {
 		const document = vscode.window.activeTextEditor?.document;
-		const currentViewController = document && FileReader.getResponsibleClassForXMLDocument(document);
+		const currentViewController = document && UI5Plugin.getInstance().parser.fileReader.getResponsibleClassForXMLDocument(new TextDocumentAdapter(document));
 
 		return currentViewController;
 	}

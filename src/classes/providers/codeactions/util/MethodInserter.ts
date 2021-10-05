@@ -1,10 +1,9 @@
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { FileReader } from "../../../utils/FileReader";
 import * as vscode from "vscode";
 import { ReusableMethods } from "../../reuse/ReusableMethods";
 import { CodeGeneratorFactory } from "../../../templateinserters/codegenerationstrategies/CodeGeneratorFactory";
 import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
+import { UI5Plugin } from "../../../../UI5Plugin";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 export enum InsertType {
 	Method = "Method",
@@ -13,10 +12,10 @@ export enum InsertType {
 export class MethodInserter {
 	static createInsertMethodCodeAction(className: string, memberName: string, params: string, body: string, type: InsertType, tabsToAdd = "\t\t") {
 		let insertMethodCodeAction: vscode.CodeAction | undefined;
-		const classPath = FileReader.getClassFSPathFromClassName(className);
+		const classPath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(className);
 		if (classPath) {
 			const classUri = vscode.Uri.file(classPath);
-			const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 			let insertContent = "";
 			if (type === InsertType.Method) {
 				insertContent = CodeGeneratorFactory.createStrategy().generateFunction(memberName, params, body, tabsToAdd);
@@ -88,7 +87,7 @@ export class MethodInserter {
 	}
 
 	private static _getInsertTextAndOffset(insertContent: string, className: string) {
-		const UIClass = <CustomUIClass>UIClassFactory.getUIClass(className);
+		const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 		let offset = 0;
 		const classIsCurrentlyOpened = this._checkIfClassIsCurrentlyOpened(className);
 		const thereAreNoMethods = UIClass.acornClassBody.properties.length === 0;
@@ -119,7 +118,7 @@ export class MethodInserter {
 		} else {
 			const lastMethod = UIClass.acornClassBody.properties[UIClass.acornClassBody.properties.length - 1];
 			if (lastMethod || thereAreNoMethods) {
-				offset = lastMethod?.end || UIClass.acornClassBody.start;
+				offset = lastMethod?.end || UIClass.acornClassBody.start + 1;
 			}
 
 			if (!thereAreNoMethods) {
@@ -135,7 +134,7 @@ export class MethodInserter {
 
 		const currentDocument = vscode.window.activeTextEditor?.document;
 		if (currentDocument && currentDocument.fileName.endsWith(".js")) {
-			const currentClassName = FileReader.getClassNameFromPath(currentDocument.fileName);
+			const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(currentDocument.fileName);
 			if (currentClassName) {
 				classIsCurrentlyOpened = className === currentClassName;
 			}
