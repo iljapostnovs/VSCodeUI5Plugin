@@ -71,7 +71,7 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 					const indexOfValue = attribute.indexOf(attributeValue);
 					const positionBegin = tagPosition.positionBegin + indexOfAttribute + indexOfValue;
 					const positionEnd = positionBegin + attributeValue.length;
-					range = RangeAdapter.offsetsToVSCodeRange(XMLFile.content, positionBegin, positionEnd);
+					range = RangeAdapter.offsetsToVSCodeRange(XMLFile.content, positionBegin, positionEnd - 1);
 				}
 			}
 		}

@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.12.72",
+	"version": "0.14.0",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -128,56 +128,6 @@
 					"default": true,
 					"description": "Should UI5 Signature Help be enabled"
 				},
-				"ui5.plugin.xmlDiagnostics": {
-					"type": "boolean",
-					"default": true,
-					"description": "Should UI5 XML Diagnostics be enabled"
-				},
-				"ui5.plugin.jsDiagnostics": {
-					"type": "boolean",
-					"default": true,
-					"description": "Should UI5 JS Diagnostics be enabled"
-				},
-				"ui5.plugin.useWrongFieldMethodLinter": {
-					"type": "boolean",
-					"default": true,
-					"description": "JS Linter: Should Wrong Field and Method validator be used. It checks if used fields and methods exists and if they are used correctly according to access level modifiers."
-				},
-				"ui5.plugin.useWrongClassNameLinter": {
-					"type": "boolean",
-					"default": true,
-					"description": "JS Linter: Should Wrong UI5 Class Name validator be used. It checks if class path which is provided in <class>.extend(\"here\", ... is correct"
-				},
-				"ui5.plugin.useWrongImportLinter": {
-					"type": "boolean",
-					"default": true,
-					"description": "JS Linter: Should Wrong SAP UI Define Import validator be used. It checks if sap.ui.define imports have corresponding classes."
-				},
-				"ui5.plugin.useWrongParametersLinter": {
-					"type": "boolean",
-					"default": true,
-					"description": "JS Linter: Should Wrong method parameters validator be used. It checks if parameter quantity and data types are consistent."
-				},
-				"ui5.plugin.useUnusedMemberLinter": {
-					"type": "boolean",
-					"default": true,
-					"description": "JS Linter: Should unused method/field validator be used. It checks if class members (fields and methods) are used."
-				},
-				"ui5.plugin.useWrongFilePathLinter": {
-					"type": "boolean",
-					"default": true,
-					"description": "JS Linter: Should wrong file path validator be used. It checks if paths has corresponding file, e.g. com.test.TestFragment should have ./webapp/TestFragment.fragment.xml"
-				},
-				"ui5.plugin.usePublicMemberLinter": {
-					"type": "boolean",
-					"default": true,
-					"description": "JS Linter: Should public member validator be used. It will check if public members probably should be private."
-				},
-				"ui5.plugin.useWrongOverrideLinter": {
-					"type": "boolean",
-					"default": true,
-					"description": "JS Linter: Should wrong override validator be used. It will check if private members are not overriden."
-				},
 				"ui5.plugin.moveDefineToFunctionParametersOnAutocomplete": {
 					"type": "boolean",
 					"default": true,
@@ -263,101 +213,6 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Data source related property. If true, the server certificate is verified against the list of supplied CAs. Verification happens at the connection level, before the HTTP request is sent."
-				},
-				"ui5.plugin.JSLinterExceptions": {
-					"type": "array",
-					"items": {
-						"type": "object",
-						"title": "Class name and method name. \"*\" for wild card",
-						"properties": {
-							"className": {
-								"type": "string",
-								"description": "Name of the class. Use \"*\" for wild card"
-							},
-							"memberName": {
-								"type": "string",
-								"description": "Name of the method/field. Use \"*\" for wild card"
-							},
-							"applyToChildren": {
-								"type": "boolean",
-								"description": "If the rule should be applied to class children (classes which extends this class)",
-								"default": false
-							}
-						}
-					},
-					"default": [
-						{
-							"className": "sap.ui.core.Element",
-							"memberName": "getDomRef",
-							"applyToChildren": true
-						},
-						{
-							"className": "sap.ui.model.json.JSONModel",
-							"memberName": "iSizeLimit",
-							"applyToChildren": true
-						},
-						{
-							"className": "sap.ui.model.Binding",
-							"memberName": "*"
-						},
-						{
-							"className": "sap.ui.model.Model",
-							"memberName": "*"
-						},
-						{
-							"className": "sap.ui.core.Element",
-							"memberName": "*"
-						},
-						{
-							"className": "sap.ui.base.ManagedObject",
-							"memberName": "*"
-						},
-						{
-							"className": "sap.ui.core.Control",
-							"memberName": "*"
-						},
-						{
-							"className": "sap.ui.xmlfragment",
-							"memberName": "*"
-						},
-						{
-							"className": "*",
-							"memberName": "byId"
-						},
-						{
-							"className": "*",
-							"memberName": "prototype"
-						},
-						{
-							"className": "*",
-							"memberName": "call"
-						},
-						{
-							"className": "*",
-							"memberName": "apply"
-						},
-						{
-							"className": "*",
-							"memberName": "bind"
-						},
-						{
-							"className": "*",
-							"memberName": "constructor"
-						},
-						{
-							"className": "*",
-							"memberName": "init"
-						},
-						{
-							"className": "*",
-							"memberName": "exit"
-						},
-						{
-							"className": "map",
-							"memberName": "*"
-						}
-					],
-					"description": "Array of objects of exceptions for JS Linter. Added exceptions will not be checked by Unused Method Linter and Wrong Field/Method Linter."
 				}
 			}
 		},
@@ -441,7 +296,7 @@
 		"ts-loader": "^9.2.6",
 		"typescript": "^4.4.3",
 		"vscode-test": "^1.6.1",
-		"webpack": "^5.56.1",
+		"webpack": "^5.57.0",
 		"webpack-cli": "^4.8.0"
 	},
 	"dependencies": {
@@ -451,7 +306,7 @@
 		"fast-xml-parser": "^3.20.3",
 		"glob": "^7.2.0",
 		"line-column": "^1.0.2",
-		"ui5plugin-linter": "^0.0.15",
+		"ui5plugin-linter": "^0.0.17",
 		"ui5plugin-parser": "^0.1.15"
 	}
 }

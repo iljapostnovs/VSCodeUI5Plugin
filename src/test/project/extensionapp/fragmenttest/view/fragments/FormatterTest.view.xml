@@ -1,0 +1,103 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button
+		id="idButtonFragmentController2"
+		text="{
+			formatter: '.formatter.formatValueFragmentController2',
+				test: [1, 2, 3],
+				test2: ['abc',
+
+				'asd'],
+				test3: {
+				test: [1, 2, 3],
+				test2: ['abc', 'asd']
+			},
+														test4: [{
+						path: 'asd'
+			}, {
+				path: 123
+			}]
+		}"
+		press="eventHandler11"
+	/>
+	<Button text="{= ${/SupportModel}}"/>
+	<Button text="{Test}"/>
+	<Button
+		icon="asd"
+		text="{
+				path: 'test'
+		}"
+	/>
+		<Text
+			text="{
+				path: 'Test>Confidence',
+				type: 'sap.ui.model.type.Integer'
+			} %"
+			wrapping="false"
+		/>
+	<Text
+		text="{
+							path: 'Test>Confidence',
+							type: 'sap.ui.model.type.Integer'
+						} {
+			path: 'Test>Confidence',
+					type: 'sap.ui.model.type.Integer'
+		}"
+		wrapping="false"
+	/>
+	<HBox
+		justifyContent="End"
+		visible="{=
+			${ZoneModel>ProcessingState} === '1' ||
+					${ZoneModel>ProcessingState} === '6' ||
+			${ZoneModel>ProcessingState} === '5'
+		}"
+	/>
+	<HBox visible="{=
+					${device>/isDesktop} &amp;&amp;
+		${
+					path: 'SupportModel>asd',
+			formatter: '.documentStatusMapping.getPhInvGroupIsPostingAllowed'
+		}
+	}"/>
+	<Button
+	visible="{=
+								((
+								${TestModel>IS_SINGLE_PRODUCT_OFFER}
+								) || (
+								(
+								${TestModel>LEVEL} === 'STORE_FORMAT_LEVEL' ||
+								${TestModel>LEVEL} === 'PRODUCT_LEVEL'
+								) &amp;&amp;
+								!${TestModel>IS_SINGLE_PRODUCT_OFFER}
+								))
+							}"
+	>
+
+
+	</Button>
+	<Button
+	visible="{=
+								!(${SupportModel>/Layout}).startsWith('Three')
+							}"
+	>
+
+	</Button>
+	<Button
+	text="({TestModel>Test/Test})"
+
+							icon="({path: 'TestModel>Test/Test',
+										formatter: 'hello.Test'
+								})"
+								tooltip="{=
+							parseFloat(${TestModel>Test}) &gt; parseFloat(${TestModel>Test}) ?
+							'random text (' + ${TestModel>Test} + ') random text (' + ${TestModel>Test} + ')' :
+							''
+						}"
+
+	>
+
+	</Button>
+</c:FragmentDefinition>

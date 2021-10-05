@@ -123,7 +123,7 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 					const positionBegin = document.positionAt(eventHandler.position);
 					const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
 					const range = new vscode.Range(positionBegin, positionEnd);
-					const rangeInView = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, eventData.node.start, eventData.node.end);
+					const rangeInView = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, eventData.node.start, eventData.node.end - 1);
 
 					if (rangeInView) {
 						const classUri = document.uri;

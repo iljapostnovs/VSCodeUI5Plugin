@@ -120,7 +120,7 @@ suite("Extension Test Suite", () => {
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
-				const errors = await new JSLinterErrorFactory(UI5Plugin.getInstance().parser).getLintingErrors(new TextDocumentAdapter(document));
+				const errors = new JSLinterErrorFactory(UI5Plugin.getInstance().parser).getLintingErrors(new TextDocumentAdapter(document));
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
 
@@ -461,9 +461,6 @@ suite("Extension Test Suite", () => {
 				FileRenameMediator.handleFolderRename(uriFrom, uriTo, fileChanges);
 				const changedFiles = fileChanges.filter(fileChange => fileChange.changed);
 
-				// const FileReader = require("../../classes/utils/FileReader").FileReader;
-				// const changesEdited = (<any>fileChanges).filter((change: any) => change.changed).map((change: any) => { change.fileData.fsPath = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(change.fileData.fsPath); return change; })
-				// copy(JSON.stringify(changesEdited))
 				assert.strictEqual(changedFiles.length, data.result.length, `Renaming from "${data.uriFrom}" to "${data.uriTo}" returned ${changedFiles.length} results, but expected ${data.result.length}`);
 				changedFiles.forEach(changedFile => {
 					const resultWithSameContent = data.result.find(result => result.fileData.content.replace(/(\r|\n|\t)/g, "") === changedFile.fileData.content.replace(/(\r|\n|\t)/g, ""));

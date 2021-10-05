@@ -151,7 +151,7 @@ export class JSRenameProvider {
 						const positionOfEventHandlerInAttributeValueBegin = positionOfValueBegin + attributeValue.indexOf(oldMemberName);
 						const positionOfEventHandlerInAttributeValueEnd = positionOfEventHandlerInAttributeValueBegin + oldMemberName.length;
 						const classUri = vscode.Uri.file(viewOrFragment.fsPath);
-						const range = RangeAdapter.offsetsToVSCodeRange(viewOrFragment.content, positionOfEventHandlerInAttributeValueBegin, positionOfEventHandlerInAttributeValueEnd);
+						const range = RangeAdapter.offsetsToVSCodeRange(viewOrFragment.content, positionOfEventHandlerInAttributeValueBegin, positionOfEventHandlerInAttributeValueEnd - 1);
 						if (range) {
 							workspaceEdits.push({
 								uri: classUri,

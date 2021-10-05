@@ -1,12 +1,11 @@
-import { XMLParser } from "ui5plugin-parser";
-import { ICustomClassUIMethod, CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { IXMLFile } from "ui5plugin-parser/dist/classes/utils/FileReader";
+import { ICustomClassUIMethod, ICustomClassUIField } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../../../UI5Plugin";
 import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
 import { VSCodeTextDocumentTransformer } from "../../../../utils/VSCodeTextDocumentTransformer";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { ReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts//util/ReferenceFinder";
+import { UI5Plugin } from "../../../../../UI5Plugin";
+import { VSCodeLocationAdapter } from "../../../../ui5linter/adapters/VSCodeLocationAdapter";
 
 export interface IReferenceCodeLensCacheable {
 	[className: string]: {
@@ -26,9 +25,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 				methods.forEach(method => {
 					if (method.memberPropertyNode) {
 						const locations = this.getReferenceLocations(method);
-						const positionBegin = document.positionAt(method.memberPropertyNode.start);
-						const positionEnd = document.positionAt(method.memberPropertyNode.end);
-						const range = new vscode.Range(positionBegin, positionEnd);
+						const range = RangeAdapter.acornLocationToVSCodeRange(method.memberPropertyNode.loc);
 						const codeLens = new vscode.CodeLens(range);
 						codeLens.command = {
 							title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
@@ -44,101 +41,8 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 		return codeLenses;
 	}
 
-	public getReferenceLocations(method: ICustomClassUIMethod) {
-		const locations: vscode.Location[] = [];
-
-		const UIClasses = UI5Plugin.getInstance().parser.classFactory.getAllCustomUIClasses();
-		UIClasses.forEach(UIClass => {
-			this._addLocationsFromUIClass(method, UIClass, locations);
-		});
-
-		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(method.owner);
-		if (UIClass instanceof CustomUIClass) {
-			const viewsAndFragments = UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, true, true);
-			const viewAndFragmentArray = [...viewsAndFragments.fragments, ...viewsAndFragments.views];
-			viewAndFragmentArray.forEach(XMLDoc => {
-				this._addLocationsFromXMLDocument(XMLDoc, method, locations);
-			});
-		}
-
-		return locations;
-	}
-
-	private _addLocationsFromXMLDocument(XMLDoc: IXMLFile, method: ICustomClassUIMethod, locations: vscode.Location[]) {
-		const cache = XMLDoc.getCache<IReferenceCodeLensCacheable>("referenceCodeLensCache") || {};
-		if (cache[method.owner]?.[`_${method.name}`]) {
-			locations.push(...cache[method.owner][`_${method.name}`]);
-		} else {
-			const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(XMLDoc, method.name, method.owner);
-
-			const currentLocations: vscode.Location[] = [];
-			tagsAndAttributes.forEach(tagAndAttribute => {
-				tagAndAttribute.attributes.forEach(attribute => {
-					const positionBegin = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute) + attribute.indexOf(method.name);
-					const positionEnd = positionBegin + method.name.length - 1;
-					const range = RangeAdapter.offsetsToVSCodeRange(XMLDoc.content, positionBegin, positionEnd);
-					if (range) {
-						const uri = vscode.Uri.file(XMLDoc.fsPath);
-						currentLocations.push(new vscode.Location(uri, range));
-					}
-				});
-			});
-			if (currentLocations.length > 0) {
-				locations.push(...currentLocations);
-			}
-			if (!cache[method.owner]) {
-				cache[method.owner] = {};
-			}
-			cache[method.owner][`_${method.name}`] = currentLocations;
-			XMLDoc.setCache("referenceCodeLensCache", cache);
-		}
-	}
-
-	private _addLocationsFromUIClass(method: ICustomClassUIMethod, UIClass: CustomUIClass, locations: vscode.Location[]) {
-		const cache = UIClass.getCache<IReferenceCodeLensCacheable>("referenceCodeLensCache") || {};
-		if (cache[method.owner]?.[`_${method.name}`]) {
-			locations.push(...cache[method.owner][`_${method.name}`]);
-		} else if (UIClass.classFSPath) {
-			const regexp = new RegExp(`(?<=\\.)${method.name}(\\(|\\)|\\,|\\.|\\s)`, "g");
-			const results: RegExpExecArray[] = [];
-			let result = regexp.exec(UIClass.classText);
-			while (result) {
-				results.push(result);
-				result = regexp.exec(UIClass.classText);
-			}
-
-			const currentLocations: vscode.Location[] = [];
-			const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
-			const uri = vscode.Uri.file(UIClass.classFSPath);
-			results.forEach(result => {
-				const calleeClassName = strategy.acornGetClassName(UIClass.className, result.index);
-				const calleeUIClass = calleeClassName && UI5Plugin.getInstance().parser.classFactory.getUIClass(calleeClassName);
-				if (
-					calleeUIClass && calleeUIClass instanceof CustomUIClass &&
-					calleeClassName &&
-					(
-						UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(calleeClassName, method.owner) ||
-						(
-							UIClass.className === calleeClassName &&
-							UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(method.owner, calleeClassName) &&
-							UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(method.owner, UIClass.className)
-						)
-					)
-				) {
-					const range = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, result.index, result.index + method.name.length - 1);
-					if (range) {
-						currentLocations.push(new vscode.Location(uri, range));
-					}
-				}
-			});
-			if (currentLocations.length > 0) {
-				locations.push(...currentLocations);
-			}
-			if (!cache[method.owner]) {
-				cache[method.owner] = {};
-			}
-			cache[method.owner][`_${method.name}`] = currentLocations;
-			UIClass.setCache("referenceCodeLensCache", cache);
-		}
+	public getReferenceLocations(member: ICustomClassUIMethod | ICustomClassUIField) {
+		const referenceFinder = new ReferenceFinder(UI5Plugin.getInstance().parser);
+		return referenceFinder.getReferenceLocations(member).map(location => new VSCodeLocationAdapter(location));
 	}
 }
