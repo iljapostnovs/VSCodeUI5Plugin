@@ -306,7 +306,7 @@
 		"fast-xml-parser": "^3.20.3",
 		"glob": "^7.2.0",
 		"line-column": "^1.0.2",
-		"ui5plugin-linter": "^0.0.31",
-		"ui5plugin-parser": "^0.1.18"
+		"ui5plugin-linter": "^0.5.0",
+		"ui5plugin-parser": "^0.5.2"
 	}
 }
