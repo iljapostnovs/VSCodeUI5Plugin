@@ -19,7 +19,8 @@ export class VSCodeParserConfigHandler implements IParserConfigHandler {
 		return vscode.workspace.getConfiguration("ui5.plugin").get("rejectUnauthorized") || false;
 	}
 	getLibsToLoad(): string[] {
-		return vscode.workspace.getConfiguration("ui5.plugin").get("libsToLoad") || [
+		const additionalLibs: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("libsToLoad") || [];
+		return [
 			"sap.m",
 			"sap.ui.comp",
 			"sap.f",
@@ -33,7 +34,7 @@ export class VSCodeParserConfigHandler implements IParserConfigHandler {
 			"sap.ushell",
 			"sap.tnt",
 			"sap.suite.ui.microchart"
-		];
+		].concat(additionalLibs);
 	}
 
 }
