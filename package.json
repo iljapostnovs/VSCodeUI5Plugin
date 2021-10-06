@@ -285,7 +285,7 @@
 		"@types/glob": "^7.1.4",
 		"@types/line-column": "^1.0.0",
 		"@types/mocha": "^9.0.0",
-		"@types/node": "^16.10.2",
+		"@types/node": "^16.10.3",
 		"@types/vscode": "^1.60.0",
 		"@types/webpack": "^5.28.0",
 		"@typescript-eslint/eslint-plugin": "^4.33.0",
@@ -297,7 +297,7 @@
 		"typescript": "^4.4.3",
 		"vscode-test": "^1.6.1",
 		"webpack": "^5.57.1",
-		"webpack-cli": "^4.8.0"
+		"webpack-cli": "^4.9.0"
 	},
 	"dependencies": {
 		"acorn-loose": "^8.2.1",
@@ -306,7 +306,7 @@
 		"fast-xml-parser": "^3.20.3",
 		"glob": "^7.2.0",
 		"line-column": "^1.0.2",
-		"ui5plugin-linter": "^0.0.27",
-		"ui5plugin-parser": "^0.1.17"
+		"ui5plugin-linter": "^0.0.31",
+		"ui5plugin-parser": "^0.1.18"
 	}
 }
