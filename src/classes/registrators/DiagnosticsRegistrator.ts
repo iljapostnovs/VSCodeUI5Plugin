@@ -137,7 +137,6 @@ export class DiagnosticsRegistrator {
 					diagnostic.source = error.source;
 					diagnostic.relatedInformation = [];
 					diagnostic.tags = error.tags || [];
-					//TODO: this
 					diagnostic.attribute = error.attribute;
 
 					return diagnostic;
