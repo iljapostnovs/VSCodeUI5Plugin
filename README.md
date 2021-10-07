@@ -3,12 +3,13 @@
 
 ---
 # v0.14.0 update
-Part of current extension was splitted into two npm packages: [ui5plugin-parser](https://www.npmjs.com/package/ui5plugin-parser) and [ui5plugin-linter](https://www.npmjs.com/package/ui5plugin-linter)
+Part of current extension was splitted into two npm packages: [ui5plugin-parser](https://www.npmjs.com/package/ui5plugin-parser) and [ui5plugin-linter](https://www.npmjs.com/package/ui5plugin-linter).
 As a result, all parser and linter related documentation moved there. Now it is possible to install linter npm package and run it globally without Visual Studio Code (which comes handy for building lint/test CI pipelines).
 
 ## Major changes
 ### Linter
-As a result of migrating to npm packages, all linter related Visual Studio Code preferences were removed and now package.json is a source for linter configuration (see ```Config``` in [ui5plugin-linter](https://www.npmjs.com/package/ui5plugin-linter)). This opens some flexibility for multiple folder workspaces, because each folder can contain different linter configuration which was not an option before.
+As a result of migrating to npm packages, all linter related Visual Studio Code preferences were removed and now package.json is a source for linter configuration (see ```Config``` in [ui5plugin-linter](https://www.npmjs.com/package/ui5plugin-linter)). This opens some flexibility for multiple folder workspaces, because each folder can contain different linter configuration which was not an option before. Additionally, now it is possible to control severity of the errors.
+
 ### Parser
 Parser related preference entries stays in Visual Studio Code for several technical reasons. <br/>
 ```UI5 version```, ```exclude folder patterns```, ```data source```, ```reject unauthorized``` and ```libs to load``` are still configured through Visual Studio Code and passed to [ui5plugin-parser](https://www.npmjs.com/package/ui5plugin-parser) afterwards.
