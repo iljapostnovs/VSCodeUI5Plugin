@@ -8,8 +8,8 @@ export class ControllerRenameHandler extends FileRenameHandler {
 		return allFiles;
 	}
 
-	private _renameViewOfController(oldCntrollerUri: vscode.Uri, newUri: vscode.Uri, allFiles: IFileChanges[]) {
-		const controllerNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(oldCntrollerUri.fsPath);
+	private _renameViewOfController(oldControllerUri: vscode.Uri, newUri: vscode.Uri, allFiles: IFileChanges[]) {
+		const controllerNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(oldControllerUri.fsPath);
 		const newControllerNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(newUri.fsPath);
 		if (controllerNameDotNotation && newControllerNameDotNotation) {
 			const controllerName = newControllerNameDotNotation.split(".")[newControllerNameDotNotation.split(".").length - 1];

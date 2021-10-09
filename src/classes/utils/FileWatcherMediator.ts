@@ -3,7 +3,6 @@ import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
 import { UI5Plugin } from "../../UI5Plugin";
 import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
 import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
-// import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { WorkspaceCompletionItemFactory } from "../providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
 import { IFileChanges, IFileRenameData } from "../filerenaming/handlers/abstraction/FileRenameHandler";
 import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/TemplateGeneratorFactory";
@@ -11,6 +10,9 @@ import { ResourceModelData } from "ui5plugin-parser/dist/classes/UI5Classes/Reso
 import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 import { VSCodeFileReader } from "./VSCodeFileReader";
 import path = require("path");
+import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { IReferenceCodeLensCacheable } from "ui5plugin-linter/dist/classes/js/parts/util/ReferenceFinder";
 
 const workspace = vscode.workspace;
 
@@ -37,16 +39,23 @@ export class FileWatcherMediator {
 					}, 50);
 
 					if (FileWatcherMediator._nextInQueue[currentClassNameDotNotation]) {
+						const { changedClassHasReferencesToActiveClass: isDiagnosticDirty, activeDocument } = this._checkIfDiagnosticIsDirty(document, currentClassNameDotNotation);
+
 						UI5Plugin.getInstance().parser.classFactory.setNewCodeForClass(
 							FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classNameDotNotation,
 							FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classFileText,
 							FileWatcherMediator._nextInQueue[currentClassNameDotNotation].force
 						);
+
+						if (isDiagnosticDirty && activeDocument) {
+							DiagnosticsRegistrator.updateDiagnosticCollection(activeDocument);
+						}
 					}
 				} else if (FileWatcherMediator._nextInQueue[currentClassNameDotNotation]) {
-					FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classFileText = document.getText();
-					FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classNameDotNotation = currentClassNameDotNotation;
-					FileWatcherMediator._nextInQueue[currentClassNameDotNotation].force = force
+					const cache = FileWatcherMediator._nextInQueue[currentClassNameDotNotation];
+					cache.classFileText = document.getText();
+					cache.classNameDotNotation = currentClassNameDotNotation;
+					cache.force = cache.force || force;
 				}
 
 			}
@@ -69,6 +78,23 @@ export class FileWatcherMediator {
 			delete require.cache[path.normalize(document.fileName)];
 		}
 	}
+	private static _checkIfDiagnosticIsDirty(document: vscode.TextDocument, currentClassNameDotNotation: string) {
+		let changedClassHasReferencesToActiveClass = false;
+		const activeDocument = vscode.window.activeTextEditor?.document;
+		if (activeDocument) {
+			if (document.fileName !== activeDocument.fileName) {
+				const activeDocumentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(activeDocument.fileName);
+				const currentClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassNameDotNotation);
+				if (activeDocumentClassName && currentClass instanceof CustomUIClass) {
+					const cache = currentClass.getCache<IReferenceCodeLensCacheable>("referenceCodeLensCache") || {};
+					changedClassHasReferencesToActiveClass = !!Object.keys(cache).find(className => className === activeDocumentClassName);
+
+				}
+			}
+		}
+		return { changedClassHasReferencesToActiveClass, activeDocument };
+	}
+
 	static register() {
 		const watcher = vscode.workspace.createFileSystemWatcher("**/*.{js,xml,json,properties}");
 		let disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
@@ -110,13 +136,13 @@ export class FileWatcherMediator {
 
 		watcher.onDidDelete(uri => {
 			if (uri.fsPath.endsWith(".js")) {
-				// DiagnosticsRegistrator.removeDiagnosticForUri(uri, "js");
+				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "js");
 			}
 			if (uri.fsPath.endsWith(".xml")) {
-				// DiagnosticsRegistrator.removeDiagnosticForUri(uri, "xml");
+				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "xml");
 			}
 			if (uri.fsPath.endsWith(".properties")) {
-				// DiagnosticsRegistrator.removeDiagnosticForUri(uri, "properties");
+				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "properties");
 			}
 
 			if (uri.fsPath.endsWith(".js")) {
@@ -190,12 +216,12 @@ export class FileWatcherMediator {
 		});
 
 		await vscode.workspace.applyEdit(edit);
-		setTimeout(() => {
-			const activeDocument = vscode.window.activeTextEditor?.document;
-			if (activeDocument) {
-				// DiagnosticsRegistrator.updateDiagnosticCollection(activeDocument);
-			}
-		}, 100);
+		// setTimeout(() => {
+		// const activeDocument = vscode.window.activeTextEditor?.document;
+		// if (activeDocument) {
+		// 	DiagnosticsRegistrator.updateDiagnosticCollection(activeDocument);
+		// }
+		// }, 100);
 
 	}
 

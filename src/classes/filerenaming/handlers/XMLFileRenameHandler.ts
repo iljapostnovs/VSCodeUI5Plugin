@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
-// import { FileReader } from "../../utils/FileReader";
 import { FileRenameHandler, IFileChanges } from "./abstraction/FileRenameHandler";
 import * as fs from "fs";
-// import { DiagnosticsRegistrator } from "../../registrators/DiagnosticsRegistrator";
+import { DiagnosticsRegistrator } from "../../registrators/DiagnosticsRegistrator";
 import { UI5Plugin } from "../../../UI5Plugin";
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -16,7 +15,7 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 			this._replaceFragmentNames(oldUri, newUri, allFiles);
 		}
 
-		// DiagnosticsRegistrator.removeDiagnosticForUri(oldUri, "xml");
+		DiagnosticsRegistrator.removeDiagnosticForUri(oldUri, "xml");
 		// const newFile = allFiles.find(file => file.fileData.fsPath === newUri.fsPath);
 		// if (newFile) {
 		// 	newFile.changed = true;
