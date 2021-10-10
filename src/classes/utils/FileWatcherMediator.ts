@@ -9,10 +9,11 @@ import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/Tem
 import { ResourceModelData } from "ui5plugin-parser/dist/classes/UI5Classes/ResourceModelData";
 import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 import { VSCodeFileReader } from "./VSCodeFileReader";
-import path = require("path");
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { IReferenceCodeLensCacheable } from "ui5plugin-linter/dist/classes/js/parts/util/ReferenceFinder";
+import { PackageLinterConfigHandler } from "ui5plugin-linter";
+import { PackageParserConfigHandler } from "ui5plugin-parser";
 
 const workspace = vscode.workspace;
 
@@ -75,7 +76,8 @@ export class FileWatcherMediator {
 				return { fsPath: wsFolder.uri.fsPath };
 			}) || []);
 		} else if (document.fileName.endsWith("package.json")) {
-			delete require.cache[path.normalize(document.fileName)];
+			delete PackageLinterConfigHandler.packageCache[document.fileName];
+			delete PackageParserConfigHandler.packageCache[document.fileName];
 		}
 	}
 	private static _checkIfDiagnosticIsDirty(document: vscode.TextDocument, currentClassNameDotNotation: string) {
