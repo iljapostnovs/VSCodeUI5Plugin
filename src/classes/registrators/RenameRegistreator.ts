@@ -5,7 +5,7 @@ import { JSRenameProvider } from "../providers/rename/JSRenameProvider";
 export class JSRenameRegistrator {
 	static register() {
 		const disposable = vscode.languages.registerRenameProvider({ language: "javascript", scheme: "file" }, {
-			provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string): vscode.ProviderResult<vscode.WorkspaceEdit> {
+			provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string) {
 				return JSRenameProvider.provideRenameEdits(document, position, newName);
 			}
 		});

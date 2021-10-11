@@ -1,6 +1,20 @@
 # SAPUI5 Extension
 ![TestAndBuildBadge](https://github.com/iljapostnovs/VSCodeUI5Plugin/workflows/Test%20and%20build/badge.svg?branch=development)
 
+---
+# v0.14.0 update
+Part of current extension was splitted into two npm packages: [ui5plugin-parser](https://www.npmjs.com/package/ui5plugin-parser) and [ui5plugin-linter](https://www.npmjs.com/package/ui5plugin-linter).
+As a result, all parser and linter related documentation moved there. Now it is possible to install linter npm package and run it globally without Visual Studio Code (which comes handy for building lint/test CI pipelines).
+
+## Major changes
+### Linter
+As a result of migrating to npm packages, all linter related Visual Studio Code preferences were removed and now package.json is a source for linter configuration (see ```Config``` in [ui5plugin-linter](https://www.npmjs.com/package/ui5plugin-linter)). This opens some flexibility for multiple folder workspaces, because each folder can contain different linter configuration which was not an option before. Additionally, now it is possible to control severity of the errors.
+
+### Parser
+Parser related preference entries stays in Visual Studio Code for several technical reasons. <br/>
+```UI5 version```, ```exclude folder patterns```, ```data source```, ```reject unauthorized``` and ```libs to load``` are still configured through Visual Studio Code and passed to [ui5plugin-parser](https://www.npmjs.com/package/ui5plugin-parser) afterwards.
+
+---
 This plugin contains perks for UI5 developers.
 
 Before you start working with the plugin, it will be useful to set formatOnSave setting in VSCode preferences:
@@ -66,69 +80,15 @@ CodeLens for Internalization Texts, overriden methods, event handlers and refere
 
 ----------
 ## XML Diagnostics
-XML Diagnostics is provided<br/>
-XML Linters available:<br/>
-* Attribute linter<br/>
->Checks for property existence, property value, prefix existence, event handler existence and if default value is not the same as entered value
-* Unused namespace linter<br/>
->Checks if declared namespaces are used
-* Tag linter<br/>
->Checks for class and aggregation existence
-* Wrong file path linter<br/>
->Checks if any strings that contains app namespace have according fragment or view
-
-
-> Related preference entries:<br/>
-> *ui5.plugin.xmlDiagnostics*<br/>
-
+See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<br/>
+>
 > To make XML Linter ignore attribute errors of next tag, you can use ```<-- @ui5ignore -->``` comment right above the tag<br/>
 
 ![DynamicCompletionItems](/images/XMLDiagnostics.gif)
 
 ----------
 ## JS Diagnostics
-> You can define diagnostic exceptions using *ui5.plugin.JSLinterExceptions* preference entry.
-
-JS Diagnostics is provided<br/>
-JS Linters available:<br/>
-* Wrong field/method usage linter<br/>
->It checks for existence of the class members and if they are used correctly according to access level modifiers
-* Wrong custom class name linter<br/>
->It checks if your class name in ```<AnyClass>.extend("here")``` is correct
-* Wrong import path linter<br/>
->It checks if imported module exists
-* Unused field/method linter<br/>
->Self explanatory: checks if methods/fields are used at all
-* Wrong file path linter<br/>
->Checks if any strings that contains app namespace have according fragment, view or class
-* Public member linter<br/>
->Checks if class members should be public. Warning is generated if member is public, but there are no references for it in other classes
-* Wrong override linter<br/>
->Checks if overriden members are not protected/private
-* Abstract class linter<br/>
->Checks if all abstract members are implemented
-* Interface linter<br/>
->Checks if all interface members are implemented
-* Wrong parameter usage in the methods linter, which checks for parameter quantity and data type<br/>
-	> Use jsdoc to make your parameters optional, e.g.
-	```javascript
-	/**
-	 *@param {string} [sOptionalString] - optional string param
-	 *@param {string} sMandatoryString - mandatory string param
-	 */
-	```
-
-> Related preference entries:<br/>
-> *ui5.plugin.jsDiagnostics*<br/>
-> *ui5.plugin.useWrongFieldMethodLinter*<br/>
-> *ui5.plugin.useWrongClassNameLinter*<br/>
-> *ui5.plugin.useWrongImportLinter*<br/>
-> *ui5.plugin.useWrongParametersLinter*<br/>
-> *ui5.plugin.useUnusedMemberLinter*<br/>
-> *ui5.plugin.useWrongFilePathLinter*<br/>
-> *ui5.plugin.usePublicMemberLinter*<br/>
-> *ui5.plugin.useWrongOverrideLinter*<br/>
-
+See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<br/>
 > To make Unused method, public member, wrong parameter usage and wrong field/method linters ignore some methods or fields, you can use @ui5ignore JSDoc param<br/>
 > ![UI5IgnoreExample](/images/UI5IgnoreExample.png)
 
@@ -136,10 +96,7 @@ JS Linters available:<br/>
 
 ----------
 ## Properties (i18n) Diagnostics
-Properties Diagnostics is provided<br/>
-Properties Linters available:<br/>
-* Unused translations linter<br/>
->Checks if translations are used
+See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<br/>
 
 ----------
 ## Code Action Provider

@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
+import { UI5Plugin } from "../../../../UI5Plugin";
+import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 import { EventHandlerCodeLensGenerator } from "./strategies/EventHandlerCodeLensGenerator";
 import { InternalizationTextCodeLenseGenerator } from "./strategies/InternalizationTextCodeLenseGenerator";
 import { OverridenMethodCodeLensGenerator } from "./strategies/OverridenMethodCodeLensGenerator";
@@ -8,7 +9,7 @@ import { ReferenceCodeLensGenerator } from "./strategies/ReferenceCodeLensGenera
 export class JSCodeLensProvider {
 	static async getCodeLenses(document: vscode.TextDocument) {
 		// setTimeout(() => {
-		UIClassFactory.setNewContentForClassUsingDocument(document);
+		UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
 		const codeLenses: vscode.CodeLens[] = [];
 
 		const aStrategies = [

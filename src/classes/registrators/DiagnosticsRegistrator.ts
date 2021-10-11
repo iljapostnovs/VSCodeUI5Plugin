@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
-import { JSLinter } from "../providers/diagnostics/js/jslinter/JSLinter";
-import { WrongFieldMethodLinter } from "../providers/diagnostics/js/jslinter/parts/WrongFieldMethodLinter";
-import { WrongParametersLinter } from "../providers/diagnostics/js/jslinter/parts/WrongParametersLinter";
-import { PropertiesLinter } from "../providers/diagnostics/properties/PropertiesLinter";
-import { XMLLinter } from "../providers/diagnostics/xml/xmllinter/XMLLinter";
-import { UIClassFactory } from "../UI5Classes/UIClassFactory";
+import { RangeAdapter } from "../adapters/vscode/RangeAdapter";
+import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
+import { VSCodeSeverityAdapter } from "../ui5linter/adapters/VSCodeSeverityAdapter";
+import { JSLinter } from "../ui5linter/js/JSLinter";
+import { PropertiesLinter } from "../ui5linter/properties/PropertiesLinter";
+import { XMLLinter } from "../ui5linter/xml/XMLLinter";
 
 let xmlDiagnosticCollection: vscode.DiagnosticCollection;
 let jsDiagnosticCollection: vscode.DiagnosticCollection;
@@ -15,7 +15,6 @@ export class CustomDiagnostics extends vscode.Diagnostic {
 	fieldName?: string;
 	methodName?: string;
 	attribute?: string;
-	isController?: boolean;
 }
 
 export enum CustomDiagnosticType {
@@ -29,69 +28,38 @@ export class DiagnosticsRegistrator {
 		propertiesDiagnosticCollection = vscode.languages.createDiagnosticCollection("properties");
 
 		if (vscode.window.activeTextEditor) {
-			const fileName = vscode.window.activeTextEditor.document.fileName;
-			if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
-				this._updateXMLDiagnostics(vscode.window.activeTextEditor.document, xmlDiagnosticCollection);
-			}
-
-			if (fileName.endsWith(".js")) {
-				this._updateJSDiagnostics(vscode.window.activeTextEditor.document, jsDiagnosticCollection);
-			}
-
-			if (fileName.endsWith(".properties")) {
-				this._updatePropertiesDiagnostics(vscode.window.activeTextEditor.document, propertiesDiagnosticCollection);
-			}
+			this.updateDiagnosticCollection(vscode.window.activeTextEditor.document);
 		}
 
 		const changeActiveTextEditor = vscode.window.onDidChangeActiveTextEditor(editor => {
 			const fileName = editor?.document.fileName;
 			if (editor && fileName) {
-				if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
-					this._updateXMLDiagnostics(editor.document, xmlDiagnosticCollection);
-				}
-
-				if (fileName.endsWith(".js")) {
-					this._updateJSDiagnostics(editor.document, jsDiagnosticCollection, true);
-				}
-
-				if (fileName.endsWith(".properties")) {
-					this._updatePropertiesDiagnostics(editor.document, propertiesDiagnosticCollection);
-				}
+				this.updateDiagnosticCollection(editor.document, true);
 			}
 		});
 
 		const textDocumentChange = vscode.workspace.onDidChangeTextDocument(event => {
 			if (event.contentChanges.length > 0) {
-				const fileName = event.document.fileName;
-				if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
-					this._updateXMLDiagnostics(event.document, xmlDiagnosticCollection);
-				}
-
-				if (fileName.endsWith(".js")) {
-					this._updateJSDiagnostics(event.document, jsDiagnosticCollection);
-				}
-
-				if (fileName.endsWith(".properties")) {
-					this._updatePropertiesDiagnostics(event.document, propertiesDiagnosticCollection);
-				}
+				DiagnosticsRegistrator.updateDiagnosticCollection(event.document);
 			}
 		});
 
 		UI5Plugin.getInstance().addDisposable(changeActiveTextEditor);
 		UI5Plugin.getInstance().addDisposable(textDocumentChange);
 	}
+
 	private static async _updatePropertiesDiagnostics(document: vscode.TextDocument, propertiesDiagnosticCollection: vscode.DiagnosticCollection) {
-		const errors = await PropertiesLinter.getLintingErrors(document);
+		const errors = new PropertiesLinter().getLintingErrors(new TextDocumentAdapter(document));
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
-			const diagnostic = new CustomDiagnostics(error.range, error.message);
+			const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);
 
 			diagnostic.code = error.code;
 			diagnostic.severity = vscode.DiagnosticSeverity.Hint;
 			diagnostic.type = error.type;
 			diagnostic.source = error.source;
 			diagnostic.tags = error.tags;
-			diagnostic.severity = error.severity !== undefined ? error.severity : vscode.DiagnosticSeverity.Warning;
+			diagnostic.severity = VSCodeSeverityAdapter.toVSCodeSeverity(error.severity);
 
 			return diagnostic;
 		});
@@ -109,11 +77,20 @@ export class DiagnosticsRegistrator {
 		}
 	}
 
-	static updateDiagnosticCollection(document: vscode.TextDocument) {
+	static updateDiagnosticCollection(document: vscode.TextDocument, bForce = false) {
 		const fileName = document.fileName;
 		if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
+			if (document.fileName.endsWith(".fragment.xml")) {
+				UI5Plugin.getInstance().parser.fileReader.setNewFragmentContentToCache(document.getText(), document.fileName);
+			} else if (document.fileName.endsWith(".view.xml")) {
+				UI5Plugin.getInstance().parser.fileReader.setNewViewContentToCache(document.getText(), document.fileName);
+			}
 			this._updateXMLDiagnostics(document, xmlDiagnosticCollection);
 		} else if (fileName.endsWith(".js")) {
+			const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+			if (className) {
+				UI5Plugin.getInstance().parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
+			}
 			this._updateJSDiagnostics(document, jsDiagnosticCollection);
 		} else if (fileName.endsWith(".properties")) {
 			this._updatePropertiesDiagnostics(document, propertiesDiagnosticCollection);
@@ -122,19 +99,16 @@ export class DiagnosticsRegistrator {
 
 	private static _timeoutId: NodeJS.Timeout | null;
 	private static _updateXMLDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
-		const isXMLDiagnosticsEnabled = vscode.workspace.getConfiguration("ui5.plugin").get("xmlDiagnostics");
-
-		if (isXMLDiagnosticsEnabled && !this._timeoutId) {
+		if (!this._timeoutId) {
 			this._timeoutId = setTimeout(() => {
-				const errors = XMLLinter.getLintingErrors(document);
+				const errors = new XMLLinter().getLintingErrors(new TextDocumentAdapter(document));
 
 				const diagnostics: CustomDiagnostics[] = errors.map(error => {
-					const diagnostic = new CustomDiagnostics(error.range, error.message);
+					const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);
 
 					diagnostic.code = error.code;
 					diagnostic.message = error.message;
-					diagnostic.range = error.range;
-					diagnostic.severity = error.severity || vscode.DiagnosticSeverity.Error;
+					diagnostic.severity = VSCodeSeverityAdapter.toVSCodeSeverity(error.severity);
 					diagnostic.source = error.source;
 					diagnostic.relatedInformation = [];
 					diagnostic.tags = error.tags || [];
@@ -149,33 +123,11 @@ export class DiagnosticsRegistrator {
 		}
 	}
 
-	private static async _updateJSDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection, bForce = false) {
-		const isJSDiagnosticsEnabled = vscode.workspace.getConfiguration("ui5.plugin").get("jsDiagnostics");
-
-		if (isJSDiagnosticsEnabled && !this._timeoutId) {
-			const timeout = this._getTimeoutForDocument(document);
-			if (!timeout) {
-				this._timeoutId = setTimeout(() => {/**dummy timeout*/ });
-				await this._updateDiagnosticCollection(document, collection, bForce);
-				this._timeoutId = null;
-			} else {
-				this._timeoutId = setTimeout(async () => {
-					await this._updateDiagnosticCollection(document, collection, bForce);
-					this._timeoutId = null;
-				}, timeout);
-
-			}
-		}
-	}
-
-	private static async _updateDiagnosticCollection(document: vscode.TextDocument, collection: vscode.DiagnosticCollection, bForce = false) {
-		if (bForce) {
-			UIClassFactory.setNewContentForClassUsingDocument(document, true);
-		}
-		const errors = await JSLinter.getLintingErrors(document);
+	private static _updateJSDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+		const errors = new JSLinter().getLintingErrors(new TextDocumentAdapter(document));
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
-			const diagnostic = new CustomDiagnostics(error.range, error.message);
+			const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);
 
 			diagnostic.code = error.code;
 			diagnostic.severity = vscode.DiagnosticSeverity.Hint;
@@ -184,25 +136,12 @@ export class DiagnosticsRegistrator {
 			diagnostic.fieldName = error.fieldName;
 			diagnostic.attribute = error.sourceClassName;
 			diagnostic.source = error.source;
-			diagnostic.isController = error.isController;
 			diagnostic.tags = error.tags;
-			diagnostic.severity = error.severity !== undefined ? error.severity : vscode.DiagnosticSeverity.Warning;
+			diagnostic.severity = VSCodeSeverityAdapter.toVSCodeSeverity(error.severity);
 
 			return diagnostic;
 		});
 
 		collection.set(document.uri, diagnostics);
-	}
-
-	private static _getTimeoutForDocument(document: vscode.TextDocument) {
-		let timeout = 0;
-		const approximateTime = WrongFieldMethodLinter.timePerChar * document.getText().length + WrongParametersLinter.timePerChar * document.getText().length;
-		if (approximateTime < 75) {
-			timeout = 0;
-		} else {
-			timeout = 100;
-		}
-
-		return timeout;
 	}
 }

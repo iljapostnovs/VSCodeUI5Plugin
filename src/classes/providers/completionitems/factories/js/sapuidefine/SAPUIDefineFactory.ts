@@ -1,45 +1,41 @@
+import { SAPNode } from "ui5plugin-parser/dist/classes/librarydata/SAPNode";
+import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
+import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
 import * as vscode from "vscode";
-import { SAPNode } from "../../../../../librarydata/SAPNode";
-import { SAPNodeDAO } from "../../../../../librarydata/SAPNodeDAO";
-import { AcornSyntaxAnalyzer } from "../../../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { UIClassFactory } from "../../../../../UI5Classes/UIClassFactory";
+import { UI5Plugin } from "../../../../../../UI5Plugin";
+import { TextDocumentAdapter } from "../../../../../adapters/vscode/TextDocumentAdapter";
 import { FileWatcherMediator } from "../../../../../utils/FileWatcherMediator";
-import { TextDocumentTransformer } from "../../../../../utils/TextDocumentTransformer";
-import { URLBuilder } from "../../../../../utils/URLBuilder";
 import { GeneratorFactory } from "../../../codegenerators/GeneratorFactory";
 import { CustomCompletionItem } from "../../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../../abstraction/ICompletionItemFactory";
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
+import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
 export class SAPUIDefineFactory implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems = SAPUIDefineFactory.JSDefineCompletionItems;
 
 		if (document && position) {
-			UIClassFactory.setNewContentForClassUsingDocument(document);
+			UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
 			const offset = document.offsetAt(position);
-			const UIClass = TextDocumentTransformer.toCustomUIClass(document);
-			if (UIClass) {
+			const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
+			if (UIClass?.fileContent) {
+				const args = UIClass.fileContent?.body[0]?.expression?.arguments;
+				if (args && args.length === 2) {
+					const UIDefinePaths: string[] = args[0].elements || [];
+					const node = UI5Plugin.getInstance().parser.syntaxAnalyser.findAcornNode(UIDefinePaths, offset);
+					const isString = node?.type === "Literal";
+					if (isString) {
+						completionItems = completionItems.map(completionItem => {
+							const completionItemWOQuotes = new CustomCompletionItem(completionItem.label);
+							completionItemWOQuotes.kind = completionItem.kind;
+							completionItemWOQuotes.className = completionItem.className;
+							completionItemWOQuotes.insertText = (<any>completionItem.insertText).substring(1, (<any>completionItem.insertText).length - 1);
+							completionItemWOQuotes.documentation = completionItem.documentation;
+							completionItemWOQuotes.command = completionItem.command;
 
-				if (UIClass.fileContent) {
-					const args = UIClass.fileContent?.body[0]?.expression?.arguments;
-					if (args && args.length === 2) {
-						const UIDefinePaths: string[] = args[0].elements || [];
-						const node = AcornSyntaxAnalyzer.findAcornNode(UIDefinePaths, offset);
-						const isString = node?.type === "Literal";
-						if (isString) {
-							completionItems = completionItems.map(completionItem => {
-								const completionItemWOQuotes = new CustomCompletionItem(completionItem.label);
-								completionItemWOQuotes.kind = completionItem.kind;
-								completionItemWOQuotes.className = completionItem.className;
-								completionItemWOQuotes.insertText = (<any>completionItem.insertText).substring(1, (<any>completionItem.insertText).length - 1);
-								completionItemWOQuotes.documentation = completionItem.documentation;
-								completionItemWOQuotes.command = completionItem.command;
-
-								return completionItemWOQuotes;
-							});
-						}
+							return completionItemWOQuotes;
+						});
 					}
-
 				}
 			}
 		}

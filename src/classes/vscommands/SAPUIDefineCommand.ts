@@ -1,7 +1,8 @@
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import * as vscode from "vscode";
-import { UIClassFactory } from "../UI5Classes/UIClassFactory";
-import { AcornSyntaxAnalyzer } from "../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { CustomUIClass } from "../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UI5Plugin } from "../../UI5Plugin";
+import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
+import { VSCodeFileReader } from "../utils/VSCodeFileReader";
 import { PascalCaseStrategy } from "./i18ncommand/strategies/PascalCaseStrategy";
 export class SAPUIDefineCommand {
 	static insertUIDefine() {
@@ -9,11 +10,11 @@ export class SAPUIDefineCommand {
 
 		if (editor) {
 			const document = editor.document;
-			const currentClassName = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			const currentClassName = VSCodeFileReader.getClassNameOfTheCurrentDocument();
 
 			if (currentClassName) {
-				UIClassFactory.setNewContentForClassUsingDocument(document);
-				const UIClass = <CustomUIClass>UIClassFactory.getUIClass(currentClassName);
+				UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
+				const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName);
 				if (UIClass.fileContent) {
 					const mainFunction = UIClass.fileContent?.body[0]?.expression;
 					const definePaths: string[] = mainFunction?.arguments[0]?.elements?.map((element: any) => element.value);

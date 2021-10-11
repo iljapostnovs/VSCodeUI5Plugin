@@ -1,7 +1,7 @@
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 import * as vscode from "vscode";
+import { HTTPHandler } from "ui5plugin-parser/dist/classes/utils/HTTPHandler";
 import { IEntityType, IAssociation, XMLMetadata, IProperty } from "./parser/XMLMetadata";
-import { HTTPHandler } from "../../../utils/HTTPHandler";
 
 export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 	getFileExtension() {
@@ -14,8 +14,8 @@ export class PlantUMLDiagramGeneratorERFromMetadata extends DiagramGenerator {
 		try {
 			const XMLData = await this._getCurrentXMLData();
 			diagram = this._buildPlantUMLDiagram(XMLData);
-		} catch (error: any) {
-			vscode.window.showErrorMessage(`Error in metadata parsing. Details: ${JSON.stringify(error.message || error)}`);
+		} catch (error) {
+			vscode.window.showErrorMessage(`Error in metadata parsing. Details: ${JSON.stringify((<any>error).message || error)}`);
 		}
 
 		return diagram;

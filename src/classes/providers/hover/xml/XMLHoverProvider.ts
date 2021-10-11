@@ -1,10 +1,11 @@
+import { XMLParser } from "ui5plugin-parser";
+import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
+import { StandardUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/StandardUIClass";
+import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
+import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
 import * as vscode from "vscode";
-import { SAPNodeDAO } from "../../../librarydata/SAPNodeDAO";
-import { StandardUIClass } from "../../../UI5Classes/UI5Parser/UIClass/StandardUIClass";
-import { UIClassFactory } from "../../../UI5Classes/UIClassFactory";
-import { TextDocumentTransformer } from "../../../utils/TextDocumentTransformer";
-import { URLBuilder } from "../../../utils/URLBuilder";
-import { XMLParser } from "../../../utils/XMLParser";
+import { UI5Plugin } from "../../../../UI5Plugin";
+import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 
 export class XMLHoverProvider {
 	static getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
@@ -13,7 +14,7 @@ export class XMLHoverProvider {
 		const offset = document.offsetAt(position);
 		let hover: vscode.Hover | undefined;
 
-		const XMLFile = TextDocumentTransformer.toXMLFile(document);
+		const XMLFile = TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
 		if (XMLFile) {
 			const allTags = XMLParser.getAllTags(XMLFile);
 			const tag = allTags.find(tag => tag.positionBegin < offset && tag.positionEnd >= offset);
@@ -45,7 +46,7 @@ export class XMLHoverProvider {
 						//is class
 						const markdownString = new vscode.MarkdownString();
 						markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
-						const UIClass = UIClassFactory.getUIClass(classOfTheTag);
+						const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(classOfTheTag);
 						const node = new SAPNodeDAO().findNode(UIClass.className);
 						let classDescription = node?.getMetadata()?.getRawMetadata()?.description || "";
 						classDescription = StandardUIClass.removeTags(classDescription);
@@ -89,7 +90,7 @@ export class XMLHoverProvider {
 
 	private static _getTextIfItIsFieldOrMethodOfClass(className: string, attributeName: string) {
 		let text = "";
-		const UIClass = UIClassFactory.getUIClass(className);
+		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 		const aggregation = UIClass.aggregations.find(aggregation => aggregation.name === attributeName);
 		const event = UIClass.events.find(event => event.name === attributeName);
 		const property = UIClass.properties.find(property => property.name === attributeName);

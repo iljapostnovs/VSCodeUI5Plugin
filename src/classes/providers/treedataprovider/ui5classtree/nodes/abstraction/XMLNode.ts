@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
-import { IXMLFile } from "../../../../../utils/FileReader";
 import { Node } from "./Node";
 import { RangeAdapter } from "../../../../../adapters/vscode/RangeAdapter";
-import { IHierarchicalTag } from "../../../../../utils/XMLParser";
+import { IXMLFile } from "ui5plugin-parser/dist/classes/utils/FileReader";
+import { IHierarchicalTag } from "ui5plugin-parser/dist/classes/utils/XMLParser";
 
 export abstract class XMLNode extends Node {
 	readonly tag: IHierarchicalTag;

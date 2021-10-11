@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { ICustomClassUIMethod, CustomUIClass } from "../../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UIClassFactory } from "../../../../../../../../UI5Classes/UIClassFactory";
 import { ReferenceCodeLensGenerator } from "../../../../../../../codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 import { Node } from "../../../../abstraction/Node";
 import { RangeAdapter } from "../../../../../../../../adapters/vscode/RangeAdapter";
+import { ICustomClassUIMethod, CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UI5Plugin } from "../../../../../../../../../UI5Plugin";
 
 
 export class MethodReferencesNode extends Node {
@@ -12,7 +12,7 @@ export class MethodReferencesNode extends Node {
 		super();
 		this.UIMethod = UIMethod;
 
-		const UIClass = UIClassFactory.getUIClass(UIMethod.owner);
+		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(UIMethod.owner);
 		if (UIClass instanceof CustomUIClass) {
 			const referenceCodeLens = new ReferenceCodeLensGenerator();
 			const locations = referenceCodeLens.getReferenceLocations(UIMethod);

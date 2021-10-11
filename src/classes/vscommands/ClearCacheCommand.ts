@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { FileReader } from "../utils/FileReader";
 import { UI5Plugin } from "../../UI5Plugin";
 
 export class ClearCacheCommand {
@@ -27,7 +26,7 @@ export class ClearCacheCommand {
 	}
 
 	static clearCache() {
-		FileReader.clearCache();
+		UI5Plugin.getInstance().parser.fileReader.clearCache();
 
 		ClearCacheCommand.reloadWindow();
 	}

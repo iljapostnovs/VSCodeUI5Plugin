@@ -1,4 +1,3 @@
-import { AbstractUIClass, IUIField, IUIMethod } from "../../../UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { Property } from "./drawiouml/Property";
 import { Method } from "./drawiouml/Method";
 import { Field } from "./drawiouml/Field";
@@ -7,8 +6,9 @@ import { Header } from "./drawiouml/Header";
 import { Footer } from "./drawiouml/Footer";
 import { Separator } from "./drawiouml/Separator";
 import { ITextLengthGettable } from "./drawiouml/interfaces/ITextLengthGettable";
-import { AcornSyntaxAnalyzer } from "../../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { CustomUIClass } from "../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { AbstractUIClass, IUIField, IUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UI5Plugin } from "../../../../UI5Plugin";
 
 export class DrawIOUMLDiagram {
 	readonly UIClass: AbstractUIClass;
@@ -25,13 +25,13 @@ export class DrawIOUMLDiagram {
 		try {
 			this.UIClass.fields.forEach(field => {
 				if (!field.type) {
-					AcornSyntaxAnalyzer.findFieldType(field, this.UIClass.className, true, true);
+					UI5Plugin.getInstance().parser.syntaxAnalyser.findFieldType(field, this.UIClass.className, true, true);
 				}
 			});
 
 			this.UIClass.methods.forEach(method => {
 				if (method.returnType === "void") {
-					AcornSyntaxAnalyzer.findMethodReturnType(method, this.UIClass.className, true, true);
+					UI5Plugin.getInstance().parser.syntaxAnalyser.findMethodReturnType(method, this.UIClass.className, true, true);
 				}
 			});
 		} catch (error) {
@@ -133,11 +133,11 @@ export class DrawIOUMLDiagram {
 
 		const separator = new Separator(this.classHead, fields.length + properties.length);
 
-		return 	this.classHead.generateXML() +
-				properties.map(property => property.generateXML()).join("") +
-				fields.map(field => field.generateXML()).join("") +
-				separator.generateXML() +
-				methods.map(method => method.generateXML()).join("");
+		return this.classHead.generateXML() +
+			properties.map(property => property.generateXML()).join("") +
+			fields.map(field => field.generateXML()).join("") +
+			separator.generateXML() +
+			methods.map(method => method.generateXML()).join("");
 	}
 
 	getLongestTextLength(items: ITextLengthGettable[]) {

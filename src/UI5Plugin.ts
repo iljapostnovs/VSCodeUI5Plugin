@@ -9,9 +9,10 @@ import { CodeLensRegistrator } from "./classes/registrators/CodeLensRegistrator"
 import { JSCodeActionRegistrator } from "./classes/registrators/CodeActionRegistrator";
 import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
 import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
-import { FileReader } from "./classes/utils/FileReader";
 import { JSRenameRegistrator } from "./classes/registrators/RenameRegistreator";
 import { TreeDataProviderRegistrator } from "./classes/registrators/TreeDataProviderRegistrator";
+import { UI5Parser, WorkspaceFolder } from "ui5plugin-parser";
+import { VSCodeParserConfigHandler } from "./classes/ui5parser/VSCodeParserConfigHandler";
 export class UI5Plugin {
 	private static _instance?: UI5Plugin;
 	public static pWhenPluginInitialized: Promise<void> | undefined;
@@ -29,35 +30,33 @@ export class UI5Plugin {
 		increment?: number | undefined;
 	}>;
 
+	public parser!: UI5Parser;
+
 	public addDisposable(disposable: vscode.Disposable) {
 		this.context?.subscriptions.push(disposable);
 	}
 	public initialize(context: vscode.ExtensionContext) {
 		UI5Plugin.pWhenPluginInitialized = new Promise<void>((resolve, reject) => {
-			this.context = context;
-			vscode.window.withProgress({
-				location: vscode.ProgressLocation.Window,
-				title: "Loading Libs",
-				cancellable: false
-			}, async progress => {
-				this.initializationProgress = progress;
-
-				try {
-					await this._registerProviders();
-					resolve();
-				} catch (error: any) {
-					console.error(error);
-					reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
-				}
+			this._initialize(context).then(resolve).catch((error: any) => {
+				console.error(error);
+				reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
 			});
 		});
 
 		return UI5Plugin.pWhenPluginInitialized;
 	}
-	private async _registerProviders() {
+	private async _initialize(context: vscode.ExtensionContext) {
+		const globalStoragePath = context.globalStorageUri.fsPath;
+		const workspaceFolders = vscode.workspace.workspaceFolders?.map(wsFolder => {
+			return new WorkspaceFolder(wsFolder.uri.fsPath);
+		})
+		const parser = UI5Parser.getInstance({
+			configHandler: new VSCodeParserConfigHandler()
+		});
+		await parser.initialize(workspaceFolders, globalStoragePath);
 		CommandRegistrator.register(false);
+		this.parser = UI5Parser.getInstance();
 		await CompletionItemRegistrator.register();
-		await FileReader.readAllFiles();
 		FileWatcherMediator.register();
 		CommandRegistrator.register(true);
 		DefinitionProviderRegistrator.register();

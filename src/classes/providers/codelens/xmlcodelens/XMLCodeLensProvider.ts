@@ -1,6 +1,7 @@
+import { ResourceModelData } from "ui5plugin-parser/dist/classes/UI5Classes/ResourceModelData";
 import * as vscode from "vscode";
-import { ResourceModelData } from "../../../UI5Classes/ResourceModelData";
-import { FileReader } from "../../../utils/FileReader";
+import { UI5Plugin } from "../../../../UI5Plugin";
+import { VSCodeFileReader } from "../../../utils/VSCodeFileReader";
 
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -10,7 +11,7 @@ export class XMLCodeLensProvider {
 	static getCodeLenses(document: vscode.TextDocument) {
 		const codeLenses: vscode.CodeLens[] = [];
 
-		const componentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
+		const componentName = VSCodeFileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
 		if (componentName) {
 			const currentResourceModelTexts = ResourceModelData.resourceModels[componentName];
 			const XMLText = document.getText();
@@ -45,13 +46,13 @@ export class XMLCodeLensProvider {
 	}
 
 	static goToResourceModel(textId: string) {
-		const manifest = FileReader.getCurrentWorkspaceFoldersManifest();
+		const manifest = VSCodeFileReader.getCurrentWorkspaceFoldersManifest();
 		if (manifest) {
-			const resourceModelText = FileReader.readResourceModelFile(manifest);
+			const resourceModelText = UI5Plugin.getInstance().parser.fileReader.readResourceModelFile(manifest);
 			const rTextPosition = new RegExp(`(?<=${escapeRegExp(textId)}\\s?=).*`);
 			const result = rTextPosition.exec(resourceModelText);
 			if (result) {
-				const resourceModelFSPath = FileReader.getResourceModelUriForManifest(manifest);
+				const resourceModelFSPath = UI5Plugin.getInstance().parser.fileReader.getResourceModelUriForManifest(manifest);
 
 				const uri = vscode.Uri.file(resourceModelFSPath);
 				vscode.window.showTextDocument(uri)

@@ -1,20 +1,20 @@
-import { AcornSyntaxAnalyzer } from "../../UI5Classes/JSParser/AcornSyntaxAnalyzer";
-import { UIClassFactory } from "../../UI5Classes/UIClassFactory";
 import { DrawIOUMLDiagram } from "./drawiogenerator/DrawIOUMLDiagram";
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 const fileSeparator = path.sep;
 import { UMLGeneratorFactory } from "./UMLGeneratorFactory";
+import { UI5Plugin } from "../../../UI5Plugin";
+import { VSCodeFileReader } from "../../utils/VSCodeFileReader";
 
 export class UMLGeneratorCommand {
 	static generateUMLForCurrentClass() {
 		const activeFileUri = vscode.window.activeTextEditor?.document.uri;
 		const wsFolder = UMLGeneratorCommand._getWorkspaceFolderOfActiveTextEditor();
 		if (activeFileUri && wsFolder) {
-			const className = AcornSyntaxAnalyzer.getClassNameOfTheCurrentDocument();
+			const className = VSCodeFileReader.getClassNameOfTheCurrentDocument();
 			if (className) {
-				const UIClass = UIClassFactory.getUIClass(className);
+				const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 				const UMLClassDiagram = new DrawIOUMLDiagram(UIClass);
 				const diagramXML = UMLClassDiagram.generateUMLClassDiagram();
 

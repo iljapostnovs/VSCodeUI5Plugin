@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { ResourceModelData } from "../../../../UI5Classes/ResourceModelData";
-import { FileReader } from "../../../../utils/FileReader";
+import { UI5Plugin } from "../../../../../UI5Plugin";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
+import { ResourceModelData } from "ui5plugin-parser/dist/classes/UI5Classes/ResourceModelData";
 
 export class InternalizationTextCodeLenseGenerator extends CodeLensGenerator {
 	getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
@@ -11,7 +11,8 @@ export class InternalizationTextCodeLenseGenerator extends CodeLensGenerator {
 	private _generateInternalizationCodeLenses(document: vscode.TextDocument) {
 		const codeLenses: vscode.CodeLens[] = [];
 
-		const componentName = FileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
+		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+		const componentName = className && UI5Plugin.getInstance().parser.fileReader.getManifestForClass(className)?.componentName;
 		if (componentName && document) {
 			const currentResourceModelTexts = ResourceModelData.resourceModels[componentName];
 			const XMLText = document.getText();

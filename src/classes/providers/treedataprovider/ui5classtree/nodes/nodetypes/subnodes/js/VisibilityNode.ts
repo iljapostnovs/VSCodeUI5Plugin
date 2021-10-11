@@ -1,5 +1,5 @@
+import { ICustomClassUIMethod, ICustomClassUIField } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import * as vscode from "vscode";
-import { ICustomClassUIMethod, ICustomClassUIField } from "../../../../../../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { Node } from "../../../abstraction/Node";
 
 

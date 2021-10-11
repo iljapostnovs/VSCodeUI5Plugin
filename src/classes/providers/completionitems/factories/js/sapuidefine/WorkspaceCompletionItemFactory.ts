@@ -2,9 +2,9 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import glob = require("glob");
-import { FileReader } from "../../../../../utils/FileReader";
 import { CustomCompletionItem } from "../../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../../abstraction/ICompletionItemFactory";
+import { UI5Plugin } from "../../../../../../UI5Plugin";
 const escapedFileSeparator = "\\" + path.sep;
 const workspace = vscode.workspace;
 
@@ -24,7 +24,7 @@ class UIDefineJSFile {
 export class WorkspaceCompletionItemFactory implements ICompletionItemFactory {
 	static async synchronizeCreate(completionItems: CustomCompletionItem[], textDocument: vscode.Uri) {
 		const fileFsPath = textDocument.fsPath;
-		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
+		const defineString = (UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
 		if (defineString) {
 			const newCompletionItem = WorkspaceCompletionItemFactory._generateCompletionItem(
 				new UIDefineJSFile({
@@ -39,7 +39,7 @@ export class WorkspaceCompletionItemFactory implements ICompletionItemFactory {
 
 	static async synchronizeDelete(completionItems: CustomCompletionItem[], textDocument: vscode.Uri) {
 		const fileFsPath = textDocument.fsPath;
-		const defineString = (FileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
+		const defineString = (UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
 		if (defineString) {
 			const deletedCompletionItem = completionItems.find(completionItem => (completionItem.label as string).substring(1, (completionItem.label as string).length - 1) === defineString);
 			if (deletedCompletionItem) {
@@ -65,7 +65,7 @@ export class WorkspaceCompletionItemFactory implements ICompletionItemFactory {
 		const wsFolders = workspace.workspaceFolders || [];
 		const separator = path.sep;
 		for (const wsFolder of wsFolders) {
-			const manifests: any = FileReader.getManifestFSPathsInWorkspaceFolder(wsFolder);
+			const manifests: any = UI5Plugin.getInstance().parser.fileReader.getManifestFSPathsInWorkspaceFolder({ fsPath: wsFolder.uri.fsPath });
 
 			for (const manifest of manifests) {
 				const manifestPath = path.normalize(manifest.fsPath);

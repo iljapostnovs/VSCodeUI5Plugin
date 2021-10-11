@@ -1,11 +1,11 @@
+import { CustomUIClass, ICustomClassUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
 import * as vscode from "vscode";
-import { ICustomClassUIMethod, CustomUIClass } from "../../UI5Classes/UI5Parser/UIClass/CustomUIClass";
-
-import { TextDocumentTransformer } from "../../utils/TextDocumentTransformer";
+import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";
 export class ReusableMethods {
 	static getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
 		let position: vscode.Position | undefined;
-		const UIClass = TextDocumentTransformer.toCustomUIClass(document);
+		const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
 		if (UIClass) {
 			const mainFunction = UIClass.fileContent?.body[0]?.expression;
 			const definePaths: any[] = mainFunction?.arguments[0]?.elements;
