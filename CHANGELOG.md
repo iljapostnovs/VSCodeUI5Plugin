@@ -1,3 +1,6 @@
+## 0.14.2 (12-10-2021)
+* Update parser
+
 ## 0.14.1 (12-10-2021)
 * Update dependencies
 
