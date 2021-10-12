@@ -1,3 +1,9 @@
+## 0.14.1 (12-10-2021)
+* Update dependencies
+
+## 0.14.0 (12-10-2021)
+* Migrating to ui5plugin-linter and ui5plugin-parser
+
 ## 0.12.77 (04-10-2021)
 * Minor bugfixes
 
