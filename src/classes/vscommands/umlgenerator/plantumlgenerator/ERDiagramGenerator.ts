@@ -1,7 +1,7 @@
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 import * as vscode from "vscode";
-import { HTTPHandler } from "ui5plugin-parser/dist/classes/utils/HTTPHandler";
-import { IEntityType, IAssociation, XMLMetadataParser, IProperty } from "../../../utils/XMLMetadataParser";
+import { IEntityType, IAssociation, XMLMetadataParser, IProperty } from "../../../utils/xmlmetadata/XMLMetadataParser";
+import { XMLSourcePrompt } from "../../../utils/xmlmetadata/XMLSourcePrompt";
 
 export class ERDiagramGenerator extends DiagramGenerator {
 	getFileExtension() {
@@ -12,50 +12,15 @@ export class ERDiagramGenerator extends DiagramGenerator {
 		let diagram = "";
 
 		try {
-			const XMLData = await this._getCurrentXMLData();
-			diagram = this._buildPlantUMLDiagram(XMLData);
+			const xmlSourcePrompt = new XMLSourcePrompt();
+			const XMLData = await xmlSourcePrompt.getXMLMetadataText();
+			const metadata = new XMLMetadataParser(XMLData);
+			diagram = this._buildPlantUMLDiagram(metadata);
 		} catch (error) {
 			vscode.window.showErrorMessage(`Error in metadata parsing. Details: ${JSON.stringify((<any>error).message || error)}`);
 		}
 
 		return diagram;
-	}
-
-	private async _getCurrentXMLData() {
-		const xmlText = await this._getXMLMetadataText();
-
-		const metadata = new XMLMetadataParser(xmlText);
-		return metadata;
-	}
-
-	private async _getXMLMetadataText() {
-		let XMLMetadata = "";
-		const activeDocument = vscode.window.activeTextEditor?.document;
-		if (activeDocument && activeDocument.fileName.endsWith("metadata.xml")) {
-			XMLMetadata = activeDocument.getText();
-		} else {
-			const uri = await vscode.window.showInputBox({
-				prompt: "Please define url to metadata"
-			});
-			const username = await vscode.window.showInputBox({
-				prompt: "Please enter username"
-			});
-			const password = await vscode.window.showInputBox({
-				prompt: "Please enter password",
-				password: true
-			});
-
-			if (uri && username && password) {
-				XMLMetadata = await HTTPHandler.get(uri, {
-					auth: {
-						username: username,
-						password: password
-					}
-				});
-			}
-		}
-
-		return XMLMetadata;
 	}
 
 	private _buildPlantUMLDiagram(XMLData: XMLMetadataParser) {

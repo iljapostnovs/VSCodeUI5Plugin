@@ -4,6 +4,7 @@ import * as XMLParser from "fast-xml-parser";
 export interface IProperty {
 	name: string,
 	type: string,
+	label?: string;
 	length?: string,
 	precision?: string,
 	scale?: string
@@ -93,7 +94,8 @@ export class XMLMetadataParser {
 					type: property["@_Type"].replace(`${namespace}.`, ""),
 					length: property["@_MaxLength"],
 					precision: property["@_Precision"],
-					scale: property["@_Scale"]
+					scale: property["@_Scale"],
+					label: property["@_sap:label"]
 				}
 			}) || [];
 			properties = properties.sort((a, b) => {

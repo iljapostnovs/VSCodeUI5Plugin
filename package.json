@@ -234,6 +234,10 @@
 				}
 			},
 			{
+				"command": "ui5plugin.generateJSTypeDefDocFromMetadata",
+				"title": "UI5: Generate JS typedef JSDoc from metadata"
+			},
+			{
 				"command": "ui5plugin.moveDefineToFunctionParameters",
 				"title": "UI5: Move sap.ui.define to parameters"
 			},

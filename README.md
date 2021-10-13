@@ -207,6 +207,12 @@ It is possible to select in preferences which type of diagram to generate: DrawI
 >![ERDiagram.png](/images/ERDiagram.png)
 
 ----------
+## JSDoc typedef generation from metadata
+There is a possibility to generate typedef JSDocs from metadata
+>![GenerateJSDocTypedef.gif](/images/GenerateJSDocTypedef.gif)
+
+
+----------
 ## Hotkeys
 | Hotkey        | Command                                  |
 |:-------------:| -------------                            |

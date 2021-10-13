@@ -1,5 +1,5 @@
-## 0.14.2 (13-10-2021)
-* Refactoring
+## 0.14.3 (14-10-2021)
+* New command introduced: "UI5: Generate JS typedef JSDoc from metadata". Now you can generate typedef JSDoc from metadata.
 
 ## 0.14.2 (12-10-2021)
 * Update parser
