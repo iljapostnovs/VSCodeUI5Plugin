@@ -66,7 +66,7 @@ export class SAPUIDefineCommand {
 		}
 	}
 
-	public static getIndexOfParenthesesBegin(indexOfTheFunctionBegin: number) {
+	private static getIndexOfParenthesesBegin(indexOfTheFunctionBegin: number) {
 		let index = 0;
 		const documentText = vscode.window.activeTextEditor?.document.getText();
 		if (documentText) {

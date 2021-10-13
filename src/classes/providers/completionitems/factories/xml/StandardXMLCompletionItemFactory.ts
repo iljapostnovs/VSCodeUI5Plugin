@@ -4,7 +4,6 @@ import { AbstractUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Par
 import { StandardUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../../../UI5Plugin";
 import { IAggregationGenerator } from "../../codegenerators/aggregation/interfaces/IAggregationGenerator";
 import { SAPClassAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
 import { SAPNodeAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
@@ -28,16 +27,11 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 	}
 
 	async generateAggregationPropertyCompletionItems() {
-		const availableProgressLeft = 50;
 		let completionItems: CustomCompletionItem[] = [];
 		const SAPNodes = this._nodeDAO.getAllNodesSync();
 
 		// console.time("Generating completion items");
 		for (const node of SAPNodes) {
-			UI5Plugin.getInstance().initializationProgress?.report({
-				message: "Generating Completion Items: " + node.getDisplayName(),
-				increment: availableProgressLeft / SAPNodes.length
-			});
 			completionItems = completionItems.concat(this._generateClassCompletionItemsRecursively(node));
 		}
 		// console.timeEnd("Generating completion items");
