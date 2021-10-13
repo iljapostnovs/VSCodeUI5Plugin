@@ -20,7 +20,7 @@ export class JSHoverProvider {
 
 			const className = strategy.acornGetClassName(currentClassName, offset) || "";
 			const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
-			const text = fieldsAndMethods?.className && this._getTextIfItIsFieldOrMethodOfClass(fieldsAndMethods.className, word);
+			const text = fieldsAndMethods?.className && this._getTextIfItIsMemberOfClass(fieldsAndMethods.className, word);
 			if (fieldsAndMethods && text) {
 				const textBefore = className === currentClassName ? "this." : `${fieldsAndMethods.className}.`;
 				const markdownString = this._getMarkdownFromText(textBefore + text);
@@ -59,7 +59,7 @@ export class JSHoverProvider {
 		return markdownString;
 	}
 
-	private static _getTextIfItIsFieldOrMethodOfClass(className: string, fieldOrMethodName: string) {
+	private static _getTextIfItIsMemberOfClass(className: string, fieldOrMethodName: string) {
 		let text = "";
 
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);

@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { PlantUMLDiagramGeneratorERFromMetadata } from "./plantumlgenerator/PlantUMLDiagramGeneratorERFromMetadata";
+import { ERDiagramGenerator } from "./plantumlgenerator/ERDiagramGenerator";
 import * as fs from "fs";
 import * as path from "path";
 const fileSeparator = path.sep;
 export class GenerateERDiagramCommand {
 	static async generateERDiagram() {
-		const generator = new PlantUMLDiagramGeneratorERFromMetadata();
-		const diagram = await generator.generateUMLClassDiagrams();
+		const generator = new ERDiagramGenerator();
+		const diagram = await generator.generate();
 		const document = vscode.window.activeTextEditor?.document;
 		const workspace = document && vscode.workspace.getWorkspaceFolder(document.uri);
 		if (workspace && diagram) {

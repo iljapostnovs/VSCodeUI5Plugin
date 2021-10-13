@@ -44,7 +44,7 @@ export class UMLGeneratorCommand {
 		const wsFolders = vscode.workspace.workspaceFolders || [];
 		for (const wsFolder of wsFolders) {
 			const generator = UMLGeneratorFactory.createUMLGenerator();
-			const diagram = await generator.generateUMLClassDiagrams(wsFolder);
+			const diagram = await generator.generate(wsFolder);
 			const path = `${wsFolder.uri.fsPath}${fileSeparator}ProjectUML${generator.getFileExtension()}`;
 			fs.writeFileSync(path, diagram, {
 				encoding: "utf8"

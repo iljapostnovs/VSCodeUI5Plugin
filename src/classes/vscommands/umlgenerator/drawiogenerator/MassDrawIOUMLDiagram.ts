@@ -28,7 +28,7 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 	getFileExtension() {
 		return ".drawio"
 	}
-	generateUMLClassDiagrams(wsFolder: vscode.WorkspaceFolder): Promise<string> {
+	generate(wsFolder: vscode.WorkspaceFolder): Promise<string> {
 		return new Promise(resolve => {
 
 			const header = new Header();

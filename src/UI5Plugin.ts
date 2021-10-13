@@ -25,10 +25,6 @@ export class UI5Plugin {
 	}
 
 	public context?: vscode.ExtensionContext;
-	public initializationProgress?: vscode.Progress<{
-		message?: string | undefined;
-		increment?: number | undefined;
-	}>;
 
 	public parser!: UI5Parser;
 
@@ -37,9 +33,28 @@ export class UI5Plugin {
 	}
 	public initialize(context: vscode.ExtensionContext) {
 		UI5Plugin.pWhenPluginInitialized = new Promise<void>((resolve, reject) => {
-			this._initialize(context).then(resolve).catch((error: any) => {
-				console.error(error);
-				reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
+			vscode.window.withProgress({
+				location: vscode.ProgressLocation.Window,
+				title: "UI5Plugin",
+				cancellable: false
+			}, async progress => {
+				progress.report({
+					message: "Initializing...",
+					increment: 0
+				});
+				await this._initialize(context).then(() => {
+					progress.report({
+						message: "Initializing...",
+						increment: 100
+					});
+					resolve();
+				}).catch((error: any) => {
+					progress.report({
+						increment: 100
+					});
+					console.error(error);
+					reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
+				});
 			});
 		});
 
