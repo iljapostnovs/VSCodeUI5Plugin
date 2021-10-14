@@ -1,4 +1,7 @@
 ## 0.14.4 (14-10-2021)
+* Fix for reference linter
+
+## 0.14.4 (14-10-2021)
 * Fix parsing of byId method
 
 ## 0.14.3 (14-10-2021)
