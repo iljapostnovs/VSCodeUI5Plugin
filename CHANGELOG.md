@@ -1,4 +1,7 @@
-## 0.14.4 (14-10-2021)
+## 0.14.6 (14-10-2021)
+* Update linter, now it checks for deprecated members
+
+## 0.14.5 (14-10-2021)
 * Fix for reference linter
 
 ## 0.14.4 (14-10-2021)
