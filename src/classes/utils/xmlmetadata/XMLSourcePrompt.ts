@@ -21,7 +21,7 @@ export class XMLSourcePrompt {
 			});
 
 			if (uri) {
-				const config: AxiosRequestConfig<any> = {};
+				const config: AxiosRequestConfig = {};
 				if (username && password) {
 					config.auth = { username, password };
 				}

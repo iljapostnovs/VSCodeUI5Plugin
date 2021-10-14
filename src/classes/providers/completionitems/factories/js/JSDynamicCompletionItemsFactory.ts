@@ -21,6 +21,11 @@ export class JSDynamicCompletionItemsFactory implements ICompletionItemFactory {
 			fieldsAndMethods = new ParentMethodStrategy().getFieldsAndMethods(new TextDocumentAdapter(document), document.offsetAt(position));
 		}
 
+		if (fieldsAndMethods) {
+			fieldsAndMethods.fields = fieldsAndMethods.fields.filter(field => !field.deprecated);
+			fieldsAndMethods.methods = fieldsAndMethods.methods.filter(method => !method.deprecated);
+		}
+
 		const interfaceFieldsAndMethods = new InterfaceMemberStrategy().getFieldsAndMethods(new TextDocumentAdapter(document), document.offsetAt(position));
 
 		if (fieldsAndMethods) {
