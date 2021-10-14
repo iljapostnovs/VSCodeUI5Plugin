@@ -1,3 +1,6 @@
+## 0.14.4 (14-10-2021)
+* Fix parsing of byId method
+
 ## 0.14.3 (14-10-2021)
 * New command introduced: "UI5: Generate JS typedef JSDoc from metadata". Now you can generate typedef JSDoc from metadata.
 
