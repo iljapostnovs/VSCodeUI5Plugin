@@ -21,7 +21,8 @@ export class ViewIdCompletionItemFactory implements ICompletionItemFactory {
 				const positionStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
 				const classNameAtById = positionStrategy.getClassNameOfTheVariableAtPosition(currentClassName, nodes[0].callee?.property?.start);
 				const isControl = classNameAtById && UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(classNameAtById, "sap.ui.core.Control");
-				if (isControl) {
+				const isController = classNameAtById && UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(classNameAtById, "sap.ui.core.mvc.Controller");
+				if (isControl || isController) {
 					const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName);
 					const viewsAndFragments = UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
 					const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
