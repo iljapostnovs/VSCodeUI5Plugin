@@ -1,3 +1,6 @@
+## 0.14.7 (15-10-2021)
+* Update linter, now deprecation linter honors exceptions
+
 ## 0.14.6 (14-10-2021)
 * Update linter, now it checks for deprecated members
 
