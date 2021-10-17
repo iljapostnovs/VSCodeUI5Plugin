@@ -1,3 +1,6 @@
+## 0.14.7 (17-10-2021)
+* Update linter and parser
+
 ## 0.14.7 (15-10-2021)
 * Update linter, now deprecation linter honors exceptions
 
