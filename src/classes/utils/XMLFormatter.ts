@@ -98,7 +98,7 @@ export class XMLFormatter {
 			const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
 			const attributeValueIndentation = tagAttributes.length === 1 ? indentation : indentation + "\t";
 			const formattedAttributeValue = this._formatAttributeValue(tagData.attributeValue, attributeValueIndentation);
-			accumulator += `${indentation}\t${tagData.attributeName}="${formattedAttributeValue}"\n`;
+			accumulator += `${indentation}\t${tagData.attributeName}=${formattedAttributeValue}\n`;
 			if (tagAttributes.length === 1) {
 				accumulator = ` ${accumulator.trimLeft()}`;
 			}
@@ -117,50 +117,55 @@ export class XMLFormatter {
 	}
 
 	private static _formatAttributeValue(attributeValue: string, indentation: string) {
-		let i = 0;
 		let formattedValue = "";
-		while (i < attributeValue.length) {
-			const currentChar = attributeValue[i];
-			if (this._charIsInString(i, attributeValue)) {
-				formattedValue += currentChar;
-			} else if (currentChar === "(") {
-				const nextChar = attributeValue[i + 1];
-				if (nextChar !== "{") {
-					indentation += "\t";
-				}
-				const nextLine = nextChar === "(" ? `\n${indentation}\t` : "";
-				formattedValue += `${currentChar}${nextLine}`;
-			} else if (currentChar === ")") {
-				const lastFormattedValueChar = formattedValue[formattedValue.length - 1];
-				indentation = indentation.substring(0, indentation.length - 1);
-				const nextChar = attributeValue[i + 1];
-				const nextLine = !["\n", "\r", " ", undefined].includes(nextChar) ? `\n${indentation}\t` : "";
-				formattedValue = lastFormattedValueChar === "\t" ? formattedValue.substring(0, formattedValue.length - 1) : formattedValue;
-				formattedValue += `${currentChar}${nextLine}`;
-			} else if (currentChar === "{") {
-				const positionEnd = this._getPositionOfObjectEnd(attributeValue, i);
-				const currentBindingValue = attributeValue.substring(i, positionEnd);
-				try {
-					const evaluatedValue = eval(`(${currentBindingValue})`);
-					if (typeof evaluatedValue === "object") {
-						const necessaryIndentation = this._getCurvyBracketsCount(attributeValue, i + 1) === 1 ? indentation : indentation + "\t";
-						const formattedBinding = this._formatAttributeObject(evaluatedValue, necessaryIndentation);
-						formattedValue += formattedBinding;
+		if (!attributeValue.startsWith("\\")) {
+			let i = 0;
+			while (i < attributeValue.length) {
+				const currentChar = attributeValue[i];
+				if (this._charIsInString(i, attributeValue)) {
+					formattedValue += currentChar;
+				} else if (currentChar === "(") {
+					const nextChar = attributeValue[i + 1];
+					if (nextChar !== "{") {
+						indentation += "\t";
 					}
+					const nextLine = nextChar === "(" ? `\n${indentation}\t` : "";
+					formattedValue += `${currentChar}${nextLine}`;
+				} else if (currentChar === ")") {
+					const lastFormattedValueChar = formattedValue[formattedValue.length - 1];
+					indentation = indentation.substring(0, indentation.length - 1);
+					const nextChar = attributeValue[i + 1];
+					const nextLine = !["\n", "\r", " ", undefined].includes(nextChar) ? `\n${indentation}\t` : "";
+					formattedValue = lastFormattedValueChar === "\t" ? formattedValue.substring(0, formattedValue.length - 1) : formattedValue;
+					formattedValue += `${currentChar}${nextLine}`;
+				} else if (currentChar === "{") {
+					const positionEnd = this._getPositionOfObjectEnd(attributeValue, i);
+					const currentBindingValue = attributeValue.substring(i, positionEnd);
+					try {
+						const evaluatedValue = eval(`(${currentBindingValue})`);
+						if (typeof evaluatedValue === "object") {
+							const necessaryIndentation = this._getCurvyBracketsCount(attributeValue, i + 1) === 1 ? indentation : indentation + "\t";
+							const formattedBinding = this._formatAttributeObject(evaluatedValue, necessaryIndentation);
+							formattedValue += formattedBinding;
+						}
+						i = positionEnd - 1;
+					} catch (error) {
+						formattedValue += currentChar;
+					}
+				} else if (currentChar === "\n") {
+					const positionEnd = this._getPositionOfIndentationEnd(attributeValue, i);
+					const necessaryIndentation = attributeValue[positionEnd] === "}" ? indentation : indentation + "\t";
+					formattedValue += "\n" + necessaryIndentation;
 					i = positionEnd - 1;
-				} catch (error) {
+				} else {
 					formattedValue += currentChar;
 				}
-			} else if (currentChar === "\n") {
-				const positionEnd = this._getPositionOfIndentationEnd(attributeValue, i);
-				const necessaryIndentation = attributeValue[positionEnd] === "}" ? indentation : indentation + "\t";
-				formattedValue += "\n" + necessaryIndentation;
-				i = positionEnd - 1;
-			} else {
-				formattedValue += currentChar;
-			}
 
-			i++;
+				i++;
+			}
+			formattedValue = `"${formattedValue}"`;
+		} else {
+			formattedValue = `'${attributeValue}'`;
 		}
 
 		return formattedValue;
