@@ -1,3 +1,6 @@
+## 0.14.10 (05-11-2021)
+*  Update linter and parser
+
 ## 0.14.9 (19-10-2021)
 * XMLFormatter bugfixes
 

@@ -4,5 +4,8 @@
 	"javascript.suggest.names": false,
 	"files.watcherExclude": {
 		"**/target": true
+	},
+	"files.exclude": {
+		"**/.git": true
 	}
 }
