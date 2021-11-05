@@ -25,6 +25,7 @@ sap.ui.define([
 			this.getView().setModel(oModel);
 			const oList = this.byId("idTable");
 			oList.setBusy(true);
+			this._vRegexTest = /asd/;
 		},
 
 		_testMyModel: function() {

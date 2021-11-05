@@ -103,6 +103,10 @@
 					"type": "sap.ui.model.Filter"
 				},
 				{
+					"name": "_vRegexTest",
+					"type": "RegExp"
+				},
+				{
 					"name": "formatter",
 					"type": "com.test.util.Formatter"
 				},
