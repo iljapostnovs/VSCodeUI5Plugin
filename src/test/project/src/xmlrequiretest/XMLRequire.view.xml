@@ -1,0 +1,19 @@
+<mvc:View
+	controllerName="com.test.xmlrequiretest.XMLRequire"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+	xmlns:f="sap.f"
+	c:require="{
+		XMLRequireUtil: 'com/test/xmlrequiretest/XMLRequireUtil'
+	}"
+	displayBlock="true"
+	height="100%"
+	busyIndicatorDelay="0"
+>
+	<f:FlexibleColumnLayout
+		afterEndColumnNavigate="com.test.xmlrequiretest.XMLRequireUtil.method2"
+		afterBeginColumnNavigate="XMLRequireUtil.method1($controller)"
+		stateChange="method1"
+	/>
+</mvc:View>

@@ -8,7 +8,6 @@ import { ReferenceCodeLensGenerator } from "./strategies/ReferenceCodeLensGenera
 
 export class JSCodeLensProvider {
 	static async getCodeLenses(document: vscode.TextDocument) {
-		// setTimeout(() => {
 		UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
 		const codeLenses: vscode.CodeLens[] = [];
 
@@ -18,13 +17,12 @@ export class JSCodeLensProvider {
 			EventHandlerCodeLensGenerator,
 			ReferenceCodeLensGenerator
 		];
-		// console.time("Code lens");
 		aStrategies.forEach(Strategy => {
 			const strategy = new Strategy();
 			codeLenses.push(...strategy.getCodeLenses(document));
 		});
-		// console.timeEnd("Code lens");
 
+		// copy(JSON.stringify(codeLenses.map(codelens => codelens.command.title)))
 		return codeLenses;
 	}
 }
