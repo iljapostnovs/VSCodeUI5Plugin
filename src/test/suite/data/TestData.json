@@ -7778,6 +7778,11 @@
 					"text": "Event handler \"eventHandler11\" not found in \"com.test.fragmenttest.controller.Master\"."
 				}
 			]
+		},
+		{
+			"className": "com.test.xmlrequiretest.XMLRequire",
+			"timeLimit": 100,
+			"errors": []
 		}
 	],
 	"FragmentLinter": [

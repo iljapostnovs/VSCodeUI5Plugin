@@ -1,3 +1,6 @@
+## 0.14.11 (28-11-2021)
+*  Update ui5linter and ui5parser
+
 ## 0.14.10 (05-11-2021)
 *  Update linter and parser
 

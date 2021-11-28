@@ -1,6 +1,21 @@
 {
 	"jsCodeLenses": [
 		{
+			"className": "com.test.xmlrequiretest.XMLRequireUtil",
+			"result": [
+				"Event handler of \"sap.f.FlexibleColumnLayout~stateChange\"",
+				"1 reference",
+				"1 reference"
+			]
+		},
+		{
+			"className": "com.test.xmlrequiretest.XMLRequire",
+			"result": [
+				"Event handler of \"sap.f.FlexibleColumnLayout~stateChange\"",
+				"1 reference"
+			]
+		},
+		{
 			"className": "com.test.fragmenttest.util.Formatter",
 			"result": [
 				"1 reference",

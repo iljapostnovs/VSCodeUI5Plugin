@@ -1215,7 +1215,9 @@
 				"\"com/test/util/interfacetest/interfaces/Interface3\"",
 				"\"com/test/statictest/StaticClass\"",
 				"\"com/test/xmllintertest/UI5IgnoreTest\"",
-				"\"com/test/util/TypeDefTest\""
+				"\"com/test/util/TypeDefTest\"",
+				"\"com/test/xmlrequiretest/XMLRequireUtil\"",
+				"\"com/test/xmlrequiretest/XMLRequire/controller\""
 			]
 		}
 	],
