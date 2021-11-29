@@ -1,3 +1,6 @@
+## 0.14.12 (29-11-2021)
+*  Make event handlers to respect JSDocs
+
 ## 0.14.11 (28-11-2021)
 *  Update ui5linter and ui5parser
 

@@ -15,6 +15,16 @@
 			"fields": []
 		},
 		{
+			"className": "com.test.xmlrequiretest.XMLRequire",
+			"methods": [
+				{
+					"name": "method1",
+					"returnType": "sap.m.Button"
+				}
+			],
+			"fields": []
+		},
+		{
 			"className": "com.test.util.JSDocTest",
 			"methods": [
 				{
