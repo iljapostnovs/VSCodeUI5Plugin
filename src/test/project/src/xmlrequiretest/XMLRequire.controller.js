@@ -6,6 +6,9 @@ sap.ui.define([
 	"use strict";
 
 	return Controller.extend("com.test.xmlrequiretest.XMLRequire", {
-		method1() {}
+		/**
+		 * @param {sap.m.Button} oButton
+		 */
+		method1(oButton) {return oButton;}
 	});
 });
