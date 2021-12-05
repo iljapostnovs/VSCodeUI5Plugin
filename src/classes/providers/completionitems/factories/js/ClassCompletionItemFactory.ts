@@ -66,11 +66,14 @@ export class ClassCompletionItemFactory implements ICompletionItemFactory {
 			if (currentMethod) {
 				const allContent = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(currentMethod.acornNode);
 				const newExpressionOrExpressionStatement = allContent.find((node: any) => {
+					const firstChar: undefined | string = node.expression?.name?.[0];
+					const firstCharCaps = node.expression?.name?.[0]?.toUpperCase();
 					return (
 						node.type === "NewExpression" ||
 						(
 							node.type === "ExpressionStatement" &&
-							node.expression?.type === "Identifier"
+							node.expression?.name &&
+							firstChar === firstCharCaps
 						)
 					) &&
 						node.start <= offset && node.end >= offset;
