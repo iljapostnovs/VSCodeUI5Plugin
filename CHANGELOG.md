@@ -1,3 +1,6 @@
+## 0.14.13 (05-12-2021)
+*  JS Class Completion items now shows if expression statement starts with upper case character or with "new" keyword
+
 ## 0.14.12 (29-11-2021)
 *  Make event handlers to respect JSDocs
 
