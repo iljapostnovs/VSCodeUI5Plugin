@@ -1,3 +1,7 @@
+## 0.14.14 (09-01-2022)
+*  Class import action bugfixes
+*  XML Formatter bugfixes
+
 ## 0.14.13 (05-12-2021)
 *  JS Class Completion items now shows if expression statement starts with upper case character or with "new" keyword
 
