@@ -75,8 +75,7 @@ export class ClassCompletionItemFactory implements ICompletionItemFactory {
 							node.expression?.name &&
 							firstChar === firstCharCaps
 						)
-					) &&
-						node.start <= offset && node.end >= offset;
+					) && node.start <= offset && node.end >= offset;
 				});
 
 				currentPositionIsNewExpressionOrExpressionStatement = !!newExpressionOrExpressionStatement;

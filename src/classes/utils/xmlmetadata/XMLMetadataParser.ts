@@ -1,5 +1,5 @@
 
-import * as XMLParser from "fast-xml-parser";
+import { XMLParser } from "fast-xml-parser";
 
 export interface IProperty {
 	name: string,
@@ -53,9 +53,9 @@ export class XMLMetadataParser {
 	}
 
 	private _parseMetadataXML(xmlText: string) {
-		const parsedXML = XMLParser.parse(xmlText, {
+		const parsedXML = new XMLParser({
 			ignoreAttributes: false
-		});
+		}).parse(xmlText);
 		let schemas = parsedXML["edmx:Edmx"]["edmx:DataServices"].Schema;
 		if (!Array.isArray(schemas)) {
 			schemas = [schemas];

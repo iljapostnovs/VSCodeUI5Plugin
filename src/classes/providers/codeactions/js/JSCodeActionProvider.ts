@@ -98,14 +98,20 @@ export class JSCodeActionProvider {
 			if (currentMethod) {
 				const allContent = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(currentMethod.acornNode);
 				const newExpressionOrExpressionStatement = allContent.find((node: any) => {
+					const firstChar: undefined | string =
+						node.expression?.name?.[0] ||
+						node.expression?.object?.name?.[0] ||
+						node.expression?.callee?.object?.name?.[0];
+
+					const firstCharCaps = firstChar?.toUpperCase();
 					return (
 						node.type === "NewExpression" ||
 						(
 							node.type === "ExpressionStatement" &&
-							node.expression?.type === "Identifier"
+							firstChar &&
+							firstChar === firstCharCaps
 						)
-					) &&
-						node.start <= offset && node.end >= offset;
+					) && node.start <= offset && node.end >= offset;
 				});
 
 				currentPositionIsNewExpressionOrExpressionStatement = !!newExpressionOrExpressionStatement;

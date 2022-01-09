@@ -246,6 +246,8 @@ export class XMLFormatter {
 			formattedAttribute += `${this._formatAttributeObject(value, indentation + "\t")}`;
 		} else if (typeof value === "string") {
 			formattedAttribute += `'${value}'`;
+		} else if (typeof value === "function") {
+			throw new Error("Parsing error");
 		} else {
 			formattedAttribute += `${value}`;
 		}
