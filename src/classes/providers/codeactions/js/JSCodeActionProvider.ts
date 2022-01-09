@@ -84,6 +84,7 @@ export class JSCodeActionProvider {
 
 		return providerResult;
 	}
+
 	//TODO: reuse with Class completion items
 	private static _getIfPositionIsNewExpressionOrExpressionStatement(document: vscode.TextDocument, position: vscode.Position) {
 		let currentPositionIsNewExpressionOrExpressionStatement = false;
@@ -98,20 +99,12 @@ export class JSCodeActionProvider {
 			if (currentMethod) {
 				const allContent = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(currentMethod.acornNode);
 				const newExpressionOrExpressionStatement = allContent.find((node: any) => {
-					const firstChar: undefined | string =
-						node.expression?.name?.[0] ||
-						node.expression?.object?.name?.[0] ||
-						node.expression?.callee?.object?.name?.[0];
-
+					const firstChar: undefined | string = node.name?.[0];
 					const firstCharCaps = firstChar?.toUpperCase();
-					return (
-						node.type === "NewExpression" ||
-						(
-							node.type === "ExpressionStatement" &&
-							firstChar &&
-							firstChar === firstCharCaps
-						)
-					) && node.start <= offset && node.end >= offset;
+					return node.type === "Identifier" &&
+						firstChar &&
+						firstChar === firstCharCaps &&
+						node.start <= offset && node.end >= offset;
 				});
 
 				currentPositionIsNewExpressionOrExpressionStatement = !!newExpressionOrExpressionStatement;
