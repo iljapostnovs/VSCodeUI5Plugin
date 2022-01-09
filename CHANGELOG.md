@@ -1,3 +1,6 @@
+## 0.14.15 (09-01-2022)
+*  Class import action bugfixes
+
 ## 0.14.14 (09-01-2022)
 *  Class import action bugfixes
 *  XML Formatter bugfixes
