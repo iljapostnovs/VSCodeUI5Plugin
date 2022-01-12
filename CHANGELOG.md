@@ -1,3 +1,6 @@
+## 0.14.16 (12-01-2022)
+*  Update dependencies
+
 ## 0.14.15 (09-01-2022)
 *  Class import action bugfixes
 
