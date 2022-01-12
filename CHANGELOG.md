@@ -1,3 +1,6 @@
+## 0.14.17 (12-01-2022)
+*  Update ui5linter
+
 ## 0.14.16 (12-01-2022)
 *  Update dependencies
 
