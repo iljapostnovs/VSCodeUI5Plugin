@@ -15,6 +15,7 @@ export class CustomDiagnostics extends vscode.Diagnostic {
 	fieldName?: string;
 	methodName?: string;
 	attribute?: string;
+	acornNode?: any;
 }
 
 export enum CustomDiagnosticType {
@@ -133,6 +134,7 @@ export class DiagnosticsRegistrator {
 			diagnostic.severity = vscode.DiagnosticSeverity.Hint;
 			diagnostic.type = error.type;
 			diagnostic.methodName = error.methodName;
+			diagnostic.acornNode = error.acornNode;
 			diagnostic.fieldName = error.fieldName;
 			diagnostic.attribute = error.sourceClassName;
 			diagnostic.source = error.source;
