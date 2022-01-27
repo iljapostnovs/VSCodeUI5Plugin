@@ -1,3 +1,7 @@
+## 0.14.18 (28-01-2022)
+* XML Hover provider improvements, now it shows descriptions for attribute values
+* JS Code actions provider improvements, now method inserter also inserts parameters
+
 ## 0.14.17 (12-01-2022)
 *  Update ui5linter
 

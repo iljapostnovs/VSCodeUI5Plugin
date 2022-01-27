@@ -23,7 +23,17 @@ export class JSCodeActionProvider {
 		const codeActions: vscode.CodeAction[] = nonExistendMethodDiagnostics.reduce((accumulator: vscode.CodeAction[], diagnostic: CustomDiagnostics) => {
 			const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 			if (className && diagnostic.methodName && diagnostic.attribute && selectedVariableName === diagnostic.methodName) {
-				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.attribute, diagnostic.methodName, "", "", this._getInsertTypeFromIdentifierName(diagnostic.methodName));
+				let parameters = "";
+				const callExpression: any | undefined = diagnostic.acornNode?.expandedContent?.find((content: any) =>
+					content.start === diagnostic.acornNode.start && content.type === "CallExpression"
+				);
+				if (callExpression?.arguments?.length > 0) {
+					parameters = callExpression.arguments.map((arg: any, index: number) =>
+						arg.type === "Identifier" ? arg.name : `arg${index}`
+					).join(", ");
+				}
+
+				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.attribute, diagnostic.methodName, parameters, "", this._getInsertTypeFromIdentifierName(diagnostic.methodName));
 				if (insertCodeAction && !accumulator.find(accum => accum.title === insertCodeAction.title)) {
 					accumulator.push(insertCodeAction);
 				}

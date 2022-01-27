@@ -1,5 +1,6 @@
 import { XMLParser } from "ui5plugin-parser";
 import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
+import { CustomUIClass, ICustomClassUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { StandardUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
 import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
@@ -10,7 +11,9 @@ import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapte
 export class XMLHoverProvider {
 	static getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
 		const range = document.getWordRangeAtPosition(position);
-		const word = document.getText(range);
+		const wordWithPrefix = document.getText(range);
+		const wordWithPrefixParts = wordWithPrefix.split(":");
+		const word = wordWithPrefixParts.pop();
 		const offset = document.offsetAt(position);
 		let hover: vscode.Hover | undefined;
 
@@ -26,11 +29,14 @@ export class XMLHoverProvider {
 					const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
 					return attributeName === word;
 				});
+				const attributeValue = attributes?.find(attribute => {
+					const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+					return attributeValue === word;
+				});
 
 				if (attribute) {
 					//highlighted text is attribute
 					const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
-
 					const text = this._getTextIfItIsFieldOrMethodOfClass(classOfTheTag, attributeName);
 
 					if (text) {
@@ -39,6 +45,31 @@ export class XMLHoverProvider {
 						markdownString.appendMarkdown(text);
 						hover = new vscode.Hover(markdownString);
 					}
+				} else if (attributeValue) {
+					const { attributeName, attributeValue: attributeVal } = XMLParser.getAttributeNameAndValue(attributeValue);
+					const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(classOfTheTag);
+					const property = UIClass.properties.find(property => property.name === attributeName);
+					const responsibleClass = UI5Plugin.getInstance().parser.fileReader.getResponsibleClassForXMLDocument(new TextDocumentAdapter(document));
+					const responsibleUIClass = responsibleClass && UI5Plugin.getInstance().parser.classFactory.getUIClass(responsibleClass);
+					const method = responsibleUIClass && responsibleUIClass.methods.find(method => method.name === attributeVal);
+					const value = property?.typeValues.find(value => value.text === attributeVal);
+					if (property && value) {
+						const markdownString = new vscode.MarkdownString();
+						const text = `**${value.text}**: ${value.description}`;
+						markdownString.appendMarkdown(text);
+						hover = new vscode.Hover(markdownString);
+					} else if (responsibleUIClass && responsibleUIClass instanceof CustomUIClass && responsibleUIClass.classText && method) {
+						const customMethod = method as ICustomClassUIMethod;
+						if (customMethod.acornNode) {
+							const methodText = responsibleUIClass.classText.substring(customMethod.acornNode.start, customMethod.acornNode.end);
+							const markdownString = new vscode.MarkdownString();
+							const text = "**Ctrl + Left Click** to navigate";
+							markdownString.appendMarkdown(text);
+							markdownString.appendCodeblock(methodText.replace(/\t/g, " "), "javascript");
+							hover = new vscode.Hover(markdownString);
+						}
+					}
+
 				} else if (tagName === word) {
 					//highlighted text is class or aggregation
 					const isClassName = word[0].toUpperCase() === word[0];
