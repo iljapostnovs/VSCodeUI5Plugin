@@ -46,12 +46,10 @@ export class XMLHoverProvider {
 						hover = new vscode.Hover(markdownString);
 					}
 				} else if (attributeValue) {
-					const { attributeName, attributeValue: attributeVal } = XMLParser.getAttributeNameAndValue(attributeValue);
-					const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(classOfTheTag);
-					const property = UIClass.properties.find(property => property.name === attributeName);
+					const { attributeName, attributeValue: attributeVal } = XMLParser.getAttributeNameAndValue(attributeValue);					const property = UI5Plugin.getInstance().parser.classFactory.getClassProperties(classOfTheTag).find(property => property.name === attributeName);
 					const responsibleClass = UI5Plugin.getInstance().parser.fileReader.getResponsibleClassForXMLDocument(new TextDocumentAdapter(document));
-					const responsibleUIClass = responsibleClass && UI5Plugin.getInstance().parser.classFactory.getUIClass(responsibleClass);
-					const method = responsibleUIClass && responsibleUIClass.methods.find(method => method.name === attributeVal);
+					const method = responsibleClass && UI5Plugin.getInstance().parser.classFactory.getClassMethods(responsibleClass).find(method => method.name === attributeVal);
+					const responsibleUIClass = method && UI5Plugin.getInstance().parser.classFactory.getUIClass(method.owner);
 					const value = property?.typeValues.find(value => value.text === attributeVal);
 					if (property && value) {
 						const markdownString = new vscode.MarkdownString();
