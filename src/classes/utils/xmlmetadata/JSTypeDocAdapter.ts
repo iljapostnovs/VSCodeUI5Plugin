@@ -26,13 +26,13 @@ export class JSTypeDocAdapter {
 	}
 
 	private readonly _typeMap: { [key: string]: string } = {
-		"Edm.Decimal": "float",
+		"Edm.Decimal": "string",
 		"Edm.Boolean": "boolean",
 		"Edm.Double": "float",
 		"Edm.Float": "float",
 		"Edm.Int16": "int",
 		"Edm.Int32": "int",
-		"Edm.Int64": "int",
+		"Edm.Int64": "string",
 		"Edm.Byte": "int",
 		"Edm.Guid": "string",
 		"Edm.DateTime": "Date",
