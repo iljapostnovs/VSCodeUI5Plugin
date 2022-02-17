@@ -1,5 +1,5 @@
-## 0.14.20 (11-02-2022)
-* Change mapping for JSTypeDocAdapter, oData decimal -> js string
+## 0.14.20 (17-02-2022)
+* Change mapping for JSTypeDocAdapter according to https://www.odata.org/documentation/odata-version-2-0/json-format/
 
 ## 0.14.19 (28-01-2022)
 * XML Hover provider improvements, now property value hovers also works with parent class properties
