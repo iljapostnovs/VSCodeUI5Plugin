@@ -26,20 +26,21 @@ export class JSTypeDocAdapter {
 	}
 
 	private readonly _typeMap: { [key: string]: string } = {
-		"Edm.Decimal": "float",
+		"Edm.Decimal": "string",
 		"Edm.Boolean": "boolean",
-		"Edm.Double": "float",
+		"Edm.Double": "string",
 		"Edm.Float": "float",
 		"Edm.Int16": "int",
 		"Edm.Int32": "int",
-		"Edm.Int64": "int",
-		"Edm.Byte": "int",
+		"Edm.Int64": "string",
 		"Edm.Guid": "string",
+		"Edm.Binary": "string",
 		"Edm.DateTime": "Date",
 		"Edm.Date": "Date",
 		"Edm.DateTimeOffset": "string",
-		"Edm.SByte": "int",
-		"Edm.Single": "float",
+		"Edm.Byte": "string",
+		"Edm.SByte": "string",
+		"Edm.Single": "string",
 		"Edm.String": "string",
 		"Edm.Time": "string"
 	}
