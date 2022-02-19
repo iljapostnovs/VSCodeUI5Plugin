@@ -698,7 +698,11 @@
 		{
 			"className": "com.test.util.TypeDefTest",
 			"timeLimit": 100,
-			"errors": []
+			"errors": [
+				{
+					"text": "No references found for \"com.test.util.TypeDefTest\" class"
+				}
+			]
 		},
 		{
 			"className": "com.statictest.StaticClass",
@@ -1092,6 +1096,9 @@
 				},
 				{
 					"text": "Method \"returnTest\" is possibly private, no references found in other classes"
+				},
+				{
+					"text": "No references found for \"com.test.util.ObjectTest\" class"
 				}
 			]
 		},
@@ -1128,6 +1135,9 @@
 				},
 				{
 					"text": "No references found for \"_oDialogNestesPromiseZero\" class member"
+				},
+				{
+					"text": "No references found for \"com.test.util.AsyncAwaitTest\" class"
 				}
 			]
 		},
@@ -1146,6 +1156,9 @@
 				},
 				{
 					"text": "Class \"com.test.util.WrongFormatter\" doesn't exist"
+				},
+				{
+					"text": "No references found for \"com.test.controller.WrongFilePathLinterTest\" class"
 				}
 			]
 		},
@@ -1158,6 +1171,9 @@
 				},
 				{
 					"text": "\"_protectedMethod\" is a protected member of class \"com.test.util.AccessLevelModifierTest\""
+				},
+				{
+					"text": "No references found for \"com.test.util.AccessLevelModifierSecondTest\" class"
 				}
 			]
 		},
@@ -1220,7 +1236,11 @@
 		{
 			"className": "com.test.util.ui5ignoretest.UI5IgnoreTest",
 			"timeLimit": 100,
-			"errors": []
+			"errors": [
+				{
+					"text": "No references found for \"com.test.util.ui5ignoretest.UI5IgnoreTest\" class"
+				}
+			]
 		},
 		{
 			"className": "com.test.util.ui5ignoretest.UI5IgnoreTestClass",
@@ -1257,6 +1277,9 @@
 				},
 				{
 					"text": "Interface \"com.test.util.interfacetest.interfaces.Interface2\" requires \"interface2Method3\" member implementation"
+				},
+				{
+					"text": "No references found for \"com.test.util.interfacetest.InterfaceImplementer\" class"
 				}
 			]
 		}

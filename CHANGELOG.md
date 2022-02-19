@@ -1,3 +1,6 @@
+## 0.14.21 (19-02-2022)
+* Update ui5-linter
+
 ## 0.14.20 (17-02-2022)
 * Change mapping for JSTypeDocAdapter according to https://www.odata.org/documentation/odata-version-2-0/json-format/
 
