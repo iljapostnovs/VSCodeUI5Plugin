@@ -1,3 +1,6 @@
+## 0.14.23 (21-02-2022)
+* Update ui5-linter, bugfix for multiple types linting
+
 ## 0.14.22 (19-02-2022)
 * Update ui5-linter, add Component.js as default exception
 
