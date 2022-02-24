@@ -1,3 +1,6 @@
+## 0.14.24 (24-02-2022)
+* Update ui5-linter
+
 ## 0.14.23 (21-02-2022)
 * Update ui5-linter, bugfix for multiple types linting
 
