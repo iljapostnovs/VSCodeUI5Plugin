@@ -1,3 +1,6 @@
+## 0.14.25 (13-04-2022)
+* Update ui5-linter, adjusted linting logic for event handlers starting with "cmd"
+
 ## 0.14.24 (24-02-2022)
 * Update ui5-linter
 
@@ -470,6 +473,7 @@
 
 ## 0.8.7 (04-02-2020)
 * Improvements for version support. Now UI5 1.73.1 should be working.
+
 ## 0.8.6 (03-02-2020)
 * Bugfixes for xml completion items
 * Added value helps for properties which has enum values for xml files

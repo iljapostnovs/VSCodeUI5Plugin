@@ -31,7 +31,7 @@ export class FileRenameMediator {
 	}
 
 	static handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri, fileChanges: IFileChanges[]): IFileChanges[] {
-		const newFilePaths = glob.sync(newUri.fsPath.replace(/\//g, fileSeparator) + "/**/*{.js,.xml}");
+		const newFilePaths = glob.sync(newUri.fsPath.replace(/\\/g, "/") + "/**/*{.js,.xml}");
 		newFilePaths.forEach(filePath => {
 			const newFileUri = vscode.Uri.file(filePath);
 			const oldFileUri = vscode.Uri.file(
