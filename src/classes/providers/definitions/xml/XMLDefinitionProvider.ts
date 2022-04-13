@@ -22,7 +22,7 @@ export class XMLDefinitionProvider {
 				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
 				const eventHandlerName = XMLParser.getEventHandlerNameFromAttributeValue(attributeValue);
 
-				return eventHandlerName === word;
+				return eventHandlerName === word || `cmd:${eventHandlerName}` === word;
 			});
 			if (attribute) {
 				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
