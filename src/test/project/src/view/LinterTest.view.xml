@@ -22,7 +22,7 @@
 				delete="_onDelete"
 				paste=".onPaste"
 				itemPress="_onItemPress(${$parameters>/value})"
-				validateFieldGroup="cmd:_onItemPress"
+				validateFieldGroup="cmd:Save"
 				busy="false"
 			/>
 			<s:WrongNamespace/>

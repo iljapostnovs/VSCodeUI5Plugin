@@ -1,3 +1,6 @@
+## 0.14.26 (23-04-2022)
+* Update ui5-linter, fix cmd support
+
 ## 0.14.25 (13-04-2022)
 * Update ui5-linter, adjusted linting logic for event handlers starting with "cmd"
 

@@ -34,6 +34,9 @@
 		"fullWidth": false
 	},
 	"sap.ui5": {
+		"commands": {
+			"Save": {}
+		},
 		"_version": "1.1.0",
 		"rootView": {
 			"viewName": "com.test.view.SecondaryViews.App",
