@@ -1,3 +1,6 @@
+## 0.14.27 (02-05-2022)
+* Fix metadata parsing
+
 ## 0.14.26 (23-04-2022)
 * Update ui5-linter, fix cmd support
 
