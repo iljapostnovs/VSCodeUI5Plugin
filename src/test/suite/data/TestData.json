@@ -385,6 +385,129 @@
 				{
 					"name": "customMethod",
 					"returnType": "sap.m.Text"
+				},
+				{
+					"name": "setDialogTitle",
+					"returnType": "com.test.util.CustomClass"
+				},
+				{
+					"name": "getDialogTitle",
+					"returnType": "string"
+				},
+				{
+					"name": "setListBindingTemplate",
+					"returnType": "com.test.util.CustomClass"
+				},
+				{
+					"name": "getListBindingTemplate",
+					"returnType": "sap.m.ListItemBase"
+				},
+				{
+					"name": "bindListBindingTemplate",
+					"returnType": "com.test.util.CustomClass"
+				},
+				{
+					"name": "unbindListBindingTemplate",
+					"returnType": "com.test.util.CustomClass"
+				},
+				{
+					"name": "fireShow",
+					"returnType": "com.test.util.CustomClass"
+				},
+				{
+					"name": "attachShow",
+					"returnType": "com.test.util.CustomClass"
+				},
+				{
+					"name": "detachShow",
+					"returnType": "com.test.util.CustomClass"
+				}
+			],
+			"fields": [
+				{
+					"name": "_customField",
+					"type": "sap.m.Text"
+				}
+			]
+		},
+		{
+			"className": "com.test.metadatatest.MetadataTest",
+			"methods": [
+				{
+					"name": "customMethod",
+					"returnType": "sap.m.Text"
+				},
+				{
+					"name": "setDialogTitle",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "getDialogTitle",
+					"returnType": "string"
+				},
+				{
+					"name": "setListBindingTemplate",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "getListBindingTemplate",
+					"returnType": "sap.m.ListItemBase"
+				},
+				{
+					"name": "bindListBindingTemplate",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "unbindListBindingTemplate",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "fireShow",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "attachShow",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "detachShow",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "addMultipleTest",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "getMultipleTests",
+					"returnType": "sap.m.Text[]"
+				},
+				{
+					"name": "removeMultipleTest",
+					"returnType": "sap.m.Text"
+				},
+				{
+					"name": "insertMultipleTest",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "bindMultipleTests",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "unbindMultipleTests",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "destroyMultipleTests",
+					"returnType": "com.test.metadatatest.MetadataTest"
+				},
+				{
+					"name": "indexOfMultipleTest",
+					"returnType": "int"
+				},
+				{
+					"name": "removeAllMultipleTests",
+					"returnType": "sap.m.Text[]"
 				}
 			],
 			"fields": [
