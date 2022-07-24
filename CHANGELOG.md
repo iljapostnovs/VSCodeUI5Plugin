@@ -1,3 +1,6 @@
+## 0.14.28 (24-07-2022)
+* JS template inserter now works only inside UI5 project
+
 ## 0.14.27 (02-05-2022)
 * Fix metadata parsing
 
