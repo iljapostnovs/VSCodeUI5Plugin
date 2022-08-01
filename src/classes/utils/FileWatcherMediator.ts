@@ -5,7 +5,7 @@ import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
 import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
 import { WorkspaceCompletionItemFactory } from "../providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
 import { IFileChanges, IFileRenameData } from "../filerenaming/handlers/abstraction/FileRenameHandler";
-import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/TemplateGeneratorFactory";
+import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/factory/TemplateGeneratorFactory";
 import { ResourceModelData } from "ui5plugin-parser/dist/classes/UI5Classes/ResourceModelData";
 import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 import { VSCodeFileReader } from "./VSCodeFileReader";
