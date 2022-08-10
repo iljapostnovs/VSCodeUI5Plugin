@@ -1,3 +1,6 @@
+## 0.14.29 (10-08-2022)
+* Fix ui5 version regex
+
 ## 0.14.28 (24-07-2022)
 * JS template inserter now works only inside UI5 project
 
