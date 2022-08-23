@@ -24,8 +24,18 @@ export class XMLDynamicCompletionItemFactory implements ICompletionItemFactory {
 			const currentPositionOffset = document.offsetAt(position);
 			const positionType = XMLParser.getPositionType(XMLFile, currentPositionOffset);
 
-			if (positionType === PositionType.InTheTagAttributes) {
+			if (positionType === PositionType.InNewAttribute || positionType === PositionType.InExistingAttribute) {
 				completionItems = this._getAttributeCompletionItems(document, position);
+
+				if (positionType === PositionType.InNewAttribute) {
+					completionItems.forEach(item => {
+						if (item.insertText instanceof vscode.SnippetString) {
+							item.insertText.appendText("=\"");
+							item.insertText.appendTabstop(0);
+							item.insertText.appendText("\"");
+						}
+					})
+				}
 
 			} else if (positionType === PositionType.InTheString) {
 				completionItems = this._getAttributeValuesCompletionItems(document, position);

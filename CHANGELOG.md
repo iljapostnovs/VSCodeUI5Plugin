@@ -1,3 +1,6 @@
+## 0.14.30 (23-08-2022)
+* Implement [#252](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/252)
+
 ## 0.14.29 (10-08-2022)
 * Fix ui5 version regex
 
