@@ -31,6 +31,7 @@ export class CompletionItemRegistrator {
 				} catch (error) {
 					console.log(error);
 				}
+				// copy(JSON.stringify(itemsToReturn.map(item => item.insertText.value ? `"${item.insertText.value}"` : `"${item.insertText}"`)))
 				return itemsToReturn;
 			}
 		}, ".", "\"", "'");

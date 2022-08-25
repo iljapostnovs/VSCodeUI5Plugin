@@ -1191,7 +1191,7 @@
 					"text": "\"oSecondParam\" param is of type \"sap.m.Text\", but provided \"sap.m.Dialog\""
 				},
 				{
-					"text": "\"sText\" param is of type \"string\", but provided \"number\""
+					"text": "\"sText?\" param is of type \"string\", but provided \"number\""
 				},
 				{
 					"text": "Method \"attachMatched\" has 2 (1 mandatory) param(s), but you provided 3"
