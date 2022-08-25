@@ -1,3 +1,6 @@
+## 0.14.31 (25-08-2022)
+* Change default UI5 Version to 1.84.28 ([#255](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/255))
+
 ## 0.14.30 (23-08-2022)
 * Implement [#252](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/252)
 
