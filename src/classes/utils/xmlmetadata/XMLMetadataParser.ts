@@ -7,7 +7,8 @@ export interface IProperty {
 	label?: string;
 	length?: string,
 	precision?: string,
-	scale?: string
+	scale?: string,
+	nullable: boolean
 }
 
 export interface IEntityType {
@@ -95,7 +96,8 @@ export class XMLMetadataParser {
 					length: property["@_MaxLength"],
 					precision: property["@_Precision"],
 					scale: property["@_Scale"],
-					label: property["@_sap:label"]
+					label: property["@_sap:label"],
+					nullable: property["@_Nullable"] === "true"
 				}
 			}) || [];
 			properties = properties.sort((a, b) => {

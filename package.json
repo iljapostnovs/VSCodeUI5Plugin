@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.14.31",
+	"version": "0.14.32",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -268,6 +268,14 @@
 			{
 				"command": "ui5plugin.generateERDiagramFromMetadata",
 				"title": "UI5: Generate ER diagram from metadata.xml"
+			},
+			{
+				"command": "ui5plugin.generateTSXMLFileInterfaces",
+				"title": "UI5: (TS) Generate interfaces for XML files (id to class mapping)"
+			},
+			{
+				"command": "ui5plugin.generateTSODataInterfaces",
+				"title": "UI5: (TS) Generate interfaces for OData entities"
 			}
 		]
 	},
