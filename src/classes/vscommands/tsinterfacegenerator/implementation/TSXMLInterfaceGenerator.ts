@@ -8,16 +8,17 @@ export class TSXMLInterfaceGenerator implements ITSInterfaceGenerator {
 		const UI5FileReader = UI5Plugin.getInstance().parser.fileReader;
 
 		const aXMLFiles: IXMLFile[] = UI5FileReader.getAllFragments().concat(UI5FileReader.getAllViews());
-		const aInterfaceData = aXMLFiles.map(XMLFile => this._generateInterfaceDataForFile(XMLFile));
-		const aUniqueImports = [...new Set(aInterfaceData.flatMap(theInterface => theInterface.imports))].map(toImport => {
+		const mInterfaceData = aXMLFiles.map(XMLFile => this._generateInterfaceDataForFile(XMLFile));
+		const aUniqueImports = [...new Set(mInterfaceData.flatMap(theInterface => theInterface.imports))].map(toImport => {
 			const className = toImport.split("/").pop();
 			return `import ${className} from "${toImport}";`;
 		});
-		const aInterfaces = aInterfaceData.map(interfaceData => {
-			return `export interface ${interfaceData.name} {\n\t${interfaceData.rows}\n}`;
+		const aInterfaces = mInterfaceData.map(interfaceData => {
+			const sExtends = interfaceData.extends.join(", ");
+			return `export interface ${interfaceData.name}${sExtends ? ` extends ${sExtends}` : ""} {\n\t${interfaceData.rows}\n}`;
 		});
 
-		return aUniqueImports.join("\n") + aInterfaces.join("\n\n");
+		return aUniqueImports.join("\n") + "\n\n" + aInterfaces.join("\n\n");
 	}
 	private _generateInterfaceDataForFile(XMLFile: IXMLFile) {
 		const tags = XMLParser.getAllTags(XMLFile);
@@ -48,11 +49,18 @@ export class TSXMLInterfaceGenerator implements ITSInterfaceGenerator {
 		const interfaceName = XMLFile.name.split(".").pop() + (isView ? "View" : "Fragment");
 		const uniqueImports = [...new Set(mInterfaceData.import)];
 		const interfaceRows = mInterfaceData.interfaces.join("\n\t");
+		const aExtends = XMLFile.fragments.map(fragment => {
+			const isView = fragment.fsPath.endsWith(".view.xml");
+			const interfaceName = fragment.name.split(".").pop() + (isView ? "View" : "Fragment");
+
+			return interfaceName;
+		});
 
 		return {
 			name: interfaceName,
 			imports: uniqueImports,
-			rows: interfaceRows
+			rows: interfaceRows,
+			extends: aExtends
 		};
 	}
 

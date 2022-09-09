@@ -1,4 +1,4 @@
-## 0.14.32 (05-09-2022)
+## 0.14.32 (09-09-2022)
 * Add typescript interface generation for OData entities and id to type mapping in views and fragments
 
 ## 0.14.31 (25-08-2022)
