@@ -9,6 +9,8 @@ import { SAPUIDefineCommand } from "../vscommands/SAPUIDefineCommand";
 import { ControllerModelViewSwitcher } from "../vscommands/switchers/ViewControllerSwitcher";
 import { UMLGeneratorCommand } from "../vscommands/umlgenerator/UMLGeneratorCommand";
 import { GenerateTypeJSDocCommand } from "../vscommands/generatetypedoc/GenerateTypeJSDocCommand";
+import { TSXMLInterfaceGenerator } from "../vscommands/tsinterfacegenerator/implementation/TSXMLInterfaceGenerator";
+import { TSODataInterfaceGenerator } from "../vscommands/tsinterfacegenerator/implementation/TSODataInterfaceGenerator";
 
 export class CommandRegistrator {
 	static register(metadataLoaded: boolean) {
@@ -62,5 +64,32 @@ export class CommandRegistrator {
 		UI5Plugin.getInstance().addDisposable(clearCacheCommand);
 		UI5Plugin.getInstance().addDisposable(generateERDiagram);
 		UI5Plugin.getInstance().addDisposable(generateTypeDefDoc);
+	}
+
+	static registerUniqueCommands() {
+		const generateTSXMLFileInterfacesCommand = vscode.commands.registerCommand("ui5plugin.generateTSXMLFileInterfaces", async () => {
+			const oTSInterfaceGenerator = new TSXMLInterfaceGenerator();
+			const sContent = await oTSInterfaceGenerator.generate();
+
+			const document = await vscode.workspace.openTextDocument({
+				content: sContent,
+				language: "typescript"
+			});
+			await vscode.window.showTextDocument(document);
+		});
+		UI5Plugin.getInstance().addDisposable(generateTSXMLFileInterfacesCommand);
+
+
+		const generateODataInterfaceCommand = vscode.commands.registerCommand("ui5plugin.generateTSODataInterfaces", async () => {
+			const oTSInterfaceGenerator = new TSODataInterfaceGenerator();
+			const sContent = await oTSInterfaceGenerator.generate();
+
+			const document = await vscode.workspace.openTextDocument({
+				content: sContent,
+				language: "typescript"
+			});
+			await vscode.window.showTextDocument(document);
+		});
+		UI5Plugin.getInstance().addDisposable(generateODataInterfaceCommand);
 	}
 }

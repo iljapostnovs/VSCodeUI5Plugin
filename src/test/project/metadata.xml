@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+	<edmx:DataServices m:DataServiceVersion="2.0">
+		<Schema Namespace="ZDCOP_DATACOP_SRV" xml:lang="en" sap:schema-version="1" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+			<EntityType Name="Scenario" sap:content-version="1">
+				<Key>
+					<PropertyRef Name="ScenarioID" />
+				</Key>
+				<Property Name="GroupID" Type="Edm.String" Nullable="false" MaxLength="20" sap:unicode="false" sap:label="Scenario Group ID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ScenarioDescription" Type="Edm.String" Nullable="false" MaxLength="60" sap:unicode="false" sap:label="Scenario Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ScenarioID" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Scenario" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<NavigationProperty Name="ScenarioToCharacteristics" Relationship="ZDCOP_DATACOP_SRV.ScenarioToCharacteristics" FromRole="FromRole_ScenarioToCharacteristics" ToRole="ToRole_ScenarioToCharacteristics" />
+				<NavigationProperty Name="ScenarioToArticleResults" Relationship="ZDCOP_DATACOP_SRV.ScenarioToArticleResults" FromRole="FromRole_ScenarioToArticleResults" ToRole="ToRole_ScenarioToArticleResults" />
+				<NavigationProperty Name="LSUSArticleResultSet" Relationship="ZDCOP_DATACOP_SRV.ScenarioToLSUSArticleResult" FromRole="FromRole_ScenarioToLSUSArticleResult" ToRole="ToRole_ScenarioToLSUSArticleResult" />
+				<NavigationProperty Name="ScenarioToArticleResultMsg" Relationship="ZDCOP_DATACOP_SRV.ScenarioToArticleResultMsg" FromRole="FromRole_ScenarioToArticleResultMsg" ToRole="ToRole_ScenarioToArticleResultMsg" />
+				<NavigationProperty Name="ScenarioToLSUSArtResMsg" Relationship="ZDCOP_DATACOP_SRV.ScenarioToLSUSArtResMsg" FromRole="FromRole_ScenarioToLSUSArtResMsg" ToRole="ToRole_ScenarioToLSUSArtResMsg" />
+			</EntityType>
+			<EntityType Name="ArticleResult" sap:content-version="1">
+				<Key>
+					<PropertyRef Name="ScenarioID" />
+					<PropertyRef Name="ProductID" />
+					<PropertyRef Name="Characteristic" />
+				</Key>
+				<Property Name="Product" Type="ZDCOP_DATACOP_SRV.Product" Nullable="false" />
+				<Property Name="Output" Type="ZDCOP_DATACOP_SRV.ArticleResultOutput" Nullable="false" />
+				<Property Name="ChangeID" Type="Edm.String" Nullable="false" MaxLength="40" ConcurrencyMode="Fixed" sap:unicode="false" sap:label="Change ID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ScenarioID" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Scenario" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ProductID" Type="Edm.String" Nullable="false" MaxLength="18" sap:unicode="false" sap:label="Product ID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Characteristic" Type="Edm.String" Nullable="false" MaxLength="20" sap:unicode="false" sap:label="Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<NavigationProperty Name="ArticleResultToScenario" Relationship="ZDCOP_DATACOP_SRV.ScenarioToArticleResults" FromRole="ToRole_ScenarioToArticleResults" ToRole="FromRole_ScenarioToArticleResults" />
+				<NavigationProperty Name="ArticleResultToArticleResultValues" Relationship="ZDCOP_DATACOP_SRV.ArticleResultToArticleResultValues" FromRole="FromRole_ArticleResultToArticleResultValues" ToRole="ToRole_ArticleResultToArticleResultValues" />
+			</EntityType>
+			<EntityType Name="LSUSArticleResult" sap:content-version="1">
+				<Key>
+					<PropertyRef Name="ScenarioID" />
+					<PropertyRef Name="ProductID" />
+					<PropertyRef Name="Characteristic" />
+					<PropertyRef Name="Language" />
+					<PropertyRef Name="UoM" />
+				</Key>
+				<Property Name="Product" Type="ZDCOP_DATACOP_SRV.Product" Nullable="false" />
+				<Property Name="Output" Type="ZDCOP_DATACOP_SRV.ArticleResultOutput" Nullable="false" />
+				<Property Name="ChangeID" Type="Edm.String" Nullable="false" MaxLength="40" ConcurrencyMode="Fixed" sap:unicode="false" sap:label="Change ID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ScenarioID" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Scenario" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ProductID" Type="Edm.String" Nullable="false" MaxLength="18" sap:unicode="false" sap:label="Product ID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Characteristic" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Language" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Language" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="UoM" Type="Edm.String" Nullable="false" MaxLength="3" sap:unicode="false" sap:label="Base Unit" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" sap:semantics="unit-of-measure" />
+				<NavigationProperty Name="LSUSArticleResultToLSUSArticleResultVal" Relationship="ZDCOP_DATACOP_SRV.LSUSArticleResultToLSUSArticleResultVal" FromRole="FromRole_LSUSArticleResultToLSUSArticleResultVal" ToRole="ToRole_LSUSArticleResultToLSUSArticleResultVal" />
+			</EntityType>
+			<EntityType Name="ProductEntity" sap:content-version="1">
+				<Key>
+					<PropertyRef Name="ProductID" />
+				</Key>
+				<Property Name="Product" Type="ZDCOP_DATACOP_SRV.Product" Nullable="false" />
+				<Property Name="ProductID" Type="Edm.String" Nullable="false" MaxLength="18" sap:unicode="false" sap:label="Product ID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="SearchText" Type="Edm.String" Nullable="false" MaxLength="50" sap:unicode="false" sap:label="Search Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+			</EntityType>
+			<EntityType Name="CharacteristicEntity" sap:content-version="1">
+				<Key>
+					<PropertyRef Name="ScenarioID" />
+					<PropertyRef Name="Characteristic" />
+				</Key>
+				<Property Name="ScenarioID" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Scenario" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Characteristic" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Attribute" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Description" Type="Edm.String" Nullable="false" MaxLength="60" sap:unicode="false" sap:label="Field Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<NavigationProperty Name="CharacteristicToScenario" Relationship="ZDCOP_DATACOP_SRV.ScenarioToCharacteristics" FromRole="ToRole_ScenarioToCharacteristics" ToRole="FromRole_ScenarioToCharacteristics" />
+			</EntityType>
+			<EntityType Name="ArticleResultValues" sap:content-version="1">
+				<Key>
+					<PropertyRef Name="ScenarioID" />
+					<PropertyRef Name="ProductID" />
+					<PropertyRef Name="Characteristic" />
+					<PropertyRef Name="Counter" />
+				</Key>
+				<Property Name="ScenarioID" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Scenario" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ProductID" Type="Edm.String" Nullable="false" MaxLength="18" sap:unicode="false" sap:label="Article" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Characteristic" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Attribute" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Counter" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:label="Counter" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Value" Type="Edm.String" Nullable="false" sap:unicode="false" sap:label="Result Value" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ValueDescription" Type="Edm.String" Nullable="false" MaxLength="60" sap:unicode="false" sap:label="Value Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<NavigationProperty Name="ArticleResultValueToArticleResult" Relationship="ZDCOP_DATACOP_SRV.ArticleResultToArticleResultValues" FromRole="ToRole_ArticleResultToArticleResultValues" ToRole="FromRole_ArticleResultToArticleResultValues" />
+			</EntityType>
+			<EntityType Name="LSUSArticleResultValues" sap:content-version="1">
+				<Key>
+					<PropertyRef Name="ScenarioID" />
+					<PropertyRef Name="ProductID" />
+					<PropertyRef Name="Characteristic" />
+					<PropertyRef Name="Counter" />
+					<PropertyRef Name="Language" />
+					<PropertyRef Name="UoM" />
+				</Key>
+				<Property Name="ScenarioID" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Scenario" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ProductID" Type="Edm.String" Nullable="false" MaxLength="18" sap:unicode="false" sap:label="Article" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Characteristic" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Attribute" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Counter" Type="Edm.Int32" Nullable="false" sap:unicode="false" sap:label="Counter" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Language" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Language" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="UoM" Type="Edm.String" Nullable="false" MaxLength="3" sap:unicode="false" sap:label="Base Unit" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" sap:semantics="unit-of-measure" />
+				<Property Name="Value" Type="Edm.String" Nullable="false" sap:unicode="false" sap:label="Result Value" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ValueDescription" Type="Edm.String" Nullable="false" MaxLength="60" sap:unicode="false" sap:label="Value Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+			</EntityType>
+			<EntityType Name="MerchCategories4" sap:content-version="1">
+				<Key>
+					<PropertyRef Name="MerchCategory" />
+				</Key>
+				<Property Name="MerchCategory" Type="Edm.String" Nullable="false" MaxLength="9" sap:unicode="false" sap:label="Mdse Catgry" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="SearchText" Type="Edm.String" Nullable="false" MaxLength="50" sap:unicode="false" sap:label="Search Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="MerchCategoryDesc" Type="Edm.String" Nullable="false" MaxLength="60" sap:unicode="false" sap:label="Merchandise Category" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+			</EntityType>
+			<EntityType Name="ArticleResultMessage" sap:content-version="1">
+				<Key>
+					<PropertyRef Name="ScenarioID" />
+					<PropertyRef Name="ProductID" />
+					<PropertyRef Name="Characteristic" />
+				</Key>
+				<Property Name="Message" Type="ZDCOP_DATACOP_SRV.MessageContainer" Nullable="false" />
+				<Property Name="ScenarioID" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Scenario" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ProductID" Type="Edm.String" Nullable="false" MaxLength="18" sap:unicode="false" sap:label="Article" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Characteristic" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Attribute" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<NavigationProperty Name="ArticleResultMsgToScenario" Relationship="ZDCOP_DATACOP_SRV.ScenarioToArticleResultMsg" FromRole="ToRole_ScenarioToArticleResultMsg" ToRole="FromRole_ScenarioToArticleResultMsg" />
+			</EntityType>
+			<EntityType Name="LSUSArticleResultMessage" sap:content-version="1">
+				<Key>
+					<PropertyRef Name="Scenarioid" />
+					<PropertyRef Name="Productid" />
+					<PropertyRef Name="Characteristic" />
+					<PropertyRef Name="Language" />
+				</Key>
+				<Property Name="Message" Type="ZDCOP_DATACOP_SRV.MessageContainer" Nullable="false" />
+				<Property Name="Scenarioid" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Scenario" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Productid" Type="Edm.String" Nullable="false" MaxLength="18" sap:unicode="false" sap:label="Article" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Characteristic" Type="Edm.String" Nullable="false" MaxLength="40" sap:unicode="false" sap:label="Attribute" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Language" Type="Edm.String" Nullable="false" MaxLength="2" sap:unicode="false" sap:label="Language" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Uom" Type="Edm.String" Nullable="false" MaxLength="3" sap:unicode="false" sap:label="Base Unit" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" sap:semantics="unit-of-measure" />
+			</EntityType>
+			<ComplexType Name="Product">
+				<Property Name="MerchandiseCategory4" Type="Edm.String" Nullable="false" MaxLength="9" sap:label="Merchandise Category" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="MaterialDescription" Type="Edm.String" Nullable="false" MaxLength="40" sap:label="Material Description" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="CompText" Type="Edm.String" Nullable="false" sap:label="Ingredients" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+			</ComplexType>
+			<ComplexType Name="ValueDataType">
+				<Property Name="DataType" Type="Edm.String" Nullable="false" MaxLength="30" sap:label="Data Type" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="MaxLength" Type="Edm.Int32" Nullable="false" sap:label="Data Type Max Length" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="TypePrecision" Type="Edm.Int32" Nullable="false" sap:label="Data Type Precision" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="TypeScale" Type="Edm.Int32" Nullable="false" sap:label="Data Type Scale" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+			</ComplexType>
+			<ComplexType Name="ArticleResultOutput">
+				<Property Name="CurrentValue" Type="Edm.String" Nullable="false" MaxLength="30" sap:label="Original value" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ProposedValue" Type="Edm.String" Nullable="false" MaxLength="30" sap:label="Proposed value" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="InputValue" Type="Edm.String" Nullable="false" MaxLength="80" sap:label="Update value" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="Confidence" Type="Edm.String" Nullable="false" MaxLength="6" sap:label="Confidence" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="UserDecision" Type="Edm.String" Nullable="false" MaxLength="1" sap:label="User Decision" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="ValueDataType" Type="ZDCOP_DATACOP_SRV.ValueDataType" Nullable="false" />
+			</ComplexType>
+			<ComplexType Name="MessageContainer">
+				<Property Name="ProcessingMsg" Type="Edm.String" Nullable="false" MaxLength="100" sap:label="Message Text" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="EtagError" Type="Edm.Boolean" Nullable="false" sap:label="TRUE" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+				<Property Name="NotFoundError" Type="Edm.Boolean" Nullable="false" sap:label="TRUE" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false" />
+			</ComplexType>
+			<Association Name="ScenarioToCharacteristics" sap:content-version="1">
+				<End Type="ZDCOP_DATACOP_SRV.Scenario" Multiplicity="1" Role="FromRole_ScenarioToCharacteristics" />
+				<End Type="ZDCOP_DATACOP_SRV.CharacteristicEntity" Multiplicity="*" Role="ToRole_ScenarioToCharacteristics" />
+				<ReferentialConstraint>
+					<Principal Role="FromRole_ScenarioToCharacteristics">
+						<PropertyRef Name="ScenarioID" />
+					</Principal>
+					<Dependent Role="ToRole_ScenarioToCharacteristics">
+						<PropertyRef Name="ScenarioID" />
+					</Dependent>
+				</ReferentialConstraint>
+			</Association>
+			<Association Name="ScenarioToArticleResults" sap:content-version="1">
+				<End Type="ZDCOP_DATACOP_SRV.Scenario" Multiplicity="1" Role="FromRole_ScenarioToArticleResults" />
+				<End Type="ZDCOP_DATACOP_SRV.ArticleResult" Multiplicity="*" Role="ToRole_ScenarioToArticleResults" />
+				<ReferentialConstraint>
+					<Principal Role="FromRole_ScenarioToArticleResults">
+						<PropertyRef Name="ScenarioID" />
+					</Principal>
+					<Dependent Role="ToRole_ScenarioToArticleResults">
+						<PropertyRef Name="ScenarioID" />
+					</Dependent>
+				</ReferentialConstraint>
+			</Association>
+			<Association Name="ScenarioToLSUSArticleResult" sap:content-version="1">
+				<End Type="ZDCOP_DATACOP_SRV.Scenario" Multiplicity="1" Role="FromRole_ScenarioToLSUSArticleResult" />
+				<End Type="ZDCOP_DATACOP_SRV.LSUSArticleResult" Multiplicity="*" Role="ToRole_ScenarioToLSUSArticleResult" />
+				<ReferentialConstraint>
+					<Principal Role="FromRole_ScenarioToLSUSArticleResult">
+						<PropertyRef Name="ScenarioID" />
+					</Principal>
+					<Dependent Role="ToRole_ScenarioToLSUSArticleResult">
+						<PropertyRef Name="ScenarioID" />
+					</Dependent>
+				</ReferentialConstraint>
+			</Association>
+			<Association Name="ScenarioToArticleResultMsg" sap:content-version="1">
+				<End Type="ZDCOP_DATACOP_SRV.Scenario" Multiplicity="1" Role="FromRole_ScenarioToArticleResultMsg" />
+				<End Type="ZDCOP_DATACOP_SRV.ArticleResultMessage" Multiplicity="*" Role="ToRole_ScenarioToArticleResultMsg" />
+				<ReferentialConstraint>
+					<Principal Role="FromRole_ScenarioToArticleResultMsg">
+						<PropertyRef Name="ScenarioID" />
+					</Principal>
+					<Dependent Role="ToRole_ScenarioToArticleResultMsg">
+						<PropertyRef Name="ScenarioID" />
+					</Dependent>
+				</ReferentialConstraint>
+			</Association>
+			<Association Name="ScenarioToLSUSArtResMsg" sap:content-version="1">
+				<End Type="ZDCOP_DATACOP_SRV.Scenario" Multiplicity="1" Role="FromRole_ScenarioToLSUSArtResMsg" />
+				<End Type="ZDCOP_DATACOP_SRV.LSUSArticleResultMessage" Multiplicity="*" Role="ToRole_ScenarioToLSUSArtResMsg" />
+				<ReferentialConstraint>
+					<Principal Role="FromRole_ScenarioToLSUSArtResMsg">
+						<PropertyRef Name="ScenarioID" />
+					</Principal>
+					<Dependent Role="ToRole_ScenarioToLSUSArtResMsg">
+						<PropertyRef Name="Scenarioid" />
+					</Dependent>
+				</ReferentialConstraint>
+			</Association>
+			<Association Name="ArticleResultToArticleResultValues" sap:content-version="1">
+				<End Type="ZDCOP_DATACOP_SRV.ArticleResult" Multiplicity="1" Role="FromRole_ArticleResultToArticleResultValues" />
+				<End Type="ZDCOP_DATACOP_SRV.ArticleResultValues" Multiplicity="*" Role="ToRole_ArticleResultToArticleResultValues" />
+				<ReferentialConstraint>
+					<Principal Role="FromRole_ArticleResultToArticleResultValues">
+						<PropertyRef Name="Characteristic" />
+						<PropertyRef Name="ProductID" />
+						<PropertyRef Name="ScenarioID" />
+					</Principal>
+					<Dependent Role="ToRole_ArticleResultToArticleResultValues">
+						<PropertyRef Name="Characteristic" />
+						<PropertyRef Name="ProductID" />
+						<PropertyRef Name="ScenarioID" />
+					</Dependent>
+				</ReferentialConstraint>
+			</Association>
+			<Association Name="LSUSArticleResultToLSUSValues" sap:content-version="1">
+				<End Type="ZDCOP_DATACOP_SRV.LSUSArticleResult" Multiplicity="1" Role="FromRole_LSUSArticleResultToLSUSValues" />
+				<End Type="ZDCOP_DATACOP_SRV.LSUSArticleResultValues" Multiplicity="*" Role="ToRole_LSUSArticleResultToLSUSValues" />
+				<ReferentialConstraint>
+					<Principal Role="FromRole_LSUSArticleResultToLSUSValues">
+						<PropertyRef Name="Characteristic" />
+						<PropertyRef Name="ProductID" />
+						<PropertyRef Name="ScenarioID" />
+						<PropertyRef Name="Language" />
+						<PropertyRef Name="UoM" />
+					</Principal>
+					<Dependent Role="ToRole_LSUSArticleResultToLSUSValues">
+						<PropertyRef Name="Characteristic" />
+						<PropertyRef Name="ProductID" />
+						<PropertyRef Name="ScenarioID" />
+						<PropertyRef Name="Language" />
+						<PropertyRef Name="UoM" />
+					</Dependent>
+				</ReferentialConstraint>
+			</Association>
+			<Association Name="LSUSArticleResultToLSUSArticleResultVal" sap:content-version="1">
+				<End Type="ZDCOP_DATACOP_SRV.LSUSArticleResult" Multiplicity="1" Role="FromRole_LSUSArticleResultToLSUSArticleResultVal" />
+				<End Type="ZDCOP_DATACOP_SRV.LSUSArticleResultValues" Multiplicity="*" Role="ToRole_LSUSArticleResultToLSUSArticleResultVal" />
+				<ReferentialConstraint>
+					<Principal Role="FromRole_LSUSArticleResultToLSUSArticleResultVal">
+						<PropertyRef Name="UoM" />
+						<PropertyRef Name="Language" />
+						<PropertyRef Name="Characteristic" />
+						<PropertyRef Name="ProductID" />
+						<PropertyRef Name="ScenarioID" />
+					</Principal>
+					<Dependent Role="ToRole_LSUSArticleResultToLSUSArticleResultVal">
+						<PropertyRef Name="UoM" />
+						<PropertyRef Name="Language" />
+						<PropertyRef Name="Characteristic" />
+						<PropertyRef Name="ProductID" />
+						<PropertyRef Name="ScenarioID" />
+					</Dependent>
+				</ReferentialConstraint>
+			</Association>
+			<EntityContainer Name="ZDCOP_DATACOP_SRV_Entities" m:IsDefaultEntityContainer="true" sap:supported-formats="atom json xlsx">
+				<EntitySet Name="Scenarios" EntityType="ZDCOP_DATACOP_SRV.Scenario" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1" />
+				<EntitySet Name="ArticleResults" EntityType="ZDCOP_DATACOP_SRV.ArticleResult" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1" />
+				<EntitySet Name="LSUSArticleResults" EntityType="ZDCOP_DATACOP_SRV.LSUSArticleResult" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1" />
+				<EntitySet Name="ProductEntities" EntityType="ZDCOP_DATACOP_SRV.ProductEntity" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1" />
+				<EntitySet Name="CharacteristicEntities" EntityType="ZDCOP_DATACOP_SRV.CharacteristicEntity" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1" />
+				<EntitySet Name="ArticleResultValues" EntityType="ZDCOP_DATACOP_SRV.ArticleResultValues" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1" />
+				<EntitySet Name="LSUSArticleResultValues" EntityType="ZDCOP_DATACOP_SRV.LSUSArticleResultValues" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1" />
+				<EntitySet Name="MerchCategories4Set" EntityType="ZDCOP_DATACOP_SRV.MerchCategories4" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:content-version="1" />
+				<EntitySet Name="ArticleResultMessages" EntityType="ZDCOP_DATACOP_SRV.ArticleResultMessage" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1" />
+				<EntitySet Name="LSUSArticleResultMessages" EntityType="ZDCOP_DATACOP_SRV.LSUSArticleResultMessage" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1" />
+				<AssociationSet Name="ScenarioToLSUSArtResMsgSet" Association="ZDCOP_DATACOP_SRV.ScenarioToLSUSArtResMsg" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+					<End EntitySet="Scenarios" Role="FromRole_ScenarioToLSUSArtResMsg" />
+					<End EntitySet="LSUSArticleResultMessages" Role="ToRole_ScenarioToLSUSArtResMsg" />
+				</AssociationSet>
+				<AssociationSet Name="ScenarioToLSUSArticleResultSet" Association="ZDCOP_DATACOP_SRV.ScenarioToLSUSArticleResult" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+					<End EntitySet="Scenarios" Role="FromRole_ScenarioToLSUSArticleResult" />
+					<End EntitySet="LSUSArticleResults" Role="ToRole_ScenarioToLSUSArticleResult" />
+				</AssociationSet>
+				<AssociationSet Name="ScenarioToArticleResultsSet" Association="ZDCOP_DATACOP_SRV.ScenarioToArticleResults" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+					<End EntitySet="Scenarios" Role="FromRole_ScenarioToArticleResults" />
+					<End EntitySet="ArticleResults" Role="ToRole_ScenarioToArticleResults" />
+				</AssociationSet>
+				<AssociationSet Name="ArticleResultToArticleResultValuesSet" Association="ZDCOP_DATACOP_SRV.ArticleResultToArticleResultValues" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+					<End EntitySet="ArticleResults" Role="FromRole_ArticleResultToArticleResultValues" />
+					<End EntitySet="ArticleResultValues" Role="ToRole_ArticleResultToArticleResultValues" />
+				</AssociationSet>
+				<AssociationSet Name="LSUSArticleResultToLSUSValuesSet" Association="ZDCOP_DATACOP_SRV.LSUSArticleResultToLSUSValues" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+					<End EntitySet="LSUSArticleResults" Role="FromRole_LSUSArticleResultToLSUSValues" />
+					<End EntitySet="LSUSArticleResultValues" Role="ToRole_LSUSArticleResultToLSUSValues" />
+				</AssociationSet>
+				<AssociationSet Name="ScenarioToCharacteristicsSet" Association="ZDCOP_DATACOP_SRV.ScenarioToCharacteristics" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+					<End EntitySet="Scenarios" Role="FromRole_ScenarioToCharacteristics" />
+					<End EntitySet="CharacteristicEntities" Role="ToRole_ScenarioToCharacteristics" />
+				</AssociationSet>
+				<AssociationSet Name="ScenarioToArticleResultMsgSet" Association="ZDCOP_DATACOP_SRV.ScenarioToArticleResultMsg" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+					<End EntitySet="Scenarios" Role="FromRole_ScenarioToArticleResultMsg" />
+					<End EntitySet="ArticleResultMessages" Role="ToRole_ScenarioToArticleResultMsg" />
+				</AssociationSet>
+				<AssociationSet Name="LSUSArticleResultToLSUSArticleResultVSet" Association="ZDCOP_DATACOP_SRV.LSUSArticleResultToLSUSArticleResultVal" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+					<End EntitySet="LSUSArticleResults" Role="FromRole_LSUSArticleResultToLSUSArticleResultVal" />
+					<End EntitySet="LSUSArticleResultValues" Role="ToRole_LSUSArticleResultToLSUSArticleResultVal" />
+				</AssociationSet>
+			</EntityContainer>
+			<atom:link rel="self" href="https://flp.dev.sap.onrimi.net/sap/opu/odata/sap/ZDCOP_DATACOP_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom" />
+			<atom:link rel="latest-version" href="https://flp.dev.sap.onrimi.net/sap/opu/odata/sap/ZDCOP_DATACOP_SRV/$metadata" xmlns:atom="http://www.w3.org/2005/Atom" />
+		</Schema>
+	</edmx:DataServices>
+</edmx:Edmx>

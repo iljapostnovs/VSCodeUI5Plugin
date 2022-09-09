@@ -1,3 +1,6 @@
+## 0.14.32 (09-09-2022)
+* Add typescript interface generation for OData entities and id to type mapping in views and fragments
+
 ## 0.14.31 (25-08-2022)
 * Change default UI5 Version to 1.84.28 ([#255](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/255))
 

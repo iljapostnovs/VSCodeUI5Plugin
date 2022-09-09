@@ -70,6 +70,7 @@ export class UI5Plugin {
 		});
 		await parser.initialize(workspaceFolders, globalStoragePath);
 		CommandRegistrator.register(false);
+		CommandRegistrator.registerUniqueCommands();
 		this.parser = UI5Parser.getInstance();
 		await CompletionItemRegistrator.register();
 		FileWatcherMediator.register();
