@@ -64,8 +64,9 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 	private _getNavigationType(navigation: INavigation, associations: IAssociation[]) {
 		const association = associations.find(assoc => assoc.name === navigation.relationship);
 		const role = navigation.to === association?.to.role ? association?.to : association?.from;
+		const isMultiple = role?.multiplicity === "*";
 
-		return role ? (role?.type + (role?.multiplicity === "*" ? "[]" : "")) : "unknown";
+		return role ? isMultiple ? `{ results: ${role?.type}[] }` : role.type : "unknown";
 	}
 
 	private _mapType(type: string) {
