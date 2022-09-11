@@ -1,3 +1,6 @@
+## 0.14.33 (11-09-2022)
+* OData interface generator bugfix
+
 ## 0.14.32 (09-09-2022)
 * Add typescript interface generation for OData entities and id to type mapping in views and fragments
 
