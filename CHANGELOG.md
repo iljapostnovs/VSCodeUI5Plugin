@@ -1,3 +1,6 @@
+## 0.14.34 (13-09-2022)
+* XML ID -> Control interface generator bugfix
+
 ## 0.14.33 (11-09-2022)
 * OData interface generator bugfix
 

@@ -14,7 +14,7 @@ export class TSXMLInterfaceGenerator implements ITSInterfaceGenerator {
 			return `import ${className} from "${toImport}";`;
 		});
 		const aInterfaces = mInterfaceData.map(interfaceData => {
-			const sExtends = interfaceData.extends.join(", ");
+			const sExtends = [... new Set(interfaceData.extends)].join(", ");
 			return `export interface ${interfaceData.name}${sExtends ? ` extends ${sExtends}` : ""} {\n\t${interfaceData.rows}\n}`;
 		});
 
