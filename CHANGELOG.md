@@ -1,3 +1,6 @@
+## 0.14.35 (16-09-2022)
+* OData interface generator now generates interface for entity set data
+
 ## 0.14.34 (13-09-2022)
 * XML ID -> Control interface generator bugfix
 
