@@ -11,15 +11,26 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 		const aComplexTypeKeyInterfaces = metadata.complexTypes.map(complexType => this._buildInterfaceForEntityKeys(complexType));
 		const aEntityTypeInterfaces = metadata.entityTypes.map(entityType => this._buildInterfaceForEntity(entityType, metadata.associations));
 		const aComplexTypeInterfaces = metadata.complexTypes.map(complexType => this._buildInterfaceForEntity(complexType, metadata.associations));
+		const aEntityDataInterfaces = this._buildInterfacesForEntitySets(metadata);
 
 		const aInterfaces = [
 			aEntityTypeKeyInterfaces,
 			aEntityTypeInterfaces,
 			aComplexTypeKeyInterfaces,
-			aComplexTypeInterfaces
+			aComplexTypeInterfaces,
+			aEntityDataInterfaces
 		].flat();
 
 		return aInterfaces.join("\n\n");
+	}
+
+	private _buildInterfacesForEntitySets(metadata: XMLMetadataParser) {
+		const aInterfaceData = metadata.entityTypes.map(entityType => {
+			const entityTypeName = entityType.name;
+			return `"${entityType.entitySetName}": {\n\t\tkeys: ${entityTypeName}Keys;\n\t\ttype: ${entityTypeName};\n\t\ttypeName: "${entityTypeName}";\n\t};`
+		});
+
+		return [`export type EntitySets = {\n\t${aInterfaceData.join("\n\t")}\n};`];
 	}
 
 	private _buildInterfaceForEntityKeys(entity: IEntityType) {
