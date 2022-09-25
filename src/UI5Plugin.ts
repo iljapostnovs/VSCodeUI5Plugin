@@ -21,6 +21,7 @@ import { TSClassFactory } from "./typescript/parsing/TSClassFactory";
 import { ControllerModelViewSwitcher } from "./classes/vscommands/switchers/ViewControllerSwitcher";
 import { InsertCustomClassNameCommand } from "./classes/vscommands/InsertCustomClassNameCommand";
 import { UI5TSParser } from "./typescript/parsing/UI5TSParser";
+import { ExportToI18NCommand } from "./classes/vscommands/i18ncommand/ExportToI18NCommand";
 
 export class UI5Plugin {
 	private static _instance?: UI5Plugin;
@@ -193,6 +194,12 @@ export class UI5Plugin {
 			InsertCustomClassNameCommand.insertCustomClassName
 		);
 		UI5Plugin.getInstance().addDisposable(insertCustomClassNameCommand);
+
+		const exportToI18NCommand = vscode.commands.registerCommand(
+			"ui5plugin.exportToi18n",
+			ExportToI18NCommand.export
+		);
+		UI5Plugin.getInstance().addDisposable(exportToI18NCommand);
 	}
 
 	static registerFallbackCommands() {

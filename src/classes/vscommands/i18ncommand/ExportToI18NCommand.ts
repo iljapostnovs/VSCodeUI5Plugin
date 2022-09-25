@@ -121,11 +121,11 @@ export class ExportToI18NCommand {
 					return returnString;
 				})();
 
-				let currentlyOpenedFileFSName = currentlyOpenedFileFSPath.replace(".controller.js", "");
-				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".js", "");
-				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".view.xml", "");
-				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".fragment.xml", "");
-				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".xml", "");
+				let currentlyOpenedFileFSName = currentlyOpenedFileFSPath.replace(/\.controller\.(ts|ts)$/, "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(/\.(ts|js)$/, "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(/\.view\.xml$/, "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(/\.fragment\.xml$/, "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(/\.xml$/, "");
 				const nameParts = currentlyOpenedFileFSName.split(path.sep);
 				const fileName = nameParts[nameParts.length - 1];
 
@@ -183,8 +183,8 @@ export class ExportToI18NCommand {
 		const editor = vscode.window.activeTextEditor;
 		if (editor) {
 			const currentlyOpenedFileFSPath = editor.document.fileName;
-			const openedFileIsController = currentlyOpenedFileFSPath.endsWith(".controller.js");
-			const openedFileIsJSFile = currentlyOpenedFileFSPath.endsWith(".js");
+			const openedFileIsController = currentlyOpenedFileFSPath.endsWith(".controller.js") || currentlyOpenedFileFSPath.endsWith(".controller.ts");
+			const openedFileIsJSFile = currentlyOpenedFileFSPath.endsWith(".js") || currentlyOpenedFileFSPath.endsWith(".ts");
 			const openedFileIsXMLFile = currentlyOpenedFileFSPath.endsWith(".xml");
 
 			if (openedFileIsController) {

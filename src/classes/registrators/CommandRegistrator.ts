@@ -16,14 +16,38 @@ export class CommandRegistrator {
 	static register(metadataLoaded: boolean) {
 		/* Commands */
 		if (metadataLoaded) {
-			const insertUIDefineCommand = vscode.commands.registerCommand("ui5plugin.moveDefineToFunctionParameters", SAPUIDefineCommand.insertUIDefine);
-			const switcherCommand = vscode.commands.registerCommand("ui5plugin.switchBetweenVC", ControllerModelViewSwitcher.switchBetweenControllerModelView);
-			const exportToI18NCommand = vscode.commands.registerCommand("ui5plugin.exportToi18n", ExportToI18NCommand.export);
-			const insertCustomClassNameCommand = vscode.commands.registerCommand("ui5plugin.insertCustomClassName", InsertCustomClassNameCommand.insertCustomClassName);
-			const generateUMLClassDiagramCommand = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagram", UMLGeneratorCommand.generateUMLForCurrentClass);
-			const generateUMLClassDiagramForWholeProject = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagramsForWholeProject", UMLGeneratorCommand.generateUMLForWholeProject);
-			const generateERDiagram = vscode.commands.registerCommand("ui5plugin.generateERDiagramFromMetadata", GenerateERDiagramCommand.generateERDiagram);
-			const generateTypeDefDoc = vscode.commands.registerCommand("ui5plugin.generateJSTypeDefDocFromMetadata", new GenerateTypeJSDocCommand().execute);
+			const insertUIDefineCommand = vscode.commands.registerCommand(
+				"ui5plugin.moveDefineToFunctionParameters",
+				SAPUIDefineCommand.insertUIDefine
+			);
+			const switcherCommand = vscode.commands.registerCommand(
+				"ui5plugin.switchBetweenVC",
+				ControllerModelViewSwitcher.switchBetweenControllerModelView
+			);
+			const exportToI18NCommand = vscode.commands.registerCommand(
+				"ui5plugin.exportToi18n",
+				ExportToI18NCommand.export
+			);
+			const insertCustomClassNameCommand = vscode.commands.registerCommand(
+				"ui5plugin.insertCustomClassName",
+				InsertCustomClassNameCommand.insertCustomClassName
+			);
+			const generateUMLClassDiagramCommand = vscode.commands.registerCommand(
+				"ui5plugin.generateUMLClassDiagram",
+				UMLGeneratorCommand.generateUMLForCurrentClass
+			);
+			const generateUMLClassDiagramForWholeProject = vscode.commands.registerCommand(
+				"ui5plugin.generateUMLClassDiagramsForWholeProject",
+				UMLGeneratorCommand.generateUMLForWholeProject
+			);
+			const generateERDiagram = vscode.commands.registerCommand(
+				"ui5plugin.generateERDiagramFromMetadata",
+				GenerateERDiagramCommand.generateERDiagram
+			);
+			const generateTypeDefDoc = vscode.commands.registerCommand(
+				"ui5plugin.generateJSTypeDefDocFromMetadata",
+				new GenerateTypeJSDocCommand().execute
+			);
 
 			UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
 			UI5Plugin.getInstance().addDisposable(switcherCommand);
@@ -34,7 +58,10 @@ export class CommandRegistrator {
 			UI5Plugin.getInstance().addDisposable(generateERDiagram);
 			UI5Plugin.getInstance().addDisposable(generateTypeDefDoc);
 		} else {
-			const clearCacheCommand = vscode.commands.registerCommand("ui5plugin.clearCache", ClearCacheCommand.clearCache);
+			const clearCacheCommand = vscode.commands.registerCommand(
+				"ui5plugin.clearCache",
+				ClearCacheCommand.clearCache
+			);
 			UI5Plugin.getInstance().addDisposable(clearCacheCommand);
 
 			/* Events */
@@ -45,15 +72,42 @@ export class CommandRegistrator {
 	}
 
 	static registerFallbackCommands() {
-		const insertUIDefineCommand = vscode.commands.registerCommand("ui5plugin.moveDefineToFunctionParameters", FallbackCommand.notifyUserThatThisIsNotUI5Project);
-		const switcherCommand = vscode.commands.registerCommand("ui5plugin.switchBetweenVC", FallbackCommand.notifyUserThatThisIsNotUI5Project);
-		const exportToI18NCommand = vscode.commands.registerCommand("ui5plugin.exportToi18n", FallbackCommand.notifyUserThatThisIsNotUI5Project);
-		const insertCustomClassNameCommand = vscode.commands.registerCommand("ui5plugin.insertCustomClassName", FallbackCommand.notifyUserThatThisIsNotUI5Project);
-		const generateUMLClassDiagramCommand = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagram", FallbackCommand.notifyUserThatThisIsNotUI5Project);
-		const generateUMLClassDiagramForWholeProject = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagramsForWholeProject", FallbackCommand.notifyUserThatThisIsNotUI5Project);
-		const clearCacheCommand = vscode.commands.registerCommand("ui5plugin.clearCache", FallbackCommand.notifyUserThatThisIsNotUI5Project);
-		const generateERDiagram = vscode.commands.registerCommand("ui5plugin.generateERDiagramFromMetadata", FallbackCommand.notifyUserThatThisIsNotUI5Project);
-		const generateTypeDefDoc = vscode.commands.registerCommand("ui5plugin.generateJSTypeDefDocFromMetadata", FallbackCommand.notifyUserThatThisIsNotUI5Project);
+		const insertUIDefineCommand = vscode.commands.registerCommand(
+			"ui5plugin.moveDefineToFunctionParameters",
+			FallbackCommand.notifyUserThatThisIsNotUI5Project
+		);
+		const switcherCommand = vscode.commands.registerCommand(
+			"ui5plugin.switchBetweenVC",
+			FallbackCommand.notifyUserThatThisIsNotUI5Project
+		);
+		const exportToI18NCommand = vscode.commands.registerCommand(
+			"ui5plugin.exportToi18n",
+			FallbackCommand.notifyUserThatThisIsNotUI5Project
+		);
+		const insertCustomClassNameCommand = vscode.commands.registerCommand(
+			"ui5plugin.insertCustomClassName",
+			FallbackCommand.notifyUserThatThisIsNotUI5Project
+		);
+		const generateUMLClassDiagramCommand = vscode.commands.registerCommand(
+			"ui5plugin.generateUMLClassDiagram",
+			FallbackCommand.notifyUserThatThisIsNotUI5Project
+		);
+		const generateUMLClassDiagramForWholeProject = vscode.commands.registerCommand(
+			"ui5plugin.generateUMLClassDiagramsForWholeProject",
+			FallbackCommand.notifyUserThatThisIsNotUI5Project
+		);
+		const clearCacheCommand = vscode.commands.registerCommand(
+			"ui5plugin.clearCache",
+			FallbackCommand.notifyUserThatThisIsNotUI5Project
+		);
+		const generateERDiagram = vscode.commands.registerCommand(
+			"ui5plugin.generateERDiagramFromMetadata",
+			FallbackCommand.notifyUserThatThisIsNotUI5Project
+		);
+		const generateTypeDefDoc = vscode.commands.registerCommand(
+			"ui5plugin.generateJSTypeDefDocFromMetadata",
+			FallbackCommand.notifyUserThatThisIsNotUI5Project
+		);
 
 		UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
 		UI5Plugin.getInstance().addDisposable(switcherCommand);
@@ -67,29 +121,34 @@ export class CommandRegistrator {
 	}
 
 	static registerUniqueCommands() {
-		const generateTSXMLFileInterfacesCommand = vscode.commands.registerCommand("ui5plugin.generateTSXMLFileInterfaces", async () => {
-			const oTSInterfaceGenerator = new TSXMLInterfaceGenerator();
-			const sContent = await oTSInterfaceGenerator.generate();
+		const generateTSXMLFileInterfacesCommand = vscode.commands.registerCommand(
+			"ui5plugin.generateTSXMLFileInterfaces",
+			async () => {
+				const oTSInterfaceGenerator = new TSXMLInterfaceGenerator();
+				const sContent = await oTSInterfaceGenerator.generate();
 
-			const document = await vscode.workspace.openTextDocument({
-				content: sContent,
-				language: "typescript"
-			});
-			await vscode.window.showTextDocument(document);
-		});
+				const document = await vscode.workspace.openTextDocument({
+					content: sContent,
+					language: "typescript"
+				});
+				await vscode.window.showTextDocument(document);
+			}
+		);
 		UI5Plugin.getInstance().addDisposable(generateTSXMLFileInterfacesCommand);
 
+		const generateODataInterfaceCommand = vscode.commands.registerCommand(
+			"ui5plugin.generateTSODataInterfaces",
+			async () => {
+				const oTSInterfaceGenerator = new TSODataInterfaceGenerator();
+				const sContent = await oTSInterfaceGenerator.generate();
 
-		const generateODataInterfaceCommand = vscode.commands.registerCommand("ui5plugin.generateTSODataInterfaces", async () => {
-			const oTSInterfaceGenerator = new TSODataInterfaceGenerator();
-			const sContent = await oTSInterfaceGenerator.generate();
-
-			const document = await vscode.workspace.openTextDocument({
-				content: sContent,
-				language: "typescript"
-			});
-			await vscode.window.showTextDocument(document);
-		});
+				const document = await vscode.workspace.openTextDocument({
+					content: sContent,
+					language: "typescript"
+				});
+				await vscode.window.showTextDocument(document);
+			}
+		);
 		UI5Plugin.getInstance().addDisposable(generateODataInterfaceCommand);
 	}
 }
