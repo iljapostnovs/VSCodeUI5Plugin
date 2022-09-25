@@ -6,7 +6,14 @@ import {
 	IUIMethod
 } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { IViewsAndFragmentsCache } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-
+interface IUIDefine {
+	path: string;
+	className: string;
+	classNameDotNotation: string;
+	start: number;
+	end: number;
+	acornNode: any;
+}
 export interface UI5Ignoreable {
 	ui5ignored?: boolean;
 }
@@ -40,11 +47,14 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 	readonly methods: ICustomClassTSMethod[] = [];
 	readonly fields: ICustomClassTSField[] = [];
 	private readonly _cache: Record<string, any> = {};
-	readonly fsPath: string | undefined;
+
+	fsPath: string | undefined;
 	readonly classText: string;
-	readonly relatedViewsAndFragments?: IViewsAndFragmentsCache[];
+	UIDefine: IUIDefine[] = [];
+	relatedViewsAndFragments?: IViewsAndFragmentsCache[];
 	readonly tsNode: ts.ClassDeclaration;
 	private readonly _sourceFile: ts.SourceFile;
+	readonly typeChecker: ts.TypeChecker;
 	constructor(classDeclaration: ts.ClassDeclaration, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker) {
 		// const classNamespace = classDeclaration.
 		// const className =
@@ -53,6 +63,8 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 		const namespace = namespaceDoc?.comment ?? "";
 		const classNameLastPart = classDeclaration.name?.escapedText ?? "";
 		super(`${namespace}.${classNameLastPart}`);
+
+		this.typeChecker = typeChecker;
 
 		const heritageClause = classDeclaration.heritageClauses?.find(heritage => {
 			return heritage.token == ts.SyntaxKind.ExtendsKeyword;
@@ -73,12 +85,10 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 				this.parentClassNameDotNotation = parentModuleName.replace(/\//g, ".");
 			} else {
 				const declarations = parentType
-					.getSymbol()?.declarations?.filter(declaration => ts.isClassDeclaration(declaration));
+					.getSymbol()
+					?.declarations?.filter(declaration => ts.isClassDeclaration(declaration));
 				const parentClassDeclaration = declarations?.[0];
-				if (
-					parentClassDeclaration &&
-					(ts.isClassDeclaration(parentClassDeclaration))
-				) {
+				if (parentClassDeclaration && ts.isClassDeclaration(parentClassDeclaration)) {
 					const jsDocs = ts.getJSDocTags(parentClassDeclaration);
 					const namespaceDoc = jsDocs.find(jsDoc => jsDoc.tagName.escapedText === "namespace");
 					const namespace = namespaceDoc?.comment ?? "";
@@ -113,6 +123,27 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 
 		this._fillMethods(classDeclaration, typeChecker);
 		this._fillFields(classDeclaration, typeChecker);
+		this._fillUIDefine();
+	}
+
+	_fillUIDefine() {
+		const importStatements = this._sourceFile.statements
+			.filter(statement => ts.isImportDeclaration(statement))
+			.map(statement => statement as ts.ImportDeclaration);
+
+		this.UIDefine = importStatements.map(importStatement => {
+			const fullModuleName = importStatement.moduleSpecifier.getText();
+			const modulePath = fullModuleName.substring(1, fullModuleName.length - 1);
+
+			return {
+				path: modulePath,
+				className: modulePath.split("/").pop() ?? "",
+				classNameDotNotation: modulePath.replace(/\//g, "."),
+				start: importStatement.getStart(),
+				end: importStatement.getEnd(),
+				acornNode: importStatement
+			}
+		})
 	}
 
 	private _fillFields(classDeclaration: ts.ClassDeclaration, typeChecker: ts.TypeChecker) {

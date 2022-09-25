@@ -53,7 +53,7 @@ export class CommandRegistrator {
 		const generateUMLClassDiagramForWholeProject = vscode.commands.registerCommand("ui5plugin.generateUMLClassDiagramsForWholeProject", FallbackCommand.notifyUserThatThisIsNotUI5Project);
 		const clearCacheCommand = vscode.commands.registerCommand("ui5plugin.clearCache", FallbackCommand.notifyUserThatThisIsNotUI5Project);
 		const generateERDiagram = vscode.commands.registerCommand("ui5plugin.generateERDiagramFromMetadata", FallbackCommand.notifyUserThatThisIsNotUI5Project);
-		const generateTypeDefDoc = vscode.commands.registerCommand("ui5plugin.generateERDiagramFromMetadata", FallbackCommand.notifyUserThatThisIsNotUI5Project);
+		const generateTypeDefDoc = vscode.commands.registerCommand("ui5plugin.generateJSTypeDefDocFromMetadata", FallbackCommand.notifyUserThatThisIsNotUI5Project);
 
 		UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
 		UI5Plugin.getInstance().addDisposable(switcherCommand);
