@@ -4,6 +4,7 @@ import { CodeGeneratorFactory } from "../../../templateinserters/codegenerations
 import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
 import { UI5Plugin } from "../../../../UI5Plugin";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomTSClass } from "../../../../typescript/parsing/classes/CustomTSClass";
 
 export enum InsertType {
 	Method = "Method",
@@ -15,7 +16,7 @@ export class MethodInserter {
 		const classPath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(className);
 		if (classPath) {
 			const classUri = vscode.Uri.file(classPath);
-			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			const UIClass = <CustomUIClass|CustomTSClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 			let insertContent = "";
 			if (type === InsertType.Method) {
 				insertContent = CodeGeneratorFactory.createStrategy().generateFunction(memberName, params, body, tabsToAdd);

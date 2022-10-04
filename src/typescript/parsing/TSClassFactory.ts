@@ -18,6 +18,8 @@ import { IFragment, IView } from "ui5plugin-parser/dist/classes/utils/FileReader
 import { CustomTSClass } from "./classes/CustomTSClass";
 import ts = require("typescript");
 import { UI5Plugin } from "../../UI5Plugin";
+import { Node, Project, SourceFile } from "ts-morph";
+import { UI5TSParser } from "./UI5TSParser";
 
 export class TSClassFactory implements IUIClassFactory {
 	private readonly _UIClasses: IUIClassMap = {};
@@ -25,7 +27,7 @@ export class TSClassFactory implements IUIClassFactory {
 	private _getInstance(
 		className: string,
 		classDeclaration?: ts.ClassDeclaration,
-		sourceFile?: ts.SourceFile,
+		sourceFile?: SourceFile,
 		typeChecker?: ts.TypeChecker
 	) {
 		let returnClass: AbstractUIClass | undefined;
@@ -65,25 +67,58 @@ export class TSClassFactory implements IUIClassFactory {
 		classNameDotNotation: string,
 		classFileText: string,
 		force = false,
-		classDeclaration?: ts.ClassDeclaration,
-		sourceFile?: ts.SourceFile,
-		typeChecker?: ts.TypeChecker,
+		sourceFile?: SourceFile,
+		project?: Project,
 		enrichWithXMLReferences = true
 	) {
 		const classDoesNotExist = !this._UIClasses[classNameDotNotation];
 		if (
-			(force ||
-				classDoesNotExist ||
-				(<CustomTSClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length ||
-				(<CustomTSClass>this._UIClasses[classNameDotNotation]).classText !== classFileText) &&
-			classDeclaration &&
-			sourceFile &&
-			typeChecker
+			force ||
+			classDoesNotExist ||
+			(<CustomTSClass>this._UIClasses[classNameDotNotation]).classText.length !== classFileText.length ||
+			(<CustomTSClass>this._UIClasses[classNameDotNotation]).classText !== classFileText
 		) {
 			// console.time(`Class parsing for ${classNameDotNotation} took`);
-			const theClass = this._getInstance(classNameDotNotation, classDeclaration, sourceFile, typeChecker);
-			if (theClass) {
-				this._UIClasses[classNameDotNotation] = theClass;
+			if (!sourceFile && !project) {
+				const fileName = UI5TSParser.getInstance().fileReader.getClassFSPathFromClassName(classNameDotNotation);
+				project = fileName ? UI5TSParser.getInstance().getProject(fileName) : undefined;
+				sourceFile = fileName ? project?.getSourceFile(fileName) : undefined;
+			}
+
+			if (project && sourceFile) {
+				if (sourceFile.getFullText().length !== classFileText.length) {
+					const textChange: ts.TextChange = {
+						newText: classFileText,
+						span: { start: 0, length: sourceFile.getFullText().length }
+					};
+					const newSourceFile = sourceFile.applyTextChanges([textChange]);
+					sourceFile = newSourceFile;
+				}
+				const typeChecker = project.getProgram().getTypeChecker();
+				const symbol = sourceFile && typeChecker.getSymbolAtLocation(sourceFile);
+				if (symbol && classNameDotNotation) {
+					const exports = typeChecker.getExportsOfModule(symbol);
+					const theExport = exports.find(
+						theExport =>
+							theExport.getName() === "default" &&
+							theExport.getDeclarations()?.find(declaration => Node.isClassDeclaration(declaration))
+					);
+					const classDeclaration = theExport
+						?.getDeclarations()
+						?.find(declaration => Node.isClassDeclaration(declaration));
+
+					if (classDeclaration && Node.isClassDeclaration(classDeclaration)) {
+						const theClass = this._getInstance(
+							classNameDotNotation,
+							classDeclaration.compilerNode,
+							sourceFile,
+							typeChecker.compilerObject
+						);
+						if (theClass) {
+							this._UIClasses[classNameDotNotation] = theClass;
+						}
+					}
+				}
 			}
 
 			const UIClass = this._UIClasses[classNameDotNotation];
@@ -462,16 +497,18 @@ export class TSClassFactory implements IUIClassFactory {
 	}
 
 	private _getAllChildrenOfClass(UIClass: CustomTSClass, bFirstLevelinheritance = false) {
-		return bFirstLevelinheritance
-			? this.getAllCustomTSClasses().filter(CurrentUIClass => {
+		if (bFirstLevelinheritance) {
+			return this.getAllCustomTSClasses().filter(CurrentUIClass => {
 				return CurrentUIClass.parentClassNameDotNotation === UIClass.className;
-			})
-			: this.getAllCustomTSClasses().filter(CurrentUIClass => {
+			});
+		} else {
+			return this.getAllCustomTSClasses().filter(CurrentUIClass => {
 				return (
 					this.isClassAChildOfClassB(CurrentUIClass.className, UIClass.className) &&
-						UIClass.className !== CurrentUIClass.className
+					UIClass.className !== CurrentUIClass.className
 				);
 			});
+		}
 	}
 
 	public getAllCustomTSClasses(): CustomTSClass[] {

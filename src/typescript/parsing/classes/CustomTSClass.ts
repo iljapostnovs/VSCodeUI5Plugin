@@ -1,4 +1,6 @@
+import { SourceFile } from "ts-morph";
 import ts = require("typescript");
+import { UI5Parser } from "ui5plugin-parser";
 import { ICacheable } from "ui5plugin-parser/dist/classes/UI5Classes/abstraction/ICacheable";
 import {
 	AbstractUIClass,
@@ -53,16 +55,15 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 	UIDefine: IUIDefine[] = [];
 	relatedViewsAndFragments?: IViewsAndFragmentsCache[];
 	readonly tsNode: ts.ClassDeclaration;
-	private readonly _sourceFile: ts.SourceFile;
+	private readonly _sourceFile: SourceFile;
 	readonly typeChecker: ts.TypeChecker;
-	constructor(classDeclaration: ts.ClassDeclaration, sourceFile: ts.SourceFile, typeChecker: ts.TypeChecker) {
-		// const classNamespace = classDeclaration.
-		// const className =
-		const jsDocs = ts.getJSDocTags(classDeclaration);
-		const namespaceDoc = jsDocs.find(jsDoc => jsDoc.tagName.escapedText === "namespace");
-		const namespace = namespaceDoc?.comment ?? "";
-		const classNameLastPart = classDeclaration.name?.escapedText ?? "";
-		super(`${namespace}.${classNameLastPart}`);
+	constructor(classDeclaration: ts.ClassDeclaration, sourceFile: SourceFile, typeChecker: ts.TypeChecker) {
+		// const jsDocs = ts.getJSDocTags(classDeclaration);
+		// const namespaceDoc = jsDocs.find(jsDoc => jsDoc.tagName.escapedText === "namespace");
+		// const namespace = namespaceDoc?.comment ?? "";
+		// const classNameLastPart = classDeclaration.name?.escapedText ?? "";
+		const className = UI5Parser.getInstance().fileReader.getClassNameFromPath(sourceFile.compilerNode.fileName);
+		super(className ?? "");
 
 		this.typeChecker = typeChecker;
 
@@ -118,7 +119,7 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 		this.classText = sourceFile.getFullText();
 
 		this._sourceFile = sourceFile;
-		this.fsPath = sourceFile.fileName;
+		this.fsPath = sourceFile.compilerNode.fileName;
 		this.tsNode = classDeclaration;
 
 		this._fillMethods(classDeclaration, typeChecker);
@@ -127,7 +128,7 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 	}
 
 	_fillUIDefine() {
-		const importStatements = this._sourceFile.statements
+		const importStatements = this._sourceFile.compilerNode.statements
 			.filter(statement => ts.isImportDeclaration(statement))
 			.map(statement => statement as ts.ImportDeclaration);
 
@@ -142,8 +143,8 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 				start: importStatement.getStart(),
 				end: importStatement.getEnd(),
 				acornNode: importStatement
-			}
-		})
+			};
+		});
 	}
 
 	private _fillFields(classDeclaration: ts.ClassDeclaration, typeChecker: ts.TypeChecker) {
@@ -190,6 +191,7 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 		const UIMethods: ICustomClassTSMethod[] = methods.map(method => {
 			const jsDocs = ts.getJSDocTags(method);
 			const ui5IgnoreDoc = jsDocs.find(jsDoc => jsDoc.tagName.escapedText === "ui5ignore");
+			const position = this._sourceFile.compilerNode.getLineAndCharacterOfPosition(method.getStart());
 			return {
 				ui5ignored: !!ui5IgnoreDoc,
 				owner: this.className,
@@ -218,10 +220,19 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 					};
 				}),
 				name: method.name.getText(),
+				position: method.getStart(),
 				deprecated: jsDocs.some(jsDoc => ts.isJSDocDeprecatedTag(jsDoc)),
 				description: "",
 				isEventHandler: false,
-				tsNode: method
+				tsNode: method,
+				memberPropertyNode: position && {
+					loc: {
+						start: {
+							line: position.line + 1,
+							column: position.character
+						}
+					}
+				}
 			};
 		});
 

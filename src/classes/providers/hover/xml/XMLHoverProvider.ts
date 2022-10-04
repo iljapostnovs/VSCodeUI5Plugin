@@ -5,6 +5,7 @@ import { StandardUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Par
 import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
 import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
 import * as vscode from "vscode";
+import { CustomTSClass, ICustomClassTSMethod } from "../../../../typescript/parsing/classes/CustomTSClass";
 import { UI5Plugin } from "../../../../UI5Plugin";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 
@@ -56,7 +57,7 @@ export class XMLHoverProvider {
 						const text = `**${value.text}**: ${value.description}`;
 						markdownString.appendMarkdown(text);
 						hover = new vscode.Hover(markdownString);
-					} else if (responsibleUIClass && responsibleUIClass instanceof CustomUIClass && responsibleUIClass.classText && method) {
+					} else if (responsibleUIClass && (responsibleUIClass instanceof CustomUIClass || responsibleUIClass instanceof CustomTSClass) && responsibleUIClass.classText && method) {
 						const customMethod = method as ICustomClassUIMethod;
 						if (customMethod.acornNode) {
 							const methodText = responsibleUIClass.classText.substring(customMethod.acornNode.start, customMethod.acornNode.end);
@@ -64,6 +65,15 @@ export class XMLHoverProvider {
 							const text = "**Ctrl + Left Click** to navigate";
 							markdownString.appendMarkdown(text);
 							markdownString.appendCodeblock(methodText.replace(/\t/g, " "), "javascript");
+							hover = new vscode.Hover(markdownString);
+						}
+						const customTSMethod = method as ICustomClassTSMethod;
+						if (customTSMethod.tsNode) {
+							const methodText = responsibleUIClass.classText.substring(customTSMethod.tsNode.getStart(), customTSMethod.tsNode.getEnd());
+							const markdownString = new vscode.MarkdownString();
+							const text = "**Ctrl + Left Click** to navigate";
+							markdownString.appendMarkdown(text);
+							markdownString.appendCodeblock(methodText.replace(/\t/g, " "), "typescript");
 							hover = new vscode.Hover(markdownString);
 						}
 					}

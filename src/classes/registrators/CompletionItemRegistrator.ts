@@ -58,4 +58,23 @@ export class CompletionItemRegistrator {
 		UI5Plugin.getInstance().addDisposable(JSMethodPropertyProvider);
 		UI5Plugin.getInstance().addDisposable(JSViewIDProvider);
 	}
+
+	static async registerTS() {
+		await new StandardXMLCompletionItemFactory().preloadCompletionItems();
+		console.log("XML Completion Items generated");
+
+		let i = 65;
+		const aChars: string[] = [];
+		for (i = 65; i <= 122; i++) {
+			aChars.push(String.fromCharCode(i));
+		}
+
+		const XMLProvider = vscode.languages.registerCompletionItemProvider({ language: "xml", scheme: "file" }, {
+			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+				return AbstractCompletionItemFactory.getFactory(AbstractCompletionItemFactory.xml.dynamic).createCompletionItems(document, position);
+			}
+		}, "<", ":", "\"", "*", ...aChars);
+
+		UI5Plugin.getInstance().addDisposable(XMLProvider);
+	}
 }

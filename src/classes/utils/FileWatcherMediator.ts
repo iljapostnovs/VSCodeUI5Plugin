@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
-import { UI5Plugin } from "../../UI5Plugin";
+import { ProjectType, UI5Plugin } from "../../UI5Plugin";
 import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
 import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
 import { WorkspaceCompletionItemFactory } from "../providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
@@ -24,7 +24,7 @@ export class FileWatcherMediator {
 		if (!document) {
 			document = await vscode.workspace.openTextDocument(uri);
 		}
-		if (document.fileName.endsWith(".js")) {
+		if (document.fileName.endsWith(".js") || document.fileName.endsWith(".ts")) {
 			const currentClassNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassNameDotNotation) {
 				if (!FileWatcherMediator._nextInQueue[currentClassNameDotNotation]?.timeoutId) {
@@ -81,7 +81,7 @@ export class FileWatcherMediator {
 	private static _updateDiagnosticsIfNecessary(changedDocument: vscode.TextDocument) {
 		const activeDocument = vscode.window.activeTextEditor?.document;
 		if (activeDocument) {
-			const supportedExtensions = [".js", ".view.xml", ".fragment.xml"];
+			const supportedExtensions = [".js", ".ts", ".view.xml", ".fragment.xml"];
 			if (supportedExtensions.some(ext => changedDocument.fileName.endsWith(ext))) {
 				const isDiagnosticDirty = this._checkIfDiagnosticIsDirty(changedDocument);
 				if (isDiagnosticDirty && activeDocument) {
@@ -124,7 +124,12 @@ export class FileWatcherMediator {
 	}
 
 	static register() {
-		const watcher = vscode.workspace.createFileSystemWatcher("**/*.{js,xml,json,properties}");
+		let watcher: vscode.FileSystemWatcher;
+		if (UI5Plugin.getInstance().projectType === ProjectType.js) {
+			watcher = vscode.workspace.createFileSystemWatcher("**/*.{js,xml,json,properties}");
+		} else {
+			watcher = vscode.workspace.createFileSystemWatcher("**/*.{ts,xml,json,properties}");
+		}
 		let disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
 			ClearCacheCommand.reloadWindow();
 		});
@@ -138,7 +143,9 @@ export class FileWatcherMediator {
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = watcher.onDidChange((uri: vscode.Uri) => {
-			this._onChange(uri, undefined, false);
+			if (!uri.fsPath.endsWith(".ts") || UI5Plugin.getInstance().projectType === ProjectType.js) {
+				this._onChange(uri, undefined, false);
+			}
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 		disposable = watcher.onDidCreate(uri => {
@@ -166,6 +173,9 @@ export class FileWatcherMediator {
 			if (uri.fsPath.endsWith(".js")) {
 				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "js");
 			}
+			if (uri.fsPath.endsWith(".ts")) {
+				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "ts");
+			}
 			if (uri.fsPath.endsWith(".xml")) {
 				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "xml");
 			}
@@ -173,7 +183,7 @@ export class FileWatcherMediator {
 				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "properties");
 			}
 
-			if (uri.fsPath.endsWith(".js")) {
+			if (uri.fsPath.endsWith(".js") || uri.fsPath.endsWith(".ts")) {
 
 				const currentClassNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(uri.fsPath);
 				if (currentClassNameDotNotation) {
@@ -186,7 +196,7 @@ export class FileWatcherMediator {
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = vscode.window.onDidChangeActiveTextEditor(textEditor => {
-			if (textEditor?.document.fileName.endsWith(".js")) {
+			if (textEditor?.document.fileName.endsWith(".js") || textEditor?.document.fileName.endsWith(".ts")) {
 
 				const currentClassNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(textEditor.document.fileName);
 				if (currentClassNameDotNotation) {

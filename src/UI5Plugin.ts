@@ -6,7 +6,7 @@ import { FileWatcherMediator } from "./classes/utils/FileWatcherMediator";
 import { SignatureHelpRegistrator } from "./classes/registrators/SignatureHelpRegistrator";
 import { DiagnosticsRegistrator } from "./classes/registrators/DiagnosticsRegistrator";
 import { CodeLensRegistrator } from "./classes/registrators/CodeLensRegistrator";
-import { JSCodeActionRegistrator } from "./classes/registrators/CodeActionRegistrator";
+import { CodeActionRegistrator } from "./classes/registrators/CodeActionRegistrator";
 import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
 import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
 import { JSRenameRegistrator } from "./classes/registrators/RenameRegistreator";
@@ -15,7 +15,6 @@ import { UI5Parser, WorkspaceFolder } from "ui5plugin-parser";
 import { VSCodeParserConfigHandler } from "./classes/ui5parser/VSCodeParserConfigHandler";
 import { glob } from "glob";
 import * as path from "path";
-import initializeTS = require("./typescript/Test");
 import { TSFileReader } from "./typescript/parsing/TSFileReader";
 import { TSClassFactory } from "./typescript/parsing/TSClassFactory";
 import { ControllerModelViewSwitcher } from "./classes/vscommands/switchers/ViewControllerSwitcher";
@@ -42,69 +41,42 @@ export class UI5Plugin {
 		this.context?.subscriptions.push(disposable);
 	}
 	public initialize(context: vscode.ExtensionContext) {
+		let fnInitialize: (context: vscode.ExtensionContext) => Promise<void> = this._initialize;
 		if (this._getIsTypescriptProject()) {
-			UI5Plugin.pWhenPluginInitialized = new Promise((resolve, reject) => {
-				vscode.window.withProgress(
-					{
-						location: vscode.ProgressLocation.Window,
-						title: "UI5Plugin",
-						cancellable: false
-					},
-					async progress => {
-						progress.report({
-							message: "Initializing...",
-							increment: 0
-						});
-						await this._initializeTS(context)
-							.then(() => {
-								progress.report({
-									message: "Initializing...",
-									increment: 100
-								});
-								resolve();
-							})
-							.catch((error: any) => {
-								progress.report({
-									increment: 100
-								});
-								console.error(error);
-								reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
-							});
-					}
-				);
-			});
-		} else {
-			UI5Plugin.pWhenPluginInitialized = new Promise<void>((resolve, reject) => {
-				vscode.window.withProgress(
-					{
-						location: vscode.ProgressLocation.Window,
-						title: "UI5Plugin",
-						cancellable: false
-					},
-					async progress => {
-						progress.report({
-							message: "Initializing...",
-							increment: 0
-						});
-						await this._initialize(context)
-							.then(() => {
-								progress.report({
-									message: "Initializing...",
-									increment: 100
-								});
-								resolve();
-							})
-							.catch((error: any) => {
-								progress.report({
-									increment: 100
-								});
-								console.error(error);
-								reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
-							});
-					}
-				);
-			});
+			this.projectType = ProjectType.ts;
+			fnInitialize = this._initializeTS;
 		}
+
+		UI5Plugin.pWhenPluginInitialized = new Promise((resolve, reject) => {
+			vscode.window.withProgress(
+				{
+					location: vscode.ProgressLocation.Window,
+					title: "UI5Plugin",
+					cancellable: false
+				},
+				async progress => {
+					progress.report({
+						message: "Initializing...",
+						increment: 0
+					});
+					await fnInitialize(context)
+						.then(() => {
+							progress.report({
+								message: "Initializing...",
+								increment: 100
+							});
+							resolve();
+						})
+						.catch((error: any) => {
+							progress.report({
+								increment: 100
+							});
+							console.error(error);
+							reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
+						});
+				}
+			);
+		});
 
 		return UI5Plugin.pWhenPluginInitialized;
 	}
@@ -145,9 +117,9 @@ export class UI5Plugin {
 		CommandRegistrator.register(true);
 		DefinitionProviderRegistrator.register();
 		SignatureHelpRegistrator.register();
-		DiagnosticsRegistrator.register();
+		DiagnosticsRegistrator.register(ProjectType.js);
 		CodeLensRegistrator.register();
-		JSCodeActionRegistrator.register();
+		CodeActionRegistrator.register();
 		HoverRegistrator.register();
 		XMLFormatterRegistrator.register();
 		JSRenameRegistrator.register();
@@ -172,10 +144,6 @@ export class UI5Plugin {
 		await parser.initialize(workspaceFolders, globalStoragePath);
 		/*@ts-expect-error: oh well*/
 		this.parser = parser;
-		const folderPaths = vscode.workspace.workspaceFolders?.map(wsFolder => wsFolder.uri.fsPath) || [];
-		folderPaths.forEach(folderPath => {
-			initializeTS(folderPath);
-		});
 
 		UI5TSParser.getInstance()
 			.classFactory.getAllCustomTSClasses()
@@ -183,26 +151,25 @@ export class UI5Plugin {
 				UI5TSParser.getInstance().classFactory.enrichTypesInCustomClass(UIClass);
 			});
 
-		const switcherCommand = vscode.commands.registerCommand(
-			"ui5plugin.switchBetweenVC",
-			ControllerModelViewSwitcher.switchBetweenControllerModelView
-		);
-		UI5Plugin.getInstance().addDisposable(switcherCommand);
-
-		const insertCustomClassNameCommand = vscode.commands.registerCommand(
-			"ui5plugin.insertCustomClassName",
-			InsertCustomClassNameCommand.insertCustomClassName
-		);
-		UI5Plugin.getInstance().addDisposable(insertCustomClassNameCommand);
-
-		const exportToI18NCommand = vscode.commands.registerCommand(
-			"ui5plugin.exportToi18n",
-			ExportToI18NCommand.export
-		);
-		UI5Plugin.getInstance().addDisposable(exportToI18NCommand);
+		CommandRegistrator.registerUniqueCommands();
+		CodeActionRegistrator.registerTS();
+		CodeLensRegistrator.registerTS();
+		CompletionItemRegistrator.registerTS();
+		DefinitionProviderRegistrator.registerTS();
+		HoverRegistrator.registerTS();
+		XMLFormatterRegistrator.register();
+		DiagnosticsRegistrator.register(ProjectType.ts);
+		FileWatcherMediator.register();
 	}
 
 	static registerFallbackCommands() {
 		CommandRegistrator.registerFallbackCommands();
 	}
+
+	projectType: ProjectType = ProjectType.js;
+}
+
+export enum ProjectType {
+	ts,
+	js
 }
