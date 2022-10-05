@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { UI5Plugin } from "../../../../UI5Plugin";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 import { InternalizationTextCodeLenseGenerator } from "./strategies/InternalizationTextCodeLenseGenerator";
+import { ReferenceCodeLensGenerator } from "./strategies/ReferenceCodeLensGenerator";
 
 export class TSCodeLensProvider {
 	static async getCodeLenses(document: vscode.TextDocument) {
@@ -11,10 +12,10 @@ export class TSCodeLensProvider {
 		const codeLenses: vscode.CodeLens[] = [];
 
 		const aStrategies = [
-			InternalizationTextCodeLenseGenerator
+			InternalizationTextCodeLenseGenerator,
 			// OverridenMethodCodeLensGenerator,
 			// EventHandlerCodeLensGenerator,
-			// ReferenceCodeLensGenerator
+			ReferenceCodeLensGenerator
 		];
 		aStrategies.forEach(Strategy => {
 			const strategy = new Strategy();

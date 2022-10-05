@@ -119,7 +119,7 @@ export class UI5Plugin {
 		DefinitionProviderRegistrator.register();
 		SignatureHelpRegistrator.register();
 		DiagnosticsRegistrator.register(ProjectType.js);
-		CodeLensRegistrator.register();
+		CodeLensRegistrator.register(ProjectType.js);
 		CodeActionRegistrator.register();
 		HoverRegistrator.register();
 		XMLFormatterRegistrator.register();
@@ -156,7 +156,7 @@ export class UI5Plugin {
 		CommandRegistrator.register(true, ProjectType.ts);
 		CommandRegistrator.registerUniqueCommands();
 		CodeActionRegistrator.registerTS();
-		CodeLensRegistrator.registerTS();
+		CodeLensRegistrator.register(ProjectType.ts);
 		CompletionItemRegistrator.registerTS();
 		DefinitionProviderRegistrator.registerTS();
 		HoverRegistrator.registerTS();

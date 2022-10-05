@@ -170,7 +170,8 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 		const UIMethods: ICustomClassTSMethod[] = methods.map(method => {
 			const jsDocs = ts.getJSDocTags(method);
 			const ui5IgnoreDoc = jsDocs.find(jsDoc => jsDoc.tagName.escapedText === "ui5ignore");
-			const position = this._sourceFile.compilerNode.getLineAndCharacterOfPosition(method.getStart());
+			const positionStart = this._sourceFile.compilerNode.getLineAndCharacterOfPosition(method.getStart());
+			const positionEnd = this._sourceFile.compilerNode.getLineAndCharacterOfPosition(method.getEnd());
 			return {
 				ui5ignored: !!ui5IgnoreDoc,
 				owner: this.className,
@@ -204,11 +205,15 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 				description: "",
 				isEventHandler: false,
 				tsNode: method,
-				memberPropertyNode: position && {
+				memberPropertyNode: positionStart && {
 					loc: {
 						start: {
-							line: position.line + 1,
-							column: position.character
+							line: positionStart.line + 1,
+							column: positionStart.character
+						},
+						end: {
+							line: positionEnd.line + 1,
+							column: positionEnd.character
 						}
 					}
 				}
