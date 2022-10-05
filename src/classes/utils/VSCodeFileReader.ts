@@ -4,6 +4,7 @@ import { UI5Parser } from "ui5plugin-parser";
 import { FileData } from "ui5plugin-parser/dist/classes/utils/FileReader";
 import * as vscode from "vscode";
 import * as fs from "fs";
+const escapedFileSeparator = "\\" + path.sep;
 
 export class VSCodeFileReader {
 	static getComponentNameOfAppInCurrentWorkspaceFolder() {
@@ -48,12 +49,12 @@ export class VSCodeFileReader {
 		const files: FileData[] = [];
 
 		for (const wsFolder of wsFolders) {
-			const wsFolderFSPath = wsFolder.uri.fsPath;
+			const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
 			const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
 			const exclusionPaths = exclusions.map(excludeString => {
 				return `${wsFolderFSPath}/${excludeString}`
 			});
-			const workspaceFilePaths = glob.sync(wsFolderFSPath.replace(/\\/g, "/") + "/**/*{.js,.xml,.json}", {
+			const workspaceFilePaths = glob.sync(wsFolderFSPath + "/**/*{.ts,.js,.xml,.json}", {
 				ignore: exclusionPaths
 			});
 			workspaceFilePaths.forEach(filePath => {

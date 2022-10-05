@@ -25,8 +25,9 @@ export class UI5TSParser {
 	readonly syntaxAnalyser: ISyntaxAnalyser;
 	readonly tsProjects: Project[] = [];
 	getProject(fsPath: string) {
-		return this.tsProjects.find(tsProgram => {
-			return !!tsProgram.getSourceFile(fsPath);
+		return this.tsProjects.find(tsProject => {
+			const [rootDirectory] = tsProject.getRootDirectories();
+			return !!tsProject.getSourceFile(fsPath) || (rootDirectory && path.normalize(fsPath).includes(path.normalize(rootDirectory.getPath())));
 		});
 	}
 

@@ -4,10 +4,15 @@ import { UI5Parser } from "ui5plugin-parser";
 import { ICacheable } from "ui5plugin-parser/dist/classes/UI5Classes/abstraction/ICacheable";
 import {
 	AbstractUIClass,
+	IUIAggregation,
+	IUIAssociation,
+	IUIEvent,
 	IUIField,
-	IUIMethod
+	IUIMethod,
+	IUIProperty
 } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { IViewsAndFragmentsCache } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import Hjson = require("hjson");
 interface IUIDefine {
 	path: string;
 	className: string;
@@ -58,10 +63,6 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 	private readonly _sourceFile: SourceFile;
 	readonly typeChecker: ts.TypeChecker;
 	constructor(classDeclaration: ts.ClassDeclaration, sourceFile: SourceFile, typeChecker: ts.TypeChecker) {
-		// const jsDocs = ts.getJSDocTags(classDeclaration);
-		// const namespaceDoc = jsDocs.find(jsDoc => jsDoc.tagName.escapedText === "namespace");
-		// const namespace = namespaceDoc?.comment ?? "";
-		// const classNameLastPart = classDeclaration.name?.escapedText ?? "";
 		const className = UI5Parser.getInstance().fileReader.getClassNameFromPath(sourceFile.compilerNode.fileName);
 		super(className ?? "");
 
@@ -71,12 +72,6 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 			return heritage.token == ts.SyntaxKind.ExtendsKeyword;
 		});
 		if (heritageClause) {
-			// const [parentSymbol] = parentHeritageClause.types.map(typeNode => {
-			// const type = typeChecker.getTypeFromTypeNode(typeNode);
-			// return typeChecker.typeToString(type);
-			// return typeChecker.getSymbolAtLocation(typeNode.expression);
-			// });
-			// const parentName = parentSymbol && typeChecker.getFullyQualifiedName(parentSymbol);
 			const parentType = typeChecker.getTypeFromTypeNode(heritageClause.types[0]);
 			const parentSymbol = parentType.getSymbol();
 			const parentName = parentSymbol && typeChecker.getFullyQualifiedName(parentSymbol);
@@ -97,23 +92,6 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 					this.parentClassNameDotNotation = `${namespace}.${classNameLastPart}`;
 				}
 			}
-			// if (parentType.isClass()) {
-			// 	const [baseType] = typeChecker.getBaseTypes(parentType);
-			// 	if (baseType?.isClass() && baseType?.getSymbol()) {
-			// 		const symbol = baseType.getSymbol();
-			// 		const parentTypeName = symbol && typeChecker.getFullyQualifiedName(symbol);
-			// 		if (parentTypeName?.startsWith('"sap/')) {
-			// 			const [parentModuleNameQuoted] = parentTypeName.split(".");
-			// 			const parentModuleName = parentModuleNameQuoted.substring(1, parentModuleNameQuoted.length - 1);
-			// 			this.parentClassNameDotNotation = parentModuleName.replace(/\//g, ".");
-			// 		} else {
-			// 			debugger;
-			// 		}
-			// 		// const declarations = baseType.getSymbol().getDeclarations();
-			// 		// const declaration = declarations ? declarations[0] : undefined;
-			// 		// const
-			// 	}
-			// }
 		}
 
 		this.classText = sourceFile.getFullText();
@@ -125,6 +103,7 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 		this._fillMethods(classDeclaration, typeChecker);
 		this._fillFields(classDeclaration, typeChecker);
 		this._fillUIDefine();
+		this._fillUI5Metadata();
 	}
 
 	_fillUIDefine() {
@@ -246,4 +225,201 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 	getCache<Type>(cacheName: string): Type {
 		return <Type>this._cache[cacheName];
 	}
+
+	private _fillUI5Metadata() {
+		const fields: ts.PropertyDeclaration[] = this.tsNode.members
+			.filter(member => ts.isPropertyDeclaration(member) && ts.isIdentifier(member.name))
+			.map(declaration => declaration as ts.PropertyDeclaration);
+
+		const metadata = fields.find(field => field.name.getText() === "metadata");
+		const metadataText = metadata?.initializer?.getText(this._sourceFile.compilerNode);
+		if (metadataText) {
+			let metadataObject: ClassInfo;
+			try {
+				metadataObject = Hjson.parse(metadataText) as ClassInfo;
+				this._fillProperties(metadataObject);
+				this._fillAggregations(metadataObject);
+				this._fillEvents(metadataObject);
+				this._fillAssociations(metadataObject);
+				this._fillInterfaces(metadataObject);
+			} catch (error: any) {
+				console.error(`Couldn't parse metadata: ${error.message}`);
+				return;
+			}
+		}
+	}
+
+	private _fillInterfaces(metadata: ClassInfo) {
+		const metadataInterfaces = metadata.interfaces;
+		if (!metadataInterfaces) {
+			return;
+		}
+
+		this.interfaces = metadataInterfaces;
+	}
+
+	private _fillAggregations(metadata: ClassInfo) {
+		const metadataAggregations = metadata.aggregations;
+		if (!metadataAggregations) {
+			return;
+		}
+		const aggregations: IUIAggregation[] = Object.keys(metadataAggregations).map(sKey => {
+			const aggregation = metadataAggregations[sKey];
+
+			return {
+				name: aggregation.name ?? sKey ?? "",
+				type: aggregation.type ?? "any",
+				multiple: aggregation.cardinality === "0..n",
+				singularName: aggregation.singularName ?? aggregation.name ?? sKey ?? "",
+				description: aggregation.deprecation ?? "",
+				visibility: aggregation.visibility ?? "public",
+				default: false
+			};
+		});
+
+		this.aggregations = aggregations;
+	}
+
+	private _fillEvents(metadata: ClassInfo) {
+		const metadataEvents = metadata.events;
+		if (!metadataEvents) {
+			return;
+		}
+		const events: IUIEvent[] = Object.keys(metadataEvents).map(sKey => {
+			const event = metadataEvents[sKey];
+
+			return {
+				name: event.name ?? sKey ?? "",
+				description: "",
+				visibility: event.visibility ?? "public",
+				params: Object.keys(event.parameters ?? {}).map(sKey => {
+					return {
+						name: event.parameters[sKey].name ?? sKey,
+						type: event.parameters[sKey].type
+					};
+				})
+			};
+		});
+		this.events = events;
+	}
+
+	private _fillProperties(metadata: ClassInfo) {
+		const metadataProperties = metadata.properties;
+		if (!metadataProperties) {
+			return;
+		}
+		const properties: IUIProperty[] = Object.keys(metadataProperties).map(sKey => {
+			const property = metadataProperties[sKey];
+
+			return {
+				name: property.name ?? sKey ?? "",
+				type: property.type ?? "any",
+				visibility: property.visibility ?? "public",
+				description: "",
+				typeValues: this.generateTypeValues(property.type ?? "")
+			};
+		});
+
+		this.properties = properties;
+	}
+
+	private _fillAssociations(metadata: ClassInfo) {
+		const metadataAssociations = metadata.associations;
+		if (!metadataAssociations) {
+			return;
+		}
+		const associations: IUIAssociation[] = Object.keys(metadataAssociations).map(sKey => {
+			const association = metadataAssociations[sKey];
+
+			return {
+				name: association.name ?? sKey ?? "",
+				type: association.type ?? "any",
+				multiple: association.cardinality === "0..n",
+				singularName: association.singularName ?? association.name ?? sKey ?? "",
+				description: association.deprecation ?? "",
+				visibility: association.visibility ?? "public"
+			};
+		});
+
+		this.associations = associations;
+	}
+}
+
+interface APIMember {
+	name: string;
+	doc?: string;
+	since?: string;
+	deprecation?: string;
+	experimental?: string;
+	visibility?: string;
+}
+
+interface APIMemberWithMethods extends APIMember {
+	methods: { [key: string]: string };
+}
+
+interface APIMemberWithType extends APIMember {
+	type: string;
+}
+
+interface Property extends APIMemberWithMethods, APIMemberWithType {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	defaultValue?: any;
+	bindable?: boolean;
+}
+
+interface Aggregation extends APIMemberWithMethods, APIMemberWithType {
+	cardinality: "0..1" | "0..n";
+	altTypes: [string];
+	//dnd: any,
+	singularName: string;
+	bindable: boolean;
+}
+interface Association extends APIMemberWithMethods, APIMemberWithType {
+	cardinality: "0..1" | "0..n";
+	singularName: string;
+}
+
+interface UI5Event extends APIMemberWithMethods {
+	allowPreventDefault: boolean;
+	enableEventBubbling: boolean;
+	parameters: { [key: string]: EventParameter };
+}
+
+interface EventParameter {
+	name: string;
+	doc: string;
+	deprecation: string;
+	since: string;
+	experimental: string;
+	type: string;
+}
+
+type SpecialSetting = APIMemberWithType;
+
+interface ClassInfo {
+	name?: string;
+	interfaces?: string[];
+	doc?: string;
+	deprecation?: string;
+	since?: string;
+	experimental?: string;
+	specialSettings?: { [key: string]: SpecialSetting };
+	properties?: { [key: string]: Property };
+	defaultProperty?: string;
+	aggregations?: { [key: string]: Aggregation };
+	defaultAggregation?: string;
+	associations?: { [key: string]: Association };
+	events?: { [key: string]: UI5Event };
+	methods?: Record<string, unknown>; // TODO
+	annotations?: Record<string, unknown>; // TODO
+	designtime?: boolean | string;
+	designTime?: boolean | string;
+	stereotype?: null;
+	metadataClass?: undefined;
+	library?: string;
+	//dnd: any,
+
+	abstract?: boolean;
+	final?: boolean;
 }

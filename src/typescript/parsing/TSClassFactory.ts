@@ -609,13 +609,16 @@ export class TSClassFactory implements IUIClassFactory {
 		const newName = UI5Parser.getInstance().fileReader.getClassNameFromPath(newPath);
 		if (oldName && newName) {
 			const oldClass = this._UIClasses[oldName];
+			if (!oldClass) {
+				return;
+			}
 			this._UIClasses[newName] = oldClass;
 			oldClass.className = newName;
 
 			if (oldClass instanceof CustomTSClass) {
 				const newClassFSPath = UI5Parser.getInstance().fileReader.convertClassNameToFSPath(
 					newName,
-					oldClass.fsPath?.endsWith(".controller.js")
+					oldClass.fsPath?.endsWith(".controller.js") || oldClass.fsPath?.endsWith(".controller.ts")
 				);
 				if (newClassFSPath) {
 					oldClass.fsPath = newClassFSPath;
@@ -627,15 +630,6 @@ export class TSClassFactory implements IUIClassFactory {
 					UIClass.parentClassNameDotNotation = newName;
 				}
 			});
-			this.removeClass(oldName);
-
-			const UIClass = this._UIClasses[newName];
-			if (UIClass instanceof CustomTSClass && UIClass.fsPath?.endsWith(".controller.js")) {
-				const view = UI5Parser.getInstance().fileReader.getViewForController(oldName);
-				if (view) {
-					UI5Parser.getInstance().fileReader.removeView(view.name);
-				}
-			}
 		}
 	}
 

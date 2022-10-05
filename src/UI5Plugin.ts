@@ -17,10 +17,7 @@ import { glob } from "glob";
 import * as path from "path";
 import { TSFileReader } from "./typescript/parsing/TSFileReader";
 import { TSClassFactory } from "./typescript/parsing/TSClassFactory";
-import { ControllerModelViewSwitcher } from "./classes/vscommands/switchers/ViewControllerSwitcher";
-import { InsertCustomClassNameCommand } from "./classes/vscommands/InsertCustomClassNameCommand";
 import { UI5TSParser } from "./typescript/parsing/UI5TSParser";
-import { ExportToI18NCommand } from "./classes/vscommands/i18ncommand/ExportToI18NCommand";
 
 export class UI5Plugin {
 	private static _instance?: UI5Plugin;
@@ -41,41 +38,45 @@ export class UI5Plugin {
 		this.context?.subscriptions.push(disposable);
 	}
 	public initialize(context: vscode.ExtensionContext) {
-		let fnInitialize: (context: vscode.ExtensionContext) => Promise<void> = this._initialize;
+		let fnInitialize: (context: vscode.ExtensionContext) => Promise<void> = this._initialize.bind(this);
 		if (this._getIsTypescriptProject()) {
 			this.projectType = ProjectType.ts;
-			fnInitialize = this._initializeTS;
+			fnInitialize = this._initializeTS.bind(this);
 		}
 
 		UI5Plugin.pWhenPluginInitialized = new Promise((resolve, reject) => {
-			vscode.window.withProgress(
-				{
-					location: vscode.ProgressLocation.Window,
-					title: "UI5Plugin",
-					cancellable: false
-				},
-				async progress => {
-					progress.report({
-						message: "Initializing...",
-						increment: 0
-					});
-					await fnInitialize(context)
-						.then(() => {
-							progress.report({
-								message: "Initializing...",
-								increment: 100
-							});
-							resolve();
-						})
-						.catch((error: any) => {
-							progress.report({
-								increment: 100
-							});
-							console.error(error);
-							reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
+			setTimeout(() => {
+				vscode.window.withProgress(
+					{
+						location: vscode.ProgressLocation.Window,
+						title: "UI5Plugin",
+						cancellable: false
+					},
+					async progress => {
+						progress.report({
+							message: "Initializing...",
+							increment: 1
 						});
-				}
-			);
+						setTimeout(async () => {
+							await fnInitialize(context)
+								.then(() => {
+									progress.report({
+										message: "Initializing...",
+										increment: 100
+									});
+									resolve();
+								})
+								.catch((error: any) => {
+									progress.report({
+										increment: 100
+									});
+									console.error(error);
+									reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
+								});
+						}, 0);
+					}
+				);
+			}, 0);
 		});
 
 		return UI5Plugin.pWhenPluginInitialized;
@@ -109,12 +110,12 @@ export class UI5Plugin {
 			configHandler: new VSCodeParserConfigHandler()
 		});
 		await parser.initialize(workspaceFolders, globalStoragePath);
-		CommandRegistrator.register(false);
+		CommandRegistrator.register(false, ProjectType.js);
 		CommandRegistrator.registerUniqueCommands();
 		this.parser = UI5Parser.getInstance();
 		await CompletionItemRegistrator.register();
 		FileWatcherMediator.register();
-		CommandRegistrator.register(true);
+		CommandRegistrator.register(true, ProjectType.js);
 		DefinitionProviderRegistrator.register();
 		SignatureHelpRegistrator.register();
 		DiagnosticsRegistrator.register(ProjectType.js);
@@ -141,6 +142,7 @@ export class UI5Plugin {
 			classFactory: factory
 		});
 
+		CommandRegistrator.register(false, ProjectType.ts);
 		await parser.initialize(workspaceFolders, globalStoragePath);
 		/*@ts-expect-error: oh well*/
 		this.parser = parser;
@@ -151,6 +153,7 @@ export class UI5Plugin {
 				UI5TSParser.getInstance().classFactory.enrichTypesInCustomClass(UIClass);
 			});
 
+		CommandRegistrator.register(true, ProjectType.ts);
 		CommandRegistrator.registerUniqueCommands();
 		CodeActionRegistrator.registerTS();
 		CodeLensRegistrator.registerTS();
