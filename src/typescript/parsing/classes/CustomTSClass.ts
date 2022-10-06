@@ -13,6 +13,8 @@ import {
 } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
 import { IViewsAndFragmentsCache } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import Hjson = require("hjson");
+import * as path from "path";
+
 interface IUIDefine {
 	path: string;
 	className: string;
@@ -107,23 +109,42 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 	}
 
 	_fillUIDefine() {
-		const importStatements = this._sourceFile.compilerNode.statements
-			.filter(statement => ts.isImportDeclaration(statement))
-			.map(statement => statement as ts.ImportDeclaration);
+		const importStatements = this._sourceFile.getImportDeclarations();
 
 		this.UIDefine = importStatements.map(importStatement => {
-			const fullModuleName = importStatement.moduleSpecifier.getText();
-			const modulePath = fullModuleName.substring(1, fullModuleName.length - 1);
+			const modulePath = importStatement.getModuleSpecifier().getLiteralText();
 
 			return {
 				path: modulePath,
 				className: modulePath.split("/").pop() ?? "",
-				classNameDotNotation: modulePath.replace(/\//g, "."),
+				classNameDotNotation: this._generateClassNameDotNotationFor(modulePath),
 				start: importStatement.getStart(),
 				end: importStatement.getEnd(),
 				acornNode: importStatement
 			};
 		});
+	}
+
+	private _generateClassNameDotNotationFor(classPath: string) {
+		let className = classPath.replace(/\//g, ".");
+
+		if (classPath?.startsWith(".")) {
+			const manifest = UI5Parser.getInstance().fileReader.getManifestForClass(this.className);
+
+			if (manifest && this.fsPath) {
+				const normalizedManifestPath = path.normalize(manifest.fsPath);
+				const importClassPath = path.resolve(path.dirname(this.fsPath), classPath);
+				const relativeToManifest = path.relative(normalizedManifestPath, importClassPath);
+				const pathRelativeToManifestDotNotation = relativeToManifest.split(path.sep).join(".");
+				className = `${manifest.componentName}.${pathRelativeToManifestDotNotation}`;
+			}
+		}
+
+		if (className.endsWith(".controller")) {
+			className = className.substring(0, className.length - ".controller".length);
+		}
+
+		return className;
 	}
 
 	private _fillFields(classDeclaration: ClassDeclaration) {
@@ -134,12 +155,21 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 			const ui5IgnoreDoc = jsDocs.some(jsDoc => jsDoc.getTags().some(tag => tag.getTagName() === "ui5ignore"));
 			const positionStart = this._sourceFile.getLineAndColumnAtPos(field.getStart());
 			const positionEnd = this._sourceFile.getLineAndColumnAtPos(field.getEnd());
+
+			let type = field.getType().getText();
+			if (/import\(".*?"\).default/.test(type)) {
+				const path = /(?<=import\(").*?(?="\).default)/.exec(type)?.[0];
+				const UI5Type = path ? UI5Parser.getInstance().fileReader.getClassNameFromPath(path) : undefined;
+				if (UI5Type) {
+					type = UI5Type;
+				}
+			}
 			return {
 				ui5ignored: ui5IgnoreDoc,
 				owner: this.className,
 				static: field.isStatic(),
 				abstract: field.isAbstract(),
-				type: field.getType().getText(),
+				type: type,
 				visibility:
 					field
 						.getModifiers()
@@ -177,12 +207,21 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 			const ui5IgnoreDoc = jsDocs.some(jsDoc => jsDoc.getTags().some(tag => tag.getTagName() === "ui5ignore"));
 			const positionStart = this._sourceFile.getLineAndColumnAtPos(method.getStart());
 			const positionEnd = this._sourceFile.getLineAndColumnAtPos(method.getEnd());
+
+			let returnType = method.getReturnType().getText();
+			if (/import\(".*?"\).default/.test(returnType)) {
+				const path = /(?<=import\(").*?(?="\).default)/.exec(returnType)?.[0];
+				const UI5Type = path ? UI5Parser.getInstance().fileReader.getClassNameFromPath(path) : undefined;
+				if (UI5Type) {
+					returnType = UI5Type;
+				}
+			}
 			return {
 				ui5ignored: !!ui5IgnoreDoc,
 				owner: this.className,
 				static: method.isStatic(),
 				abstract: method.isAbstract(),
-				returnType: method.getReturnType().getText() ?? "void",
+				returnType: returnType ?? "void",
 				visibility:
 					method
 						.getModifiers()
