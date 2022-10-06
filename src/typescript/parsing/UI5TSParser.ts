@@ -27,7 +27,10 @@ export class UI5TSParser {
 	getProject(fsPath: string) {
 		return this.tsProjects.find(tsProject => {
 			const [rootDirectory] = tsProject.getRootDirectories();
-			return !!tsProject.getSourceFile(fsPath) || (rootDirectory && path.normalize(fsPath).includes(path.normalize(rootDirectory.getPath())));
+			return (
+				!!tsProject.getSourceFile(fsPath) ||
+				(rootDirectory && path.normalize(fsPath).includes(path.normalize(rootDirectory.getPath())))
+			);
 		});
 	}
 
@@ -100,9 +103,12 @@ export class UI5TSParser {
 		await this._preloadUI5Metadata();
 		this.fileReader.rereadAllManifests(wsFolders);
 		this.fileReader.readAllFiles(wsFolders);
-		wsFolders.forEach(wsFolder => {
+		// wsFolders.forEach(wsFolder => {
+		const wsFolder = wsFolders[0];
+		if (wsFolder) {
 			this._initializeTS(wsFolder.fsPath);
-		});
+		}
+		// });
 	}
 
 	_initializeTS(folderPath: string) {

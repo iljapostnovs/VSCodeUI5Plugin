@@ -10,7 +10,11 @@ import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 import { ReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts//util/ReferenceFinder";
 import { UI5Plugin } from "../../../../../UI5Plugin";
 import { VSCodeLocationAdapter } from "../../../../ui5linter/adapters/VSCodeLocationAdapter";
-import { CustomTSClass } from "../../../../../typescript/parsing/classes/CustomTSClass";
+import {
+	CustomTSClass,
+	ICustomClassTSField,
+	ICustomClassTSMethod
+} from "../../../../../typescript/parsing/classes/CustomTSClass";
 import { TSReferenceFinder } from "./reference/TSReferenceFinder";
 import { UI5TSParser } from "../../../../../typescript/parsing/UI5TSParser";
 
@@ -54,12 +58,26 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 								const range = RangeAdapter.acornLocationToVSCodeRange(method.memberPropertyNode.loc);
 								const codeLens = new vscode.CodeLens(range);
 								codeLens.command = {
-									title: `${locations.length} XML reference${locations.length === 1 ? "" : "s"}`,
+									title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
 									command: locations.length ? "editor.action.showReferences" : "",
 									arguments: [document.uri, range.start, locations]
 								};
 								codeLenses.push(codeLens);
 							}
+						}
+					});
+
+					TSClass.fields.forEach(field => {
+						if (field.memberPropertyNode) {
+							const locations = this.getTSReferenceLocations(field);
+							const range = RangeAdapter.acornLocationToVSCodeRange(field.memberPropertyNode.loc);
+							const codeLens = new vscode.CodeLens(range);
+							codeLens.command = {
+								title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
+								command: locations.length ? "editor.action.showReferences" : "",
+								arguments: [document.uri, range.start, locations]
+							};
+							codeLenses.push(codeLens);
 						}
 					});
 				}
@@ -74,7 +92,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 		return referenceFinder.getReferenceLocations(member).map(location => new VSCodeLocationAdapter(location));
 	}
 
-	public getTSReferenceLocations(member: ICustomClassUIMethod | ICustomClassUIField) {
+	public getTSReferenceLocations(member: ICustomClassTSMethod | ICustomClassTSField) {
 		const referenceFinder = new TSReferenceFinder(UI5TSParser.getInstance());
 		return referenceFinder.getReferenceLocations(member).map(location => new VSCodeLocationAdapter(location));
 	}

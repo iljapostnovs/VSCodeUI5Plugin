@@ -18,7 +18,7 @@ import { IFragment, IView } from "ui5plugin-parser/dist/classes/utils/FileReader
 import { CustomTSClass } from "./classes/CustomTSClass";
 import ts = require("typescript");
 import { UI5Plugin } from "../../UI5Plugin";
-import { Node, Project, SourceFile } from "ts-morph";
+import { ClassDeclaration, Node, Project, SourceFile } from "ts-morph";
 import { UI5TSParser } from "./UI5TSParser";
 
 export class TSClassFactory implements IUIClassFactory {
@@ -26,7 +26,7 @@ export class TSClassFactory implements IUIClassFactory {
 
 	private _getInstance(
 		className: string,
-		classDeclaration?: ts.ClassDeclaration,
+		classDeclaration?: ClassDeclaration,
 		sourceFile?: SourceFile,
 		typeChecker?: ts.TypeChecker
 	) {
@@ -110,7 +110,7 @@ export class TSClassFactory implements IUIClassFactory {
 					if (classDeclaration && Node.isClassDeclaration(classDeclaration)) {
 						const theClass = this._getInstance(
 							classNameDotNotation,
-							classDeclaration.compilerNode,
+							classDeclaration,
 							sourceFile,
 							typeChecker.compilerObject
 						);
@@ -685,7 +685,7 @@ export class TSClassFactory implements IUIClassFactory {
 			return necessaryNode;
 		};
 		UIClass.methods.find(method => {
-			const child = fnForEachChild(method.tsNode);
+			const child = fnForEachChild(method.tsNode.compilerNode);
 			const args = child?.arguments;
 			const firstArg = args?.[0];
 			if (firstArg && ts.isCallExpression(firstArg) && ts.isStringLiteral(firstArg.arguments[0])) {

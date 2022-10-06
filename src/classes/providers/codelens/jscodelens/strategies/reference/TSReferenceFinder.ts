@@ -1,12 +1,13 @@
+import { ConstructorDeclaration } from "ts-morph";
 import { RangeAdapter } from "ui5plugin-linter";
 import { IRange } from "ui5plugin-linter/dist/classes/Linter";
 import { XMLParser } from "ui5plugin-parser";
-import {
-	ICustomClassUIMethod,
-	ICustomClassUIField
-} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { IXMLFile } from "ui5plugin-parser/dist/classes/utils/FileReader";
-import { CustomTSClass } from "../../../../../../typescript/parsing/classes/CustomTSClass";
+import {
+	CustomTSClass,
+	ICustomClassTSField,
+	ICustomClassTSMethod
+} from "../../../../../../typescript/parsing/classes/CustomTSClass";
 import { UI5TSParser } from "../../../../../../typescript/parsing/UI5TSParser";
 export interface ILocation {
 	filePath: string;
@@ -23,16 +24,12 @@ export class TSReferenceFinder {
 	constructor(parser: UI5TSParser) {
 		this._parser = parser;
 	}
-	public getReferenceLocations(member: ICustomClassUIMethod | ICustomClassUIField) {
+	public getReferenceLocations(member: ICustomClassTSMethod | ICustomClassTSField) {
 		const locations: ILocation[] = [];
-
-		// const UIClasses = this._parser.classFactory.getAllCustomUIClasses();
-		// UIClasses.forEach(UIClass => {
-		// 	this._addLocationsFromUIClass(member, UIClass, locations);
-		// });
 
 		const UIClass = this._parser.classFactory.getUIClass(member.owner);
 		if (UIClass instanceof CustomTSClass) {
+			this._addLocationsFromUIClass(member, UIClass, locations);
 			const viewsAndFragments = this._parser.classFactory.getViewsAndFragmentsOfControlHierarchically(
 				UIClass,
 				[],
@@ -51,7 +48,7 @@ export class TSReferenceFinder {
 
 	private _addLocationsFromXMLDocument(
 		XMLDoc: IXMLFile,
-		member: ICustomClassUIMethod | ICustomClassUIField,
+		member: ICustomClassTSMethod | ICustomClassTSField,
 		locations: ILocation[]
 	) {
 		const cache = XMLDoc.getCache<IReferenceCodeLensCacheable>("referenceCodeLensCache") || {};
@@ -85,55 +82,51 @@ export class TSReferenceFinder {
 		}
 	}
 
-	// private _addLocationsFromUIClass(member: ICustomClassUIMethod | ICustomClassUIField, UIClass: CustomTSClass, locations: ILocation[]) {
-	// const cache = UIClass.getCache<IReferenceCodeLensCacheable>("referenceCodeLensCache") || {};
-	// if (cache[member.owner]?.[`_${member.name}`]) {
-	// 	locations.push(...cache[member.owner][`_${member.name}`]);
-	// } else if (UIClass.classFSPath) {
-	// 	const results: RegExpExecArray[] = this._getCurrentMethodMentioning(member, UIClass);
+	private _addLocationsFromUIClass(
+		member: ICustomClassTSMethod | ICustomClassTSField,
+		UIClass: CustomTSClass,
+		locations: ILocation[]
+	) {
+		const cache = UIClass.getCache<IReferenceCodeLensCacheable>("referenceCodeLensCache") || {};
+		if (cache[member.owner]?.[`_${member.name}`]) {
+			locations.push(...cache[member.owner][`_${member.name}`]);
+			return;
+		}
 
-	// 	const currentLocations: ILocation[] = [];
-	// 	const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(this._parser.syntaxAnalyser);
-	// 	results.forEach(result => {
-	// 		const calleeClassName = strategy.acornGetClassName(UIClass.className, result.index);
-	// 		const calleeUIClass = calleeClassName && this._parser.classFactory.getUIClass(calleeClassName);
-	// 		if (
-	// 			calleeUIClass && calleeUIClass instanceof CustomUIClass &&
-	// 			calleeClassName &&
-	// 			(
-	// 				this._parser.classFactory.isClassAChildOfClassB(calleeClassName, member.owner) ||
-	// 				(
-	// 					UIClass.className === calleeClassName &&
-	// 					this._parser.classFactory.isClassAChildOfClassB(member.owner, calleeClassName) &&
-	// 					this._parser.classFactory.isClassAChildOfClassB(member.owner, UIClass.className)
-	// 				)
-	// 			)
-	// 		) {
-	// 			const range = RangeAdapter.offsetsRange(UIClass.classText, result.index, result.index + member.name.length);
-	// 			if (range) {
-	// 				currentLocations.push({ filePath: UIClass.classFSPath || "", range: range });
-	// 			}
-	// 		}
-	// 	});
-	// 	if (currentLocations.length > 0) {
-	// 		locations.push(...currentLocations);
-	// 	}
-	// 	if (!cache[member.owner]) {
-	// 		cache[member.owner] = {};
-	// 	}
-	// 	cache[member.owner][`_${member.name}`] = currentLocations;
-	// 	UIClass.setCache("referenceCodeLensCache", cache);
-	// }
-	// }
+		const references = member.tsNode.findReferences().flatMap(reference => reference.getReferences());
+		const currentLocations: ILocation[] = references
+			.filter(reference => {
+				const notAReferenceToItself =
+					reference.getSourceFile().getFilePath() !== UIClass.fsPath ||
+					(!(member.tsNode instanceof ConstructorDeclaration) &&
+						reference.getNode().getStart() !== member.tsNode.getNameNode().getStart()) ||
+					(member.tsNode instanceof ConstructorDeclaration &&
+						reference.getNode().getStart() !== member.tsNode.getStart());
+				return notAReferenceToItself;
+			})
+			.map(reference => {
+				const range = RangeAdapter.offsetsRange(
+					reference.getSourceFile().getFullText(),
+					reference.getTextSpan().getStart(),
+					reference.getTextSpan().getEnd()
+				);
+				let referenceData: [IRange, string] | undefined;
+				if (range) {
+					referenceData = [range, reference.getSourceFile().getFilePath()];
+				}
+				return referenceData;
+			})
+			.filter(rangeData => !!rangeData)
+			.map(rangeData => {
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				return { filePath: rangeData![1] || "", range: rangeData![0] };
+			});
 
-	// private _getCurrentMethodMentioning(member: ICustomClassUIMethod | ICustomClassUIField, UIClass: CustomTSClass) {
-	// 	const regexp = new RegExp(`(?<=\\.)${member.name}(\\(|\\)|\\,|\\.|\\s|;|\\[|\\])(?!=)`, "g");
-	// 	const results: RegExpExecArray[] = [];
-	// 	let result = regexp.exec(UIClass.classText);
-	// 	while (result) {
-	// 		results.push(result);
-	// 		result = regexp.exec(UIClass.classText);
-	// 	}
-	// 	return results;
-	// }
+		if (!cache[member.owner]) {
+			cache[member.owner] = {};
+		}
+		cache[member.owner][`_${member.name}`] = currentLocations;
+		UIClass.setCache("referenceCodeLensCache", cache);
+		locations.push(...currentLocations);
+	}
 }

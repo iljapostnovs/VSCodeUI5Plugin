@@ -1,4 +1,4 @@
-import { SourceFile } from "ts-morph";
+import { ClassDeclaration, ConstructorDeclaration, MethodDeclaration, PropertyDeclaration, SourceFile } from "ts-morph";
 import ts = require("typescript");
 import { UI5Parser } from "ui5plugin-parser";
 import { ICacheable } from "ui5plugin-parser/dist/classes/UI5Classes/abstraction/ICacheable";
@@ -35,7 +35,7 @@ export interface ITSNodeBearer<NodeType> {
 }
 export interface ICustomClassTSMethod
 	extends IUIMethod,
-	ITSNodeBearer<ts.MethodDeclaration>,
+	ITSNodeBearer<MethodDeclaration | ConstructorDeclaration>,
 	IXMLDocumentMentionable,
 	UI5Ignoreable {
 	position?: number;
@@ -44,13 +44,13 @@ export interface ICustomClassTSMethod
 }
 export interface ICustomClassTSField
 	extends IUIField,
-	ITSNodeBearer<ts.PropertyDeclaration>,
+	ITSNodeBearer<PropertyDeclaration>,
 	IXMLDocumentMentionable,
 	UI5Ignoreable {
 	customData?: Record<string, any>;
 }
 
-export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNodeBearer<ts.ClassDeclaration> {
+export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNodeBearer<ClassDeclaration> {
 	readonly methods: ICustomClassTSMethod[] = [];
 	readonly fields: ICustomClassTSField[] = [];
 	private readonly _cache: Record<string, any> = {};
@@ -59,16 +59,16 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 	readonly classText: string;
 	UIDefine: IUIDefine[] = [];
 	relatedViewsAndFragments?: IViewsAndFragmentsCache[];
-	readonly tsNode: ts.ClassDeclaration;
+	readonly tsNode: ClassDeclaration;
 	private readonly _sourceFile: SourceFile;
 	readonly typeChecker: ts.TypeChecker;
-	constructor(classDeclaration: ts.ClassDeclaration, sourceFile: SourceFile, typeChecker: ts.TypeChecker) {
+	constructor(classDeclaration: ClassDeclaration, sourceFile: SourceFile, typeChecker: ts.TypeChecker) {
 		const className = UI5Parser.getInstance().fileReader.getClassNameFromPath(sourceFile.compilerNode.fileName);
 		super(className ?? "");
 
 		this.typeChecker = typeChecker;
 
-		const heritageClause = classDeclaration.heritageClauses?.find(heritage => {
+		const heritageClause = classDeclaration.compilerNode.heritageClauses?.find(heritage => {
 			return heritage.token == ts.SyntaxKind.ExtendsKeyword;
 		});
 		if (heritageClause) {
@@ -100,8 +100,8 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 		this.fsPath = sourceFile.compilerNode.fileName;
 		this.tsNode = classDeclaration;
 
-		this._fillMethods(classDeclaration, typeChecker);
-		this._fillFields(classDeclaration, typeChecker);
+		this._fillMethods(classDeclaration);
+		this._fillFields(classDeclaration);
 		this._fillUIDefine();
 		this._fillUI5Metadata();
 	}
@@ -126,101 +126,145 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 		});
 	}
 
-	private _fillFields(classDeclaration: ts.ClassDeclaration, typeChecker: ts.TypeChecker) {
-		const fields: ts.PropertyDeclaration[] = classDeclaration.members
-			.filter(member => ts.isPropertyDeclaration(member) && ts.isIdentifier(member.name))
-			.map(declaration => declaration as ts.PropertyDeclaration);
+	private _fillFields(classDeclaration: ClassDeclaration) {
+		const fields: PropertyDeclaration[] = classDeclaration.getProperties();
 
 		const UIFields: ICustomClassTSField[] = fields.map(field => {
-			const jsDocs = ts.getJSDocTags(field);
-			const ui5IgnoreDoc = jsDocs.find(jsDoc => jsDoc.tagName.escapedText === "ui5ignore");
+			const jsDocs = field.getJsDocs();
+			const ui5IgnoreDoc = jsDocs.some(jsDoc => jsDoc.getTags().some(tag => tag.getTagName() === "ui5ignore"));
+			const positionStart = this._sourceFile.getLineAndColumnAtPos(field.getStart());
+			const positionEnd = this._sourceFile.getLineAndColumnAtPos(field.getEnd());
 			return {
-				ui5ignored: !!ui5IgnoreDoc,
+				ui5ignored: ui5IgnoreDoc,
 				owner: this.className,
-
-				static: field.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.StaticKeyword) ?? false,
-				abstract: field.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.AbstractKeyword) ?? false,
-				type: typeChecker.typeToString(typeChecker.getTypeAtLocation(field)) ?? "any",
+				static: field.isStatic(),
+				abstract: field.isAbstract(),
+				type: field.getType().getText(),
 				visibility:
-					field.modifiers
-						?.find(modifier =>
+					field
+						.getModifiers()
+						.find(modifier =>
 							[
 								ts.SyntaxKind.ProtectedKeyword,
 								ts.SyntaxKind.PrivateKeyword,
 								ts.SyntaxKind.PublicKeyword
-							].includes(modifier.kind)
+							].includes(modifier.getKind())
 						)
 						?.getText() ?? "public",
-				name: field.name.getText(),
-				deprecated: jsDocs.some(jsDoc => ts.isJSDocDeprecatedTag(jsDoc)),
+				name: field.getName(),
+				deprecated: jsDocs.some(jsDoc => ts.isJSDocDeprecatedTag(jsDoc.compilerNode)),
 				description: "",
 				isEventHandler: false,
-				tsNode: field
+				tsNode: field,
+				memberPropertyNode: positionStart && {
+					loc: {
+						start: positionStart,
+						end: positionEnd
+					}
+				}
 			};
 		});
 
 		this.fields.push(...UIFields);
 	}
 
-	private _fillMethods(classDeclaration: ts.ClassDeclaration, typeChecker: ts.TypeChecker) {
-		const methods: ts.MethodDeclaration[] = classDeclaration.members
-			.filter(member => ts.isMethodDeclaration(member) && ts.isIdentifier(member.name))
-			.map(declaration => declaration as ts.MethodDeclaration);
+	private _fillMethods(classDeclaration: ClassDeclaration) {
+		const constructorDeclarations = classDeclaration.getConstructors();
+		const methods: MethodDeclaration[] = classDeclaration.getMethods();
 
 		const UIMethods: ICustomClassTSMethod[] = methods.map(method => {
-			const jsDocs = ts.getJSDocTags(method);
-			const ui5IgnoreDoc = jsDocs.find(jsDoc => jsDoc.tagName.escapedText === "ui5ignore");
-			const positionStart = this._sourceFile.compilerNode.getLineAndCharacterOfPosition(method.getStart());
-			const positionEnd = this._sourceFile.compilerNode.getLineAndCharacterOfPosition(method.getEnd());
+			const jsDocs = method.getJsDocs();
+			const ui5IgnoreDoc = jsDocs.some(jsDoc => jsDoc.getTags().some(tag => tag.getTagName() === "ui5ignore"));
+			const positionStart = this._sourceFile.getLineAndColumnAtPos(method.getStart());
+			const positionEnd = this._sourceFile.getLineAndColumnAtPos(method.getEnd());
 			return {
 				ui5ignored: !!ui5IgnoreDoc,
 				owner: this.className,
-				static: method.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.StaticKeyword) ?? false,
-				abstract: method.modifiers?.some(modifier => modifier.kind === ts.SyntaxKind.AbstractKeyword) ?? false,
-				returnType:
-					typeChecker.typeToString(
-						typeChecker.getTypeAtLocation(method).getCallSignatures()[0]?.getReturnType()
-					) ?? "void",
+				static: method.isStatic(),
+				abstract: method.isAbstract(),
+				returnType: method.getReturnType().getText() ?? "void",
 				visibility:
-					method.modifiers
-						?.find(modifier =>
+					method
+						.getModifiers()
+						.find(modifier =>
 							[
 								ts.SyntaxKind.ProtectedKeyword,
 								ts.SyntaxKind.PrivateKeyword,
 								ts.SyntaxKind.PublicKeyword
-							].includes(modifier.kind)
+							].includes(modifier.getKind())
 						)
 						?.getText() ?? "public",
-				params: method.parameters.map(param => {
+				params: method.getParameters().map(param => {
 					return {
-						name: param.name.getText(),
-						type: typeChecker.typeToString(typeChecker.getTypeAtLocation(param)) ?? "any",
+						name: param.getName(),
+						type: param.getType().getText() ?? "any",
 						description: "",
 						isOptional: false
 					};
 				}),
-				name: method.name.getText(),
+				name: method.getName(),
 				position: method.getStart(),
-				deprecated: jsDocs.some(jsDoc => ts.isJSDocDeprecatedTag(jsDoc)),
+				deprecated: jsDocs.some(jsDoc => ts.isJSDocDeprecatedTag(jsDoc.compilerNode)),
 				description: "",
 				isEventHandler: false,
 				tsNode: method,
 				memberPropertyNode: positionStart && {
 					loc: {
-						start: {
-							line: positionStart.line + 1,
-							column: positionStart.character
-						},
-						end: {
-							line: positionEnd.line + 1,
-							column: positionEnd.character
-						}
+						start: positionStart,
+						end: positionEnd
 					}
 				}
 			};
 		});
 
 		this.methods.push(...UIMethods);
+
+		const constructors: ICustomClassTSMethod[] = constructorDeclarations.map(constructor => {
+			const jsDocs = constructor.getJsDocs();
+			const ui5IgnoreDoc = jsDocs.some(jsDoc => jsDoc.getTags().some(tag => tag.getTagName() === "ui5ignore"));
+			const positionStart = this._sourceFile.getLineAndColumnAtPos(constructor.getStart());
+			const positionEnd = this._sourceFile.getLineAndColumnAtPos(constructor.getEnd());
+			return {
+				ui5ignored: !!ui5IgnoreDoc,
+				owner: this.className,
+				static: false,
+				abstract: false,
+				returnType: constructor.getReturnType().getText() ?? "void",
+				visibility:
+					constructor
+						.getModifiers()
+						.find(modifier =>
+							[
+								ts.SyntaxKind.ProtectedKeyword,
+								ts.SyntaxKind.PrivateKeyword,
+								ts.SyntaxKind.PublicKeyword
+							].includes(modifier.getKind())
+						)
+						?.getText() ?? "public",
+				params: constructor.getParameters().map(param => {
+					return {
+						name: param.getName(),
+						type: param.getType().getText() ?? "any",
+						description: "",
+						isOptional: false
+					};
+				}),
+				name: "constructor",
+				position: constructor.getStart(),
+				deprecated: jsDocs.some(jsDoc => ts.isJSDocDeprecatedTag(jsDoc.compilerNode)),
+				description: "",
+				isEventHandler: false,
+				tsNode: constructor,
+				memberPropertyNode: positionStart && {
+					loc: {
+						start: positionStart,
+						end: positionEnd
+					}
+				}
+			};
+		});
+
+		this.methods.push(...constructors);
 	}
 
 	setCache<Type>(cacheName: string, cacheValue: Type) {
@@ -232,12 +276,9 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 	}
 
 	private _fillUI5Metadata() {
-		const fields: ts.PropertyDeclaration[] = this.tsNode.members
-			.filter(member => ts.isPropertyDeclaration(member) && ts.isIdentifier(member.name))
-			.map(declaration => declaration as ts.PropertyDeclaration);
+		const metadata = this.tsNode.getProperty("metadata");
 
-		const metadata = fields.find(field => field.name.getText() === "metadata");
-		const metadataText = metadata?.initializer?.getText(this._sourceFile.compilerNode);
+		const metadataText = metadata?.getInitializer()?.getText();
 		if (metadataText) {
 			let metadataObject: ClassInfo;
 			try {
