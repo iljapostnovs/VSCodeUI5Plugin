@@ -157,13 +157,7 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 			const positionEnd = this._sourceFile.getLineAndColumnAtPos(field.getEnd());
 
 			let type = field.getType().getText();
-			if (/import\(".*?"\).default/.test(type)) {
-				const path = /(?<=import\(").*?(?="\).default)/.exec(type)?.[0];
-				const UI5Type = path ? UI5Parser.getInstance().fileReader.getClassNameFromPath(path) : undefined;
-				if (UI5Type) {
-					type = UI5Type;
-				}
-			}
+			type = this._modifyType(type);
 			return {
 				ui5ignored: ui5IgnoreDoc,
 				owner: this.className,
@@ -209,13 +203,7 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 			const positionEnd = this._sourceFile.getLineAndColumnAtPos(method.getEnd());
 
 			let returnType = method.getReturnType().getText();
-			if (/import\(".*?"\).default/.test(returnType)) {
-				const path = /(?<=import\(").*?(?="\).default)/.exec(returnType)?.[0];
-				const UI5Type = path ? UI5Parser.getInstance().fileReader.getClassNameFromPath(path) : undefined;
-				if (UI5Type) {
-					returnType = UI5Type;
-				}
-			}
+			returnType = this._modifyType(returnType);
 			return {
 				ui5ignored: !!ui5IgnoreDoc,
 				owner: this.className,
@@ -236,7 +224,7 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 				params: method.getParameters().map(param => {
 					return {
 						name: param.getName(),
-						type: param.getType().getText() ?? "any",
+						type: this._modifyType(param.getType().getText()) ?? "any",
 						description: "",
 						isOptional: false
 					};
@@ -268,7 +256,7 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 				owner: this.className,
 				static: false,
 				abstract: false,
-				returnType: constructor.getReturnType().getText() ?? "void",
+				returnType: this._modifyType(constructor.getReturnType().getText()) ?? "void",
 				visibility:
 					constructor
 						.getModifiers()
@@ -283,7 +271,7 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 				params: constructor.getParameters().map(param => {
 					return {
 						name: param.getName(),
-						type: param.getType().getText() ?? "any",
+						type: this._modifyType(param.getType().getText()) ?? "any",
 						description: "",
 						isOptional: false
 					};
@@ -304,6 +292,24 @@ export class CustomTSClass extends AbstractUIClass implements ICacheable, ITSNod
 		});
 
 		this.methods.push(...constructors);
+	}
+
+	private _modifyType(returnType: string): string {
+		if (/import\(".*?"\).default/.test(returnType)) {
+			const path = /(?<=import\(").*?(?="\).default)/.exec(returnType)?.[0];
+			const UI5Type = path ? UI5Parser.getInstance().fileReader.getClassNameFromPath(path) : undefined;
+			if (UI5Type) {
+				returnType = UI5Type;
+			}
+		}
+		if (/import\(".*?"\)\.[a-zA-Z|$]*/.test(returnType)) {
+			const className = /(?<=import\(".*?"\)\.)[a-zA-Z|$]*/.exec(returnType)?.[0];
+			if (className) {
+				returnType = className;
+			}
+		}
+
+		return returnType;
 	}
 
 	setCache<Type>(cacheName: string, cacheValue: Type) {

@@ -20,6 +20,7 @@ import ts = require("typescript");
 import { UI5Plugin } from "../../UI5Plugin";
 import { ClassDeclaration, Node, Project, SourceFile } from "ts-morph";
 import { UI5TSParser } from "./UI5TSParser";
+import { EmptyUIClass } from "./classes/EmptyUIClass";
 
 export class TSClassFactory implements IUIClassFactory {
 	private readonly _UIClasses: IUIClassMap = {};
@@ -36,6 +37,8 @@ export class TSClassFactory implements IUIClassFactory {
 			returnClass = new StandardUIClass(className);
 		} else if (classDeclaration && sourceFile && typeChecker) {
 			returnClass = new CustomTSClass(classDeclaration, sourceFile, typeChecker);
+		} else {
+			returnClass = new EmptyUIClass(className);
 		}
 
 		return returnClass;

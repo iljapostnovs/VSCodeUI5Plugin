@@ -207,9 +207,9 @@ export class TSFileReader implements IFileReader {
 	}
 
 	private _readFilesInWorkspace(wsFolder: WorkspaceFolder, path: string) {
-
 		const wsFolderFSPath = wsFolder.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
 		const exclusions: string[] = this._configHandler.getExcludeFolderPatterns();
+		exclusions.push("**/*.d.ts")
 		const exclusionPaths = exclusions.map(excludeString => {
 			return `${wsFolderFSPath}/${excludeString}`
 		});

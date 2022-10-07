@@ -53,6 +53,26 @@ export class CommandRegistrator {
 			ExportToI18NCommand.export
 		);
 		UI5Plugin.getInstance().addDisposable(exportToI18NCommand);
+		const generateUMLClassDiagramCommand = vscode.commands.registerCommand(
+			"ui5plugin.generateUMLClassDiagram",
+			UMLGeneratorCommand.generateUMLForCurrentClass
+		);
+		const generateUMLClassDiagramForWholeProject = vscode.commands.registerCommand(
+			"ui5plugin.generateUMLClassDiagramsForWholeProject",
+			UMLGeneratorCommand.generateUMLForWholeProject
+		);
+		const generateERDiagram = vscode.commands.registerCommand(
+			"ui5plugin.generateERDiagramFromMetadata",
+			GenerateERDiagramCommand.generateERDiagram
+		);
+		const generateTypeDefDoc = vscode.commands.registerCommand(
+			"ui5plugin.generateJSTypeDefDocFromMetadata",
+			new GenerateTypeJSDocCommand().execute
+		);
+		UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramCommand);
+		UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramForWholeProject);
+		UI5Plugin.getInstance().addDisposable(generateERDiagram);
+		UI5Plugin.getInstance().addDisposable(generateTypeDefDoc);
 	}
 
 	private static _initJS() {
