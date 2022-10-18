@@ -15,4 +15,8 @@ export class CodeGeneratorFactory {
 			return new ES6Strategy();
 		}
 	}
+
+	static createTSStrategy(): ESBase {
+		return new ES6Strategy();
+	}
 }
