@@ -4,7 +4,7 @@ import { CodeGeneratorFactory } from "../../../templateinserters/codegenerations
 import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
 import { UI5Plugin } from "../../../../UI5Plugin";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { CustomTSClass } from "../../../../typescript/parsing/classes/CustomTSClass";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 
 export enum InsertType {
 	Method = "Method",
@@ -16,7 +16,7 @@ export class MethodInserter {
 		const classPath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(className);
 		if (classPath) {
 			const classUri = vscode.Uri.file(classPath);
-			const UIClass = <CustomUIClass|CustomTSClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			const UIClass = <AbstractCustomClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 			let insertContent = "";
 			if (type === InsertType.Method) {
 				insertContent = CodeGeneratorFactory.createStrategy().generateFunction(memberName, params, body, tabsToAdd);
@@ -99,9 +99,9 @@ export class MethodInserter {
 			const currentSelection = vscode.window.activeTextEditor.selection.start;
 			const currentPosition = vscode.window.activeTextEditor.document.offsetAt(currentSelection);
 			if (currentPosition) {
-				const currentMethod = UIClass.methods.find(method => method.acornNode?.start < currentPosition && method.acornNode?.end > currentPosition);
+				const currentMethod = UIClass.methods.find(method => method.node?.start < currentPosition && method.node?.end > currentPosition);
 				if (currentMethod) {
-					offset = currentMethod.acornNode.end;
+					offset = currentMethod.node.end;
 					const currentMethodIsLastMethod = ReusableMethods.getIfMethodIsLastOne(UIClass, currentMethod);
 
 					if (!thereAreNoMethods) {

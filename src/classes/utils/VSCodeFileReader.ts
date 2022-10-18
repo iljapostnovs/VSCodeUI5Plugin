@@ -4,6 +4,7 @@ import { UI5Parser } from "ui5plugin-parser";
 import { FileData } from "ui5plugin-parser/dist/classes/utils/FileReader";
 import * as vscode from "vscode";
 import * as fs from "fs";
+import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
 const escapedFileSeparator = "\\" + path.sep;
 
 export class VSCodeFileReader {
@@ -14,7 +15,7 @@ export class VSCodeFileReader {
 	static getCurrentWorkspaceFoldersManifest() {
 		const currentClassName = this.getClassNameOfTheCurrentDocument();
 		if (currentClassName) {
-			return UI5Parser.getInstance().fileReader.getManifestForClass(currentClassName);
+			return AbstractUI5Parser.getInstance(UI5Parser).fileReader.getManifestForClass(currentClassName);
 		}
 	}
 	public static getClassNameOfTheCurrentDocument(classPath?: string) {
@@ -25,7 +26,7 @@ export class VSCodeFileReader {
 		}
 
 		if (classPath) {
-			returnClassName = UI5Parser.getInstance().fileReader.getClassNameFromPath(classPath);
+			returnClassName = AbstractUI5Parser.getInstance(UI5Parser).fileReader.getClassNameFromPath(classPath);
 		}
 
 		return returnClassName;
@@ -36,7 +37,7 @@ export class VSCodeFileReader {
 		const currentDocument = vscode.window.activeTextEditor?.document;
 		if (currentDocument && currentDocument.fileName.endsWith(".view.xml")) {
 			const currentDocumentText = currentDocument.getText();
-			controllerName = UI5Parser.getInstance().fileReader.getControllerNameFromView(currentDocumentText);
+			controllerName = AbstractUI5Parser.getInstance(UI5Parser).fileReader.getControllerNameFromView(currentDocumentText);
 		}
 
 		return controllerName;

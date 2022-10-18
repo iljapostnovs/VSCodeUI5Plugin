@@ -8,21 +8,16 @@ import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
 import { VSCodeTextDocumentTransformer } from "../../../../utils/VSCodeTextDocumentTransformer";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 import { ReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts//util/ReferenceFinder";
-import { UI5Plugin } from "../../../../../UI5Plugin";
+import { TSReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts//util/TSReferenceFinder";
 import { VSCodeLocationAdapter } from "../../../../ui5linter/adapters/VSCodeLocationAdapter";
 import {
 	CustomTSClass,
+	ICustomClassTSMethod,
 	ICustomClassTSField,
-	ICustomClassTSMethod
-} from "../../../../../typescript/parsing/classes/CustomTSClass";
-import { TSReferenceFinder } from "./reference/TSReferenceFinder";
-import { UI5TSParser } from "../../../../../typescript/parsing/UI5TSParser";
-
-export interface IReferenceCodeLensCacheable {
-	[className: string]: {
-		[methodName: string]: vscode.Location[];
-	};
-}
+	ICustomClassTSConstructor
+} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
+import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
+import { UI5Parser, UI5TSParser } from "ui5plugin-parser";
 
 export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 	getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
@@ -35,9 +30,9 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 					const methods = UIClass.methods;
 
 					methods.forEach(method => {
-						if (method.memberPropertyNode) {
+						if (method.loc) {
 							const locations = this.getReferenceLocations(method);
-							const range = RangeAdapter.acornLocationToVSCodeRange(method.memberPropertyNode.loc);
+							const range = RangeAdapter.acornLocationToVSCodeRange(method.loc);
 							const codeLens = new vscode.CodeLens(range);
 							codeLens.command = {
 								title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
@@ -48,29 +43,27 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 						}
 					});
 				} else if (UIClass instanceof CustomTSClass) {
-					const TSClass = UIClass as CustomTSClass;
-					const methods = TSClass.methods;
+					const methods = UIClass.methods;
+					const constructors = UIClass.constructors;
 
-					methods.forEach(method => {
-						if (method.memberPropertyNode) {
+					[...methods, ...constructors].forEach(method => {
+						if (method.loc) {
 							const locations = this.getTSReferenceLocations(method);
-							if (locations.length > 0) {
-								const range = RangeAdapter.acornLocationToVSCodeRange(method.memberPropertyNode.loc);
-								const codeLens = new vscode.CodeLens(range);
-								codeLens.command = {
-									title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
-									command: locations.length ? "editor.action.showReferences" : "",
-									arguments: [document.uri, range.start, locations]
-								};
-								codeLenses.push(codeLens);
-							}
+							const range = RangeAdapter.acornLocationToVSCodeRange(method.loc);
+							const codeLens = new vscode.CodeLens(range);
+							codeLens.command = {
+								title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
+								command: locations.length ? "editor.action.showReferences" : "",
+								arguments: [document.uri, range.start, locations]
+							};
+							codeLenses.push(codeLens);
 						}
 					});
 
-					TSClass.fields.forEach(field => {
-						if (field.memberPropertyNode) {
+					UIClass.fields.forEach(field => {
+						if (field.loc) {
 							const locations = this.getTSReferenceLocations(field);
-							const range = RangeAdapter.acornLocationToVSCodeRange(field.memberPropertyNode.loc);
+							const range = RangeAdapter.acornLocationToVSCodeRange(field.loc);
 							const codeLens = new vscode.CodeLens(range);
 							codeLens.command = {
 								title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
@@ -88,12 +81,12 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 	}
 
 	public getReferenceLocations(member: ICustomClassUIMethod | ICustomClassUIField) {
-		const referenceFinder = new ReferenceFinder(UI5Plugin.getInstance().parser);
+		const referenceFinder = new ReferenceFinder(AbstractUI5Parser.getInstance(UI5Parser));
 		return referenceFinder.getReferenceLocations(member).map(location => new VSCodeLocationAdapter(location));
 	}
 
-	public getTSReferenceLocations(member: ICustomClassTSMethod | ICustomClassTSField) {
-		const referenceFinder = new TSReferenceFinder(UI5TSParser.getInstance());
+	public getTSReferenceLocations(member: ICustomClassTSMethod | ICustomClassTSField | ICustomClassTSConstructor) {
+		const referenceFinder = new TSReferenceFinder(UI5TSParser.getInstance(UI5TSParser));
 		return referenceFinder.getReferenceLocations(member).map(location => new VSCodeLocationAdapter(location));
 	}
 }

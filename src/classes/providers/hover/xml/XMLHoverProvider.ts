@@ -1,11 +1,18 @@
 import { XMLParser } from "ui5plugin-parser";
 import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
-import { CustomUIClass, ICustomClassUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
+import {
+	CustomTSClass,
+	ICustomClassTSMethod
+} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
+import {
+	CustomUIClass,
+	ICustomClassUIMethod
+} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { StandardUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
 import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
 import * as vscode from "vscode";
-import { CustomTSClass, ICustomClassTSMethod } from "../../../../typescript/parsing/classes/CustomTSClass";
 import { UI5Plugin } from "../../../../UI5Plugin";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 
@@ -47,37 +54,63 @@ export class XMLHoverProvider {
 						hover = new vscode.Hover(markdownString);
 					}
 				} else if (attributeValue) {
-					const { attributeName, attributeValue: attributeVal } = XMLParser.getAttributeNameAndValue(attributeValue);					const property = UI5Plugin.getInstance().parser.classFactory.getClassProperties(classOfTheTag).find(property => property.name === attributeName);
-					const responsibleClass = UI5Plugin.getInstance().parser.fileReader.getResponsibleClassForXMLDocument(new TextDocumentAdapter(document));
-					const method = responsibleClass && UI5Plugin.getInstance().parser.classFactory.getClassMethods(responsibleClass).find(method => method.name === attributeVal);
-					const responsibleUIClass = method && UI5Plugin.getInstance().parser.classFactory.getUIClass(method.owner);
+					const { attributeName, attributeValue: attributeVal } =
+						XMLParser.getAttributeNameAndValue(attributeValue);
+					const property = UI5Plugin.getInstance()
+						.parser.classFactory.getClassProperties(classOfTheTag)
+						.find(property => property.name === attributeName);
+					const responsibleClass =
+						UI5Plugin.getInstance().parser.fileReader.getResponsibleClassForXMLDocument(
+							new TextDocumentAdapter(document)
+						);
+					const method =
+						responsibleClass &&
+						UI5Plugin.getInstance()
+							.parser.classFactory.getClassMethods(responsibleClass)
+							.find(method => method.name === attributeVal);
+					const responsibleUIClass =
+						method && UI5Plugin.getInstance().parser.classFactory.getUIClass(method.owner);
 					const value = property?.typeValues.find(value => value.text === attributeVal);
 					if (property && value) {
 						const markdownString = new vscode.MarkdownString();
 						const text = `**${value.text}**: ${value.description}`;
 						markdownString.appendMarkdown(text);
 						hover = new vscode.Hover(markdownString);
-					} else if (responsibleUIClass && (responsibleUIClass instanceof CustomUIClass || responsibleUIClass instanceof CustomTSClass) && responsibleUIClass.classText && method) {
-						const customMethod = method as ICustomClassUIMethod;
-						if (customMethod.acornNode) {
-							const methodText = responsibleUIClass.classText.substring(customMethod.acornNode.start, customMethod.acornNode.end);
-							const markdownString = new vscode.MarkdownString();
-							const text = "**Ctrl + Left Click** to navigate";
-							markdownString.appendMarkdown(text);
-							markdownString.appendCodeblock(methodText.replace(/\t/g, " "), "javascript");
-							hover = new vscode.Hover(markdownString);
+					} else if (
+						responsibleUIClass &&
+						responsibleUIClass instanceof AbstractCustomClass &&
+						responsibleUIClass.classText &&
+						method
+					) {
+						if (responsibleUIClass instanceof CustomUIClass) {
+							const customMethod = method as ICustomClassUIMethod;
+							if (customMethod.node) {
+								const methodText = responsibleUIClass.classText.substring(
+									customMethod.node.start,
+									customMethod.node.end
+								);
+								const markdownString = new vscode.MarkdownString();
+								const text = "**Ctrl + Left Click** to navigate";
+								markdownString.appendMarkdown(text);
+								markdownString.appendCodeblock(methodText.replace(/\t/g, " "), "javascript");
+								hover = new vscode.Hover(markdownString);
+							}
 						}
-						const customTSMethod = method as ICustomClassTSMethod;
-						if (customTSMethod.tsNode) {
-							const methodText = responsibleUIClass.classText.substring(customTSMethod.tsNode.getStart(), customTSMethod.tsNode.getEnd());
-							const markdownString = new vscode.MarkdownString();
-							const text = "**Ctrl + Left Click** to navigate";
-							markdownString.appendMarkdown(text);
-							markdownString.appendCodeblock(methodText.replace(/\t/g, " "), "typescript");
-							hover = new vscode.Hover(markdownString);
+						if (responsibleUIClass instanceof CustomTSClass) {
+							const customTSMethod = method as ICustomClassTSMethod;
+							if (customTSMethod.node) {
+								const methodText = responsibleUIClass.classText.substring(
+									customTSMethod.node.getStart(),
+									customTSMethod.node.getEnd()
+								);
+								const markdownString = new vscode.MarkdownString();
+								const text = "**Ctrl + Left Click** to navigate";
+								markdownString.appendMarkdown(text);
+								markdownString.appendCodeblock(methodText.replace(/\t/g, " "), "typescript");
+								hover = new vscode.Hover(markdownString);
+							}
 						}
 					}
-
 				} else if (tagName === word) {
 					//highlighted text is class or aggregation
 					const isClassName = word[0].toUpperCase() === word[0];
@@ -143,7 +176,9 @@ export class XMLHoverProvider {
 			api = URLBuilder.getInstance().getMarkupUrlForEventsApi(UIClass, event.name);
 
 			if (event.params.length > 0) {
-				text += `  \n\nParameters:  \n${event.params.map(param => `*${param.name}*: ${param.type}`).join("  \n")}`;
+				text += `  \n\nParameters:  \n${event.params
+					.map(param => `*${param.name}*: ${param.type}`)
+					.join("  \n")}`;
 			}
 		}
 		if (property) {

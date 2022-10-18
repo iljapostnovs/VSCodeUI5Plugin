@@ -11,13 +11,14 @@ import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
 import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
 import { JSRenameRegistrator } from "./classes/registrators/RenameRegistreator";
 import { TreeDataProviderRegistrator } from "./classes/registrators/TreeDataProviderRegistrator";
-import { UI5Parser, WorkspaceFolder } from "ui5plugin-parser";
+import { UI5Parser, UI5TSParser, WorkspaceFolder } from "ui5plugin-parser";
 import { VSCodeParserConfigHandler } from "./classes/ui5parser/VSCodeParserConfigHandler";
-import { glob } from "glob";
-import * as path from "path";
-import { TSFileReader } from "./typescript/parsing/TSFileReader";
-import { TSClassFactory } from "./typescript/parsing/TSClassFactory";
-import { UI5TSParser } from "./typescript/parsing/UI5TSParser";
+import { TSClassFactory } from "ui5plugin-parser/dist/classes/UI5Classes/TSClassFactory";
+import { TSFileReader } from "ui5plugin-parser/dist/classes/utils/TSFileReader";
+import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
+import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
+import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 export class UI5Plugin {
 	private static _instance?: UI5Plugin;
@@ -32,14 +33,19 @@ export class UI5Plugin {
 
 	public context?: vscode.ExtensionContext;
 
-	public parser!: UI5Parser;
+	public parser!: AbstractUI5Parser<AbstractCustomClass>;
 
 	public addDisposable(disposable: vscode.Disposable) {
 		this.context?.subscriptions.push(disposable);
 	}
 	public initialize(context: vscode.ExtensionContext) {
 		let fnInitialize: (context: vscode.ExtensionContext) => Promise<void> = this._initialize.bind(this);
-		if (this._getIsTypescriptProject()) {
+
+		const workspaceFolders = vscode.workspace.workspaceFolders?.map(wsFolder => {
+			return new WorkspaceFolder(wsFolder.uri.fsPath);
+		}) ?? [];
+		const oConfigHandler = new VSCodeParserConfigHandler();
+		if (AbstractUI5Parser.getIsTypescriptProject(workspaceFolders, oConfigHandler)) {
 			this.projectType = ProjectType.ts;
 			fnInitialize = this._initializeTS.bind(this);
 		}
@@ -81,38 +87,18 @@ export class UI5Plugin {
 
 		return UI5Plugin.pWhenPluginInitialized;
 	}
-	private _getIsTypescriptProject() {
-		const escapedFileSeparator = "\\" + path.sep;
-		const workspaceFolders = vscode.workspace.workspaceFolders?.map(wsFolder => {
-			return new WorkspaceFolder(wsFolder.uri.fsPath);
-		});
-
-		const tsFiles = workspaceFolders?.flatMap(wsFolder => {
-			const oConfigHandler = new VSCodeParserConfigHandler();
-			const wsFolderFSPath = wsFolder.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-			const exclusions: string[] = oConfigHandler.getExcludeFolderPatterns();
-			const exclusionPaths = exclusions.map(excludeString => {
-				return `${wsFolderFSPath}/${excludeString}`;
-			});
-			return glob.sync(`${wsFolderFSPath}/**/*.ts`, {
-				ignore: exclusionPaths
-			});
-		});
-
-		return !!tsFiles?.length || false;
-	}
 	private async _initialize(context: vscode.ExtensionContext) {
 		const globalStoragePath = context.globalStorageUri.fsPath;
 		const workspaceFolders = vscode.workspace.workspaceFolders?.map(wsFolder => {
 			return new WorkspaceFolder(wsFolder.uri.fsPath);
 		});
-		const parser = UI5Parser.getInstance({
+		const parser = AbstractUI5Parser.getInstance<UI5Parser, CustomUIClass>(UI5Parser, {
 			configHandler: new VSCodeParserConfigHandler()
 		});
 		await parser.initialize(workspaceFolders, globalStoragePath);
 		CommandRegistrator.register(false, ProjectType.js);
 		CommandRegistrator.registerUniqueCommands();
-		this.parser = UI5Parser.getInstance();
+		this.parser = AbstractUI5Parser.getInstance(UI5Parser);
 		await CompletionItemRegistrator.register();
 		FileWatcherMediator.register();
 		CommandRegistrator.register(true, ProjectType.js);
@@ -136,7 +122,7 @@ export class UI5Plugin {
 		const factory = new TSClassFactory();
 
 		(UI5Parser as unknown as any).getInstance = UI5TSParser.getInstance;
-		const parser = UI5TSParser.getInstance({
+		const parser = AbstractUI5Parser.getInstance<UI5TSParser, CustomTSClass>(UI5TSParser, {
 			configHandler: configHandler,
 			fileReader: new TSFileReader(configHandler, factory),
 			classFactory: factory
@@ -144,13 +130,12 @@ export class UI5Plugin {
 
 		CommandRegistrator.register(false, ProjectType.ts);
 		await parser.initialize(workspaceFolders, globalStoragePath);
-		/*@ts-expect-error: oh well*/
 		this.parser = parser;
 
-		UI5TSParser.getInstance()
-			.classFactory.getAllCustomTSClasses()
+		AbstractUI5Parser.getInstance(UI5TSParser)
+			.classFactory.getAllCustomUIClasses()
 			.forEach(UIClass => {
-				UI5TSParser.getInstance().classFactory.enrichTypesInCustomClass(UIClass);
+				AbstractUI5Parser.getInstance(UI5TSParser).classFactory.enrichTypesInCustomClass(UIClass);
 			});
 
 		CommandRegistrator.register(true, ProjectType.ts);
@@ -163,6 +148,7 @@ export class UI5Plugin {
 		XMLFormatterRegistrator.register();
 		DiagnosticsRegistrator.register(ProjectType.ts);
 		FileWatcherMediator.register();
+		TreeDataProviderRegistrator.register();
 	}
 
 	static registerFallbackCommands() {

@@ -1,12 +1,10 @@
 import { XMLParser } from "ui5plugin-parser";
 import {
-	CustomUIClass,
-	ICustomClassUIMethod
-} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+	AbstractCustomClass
+} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
 import { ITag } from "ui5plugin-parser/dist/classes/utils/XMLParser";
 import * as vscode from "vscode";
-import { CustomTSClass, ICustomClassTSMethod } from "../../../../typescript/parsing/classes/CustomTSClass";
 import { UI5Plugin } from "../../../../UI5Plugin";
 import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
@@ -94,15 +92,13 @@ export class XMLDefinitionProvider {
 		const responsibleClassName = this._findClassNameOfEventHandler(jsUIClassName, eventHandlerName);
 		if (responsibleClassName) {
 			const controllerUIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(responsibleClassName);
-			if (controllerUIClass instanceof CustomUIClass || controllerUIClass instanceof CustomTSClass) {
+			if (controllerUIClass instanceof AbstractCustomClass) {
 				const classPath =
 					UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(responsibleClassName);
-				const method: ICustomClassTSMethod | ICustomClassUIMethod = controllerUIClass.methods.find(
-					(method: ICustomClassTSMethod | ICustomClassUIMethod) => method.name === eventHandlerName
-				);
-				if (method?.position && classPath) {
+				const method = controllerUIClass.methods.find(method => method.name === eventHandlerName);
+				if (method?.position && classPath && method.loc) {
 					const classUri = vscode.Uri.file(classPath);
-					const position = PositionAdapter.acornPositionToVSCodePosition(method.memberPropertyNode.loc.start);
+					const position = PositionAdapter.acornPositionToVSCodePosition(method.loc?.start);
 					if (position) {
 						location = new vscode.Location(classUri, position);
 					}
@@ -114,7 +110,7 @@ export class XMLDefinitionProvider {
 	}
 
 	private static _findClassNameOfEventHandler(className: string, methodName: string): string | undefined {
-		const UIClass = <CustomUIClass | CustomTSClass>(
+		const UIClass = <AbstractCustomClass>(
 			UI5Plugin.getInstance().parser.classFactory.getUIClass(className)
 		);
 		const method = UIClass.methods.find(method => method.name === methodName);

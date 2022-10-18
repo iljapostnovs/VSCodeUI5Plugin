@@ -1,6 +1,5 @@
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 import * as vscode from "vscode";
-import { CustomTSClass } from "../../../typescript/parsing/classes/CustomTSClass";
 import { UI5Plugin } from "../../../UI5Plugin";
 
 export class SwitchToModelCommand {
@@ -14,7 +13,7 @@ export class SwitchToModelCommand {
 					const modelName = UI5Plugin.getInstance().parser.classFactory.getDefaultModelForClass(currentClassName);
 					if (modelName) {
 						const UIModelClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(modelName);
-						if (UIModelClass instanceof CustomUIClass || UIModelClass instanceof CustomTSClass) {
+						if (UIModelClass instanceof AbstractCustomClass) {
 							await this._switchToModel(UIModelClass.className);
 						}
 					} else {

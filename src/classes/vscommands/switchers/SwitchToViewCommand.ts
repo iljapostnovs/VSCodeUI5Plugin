@@ -1,6 +1,5 @@
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 import * as vscode from "vscode";
-import { CustomTSClass } from "../../../typescript/parsing/classes/CustomTSClass";
 import { UI5Plugin } from "../../../UI5Plugin";
 
 export class SwitchToViewCommand {
@@ -13,8 +12,8 @@ export class SwitchToViewCommand {
 				if (isModel) {
 					const allUIClasses = UI5Plugin.getInstance().parser.classFactory.getAllExistentUIClasses();
 					const controllers = Object.keys(allUIClasses)
-						.filter(key => allUIClasses[key] instanceof CustomUIClass || allUIClasses[key] instanceof CustomTSClass)
-						.map(key => <CustomUIClass|CustomTSClass>allUIClasses[key])
+						.filter(key => allUIClasses[key] instanceof AbstractCustomClass)
+						.map(key => <AbstractCustomClass>allUIClasses[key])
 						.filter(UIClass => {
 							const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(UIClass.className);
 							return filePath?.endsWith(".controller.js") || filePath?.endsWith(".controller.ts");

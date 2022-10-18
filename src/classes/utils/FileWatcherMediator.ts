@@ -11,11 +11,10 @@ import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 import { VSCodeFileReader } from "./VSCodeFileReader";
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { IReferenceCodeLensCacheable } from "ui5plugin-linter/dist/classes/js/parts/util/ReferenceFinder";
 import { PackageLinterConfigHandler } from "ui5plugin-linter";
-import { PackageParserConfigHandler } from "ui5plugin-parser";
+import { PackageParserConfigHandler, UI5TSParser } from "ui5plugin-parser";
 import { ICacheable } from "ui5plugin-parser/dist/classes/UI5Classes/abstraction/ICacheable";
-import { UI5TSParser } from "../../typescript/parsing/UI5TSParser";
+import { IReferenceCodeLensCacheable } from "ui5plugin-linter/dist/classes/js/parts/util/ReferenceFinderBase";
 
 const workspace = vscode.workspace;
 
@@ -199,7 +198,7 @@ export class FileWatcherMediator {
 			}
 			if (uri.fsPath.endsWith(".ts")) {
 				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "ts");
-				const project = UI5TSParser.getInstance().getProject(uri.fsPath);
+				const project = UI5TSParser.getInstance(UI5TSParser).getProject(uri.fsPath);
 				const sourceFile = project?.getSourceFile(uri.fsPath);
 				if (sourceFile) {
 					project?.removeSourceFile(sourceFile);
@@ -362,7 +361,7 @@ export class FileWatcherMediator {
 	private static async _syncWithProjectCache(uri: vscode.Uri) {
 		const document = await vscode.workspace.openTextDocument(uri);
 		if (uri.fsPath.endsWith(".js") || uri.fsPath.endsWith(".ts")) {
-			const project = UI5TSParser.getInstance().getProject(uri.fsPath);
+			const project = UI5TSParser.getInstance(UI5TSParser).getProject(uri.fsPath);
 			project?.addSourceFileAtPath(document.fileName);
 			UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(
 				new TextDocumentAdapter(document),

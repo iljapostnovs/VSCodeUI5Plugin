@@ -1,9 +1,10 @@
+import { UI5Parser } from "ui5plugin-parser";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 import { IAbstract, IStatic } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { IXMLFile, IFragment, IView } from "ui5plugin-parser/dist/classes/utils/FileReader";
+import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
 import { WorkspaceFolder } from "vscode";
-import { CustomTSClass } from "../../../../typescript/parsing/classes/CustomTSClass";
 import { UI5Plugin } from "../../../../UI5Plugin";
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 
@@ -33,7 +34,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 		});
 		groupedClassNames.unpackagedClasses.forEach(className => {
 			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
-			if (UIClass instanceof CustomUIClass || UIClass instanceof CustomTSClass) {
+			if (UIClass instanceof AbstractCustomClass) {
 				diagram += this._generateClassDiagram(UIClass);
 			}
 		});
@@ -61,7 +62,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 
 		const JSClassRelationships: string[] = classNames.flatMap(className => {
 			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
-			if (UIClass instanceof CustomUIClass || UIClass instanceof CustomTSClass) {
+			if (UIClass instanceof AbstractCustomClass) {
 				return this._generateRelationships(UIClass);
 			} else {
 				return [];
@@ -84,7 +85,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 		const data: {
 			packages: {
 				[packageName: string]: {
-					UIClasses: (CustomUIClass | CustomTSClass)[];
+					UIClasses: AbstractCustomClass[];
 					views: IView[];
 				};
 			};
@@ -98,9 +99,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 
 		let className = classNames.pop();
 		while (className) {
-			const UIClass = <CustomUIClass | CustomTSClass>(
-				UI5Plugin.getInstance().parser.classFactory.getUIClass(className)
-			);
+			const UIClass = <AbstractCustomClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
 			if (
 				UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(
 					UIClass.className,
@@ -120,7 +119,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 					);
 					if (modelName) {
 						const model = UI5Plugin.getInstance().parser.classFactory.getUIClass(modelName);
-						if (model instanceof CustomUIClass || model instanceof CustomTSClass) {
+						if (model instanceof AbstractCustomClass) {
 							UIClasses.push(model);
 							if (classNames.includes(modelName)) {
 								classNames.splice(classNames.indexOf(model.className), 1);
@@ -188,13 +187,13 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 		return !charsAtIndex.some(char => char !== charsAtIndex[0]);
 	}
 
-	private _generateRelationships(UIClass: CustomUIClass | CustomTSClass) {
+	private _generateRelationships(UIClass: AbstractCustomClass) {
 		const relationships: string[] = [];
 		const dependencies = [...new Set(this._gatherAllDependencies(UIClass))];
 		const parent =
 			UIClass.parentClassNameDotNotation &&
 			UI5Plugin.getInstance().parser.classFactory.getUIClass(UIClass.parentClassNameDotNotation);
-		if (parent instanceof CustomUIClass || parent instanceof CustomTSClass) {
+		if (parent instanceof AbstractCustomClass) {
 			const parentIsFromSameProject = this._getIfClassesAreWithinSameProject(
 				UIClass.className,
 				UIClass.parentClassNameDotNotation
@@ -205,10 +204,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 		}
 		dependencies.forEach(dependency => {
 			const dependencyClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(dependency);
-			if (
-				dependency !== UIClass.parentClassNameDotNotation &&
-				(dependencyClass instanceof CustomUIClass || dependencyClass instanceof CustomTSClass)
-			) {
+			if (dependency !== UIClass.parentClassNameDotNotation && dependencyClass instanceof AbstractCustomClass) {
 				const dependencyIsFromSameProject = this._getIfClassesAreWithinSameProject(
 					UIClass.className,
 					dependency
@@ -239,10 +235,10 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 
 		return relationships;
 	}
-	private _gatherAllDependencies(UIClass: CustomUIClass | CustomTSClass) {
+	private _gatherAllDependencies(UIClass: AbstractCustomClass) {
 		const dependencies: string[] = [];
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
-			UI5Plugin.getInstance().parser.syntaxAnalyser
+			AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
 		);
 
 		UIClass.UIDefine.forEach(UIDefine => {
@@ -256,8 +252,8 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 
 		UIClass.methods.forEach(UIMethod => {
 			if ((<any>UIMethod).acornNode) {
-				const memberExpressions = UI5Plugin.getInstance()
-					.parser.syntaxAnalyser.expandAllContent((<any>UIMethod).acornNode)
+				const memberExpressions = AbstractUI5Parser.getInstance(UI5Parser)
+					.syntaxAnalyser.expandAllContent((<any>UIMethod).acornNode)
 					.filter((node: any) => node.type === "MemberExpression");
 				memberExpressions.forEach((memberExpression: any) => {
 					const className = strategy.acornGetClassName(UIClass.className, memberExpression.property.start);
@@ -281,7 +277,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 		return thisClassManifest?.fsPath === parentClassManifest?.fsPath;
 	}
 
-	private _generateClassDiagram(UIClass: CustomUIClass | CustomTSClass) {
+	private _generateClassDiagram(UIClass: AbstractCustomClass) {
 		const classColor = this._getClassColor(UIClass);
 		const classOrInterface = this._getClassOrInterfaceKeyword(UIClass);
 		const implementations = UIClass.interfaces.length > 0 ? ` implements ${UIClass.interfaces.join(", ")}` : "";
@@ -308,7 +304,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 		classDiagram += "}\n";
 		return classDiagram;
 	}
-	private _getStereotype(UIClass: CustomUIClass | CustomTSClass) {
+	private _getStereotype(UIClass: AbstractCustomClass) {
 		let stereotype = "";
 
 		if (
@@ -330,7 +326,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 
 		return stereotype;
 	}
-	private _getClassOrInterfaceKeyword(UIClass: CustomUIClass | CustomTSClass) {
+	private _getClassOrInterfaceKeyword(UIClass: AbstractCustomClass) {
 		let keyword = "class";
 		const isInterface = !!UI5Plugin.getInstance()
 			.parser.classFactory.getAllCustomUIClasses()
@@ -341,7 +337,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 
 		return keyword;
 	}
-	private _getClassColor(UIClass: CustomUIClass | CustomTSClass) {
+	private _getClassColor(UIClass: AbstractCustomClass) {
 		let color = "";
 		const isModel = UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(
 			UIClass.className,

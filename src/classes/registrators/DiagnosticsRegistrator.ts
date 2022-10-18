@@ -5,6 +5,7 @@ import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 import { VSCodeSeverityAdapter } from "../ui5linter/adapters/VSCodeSeverityAdapter";
 import { JSLinter } from "../ui5linter/js/JSLinter";
 import { PropertiesLinter } from "../ui5linter/properties/PropertiesLinter";
+import { TSLinter } from "../ui5linter/ts/TSLinter";
 import { XMLLinter } from "../ui5linter/xml/XMLLinter";
 
 let xmlDiagnosticCollection: vscode.DiagnosticCollection;
@@ -162,25 +163,25 @@ export class DiagnosticsRegistrator {
 	}
 
 	private static _updateTSDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
-		// const errors = new JSLinter().getLintingErrors(new TextDocumentAdapter(document));
+		const errors = new TSLinter().getLintingErrors(new TextDocumentAdapter(document));
 
-		// const diagnostics: CustomDiagnostics[] = errors.map(error => {
-		// 	const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);
+		const diagnostics: CustomDiagnostics[] = errors.map(error => {
+			const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);
 
-		// 	diagnostic.code = error.code;
-		// 	diagnostic.severity = vscode.DiagnosticSeverity.Hint;
-		// 	diagnostic.type = error.type;
-		// 	diagnostic.methodName = error.methodName;
-		// 	diagnostic.acornNode = error.acornNode;
-		// 	diagnostic.fieldName = error.fieldName;
-		// 	diagnostic.attribute = error.sourceClassName;
-		// 	diagnostic.source = error.source;
-		// 	diagnostic.tags = error.tags;
-		// 	diagnostic.severity = VSCodeSeverityAdapter.toVSCodeSeverity(error.severity);
+			diagnostic.code = error.code;
+			diagnostic.severity = vscode.DiagnosticSeverity.Hint;
+			diagnostic.type = error.type;
+			diagnostic.methodName = error.methodName;
+			diagnostic.acornNode = error.acornNode;
+			diagnostic.fieldName = error.fieldName;
+			diagnostic.attribute = error.sourceClassName;
+			diagnostic.source = error.source;
+			diagnostic.tags = error.tags;
+			diagnostic.severity = VSCodeSeverityAdapter.toVSCodeSeverity(error.severity);
 
-		// 	return diagnostic;
-		// });
+			return diagnostic;
+		});
 
-		// collection.set(document.uri, diagnostics);
+		collection.set(document.uri, diagnostics);
 	}
 }

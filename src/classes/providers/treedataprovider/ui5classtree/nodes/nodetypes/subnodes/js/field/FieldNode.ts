@@ -12,8 +12,8 @@ export class FieldNode extends NavigatiableNode {
 		const label = `${UIField.name}: ${UIField.type}`;
 		this.label = label;
 
-		if (UIField.memberPropertyNode) {
-			this._addNavigationCommand(UIField.owner, UIField.memberPropertyNode.loc);
+		if (UIField.loc) {
+			this._addNavigationCommand(UIField.owner, UIField.loc);
 		}
 
 	}

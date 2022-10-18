@@ -7,6 +7,8 @@ import { UI5Plugin } from "../../../../UI5Plugin";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
+import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
+import { UI5Parser } from "ui5plugin-parser";
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -104,10 +106,10 @@ export class JSCodeActionProvider {
 			const offset = document.offsetAt(position);
 			const currentUIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName);
 			const currentMethod = currentUIClass.methods.find(method => {
-				return method.acornNode?.start < offset && offset < method.acornNode?.end;
+				return method.node?.start < offset && offset < method.node?.end;
 			});
 			if (currentMethod) {
-				const allContent = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(currentMethod.acornNode);
+				const allContent = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.expandAllContent(currentMethod.node);
 				const newExpressionOrExpressionStatement = allContent.find((node: any) => {
 					const firstChar: undefined | string = node.name?.[0];
 					const firstCharCaps = firstChar?.toUpperCase();
@@ -146,12 +148,12 @@ export class JSCodeActionProvider {
 
 		if (!selectedVariableName) {
 			const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
-			if (UIClass) {
+			if (UIClass instanceof CustomUIClass) {
 				const currentPositionOffset = document?.offsetAt(range.end);
-				const node = UI5Plugin.getInstance().parser.syntaxAnalyser.findAcornNode(UIClass.acornMethodsAndFields, currentPositionOffset);
+				const node = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findAcornNode(UIClass.acornMethodsAndFields, currentPositionOffset);
 				if (node && node.value) {
-					const content = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(node.value).filter(node => node.type === "Identifier");
-					const neededIdentifier = UI5Plugin.getInstance().parser.syntaxAnalyser.findAcornNode(content, currentPositionOffset);
+					const content = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.expandAllContent(node.value).filter(node => node.type === "Identifier");
+					const neededIdentifier = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findAcornNode(content, currentPositionOffset);
 					if (neededIdentifier) {
 						selectedVariableName = neededIdentifier.name;
 					}
