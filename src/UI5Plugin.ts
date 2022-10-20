@@ -9,7 +9,7 @@ import { CodeLensRegistrator } from "./classes/registrators/CodeLensRegistrator"
 import { CodeActionRegistrator } from "./classes/registrators/CodeActionRegistrator";
 import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
 import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
-import { JSRenameRegistrator } from "./classes/registrators/RenameRegistreator";
+import { JSRenameRegistrator } from "./classes/registrators/RenameRegistrator";
 import { TreeDataProviderRegistrator } from "./classes/registrators/TreeDataProviderRegistrator";
 import { UI5Parser, UI5TSParser, WorkspaceFolder } from "ui5plugin-parser";
 import { VSCodeParserConfigHandler } from "./classes/ui5parser/VSCodeParserConfigHandler";
@@ -148,6 +148,7 @@ export class UI5Plugin {
 		XMLFormatterRegistrator.register();
 		DiagnosticsRegistrator.register(ProjectType.ts);
 		FileWatcherMediator.register();
+		JSRenameRegistrator.registerTS();
 		TreeDataProviderRegistrator.register();
 	}
 

@@ -29,14 +29,6 @@ export class CodeActionRegistrator {
 	}
 
 	static registerTS() {
-		// let disposable = vscode.languages.registerCodeActionsProvider({ language: "javascript", scheme: "file" }, {
-		// 	provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
-		// 		return JSCodeActionProvider.getCodeActions(document, range);
-		// 	}
-		// });
-
-		// UI5Plugin.getInstance().addDisposable(disposable);
-
 		const disposable = vscode.languages.registerCodeActionsProvider(
 			{ language: "xml", scheme: "file" },
 			{

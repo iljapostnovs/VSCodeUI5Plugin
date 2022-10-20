@@ -56,7 +56,10 @@ export class DiagnosticsRegistrator {
 		UI5Plugin.getInstance().addDisposable(textDocumentChange);
 	}
 
-	private static async _updatePropertiesDiagnostics(document: vscode.TextDocument, propertiesDiagnosticCollection: vscode.DiagnosticCollection) {
+	private static async _updatePropertiesDiagnostics(
+		document: vscode.TextDocument,
+		propertiesDiagnosticCollection: vscode.DiagnosticCollection
+	) {
 		const errors = new PropertiesLinter().getLintingErrors(new TextDocumentAdapter(document));
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
@@ -91,9 +94,15 @@ export class DiagnosticsRegistrator {
 		const fileName = document.fileName;
 		if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
 			if (document.fileName.endsWith(".fragment.xml")) {
-				UI5Plugin.getInstance().parser.fileReader.setNewFragmentContentToCache(document.getText(), document.fileName);
+				UI5Plugin.getInstance().parser.fileReader.setNewFragmentContentToCache(
+					document.getText(),
+					document.fileName
+				);
 			} else if (document.fileName.endsWith(".view.xml")) {
-				UI5Plugin.getInstance().parser.fileReader.setNewViewContentToCache(document.getText(), document.fileName);
+				UI5Plugin.getInstance().parser.fileReader.setNewViewContentToCache(
+					document.getText(),
+					document.fileName
+				);
 			}
 			this._updateXMLDiagnostics(document, xmlDiagnosticCollection);
 		} else if (fileName.endsWith(".js")) {
@@ -120,7 +129,10 @@ export class DiagnosticsRegistrator {
 				const errors = new XMLLinter().getLintingErrors(new TextDocumentAdapter(document));
 
 				const diagnostics: CustomDiagnostics[] = errors.map(error => {
-					const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);
+					const diagnostic = new CustomDiagnostics(
+						RangeAdapter.rangeToVSCodeRange(error.range),
+						error.message
+					);
 
 					diagnostic.code = error.code;
 					diagnostic.message = error.message;
