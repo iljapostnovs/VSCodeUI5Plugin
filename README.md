@@ -4,7 +4,7 @@
 
 Any support is highly appreciated!<br/>
 [<img src="https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86" height="30"/>](https://github.com/sponsors/iljapostnovs)
-[<img src="https://newbie.zeromesh.net/donate.7.6.svg" height="30"/>](https://donate.cafe/iljapostnovs)
+[<img src="./images/donate.png" height="30"/>](https://donate.cafe/iljapostnovs)
 
 ---
 
