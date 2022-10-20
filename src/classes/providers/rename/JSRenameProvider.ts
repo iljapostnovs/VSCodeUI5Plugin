@@ -25,7 +25,12 @@ export class JSRenameProvider {
 			const offset = document.offsetAt(position);
 			const members = [...UIClass.methods, ...UIClass.fields];
 			const methodOrField = members.find(method => {
-				return method.node?.start <= offset && method.node?.end >= offset;
+				if (method.loc) {
+					const range = RangeAdapter.acornLocationToVSCodeRange(method.loc);
+					const offsetBegin = document.offsetAt(range.start);
+					const offsetEnd = document.offsetAt(range.end);
+					return offsetBegin <= offset && offsetEnd >= offset;
+				}
 			});
 
 			if (methodOrField?.node) {
