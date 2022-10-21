@@ -1,10 +1,10 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { Node } from "./Node";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 export abstract class RootNode extends Node {
-	readonly UIClass: CustomUIClass;
-	constructor(UIClass: CustomUIClass) {
+	readonly UIClass: AbstractCustomClass;
+	constructor(UIClass: AbstractCustomClass) {
 		super();
 		this.UIClass = UIClass;
 	}

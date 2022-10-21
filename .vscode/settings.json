@@ -7,5 +7,6 @@
 	},
 	"files.exclude": {
 		"**/.git": true
-	}
+	},
+	"typescript.referencesCodeLens.enabled": true
 }

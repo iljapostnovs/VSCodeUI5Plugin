@@ -1,10 +1,14 @@
 import * as vscode from "vscode";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
-import { XMLParser } from "ui5plugin-parser";
-import { CustomUIClass, ICustomClassUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { UI5Parser, XMLParser } from "ui5plugin-parser";
+import {
+	CustomUIClass
+} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { IXMLFile } from "ui5plugin-parser/dist/classes/utils/FileReader";
 import { UI5Plugin } from "../../../../../UI5Plugin";
+import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
+import { AbstractCustomClass, ICustomClassMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 
 interface IEventHandlerData {
 	name: string;
@@ -25,30 +29,47 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 
 		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 		if (className) {
-			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
-			const eventHandlers = UIClass.methods.filter(method => method.isEventHandler);
-			const viewsAndFragments = UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(UIClass, [], true, true, true);
-			const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
-			XMLDocuments.forEach(XMLDocument => {
-				codeLenses.push(...this._getCodeLensesForEventsFromXMLText(XMLDocument, eventHandlers, document));
-			});
+			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			if (UIClass instanceof AbstractCustomClass) {
+				const eventHandlers = UIClass.methods.filter(method => method.isEventHandler);
+				const viewsAndFragments =
+					UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(
+						UIClass,
+						[],
+						true,
+						true,
+						true
+					);
+				const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
+				XMLDocuments.forEach(XMLDocument => {
+					codeLenses.push(...this._getCodeLensesForEventsFromXMLText(XMLDocument, eventHandlers, document));
+				});
 
-			codeLenses.push(...this._getCodeLensesForEventsFromJSClass(eventHandlers, document));
+				codeLenses.push(...this._getCodeLensesForEventsFromJSClass(eventHandlers, document));
+			}
 		}
 
 		return codeLenses;
 	}
 
-	private _getCodeLensesForEventsFromXMLText(XMLText: IXMLFile, eventHandlers: ICustomClassUIMethod[], document: vscode.TextDocument) {
+	private _getCodeLensesForEventsFromXMLText(
+		XMLText: IXMLFile,
+		eventHandlers: ICustomClassMethod[],
+		document: vscode.TextDocument
+	) {
 		const codeLenses: vscode.CodeLens[] = [];
-		const solvedEventHandlers: ICustomClassUIMethod[] = [];
+		const solvedEventHandlers: ICustomClassMethod[] = [];
 		eventHandlers.forEach(eventHandler => {
 			const eventHandlerXMLData = this._getEventHandlerData(XMLText, eventHandler.name);
 			if (eventHandlerXMLData && eventHandler.position) {
 				const positionBegin = document.positionAt(eventHandler.position);
 				const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
 				const range = new vscode.Range(positionBegin, positionEnd);
-				const rangeInView = RangeAdapter.offsetsToVSCodeRange(XMLText.content, eventHandlerXMLData.start, eventHandlerXMLData.end);
+				const rangeInView = RangeAdapter.offsetsToVSCodeRange(
+					XMLText.content,
+					eventHandlerXMLData.start,
+					eventHandlerXMLData.end
+				);
 
 				if (rangeInView) {
 					const classUri = vscode.Uri.file(XMLText.fsPath);
@@ -58,9 +79,12 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 						tooltip: description,
 						title: description,
 						command: "vscode.open",
-						arguments: [classUri, {
-							selection: rangeInView
-						}]
+						arguments: [
+							classUri,
+							{
+								selection: rangeInView
+							}
+						]
 					});
 					codeLenses.push(codeLens);
 					solvedEventHandlers.push(eventHandler);
@@ -105,42 +129,52 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 					controlId: controlId
 				};
 			}
-
 		}
 
 		return eventHandlerData;
 	}
 
-	private _getCodeLensesForEventsFromJSClass(eventHandlers: ICustomClassUIMethod[], document: vscode.TextDocument) {
-		const solvedEventHandlers: ICustomClassUIMethod[] = [];
+	private _getCodeLensesForEventsFromJSClass(eventHandlers: ICustomClassMethod[], document: vscode.TextDocument) {
+		const solvedEventHandlers: ICustomClassMethod[] = [];
 		const codeLenses: vscode.CodeLens[] = [];
 		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 		if (className) {
-			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
-			eventHandlers.forEach(eventHandler => {
-				const eventData = UI5Plugin.getInstance().parser.syntaxAnalyser.getEventHandlerDataFromJSClass(className, eventHandler.name);
-				if (eventData && eventHandler.position) {
-					const positionBegin = document.positionAt(eventHandler.position);
-					const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
-					const range = new vscode.Range(positionBegin, positionEnd);
-					const rangeInView = RangeAdapter.offsetsToVSCodeRange(UIClass.classText, eventData.node.start, eventData.node.end - 1);
+			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			if (UIClass instanceof CustomUIClass) {
+				eventHandlers.forEach(eventHandler => {
+					const eventData = AbstractUI5Parser.getInstance(
+						UI5Parser
+					).syntaxAnalyser.getEventHandlerDataFromJSClass(className, eventHandler.name);
+					if (eventData && eventHandler.position) {
+						const positionBegin = document.positionAt(eventHandler.position);
+						const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);
+						const range = new vscode.Range(positionBegin, positionEnd);
+						const rangeInView = RangeAdapter.offsetsToVSCodeRange(
+							UIClass.classText,
+							eventData.node.start,
+							eventData.node.end - 1
+						);
 
-					if (rangeInView) {
-						const classUri = document.uri;
-						const description = `Event handler of "${eventData.className}~${eventData.eventName}"`;
-						const codeLens = new vscode.CodeLens(range, {
-							tooltip: description,
-							title: description,
-							command: "vscode.open",
-							arguments: [classUri, {
-								selection: rangeInView
-							}]
-						});
-						codeLenses.push(codeLens);
-						solvedEventHandlers.push(eventHandler);
+						if (rangeInView) {
+							const classUri = document.uri;
+							const description = `Event handler of "${eventData.className}~${eventData.eventName}"`;
+							const codeLens = new vscode.CodeLens(range, {
+								tooltip: description,
+								title: description,
+								command: "vscode.open",
+								arguments: [
+									classUri,
+									{
+										selection: rangeInView
+									}
+								]
+							});
+							codeLenses.push(codeLens);
+							solvedEventHandlers.push(eventHandler);
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 
 		solvedEventHandlers.forEach(solvedEventHandler => {

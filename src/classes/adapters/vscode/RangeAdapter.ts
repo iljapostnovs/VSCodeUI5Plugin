@@ -1,11 +1,12 @@
 import LineColumn = require("line-column");
+import { SourceFile } from "ts-morph";
 import { IRange } from "ui5plugin-linter/dist/classes/Linter";
 import * as vscode from "vscode";
 import { IAcornPosition, PositionAdapter } from "./PositionAdapter";
 
 export interface IAcornLocation {
-	start: IAcornPosition,
-	end: IAcornPosition
+	start: IAcornPosition;
+	end: IAcornPosition;
 }
 
 export class RangeAdapter {
@@ -36,5 +37,14 @@ export class RangeAdapter {
 		const vscodePositionBegin = PositionAdapter.acornPositionToVSCodePosition(location.start);
 		const vscodePositionEnd = PositionAdapter.acornPositionToVSCodePosition(location.end);
 		return new vscode.Range(vscodePositionBegin, vscodePositionEnd);
+	}
+
+	static tsOffsetsToVSCodeRange(start: number, end: number, sourceFile: SourceFile) {
+		const lineColumnBegin = sourceFile.getLineAndColumnAtPos(start);
+		const lineColumnEnd = sourceFile.getLineAndColumnAtPos(end);
+		const positionBegin = new vscode.Position(lineColumnBegin.line - 1, lineColumnBegin.column - 1);
+		const positionEnd = new vscode.Position(lineColumnEnd.line - 1, lineColumnEnd.column - 1);
+
+		return new vscode.Range(positionBegin, positionEnd);
 	}
 }

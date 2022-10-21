@@ -1,4 +1,4 @@
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../../UI5Plugin";
 
@@ -12,9 +12,12 @@ export class SwitchToViewCommand {
 				if (isModel) {
 					const allUIClasses = UI5Plugin.getInstance().parser.classFactory.getAllExistentUIClasses();
 					const controllers = Object.keys(allUIClasses)
-						.filter(key => allUIClasses[key] instanceof CustomUIClass)
-						.map(key => <CustomUIClass>allUIClasses[key])
-						.filter(UIClass => UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(UIClass.className)?.endsWith(".controller.js"));
+						.filter(key => allUIClasses[key] instanceof AbstractCustomClass)
+						.map(key => <AbstractCustomClass>allUIClasses[key])
+						.filter(UIClass => {
+							const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(UIClass.className);
+							return filePath?.endsWith(".controller.js") || filePath?.endsWith(".controller.ts");
+						});
 
 					const controllersWithThisModelInUIDefine = controllers.filter(controller => {
 						const bControllerHasThisModelInUIDefine = !!controller.UIDefine.find(UIDefine => UIDefine.classNameDotNotation === currentClassName);

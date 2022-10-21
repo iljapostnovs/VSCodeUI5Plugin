@@ -1,14 +1,18 @@
+import { UI5Parser } from "ui5plugin-parser";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { StandardUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/StandardUIClass";
 import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
+import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../../../UI5Plugin";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 
 export class JSHoverProvider {
 	static getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
-		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
+			AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
+		);
 		const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 		const range = document.getWordRangeAtPosition(position);
 		const word = document.getText(range);
@@ -16,11 +20,14 @@ export class JSHoverProvider {
 		let hover: vscode.Hover | undefined;
 
 		if (currentClassName) {
-			UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
+			UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(
+				new TextDocumentAdapter(document)
+			);
 
 			const className = strategy.acornGetClassName(currentClassName, offset) || "";
 			const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
-			const text = fieldsAndMethods?.className && this._getTextIfItIsMemberOfClass(fieldsAndMethods.className, word);
+			const text =
+				fieldsAndMethods?.className && this._getTextIfItIsMemberOfClass(fieldsAndMethods.className, word);
 			if (fieldsAndMethods && text) {
 				const textBefore = className === currentClassName ? "this." : `${fieldsAndMethods.className}.`;
 				const markdownString = this._getMarkdownFromText(textBefore + text);
@@ -62,23 +69,37 @@ export class JSHoverProvider {
 	private static _getTextIfItIsMemberOfClass(className: string, fieldOrMethodName: string) {
 		let text = "";
 
-		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
+			AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
+		);
 		const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
 		if (fieldsAndMethods) {
 			const method = fieldsAndMethods.methods.find(method => method.name === fieldOrMethodName);
 			const field = fieldsAndMethods.fields.find(field => field.name === fieldOrMethodName);
 			if (method) {
 				if (!method.returnType || method.returnType === "void") {
-					UI5Plugin.getInstance().parser.syntaxAnalyser.findMethodReturnType(method, className, true, true);
+					AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findMethodReturnType(
+						method,
+						className,
+						true,
+						true
+					);
 				}
-				text += `${method.name}(${method.params.map(param => `${param.name}: ${param.type}`).join(", ")}) : ${method.returnType}\n`;
+				text += `${method.name}(${method.params.map(param => `${param.name}: ${param.type}`).join(", ")}) : ${
+					method.returnType
+				}\n`;
 				if (method.api) {
 					text += method.api;
 				}
 				text += `${method.description}`;
 			} else if (field) {
 				if (!field.type) {
-					UI5Plugin.getInstance().parser.syntaxAnalyser.findFieldType(field, className, true, false);
+					AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findFieldType(
+						field,
+						className,
+						true,
+						false
+					);
 				}
 				text = `${field.name} : ${field.type}`;
 			}
@@ -89,27 +110,39 @@ export class JSHoverProvider {
 
 	private static _getClassNameForOffset(offset: number, className: string, identifierName: string) {
 		const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
-		const method = UI5Plugin.getInstance().parser.syntaxAnalyser.findAcornNode(UIClass.acornMethodsAndFields, offset);
+		const method = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findAcornNode(
+			UIClass.acornMethodsAndFields,
+			offset
+		);
 		let node = method?.value;
 		if (!node) {
 			const UIDefineBody = UIClass.getUIDefineAcornBody();
-			node = UI5Plugin.getInstance().parser.syntaxAnalyser.findAcornNode(UIDefineBody, offset);
+			node = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findAcornNode(UIDefineBody, offset);
 		}
 		if (node) {
-			const allContent = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(node);
-			const identifier = allContent.find(content => content.type === "Identifier" && content.name === identifierName);
+			const allContent = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.expandAllContent(node);
+			const identifier = allContent.find(
+				content => content.type === "Identifier" && content.name === identifierName
+			);
 			if (identifier) {
 				let position = identifier.end;
 				const callee = allContent.find(node => node.callee === identifier);
 				if (callee) {
 					position = callee.end;
 				}
-				const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
+				const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
+					AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
+				);
 				const stack = strategy.getStackOfNodesForPosition(className, position, true);
 				if (stack.length === 0) {
 					stack.push(identifier);
 				}
-				className = UI5Plugin.getInstance().parser.syntaxAnalyser.findClassNameForStack(stack, className, undefined, true);
+				className = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findClassNameForStack(
+					stack,
+					className,
+					undefined,
+					true
+				);
 				if (className) {
 					const fieldsAndMethods = strategy.destructueFieldsAndMethodsAccordingToMapParams(className);
 					if (fieldsAndMethods) {
