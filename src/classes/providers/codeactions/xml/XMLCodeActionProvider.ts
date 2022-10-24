@@ -17,14 +17,18 @@ export class XMLCodeActionProvider {
 	private static _getEventAutofillCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const providerResult: vscode.CodeAction[] = [];
 		const diagnostics = vscode.languages.getDiagnostics(document.uri);
-		const diagnostic: CustomDiagnostics | undefined = diagnostics.filter(diagnostic => diagnostic instanceof CustomDiagnostics).find(diagnostic => {
-			return diagnostic.range.contains(range);
-		});
+		const diagnostic: CustomDiagnostics | undefined = diagnostics
+			.filter(diagnostic => diagnostic instanceof CustomDiagnostics)
+			.find(diagnostic => {
+				return diagnostic.range.contains(range);
+			});
 		const XMLFile = diagnostic?.attribute && TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
 		if (diagnostic?.attribute && XMLFile) {
 			const currentPositionOffset = document?.offsetAt(range.end);
 			const attributeData = XMLParser.getAttributeNameAndValue(diagnostic.attribute);
-			attributeData.attributeValue = XMLParser.getEventHandlerNameFromAttributeValue(attributeData.attributeValue);
+			attributeData.attributeValue = XMLParser.getEventHandlerNameFromAttributeValue(
+				attributeData.attributeValue
+			);
 			const tagText = XMLParser.getTagInPosition(XMLFile, currentPositionOffset).text;
 			const tagPrefix = XMLParser.getTagPrefix(tagText);
 			const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
@@ -35,7 +39,30 @@ export class XMLCodeActionProvider {
 			if (event) {
 				const controllerName = SwitchToControllerCommand.getResponsibleClassForCurrentView();
 				if (controllerName) {
-					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(controllerName, attributeData.attributeValue, "oEvent", "", InsertType.Method);
+					// TODO: this
+					const eventModule =
+						(vscode.workspace.getConfiguration("ui5.plugin").get("tsEventModule") as string) ??
+						"sap/ui/base/Event";
+
+					const eventName = eventModule.split("/").pop() ?? "Event";
+
+					const eventType =
+						(vscode.workspace.getConfiguration("ui5.plugin").get("tsEventType") as string) ?? "Event";
+					const eventTypeWithReplacedVars = eventType
+						.replace("{classModule}", classOfTheTag.replace(/\./g, "/"))
+						.replace("{className}", classOfTheTag)
+						.replace("{eventName}", attributeData.attributeName);
+
+					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(
+						controllerName,
+						attributeData.attributeValue,
+						"oEvent",
+						"",
+						InsertType.Method,
+						eventName,
+						eventModule,
+						eventTypeWithReplacedVars
+					);
 					if (insertCodeAction) {
 						insertCodeAction.diagnostics = [diagnostic];
 
@@ -47,5 +74,4 @@ export class XMLCodeActionProvider {
 
 		return providerResult;
 	}
-
 }

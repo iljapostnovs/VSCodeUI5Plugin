@@ -12,22 +12,20 @@ import { VSCodeFileReader } from "./VSCodeFileReader";
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { PackageLinterConfigHandler } from "ui5plugin-linter";
-import { PackageParserConfigHandler, UI5TSParser } from "ui5plugin-parser";
+import { AbstractUI5Parser, PackageParserConfigHandler, UI5TSParser } from "ui5plugin-parser";
 import { ICacheable } from "ui5plugin-parser/dist/classes/UI5Classes/abstraction/ICacheable";
+import * as ts from "typescript";
 import { IReferenceCodeLensCacheable } from "ui5plugin-linter/dist/classes/js/parts/util/ReferenceFinderBase";
 
 const workspace = vscode.workspace;
 
 export class FileWatcherMediator {
-	private static _nextInQueue: {
-		[key: string]: {
-			timeoutId?: NodeJS.Timeout;
-			classNameDotNotation: string;
-			classFileText: string;
-			force: boolean;
-		};
-	} = {};
-	private static async _onChange(uri: vscode.Uri, document?: vscode.TextDocument, force = true) {
+	private static async _onChange(
+		uri: vscode.Uri,
+		document?: vscode.TextDocument,
+		force = true,
+		contentChanges?: Readonly<vscode.TextDocumentContentChangeEvent[]>
+	) {
 		if (!document) {
 			document = await vscode.workspace.openTextDocument(uri);
 		}
@@ -36,35 +34,28 @@ export class FileWatcherMediator {
 				document.fileName
 			);
 			if (currentClassNameDotNotation) {
-				if (!FileWatcherMediator._nextInQueue[currentClassNameDotNotation]?.timeoutId) {
-					FileWatcherMediator._nextInQueue[currentClassNameDotNotation] = {
-						classFileText: document.getText(),
-						classNameDotNotation: currentClassNameDotNotation,
-						force: force
-					};
-					FileWatcherMediator._nextInQueue[currentClassNameDotNotation].timeoutId = setTimeout(() => {
-						if (FileWatcherMediator._nextInQueue[currentClassNameDotNotation]) {
-							UI5Plugin.getInstance().parser.classFactory.setNewCodeForClass(
-								FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classNameDotNotation,
-								FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classFileText,
-								FileWatcherMediator._nextInQueue[currentClassNameDotNotation].force
-							);
-							delete FileWatcherMediator._nextInQueue[currentClassNameDotNotation];
-						}
-					}, 50);
-
-					if (FileWatcherMediator._nextInQueue[currentClassNameDotNotation]) {
-						UI5Plugin.getInstance().parser.classFactory.setNewCodeForClass(
-							FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classNameDotNotation,
-							FileWatcherMediator._nextInQueue[currentClassNameDotNotation].classFileText,
-							FileWatcherMediator._nextInQueue[currentClassNameDotNotation].force
-						);
-					}
-				} else if (FileWatcherMediator._nextInQueue[currentClassNameDotNotation]) {
-					const cache = FileWatcherMediator._nextInQueue[currentClassNameDotNotation];
-					cache.classFileText = document.getText();
-					cache.classNameDotNotation = currentClassNameDotNotation;
-					cache.force = cache.force || force;
+				if (document.fileName.endsWith(".ts")) {
+					const textChanges: ts.TextChange[] | undefined = contentChanges?.map(contentChange => {
+						return {
+							newText: contentChange.text,
+							span: { length: contentChange.rangeLength, start: contentChange.rangeOffset }
+						};
+					});
+					AbstractUI5Parser.getInstance(UI5TSParser).classFactory.setNewCodeForClass(
+						currentClassNameDotNotation,
+						document.getText(),
+						force,
+						undefined,
+						undefined,
+						true,
+						textChanges
+					);
+				} else {
+					UI5Plugin.getInstance().parser.classFactory.setNewCodeForClass(
+						currentClassNameDotNotation,
+						document.getText(),
+						force
+					);
 				}
 			}
 		} else if (document.fileName.endsWith(".view.xml")) {

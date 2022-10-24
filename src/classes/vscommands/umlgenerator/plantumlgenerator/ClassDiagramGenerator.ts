@@ -2,6 +2,7 @@ import { UI5Parser } from "ui5plugin-parser";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 import { IAbstract, IStatic } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
 import { IXMLFile, IFragment, IView } from "ui5plugin-parser/dist/classes/utils/FileReader";
 import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
 import { WorkspaceFolder } from "vscode";
@@ -278,6 +279,9 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 	}
 
 	private _generateClassDiagram(UIClass: AbstractCustomClass) {
+		if (UIClass instanceof CustomTSClass) {
+			UIClass.loadTypes();
+		}
 		const classColor = this._getClassColor(UIClass);
 		const classOrInterface = this._getClassOrInterfaceKeyword(UIClass);
 		const implementations = UIClass.interfaces.length > 0 ? ` implements ${UIClass.interfaces.join(", ")}` : "";

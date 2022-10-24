@@ -18,6 +18,9 @@ export class MethodInserter {
 		params: string,
 		body: string,
 		type: InsertType,
+		eventName = "Event",
+		eventModule = "sap/ui/base/Event",
+		eventType = eventName,
 		tabsToAdd = "\t\t"
 	) {
 		let insertMethodCodeAction: vscode.CodeAction | undefined;
@@ -40,20 +43,21 @@ export class MethodInserter {
 					tabsToAdd
 				);
 			} else if (UIClass instanceof CustomTSClass) {
+				//event handler insertion only
 				insertContent = CodeGeneratorFactory.createTSStrategy().generateFunction(
 					memberName,
-					params + ": Event",
+					`${params}: ${eventType}`,
 					body,
 					"\t"
 				);
 
 				const importDeclarations = UIClass.node.getSourceFile().getImportDeclarations();
 				const baseEventImportDeclaration = importDeclarations.find(
-					importDeclaration => importDeclaration.getModuleSpecifier().getLiteralText() === "sap/ui/base/Event"
+					importDeclaration => importDeclaration.getModuleSpecifier().getLiteralText() === eventModule
 				);
 				if (!baseEventImportDeclaration) {
 					// eslint-disable-next-line @typescript-eslint/quotes
-					insertImport = '\nimport Event from "sap/ui/base/Event";';
+					insertImport = `\nimport ${eventName} from "${eventModule}";`;
 					insertImportOffset = importDeclarations[importDeclarations.length - 1].getEnd() ?? 0;
 				}
 			}

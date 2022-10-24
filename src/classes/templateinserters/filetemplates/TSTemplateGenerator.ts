@@ -9,8 +9,14 @@ export class TSTemplateGenerator extends TemplateGenerator {
 		if (!classNameDotNotation) {
 			return;
 		}
+		const sManagedObjectModuleName =
+			(vscode.workspace.getConfiguration("ui5.plugin").get("insertManagedObjectModule") as string) ??
+			"sap/ui/base/ManagedObject";
+		const sControllerModuleName =
+			(vscode.workspace.getConfiguration("ui5.plugin").get("insertControllerModule") as string) ??
+			"sap/ui/core/mvc/Controller";
 
-		const standardUIDefineClassForExtension = isController ? "sap/ui/core/mvc/Controller" : "sap/ui/base/ManagedObject";
+		const standardUIDefineClassForExtension = isController ? sControllerModuleName : sManagedObjectModuleName;
 		const UIDefineClassNameParts = standardUIDefineClassForExtension.split("/");
 		const controlName = UIDefineClassNameParts[UIDefineClassNameParts.length - 1];
 		const namespaceParts = classNameDotNotation?.split(".") ?? "";
@@ -18,6 +24,6 @@ export class TSTemplateGenerator extends TemplateGenerator {
 		const namespace = namespaceParts.join(".");
 		const className = classNameDotNotation.split(".").pop() ?? "";
 
-		return `import ${controlName} from "${standardUIDefineClassForExtension}";\n\n/**\n * @namespace ${namespace}\n */\nexport default class ${className} extends ${controlName} {}`
+		return `import ${controlName} from "${standardUIDefineClassForExtension}";\n\n/**\n * @namespace ${namespace}\n */\nexport default class ${className} extends ${controlName} {}`;
 	}
 }

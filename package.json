@@ -213,6 +213,26 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Data source related property. If true, the server certificate is verified against the list of supplied CAs. Verification happens at the connection level, before the HTTP request is sent."
+				},
+				"ui5.plugin.tsEventModule": {
+					"type": "string",
+					"description": "Event module for Typescript, which will be used when creating event handler from XML",
+					"default": "sap/ui/base/Event"
+				},
+				"ui5.plugin.tsEventType": {
+					"type": "string",
+					"description": "Event type for Typescript, which will be used when creating event handler from XML. (e.g. type of oEvent: 'Event'). There are three possible optional variables used for replacing: classModule, className, eventName. Example: if the value for this property is Event<\"{classModule}\", \"{eventName}\">, and you are inserting change event from sap.m.Table, the result will be 'oEvent: Event<\"sap/m/Table\", \"change\">'",
+					"default": "Event"
+				},
+				"ui5.plugin.insertManagedObjectModule": {
+					"type": "string",
+					"description": "Module which will be used for automatic insertion on custom class creation",
+					"default": "sap/ui/base/ManagedObject"
+				},
+				"ui5.plugin.insertControllerModule": {
+					"type": "string",
+					"description": "Module which will be used for automatic insertion on custom controller creation",
+					"default": "sap/ui/core/mvc/Controller"
 				}
 			}
 		},
@@ -317,10 +337,10 @@
 		"fast-xml-parser": "^4.0.11",
 		"glob": "^8.0.3",
 		"line-column": "^1.0.2",
-		"ui5plugin-linter": "^0.7.2",
+		"ui5plugin-linter": "^0.7.3",
 		"ts-morph": "^16.0.0",
 		"typescript": "^4.8.2",
-		"ui5plugin-parser": "^0.6.1"
+		"ui5plugin-parser": "^0.6.4"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",

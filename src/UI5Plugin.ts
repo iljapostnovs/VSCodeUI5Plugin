@@ -21,8 +21,15 @@ import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parse
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 
 export class UI5Plugin {
+	static waitFor(ms: number) {
+		return new Promise<void>(resolve => {
+			setTimeout(() => {
+				resolve();
+			}, ms);
+		});
+	}
 	private static _instance?: UI5Plugin;
-	public static pWhenPluginInitialized: Promise<void> | undefined;
+	public static pWhenPluginInitialized: Thenable<void> | undefined;
 	public static getInstance() {
 		if (!UI5Plugin._instance) {
 			UI5Plugin._instance = new UI5Plugin();
@@ -41,49 +48,43 @@ export class UI5Plugin {
 	public initialize(context: vscode.ExtensionContext) {
 		let fnInitialize: (context: vscode.ExtensionContext) => Promise<void> = this._initialize.bind(this);
 
-		const workspaceFolders = vscode.workspace.workspaceFolders?.map(wsFolder => {
-			return new WorkspaceFolder(wsFolder.uri.fsPath);
-		}) ?? [];
+		const workspaceFolders =
+			vscode.workspace.workspaceFolders?.map(wsFolder => {
+				return new WorkspaceFolder(wsFolder.uri.fsPath);
+			}) ?? [];
 		const oConfigHandler = new VSCodeParserConfigHandler();
 		if (AbstractUI5Parser.getIsTypescriptProject(workspaceFolders, oConfigHandler)) {
 			this.projectType = ProjectType.ts;
 			fnInitialize = this._initializeTS.bind(this);
 		}
 
-		UI5Plugin.pWhenPluginInitialized = new Promise((resolve, reject) => {
-			setTimeout(() => {
-				vscode.window.withProgress(
-					{
-						location: vscode.ProgressLocation.Window,
-						title: "UI5Plugin",
-						cancellable: false
-					},
-					async progress => {
-						progress.report({
-							message: "Initializing...",
-							increment: 1
-						});
-						setTimeout(async () => {
-							await fnInitialize(context)
-								.then(() => {
-									progress.report({
-										message: "Initializing...",
-										increment: 100
-									});
-									resolve();
-								})
-								.catch((error: any) => {
-									progress.report({
-										increment: 100
-									});
-									console.error(error);
-									reject("Couldn't initialize plugin: " + JSON.stringify(error.message));
-								});
-						}, 0);
-					}
-				);
-			}, 0);
-		});
+		UI5Plugin.pWhenPluginInitialized = vscode.window.withProgress(
+			{
+				location: vscode.ProgressLocation.Window,
+				title: "UI5Plugin",
+				cancellable: false
+			},
+			async progress => {
+				progress.report({
+					message: "Initializing...",
+					increment: 1
+				});
+				await UI5Plugin.waitFor(0);
+
+				try {
+					await fnInitialize(context);
+					progress.report({
+						message: "Initializing...",
+						increment: 100
+					});
+				} catch (error) {
+					progress.report({
+						increment: 100
+					});
+					console.error(error);
+				}
+			}
+		);
 
 		return UI5Plugin.pWhenPluginInitialized;
 	}
@@ -138,6 +139,7 @@ export class UI5Plugin {
 				AbstractUI5Parser.getInstance(UI5TSParser).classFactory.enrichTypesInCustomClass(UIClass);
 			});
 
+		FileWatcherMediator.register();
 		CommandRegistrator.register(true, ProjectType.ts);
 		CommandRegistrator.registerUniqueCommands();
 		CodeActionRegistrator.registerTS();
@@ -147,7 +149,6 @@ export class UI5Plugin {
 		HoverRegistrator.registerTS();
 		XMLFormatterRegistrator.register();
 		DiagnosticsRegistrator.register(ProjectType.ts);
-		FileWatcherMediator.register();
 		JSRenameRegistrator.registerTS();
 		TreeDataProviderRegistrator.register();
 	}
