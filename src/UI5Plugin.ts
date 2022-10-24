@@ -77,7 +77,7 @@ export class UI5Plugin {
 		});
 		CommandRegistrator.register(false, ProjectType.js);
 		await parser.initialize(workspaceFolders, globalStoragePath);
-		if (UI5Plugin.getInstance().parser.fileReader.getAllManifests().length === 0) {
+		if (parser.fileReader.getAllManifests().length === 0) {
 			this.registerFallbackCommands();
 			return;
 		}
@@ -114,11 +114,11 @@ export class UI5Plugin {
 
 		CommandRegistrator.register(false, ProjectType.ts);
 		await parser.initialize(workspaceFolders, globalStoragePath);
+		this.parser = parser;
 		if (UI5Plugin.getInstance().parser.fileReader.getAllManifests().length === 0) {
 			this.registerFallbackCommands();
 			return;
 		}
-		this.parser = parser;
 
 		AbstractUI5Parser.getInstance(UI5TSParser)
 			.classFactory.getAllCustomUIClasses()
