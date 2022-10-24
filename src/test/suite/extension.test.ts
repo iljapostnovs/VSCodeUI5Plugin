@@ -345,8 +345,8 @@ suite("Extension Test Suite", () => {
 				const uri = vscode.Uri.file(filePath);
 				const document = await vscode.workspace.openTextDocument(uri);
 				const method = UIClass.methods.find(method => method.name === data.methodName);
-				if (method && method.node) {
-					const position = document.positionAt(method.node.start);
+				if (method && method.position) {
+					const position = document.positionAt(method.position);
 					const newMethodName = `${data.methodName}New`;
 					const workspaceEdits = await JSRenameProvider.provideRenameEdits(document, position, newMethodName);
 
@@ -458,7 +458,7 @@ suite("Extension Test Suite", () => {
 							}
 						}
 					}
-					assert.ok(!!entries, "No workspace edit entries found");
+					assert.ok(!!entries, `No workspace edit entries found. Class "${data.className}", method: "${data.methodName}"`);
 				}
 			}
 		}
