@@ -7,7 +7,7 @@ jobs:
     name: Test Extension
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Launch tests
         run: |
           npm install
@@ -17,7 +17,7 @@ jobs:
     name: Build Extension
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: npm install and build
         env:
           NPM_CONFIG_PREFIX: "~/.npm-global"
