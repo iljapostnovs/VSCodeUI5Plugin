@@ -120,52 +120,25 @@ export class CommandRegistrator {
 	}
 
 	static registerFallbackCommands() {
-		const insertUIDefineCommand = vscode.commands.registerCommand(
+		const commands = [
 			"ui5plugin.moveDefineToFunctionParameters",
-			FallbackCommand.notifyUserThatThisIsNotUI5Project
-		);
-		const switcherCommand = vscode.commands.registerCommand(
 			"ui5plugin.switchBetweenVC",
-			FallbackCommand.notifyUserThatThisIsNotUI5Project
-		);
-		const exportToI18NCommand = vscode.commands.registerCommand(
 			"ui5plugin.exportToi18n",
-			FallbackCommand.notifyUserThatThisIsNotUI5Project
-		);
-		const insertCustomClassNameCommand = vscode.commands.registerCommand(
 			"ui5plugin.insertCustomClassName",
-			FallbackCommand.notifyUserThatThisIsNotUI5Project
-		);
-		const generateUMLClassDiagramCommand = vscode.commands.registerCommand(
 			"ui5plugin.generateUMLClassDiagram",
-			FallbackCommand.notifyUserThatThisIsNotUI5Project
-		);
-		const generateUMLClassDiagramForWholeProject = vscode.commands.registerCommand(
 			"ui5plugin.generateUMLClassDiagramsForWholeProject",
-			FallbackCommand.notifyUserThatThisIsNotUI5Project
-		);
-		const clearCacheCommand = vscode.commands.registerCommand(
-			"ui5plugin.clearCache",
-			FallbackCommand.notifyUserThatThisIsNotUI5Project
-		);
-		const generateERDiagram = vscode.commands.registerCommand(
 			"ui5plugin.generateERDiagramFromMetadata",
-			FallbackCommand.notifyUserThatThisIsNotUI5Project
-		);
-		const generateTypeDefDoc = vscode.commands.registerCommand(
-			"ui5plugin.generateJSTypeDefDocFromMetadata",
-			FallbackCommand.notifyUserThatThisIsNotUI5Project
-		);
+			"ui5plugin.generateTSXMLFileInterfaces",
+			"ui5plugin.generateTSODataInterfaces"
+		];
 
-		UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
-		UI5Plugin.getInstance().addDisposable(switcherCommand);
-		UI5Plugin.getInstance().addDisposable(exportToI18NCommand);
-		UI5Plugin.getInstance().addDisposable(insertCustomClassNameCommand);
-		UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramCommand);
-		UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramForWholeProject);
-		UI5Plugin.getInstance().addDisposable(clearCacheCommand);
-		UI5Plugin.getInstance().addDisposable(generateERDiagram);
-		UI5Plugin.getInstance().addDisposable(generateTypeDefDoc);
+		commands.forEach(command => {
+			const disposable = vscode.commands.registerCommand(
+				command,
+				FallbackCommand.notifyUserThatThisIsNotUI5Project
+			);
+			UI5Plugin.getInstance().addDisposable(disposable);
+		});
 	}
 
 	static registerUniqueCommands() {

@@ -63,6 +63,7 @@ export class UI5Plugin {
 				await fnInitialize(context);
 			} catch (error) {
 				console.error(error);
+				this.registerFallbackCommands();
 			}
 		}, "Initializing");
 	}
@@ -74,8 +75,12 @@ export class UI5Plugin {
 		const parser = AbstractUI5Parser.getInstance<UI5Parser, CustomUIClass>(UI5Parser, {
 			configHandler: new VSCodeParserConfigHandler()
 		});
-		await parser.initialize(workspaceFolders, globalStoragePath);
 		CommandRegistrator.register(false, ProjectType.js);
+		await parser.initialize(workspaceFolders, globalStoragePath);
+		if (UI5Plugin.getInstance().parser.fileReader.getAllManifests().length === 0) {
+			this.registerFallbackCommands();
+			return;
+		}
 		CommandRegistrator.registerUniqueCommands();
 		this.parser = AbstractUI5Parser.getInstance(UI5Parser);
 		await CompletionItemRegistrator.register();
@@ -109,6 +114,10 @@ export class UI5Plugin {
 
 		CommandRegistrator.register(false, ProjectType.ts);
 		await parser.initialize(workspaceFolders, globalStoragePath);
+		if (UI5Plugin.getInstance().parser.fileReader.getAllManifests().length === 0) {
+			this.registerFallbackCommands();
+			return;
+		}
 		this.parser = parser;
 
 		AbstractUI5Parser.getInstance(UI5TSParser)
@@ -131,7 +140,7 @@ export class UI5Plugin {
 		TreeDataProviderRegistrator.register();
 	}
 
-	static registerFallbackCommands() {
+	registerFallbackCommands() {
 		CommandRegistrator.registerFallbackCommands();
 	}
 
