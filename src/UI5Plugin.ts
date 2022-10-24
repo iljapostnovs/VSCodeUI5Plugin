@@ -19,6 +19,7 @@ import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
 import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import Progress from "./classes/utils/Progress";
 
 export class UI5Plugin {
 	static waitFor(ms: number) {
@@ -58,33 +59,13 @@ export class UI5Plugin {
 			fnInitialize = this._initializeTS.bind(this);
 		}
 
-		UI5Plugin.pWhenPluginInitialized = vscode.window.withProgress(
-			{
-				location: vscode.ProgressLocation.Window,
-				title: "UI5Plugin",
-				cancellable: false
-			},
-			async progress => {
-				progress.report({
-					message: "Initializing...",
-					increment: 1
-				});
-				await UI5Plugin.waitFor(0);
-
-				try {
-					await fnInitialize(context);
-					progress.report({
-						message: "Initializing...",
-						increment: 100
-					});
-				} catch (error) {
-					progress.report({
-						increment: 100
-					});
-					console.error(error);
-				}
+		UI5Plugin.pWhenPluginInitialized = Progress.show(async () => {
+			try {
+				await fnInitialize(context);
+			} catch (error) {
+				console.error(error);
 			}
-		);
+		}, "Initializing");
 
 		return UI5Plugin.pWhenPluginInitialized;
 	}
