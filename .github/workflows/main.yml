@@ -7,7 +7,7 @@ jobs:
     name: Test Extension
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.1
       - name: Launch tests
         run: |
           npm install
@@ -17,7 +17,7 @@ jobs:
     name: Build Extension
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.1
       - name: npm install and build
         env:
           NPM_CONFIG_PREFIX: "~/.npm-global"
@@ -27,7 +27,7 @@ jobs:
           npm install -g vsce
           vsce package
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v2.2.2
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: ui5plugin
           path: |

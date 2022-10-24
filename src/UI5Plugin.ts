@@ -30,7 +30,6 @@ export class UI5Plugin {
 		});
 	}
 	private static _instance?: UI5Plugin;
-	public static pWhenPluginInitialized: Thenable<void> | undefined;
 	public static getInstance() {
 		if (!UI5Plugin._instance) {
 			UI5Plugin._instance = new UI5Plugin();
@@ -59,15 +58,13 @@ export class UI5Plugin {
 			fnInitialize = this._initializeTS.bind(this);
 		}
 
-		UI5Plugin.pWhenPluginInitialized = Progress.show(async () => {
+		return Progress.show(async () => {
 			try {
 				await fnInitialize(context);
 			} catch (error) {
 				console.error(error);
 			}
 		}, "Initializing");
-
-		return UI5Plugin.pWhenPluginInitialized;
 	}
 	private async _initialize(context: vscode.ExtensionContext) {
 		const globalStoragePath = context.globalStorageUri.fsPath;

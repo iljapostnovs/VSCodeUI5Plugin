@@ -34,7 +34,6 @@ suite("Extension Test Suite", () => {
 	test("Extension launched", async () => {
 		const extension = vscode.extensions.getExtension("ui5.plugin");
 		await extension?.activate();
-		await UI5Plugin.pWhenPluginInitialized;
 
 		assert.ok(true, "Extension activated");
 	});
