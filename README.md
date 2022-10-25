@@ -67,7 +67,7 @@ Things to know:
 | WrongNamespaceLinter                                   | ❌  | ✅  | Necessary namespace for UI5 babel        |
 | TagLinter                                              | ✅  | ✅  |                                          |
 | TagAttributeLinter                                     | ✅  | ✅  |                                          |
-| PublicMemberLinter                                     | ✅  | ❌  |                                          |
+| PublicMemberLinter                                     | ✅  | ✅  |                                          |
 | InterfaceLinter                                        | ✅  | ❌  | TS has this out of the box               |
 | AbstractClassLinter                                    | ✅  | ❌  | TS has this out of the box               |
 | UnusedClassLinter                                      | ✅  | ✅  |                                          |
