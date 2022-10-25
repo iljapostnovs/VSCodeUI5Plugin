@@ -337,7 +337,7 @@
 		"fast-xml-parser": "^4.0.11",
 		"glob": "^8.0.3",
 		"line-column": "^1.0.2",
-		"ui5plugin-linter": "^0.7.3",
+		"ui5plugin-linter": "^0.7.5",
 		"ts-morph": "^16.0.0",
 		"typescript": "^4.8.2",
 		"ui5plugin-parser": "^0.6.4"
