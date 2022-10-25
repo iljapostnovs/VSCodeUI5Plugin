@@ -311,7 +311,7 @@ There is a possibility to generate typedef JSDocs from metadata
 
 There is a possibility to generate mapping TS interfaces from control id to control type
 
-> ![GenerateXMLToIdInterfaces.png](/images/GenerateXMLToIdInterfaces.png)
+![GenerateODataInterfaces.png](/images/GenerateODataInterfaces.png)
 
 ---
 
@@ -319,7 +319,7 @@ There is a possibility to generate mapping TS interfaces from control id to cont
 
 There is a possibility to generate TS interfaces for OData entities
 
-> ![GenerateODataInterfaces.png](/images/GenerateODataInterfaces.png)
+![GenerateXMLToIdInterfaces.png](/images/GenerateXMLToIdInterfaces.png)
 
 ---
 
