@@ -7,8 +7,8 @@ import * as vscode from "vscode";
 import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
 import { VSCodeTextDocumentTransformer } from "../../../../utils/VSCodeTextDocumentTransformer";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
-import { ReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts//util/ReferenceFinder";
-import { TSReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts//util/TSReferenceFinder";
+import { ReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts/util/ReferenceFinder";
+import { TSReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts/util/TSReferenceFinder";
 import { VSCodeLocationAdapter } from "../../../../ui5linter/adapters/VSCodeLocationAdapter";
 import {
 	CustomTSClass,
