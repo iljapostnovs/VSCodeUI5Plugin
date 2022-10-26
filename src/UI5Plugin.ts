@@ -11,13 +11,12 @@ import { HoverRegistrator } from "./classes/registrators/HoverRegistrator";
 import { XMLFormatterRegistrator } from "./classes/registrators/XMLFormatterRegistrator";
 import { JSRenameRegistrator } from "./classes/registrators/RenameRegistrator";
 import { TreeDataProviderRegistrator } from "./classes/registrators/TreeDataProviderRegistrator";
-import { UI5Parser, UI5TSParser, WorkspaceFolder } from "ui5plugin-parser";
+import { AnyCustomTSClass, UI5Parser, UI5TSParser, WorkspaceFolder } from "ui5plugin-parser";
 import { VSCodeParserConfigHandler } from "./classes/ui5parser/VSCodeParserConfigHandler";
 import { TSClassFactory } from "ui5plugin-parser/dist/classes/UI5Classes/TSClassFactory";
 import { TSFileReader } from "ui5plugin-parser/dist/classes/utils/TSFileReader";
 import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
 import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
-import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import Progress from "./classes/utils/Progress";
 
@@ -106,7 +105,7 @@ export class UI5Plugin {
 		const factory = new TSClassFactory();
 
 		(UI5Parser as unknown as any).getInstance = UI5TSParser.getInstance;
-		const parser = AbstractUI5Parser.getInstance<UI5TSParser, CustomTSClass>(UI5TSParser, {
+		const parser = AbstractUI5Parser.getInstance<UI5TSParser, AnyCustomTSClass>(UI5TSParser, {
 			configHandler: configHandler,
 			fileReader: new TSFileReader(configHandler, factory),
 			classFactory: factory

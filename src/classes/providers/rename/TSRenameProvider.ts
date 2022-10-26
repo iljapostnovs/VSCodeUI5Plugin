@@ -1,5 +1,6 @@
-import { AbstractUI5Parser, UI5TSParser, XMLParser } from "ui5plugin-parser";
+import { AbstractUI5Parser, ICustomTSField, ICustomTSMethod, UI5TSParser, XMLParser } from "ui5plugin-parser";
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
+import { CustomTSObject } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSObject";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../../UI5Plugin";
 import { RangeAdapter } from "../../adapters/vscode/RangeAdapter";
@@ -20,7 +21,7 @@ export class TSRenameProvider {
 				new TextDocumentAdapter(document)
 			);
 			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
-			if (UIClass instanceof CustomTSClass) {
+			if (UIClass instanceof CustomTSClass || UIClass instanceof CustomTSObject) {
 				const offset = document.offsetAt(position);
 				const members = [...UIClass.methods, ...UIClass.fields];
 				const methodOrField = members.find(method => {
@@ -101,10 +102,13 @@ export class TSRenameProvider {
 		workspaceEdits: IWorkspaceEdit[]
 	) {
 		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
-		if (UIClass instanceof CustomTSClass) {
+		if (UIClass instanceof CustomTSClass || UIClass instanceof CustomTSObject) {
+			const fields: ICustomTSField[] = UIClass.fields;
+			const methods: ICustomTSMethod[] = UIClass.methods;
 			const methodOrField =
-				UIClass.methods.find(method => method.name === oldMemberName) ||
-				UIClass.fields.find(field => field.name === oldMemberName);
+				methods.find(method => method.name === oldMemberName) ??
+				fields.find(field => field.name === oldMemberName);
+
 			if (methodOrField?.mentionedInTheXMLDocument) {
 				const viewsAndFragments =
 					UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(

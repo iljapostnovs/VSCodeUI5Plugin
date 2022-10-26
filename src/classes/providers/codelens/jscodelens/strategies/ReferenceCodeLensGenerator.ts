@@ -12,12 +12,11 @@ import { TSReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts/util/T
 import { VSCodeLocationAdapter } from "../../../../ui5linter/adapters/VSCodeLocationAdapter";
 import {
 	CustomTSClass,
-	ICustomClassTSMethod,
-	ICustomClassTSField,
 	ICustomClassTSConstructor
 } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
 import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
-import { UI5Parser, UI5TSParser } from "ui5plugin-parser";
+import { ICustomTSField, ICustomTSMethod, UI5Parser, UI5TSParser } from "ui5plugin-parser";
+import { CustomTSObject } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSObject";
 
 export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 	getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
@@ -42,9 +41,9 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 							codeLenses.push(codeLens);
 						}
 					});
-				} else if (UIClass instanceof CustomTSClass) {
+				} else if (UIClass instanceof CustomTSClass || UIClass instanceof CustomTSObject) {
 					const methods = UIClass.methods;
-					const constructors = UIClass.constructors;
+					const constructors = UIClass instanceof CustomTSClass ? UIClass.constructors : [];
 
 					[...methods, ...constructors].forEach(method => {
 						if (method.loc) {
@@ -85,7 +84,7 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 		return referenceFinder.getReferenceLocations(member).map(location => new VSCodeLocationAdapter(location));
 	}
 
-	public getTSReferenceLocations(member: ICustomClassTSMethod | ICustomClassTSField | ICustomClassTSConstructor) {
+	public getTSReferenceLocations(member: ICustomClassTSConstructor | ICustomTSField | ICustomTSMethod) {
 		const referenceFinder = new TSReferenceFinder(UI5TSParser.getInstance(UI5TSParser));
 		return referenceFinder.getReferenceLocations(member).map(location => new VSCodeLocationAdapter(location));
 	}

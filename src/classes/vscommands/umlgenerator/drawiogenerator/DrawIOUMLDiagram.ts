@@ -15,6 +15,7 @@ import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parse
 import { UI5Parser } from "ui5plugin-parser";
 import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
+import { CustomTSObject } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSObject";
 
 export class DrawIOUMLDiagram {
 	readonly UIClass: AbstractUIClass;
@@ -56,7 +57,7 @@ export class DrawIOUMLDiagram {
 
 		if (this.UIClass instanceof CustomUIClass) {
 			this.UIClass.fillTypesFromHungarionNotation();
-		} else if (this.UIClass instanceof CustomTSClass) {
+		} else if (this.UIClass instanceof CustomTSClass || this.UIClass instanceof CustomTSObject) {
 			this.UIClass.loadTypes();
 		}
 

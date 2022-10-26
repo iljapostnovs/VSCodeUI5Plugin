@@ -15,9 +15,9 @@ export class TSCodeLensProvider {
 
 		const aStrategies = [
 			InternalizationTextCodeLenseGenerator,
-			OverridenMethodCodeLensGenerator,
+			ReferenceCodeLensGenerator,
 			EventHandlerCodeLensGenerator,
-			ReferenceCodeLensGenerator
+			OverridenMethodCodeLensGenerator
 		];
 		aStrategies.forEach(Strategy => {
 			const strategy = new Strategy();

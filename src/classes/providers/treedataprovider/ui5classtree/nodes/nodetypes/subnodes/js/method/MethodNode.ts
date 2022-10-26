@@ -7,6 +7,7 @@ import { ICustomClassMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { VSCodeLocationAdapter } from "../../../../../../../../ui5linter/adapters/VSCodeLocationAdapter";
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
+import { CustomTSObject } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSObject";
 
 export class MethodNode extends NavigatiableNode {
 	readonly UIMethod: ICustomClassMethod;
@@ -48,7 +49,7 @@ export class MethodNode extends NavigatiableNode {
 		const ownerClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(this.UIMethod.owner);
 		if (ownerClass instanceof CustomUIClass) {
 			locations.push(...referenceCodeLens.getReferenceLocations(this.UIMethod));
-		} else if (ownerClass instanceof CustomTSClass) {
+		} else if (ownerClass instanceof CustomTSClass || ownerClass instanceof CustomTSObject) {
 			locations.push(...referenceCodeLens.getTSReferenceLocations(this.UIMethod));
 		}
 
