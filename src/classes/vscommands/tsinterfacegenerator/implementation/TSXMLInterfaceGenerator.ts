@@ -16,10 +16,10 @@ export class TSXMLInterfaceGenerator implements ITSInterfaceGenerator {
 			}
 		);
 		const aInterfaces = mInterfaceData.map(interfaceData => {
-			const sExtends = [...new Set(interfaceData.extends)].join(", ");
-			return `export interface ${interfaceData.name}${sExtends ? ` extends ${sExtends}` : ""} {\n\t${
+			const sExtends = [...new Set(interfaceData.extends)].join(" & ");
+			return `export type ${interfaceData.name} = {\n\t${
 				interfaceData.rows
-			}\n}`;
+			}\n}${sExtends ? " & " + sExtends : ""};`;
 		});
 
 		return aUniqueImports.join("\n") + "\n\n" + aInterfaces.join("\n\n");

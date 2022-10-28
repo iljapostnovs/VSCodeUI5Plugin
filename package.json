@@ -291,7 +291,7 @@
 			},
 			{
 				"command": "ui5plugin.generateTSXMLFileInterfaces",
-				"title": "UI5: (TS) Generate interfaces for XML files (id to class mapping)"
+				"title": "UI5: (TS) Generate types for XML files (id to class mapping)"
 			},
 			{
 				"command": "ui5plugin.generateTSODataInterfaces",
