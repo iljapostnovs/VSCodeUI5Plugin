@@ -31,7 +31,7 @@ export class NodeFactory {
 		const rootNodes: (RootNode | XMLNode)[] = [];
 
 		const currentDocument = vscode.window.activeTextEditor?.document;
-		if (currentDocument?.fileName.endsWith(".js")) {
+		if (currentDocument?.fileName.endsWith(".js") || currentDocument?.fileName.endsWith(".ts")) {
 			const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(currentDocument));
 			if (UIClass) {
 				rootNodes.push(new ClassNameNode(UIClass));
@@ -80,6 +80,6 @@ export class NodeFactory {
 		return nodes;
 	}
 	private static _getMethodNodes(node: MethodsNode) {
-		return node.UIClass.methods.filter(method => !!method.acornNode).map(UIMethod => new MethodNode(UIMethod));
+		return node.UIClass.methods.filter(method => !!method.node).map(UIMethod => new MethodNode(UIMethod));
 	}
 }

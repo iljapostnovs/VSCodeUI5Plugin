@@ -7,6 +7,8 @@ import { UI5Plugin } from "../../../../UI5Plugin";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
+import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
+import { UI5Parser } from "ui5plugin-parser";
 
 export class JSCodeActionProvider {
 	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
@@ -18,29 +20,48 @@ export class JSCodeActionProvider {
 	private static _getCreateMethodCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const selectedVariableName = this._getCurrentVariable(document, range);
 		const jsDiagnosticCollection = vscode.languages.getDiagnostics(document.uri);
-		const customDiagnostics = <CustomDiagnostics[]>jsDiagnosticCollection.filter(diagnostic => diagnostic instanceof CustomDiagnostics);
-		const nonExistendMethodDiagnostics = customDiagnostics.filter(diagnostic => diagnostic.type === CustomDiagnosticType.NonExistentMethod);
-		const codeActions: vscode.CodeAction[] = nonExistendMethodDiagnostics.reduce((accumulator: vscode.CodeAction[], diagnostic: CustomDiagnostics) => {
-			const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
-			if (className && diagnostic.methodName && diagnostic.attribute && selectedVariableName === diagnostic.methodName) {
-				let parameters = "";
-				const callExpression: any | undefined = diagnostic.acornNode?.expandedContent?.find((content: any) =>
-					content.start === diagnostic.acornNode.start && content.type === "CallExpression"
-				);
-				if (callExpression?.arguments?.length > 0) {
-					parameters = callExpression.arguments.map((arg: any, index: number) =>
-						arg.type === "Identifier" ? arg.name : `arg${index}`
-					).join(", ");
+		const customDiagnostics = <CustomDiagnostics[]>(
+			jsDiagnosticCollection.filter(diagnostic => diagnostic instanceof CustomDiagnostics)
+		);
+		const nonExistendMethodDiagnostics = customDiagnostics.filter(
+			diagnostic => diagnostic.type === CustomDiagnosticType.NonExistentMethod
+		);
+		const codeActions: vscode.CodeAction[] = nonExistendMethodDiagnostics.reduce(
+			(accumulator: vscode.CodeAction[], diagnostic: CustomDiagnostics) => {
+				const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+				if (
+					className &&
+					diagnostic.methodName &&
+					diagnostic.attribute &&
+					selectedVariableName === diagnostic.methodName
+				) {
+					let parameters = "";
+					const callExpression: any | undefined = diagnostic.acornNode?.expandedContent?.find(
+						(content: any) =>
+							content.start === diagnostic.acornNode.start && content.type === "CallExpression"
+					);
+					if (callExpression?.arguments?.length > 0) {
+						parameters = callExpression.arguments
+							.map((arg: any, index: number) => (arg.type === "Identifier" ? arg.name : `arg${index}`))
+							.join(", ");
+					}
+
+					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(
+						diagnostic.attribute,
+						diagnostic.methodName,
+						parameters,
+						"",
+						this._getInsertTypeFromIdentifierName(diagnostic.methodName)
+					);
+					if (insertCodeAction && !accumulator.find(accum => accum.title === insertCodeAction.title)) {
+						accumulator.push(insertCodeAction);
+					}
 				}
 
-				const insertCodeAction = MethodInserter.createInsertMethodCodeAction(diagnostic.attribute, diagnostic.methodName, parameters, "", this._getInsertTypeFromIdentifierName(diagnostic.methodName));
-				if (insertCodeAction && !accumulator.find(accum => accum.title === insertCodeAction.title)) {
-					accumulator.push(insertCodeAction);
-				}
-			}
-
-			return accumulator;
-		}, []);
+				return accumulator;
+			},
+			[]
+		);
 
 		return codeActions;
 	}
@@ -54,7 +75,10 @@ export class JSCodeActionProvider {
 		}
 	}
 
-	private static async _getImportClassCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
+	private static async _getImportClassCodeActions(
+		document: vscode.TextDocument,
+		range: vscode.Range | vscode.Selection
+	) {
 		const selectedVariableName = this._getCurrentVariable(document, range);
 		let providerResult: vscode.CodeAction[] = [];
 		const positionFits = this._getIfPositionIsNewExpressionOrExpressionStatement(document, range.start);
@@ -62,22 +86,37 @@ export class JSCodeActionProvider {
 		if (positionFits && selectedVariableName) {
 			const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassName) {
-				UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
+				UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(
+					new TextDocumentAdapter(document)
+				);
 				const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName);
 				const UIDefine = await new SAPUIDefineFactory().generateUIDefineCompletionItems();
-				const UIDefineCompletionItemsWhichContainsCurrentSelectionText = UIDefine
-					.filter(completionItem => (completionItem.label as string).indexOf(selectedVariableName) > -1)
-					.filter(completionItem => !UIClass.UIDefine.find(UIDefine => `"${UIDefine.path}"` === completionItem.label))
+				const UIDefineCompletionItemsWhichContainsCurrentSelectionText = UIDefine.filter(
+					completionItem => (completionItem.label as string).indexOf(selectedVariableName) > -1
+				)
+					.filter(
+						completionItem =>
+							!UIClass.UIDefine.find(UIDefine => `"${UIDefine.path}"` === completionItem.label)
+					)
 					.reverse();
 
 				UIDefineCompletionItemsWhichContainsCurrentSelectionText.forEach(completionItem => {
-					const UIDefineCodeAction = new vscode.CodeAction(`Import ${completionItem.label}`, vscode.CodeActionKind.QuickFix);
+					const UIDefineCodeAction = new vscode.CodeAction(
+						`Import ${completionItem.label}`,
+						vscode.CodeActionKind.QuickFix
+					);
 					UIDefineCodeAction.isPreferred = true;
 					UIDefineCodeAction.edit = new vscode.WorkspaceEdit();
-					UIDefineCodeAction.command = { command: "ui5plugin.moveDefineToFunctionParameters", title: "Add to UI Define" };
+					UIDefineCodeAction.command = {
+						command: "ui5plugin.moveDefineToFunctionParameters",
+						title: "Add to UI Define"
+					};
 					const position = ReusableMethods.getPositionOfTheLastUIDefine(document);
 					if (position) {
-						const insertText = UIClass.UIDefine.length === 0 ? `\n\t${completionItem.label}` : `,\n\t${completionItem.label}`;
+						const insertText =
+							UIClass.UIDefine.length === 0
+								? `\n\t${completionItem.label}`
+								: `,\n\t${completionItem.label}`;
 						UIDefineCodeAction.edit.insert(document.uri, position, insertText);
 						providerResult.push(UIDefineCodeAction);
 					}
@@ -96,31 +135,40 @@ export class JSCodeActionProvider {
 	}
 
 	//TODO: reuse with Class completion items
-	private static _getIfPositionIsNewExpressionOrExpressionStatement(document: vscode.TextDocument, position: vscode.Position) {
+	private static _getIfPositionIsNewExpressionOrExpressionStatement(
+		document: vscode.TextDocument,
+		position: vscode.Position
+	) {
 		let currentPositionIsNewExpressionOrExpressionStatement = false;
 
 		const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
 		if (currentClassName) {
 			const offset = document.offsetAt(position);
-			const currentUIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName);
+			const currentUIClass = <CustomUIClass>(
+				UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName)
+			);
 			const currentMethod = currentUIClass.methods.find(method => {
-				return method.acornNode?.start < offset && offset < method.acornNode?.end;
+				return method.node?.start < offset && offset < method.node?.end;
 			});
 			if (currentMethod) {
-				const allContent = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(currentMethod.acornNode);
+				const allContent = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.expandAllContent(
+					currentMethod.node
+				);
 				const newExpressionOrExpressionStatement = allContent.find((node: any) => {
 					const firstChar: undefined | string = node.name?.[0];
 					const firstCharCaps = firstChar?.toUpperCase();
-					return node.type === "Identifier" &&
+					return (
+						node.type === "Identifier" &&
 						firstChar &&
 						firstChar === firstCharCaps &&
-						node.start <= offset && node.end >= offset;
+						node.start <= offset &&
+						node.end >= offset
+					);
 				});
 
 				currentPositionIsNewExpressionOrExpressionStatement = !!newExpressionOrExpressionStatement;
 			}
 		}
-
 
 		return currentPositionIsNewExpressionOrExpressionStatement;
 	}
@@ -146,19 +194,26 @@ export class JSCodeActionProvider {
 
 		if (!selectedVariableName) {
 			const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
-			if (UIClass) {
+			if (UIClass instanceof CustomUIClass) {
 				const currentPositionOffset = document?.offsetAt(range.end);
-				const node = UI5Plugin.getInstance().parser.syntaxAnalyser.findAcornNode(UIClass.acornMethodsAndFields, currentPositionOffset);
+				const node = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findAcornNode(
+					UIClass.acornMethodsAndFields,
+					currentPositionOffset
+				);
 				if (node && node.value) {
-					const content = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(node.value).filter(node => node.type === "Identifier");
-					const neededIdentifier = UI5Plugin.getInstance().parser.syntaxAnalyser.findAcornNode(content, currentPositionOffset);
+					const content = AbstractUI5Parser.getInstance(UI5Parser)
+						.syntaxAnalyser.expandAllContent(node.value)
+						.filter(node => node.type === "Identifier");
+					const neededIdentifier = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findAcornNode(
+						content,
+						currentPositionOffset
+					);
 					if (neededIdentifier) {
 						selectedVariableName = neededIdentifier.name;
 					}
 				}
 			}
 		}
-
 
 		return selectedVariableName;
 	}

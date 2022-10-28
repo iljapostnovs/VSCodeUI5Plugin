@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.14.35",
+	"version": "0.15.0",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -19,13 +19,13 @@
 	"icon": "images/ui5.png",
 	"homepage": "https://github.com/iljapostnovs/VSCodeUI5Plugin/blob/master/README.md",
 	"engines": {
-		"vscode": "^1.69.0"
+		"vscode": "^1.72.0"
 	},
 	"categories": [
 		"Extension Packs"
 	],
 	"activationEvents": [
-		"*"
+		"onStartupFinished"
 	],
 	"keywords": [
 		"ui5",
@@ -213,6 +213,26 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Data source related property. If true, the server certificate is verified against the list of supplied CAs. Verification happens at the connection level, before the HTTP request is sent."
+				},
+				"ui5.plugin.tsEventModule": {
+					"type": "string",
+					"description": "Event module for Typescript, which will be used when creating event handler from XML",
+					"default": "sap/ui/base/Event"
+				},
+				"ui5.plugin.tsEventType": {
+					"type": "string",
+					"description": "Event type for Typescript, which will be used when creating event handler from XML. (e.g. type of oEvent: 'Event'). There are three possible optional variables used for replacing: classModule, className, eventName. Example: if the value for this property is Event<\"{classModule}\", \"{eventName}\">, and you are inserting change event from sap.m.Table, the result will be 'oEvent: Event<\"sap/m/Table\", \"change\">'",
+					"default": "Event"
+				},
+				"ui5.plugin.insertManagedObjectModule": {
+					"type": "string",
+					"description": "Module which will be used for automatic insertion on custom class creation",
+					"default": "sap/ui/base/ManagedObject"
+				},
+				"ui5.plugin.insertControllerModule": {
+					"type": "string",
+					"description": "Module which will be used for automatic insertion on custom controller creation",
+					"default": "sap/ui/core/mvc/Controller"
 				}
 			}
 		},
@@ -271,7 +291,7 @@
 			},
 			{
 				"command": "ui5plugin.generateTSXMLFileInterfaces",
-				"title": "UI5: (TS) Generate interfaces for XML files (id to class mapping)"
+				"title": "UI5: (TS) Generate types for XML files (id to class mapping)"
 			},
 			{
 				"command": "ui5plugin.generateTSODataInterfaces",
@@ -294,32 +314,33 @@
 	},
 	"devDependencies": {
 		"@types/axios": "^0.14.0",
-		"@types/glob": "^7.2.0",
+		"@types/glob": "^8.0.0",
 		"@types/line-column": "^1.0.0",
-		"@types/mocha": "^9.1.1",
-		"@types/node": "^18.0.6",
-		"@types/vscode": "^1.69.0",
+		"@types/mocha": "^10.0.0",
+		"@types/node": "^18.11.0",
+		"@types/vscode": "^1.72.0",
 		"@types/webpack": "^5.28.0",
-		"@typescript-eslint/eslint-plugin": "^5.30.7",
-		"@typescript-eslint/parser": "^5.30.7",
+		"@typescript-eslint/eslint-plugin": "^5.40.0",
+		"@typescript-eslint/parser": "^5.40.0",
 		"clean-webpack-plugin": "^4.0.0",
-		"eslint": "^8.20.0",
-		"mocha": "^10.0.0",
-		"ts-loader": "^9.3.1",
-		"typescript": "^4.7.4",
+		"eslint": "^8.25.0",
+		"mocha": "^10.1.0",
+		"ts-loader": "^9.4.1",
 		"vscode-test": "^1.6.1",
-		"webpack": "^5.73.0",
+		"webpack": "^5.74.0",
 		"webpack-cli": "^4.10.0"
 	},
 	"dependencies": {
 		"acorn-loose": "^8.3.0",
-		"axios": "^0.22.0",
+		"axios": "^1.1.3",
 		"comment-parser": "^1.3.1",
-		"fast-xml-parser": "^4.0.9",
+		"fast-xml-parser": "^4.0.11",
 		"glob": "^8.0.3",
 		"line-column": "^1.0.2",
-		"ui5plugin-linter": "^0.6.8",
-		"ui5plugin-parser": "^0.5.23"
+		"ts-morph": "^16.0.0",
+		"typescript": "^4.8.2",
+		"ui5plugin-linter": "^0.8.0",
+		"ui5plugin-parser": "^0.7.0"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",

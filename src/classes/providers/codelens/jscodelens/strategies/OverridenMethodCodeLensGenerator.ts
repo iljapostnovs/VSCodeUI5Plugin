@@ -12,7 +12,9 @@ export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {
 		if (UIClass?.parentClassNameDotNotation) {
 			const rootMethods = UIClass.methods;
 			const overriddenMethods: ICustomClassUIMethod[] = [];
-			const parentMethods: IUIMethod[] = UIClass.parentClassNameDotNotation ? UI5Plugin.getInstance().parser.classFactory.getClassMethods(UIClass.parentClassNameDotNotation, true) : [];
+			const parentMethods: IUIMethod[] = UIClass.parentClassNameDotNotation
+				? UI5Plugin.getInstance().parser.classFactory.getClassMethods(UIClass.parentClassNameDotNotation, true)
+				: [];
 
 			rootMethods.forEach(method => {
 				const methodFromParent = parentMethods.find(methodFromparent => methodFromparent.name === method.name);

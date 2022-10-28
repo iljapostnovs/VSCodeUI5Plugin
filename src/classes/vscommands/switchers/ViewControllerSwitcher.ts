@@ -28,10 +28,12 @@ export class ControllerModelViewSwitcher {
 	}
 
 	private static _getIfControllerIsOpened() {
-		return vscode.window.activeTextEditor?.document.fileName.endsWith(".controller.js") || false;
+		const fileName = vscode.window.activeTextEditor?.document.fileName;
+		return fileName?.endsWith(".controller.js") || fileName?.endsWith(".controller.ts") || false;
 	}
 
 	private static _getIfJSClassIsOpened() {
-		return vscode.window.activeTextEditor?.document.fileName.endsWith(".js") || false;
+		const fileName = vscode.window.activeTextEditor?.document.fileName;
+		return fileName?.endsWith(".js") || fileName?.endsWith(".ts") || false;
 	}
 }

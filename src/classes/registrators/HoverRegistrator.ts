@@ -19,4 +19,13 @@ export class HoverRegistrator {
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 	}
+
+	static registerTS() {
+		const disposable = vscode.languages.registerHoverProvider("xml", {
+			provideHover(document, position) {
+				return XMLHoverProvider.getTextEdits(document, position);
+			}
+		});
+		UI5Plugin.getInstance().addDisposable(disposable);
+	}
 }

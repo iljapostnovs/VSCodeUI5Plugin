@@ -8,7 +8,7 @@ import * as XMLCompletionItemData from "./data/completionitems/XMLCompletionItem
 import * as XMLFormatterData from "./data/XMLFormatterData.json";
 import * as CodeLensData from "./data/CodeLensData.json";
 import { JSLinterErrorFactory, PropertiesLinterErrorFactory, XMLLinterErrorFactory } from "ui5plugin-linter";
-import { XMLParser } from "ui5plugin-parser";
+import { UI5Parser, XMLParser } from "ui5plugin-parser";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { FileRenameMediator } from "../../classes/filerenaming/FileRenameMediator";
@@ -23,6 +23,7 @@ import { XMLFormatter } from "../../classes/utils/XMLFormatter";
 import { UI5Plugin } from "../../UI5Plugin";
 import { TextDocumentAdapter } from "../../classes/adapters/vscode/TextDocumentAdapter";
 import { VSCodeLinterConfigHandler } from "../../classes/ui5linter/config/VSCodeLinterConfigHandler";
+import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
 // import * as os from "os";
 
 suite("Extension Test Suite", () => {
@@ -33,7 +34,6 @@ suite("Extension Test Suite", () => {
 	test("Extension launched", async () => {
 		const extension = vscode.extensions.getExtension("ui5.plugin");
 		await extension?.activate();
-		await UI5Plugin.pWhenPluginInitialized;
 
 		assert.ok(true, "Extension activated");
 	});
@@ -42,12 +42,23 @@ suite("Extension Test Suite", () => {
 		const testData = data.data;
 		testData.forEach(data => {
 			data.methods.forEach(testMethodData => {
-				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(data.className);
+				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(
+					data.className
+				);
 				const method = fieldsAndMethods.methods.find(method => method.name === testMethodData.name);
 				if (method?.returnType === "void") {
-					UI5Plugin.getInstance().parser.syntaxAnalyser.findMethodReturnType(method, data.className, true, true);
+					AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findMethodReturnType(
+						method,
+						data.className,
+						true,
+						true
+					);
 				}
-				assert.strictEqual(method?.returnType, testMethodData.returnType, `${data.className} -> ${testMethodData.name} return type is "${method?.returnType}" but expected "${testMethodData.returnType}"`);
+				assert.strictEqual(
+					method?.returnType,
+					testMethodData.returnType,
+					`${data.className} -> ${testMethodData.name} return type is "${method?.returnType}" but expected "${testMethodData.returnType}"`
+				);
 			});
 		});
 	});
@@ -56,12 +67,23 @@ suite("Extension Test Suite", () => {
 		const testData = data.data;
 		testData.forEach(data => {
 			data.fields.forEach(testFieldData => {
-				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(data.className);
+				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(
+					data.className
+				);
 				const field = fieldsAndMethods.fields.find(method => method.name === testFieldData.name);
 				if (field && !field?.type) {
-					UI5Plugin.getInstance().parser.syntaxAnalyser.findFieldType(field, data.className, true, true);
+					AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findFieldType(
+						field,
+						data.className,
+						true,
+						true
+					);
 				}
-				assert.strictEqual(field?.type, testFieldData.type, `${data.className} -> ${testFieldData.name} return type is "${field?.type}" but expected "${testFieldData.type}"`);
+				assert.strictEqual(
+					field?.type,
+					testFieldData.type,
+					`${data.className} -> ${testFieldData.name} return type is "${field?.type}" but expected "${testFieldData.type}"`
+				);
 			});
 		});
 	});
@@ -70,15 +92,27 @@ suite("Extension Test Suite", () => {
 		const testData = data.VisibilityTest;
 		testData.forEach(data => {
 			data.fields.forEach(testFieldData => {
-				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(data.className);
+				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(
+					data.className
+				);
 				const field = fieldsAndMethods.fields.find(method => method.name === testFieldData.name);
-				assert.strictEqual(field?.visibility, testFieldData.visibility, `${data.className} -> ${testFieldData.name} visibility is "${field?.visibility}" but expected "${testFieldData.visibility}"`);
+				assert.strictEqual(
+					field?.visibility,
+					testFieldData.visibility,
+					`${data.className} -> ${testFieldData.name} visibility is "${field?.visibility}" but expected "${testFieldData.visibility}"`
+				);
 			});
 
 			data.methods.forEach(testMethodData => {
-				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(data.className);
+				const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(
+					data.className
+				);
 				const field = fieldsAndMethods.methods.find(method => method.name === testMethodData.name);
-				assert.strictEqual(field?.visibility, testMethodData.visibility, `${data.className} -> ${testMethodData.name} visibility is "${field?.visibility}" but expected "${testMethodData.visibility}"`);
+				assert.strictEqual(
+					field?.visibility,
+					testMethodData.visibility,
+					`${data.className} -> ${testMethodData.name} visibility is "${field?.visibility}" but expected "${testMethodData.visibility}"`
+				);
 			});
 		});
 	});
@@ -87,8 +121,12 @@ suite("Extension Test Suite", () => {
 		const testData = data.SyntaxAnalyser;
 		testData.forEach(data => {
 			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(data.className);
-			const method = UIClass.acornMethodsAndFields.find(methodOrField => methodOrField.key?.name === data.methodName);
-			const methodContent = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(method.value.body);
+			const method = UIClass.acornMethodsAndFields.find(
+				methodOrField => methodOrField.key?.name === data.methodName
+			);
+			const methodContent = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.expandAllContent(
+				method.value.body
+			);
 			const searchedNode = methodContent.find(node => {
 				return compareProperties(data.node, node);
 			});
@@ -98,13 +136,22 @@ suite("Extension Test Suite", () => {
 			}
 
 			const position = searchedNode.property?.start || searchedNode.start + data.positionAddition;
-			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
+			const positionBeforeCurrentStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
+				AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
+			);
 			let classNameAtPosition = positionBeforeCurrentStrategy.acornGetClassName(data.className, position);
 			if (classNameAtPosition) {
-				const fieldsAndMethods = positionBeforeCurrentStrategy.destructueFieldsAndMethodsAccordingToMapParams(classNameAtPosition);
+				const fieldsAndMethods =
+					positionBeforeCurrentStrategy.destructueFieldsAndMethodsAccordingToMapParams(classNameAtPosition);
 				classNameAtPosition = fieldsAndMethods?.className;
 			}
-			assert.strictEqual(classNameAtPosition, data.type, `"${data.className}" position ${position} method "${data.methodName}" type is "${classNameAtPosition}" but expected "${data.type}". Data: ${JSON.stringify(data)}`);
+			assert.strictEqual(
+				classNameAtPosition,
+				data.type,
+				`"${data.className}" position ${position} method "${
+					data.methodName
+				}" type is "${classNameAtPosition}" but expected "${data.type}". Data: ${JSON.stringify(data)}`
+			);
 		});
 	});
 
@@ -120,20 +167,31 @@ suite("Extension Test Suite", () => {
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
-				const errors = new JSLinterErrorFactory(UI5Plugin.getInstance().parser).getLintingErrors(new TextDocumentAdapter(document));
+				const errors = new JSLinterErrorFactory(AbstractUI5Parser.getInstance(UI5Parser)).getLintingErrors(
+					new TextDocumentAdapter(document)
+				);
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
 
-				assert.strictEqual(errors.length, data.errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
-				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
+				assert.strictEqual(
+					errors.length,
+					data.errors.length,
+					`"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`
+				);
+				assert.ok(
+					timeSpent < data.timeLimit,
+					`"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`
+				);
 				console.log(`JS Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit}`);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
-					assert.ok(!!errorInDocument, `"${data.className}" class should have "${dataError.text}" error, but it doesn't`);
+					assert.ok(
+						!!errorInDocument,
+						`"${data.className}" class should have "${dataError.text}" error, but it doesn't`
+					);
 				});
 			}
-
 		}
 	});
 
@@ -145,24 +203,37 @@ suite("Extension Test Suite", () => {
 		// console.log(`CPU SPeed: ${cpuSpeed}`);
 
 		for (const data of testData) {
-			const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.className)?.replace(".js", ".properties");
+			const filePath = UI5Plugin.getInstance()
+				.parser.fileReader.convertClassNameToFSPath(data.className)
+				?.replace(".js", ".properties");
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
-				const errors = new PropertiesLinterErrorFactory(UI5Plugin.getInstance().parser).getLintingErrors(new TextDocumentAdapter(document));
+				const errors = new PropertiesLinterErrorFactory(AbstractUI5Parser.getInstance(UI5Parser)).getLintingErrors(
+					new TextDocumentAdapter(document)
+				);
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
 
-				assert.strictEqual(errors.length, data.errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
-				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
+				assert.strictEqual(
+					errors.length,
+					data.errors.length,
+					`"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`
+				);
+				assert.ok(
+					timeSpent < data.timeLimit,
+					`"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`
+				);
 				console.log(`JS Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit}`);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
-					assert.ok(!!errorInDocument, `"${data.className}" class should have "${dataError.text}" error, but it doesn't`);
+					assert.ok(
+						!!errorInDocument,
+						`"${data.className}" class should have "${dataError.text}" error, but it doesn't`
+					);
 				});
 			}
-
 		}
 	});
 
@@ -173,23 +244,39 @@ suite("Extension Test Suite", () => {
 		const testData = data.XMLLinter;
 
 		for (const data of testData) {
-			const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.className, false, false, true);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(
+				data.className,
+				false,
+				false,
+				true
+			);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
 				const startTime = new Date().getTime();
-				const errors = new XMLLinterErrorFactory(UI5Plugin.getInstance().parser).getLintingErrors(new TextDocumentAdapter(document));
+				const errors = new XMLLinterErrorFactory(AbstractUI5Parser.getInstance(UI5Parser)).getLintingErrors(
+					new TextDocumentAdapter(document)
+				);
 				const endTime = new Date().getTime();
 				const timeSpent = endTime - startTime;
 				console.log(`XML Linter for ${data.className} spent ${timeSpent}ms, target: ${data.timeLimit}`);
-				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
-				assert.ok(timeSpent < data.timeLimit, `"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`);
+				assert.strictEqual(
+					data.errors.length,
+					errors.length,
+					`"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`
+				);
+				assert.ok(
+					timeSpent < data.timeLimit,
+					`"${data.className}" linters should run less than ${data.timeLimit}ms, but it ran ${timeSpent} ms`
+				);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
-					assert.ok(!!errorInDocument, `"${data.className}" class should have ${dataError.text} error, but it doesn't`);
+					assert.ok(
+						!!errorInDocument,
+						`"${data.className}" class should have ${dataError.text} error, but it doesn't`
+					);
 				});
 			}
-
 		}
 	});
 
@@ -197,18 +284,30 @@ suite("Extension Test Suite", () => {
 		const testData = data.FragmentLinter;
 
 		for (const data of testData) {
-			const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.className, false, true);
+			const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(
+				data.className,
+				false,
+				true
+			);
 			if (filePath) {
 				const document = await vscode.workspace.openTextDocument(filePath);
-				const errors = new XMLLinterErrorFactory(UI5Plugin.getInstance().parser).getLintingErrors(new TextDocumentAdapter(document));
-				assert.strictEqual(data.errors.length, errors.length, `"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`);
+				const errors = new XMLLinterErrorFactory(AbstractUI5Parser.getInstance(UI5Parser)).getLintingErrors(
+					new TextDocumentAdapter(document)
+				);
+				assert.strictEqual(
+					data.errors.length,
+					errors.length,
+					`"${data.className}" class should have ${data.errors.length} errors, but got ${errors.length}`
+				);
 
 				data.errors.forEach(dataError => {
 					const errorInDocument = errors.find(error => error.message === dataError.text);
-					assert.ok(!!errorInDocument, `"${data.className}" class should have ${dataError.text} error, but it doesn't`);
+					assert.ok(
+						!!errorInDocument,
+						`"${data.className}" class should have ${dataError.text} error, but it doesn't`
+					);
 				});
 			}
-
 		}
 	});
 
@@ -216,20 +315,26 @@ suite("Extension Test Suite", () => {
 		const testData = data.EventHandlers;
 
 		for (const data of testData) {
-			const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(data.className);
+			const fieldsAndMethods = UI5Plugin.getInstance().parser.classFactory.getFieldsAndMethodsForClass(
+				data.className
+			);
 			data.eventHandlers.forEach(eventHandlerName => {
 				const eventHandlerMethod: any = fieldsAndMethods.methods.find((method: any) => {
 					return method.name === eventHandlerName;
 				});
-				assert.ok(!!eventHandlerMethod.isEventHandler, `"${data.className}" class should have "${eventHandlerName}" method recognized as event handler, but it doesn't`);
+				assert.ok(
+					!!eventHandlerMethod.isEventHandler,
+					`"${data.className}" class should have "${eventHandlerName}" method recognized as event handler, but it doesn't`
+				);
 			});
-
 		}
 	});
 
 	test("JS Rename Handler working properly", async () => {
 		const testData = data.RenameProvider;
-		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(UI5Plugin.getInstance().parser.syntaxAnalyser);
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
+			AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
+		);
 
 		for (const data of testData) {
 			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(data.className);
@@ -239,8 +344,8 @@ suite("Extension Test Suite", () => {
 				const uri = vscode.Uri.file(filePath);
 				const document = await vscode.workspace.openTextDocument(uri);
 				const method = UIClass.methods.find(method => method.name === data.methodName);
-				if (method && method.memberPropertyNode) {
-					const position = document.positionAt(method.memberPropertyNode.start);
+				if (method && method.position) {
+					const position = document.positionAt(method.position);
 					const newMethodName = `${data.methodName}New`;
 					const workspaceEdits = await JSRenameProvider.provideRenameEdits(document, position, newMethodName);
 
@@ -252,26 +357,48 @@ suite("Extension Test Suite", () => {
 							return accumulator;
 						}, 0);
 						const expectedEditQuantity = data.renames.methods.length + data.renames.XMLDocEdits.length + 1; //1 - edit of method in main class itself
-						assert.strictEqual(textEditQuantity, expectedEditQuantity, `Expected ${expectedEditQuantity} edits, but got ${textEditQuantity} for "${data.className}" -> "${data.methodName}"`);
+						assert.strictEqual(
+							textEditQuantity,
+							expectedEditQuantity,
+							`Expected ${expectedEditQuantity} edits, but got ${textEditQuantity} for "${data.className}" -> "${data.methodName}"`
+						);
 
 						if (workspaceEdits) {
-							assertEntry(entries, uri, method.memberPropertyNode.start, method.memberPropertyNode.end);
+							assertEntry(entries, uri, method.node.start, method.node.end);
 						}
 
 						for (const methodRename of data.renames.methods) {
-							const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(methodRename.className);
+							const filePath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(
+								methodRename.className
+							);
 							const uri = filePath && vscode.Uri.file(filePath);
 							if (uri) {
-								const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(methodRename.className);
-								const containerMethod = UIClass.methods.find(method => method.name === methodRename.containerMethod);
-								const allNodes = UI5Plugin.getInstance().parser.syntaxAnalyser.expandAllContent(containerMethod?.acornNode);
-								const allNodesWithCurrentMethod = allNodes.filter((node: any) => node.type === "MemberExpression" && node.property?.name === data.methodName);
+								const UIClass = <CustomUIClass>(
+									UI5Plugin.getInstance().parser.classFactory.getUIClass(methodRename.className)
+								);
+								const containerMethod = UIClass.methods.find(
+									method => method.name === methodRename.containerMethod
+								);
+								const allNodes = AbstractUI5Parser.getInstance(
+									UI5Parser
+								).syntaxAnalyser.expandAllContent(containerMethod?.node);
+								const allNodesWithCurrentMethod = allNodes.filter(
+									(node: any) =>
+										node.type === "MemberExpression" && node.property?.name === data.methodName
+								);
 								const allNodesFromCurrentClass = allNodesWithCurrentMethod.filter((node: any) => {
-									const ownerClassName = strategy.acornGetClassName(methodRename.className, node.end, true);
+									const ownerClassName = strategy.acornGetClassName(
+										methodRename.className,
+										node.end,
+										true
+									);
 									return ownerClassName === data.className;
 								});
 
-								assert.ok(allNodesFromCurrentClass.length > 0, `Nodes with "${data.methodName}" method in "${methodRename.className}" class "${methodRename.containerMethod}" method not found`);
+								assert.ok(
+									allNodesFromCurrentClass.length > 0,
+									`Nodes with "${data.methodName}" method in "${methodRename.className}" class "${methodRename.containerMethod}" method not found`
+								);
 
 								for (const node of allNodesFromCurrentClass) {
 									await assertEntry(entries, uri, node.property.start, node.property.end);
@@ -280,34 +407,57 @@ suite("Extension Test Suite", () => {
 						}
 
 						for (const XMLDocEdit of data.renames.XMLDocEdits) {
-							const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(XMLDocEdit.className, false, XMLDocEdit.type === "fragment", XMLDocEdit.type === "view");
+							const filePath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(
+								XMLDocEdit.className,
+								false,
+								XMLDocEdit.type === "fragment",
+								XMLDocEdit.type === "view"
+							);
 							if (filePath) {
 								const uri = vscode.Uri.file(filePath);
-								const viewOrFragment = XMLDocEdit.type === "fragment" ? UI5Plugin.getInstance().parser.fileReader.getAllFragments().find(fragment => fragment.fsPath === filePath) : UI5Plugin.getInstance().parser.fileReader.getAllViews().find(view => view.fsPath === filePath);
+								const viewOrFragment =
+									XMLDocEdit.type === "fragment"
+										? UI5Plugin.getInstance()
+											.parser.fileReader.getAllFragments()
+											.find(fragment => fragment.fsPath === filePath)
+										: UI5Plugin.getInstance()
+											.parser.fileReader.getAllViews()
+											.find(view => view.fsPath === filePath);
 								if (viewOrFragment) {
-									const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(viewOrFragment, data.methodName);
+									const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(
+										viewOrFragment,
+										data.methodName
+									);
 									const tagAndAttribute = tagsAndAttributes.find(tagAndAttribute => {
-										return XMLParser.getClassNameFromTag(tagAndAttribute.tag.text) === XMLDocEdit.tagClassName;
+										return (
+											XMLParser.getClassNameFromTag(tagAndAttribute.tag.text) ===
+											XMLDocEdit.tagClassName
+										);
 									});
 									if (tagAndAttribute) {
 										const attribute = tagAndAttribute.attributes.find(attribute => {
-											return XMLParser.getAttributeNameAndValue(attribute).attributeName === XMLDocEdit.attribute;
+											return (
+												XMLParser.getAttributeNameAndValue(attribute).attributeName ===
+												XMLDocEdit.attribute
+											);
 										});
 										if (attribute) {
 											const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
-											const positionOfAttribute = tagAndAttribute.tag.positionBegin + tagAndAttribute.tag.text.indexOf(attribute);
-											const positionOfValueBegin = positionOfAttribute + attribute.indexOf(attributeValue);
+											const positionOfAttribute =
+												tagAndAttribute.tag.positionBegin +
+												tagAndAttribute.tag.text.indexOf(attribute);
+											const positionOfValueBegin =
+												positionOfAttribute + attribute.indexOf(attributeValue);
 											const positionOfValueEnd = positionOfValueBegin + attributeValue.length;
 
 											assertEntry(entries, uri, positionOfValueBegin, positionOfValueEnd);
-
 										}
 									}
 								}
 							}
 						}
 					}
-					assert.ok(!!entries, "No workspace edit entries found");
+					assert.ok(!!entries, `No workspace edit entries found. Class "${data.className}", method: "${data.methodName}"`);
 				}
 			}
 		}
@@ -316,9 +466,16 @@ suite("Extension Test Suite", () => {
 	test("Check config handler", () => {
 		const testData = data.ConfigHandler;
 		testData.forEach(config => {
-			const isException = new VSCodeLinterConfigHandler().checkIfMemberIsException(config.className, config.methodName);
+			const isException = new VSCodeLinterConfigHandler().checkIfMemberIsException(
+				config.className,
+				config.methodName
+			);
 
-			assert.strictEqual(isException, config.result, `"${config.className}" -> "${config.methodName}" should have exception value "${config.result}", but it has "${isException}"`);
+			assert.strictEqual(
+				isException,
+				config.result,
+				`"${config.className}" -> "${config.methodName}" should have exception value "${config.result}", but it has "${isException}"`
+			);
 		});
 	});
 
@@ -334,9 +491,15 @@ suite("Extension Test Suite", () => {
 				const position = document.positionAt(offset);
 				const completionItems = await factory.createCompletionItems(document, position);
 
-				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
+				const completionItemInsertTexts = completionItems.map(
+					(item: any) => item.insertText?.value || item.insertText
+				);
 				compareArrays(completionItemInsertTexts, data.items, data.className);
-				assert.strictEqual(completionItems.length, data.items.length, `"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}`);
+				assert.strictEqual(
+					completionItems.length,
+					data.items.length,
+					`"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}`
+				);
 			}
 		}
 	});
@@ -353,10 +516,16 @@ suite("Extension Test Suite", () => {
 				const position = document.positionAt(offset);
 				const completionItems = await factory.createCompletionItems(document, position);
 
-				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
+				const completionItemInsertTexts = completionItems.map(
+					(item: any) => item.insertText?.value || item.insertText
+				);
 				compareArrays(completionItemInsertTexts, data.items, data.className);
 
-				assert.strictEqual(completionItems.length, data.items.length, `"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}. Search term "${data.textToFind}"`);
+				assert.strictEqual(
+					completionItems.length,
+					data.items.length,
+					`"${data.className}" at offset ${offset} expected to have ${data.items.length} completion items, but got ${completionItems.length}. Search term "${data.textToFind}"`
+				);
 			}
 		}
 	});
@@ -370,7 +539,9 @@ suite("Extension Test Suite", () => {
 			if (filePath) {
 				const completionItems = await factory.generateUIDefineCompletionItems();
 
-				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText);
+				const completionItemInsertTexts = completionItems.map(
+					(item: any) => item.insertText?.value || item.insertText
+				);
 				compareArrays(completionItemInsertTexts, data.items, data.className);
 			}
 		}
@@ -388,7 +559,9 @@ suite("Extension Test Suite", () => {
 				const position = document.positionAt(offset);
 				const completionItems = await factory.createCompletionItems(document, position);
 
-				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				const completionItemInsertTexts = completionItems.map(
+					(item: any) => item.insertText?.value || item.insertText || item.label
+				);
 				compareArrays(completionItemInsertTexts, data.items, data.className);
 			}
 		}
@@ -406,7 +579,9 @@ suite("Extension Test Suite", () => {
 				const position = document.positionAt(offset);
 				const completionItems = await factory.createCompletionItems(document, position);
 
-				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				const completionItemInsertTexts = completionItems.map(
+					(item: any) => item.insertText?.value || item.insertText || item.label
+				);
 				compareArrays(completionItemInsertTexts, data.items, data.className);
 			}
 		}
@@ -424,7 +599,9 @@ suite("Extension Test Suite", () => {
 				const position = document.positionAt(offset);
 				const completionItems = await factory.createCompletionItems(document, position);
 
-				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				const completionItemInsertTexts = completionItems.map(
+					(item: any) => item.insertText?.value || item.insertText || item.label
+				);
 				compareArrays(completionItemInsertTexts, data.items, data.className);
 			}
 		}
@@ -442,7 +619,9 @@ suite("Extension Test Suite", () => {
 				const position = document.positionAt(offset);
 				const completionItems = await factory.createCompletionItems(document, position);
 
-				const completionItemInsertTexts = completionItems.map((item: any) => item.insertText?.value || item.insertText || item.label)
+				const completionItemInsertTexts = completionItems.map(
+					(item: any) => item.insertText?.value || item.insertText || item.label
+				);
 				compareArrays(completionItemInsertTexts, data.items, data.className);
 			}
 		}
@@ -452,8 +631,20 @@ suite("Extension Test Suite", () => {
 		const testData = renameData.folderRenames;
 
 		for (const data of testData) {
-			const pathFrom = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.uriFrom, false, false, false, true);
-			const pathTo = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.uriTo, false, false, false, true);
+			const pathFrom = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(
+				data.uriFrom,
+				false,
+				false,
+				false,
+				true
+			);
+			const pathTo = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(
+				data.uriTo,
+				false,
+				false,
+				false,
+				true
+			);
 			if (pathFrom && pathTo) {
 				const uriFrom = vscode.Uri.file(pathFrom);
 				const uriTo = vscode.Uri.file(pathTo);
@@ -461,13 +652,27 @@ suite("Extension Test Suite", () => {
 				FileRenameMediator.handleFolderRename(uriFrom, uriTo, fileChanges);
 				const changedFiles = fileChanges.filter(fileChange => fileChange.changed);
 
-				assert.strictEqual(changedFiles.length, data.result.length, `Renaming from "${data.uriFrom}" to "${data.uriTo}" returned ${changedFiles.length} results, but expected ${data.result.length}`);
+				assert.strictEqual(
+					changedFiles.length,
+					data.result.length,
+					`Renaming from "${data.uriFrom}" to "${data.uriTo}" returned ${changedFiles.length} results, but expected ${data.result.length}`
+				);
 				changedFiles.forEach(changedFile => {
-					const resultWithSameContent = data.result.find(result => result.fileData.content.replace(/(\r|\n|\t)/g, "") === changedFile.fileData.content.replace(/(\r|\n|\t)/g, ""));
-					assert.ok(!!resultWithSameContent, `File "${changedFile.fileData.fsPath}" was not found in the renaming result`);
-					assert.strictEqual(changedFile.renames.length, resultWithSameContent.renames.length, `File "${changedFile.fileData.fsPath}" must have ${resultWithSameContent.renames.length} renames, but got ${changedFile.renames.length}`);
+					const resultWithSameContent = data.result.find(
+						result =>
+							result.fileData.content.replace(/(\r|\n|\t)/g, "") ===
+							changedFile.fileData.content.replace(/(\r|\n|\t)/g, "")
+					);
+					assert.ok(
+						!!resultWithSameContent,
+						`File "${changedFile.fileData.fsPath}" was not found in the renaming result`
+					);
+					assert.strictEqual(
+						changedFile.renames.length,
+						resultWithSameContent.renames.length,
+						`File "${changedFile.fileData.fsPath}" must have ${resultWithSameContent.renames.length} renames, but got ${changedFile.renames.length}`
+					);
 				});
-
 			}
 		}
 	});
@@ -476,13 +681,21 @@ suite("Extension Test Suite", () => {
 		const testData = XMLFormatterData.formatterData;
 
 		for (const data of testData) {
-			const fsPath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(data.className, false, false, true);
+			const fsPath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(
+				data.className,
+				false,
+				false,
+				true
+			);
 			if (fsPath) {
 				const uri = vscode.Uri.file(fsPath);
 				const document = await vscode.workspace.openTextDocument(uri);
 				const textEdits = XMLFormatter.formatDocument(document);
-				assert.strictEqual(textEdits[0].newText, data.formattedText, `XML Formatter for "${data.className}" should have formatted to "${data.formattedText}", but result was "${textEdits[0].newText}"`);
-
+				assert.strictEqual(
+					textEdits[0].newText,
+					data.formattedText,
+					`XML Formatter for "${data.className}" should have formatted to "${data.formattedText}", but result was "${textEdits[0].newText}"`
+				);
 			}
 		}
 	});
@@ -505,11 +718,20 @@ suite("Extension Test Suite", () => {
 
 function compareStringArrays(actualArray: string[], expectedArray: string[], assertText: string) {
 	expectedArray.forEach((expectedValue, index) => {
-		assert.strictEqual(actualArray[index], expectedValue, `${assertText}, expected: "${expectedValue}", but got "${actualArray[index]}"`);
+		assert.strictEqual(
+			actualArray[index],
+			expectedValue,
+			`${assertText}, expected: "${expectedValue}", but got "${actualArray[index]}"`
+		);
 	});
 }
 
-async function assertEntry(entries: [vscode.Uri, vscode.TextEdit[]][], uri: vscode.Uri, offsetBegin: number, offsetEnd: number) {
+async function assertEntry(
+	entries: [vscode.Uri, vscode.TextEdit[]][],
+	uri: vscode.Uri,
+	offsetBegin: number,
+	offsetEnd: number
+) {
 	let necessaryEntry: [vscode.Uri, vscode.TextEdit[]] | undefined;
 	for (const entry of entries) {
 		const entryUri = entry[0];
@@ -519,10 +741,7 @@ async function assertEntry(entries: [vscode.Uri, vscode.TextEdit[]][], uri: vsco
 			for (const textEdit of textEdits) {
 				const startOffset = document.offsetAt(textEdit.range.start);
 				const endOffset = document.offsetAt(textEdit.range.end);
-				if (
-					offsetBegin === startOffset &&
-					offsetEnd === endOffset
-				) {
+				if (offsetBegin === startOffset && offsetEnd === endOffset) {
 					necessaryEntry = entry;
 					break;
 				}
@@ -555,11 +774,24 @@ function compareProperties(dataNode: any, node2: any): boolean {
 	return allInnerNodesExists;
 }
 
-function compareArrays(completionItemInsertTexts: (string | vscode.SnippetString | undefined)[], items: string[], className: string) {
+function compareArrays(
+	completionItemInsertTexts: (string | vscode.SnippetString | undefined)[],
+	items: string[],
+	className: string
+) {
 	completionItemInsertTexts.forEach(insertText => {
-		const stringToInsert = typeof insertText === "string" ? insertText :
-			insertText instanceof vscode.SnippetString ? insertText.value : undefined;
+		const stringToInsert =
+			typeof insertText === "string"
+				? insertText
+				: insertText instanceof vscode.SnippetString
+					? insertText.value
+					: undefined;
 		const item = items.find(item => item === stringToInsert);
-		assert.ok(!!item, `Class: "${className}", "${stringToInsert}" wasn't found in "${JSON.stringify(items.slice(0, 10))}"... array`);
+		assert.ok(
+			!!item,
+			`Class: "${className}", "${stringToInsert}" wasn't found in "${JSON.stringify(
+				items.slice(0, 10)
+			)}"... array`
+		);
 	});
 }

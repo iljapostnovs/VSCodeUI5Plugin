@@ -1,5 +1,6 @@
 import { TemplateGenerator } from "../abstraction/TemplateGenerator";
 import { JSTemplateGenerator } from "../JSTemplateGenerator";
+import { TSTemplateGenerator } from "../TSTemplateGenerator";
 import { XMLTemplateGenerator } from "../XMLTemplateGenerator";
 
 export class TemplateGeneratorFactory {
@@ -10,6 +11,8 @@ export class TemplateGeneratorFactory {
 			templateGenerator = new JSTemplateGenerator();
 		} else if (filePath.endsWith(".xml")) {
 			templateGenerator = new XMLTemplateGenerator();
+		} else if (filePath.endsWith(".ts")) {
+			templateGenerator = new TSTemplateGenerator();
 		}
 
 		return templateGenerator;

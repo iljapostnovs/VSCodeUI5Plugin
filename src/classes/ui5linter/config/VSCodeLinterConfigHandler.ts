@@ -1,10 +1,11 @@
 import { ILinterConfigHandler, PackageLinterConfigHandler, Severity } from "ui5plugin-linter";
 import { JSLinters, XMLLinters, PropertiesLinters } from "ui5plugin-linter/dist/classes/Linter";
-import { TextDocument } from "ui5plugin-parser";
+import { TextDocument, UI5Parser } from "ui5plugin-parser";
 import { UI5Plugin } from "../../../UI5Plugin";
 import * as vscode from "vscode";
 import path = require("path");
 import { JSLinterException } from "ui5plugin-linter/dist/classes/config/ILinterConfigHandler";
+import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
 
 export class VSCodeLinterConfigHandler implements ILinterConfigHandler {
 	private readonly _packageLinterConfigHandler: PackageLinterConfigHandler;
@@ -18,7 +19,7 @@ export class VSCodeLinterConfigHandler implements ILinterConfigHandler {
 			const dirname = path.dirname(manifest.fsPath);
 			packagePath = path.join(dirname, "/package.json");
 		}
-		this._packageLinterConfigHandler = new PackageLinterConfigHandler(UI5Plugin.getInstance().parser, packagePath);
+		this._packageLinterConfigHandler = new PackageLinterConfigHandler(AbstractUI5Parser.getInstance(UI5Parser), packagePath);
 	}
 
 	getJSLinterExceptions(): JSLinterException[] {

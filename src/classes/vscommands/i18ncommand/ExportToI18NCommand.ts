@@ -11,12 +11,17 @@ export class ExportToI18NCommand {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
-			const stringRange = ExportToI18NCommand._getStringRange() || new vscode.Range(editor.selection.start, editor.selection.start);
+			const stringRange =
+				ExportToI18NCommand._getStringRange() ||
+				new vscode.Range(editor.selection.start, editor.selection.start);
 			let stringForReplacing = editor.document.getText(stringRange);
 			stringForReplacing = stringForReplacing.substring(1, stringForReplacing.length - 1);
 			const I18nID = await ExportToI18NCommand._askUserForI18nID(stringForReplacing);
 			if (I18nID) {
-				const textForInsertionIntoI18N = await ExportToI18NCommand._generateStringForI18NInsert(stringForReplacing, I18nID);
+				const textForInsertionIntoI18N = await ExportToI18NCommand._generateStringForI18NInsert(
+					stringForReplacing,
+					I18nID
+				);
 				const textForInsertionIntoCurrentFile = ExportToI18NCommand._getStringForSavingIntoI18n(I18nID);
 
 				await ExportToI18NCommand._insertIntoI18NFile(textForInsertionIntoI18N);
@@ -25,10 +30,7 @@ export class ExportToI18NCommand {
 					if (editor) {
 						editBuilder.replace(stringRange, textForInsertionIntoCurrentFile);
 
-						editor.selection = new vscode.Selection(
-							stringRange.start,
-							stringRange.start
-						);
+						editor.selection = new vscode.Selection(stringRange.start, stringRange.start);
 					}
 				});
 			}
@@ -39,9 +41,14 @@ export class ExportToI18NCommand {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
-			const iDeltaStart = ExportToI18NCommand._getDeltaForFirstOccuraneOf("\"", -1);
-			const iDeltaEnd = ExportToI18NCommand._getDeltaForFirstOccuraneOf("\"", 1);
-			const range = new vscode.Range(editor.selection.start.translate(0, iDeltaStart), editor.selection.start.translate(0, iDeltaEnd));
+			// eslint-disable-next-line @typescript-eslint/quotes
+			const iDeltaStart = ExportToI18NCommand._getDeltaForFirstOccuraneOf('"', -1);
+			// eslint-disable-next-line @typescript-eslint/quotes
+			const iDeltaEnd = ExportToI18NCommand._getDeltaForFirstOccuraneOf('"', 1);
+			const range = new vscode.Range(
+				editor.selection.start.translate(0, iDeltaStart),
+				editor.selection.start.translate(0, iDeltaEnd)
+			);
 			return range;
 		}
 	}
@@ -71,7 +78,6 @@ export class ExportToI18NCommand {
 					throw new Error("No string for export to i18n found");
 				}
 			}
-
 		}
 
 		return deltaToReturn;
@@ -83,11 +89,12 @@ export class ExportToI18NCommand {
 
 		const shouldUserConfirmI18nId = vscode.workspace.getConfiguration("ui5.plugin").get("askUserToConfirmI18nId");
 		if (shouldUserConfirmI18nId) {
-			i18nID = await vscode.window.showInputBox({
-				value: startingProposedValue,
-				placeHolder: "Enter i18n ID",
-				valueSelection: [startingProposedValue.length, startingProposedValue.length]
-			}) || "";
+			i18nID =
+				(await vscode.window.showInputBox({
+					value: startingProposedValue,
+					placeHolder: "Enter i18n ID",
+					valueSelection: [startingProposedValue.length, startingProposedValue.length]
+				})) || "";
 		}
 
 		return i18nID;
@@ -101,7 +108,9 @@ export class ExportToI18NCommand {
 		const openedFileType = ExportToI18NCommand._getCurrentlyOpenedFileType();
 
 		if (editor) {
-			const textTransformationStrategyType = vscode.workspace.getConfiguration("ui5.plugin").get("textTransformationStrategy");
+			const textTransformationStrategyType = vscode.workspace
+				.getConfiguration("ui5.plugin")
+				.get("textTransformationStrategy");
 			const textTransformationStrategy = TextTransformationFactory.createTextTransformationStrategy();
 
 			if (textTransformationStrategyType === CaseType.PascalCase) {
@@ -121,22 +130,19 @@ export class ExportToI18NCommand {
 					return returnString;
 				})();
 
-				let currentlyOpenedFileFSName = currentlyOpenedFileFSPath.replace(".controller.js", "");
-				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".js", "");
-				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".view.xml", "");
-				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".fragment.xml", "");
-				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(".xml", "");
+				let currentlyOpenedFileFSName = currentlyOpenedFileFSPath.replace(/\.controller\.(js|ts)$/, "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(/\.(ts|js)$/, "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(/\.view\.xml$/, "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(/\.fragment\.xml$/, "");
+				currentlyOpenedFileFSName = currentlyOpenedFileFSName.replace(/\.xml$/, "");
 				const nameParts = currentlyOpenedFileFSName.split(path.sep);
 				const fileName = nameParts[nameParts.length - 1];
 
 				const transformatedText = textTransformationStrategy.transform(text);
 				proposedI18NValue = `${fileName}${addition}.${transformatedText}`;
-
 			} else if (textTransformationStrategyType === CaseType.SnakeUpperCase) {
-
 				proposedI18NValue = textTransformationStrategy.transform(text);
 			}
-
 		}
 
 		return proposedI18NValue;
@@ -146,11 +152,12 @@ export class ExportToI18NCommand {
 		const shouldUserConfirmI18nId = vscode.workspace.getConfiguration("ui5.plugin").get("askUserToConfirmI18nId");
 		let item;
 		if (shouldUserConfirmI18nId) {
-			const i18nIDs = [{
-				label: "YMSG",
-				description: "Message text (long)"
-			}].concat(jsClassData);
-
+			const i18nIDs = [
+				{
+					label: "YMSG",
+					description: "Message text (long)"
+				}
+			].concat(jsClassData);
 
 			const resourceGroups: vscode.QuickPickItem[] = i18nIDs;
 			item = await vscode.window.showQuickPick(resourceGroups, {
@@ -164,8 +171,6 @@ export class ExportToI18NCommand {
 		const textToInsert = `\n#${item?.label || "YMSG"}${textLength}: ${I18nID}\n${I18nID} = ${selectedText}`;
 		return textToInsert;
 	}
-
-
 
 	private static _getStringForSavingIntoI18n(I18nID: string) {
 		const openedFileType = ExportToI18NCommand._getCurrentlyOpenedFileType();
@@ -183,8 +188,11 @@ export class ExportToI18NCommand {
 		const editor = vscode.window.activeTextEditor;
 		if (editor) {
 			const currentlyOpenedFileFSPath = editor.document.fileName;
-			const openedFileIsController = currentlyOpenedFileFSPath.endsWith(".controller.js");
-			const openedFileIsJSFile = currentlyOpenedFileFSPath.endsWith(".js");
+			const openedFileIsController =
+				currentlyOpenedFileFSPath.endsWith(".controller.js") ||
+				currentlyOpenedFileFSPath.endsWith(".controller.ts");
+			const openedFileIsJSFile =
+				currentlyOpenedFileFSPath.endsWith(".js") || currentlyOpenedFileFSPath.endsWith(".ts");
 			const openedFileIsXMLFile = currentlyOpenedFileFSPath.endsWith(".xml");
 
 			if (openedFileIsController) {
@@ -215,5 +223,5 @@ export class ExportToI18NCommand {
 		xml: "xml",
 		controller: "controller",
 		js: "js"
-	}
+	};
 }

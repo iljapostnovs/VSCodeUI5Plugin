@@ -10,7 +10,16 @@ export class JSTemplateGenerator extends TemplateGenerator {
 			return;
 		}
 
-		const standardUIDefineClassForExtension = isController ? "sap/ui/core/mvc/Controller" : "sap/ui/base/ManagedObject";
+		const sManagedObjectModuleName =
+			vscode.workspace.getConfiguration("ui5.plugin").get("insertManagedObjectModule") as string ??
+			"sap/ui/base/ManagedObject";
+		const sControllerModuleName =
+			vscode.workspace.getConfiguration("ui5.plugin").get("insertControllerModule") as string ??
+			"sap/ui/core/mvc/Controller";
+
+		const standardUIDefineClassForExtension = isController
+			? sControllerModuleName
+			: sManagedObjectModuleName;
 		const UIDefineClassNameParts = standardUIDefineClassForExtension.split("/");
 		const controlName = UIDefineClassNameParts[UIDefineClassNameParts.length - 1];
 

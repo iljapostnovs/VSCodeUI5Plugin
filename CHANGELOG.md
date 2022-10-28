@@ -1,3 +1,6 @@
+## 0.15.0 (28-10-2022)
+* Typescript support introduced
+
 ## 0.14.35 (16-09-2022)
 * OData interface generator now generates interface for entity set data
 
