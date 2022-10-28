@@ -12,6 +12,8 @@ Any support is highly appreciated!<br/>
 
 ## Typescript support introduced! <br/>
 
+[Check the blog to get some ideas for developing with TS!](https://blogs.sap.com/2022/10/28/visual-studio-code-sapui5-extension-now-supports-typescript/)
+
 Most of the functionality works now in typescript as well.
 Things to know:
 
@@ -19,8 +21,26 @@ Things to know:
 2. If any `.ts` files are found, project is considered to be TS project
 3. `webapp` and `src-gen` are automatically excluded by extension if it's TS project. If build folder has different name, it should be added to folder exclusions in VSCode extension preferences
 4. Not all linters work for TS, because TS has a lot out of the box features. E.g. Wrong field/method linter works only for JS, because TS has it's own syntax analysis for that.
-5. After initial load when ts file is changed, VSCode might hang up for ~5-10s, because `ts-morph` (which is used as TS Parser) for some reason rereads the project instead of updating one file. It should work as expected afterwards.
+5. `ts-morph` is used as TS parser and it has some drawbacks. When using typechecker to get type e.g. of the field or return type of the method, `ts-morph` might hang up for about ~10s, which is not great. However, types are crucial for Reference CodeLens/Linters, specifically for fields in order to be able to distinguish them in views/fragments. As a workaround for performance issues, typechecker is not used to get field types. Because of that only simple structure is allowed.
+
+Examples which should work as expected:
+
+```typescript
+export default class Random {
+  formatterInstance = new Formatter(),
+  formatterObject = Formatter
+}
+```
+
+At the same time type detection will work if the type is specifically written, e.g.
+
+```typescript
+formatter: Formatter = ...
+```
+
 6. Disabling TS standard reference code lens should be considered. This extension contains its own reference code lens, which includes references to views and fragments.
+
+# Feature support
 
 | Feature                                                | JS  | TS  | Comment                                  |
 | :----------------------------------------------------- | :-: | :-: | :--------------------------------------- |
