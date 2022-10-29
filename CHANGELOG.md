@@ -1,5 +1,8 @@
+## 0.15.1 (29-10-2022)
+* Fix [#264](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/264), fix unused translations linter
+
 ## 0.15.0 (28-10-2022)
-* Typescript support introduced
+* Introduce Typescript support
 
 ## 0.14.35 (16-09-2022)
 * OData interface generator now generates interface for entity set data
