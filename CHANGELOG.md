@@ -1,5 +1,5 @@
 ## 0.15.1 (29-10-2022)
-* Fix [#264](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/264)
+* Fix [#264](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/264), fix unused translations linter
 
 ## 0.15.0 (28-10-2022)
 * Introduce Typescript support

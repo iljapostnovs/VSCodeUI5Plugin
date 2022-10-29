@@ -10,9 +10,9 @@ Any support is highly appreciated!<br/>
 
 # v0.15.0 update
 
-## Typescript support introduced! <br/>
+## Typescript support introduced!
 
-[Check the blog to get some ideas for developing with TS!](https://blogs.sap.com/2022/10/28/visual-studio-code-sapui5-extension-now-supports-typescript/)
+[Check the blog to get some ideas for developing with TS!](https://blogs.sap.com/2022/10/28/visual-studio-code-sapui5-extension-now-supports-typescript)
 
 Most of the functionality works now in typescript as well.
 Things to know:
