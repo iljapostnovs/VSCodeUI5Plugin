@@ -1,0 +1,19 @@
+{
+	"name": "ui5-typescript-helloworld",
+	"version": "1.0.0",
+	"description": "Showcase of a TypeScript setup for developing UI5 applications",
+	"author": "SAP SE",
+	"license": "Apache-2.0",
+	"scripts": {
+	},
+	"repository": {
+	  "type": "git",
+	  "url": "https://github.com/SAP-samples/ui5-typescript-helloworld.git"
+	},
+	"devDependencies": {
+	  "@types/jquery": "3.5.14",
+	  "@types/openui5": "1.97.0",
+	  "@types/qunit": "2.11.3",
+	  "typescript": "^4.6.2"
+	}
+  }

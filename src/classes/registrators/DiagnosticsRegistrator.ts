@@ -151,7 +151,7 @@ export class DiagnosticsRegistrator {
 		}
 	}
 
-	private static _updateJSDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+	private static _updateJSDiagnostics(document: vscode.TextDocument, collection?: vscode.DiagnosticCollection) {
 		const errors = new JSLinter().getLintingErrors(new TextDocumentAdapter(document));
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
@@ -171,10 +171,10 @@ export class DiagnosticsRegistrator {
 			return diagnostic;
 		});
 
-		collection.set(document.uri, diagnostics);
+		collection?.set(document.uri, diagnostics);
 	}
 
-	private static _updateTSDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+	private static _updateTSDiagnostics(document: vscode.TextDocument, collection?: vscode.DiagnosticCollection) {
 		const errors = new TSLinter().getLintingErrors(new TextDocumentAdapter(document));
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
@@ -194,6 +194,6 @@ export class DiagnosticsRegistrator {
 			return diagnostic;
 		});
 
-		collection.set(document.uri, diagnostics);
+		collection?.set(document.uri, diagnostics);
 	}
 }

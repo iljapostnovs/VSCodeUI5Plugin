@@ -19,17 +19,32 @@
 			"preLaunchTask": "npm: watch"
 		},
 		{
-			"name": "Extension Tests",
+			"name": "Extension Tests (JS)",
 			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
 				"${workspaceFolder}/src/test/project",
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"--extensionTestsPath=${workspaceFolder}/dist/test/suite/index",
+				"--extensionTestsPath=${workspaceFolder}/dist/test/js/suite/index",
 				"--disable-extensions"
 			],
-			"outFiles": ["${workspaceFolder}/dist/test/**/*.js"],
+			"outFiles": ["${workspaceFolder}/dist/test/js/**/*.js"],
+			"sourceMaps": true,
+			"preLaunchTask": "npm: compilets"
+		},
+		{
+			"name": "Extension Tests (TS)",
+			"type": "extensionHost",
+			"request": "launch",
+			"runtimeExecutable": "${execPath}",
+			"args": [
+				"${workspaceFolder}/src/test/project",
+				"--extensionDevelopmentPath=${workspaceFolder}",
+				"--extensionTestsPath=${workspaceFolder}/dist/test/ts/suite/index",
+				"--disable-extensions"
+			],
+			"outFiles": ["${workspaceFolder}/dist/test/ts/**/*.js"],
 			"sourceMaps": true,
 			"preLaunchTask": "npm: compilets"
 		}

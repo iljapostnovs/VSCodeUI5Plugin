@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "target": "es2015",
+        "module": "es2015",
+        "skipLibCheck": true,
+        "preserveConstEnums": true,
+        "sourceMap": false,
+        "allowJs": true,
+        "declaration": true,
+        "declarationMap": true,
+        "strict": true,
+        "strictNullChecks": false,
+        "strictPropertyInitialization": false,
+        "rootDir": "./",
+        "outDir": "./dist",
+        "baseUrl": "./",
+        "paths": {
+            "comt/test/*": [
+                "./src/*"
+            ],
+            "com/test/library/*": [
+                "./lib/src/*"
+            ],
+            "com/extend/*": [
+                "./extensionapp*"
+            ]
+        }
+    }
+}
