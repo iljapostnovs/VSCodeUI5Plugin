@@ -5,13 +5,14 @@ on:
 jobs:
   test_js:
     name: Test Extension (JS)
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3.1.0
       - name: Launch tests
         run: |
           npm install
           npm run test:js
+          &cmd.exe /c rd /s /q .vscode-test
   test_ts:
     name: Test Extension (TS)
     runs-on: self-hosted
