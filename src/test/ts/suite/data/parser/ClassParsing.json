@@ -1,0 +1,101 @@
+{
+	"classParsing": [
+		{
+			"className": "com.test.parser.classparsing.TestClassParsing",
+			"type": "TSClass",
+			"methods": [
+				{
+					"name": "method1",
+					"returnType": "void",
+					"visibility": "public",
+					"params": [
+						{
+							"name": "param1",
+							"type": "string"
+						}
+					]
+				},{
+					"name": "method2",
+					"returnType": "sap.m.Text",
+					"visibility": "public",
+					"params": []
+				},{
+					"name": "staticMethod",
+					"returnType": "number",
+					"visibility": "public",
+					"params": []
+				},{
+					"name": "privateSaticMethod",
+					"returnType": "number",
+					"visibility": "private",
+					"params": []
+				},{
+					"name": "_privateMethod",
+					"returnType": "void",
+					"visibility": "private",
+					"params": []
+				},{
+					"name": "_protectedMethod",
+					"returnType": "void",
+					"visibility": "protected",
+					"params": []
+				}
+			],
+			"fields": [
+				{
+					"name": "formatter",
+					"type": "{ field1: number; field2: number; method1(): void; method2: () => void; method3: () => string; }",
+					"visibility": "public"
+				},
+				{
+					"name": "formatterWOType",
+					"type": "{ field1: number; field2: number; method1(): void; method2: () => void; method3: () => string; }",
+					"visibility": "protected"
+				},
+				{
+					"name": "field1",
+					"type": "number",
+					"visibility": "private"
+				},
+				{
+					"name": "field2",
+					"type": "string",
+					"visibility": "public"
+				}
+			]
+		},{
+			"className": "com.test.parser.classparsing.Formatter",
+			"type": "TSObject",
+			"methods": [
+				{
+					"name": "method1",
+					"returnType": "void",
+					"visibility": "public",
+					"params": []
+				},{
+					"name": "method2",
+					"returnType": "void",
+					"visibility": "public",
+					"params": []
+				},{
+					"name": "method3",
+					"returnType": "string",
+					"visibility": "public",
+					"params": []
+				}
+			],
+			"fields": [
+				{
+					"name": "field1",
+					"type": "number",
+					"visibility": "public"
+				},
+				{
+					"name": "field2",
+					"type": "number",
+					"visibility": "public"
+				}
+			]
+		}
+	]
+}

@@ -11,7 +11,7 @@ async function main() {
 		// The path to the extension test script
 		// Passed to --extensionTestsPath
 		const extensionTestsPath = path.resolve(__dirname, "./suite/index");
-		const testWorkspace = path.resolve(__dirname, "../../src/test/js/project");
+		const testWorkspace = path.resolve(__dirname, "../../../src/test/js/project");
 
 		// Download VS Code, unzip it and run the integration test
 		await runTests({ extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace, "--disable-extensions"] });

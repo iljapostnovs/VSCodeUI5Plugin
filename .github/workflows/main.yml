@@ -1,17 +1,27 @@
 name: Test and build
 on:
   push:
-    branches: [ development, typescript ]
+    branches: [ development ]
 jobs:
-  test:
-    name: Test Extension
+  test_js:
+    name: Test Extension (JS)
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3.1.0
       - name: Launch tests
         run: |
           npm install
-          npm run test
+          npm run test:js
+          &cmd.exe /c rd /s /q .vscode-test
+  test_ts:
+    name: Test Extension (TS)
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - name: Launch tests
+        run: |
+          npm install
+          npm run test:ts
           &cmd.exe /c rd /s /q .vscode-test
   build_artifact:
     name: Build Extension

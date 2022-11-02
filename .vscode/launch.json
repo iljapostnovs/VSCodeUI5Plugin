@@ -24,7 +24,7 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"${workspaceFolder}/src/test/project",
+				"${workspaceFolder}/src/test/js/project",
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/dist/test/js/suite/index",
 				"--disable-extensions"
@@ -39,7 +39,7 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"${workspaceFolder}/src/test/project",
+				"${workspaceFolder}/src/test/ts/project",
 				"--extensionDevelopmentPath=${workspaceFolder}",
 				"--extensionTestsPath=${workspaceFolder}/dist/test/ts/suite/index",
 				"--disable-extensions"

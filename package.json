@@ -307,9 +307,10 @@
 		"compile": "webpack --mode none",
 		"compilets": "npx tsc",
 		"lint": "tslint -p ./",
-		"test": "node ./dist/test/js/TestRunner.js",
+		"test:js": "node ./dist/test/js/TestRunner.js",
 		"test:ts": "node ./dist/test/ts/TestRunner.js",
-		"pretest": "npm run compilets",
+		"pretest:js": "npm run compilets",
+		"pretest:ts": "npm run compilets",
 		"watch": "npm run compilets",
 		"install_ext": "vsce package && PowerShell -Command \"code --install-extension $(node -p -e '`ui5plugin-` + require(`./package.json`).version + `.vsix`')\""
 	},

@@ -12,6 +12,9 @@
 	},
 	"exclude": [
 		"node_modules",
-		".vscode-test"
+		"src/test/ts/project",
+		"src/test/js/project",
+		".vscode-test",
+		"dist"
 	]
 }

@@ -32,10 +32,10 @@ suite("Extension Test Suite", () => {
 	});
 
 	test("Extension launched", async () => {
-		const extension = vscode.extensions.getExtension("ui5.plugin");
+		const extension = vscode.extensions.getExtension("iljapostnovs.ui5plugin");
 		await extension?.activate();
 
-		assert.ok(true, "Extension activated");
+		assert.ok(extension?.isActive, "Extension activated");
 	});
 
 	test("Method Types match", async () => {
