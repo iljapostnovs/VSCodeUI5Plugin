@@ -692,8 +692,8 @@ suite("Extension Test Suite", () => {
 				const document = await vscode.workspace.openTextDocument(uri);
 				const textEdits = XMLFormatter.formatDocument(document);
 				assert.strictEqual(
-					textEdits[0].newText,
-					data.formattedText,
+					textEdits[0].newText.replaceAll("\r", ""),
+					data.formattedText.replaceAll("\r", ""),
 					`XML Formatter for "${data.className}" should have formatted to "${data.formattedText}", but result was "${textEdits[0].newText}"`
 				);
 			}
