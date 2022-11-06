@@ -318,7 +318,6 @@
 		"install_ext": "vsce package && PowerShell -Command \"code --install-extension $(node -p -e '`ui5plugin-` + require(`./package.json`).version + `.vsix`')\""
 	},
 	"devDependencies": {
-		"@types/axios": "^0.14.0",
 		"@types/glob": "^8.0.0",
 		"@types/line-column": "^1.0.0",
 		"@types/mocha": "^10.0.0",
@@ -331,7 +330,7 @@
 		"eslint": "^8.25.0",
 		"mocha": "^10.1.0",
 		"ts-loader": "^9.4.1",
-		"vscode-test": "^1.6.1",
+		"@vscode/test-electron": "^2.2.0",
 		"webpack": "^5.74.0",
 		"webpack-cli": "^4.10.0"
 	},
