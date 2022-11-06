@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.15.1",
+	"version": "0.15.2",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -15,6 +15,9 @@
 	},
 	"bugs": {
 		"url": "https://github.com/iljapostnovs/VSCodeUI5Plugin/issues"
+	},
+	"sponsor": {
+		"url": "https://github.com/sponsors/iljapostnovs"
 	},
 	"icon": "images/ui5.png",
 	"homepage": "https://github.com/iljapostnovs/VSCodeUI5Plugin/blob/master/README.md",
@@ -307,13 +310,14 @@
 		"compile": "webpack --mode none",
 		"compilets": "npx tsc",
 		"lint": "tslint -p ./",
-		"test": "node ./dist/test/TestRunner.js",
-		"pretest": "npm run compilets",
+		"test:js": "node ./dist/test/js/TestRunner.js",
+		"test:ts": "node ./dist/test/ts/TestRunner.js",
+		"pretest:js": "npm run compilets",
+		"pretest:ts": "npm run compilets",
 		"watch": "npm run compilets",
 		"install_ext": "vsce package && PowerShell -Command \"code --install-extension $(node -p -e '`ui5plugin-` + require(`./package.json`).version + `.vsix`')\""
 	},
 	"devDependencies": {
-		"@types/axios": "^0.14.0",
 		"@types/glob": "^8.0.0",
 		"@types/line-column": "^1.0.0",
 		"@types/mocha": "^10.0.0",
@@ -326,7 +330,7 @@
 		"eslint": "^8.25.0",
 		"mocha": "^10.1.0",
 		"ts-loader": "^9.4.1",
-		"vscode-test": "^1.6.1",
+		"@vscode/test-electron": "^2.2.0",
 		"webpack": "^5.74.0",
 		"webpack-cli": "^4.10.0"
 	},
@@ -339,8 +343,8 @@
 		"line-column": "^1.0.2",
 		"ts-morph": "^16.0.0",
 		"typescript": "^4.8.2",
-		"ui5plugin-linter": "^0.8.2",
-		"ui5plugin-parser": "^0.7.1"
+		"ui5plugin-linter": "^0.8.5",
+		"ui5plugin-parser": "^0.7.4"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",

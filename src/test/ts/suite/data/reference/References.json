@@ -1,0 +1,71 @@
+{
+	"data": [
+		{
+			"className": "com.test.linter.UnusedMemberLinter.mvc.controller.UnusedMemberLinter",
+			"References": [
+				{
+					"member": "unusedField",
+					"quantity": 0
+				},
+				{
+					"member": "usedField",
+					"quantity": 1
+				},
+				{
+					"member": "usedMethod",
+					"quantity": 2
+				},
+				{
+					"member": "usedMethod2",
+					"quantity": 1
+				},
+				{
+					"member": "unusedMethod",
+					"quantity": 0
+				},
+				{
+					"member": "usedStatic",
+					"quantity": 1
+				},
+				{
+					"member": "unusedStatic",
+					"quantity": 0
+				}
+			]
+		},
+		{
+			"className": "com.test.linter.UnusedMemberLinter.mvc.controller.BaseController",
+			"References": [
+				{
+					"member": "util",
+					"quantity": 5
+				}
+			]
+		},
+		{
+			"className": "com.test.linter.UnusedMemberLinter.mvc.model.Util",
+			"References": [
+				{
+					"member": "usedMethod",
+					"quantity": 1
+				},
+				{
+					"member": "unusedMethod",
+					"quantity": 0
+				},
+				{
+					"member": "usedInFragment1",
+					"quantity": 1
+				},
+				{
+					"member": "usedInFragment2",
+					"quantity": 1
+				},
+				{
+					"member": "usedInFragment3",
+					"quantity": 1
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,8 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button text="{
+		formatter: '.util.usedInFragment3'
+	}"/>
+</c:FragmentDefinition>

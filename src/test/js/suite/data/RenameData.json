@@ -1,0 +1,58 @@
+{
+	"folderRenames": [
+		{
+			"uriFrom": "com.test.renametest",
+			"uriTo": "com.test.renametests",
+			"result": [
+				{
+					"fileData": {
+						"fsPath": "com.test.manifeston",
+						"content": "{\n\t\"_version\": \"1.1.0\",\n\t\"sap.app\": {\n\t\t\"_version\": \"1.1.0\",\n\t\t\"id\": \"com.test\",\n\t\t\"type\": \"application\",\n\t\t\"i18n\": \"i18n/i18n.properties\",\n\t\t\"applicationVersion\": {\n\t\t\t\"version\": \"1.0.0\"\n\t\t},\n\t\t\"title\": \"{{App.Title}}\",\n\t\t\"description\": \"{{App.Description}}\",\n\t\t\"dataSources\": {}\n\t},\n\t\"sap.ui\": {\n\t\t\"_version\": \"1.1.0\",\n\t\t\"technology\": \"UI5\",\n\t\t\"icons\": {\n\t\t\t\"icon\": \"\",\n\t\t\t\"favIcon\": \"\",\n\t\t\t\"phone\": \"\",\n\t\t\t\"phone@2\": \"\",\n\t\t\t\"tablet\": \"\",\n\t\t\t\"tablet@2\": \"\"\n\t\t},\n\t\t\"deviceTypes\": {\n\t\t\t\"desktop\": true,\n\t\t\t\"tablet\": true,\n\t\t\t\"phone\": true\n\t\t},\n\t\t\"supportedThemes\": [\n\t\t\t\"sap_belize\"\n\t\t],\n\t\t\"fullWidth\": false\n\t},\n\t\"sap.ui5\": {\n\t\t\"commands\": {\n\t\t\t\"Save\": {}\n\t\t},\n\t\t\"_version\": \"1.1.0\",\n\t\t\"rootView\": {\n\t\t\t\"viewName\": \"com.test.view.SecondaryViews.App\",\n\t\t\t\"type\": \"XML\"\n\t\t},\n\t\t\"dependencies\": {\n\t\t\t\"minUI5Version\": \"1.60.10\",\n\t\t\t\"libs\": {\n\t\t\t\t\"sap.ui.core\": {},\n\t\t\t\t\"sap.m\": {}\n\t\t\t}\n\t\t},\n\t\t\"contentDensities\": {\n\t\t\t\"compact\": true,\n\t\t\t\"cozy\": true\n\t\t},\n\t\t\"models\": {\n\t\t\t\"i18n\": {\n\t\t\t\t\"type\": \"sap.ui.model.resource.ResourceModel\",\n\t\t\t\t\"settings\": {\n\t\t\t\t\t\"bundleName\": \"com.test.i18n.i18n\"\n\t\t\t\t}\n\t\t\t},\n\t\t\t\"TestModel\": {\n\t\t\t\t\"type\": \"com.test.util.TestModel\"\n\t\t\t},\n\t\t\t\"AnotherModel\": {\n\t\t\t\t\"type\": \"com.test.util.AnotherModel\"\n\t\t\t}\n\t\t},\n\t\t\"config\": {\n\t\t\t\"i18nBundle\": \"com.test.i18n.i18n\"\n\t\t},\n\t\t\"routing\": {\n\t\t\t\"config\": {\n\t\t\t\t\"routerClass\": \"sap.m.routing.Router\",\n\t\t\t\t\"viewType\": \"XML\",\n\t\t\t\t\"viewPath\": \"com.test\",\n\t\t\t\t\"controlId\": \"idApp\",\n\t\t\t\t\"controlAggregation\": \"detailPages\",\n\t\t\t\t\"async\": true\n\t\t\t},\n\t\t\t\"routes\": [\n\t\t\t\t{\n\t\t\t\t\t\"pattern\": \"\",\n\t\t\t\t\t\"name\": \"Master\",\n\t\t\t\t\t\"target\": [\n\t\t\t\t\t\t\"Empty\",\n\t\t\t\t\t\t\"Master\"\n\t\t\t\t\t]\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"pattern\": \"Detail({ID})\",\n\t\t\t\t\t\"name\": \"Detail\",\n\t\t\t\t\t\"target\": [\n\t\t\t\t\t\t\"Master\",\n\t\t\t\t\t\t\"Detail\"\n\t\t\t\t\t]\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"pattern\": \"Empty\",\n\t\t\t\t\t\"name\": \"Empty\",\n\t\t\t\t\t\"target\": [\n\t\t\t\t\t\t\"Empty\",\n\t\t\t\t\t\t\"Master\"\n\t\t\t\t\t]\n\t\t\t\t},\n\t\t\t\t{\n\t\t\t\t\t\"pattern\": \"Error\",\n\t\t\t\t\t\"name\": \"Error\",\n\t\t\t\t\t\"target\": \"Error\"\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"targets\": {\n\t\t\t\t\"Master\": {\n\t\t\t\t\t\"viewName\": \"view.Master\",\n\t\t\t\t\t\"viewLevel\": 1,\n\t\t\t\t\t\"transition\": \"show\",\n\t\t\t\t\t\"controlAggregation\": \"masterPages\"\n\t\t\t\t},\n\t\t\t\t\"Detail\": {\n\t\t\t\t\t\"viewName\": \"view.Detail\",\n\t\t\t\t\t\"viewLevel\": 2\n\t\t\t\t},\n\t\t\t\t\"RenameTest\": {\n\t\t\t\t\t\"viewName\": \"renametests.view.Master\",\n\t\t\t\t\t\"viewLevel\": 2\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t\"extends\": {\n\t\t\t\"extensions\": {\n\t\t\t\t\"sap.ui.controllerExtensions\": {\n\t\t\t\t\t\"com.test.controller.Master\": {\n\t\t\t\t\t\t\"controllerName\": \"com.test.controller.ControllerExtension\"\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t},\n\t\t\"resources\": {\n\t\t\t\"css\": [\n\t\t\t\t{\n\t\t\t\t\t\"uri\": \"css/style.css\"\n\t\t\t\t}\n\t\t\t]\n\t\t}\n\t}\n}"
+					},
+					"changed": true,
+					"renames": []
+				},
+				{
+					"fileData": {
+						"fsPath": "com.test.renametest.controller.Master",
+						"content": "sap.ui.define([\r\n\t\"sap/ui/core/mvc/Controller\",\r\n\t\"com/test/renametests/util/Formatter\"\r\n], function(\r\n\tController,\r\n\tFormatter\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn Controller.extend(\"com.test.renametests.controller.Master\", {\r\n\t\tformatter: Formatter,\r\n\t\teventHandler1() {\r\n\t\t\t\"com.test.renametests.view.fragments.FragmentController1\";\r\n\t\t},\r\n\t\teventHandler2() {\r\n\t\t\tthis.getView().byId(\"\")\r\n\t\t},\r\n\t\teventHandler3() { },\r\n\t\teventHandler4() { },\r\n\t\teventHandler12() { },\r\n\t\tunusedEventHandler() { }\r\n\t});\r\n});"
+					},
+					"changed": true,
+					"renames": []
+				},
+				{
+					"fileData": {
+						"fsPath": "com.test.renametest.util.ExtendFormatter",
+						"content": "sap.ui.define([\r\n\t\"com/test/renametests/util/Formatter\"\r\n], function(\r\n\tFormatter\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn Formatter.extend(\"com.test.renametests.util.ExtendFormatter\", {\r\n\t});\r\n});"
+					},
+					"changed": true,
+					"renames": []
+				},
+				{
+					"fileData": {
+						"fsPath": "com.test.renametest.util.Formatter",
+						"content": "sap.ui.define([\r\n\t\"sap/ui/base/ManagedObject\"\r\n], function(\r\n\tManagedObject\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn ManagedObject.extend(\"com.test.renametests.util.Formatter\", {\r\n\t});\r\n});"
+					},
+					"changed": true,
+					"renames": []
+				},
+				{
+					"fileData": {
+						"fsPath": "com.test.renametest.view.Master",
+						"content": "<mvc:View\n\tcontrollerName=\"com.test.renametests.controller.Master\"\n\txmlns:mvc=\"sap.ui.core.mvc\"\n\txmlns=\"sap.m\"\n\txmlns:c=\"sap.ui.core\"\n\tdisplayBlock=\"true\"\n\theight=\"100%\"\n\tbusyIndicatorDelay=\"0\"\n>\n\t<Button\n\t\tid=\"idButtonMasterView\"\n\t\ttext=\"{\n\t\t\tformatter: '.formatter.formatValueViewMaster'\n\t\t}\"\n\t\tpress=\"eventHandler1\"\n\t\tbusy=\"true\"\n\t\tparseError=\"eventHandler11\"\n\t/>\n\t<Bar>\n\t\t<contentLeft>\n\n\t\t</contentLeft>\n\t</Bar>\n\t<c:Fragment\n\t\tfragmentName=\"com.test.renametests.view.fragments.FragmentView1\"\n\t\ttype=\"XML\"\n\t/>\n\t<c:Fragment\n\t\tfragmentName=\"com.test.renametests.view.fragments.FragmentView2\"\n\t\ttype=\"XML\"\n\t/>\n</mvc:View>"
+					},
+					"changed": true,
+					"renames": []
+				},
+				{
+					"fileData": {
+						"fsPath": "com.test.renametests.util.ExtendFormatter",
+						"content": "sap.ui.define([\r\n\t\"com/test/renametests/util/Formatter\"\r\n], function(\r\n\tFormatter\r\n) {\r\n\t\"use strict\";\r\n\r\n\treturn Formatter.extend(\"com.test.renametests.util.ExtendFormatter\", {\r\n\t});\r\n});"
+					},
+					"changed": true,
+					"renames": []
+				}
+			]
+		}
+	]
+}

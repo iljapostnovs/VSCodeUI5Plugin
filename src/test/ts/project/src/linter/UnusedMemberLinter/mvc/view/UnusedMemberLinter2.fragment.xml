@@ -1,0 +1,12 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Button text="{
+		formatter: '.util.usedInFragment2'
+	}"/>
+	<c:Fragment
+		fragmentName="com.test.linter.UnusedMemberLinter.mvc.view.UnusedMemberLinter3"
+		type="XML"
+	/>
+</c:FragmentDefinition>

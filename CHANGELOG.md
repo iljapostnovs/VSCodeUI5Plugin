@@ -1,3 +1,6 @@
+## 0.15.2 (06-11-2022)
+* Update parser and linter. Minor bugfixes.
+
 ## 0.15.1 (29-10-2022)
 * Fix [#264](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/264), fix unused translations linter
 
