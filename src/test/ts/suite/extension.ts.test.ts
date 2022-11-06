@@ -1,11 +1,19 @@
 import assert = require("assert");
 import { after, test } from "mocha";
-import { AbstractUI5Parser, UI5TSParser } from "ui5plugin-parser";
-import { ICustomClassField, ICustomClassMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
+import { UnusedMemberLinter } from "ui5plugin-linter/dist/classes/js/parts/UnusedMemberLinter";
+import { TSReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts/util/TSReferenceFinder";
+import { AbstractUI5Parser, TextDocument, UI5TSParser } from "ui5plugin-parser";
+import {
+	ICustomClassField,
+	ICustomClassMethod
+} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
 import { CustomTSObject } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSObject";
 import * as vscode from "vscode";
+import { VSCodeLinterConfigHandler } from "../../../classes/ui5linter/config/VSCodeLinterConfigHandler";
+import * as JSLinterData from "./data/linter/JSLinterData.json";
 import * as ClassParsing from "./data/parser/ClassParsing.json";
+import * as References from "./data/reference/References.json";
 // import * as os from "os";
 
 suite("Extension Test Suite", () => {
@@ -30,8 +38,16 @@ suite("Extension Test Suite", () => {
 			assert.ok(UIClass instanceof TSClass, `Class "${testData.className}" is not recognized as Custom Class`);
 
 			UIClass.loadTypes();
-			assert.equal(UIClass.methods.length, testData.methods.length, `Class "${UIClass.className}" has wrong method quantity`);
-			assert.equal(UIClass.fields.length, testData.fields.length, `Class "${UIClass.className}" has wrong field quantity`);
+			assert.equal(
+				UIClass.methods.length,
+				testData.methods.length,
+				`Class "${UIClass.className}" has wrong method quantity`
+			);
+			assert.equal(
+				UIClass.fields.length,
+				testData.fields.length,
+				`Class "${UIClass.className}" has wrong field quantity`
+			);
 			testData.methods.forEach(methodData => {
 				testMethod(UIClass, methodData);
 			});
@@ -39,6 +55,47 @@ suite("Extension Test Suite", () => {
 				testField(UIClass, fieldData);
 			});
 		});
+	});
+
+	test("Linter: TS Linters, Unused Member Linter", async () => {
+		const allTestData = JSLinterData.data;
+
+		for (const testData of allTestData) {
+			const parser = AbstractUI5Parser.getInstance(UI5TSParser);
+			const UIClass = parser.classFactory.getUIClass(testData.className);
+			if (parser.classFactory.isCustomClass(UIClass)) {
+				const document = await vscode.workspace.openTextDocument(UIClass.fsPath);
+
+				const linter = new UnusedMemberLinter(parser, new VSCodeLinterConfigHandler());
+				const errors = linter.getLintingErrors(new TextDocument(document.getText(), document.uri.fsPath));
+				const errorMessages = errors.map(error => error.message);
+				// copy(JSON.stringify(errorMessages))
+				assert.deepEqual(errorMessages, testData.UnusedMemberLinter, `Class "${UIClass.className}" has wrong error messages for UnusedMemberLinter`);
+			}
+		}
+	});
+
+	test("References: TS references", () => {
+		const allTestData = References.data;
+
+		for (const testData of allTestData) {
+			const parser = AbstractUI5Parser.getInstance(UI5TSParser);
+			const UIClass = parser.classFactory.getUIClass(testData.className);
+			if (parser.classFactory.isCustomClass(UIClass)) {
+				const members = [...UIClass.fields, ...UIClass.methods];
+
+				const referenceFinder = new TSReferenceFinder(parser);
+				testData.References.forEach(referenceData => {
+					const member = members.find(member => member.name === referenceData.member);
+					if (member) {
+						const locations = referenceFinder.getReferenceLocations(member);
+						assert.equal(locations.length, referenceData.quantity, `Class "${UIClass.className}" member "${referenceData.member}" has wrong reference quantity`);
+					} else {
+						assert.ok(false, `Class "${UIClass.className}" doesnt have "${referenceData.member}" member. (Reference finder)`);
+					}
+				});
+			}
+		}
 	});
 });
 

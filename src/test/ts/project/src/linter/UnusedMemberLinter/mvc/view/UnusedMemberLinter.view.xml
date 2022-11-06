@@ -1,0 +1,29 @@
+<mvc:View
+	controllerName="com.test.linter.UnusedMemberLinter.mvc.controller.UnusedMemberLinter"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+	displayBlock="true"
+	height="100%"
+	busyIndicatorDelay="0"
+>
+	<Button
+		press="usedMethod"
+		text="{
+			formatter: '.usedMethod'
+		}"
+	/>
+	<Button text="{
+		formatter: 'com.test.linter.UnusedMemberLinter.mvc.controller.UnusedMemberLinter.usedStatic'
+	}"/>
+	<Button text="{
+		formatter: '.util.usedMethod'
+	}"/>
+	<Button text="{
+		formatter: '.util.nonExistantMethod'
+	}"/>
+	<c:Fragment
+		fragmentName="com.test.linter.UnusedMemberLinter.mvc.view.UnusedMemberLinter1"
+		type="XML"
+	/>
+</mvc:View>

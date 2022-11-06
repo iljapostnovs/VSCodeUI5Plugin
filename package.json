@@ -16,6 +16,9 @@
 	"bugs": {
 		"url": "https://github.com/iljapostnovs/VSCodeUI5Plugin/issues"
 	},
+	"sponsor": {
+		"url": "https://github.com/sponsors/iljapostnovs"
+	},
 	"icon": "images/ui5.png",
 	"homepage": "https://github.com/iljapostnovs/VSCodeUI5Plugin/blob/master/README.md",
 	"engines": {
@@ -341,8 +344,8 @@
 		"line-column": "^1.0.2",
 		"ts-morph": "^16.0.0",
 		"typescript": "^4.8.2",
-		"ui5plugin-linter": "^0.8.2",
-		"ui5plugin-parser": "^0.7.1"
+		"ui5plugin-linter": "^0.8.3",
+		"ui5plugin-parser": "^0.7.2"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",

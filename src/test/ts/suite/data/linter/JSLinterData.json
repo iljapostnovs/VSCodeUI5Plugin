@@ -1,0 +1,18 @@
+{
+	"data": [
+		{
+			"className": "com.test.linter.UnusedMemberLinter.mvc.controller.UnusedMemberLinter",
+			"UnusedMemberLinter": [
+				"No references found for \"unusedMethod\" class member",
+				"No references found for \"unusedStatic\" class member",
+				"No references found for \"unusedField\" class member"
+			]
+		},
+		{
+			"className": "com.test.linter.UnusedMemberLinter.mvc.model.Util",
+			"UnusedMemberLinter": [
+				"No references found for \"unusedMethod\" class member"
+			]
+		}
+	]
+}
