@@ -49,22 +49,17 @@ export class ERDiagramGenerator extends DiagramGenerator {
 	}
 
 	private _buildDiagramForAssociations(associations: IAssociation[], entityTypes: IEntityType[]) {
-		return associations.map(association => {
-			const multiplicityFrom = this._getMultiplicity(association.from.multiplicity, true);
-			const multiplicityTo = this._getMultiplicity(association.to.multiplicity, false);
-			const navigationName = this._getNavigationName(association, entityTypes);
+		return entityTypes.flatMap(entityType => {
+			return entityType.navigations.map(navigation => {
+				const association = associations.find(association => association.name === navigation.relationship);
+				const fromRole = association?.from.role === navigation.from ? association?.from : association?.to;
+				const toRole = association?.to.role === navigation.to ? association?.to : association?.from;
 
-			return `${association.from.type} ${multiplicityFrom}--${multiplicityTo} ${association.to.type}${navigationName}`;
+				const multiplicityTo = this._getMultiplicity(toRole?.multiplicity ?? "1", false);
+
+				return `${fromRole?.type} --${multiplicityTo} ${toRole?.type}: ${navigation.name}`;
+			});
 		}).join("\n") + "\n";
-	}
-
-	private _getNavigationName(association: IAssociation, entityTypes: IEntityType[]) {
-		const entityTypeFrom = entityTypes.find(entityType => entityType.name === association.from.type);
-		const navigation = entityTypeFrom?.navigations.find(navigation => {
-			return navigation.relationship === association.name;
-		});
-
-		return navigation ? `: ${navigation.name}` : "";
 	}
 
 	private _getMultiplicity(multiplicity: string, isFrom: boolean) {
@@ -103,7 +98,6 @@ export class ERDiagramGenerator extends DiagramGenerator {
 				const additionalTypeNumbers = this._getAdditionalTypeNumbers(property);
 				const isComplexType = property.type.startsWith("Edm.");
 				diagram += `\t${isComplexType ? "{field}" : "{method}"} ${keySymbolic}${property.name}: ${property.type}${additionalTypeNumbers}${keySymbolic}\n`;
-
 			});
 			diagram += "}";
 

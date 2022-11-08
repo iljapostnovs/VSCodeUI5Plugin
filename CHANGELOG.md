@@ -1,3 +1,6 @@
+## 0.15.3 (08-11-2022)
+* ER Diagram generation from metadata now generates navigations to both ways (previously only "from" -> "to" navigation arrow was generated, now "to" -> "from" persists as well).
+
 ## 0.15.2 (06-11-2022)
 * Update parser and linter. Minor bugfixes.
 
