@@ -86,8 +86,8 @@ export class XMLMetadataParser {
 
 	private _parseEntityTypes(entityTypes: any[], namespace: string, entitySets: any[]): IEntityType[] {
 		return entityTypes.map((entityType: any) => {
-			const name = entityType["@_Name"];
-			const keys = entityType.Key?.PropertyRef["@_Name"] ? [entityType.Key.PropertyRef["@_Name"]] : (entityType.Key?.PropertyRef.map((propertyRef: any) => propertyRef["@_Name"]) || []);
+			const name: string = entityType["@_Name"];
+			const keys: string[] = entityType.Key?.PropertyRef["@_Name"] ? [entityType.Key.PropertyRef["@_Name"]] : (entityType.Key?.PropertyRef.map((propertyRef: any) => propertyRef["@_Name"]) || []);
 			const XMLProperties = this._getArray(entityType.Property);
 			let properties: IProperty[] = XMLProperties.map((property: any) => {
 				return {
