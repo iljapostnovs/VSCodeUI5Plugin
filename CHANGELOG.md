@@ -1,3 +1,6 @@
+## 0.15.4 (28-11-2022)
+* Update packages. Now parser checks both for ```.ts``` files and ```tsconfig.json``` existence
+
 ## 0.15.3 (08-11-2022)
 * ER Diagram generation from metadata now generates navigations to both ways (previously only "from" -> "to" navigation arrow was generated, now "to" -> "from" persists as well).
 

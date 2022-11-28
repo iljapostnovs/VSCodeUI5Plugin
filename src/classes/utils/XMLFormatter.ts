@@ -70,7 +70,7 @@ export class XMLFormatter {
 
 	private static _formatNonCommentTag(currentTag: ITag, indentationLevel: number) {
 		const tagName = this._getTagName(currentTag.text);
-		const tagAttributes = this._getTagAttributes(currentTag.text);
+		const tagAttributes = this._getTagAttributes(currentTag.text).map(tag => tag.toString());
 		let endSubstraction = 1;
 		if (currentTag.text.endsWith("/>")) {
 			endSubstraction = 2;

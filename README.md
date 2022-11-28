@@ -18,7 +18,7 @@ Most of the functionality works now in typescript as well.
 Things to know:
 
 1. `tsconfig.json` should be located in the root folder of workspace
-2. If any `.ts` files are found, project is considered to be TS project
+2. If any `.ts` files are found and `tsconfig.json` is found, project is considered to be TS project
 3. `webapp` and `src-gen` are automatically excluded by extension if it's TS project. If build folder has different name, it should be added to folder exclusions in VSCode extension preferences
 4. Not all linters work for TS, because TS has a lot out of the box features. E.g. Wrong field/method linter works only for JS, because TS has it's own syntax analysis for that.
 5. `ts-morph` is used as TS parser and it has some drawbacks. When using typechecker to get type e.g. of the field or return type of the method, `ts-morph` might hang up for about ~10s, which is not great. However, types are crucial for Reference CodeLens/Linters, specifically for fields in order to be able to distinguish them in views/fragments. As a workaround for performance issues, typechecker is not used to get field types. Because of that only simple structure is allowed.
