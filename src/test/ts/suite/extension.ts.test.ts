@@ -91,7 +91,7 @@ suite("Extension Test Suite", () => {
 						const locations = referenceFinder.getReferenceLocations(member);
 						assert.equal(locations.length, referenceData.quantity, `Class "${UIClass.className}" member "${referenceData.member}" has wrong reference quantity`);
 					} else {
-						assert.ok(false, `Class "${UIClass.className}" doesnt have "${referenceData.member}" member. (Reference finder)`);
+						assert.ok(false, `Class "${UIClass.className}" doesn't have "${referenceData.member}" member. (Reference finder)`);
 					}
 				});
 			}
