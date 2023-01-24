@@ -101,8 +101,8 @@ export class XMLMetadataParser {
 				}
 			}) || [];
 			properties = properties.sort((a, b) => {
-				const aValue = keys.includes(a.name) ? 1 : 0;
-				const bValue = keys.includes(b.name) ? 1 : 0;
+				const aValue: 1 | 0 = keys.includes(a.name) ? 1 : 0;
+				const bValue: 1 | 0 = keys.includes(b.name) ? 1 : 0;
 				return bValue - aValue;
 			});
 

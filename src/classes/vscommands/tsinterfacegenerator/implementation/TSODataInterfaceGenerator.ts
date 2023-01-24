@@ -27,10 +27,40 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 	private _buildInterfacesForEntitySets(metadata: XMLMetadataParser) {
 		const aInterfaceData = metadata.entityTypes.map(entityType => {
 			const entityTypeName = entityType.name;
-			return `"${entityType.entitySetName}": {\n\t\tkeys: ${entityTypeName}Keys;\n\t\ttype: ${entityTypeName};\n\t\ttypeName: "${entityTypeName}";\n\t};`
+			const navigations = this._generateNavigations(entityType, metadata);
+
+			return `"${entityType.entitySetName}": {\n\t\tkeys: ${entityTypeName}Keys;\n\t\ttype: ${entityTypeName};\n\t\ttypeName: "${entityTypeName}";\n\t\tnavigations: ${navigations};\n\t};`
 		});
 
 		return [`export type EntitySets = {\n\t${aInterfaceData.join("\n\t")}\n};`];
+	}
+
+	private _generateNavigations(entityType: IEntityType, metadata: XMLMetadataParser) {
+		const navigationProperties = entityType.navigations.map(navigation => {
+			const association = metadata.associations.find(association => association.name === navigation.relationship);
+			const toRole = association?.to.role === navigation.to ? association?.to : association?.from;
+
+			const isMultiple = this._getIsMultiple(toRole?.multiplicity ?? "1");
+
+			const entityTypeName = isMultiple && toRole?.type ? `${toRole?.type}[]` : (toRole?.type ?? "any");
+			const navigationName = navigation.name;
+
+			return `\t\t\t"${navigationName}": {\n\t\t\t\ttype: ${entityTypeName}\n\t\t\t};`;
+		}).join("\n");
+		const navigations = `{\n${navigationProperties}\n\t\t}`;
+		return navigations;
+	}
+
+	private _getIsMultiple(multiplicity: string) {
+		if (multiplicity === "1") {
+			return false;
+		} else if (multiplicity === "*") {
+			return true;
+		} else if (multiplicity === "0..1") {
+			return false;
+		} else {
+			return false;
+		}
 	}
 
 	private _buildInterfaceForEntityKeys(entity: IEntityType) {
