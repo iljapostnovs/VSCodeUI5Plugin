@@ -236,6 +236,11 @@
 					"type": "string",
 					"description": "Module which will be used for automatic insertion on custom controller creation",
 					"default": "sap/ui/core/mvc/Controller"
+				},
+				"ui5.plugin.xmlFormatterTagEndingNewline": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should XML Formatter put tag ending (\">\", \"/>\") in newline"
 				}
 			}
 		},

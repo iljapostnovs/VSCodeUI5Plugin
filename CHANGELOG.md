@@ -1,5 +1,6 @@
 ## 0.15.5 (24-01-2023)
 * Navigation data to OData TS interface generation added
+* New preferences entry added: ```ui5.plugin.xmlFormatterTagEndingNewline```
 
 ## 0.15.4 (28-11-2022)
 * Update packages. Now parser checks both for ```.ts``` files and ```tsconfig.json``` existence
