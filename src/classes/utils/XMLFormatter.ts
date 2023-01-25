@@ -92,7 +92,7 @@ export class XMLFormatter {
 		let formattedTag = `${indentation}${tagBegin}${tagName}\n`;
 
 		if (tagAttributes.length === 1) {
-			formattedTag = formattedTag.trimRight();
+			formattedTag = formattedTag.trimEnd();
 		}
 		formattedTag += tagAttributes.reduce((accumulator, tagAttribute) => {
 			const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
@@ -100,13 +100,16 @@ export class XMLFormatter {
 			const formattedAttributeValue = this._formatAttributeValue(tagData.attributeValue, attributeValueIndentation);
 			accumulator += `${indentation}\t${tagData.attributeName}=${formattedAttributeValue}\n`;
 			if (tagAttributes.length === 1) {
-				accumulator = ` ${accumulator.trimLeft()}`;
+				accumulator = ` ${accumulator.trimStart()}`;
 			}
 			return accumulator;
 		}, "");
 
-		if (tagAttributes.length <= 1) {
-			formattedTag = formattedTag.trimRight();
+
+		const bShouldTagEndingBeOnNewline = vscode.workspace.getConfiguration("ui5.plugin").get("xmlFormatterTagEndingNewline") as boolean;
+
+		if (tagAttributes.length <= 1 || !bShouldTagEndingBeOnNewline) {
+			formattedTag = formattedTag.trimEnd();
 			indentation = "";
 		}
 

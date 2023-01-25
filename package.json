@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "0.15.4",
+	"version": "0.15.5",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -236,6 +236,11 @@
 					"type": "string",
 					"description": "Module which will be used for automatic insertion on custom controller creation",
 					"default": "sap/ui/core/mvc/Controller"
+				},
+				"ui5.plugin.xmlFormatterTagEndingNewline": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should XML Formatter put tag ending (\">\", \"/>\") in newline"
 				}
 			}
 		},
@@ -343,8 +348,8 @@
 		"line-column": "^1.0.2",
 		"ts-morph": "^17.0.1",
 		"typescript": "^4.9.3",
-		"ui5plugin-linter": "^0.8.6",
-		"ui5plugin-parser": "^0.7.5"
+		"ui5plugin-linter": "^0.8.7",
+		"ui5plugin-parser": "^0.7.6"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",
