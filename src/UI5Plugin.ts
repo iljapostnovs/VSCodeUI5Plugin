@@ -60,8 +60,9 @@ export class UI5Plugin {
 		return Progress.show(async () => {
 			try {
 				await fnInitialize(context);
-			} catch (error) {
+			} catch (error: any) {
 				console.error(error);
+				vscode.window.showErrorMessage(`SAPUI5 Extension error: ${error.message}`);
 				this.registerFallbackCommands();
 			}
 		}, "Initializing");

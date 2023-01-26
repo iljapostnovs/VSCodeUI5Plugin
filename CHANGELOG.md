@@ -1,3 +1,6 @@
+## 0.15.7 (26-01-2023)
+* Fix for [#287](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/287)
+
 ## 0.15.6 (26-01-2023)
 * UI5Parser updated
 
