@@ -16,7 +16,11 @@
 		<content>
 			<Table
 				id="idTableFromView"
-				popinChanged="_onItemPress($event, $controller, formatMessage($test>test}))"
+				popinChanged="_onItemPress(
+					$event,
+					$controller,
+					formatMessage($test>test})
+				)"
 				alternateRowColors="wrong value"
 				wrongProperty=""
 				selectionChange="nonExistantEventHandler"

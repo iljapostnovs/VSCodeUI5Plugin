@@ -1,3 +1,6 @@
+## 0.15.6 (26-01-2023)
+* UI5Parser updated
+
 ## 0.15.5 (25-01-2023)
 * Navigation data to OData TS interface generation added
 * New preferences entry added: ```ui5.plugin.xmlFormatterTagEndingNewline```
