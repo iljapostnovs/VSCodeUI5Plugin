@@ -1,3 +1,4 @@
+import { AbstractUI5Parser, UI5Parser } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 
@@ -26,7 +27,7 @@ export class ClearCacheCommand {
 	}
 
 	static clearCache() {
-		UI5Plugin.getInstance().parser.fileReader.clearCache();
+		AbstractUI5Parser.getInstance(UI5Parser).fileReader.clearCache();
 
 		ClearCacheCommand.reloadWindow();
 	}
