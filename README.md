@@ -396,7 +396,7 @@ Custom UI5 Explorer in VSCode panel is available<br/>
 
 If HTTP_PROXY or HTTPS_PROXY environment variables are set, ui5.sap.com will be requested using the proxy.
 
-# Known limitations
+# Known issues
 
 ## acorn-loose
 
@@ -426,3 +426,8 @@ Standard VSCode JS Formatter is not handling all formatting issues. `hookyqr.bea
 	"editor.defaultFormatter": "<YourFormatter>"
 }
 ```
+
+## ui5.sap.com damaged JSON response
+For some reason ui5.sap.com sometimes might return damaged JSON when requesting standard library metadata. As a result, it is possible to get such error as:<br/>
+![UIFiveError](/images/UIFiveError.png)<br/>
+To solve it, please run ```UI5: Clear cache``` command and reload VSCode.

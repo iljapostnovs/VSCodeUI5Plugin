@@ -1,3 +1,6 @@
+## 0.15.10 (02-01-2023)
+* Update readme.md
+
 ## 0.15.9 (02-01-2023)
 * Fix xml parser [#291](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/291)
 
