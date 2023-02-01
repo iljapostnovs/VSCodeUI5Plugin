@@ -9,6 +9,7 @@
 	height="100%"
 	busyIndicatorDelay="0"
 >
+	<Input value="Numéro d'article"/>
 	<Page>
 		<nonExistantAggregation>
 		<!-- Don't shrink below minimum size. Fills space if savailable. -->

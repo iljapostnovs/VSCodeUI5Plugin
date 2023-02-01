@@ -1,3 +1,6 @@
+## 0.15.9 (02-01-2023)
+* Fix xml parser [#291](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/291)
+
 ## 0.15.8 (28-01-2023)
 * Fix for ```Clear cache``` command, which was not working when UI5 library metadata preload failed
 
