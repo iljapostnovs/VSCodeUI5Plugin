@@ -18,7 +18,8 @@ export class XMLFormatter {
 				let indentationLevel = 0;
 				const formattedTags = allTags.map(currentTag => {
 					const isComment = currentTag.text.startsWith("<!--");
-					if (isComment) {
+					const isDocTypeTag = currentTag.text.startsWith("<!");
+					if (isComment || isDocTypeTag) {
 						const indentation = this._getIndentation(indentationLevel);
 						return `${indentation}${currentTag.text}`;
 					} else {
@@ -308,14 +309,15 @@ export class XMLFormatter {
 
 		if (allStringsAreClosed) {
 			while (i < document.content.length) {
+				const possiblyDocType = document.content.substring(i, i + 9).toLowerCase();
+				const isDocType = possiblyDocType === "<!doctype";
 				const thisIsTagEnd =
 					document.content[i] === ">" &&
 					!XMLParser.getIfPositionIsInString(document, i) &&
 					(
 						XMLParser.getIfPositionIsNotInComments(document, i) ||
 						document.content.substring(i - 2, i + 1) === "-->"
-					)
-					;
+					);
 				if (thisIsTagEnd) {
 					const indexOfTagBegining = this._getTagBeginingIndex(document, i);
 					tags.push({
@@ -323,12 +325,42 @@ export class XMLFormatter {
 						positionBegin: indexOfTagBegining,
 						positionEnd: i
 					});
+				} else if (isDocType) {
+					const doctypeTag = this._processDocType(document, i);
+					tags.push(doctypeTag);
+					i += doctypeTag.text.length;
 				}
 				i++;
 			}
 		}
 
 		return tags;
+	}
+	private static _processDocType(document: IXMLFile, i: number): ITag {
+		const doctypeBeginIndex = i;
+		let doctypeEndIndex = i;
+
+		let tagOpeningCount = 0;
+		let tagClosingCount = 0;
+		while (doctypeEndIndex === doctypeBeginIndex && i < document.content.length) {
+			if (!XMLParser.getIfPositionIsInString(document, i) && XMLParser.getIfPositionIsNotInComments(document, i)) {
+				if (document.content[i] === "<") {
+					tagOpeningCount++;
+				} else if (document.content[i] === ">") {
+					tagClosingCount++;
+				}
+				if (tagOpeningCount === tagClosingCount) {
+					doctypeEndIndex = i + 1;
+				}
+			}
+			i++;
+		}
+
+		return {
+			text: document.content.substring(doctypeBeginIndex, doctypeEndIndex),
+			positionBegin: doctypeBeginIndex,
+			positionEnd: doctypeEndIndex
+		};
 	}
 
 	private static _getIfAllStringsAreClosed(document: string) {

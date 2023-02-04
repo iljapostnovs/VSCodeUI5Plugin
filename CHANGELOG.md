@@ -1,3 +1,6 @@
+## 0.15.11 (04-01-2023)
+* Fix [#188](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/188)
+
 ## 0.15.10 (02-01-2023)
 * Update readme.md
 

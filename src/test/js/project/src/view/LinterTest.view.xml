@@ -11,8 +11,12 @@
 >
 	<Input value="Numéro d'article"/>
 	<Page>
+		<!DOCTYPE variables [
+			<!ENTITY checkBoxGridDataSpan "test test >stest">
+			<!ENTITY checkBoxGridDataSpan "test test test">
+		]>
 		<nonExistantAggregation>
-		<!-- Don't shrink below minimum size. Fills space if savailable. -->
+			<!-- Don't shrink below minimum size. Fills space if available. -->
 		</nonExistantAggregation>
 		<content>
 			<Table
@@ -39,7 +43,6 @@
 			/>
 			<Input binding="{test}">
 				<f:customData>
-
 				</f:customData>
 			</Input>
 		</content>
