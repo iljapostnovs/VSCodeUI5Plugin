@@ -1,33 +1,37 @@
-import { XMLParser } from "ui5plugin-parser";
-import { IXMLFile } from "ui5plugin-parser/dist/classes/utils/FileReader";
-import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
-import { ITag } from "ui5plugin-parser/dist/classes/utils/XMLParser";
+import { IXMLFile } from "ui5plugin-parser/dist/classes/parsing/util/filereader/IFileReader";
+import { ITag } from "ui5plugin-parser/dist/classes/parsing/util/xml/XMLParser";
 import * as vscode from "vscode";
 import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
+import ParserBearer from "../ui5parser/ParserBearer";
 
-export class XMLFormatter {
-	static formatDocument(document: vscode.TextDocument) {
+export class XMLFormatter extends ParserBearer {
+	formatDocument(document: vscode.TextDocument) {
 		const textEdits: vscode.TextEdit[] = [];
 		const documentText = document.getText();
 
-		const XMLFile = TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(document), true);
+		const XMLFile = this._parser.textDocumentTransformer.toXMLFile(new TextDocumentAdapter(document), true);
 		if (XMLFile) {
 			const allTags = this._getAllTags(XMLFile);
 
 			if (allTags.length > 0) {
 				let indentationLevel = 0;
-				const formattedTags = allTags.map(currentTag => {
-					const isComment = currentTag.text.startsWith("<!--");
-					const isDocTypeTag = currentTag.text.startsWith("<!");
-					if (isComment || isDocTypeTag) {
-						const indentation = this._getIndentation(indentationLevel);
-						return `${indentation}${currentTag.text}`;
-					} else {
-						let formattedTag;
-						({ formattedTag, indentationLevel } = this._formatNonCommentTag(currentTag, indentationLevel));
-						return formattedTag;
-					}
-				}).reduce(this._removeUnnecessaryTags, []);
+				const formattedTags = allTags
+					.map(currentTag => {
+						const isComment = currentTag.text.startsWith("<!--");
+						const isDocTypeTag = currentTag.text.startsWith("<!");
+						if (isComment || isDocTypeTag) {
+							const indentation = this._getIndentation(indentationLevel);
+							return `${indentation}${currentTag.text}`;
+						} else {
+							let formattedTag;
+							({ formattedTag, indentationLevel } = this._formatNonCommentTag(
+								currentTag,
+								indentationLevel
+							));
+							return formattedTag;
+						}
+					})
+					.reduce(this._removeUnnecessaryTags.bind(this), []);
 
 				const positionBegin = document.positionAt(0);
 				const positionEnd = document.positionAt(documentText.length);
@@ -40,25 +44,28 @@ export class XMLFormatter {
 		return textEdits;
 	}
 
-	private static _removeUnnecessaryTags(accumulator: string[], currentTag: string): string[] {
+	private _removeUnnecessaryTags(accumulator: string[], currentTag: string): string[] {
 		//<Button></Button> -> <Button/>
 		const lastTagInAccumulator = accumulator[accumulator.length - 1];
-		const lastTagIsAnOpener = lastTagInAccumulator && !lastTagInAccumulator.trim().startsWith("</") && !lastTagInAccumulator.trim().endsWith("/>");
+		const lastTagIsAnOpener =
+			lastTagInAccumulator &&
+			!lastTagInAccumulator.trim().startsWith("</") &&
+			!lastTagInAccumulator.trim().endsWith("/>");
 		if (lastTagIsAnOpener) {
-			const lastTagName = XMLParser.getClassNameFromTag(lastTagInAccumulator.trim());
-			const currentTagName = XMLParser.getClassNameFromTag(currentTag.trim());
+			const lastTagName = this._parser.xmlParser.getClassNameFromTag(lastTagInAccumulator.trim());
+			const currentTagName = this._parser.xmlParser.getClassNameFromTag(currentTag.trim());
 			const bothTagsAreSameClass = lastTagName && currentTagName && lastTagName === currentTagName;
 			const previousTagIsAClass = lastTagName && lastTagName[0] === lastTagName[0].toUpperCase();
 			const currentTagIsClosure = currentTag.trim().startsWith("</");
 			const lastTagIsNotSelfClosed = !lastTagInAccumulator.trim().endsWith("/>");
 			const nextTagClosesCurrentOne =
-				previousTagIsAClass &&
-				bothTagsAreSameClass &&
-				currentTagIsClosure &&
-				lastTagIsNotSelfClosed;
+				previousTagIsAClass && bothTagsAreSameClass && currentTagIsClosure && lastTagIsNotSelfClosed;
 
 			if (nextTagClosesCurrentOne) {
-				accumulator[accumulator.length - 1] = `${lastTagInAccumulator.substring(0, lastTagInAccumulator.length - 1)}/>`;
+				accumulator[accumulator.length - 1] = `${lastTagInAccumulator.substring(
+					0,
+					lastTagInAccumulator.length - 1
+				)}/>`;
 			} else {
 				accumulator.push(currentTag);
 			}
@@ -69,17 +76,14 @@ export class XMLFormatter {
 		return accumulator;
 	}
 
-	private static _formatNonCommentTag(currentTag: ITag, indentationLevel: number) {
+	private _formatNonCommentTag(currentTag: ITag, indentationLevel: number) {
 		const tagName = this._getTagName(currentTag.text);
 		const tagAttributes = this._getTagAttributes(currentTag.text).map(tag => tag.toString());
 		let endSubstraction = 1;
 		if (currentTag.text.endsWith("/>")) {
 			endSubstraction = 2;
 		}
-		const tagEnd = currentTag.text.substring(
-			currentTag.text.length - endSubstraction,
-			currentTag.text.length
-		);
+		const tagEnd = currentTag.text.substring(currentTag.text.length - endSubstraction, currentTag.text.length);
 
 		let beginAddition = 1;
 		if (currentTag.text.startsWith("</")) {
@@ -96,9 +100,12 @@ export class XMLFormatter {
 			formattedTag = formattedTag.trimEnd();
 		}
 		formattedTag += tagAttributes.reduce((accumulator, tagAttribute) => {
-			const tagData = XMLParser.getAttributeNameAndValue(tagAttribute);
+			const tagData = this._parser.xmlParser.getAttributeNameAndValue(tagAttribute);
 			const attributeValueIndentation = tagAttributes.length === 1 ? indentation : indentation + "\t";
-			const formattedAttributeValue = this._formatAttributeValue(tagData.attributeValue, attributeValueIndentation);
+			const formattedAttributeValue = this._formatAttributeValue(
+				tagData.attributeValue,
+				attributeValueIndentation
+			);
 			accumulator += `${indentation}\t${tagData.attributeName}=${formattedAttributeValue}\n`;
 			if (tagAttributes.length === 1) {
 				accumulator = ` ${accumulator.trimStart()}`;
@@ -106,8 +113,9 @@ export class XMLFormatter {
 			return accumulator;
 		}, "");
 
-
-		const bShouldTagEndingBeOnNewline = vscode.workspace.getConfiguration("ui5.plugin").get("xmlFormatterTagEndingNewline") as boolean;
+		const bShouldTagEndingBeOnNewline = vscode.workspace
+			.getConfiguration("ui5.plugin")
+			.get("xmlFormatterTagEndingNewline") as boolean;
 
 		if (tagAttributes.length <= 1 || !bShouldTagEndingBeOnNewline) {
 			formattedTag = formattedTag.trimEnd();
@@ -120,7 +128,7 @@ export class XMLFormatter {
 		return { formattedTag, indentationLevel };
 	}
 
-	private static _formatAttributeValue(attributeValue: string, indentation: string) {
+	private _formatAttributeValue(attributeValue: string, indentation: string) {
 		let formattedValue = "";
 		if (!attributeValue.startsWith("\\")) {
 			let i = 0;
@@ -140,7 +148,10 @@ export class XMLFormatter {
 					indentation = indentation.substring(0, indentation.length - 1);
 					const nextChar = attributeValue[i + 1];
 					const nextLine = !["\n", "\r", " ", undefined].includes(nextChar) ? `\n${indentation}\t` : "";
-					formattedValue = lastFormattedValueChar === "\t" ? formattedValue.substring(0, formattedValue.length - 1) : formattedValue;
+					formattedValue =
+						lastFormattedValueChar === "\t"
+							? formattedValue.substring(0, formattedValue.length - 1)
+							: formattedValue;
 					formattedValue += `${currentChar}${nextLine}`;
 				} else if (currentChar === "{") {
 					const positionEnd = this._getPositionOfObjectEnd(attributeValue, i);
@@ -148,7 +159,10 @@ export class XMLFormatter {
 					try {
 						const evaluatedValue = eval(`(${currentBindingValue})`);
 						if (typeof evaluatedValue === "object") {
-							const necessaryIndentation = this._getCurvyBracketsCount(attributeValue, i + 1) === 1 ? indentation : indentation + "\t";
+							const necessaryIndentation =
+								this._getCurvyBracketsCount(attributeValue, i + 1) === 1
+									? indentation
+									: indentation + "\t";
 							const formattedBinding = this._formatAttributeObject(evaluatedValue, necessaryIndentation);
 							formattedValue += formattedBinding;
 						}
@@ -174,7 +188,7 @@ export class XMLFormatter {
 
 		return formattedValue;
 	}
-	private static _charIsInString(index: number, attributeValue: string) {
+	private _charIsInString(index: number, attributeValue: string) {
 		let i = 0;
 		let quotesQuantity = 0;
 		while (i < index) {
@@ -185,7 +199,7 @@ export class XMLFormatter {
 		return quotesQuantity % 2 === 1;
 	}
 
-	private static _getCurvyBracketsCount(attributeValue: string, positionAt: number) {
+	private _getCurvyBracketsCount(attributeValue: string, positionAt: number) {
 		let curvedBracketsCount = 0;
 		let i = 0;
 		while (i < attributeValue.length && i < positionAt) {
@@ -199,7 +213,7 @@ export class XMLFormatter {
 		return curvedBracketsCount;
 	}
 
-	private static _getPositionOfObjectEnd(attributeValue: string, i: number) {
+	private _getPositionOfObjectEnd(attributeValue: string, i: number) {
 		let curvedBracketsCount = 1;
 		i++;
 		while (i < attributeValue.length && curvedBracketsCount !== 0) {
@@ -213,7 +227,7 @@ export class XMLFormatter {
 		return i;
 	}
 
-	private static _getPositionOfIndentationEnd(attributeValue: string, i: number) {
+	private _getPositionOfIndentationEnd(attributeValue: string, i: number) {
 		i++;
 		while (i < attributeValue.length && /\s/.test(attributeValue[i])) {
 			i++;
@@ -221,7 +235,7 @@ export class XMLFormatter {
 		return i;
 	}
 
-	private static _formatAttributeObject(anyObject: any, indentation: string) {
+	private _formatAttributeObject(anyObject: any, indentation: string) {
 		let formattedAttribute = "{\n";
 
 		const keys = Object.keys(anyObject);
@@ -231,9 +245,9 @@ export class XMLFormatter {
 			formattedAttribute += this._formatAttributeValuePart(value, indentation);
 			const isLastKey = keys.indexOf(key) === keys.length - 1;
 			if (!isLastKey) {
-				formattedAttribute += ","
+				formattedAttribute += ",";
 			}
-			formattedAttribute += "\n"
+			formattedAttribute += "\n";
 		});
 
 		formattedAttribute += `${indentation}}`;
@@ -241,10 +255,11 @@ export class XMLFormatter {
 		return formattedAttribute;
 	}
 
-	private static _formatAttributeValuePart(value: any, indentation: string) {
+	private _formatAttributeValuePart(value: any, indentation: string) {
 		let formattedAttribute = "";
 		if (Array.isArray(value)) {
-			const arrayString = "[" + value.map(value => `${this._formatAttributeValuePart(value, indentation)}`).join(", ") + "]";
+			const arrayString =
+				"[" + value.map(value => `${this._formatAttributeValuePart(value, indentation)}`).join(", ") + "]";
 			formattedAttribute += `${arrayString}`;
 		} else if (typeof value === "object") {
 			formattedAttribute += `${this._formatAttributeObject(value, indentation + "\t")}`;
@@ -258,17 +273,22 @@ export class XMLFormatter {
 		return formattedAttribute;
 	}
 
-	private static _modifyIndentationLevel(currentTag: ITag, indentationLevel: number, beforeTagGeneration: boolean) {
+	private _modifyIndentationLevel(currentTag: ITag, indentationLevel: number, beforeTagGeneration: boolean) {
 		if (beforeTagGeneration && currentTag.text.startsWith("</")) {
 			indentationLevel--;
-		} else if (!beforeTagGeneration && currentTag.text.startsWith("<") && !currentTag.text.endsWith("/>") && !currentTag.text.startsWith("</")) {
+		} else if (
+			!beforeTagGeneration &&
+			currentTag.text.startsWith("<") &&
+			!currentTag.text.endsWith("/>") &&
+			!currentTag.text.startsWith("</")
+		) {
 			indentationLevel++;
 		}
 
 		return indentationLevel;
 	}
 
-	private static _getIndentation(indentationLevel: number) {
+	private _getIndentation(indentationLevel: number) {
 		const indentationChar = "\t";
 		let indentation = "";
 
@@ -279,7 +299,7 @@ export class XMLFormatter {
 		return indentation;
 	}
 
-	private static _getTagName(tag: string) {
+	private _getTagName(tag: string) {
 		let i = 1; //first char is "<", that's why we start with second char
 		while (!tag[i].match(/(\s|>|\n)/) && i < tag.length) {
 			i++;
@@ -295,14 +315,14 @@ export class XMLFormatter {
 		return tag;
 	}
 
-	private static _getTagAttributes(tag: string) {
-		const tagAttributes = tag.match(/((?<=\s)(\w|:|\.)*(\s?)=(\s?)"(\s|.)*?")|((?<=\s)(\w|:|\.)*(\s?)=(\s?)'(\s|.)*?')/g) || [];
+	private _getTagAttributes(tag: string) {
+		const tagAttributes =
+			tag.match(/((?<=\s)(\w|:|\.)*(\s?)=(\s?)"(\s|.)*?")|((?<=\s)(\w|:|\.)*(\s?)=(\s?)'(\s|.)*?')/g) || [];
 
 		return tagAttributes;
 	}
 
-
-	private static _getAllTags(document: IXMLFile) {
+	private _getAllTags(document: IXMLFile) {
 		let i = 0;
 		const tags: ITag[] = [];
 		const allStringsAreClosed = this._getIfAllStringsAreClosed(document.content);
@@ -313,11 +333,9 @@ export class XMLFormatter {
 				const isDocType = possiblyDocType === "<!doctype";
 				const thisIsTagEnd =
 					document.content[i] === ">" &&
-					!XMLParser.getIfPositionIsInString(document, i) &&
-					(
-						XMLParser.getIfPositionIsNotInComments(document, i) ||
-						document.content.substring(i - 2, i + 1) === "-->"
-					);
+					!this._parser.xmlParser.getIfPositionIsInString(document, i) &&
+					(this._parser.xmlParser.getIfPositionIsNotInComments(document, i) ||
+						document.content.substring(i - 2, i + 1) === "-->");
 				if (thisIsTagEnd) {
 					const indexOfTagBegining = this._getTagBeginingIndex(document, i);
 					tags.push({
@@ -336,14 +354,17 @@ export class XMLFormatter {
 
 		return tags;
 	}
-	private static _processDocType(document: IXMLFile, i: number): ITag {
+	private _processDocType(document: IXMLFile, i: number): ITag {
 		const doctypeBeginIndex = i;
 		let doctypeEndIndex = i;
 
 		let tagOpeningCount = 0;
 		let tagClosingCount = 0;
 		while (doctypeEndIndex === doctypeBeginIndex && i < document.content.length) {
-			if (!XMLParser.getIfPositionIsInString(document, i) && XMLParser.getIfPositionIsNotInComments(document, i)) {
+			if (
+				!this._parser.xmlParser.getIfPositionIsInString(document, i) &&
+				this._parser.xmlParser.getIfPositionIsNotInComments(document, i)
+			) {
 				if (document.content[i] === "<") {
 					tagOpeningCount++;
 				} else if (document.content[i] === ">") {
@@ -363,7 +384,7 @@ export class XMLFormatter {
 		};
 	}
 
-	private static _getIfAllStringsAreClosed(document: string) {
+	private _getIfAllStringsAreClosed(document: string) {
 		let quotionMarkCount = 0;
 		let secondTypeQuotionMarkCount = 0;
 
@@ -381,15 +402,13 @@ export class XMLFormatter {
 		return quotionMarkCount % 2 === 0 && secondTypeQuotionMarkCount % 2 === 0;
 	}
 
-	private static _getTagBeginingIndex(document: IXMLFile, position: number) {
+	private _getTagBeginingIndex(document: IXMLFile, position: number) {
 		let i = position;
 		let shouldStop = i < 0;
 		let isThisTagBegining =
 			document.content[i] === "<" &&
-			(
-				XMLParser.getIfPositionIsNotInComments(document, i) ||
-				document.content.substring(i, i + 4) === "<!--"
-			);
+			(this._parser.xmlParser.getIfPositionIsNotInComments(document, i) ||
+				document.content.substring(i, i + 4) === "<!--");
 		shouldStop ||= isThisTagBegining;
 
 		while (!shouldStop) {
@@ -398,14 +417,11 @@ export class XMLFormatter {
 			shouldStop = i < 0;
 			isThisTagBegining =
 				document.content[i] === "<" &&
-				(
-					XMLParser.getIfPositionIsNotInComments(document, i) ||
-					document.content.substring(i, i + 4) === "<!--"
-				);
+				(this._parser.xmlParser.getIfPositionIsNotInComments(document, i) ||
+					document.content.substring(i, i + 4) === "<!--");
 			shouldStop ||= isThisTagBegining;
 		}
 
 		return i;
 	}
-
 }

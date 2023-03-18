@@ -1,18 +1,18 @@
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
 import * as vscode from "vscode";
-import { ReusableMethods } from "../../reuse/ReusableMethods";
-import { CodeGeneratorFactory } from "../../../templateinserters/codegenerationstrategies/CodeGeneratorFactory";
 import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
-import { UI5Plugin } from "../../../../UI5Plugin";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
-import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
+import { CodeGeneratorFactory } from "../../../templateinserters/codegenerationstrategies/CodeGeneratorFactory";
+import ParserBearer from "../../../ui5parser/ParserBearer";
+import { ReusableMethods } from "../../reuse/ReusableMethods";
 
 export enum InsertType {
 	Method = "Method",
 	Field = "Field"
 }
-export class MethodInserter {
-	static createInsertMethodCodeAction(
+export class MethodInserter extends ParserBearer {
+	createInsertMethodCodeAction(
 		className: string,
 		memberName: string,
 		params: string,
@@ -26,16 +26,16 @@ export class MethodInserter {
 		let insertMethodCodeAction: vscode.CodeAction | undefined;
 		let insertImport: string | undefined;
 		let insertImportOffset: number | undefined;
-		const classPath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(className);
+		const classPath = this._parser.fileReader.getClassFSPathFromClassName(className);
 		if (!classPath) {
 			return;
 		}
 
 		const classUri = vscode.Uri.file(classPath);
-		const UIClass = <AbstractCustomClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+		const UIClass = <AbstractCustomClass>this._parser.classFactory.getUIClass(className);
 		let insertContent = "";
 		if (type === InsertType.Method) {
-			if (UIClass instanceof CustomUIClass) {
+			if (UIClass instanceof CustomJSClass) {
 				insertContent = CodeGeneratorFactory.createStrategy().generateFunction(
 					memberName,
 					params,
@@ -97,10 +97,10 @@ export class MethodInserter {
 		return insertMethodCodeAction;
 	}
 
-	private static _getInsertContentFromIdentifierName(name: string) {
+	private _getInsertContentFromIdentifierName(name: string) {
 		let content = "";
 
-		const type = CustomUIClass.getTypeFromHungarianNotation(name)?.toLowerCase();
+		const type = CustomJSClass.getTypeFromHungarianNotation(name)?.toLowerCase();
 		switch (type) {
 			case "object":
 				content = "{}";
@@ -137,13 +137,13 @@ export class MethodInserter {
 		return content;
 	}
 
-	private static _getInsertTextAndOffset(insertContent: string, className: string) {
-		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+	private _getInsertTextAndOffset(insertContent: string, className: string) {
+		const UIClass = this._parser.classFactory.getUIClass(className);
 		let offset = 0;
 		const classIsCurrentlyOpened = this._checkIfClassIsCurrentlyOpened(className);
 
 		let insertText = insertContent;
-		if (UIClass instanceof CustomUIClass) {
+		if (UIClass instanceof CustomJSClass) {
 			insertText = `\n\t\t${insertText}`;
 			const thereAreNoMethods = UIClass.acornClassBody.properties.length === 0;
 			if (classIsCurrentlyOpened && vscode.window.activeTextEditor) {
@@ -194,14 +194,12 @@ export class MethodInserter {
 		return { insertText, offset };
 	}
 
-	private static _checkIfClassIsCurrentlyOpened(className: string) {
+	private _checkIfClassIsCurrentlyOpened(className: string) {
 		let classIsCurrentlyOpened = false;
 
 		const currentDocument = vscode.window.activeTextEditor?.document;
 		if (currentDocument && (currentDocument.fileName.endsWith(".js") || currentDocument.fileName.endsWith(".ts"))) {
-			const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(
-				currentDocument.fileName
-			);
+			const currentClassName = this._parser.fileReader.getClassNameFromPath(currentDocument.fileName);
 			if (currentClassName) {
 				classIsCurrentlyOpened = className === currentClassName;
 			}

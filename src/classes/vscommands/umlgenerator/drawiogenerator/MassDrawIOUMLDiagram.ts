@@ -1,13 +1,13 @@
-import { Header } from "./drawiouml/Header";
-import { Footer } from "./drawiouml/Footer";
-import { DrawIOUMLDiagram } from "./DrawIOUMLDiagram";
+import { UI5JSParser } from "ui5plugin-parser";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
-import { DependencyLine } from "./drawiouml/lines/DependencyLine";
-import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
-import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UI5Plugin } from "../../../../UI5Plugin";
+import { Footer } from "./drawiouml/Footer";
+import { Header } from "./drawiouml/Header";
+import { IUMLGenerator } from "./drawiouml/interfaces/IUMLGenerator";
+import { DependencyLine } from "./drawiouml/lines/DependencyLine";
+import { ImplementationLine } from "./drawiouml/lines/ImplementationLIne";
+import { DrawIOUMLDiagram } from "./DrawIOUMLDiagram";
 
 interface IUsedClassMap {
 	[key: string]: {
@@ -26,58 +26,67 @@ interface IUsageMap {
 }
 export class MassDrawIOUMLDiagram extends DiagramGenerator {
 	getFileExtension() {
-		return ".drawio"
+		return ".drawio";
 	}
 	generate(wsFolder: vscode.WorkspaceFolder): Promise<string> {
 		return new Promise(resolve => {
-
 			const header = new Header();
 			const footer = new Footer();
 			// let xAxis = 70;
 
-			vscode.window.withProgress({
-				location: vscode.ProgressLocation.Notification,
-				title: "Generating UML",
-				cancellable: false
-			}, async progress => {
-				const classNames = UI5Plugin.getInstance().parser.fileReader.getAllJSClassNamesFromProject({ fsPath: wsFolder.uri.fsPath });
-				const classQuantity = classNames.length;
-
-				const UMLDiagrams: DrawIOUMLDiagram[] = [];
-				const promises = classNames.map(className => {
-					return new Promise<void>(resolve => {
-						setTimeout(() => {
-							try {
-								const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
-								const UMLDiagram = new DrawIOUMLDiagram(UIClass, header);
-								UMLDiagrams.push(UMLDiagram);
-								// UMLDiagram.xAxis = xAxis;
-
-								// xAxis += UMLDiagram.width + 10;
-
-								progress.report({ message: `${className} generated`, increment: Math.round(100 / classQuantity) });
-							} catch (error) {
-								console.log(`Failed to generate UML Diagram for ${className}`);
-							}
-							resolve();
-						}, 0);
+			vscode.window.withProgress(
+				{
+					location: vscode.ProgressLocation.Notification,
+					title: "Generating UML",
+					cancellable: false
+				},
+				async progress => {
+					const classNames = this._parser.fileReader.getAllJSClassNamesFromProject({
+						fsPath: wsFolder.uri.fsPath
 					});
-				});
-				await Promise.all(promises);
+					const classQuantity = classNames.length;
 
-				MassDrawIOUMLDiagram._calculatePositionsFor(UMLDiagrams);
+					const UMLDiagrams: DrawIOUMLDiagram[] = [];
+					const promises = classNames.map(className => {
+						return new Promise<void>(resolve => {
+							setTimeout(() => {
+								try {
+									const UIClass = this._parser.classFactory.getUIClass(className);
+									if (UIClass instanceof CustomJSClass && this._parser instanceof UI5JSParser) {
+										const UMLDiagram = new DrawIOUMLDiagram(UIClass, header, this._parser);
+										UMLDiagrams.push(UMLDiagram);
+									}
+									// UMLDiagram.xAxis = xAxis;
 
-				const body = UMLDiagrams.reduce((accumulator, UMLDiagram) => {
-					accumulator += UMLDiagram.generateBody();
+									// xAxis += UMLDiagram.width + 10;
 
-					return accumulator;
-				}, "");
+									progress.report({
+										message: `${className} generated`,
+										increment: Math.round(100 / classQuantity)
+									});
+								} catch (error) {
+									console.log(`Failed to generate UML Diagram for ${className}`);
+								}
+								resolve();
+							}, 0);
+						});
+					});
+					await Promise.all(promises);
 
-				const lines = MassDrawIOUMLDiagram._generateLines(UMLDiagrams, header);
+					MassDrawIOUMLDiagram._calculatePositionsFor(UMLDiagrams);
 
-				const UMLDiagram = header.generateXML() + lines + body + footer.generateXML();
-				resolve(UMLDiagram);
-			});
+					const body = UMLDiagrams.reduce((accumulator, UMLDiagram) => {
+						accumulator += UMLDiagram.generateBody();
+
+						return accumulator;
+					}, "");
+
+					const lines = MassDrawIOUMLDiagram._generateLines(UMLDiagrams, header);
+
+					const UMLDiagram = header.generateXML() + lines + body + footer.generateXML();
+					resolve(UMLDiagram);
+				}
+			);
 		});
 	}
 
@@ -106,16 +115,25 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 			if (biggestTreeDiagram) {
 				const usageMapEntryForBiggestTreeDiagram = usageMap[biggestTreeDiagram.UIClass.className];
 				if (previousUMLDiagramRoots.length > 0) {
-					const previousDiagramLeavesCount = previousUMLDiagramRoots.reduce((accumulator, previousUMLDiagramRoot) => {
-						accumulator += this._getLeavesCount(usageMap, previousUMLDiagramRoot);
-						return accumulator;
-					}, 0);
+					const previousDiagramLeavesCount = previousUMLDiagramRoots.reduce(
+						(accumulator, previousUMLDiagramRoot) => {
+							accumulator += this._getLeavesCount(usageMap, previousUMLDiagramRoot);
+							return accumulator;
+						},
+						0
+					);
 					usageMapEntryForBiggestTreeDiagram.column = previousDiagramLeavesCount + 1;
 				} else {
 					usageMapEntryForBiggestTreeDiagram.column = 1;
 				}
 
-				this._buildInheritanceTree(usageMap, biggestTreeDiagram, usedClassMap, biggestTreeDiagram, previousUMLDiagramRoots);
+				this._buildInheritanceTree(
+					usageMap,
+					biggestTreeDiagram,
+					usedClassMap,
+					biggestTreeDiagram,
+					previousUMLDiagramRoots
+				);
 				previousUMLDiagramRoots.push(biggestTreeDiagram);
 			}
 
@@ -128,7 +146,13 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 		}
 	}
 
-	private static _buildInheritanceTree(usageMap: IUsageMap, rootUMLDiagram: DrawIOUMLDiagram, usedClassMap: IUsedClassMap, UMLDiagram: DrawIOUMLDiagram = rootUMLDiagram, previousRootDiagrams: DrawIOUMLDiagram[] = []) {
+	private static _buildInheritanceTree(
+		usageMap: IUsageMap,
+		rootUMLDiagram: DrawIOUMLDiagram,
+		usedClassMap: IUsedClassMap,
+		UMLDiagram: DrawIOUMLDiagram = rootUMLDiagram,
+		previousRootDiagrams: DrawIOUMLDiagram[] = []
+	) {
 		usedClassMap[UMLDiagram.UIClass.className].isUsed = true;
 
 		this._setColumnsForTree(rootUMLDiagram, usageMap);
@@ -141,7 +165,11 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 		});
 	}
 
-	private static _getAllDiagramsInUsageMap(usageMap: IUsageMap, UMLDiagram: DrawIOUMLDiagram, diagrams: DrawIOUMLDiagram[] = []) {
+	private static _getAllDiagramsInUsageMap(
+		usageMap: IUsageMap,
+		UMLDiagram: DrawIOUMLDiagram,
+		diagrams: DrawIOUMLDiagram[] = []
+	) {
 		diagrams.push(UMLDiagram);
 		const usageMapEntry = usageMap[UMLDiagram.UIClass.className];
 
@@ -152,7 +180,12 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 		return diagrams;
 	}
 
-	private static _getDiagramXAxis(usageMap: IUsageMap, UMLDiagram: DrawIOUMLDiagram, rootUMLDiagram: DrawIOUMLDiagram, previousRootDiagrams: DrawIOUMLDiagram[]) {
+	private static _getDiagramXAxis(
+		usageMap: IUsageMap,
+		UMLDiagram: DrawIOUMLDiagram,
+		rootUMLDiagram: DrawIOUMLDiagram,
+		previousRootDiagrams: DrawIOUMLDiagram[]
+	) {
 		const previousDiagramColumnCount = previousRootDiagrams.reduce((accumulator, diagram) => {
 			accumulator += this._getLeavesCount(usageMap, diagram);
 			return accumulator;
@@ -167,11 +200,13 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 
 		let widthTakenBeforeThisRootDiagram = 0;
 		if (previousRootDiagrams.length > 0) {
-			widthTakenBeforeThisRootDiagram = previousRootDiagrams.map(diagram => {
-				const columnWidths = this._getColumnWidths(usageMap, diagram);
+			widthTakenBeforeThisRootDiagram = previousRootDiagrams
+				.map(diagram => {
+					const columnWidths = this._getColumnWidths(usageMap, diagram);
 
-				return columnWidths.reduce((accum, width) => accum + width, 0);
-			}).reduce((accum, width) => accum + width, 0);
+					return columnWidths.reduce((accum, width) => accum + width, 0);
+				})
+				.reduce((accum, width) => accum + width, 0);
 		}
 
 		return widthTakenBeforeThisRootDiagram + widthSum;
@@ -183,7 +218,9 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 
 		for (let i = 1; i <= columnsCount; i++) {
 			const column = i;
-			const currentColumnDiagrams = Object.keys(usageMap).map(key => usageMap[key]).filter(usageEntry => usageEntry.column === column);
+			const currentColumnDiagrams = Object.keys(usageMap)
+				.map(key => usageMap[key])
+				.filter(usageEntry => usageEntry.column === column);
 
 			let maxDiagramWidth = 0;
 			currentColumnDiagrams.forEach(usageMapEntry => {
@@ -198,13 +235,19 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 		return columnWidths;
 	}
 
-	private static _getDiagramYAxis(usageMap: IUsageMap, UMLDiagram: DrawIOUMLDiagram, rootUMLDiagram: DrawIOUMLDiagram) {
+	private static _getDiagramYAxis(
+		usageMap: IUsageMap,
+		UMLDiagram: DrawIOUMLDiagram,
+		rootUMLDiagram: DrawIOUMLDiagram
+	) {
 		const rowsCount = this._getTreeHeight(usageMap, rootUMLDiagram);
 		const rowHeights: number[] = [];
 
 		for (let i = 1; i <= rowsCount; i++) {
 			const row = i;
-			const currentRowDiagrams = Object.keys(usageMap).map(key => usageMap[key]).filter(usageEntry => usageEntry.level === row);
+			const currentRowDiagrams = Object.keys(usageMap)
+				.map(key => usageMap[key])
+				.filter(usageEntry => usageEntry.level === row);
 
 			let maxHeight = 0;
 			currentRowDiagrams.forEach(usageMapEntry => {
@@ -271,7 +314,7 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 		//add usedBy
 		UMLDiagrams.forEach(UMLDiagram => {
 			const UIClass = UMLDiagram.UIClass;
-			if (UIClass instanceof CustomUIClass) {
+			if (UIClass instanceof CustomJSClass) {
 				if (UIClass.parentClassNameDotNotation) {
 					usageMap[UIClass.parentClassNameDotNotation]?.usedBy.push(UMLDiagram);
 				}
@@ -336,15 +379,23 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 		let lines = "";
 		UMLDiagrams.forEach(UMLDiagram => {
 			const UIClass = UMLDiagram.UIClass;
-			if (UIClass instanceof CustomUIClass) {
+			if (UIClass instanceof CustomJSClass) {
 				UIClass.UIDefine.forEach(define => {
-					const accordingUMLDiagram = UMLDiagrams.find(diagram => diagram.UIClass.className === define.classNameDotNotation);
+					const accordingUMLDiagram = UMLDiagrams.find(
+						diagram => diagram.UIClass.className === define.classNameDotNotation
+					);
 					if (accordingUMLDiagram) {
 						let line: IUMLGenerator;
 						if (accordingUMLDiagram.UIClass.className === UMLDiagram.UIClass.parentClassNameDotNotation) {
-							line = new ImplementationLine(header, { source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead });
+							line = new ImplementationLine(header, {
+								source: UMLDiagram.classHead,
+								target: accordingUMLDiagram.classHead
+							});
 						} else {
-							line = new DependencyLine(header, { source: UMLDiagram.classHead, target: accordingUMLDiagram.classHead });
+							line = new DependencyLine(header, {
+								source: UMLDiagram.classHead,
+								target: accordingUMLDiagram.classHead
+							});
 						}
 						lines += line.generateXML();
 					}

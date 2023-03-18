@@ -1,15 +1,15 @@
-import { IUMLGenerator } from "./interfaces/IUMLGenerator";
+import { ICustomClassMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
 import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 import { ClassHead } from "./ClassHead";
 import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
-import { IUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { IUMLGenerator } from "./interfaces/IUMLGenerator";
 
 export class Method implements IUMLGenerator, ITextLengthGettable {
 	id: number;
-	UIMethod: IUIMethod;
+	UIMethod: ICustomClassMethod;
 	parent: ClassHead;
 	index: number;
-	constructor(UIMethod: IUIMethod, parent: ClassHead, index: number) {
+	constructor(UIMethod: ICustomClassMethod, parent: ClassHead, index: number) {
 		this.id = DrawIOUMLDiagram.getUniqueId();
 		this.UIMethod = UIMethod;
 		this.parent = parent;

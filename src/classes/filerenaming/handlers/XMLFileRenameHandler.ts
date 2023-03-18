@@ -1,8 +1,7 @@
-import * as vscode from "vscode";
-import { FileRenameHandler, IFileChanges } from "./abstraction/FileRenameHandler";
 import * as fs from "fs";
+import * as vscode from "vscode";
 import { DiagnosticsRegistrator } from "../../registrators/DiagnosticsRegistrator";
-import { UI5Plugin } from "../../../UI5Plugin";
+import { FileRenameHandler, IFileChanges } from "./abstraction/FileRenameHandler";
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -20,33 +19,39 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 		// if (newFile) {
 		// 	newFile.changed = true;
 		// }
-		const oldName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(oldUri.fsPath);
-		const newName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(newUri.fsPath);
+		const oldName = this._parser.fileReader.getClassNameFromPath(oldUri.fsPath);
+		const newName = this._parser.fileReader.getClassNameFromPath(newUri.fsPath);
 		if (oldName && newName) {
 			if (oldUri.fsPath.endsWith(".fragment.xml")) {
-				UI5Plugin.getInstance().parser.fileReader.replaceFragmentNames(oldName, newName);
+				this._parser.fileReader.replaceFragmentNames(oldName, newName);
 			} else if (oldUri.fsPath.endsWith(".view.xml")) {
-				UI5Plugin.getInstance().parser.fileReader.replaceViewNames(oldName, newName);
+				this._parser.fileReader.replaceViewNames(oldName, newName);
 			}
 		}
 
 		return allFiles;
 	}
 
-
 	private _replaceFragmentNames(oldUri: vscode.Uri, newUri: vscode.Uri, allFiles: IFileChanges[]) {
-		const textToReplaceFromDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(oldUri.fsPath)?.replace(".fragment.xml", "");
-		const textToReplaceToDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(newUri.fsPath)?.replace(".fragment.xml", "");
+		const textToReplaceFromDotNotation = this._parser.fileReader
+			.getClassNameFromPath(oldUri.fsPath)
+			?.replace(".fragment.xml", "");
+		const textToReplaceToDotNotation = this._parser.fileReader
+			.getClassNameFromPath(newUri.fsPath)
+			?.replace(".fragment.xml", "");
 
 		if (textToReplaceFromDotNotation && textToReplaceToDotNotation) {
 			this.replaceAllOccurrencesInFiles(textToReplaceFromDotNotation, textToReplaceToDotNotation, allFiles);
 		}
 	}
 
-
 	private _replaceViewNames(oldUri: vscode.Uri, newUri: vscode.Uri, allFiles: IFileChanges[]) {
-		const textToReplaceFromDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(oldUri.fsPath)?.replace(".view.xml", "");
-		const textToReplaceToDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(newUri.fsPath)?.replace(".view.xml", "");
+		const textToReplaceFromDotNotation = this._parser.fileReader
+			.getClassNameFromPath(oldUri.fsPath)
+			?.replace(".view.xml", "");
+		const textToReplaceToDotNotation = this._parser.fileReader
+			.getClassNameFromPath(newUri.fsPath)
+			?.replace(".view.xml", "");
 
 		if (textToReplaceFromDotNotation && textToReplaceToDotNotation) {
 			this._renameController(textToReplaceToDotNotation, allFiles);
@@ -57,17 +62,17 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 
 	private _renameController(newViewName: string, allFiles: IFileChanges[]) {
 		const viewNamePart = newViewName.split(".")[newViewName.split(".").length - 1];
-		const viewPath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(newViewName, false, false, true);
+		const viewPath = this._parser.fileReader.convertClassNameToFSPath(newViewName, false, false, true);
 		if (viewPath) {
 			const viewText = fs.readFileSync(viewPath, "utf8");
-			const controllerName = UI5Plugin.getInstance().parser.fileReader.getControllerNameFromView(viewText);
+			const controllerName = this._parser.fileReader.getControllerNameFromView(viewText);
 			if (controllerName) {
-				const controllerPath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(controllerName, true);
+				const controllerPath = this._parser.fileReader.convertClassNameToFSPath(controllerName, true);
 				if (controllerPath) {
 					const newControllerNameParts = controllerName.split(".");
 					newControllerNameParts[newControllerNameParts.length - 1] = viewNamePart;
 					const newControllerName = newControllerNameParts.join(".");
-					const newControllerPath = UI5Plugin.getInstance().parser.fileReader.convertClassNameToFSPath(newControllerName, true);
+					const newControllerPath = this._parser.fileReader.convertClassNameToFSPath(newControllerName, true);
 					if (newControllerPath && controllerPath !== newControllerPath) {
 						const controllerFile = allFiles.find(file => file.fileData.fsPath === controllerPath);
 						if (controllerFile) {
@@ -82,7 +87,11 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 		}
 	}
 
-	private _replaceViewNamesInManifests(textToReplaceFromDotNotation: string, textToReplaceToDotNotation: string, allFiles: IFileChanges[]) {
+	private _replaceViewNamesInManifests(
+		textToReplaceFromDotNotation: string,
+		textToReplaceToDotNotation: string,
+		allFiles: IFileChanges[]
+	) {
 		const manifests = allFiles.filter(file => file.fileData.fsPath.endsWith("manifest.json"));
 
 		manifests.forEach(manifest => {
@@ -91,11 +100,18 @@ export class XMLFileRenameHandler extends FileRenameHandler {
 				const viewPath = content["sap.ui5"]?.routing?.config?.viewPath;
 
 				if (viewPath && textToReplaceFromDotNotation.startsWith(viewPath)) {
-					const oldPath = `"${textToReplaceFromDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
-					const newPath = `"${textToReplaceToDotNotation.replace(viewPath, "").replace(".", "")}"`/*removes first dot*/;
+					const oldPath = `"${textToReplaceFromDotNotation
+						.replace(viewPath, "")
+						.replace(".", "")}"`; /*removes first dot*/
+					const newPath = `"${textToReplaceToDotNotation
+						.replace(viewPath, "")
+						.replace(".", "")}"`; /*removes first dot*/
 
 					if (JSON.stringify(content).indexOf(oldPath) > -1) {
-						manifest.fileData.content = manifest.fileData.content.replace(new RegExp(`${escapeRegExp(oldPath)}`, "g"), newPath);
+						manifest.fileData.content = manifest.fileData.content.replace(
+							new RegExp(`${escapeRegExp(oldPath)}`, "g"),
+							newPath
+						);
 						manifest.changed = true;
 					}
 				}

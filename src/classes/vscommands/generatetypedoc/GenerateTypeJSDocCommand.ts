@@ -1,8 +1,8 @@
+import * as vscode from "vscode";
 import { JSTypeDocAdapter } from "../../utils/xmlmetadata/JSTypeDocAdapter";
 import { XMLMetadataParser } from "../../utils/xmlmetadata/XMLMetadataParser";
 import { XMLSourcePrompt } from "../../utils/xmlmetadata/XMLSourcePrompt";
 import { IVSCodeCommand } from "../IVSCodeCommand";
-import * as vscode from "vscode";
 
 export class GenerateTypeJSDocCommand implements IVSCodeCommand {
 	async execute() {
@@ -22,5 +22,4 @@ export class GenerateTypeJSDocCommand implements IVSCodeCommand {
 			vscode.window.showErrorMessage(`Couldn't parse XML: ${error.message}`);
 		}
 	}
-
 }

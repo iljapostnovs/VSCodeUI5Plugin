@@ -1,4 +1,4 @@
-import { AbstractUI5Parser, UI5Parser } from "ui5plugin-parser";
+import ParserPool from "ui5plugin-parser/dist/parser/pool/ParserPool";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 
@@ -16,7 +16,10 @@ export class ClearCacheCommand {
 				event.affectsConfiguration("ui5.plugin.xmlDiagnostics") ||
 				event.affectsConfiguration("ui5.plugin.excludeFolderPattern");
 
-			if (event.affectsConfiguration("ui5.plugin.libsToLoad") || event.affectsConfiguration("ui5.plugin.dataSource")) {
+			if (
+				event.affectsConfiguration("ui5.plugin.libsToLoad") ||
+				event.affectsConfiguration("ui5.plugin.dataSource")
+			) {
 				this.clearCache();
 			} else if (isAnyConfigurationAffected) {
 				ClearCacheCommand.reloadWindow();
@@ -27,7 +30,7 @@ export class ClearCacheCommand {
 	}
 
 	static clearCache() {
-		AbstractUI5Parser.getInstance(UI5Parser).fileReader.clearCache();
+		ParserPool.clearCache();
 
 		ClearCacheCommand.reloadWindow();
 	}
@@ -35,7 +38,10 @@ export class ClearCacheCommand {
 	public static reloadWindow() {
 		const action = "Reload";
 		vscode.window
-			.showInformationMessage("Reload window in order for change in extension ui5.plugin configuration to take effect.", action)
+			.showInformationMessage(
+				"Reload window in order for change in extension ui5.plugin configuration to take effect.",
+				action
+			)
 			.then(selectedAction => {
 				if (selectedAction === action) {
 					vscode.commands.executeCommand("workbench.action.reloadWindow");

@@ -1,9 +1,8 @@
 import { SAPNode } from "ui5plugin-parser/dist/classes/librarydata/SAPNode";
-import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
-import { AbstractUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { StandardUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/StandardUIClass";
-import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
+import { AbstractJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
+import { StandardUIClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/StandardUIClass";
 import * as vscode from "vscode";
+import ParserBearer from "../../../../ui5parser/ParserBearer";
 import { IAggregationGenerator } from "../../codegenerators/aggregation/interfaces/IAggregationGenerator";
 import { SAPClassAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
 import { SAPNodeAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
@@ -14,21 +13,19 @@ import { SAPNodePropertyGenerationStrategy } from "../../codegenerators/property
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
-export class StandardXMLCompletionItemFactory implements ICompletionItemFactory {
-	static XMLStandardLibCompletionItems: CustomCompletionItem[] = [];
+export class StandardXMLCompletionItemFactory extends ParserBearer implements ICompletionItemFactory {
+	XMLStandardLibCompletionItems: CustomCompletionItem[] = [];
 	async createCompletionItems() {
 		return this.generateAggregationPropertyCompletionItems();
 	}
 
-	private readonly _nodeDAO = new SAPNodeDAO();
-
 	async preloadCompletionItems() {
-		StandardXMLCompletionItemFactory.XMLStandardLibCompletionItems = await this.generateAggregationPropertyCompletionItems();
+		this.XMLStandardLibCompletionItems = await this.generateAggregationPropertyCompletionItems();
 	}
 
 	async generateAggregationPropertyCompletionItems() {
 		let completionItems: CustomCompletionItem[] = [];
-		const SAPNodes = this._nodeDAO.getAllNodesSync();
+		const SAPNodes = this._parser.nodeDAO.getAllNodesSync();
 
 		// console.time("Generating completion items");
 		for (const node of SAPNodes) {
@@ -47,7 +44,11 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 			}
 		}
 
-		if (node.getKind() === "class" && !node.getIsDeprecated() && (node.node.visibility === "public" || node.node.visibility === "protected")) {
+		if (
+			node.getKind() === "class" &&
+			!node.getIsDeprecated() &&
+			(node.node.visibility === "public" || node.node.visibility === "protected")
+		) {
 			const metadata = node.getMetadata();
 			const stereotype = metadata.getUI5Metadata()?.stereotype;
 
@@ -69,7 +70,7 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
-		mardownString.appendMarkdown(URLBuilder.getInstance().getMarkupUrlForClassApi(node));
+		mardownString.appendMarkdown(this._parser.urlBuilder.getMarkupUrlForClassApi(node));
 		mardownString.appendMarkdown(StandardUIClass.removeTags(metadata.description));
 
 		return this._generateXMLClassCompletionItemUsing({
@@ -80,7 +81,7 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 		});
 	}
 
-	public generateXMLClassCompletionItemFromUIClass(UIClass: AbstractUIClass, classPrefix = "") {
+	public generateXMLClassCompletionItemFromUIClass(UIClass: AbstractJSClass, classPrefix = "") {
 		return this._generateXMLClassCompletionItemUsing({
 			markdown: new vscode.MarkdownString("Custom class"),
 			insertText: this.generateClassInsertTextFromSAPClass(UIClass, classPrefix),
@@ -89,7 +90,12 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 		});
 	}
 
-	private _generateXMLClassCompletionItemUsing(data: { className: string, insertText: string, detail: string, markdown: vscode.MarkdownString }) {
+	private _generateXMLClassCompletionItemUsing(data: {
+		className: string;
+		insertText: string;
+		detail: string;
+		markdown: vscode.MarkdownString;
+	}) {
 		const className = data.className.split(".")[data.className.split(".").length - 1];
 		const completionItem: CustomCompletionItem = new CustomCompletionItem(className);
 		completionItem.kind = vscode.CompletionItemKind.Class;
@@ -103,25 +109,45 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 	}
 
 	public generateClassInsertTextFromSAPNode(node: SAPNode, classPrefix: string, prefixBeforeClassName = "") {
-		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(GeneratorFactory.language.xml);
-		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(GeneratorFactory.language.xml);
+		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(
+			GeneratorFactory.language.xml
+		);
+		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(
+			GeneratorFactory.language.xml
+		);
 
-		const propertyGeneratorStrategy = new SAPNodePropertyGenerationStrategy(node);
-		const aggregationGeneratorStrategy = new SAPNodeAggregationGetterStrategy(node);
+		const propertyGeneratorStrategy = new SAPNodePropertyGenerationStrategy(this._parser, node);
+		const aggregationGeneratorStrategy = new SAPNodeAggregationGetterStrategy(this._parser, node);
 		const properties: string = propertyGenerator.generateProperties(propertyGeneratorStrategy);
-		const aggregations: string = aggregationGenerator.generateAggregations(aggregationGeneratorStrategy, classPrefix);
+		const aggregations: string = aggregationGenerator.generateAggregations(
+			aggregationGeneratorStrategy,
+			classPrefix
+		);
 
-		return this._generateInsertStringFrom(node.getDisplayName(), properties, aggregations, classPrefix, prefixBeforeClassName);
+		return this._generateInsertStringFrom(
+			node.getDisplayName(),
+			properties,
+			aggregations,
+			classPrefix,
+			prefixBeforeClassName
+		);
 	}
 
-	public generateClassInsertTextFromSAPClass(UIClass: AbstractUIClass, classPrefix: string) {
-		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(GeneratorFactory.language.xml);
-		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(GeneratorFactory.language.xml);
+	public generateClassInsertTextFromSAPClass(UIClass: AbstractJSClass, classPrefix: string) {
+		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(
+			GeneratorFactory.language.xml
+		);
+		const aggregationGenerator: IAggregationGenerator = GeneratorFactory.getAggregationGenerator(
+			GeneratorFactory.language.xml
+		);
 
-		const propertyGeneratorStrategy = new SAPClassPropertyGetterStrategy(UIClass);
-		const aggregationGeneratorStrategy = new SAPClassAggregationGetterStrategy(UIClass);
+		const propertyGeneratorStrategy = new SAPClassPropertyGetterStrategy(this._parser, UIClass);
+		const aggregationGeneratorStrategy = new SAPClassAggregationGetterStrategy(this._parser, UIClass);
 		const properties: string = propertyGenerator.generateProperties(propertyGeneratorStrategy);
-		const aggregations: string = aggregationGenerator.generateAggregations(aggregationGeneratorStrategy, classPrefix);
+		const aggregations: string = aggregationGenerator.generateAggregations(
+			aggregationGeneratorStrategy,
+			classPrefix
+		);
 
 		let className = UIClass.className;
 		const classNameParts = className.split(".");
@@ -130,7 +156,13 @@ export class StandardXMLCompletionItemFactory implements ICompletionItemFactory 
 		return this._generateInsertStringFrom(className, properties, aggregations, classPrefix);
 	}
 
-	private _generateInsertStringFrom(className: string, properties: string, aggregations: string, classPrefix: string, prefixBeforeClassName = "") {
+	private _generateInsertStringFrom(
+		className: string,
+		properties: string,
+		aggregations: string,
+		classPrefix: string,
+		prefixBeforeClassName = ""
+	) {
 		let insertText = `${prefixBeforeClassName}${className}\n`;
 
 		const shouldAttributesBeAdded = vscode.workspace.getConfiguration("ui5.plugin").get("addTagAttributes");

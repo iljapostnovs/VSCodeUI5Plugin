@@ -1,34 +1,37 @@
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../UI5Plugin";
 import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
+import ParserBearer from "../ui5parser/ParserBearer";
 import { VSCodeFileReader } from "../utils/VSCodeFileReader";
 import { PascalCaseStrategy } from "./i18ncommand/strategies/PascalCaseStrategy";
-export class SAPUIDefineCommand {
-	static insertUIDefine() {
+export class SAPUIDefineCommand extends ParserBearer {
+	insertUIDefine() {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
 			const document = editor.document;
-			const currentClassName = VSCodeFileReader.getClassNameOfTheCurrentDocument();
+			const currentClassName = new VSCodeFileReader(this._parser).getClassNameOfTheCurrentDocument();
 
 			if (currentClassName) {
-				UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
-				const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName);
+				this._parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
+				const UIClass = <CustomJSClass>this._parser.classFactory.getUIClass(currentClassName);
 				if (UIClass.fileContent) {
 					const mainFunction = UIClass.fileContent?.body[0]?.expression;
-					const definePaths: string[] = mainFunction?.arguments[0]?.elements?.map((element: any) => element.value);
+					const definePaths: string[] = mainFunction?.arguments[0]?.elements?.map(
+						(element: any) => element.value
+					);
 					const defineParams: any[] = mainFunction?.arguments[1]?.params;
 
 					if (definePaths && definePaths.length > 0) {
-
 						let deleteIndexStart: any;
 						let deleteIndexEnd: any;
 						let insertIndexStart: any;
 						let spaceAtTheBegining = "";
 
 						if (defineParams.length === 0) {
-							insertIndexStart = SAPUIDefineCommand.getIndexOfParenthesesBegin(mainFunction?.arguments[1].start);
+							insertIndexStart = SAPUIDefineCommand.getIndexOfParenthesesBegin(
+								mainFunction?.arguments[1].start
+							);
 							spaceAtTheBegining = "\n\t";
 						} else {
 							deleteIndexStart = defineParams[0].start;
@@ -53,7 +56,12 @@ export class SAPUIDefineCommand {
 						editor.edit(editBuilder => {
 							if (editor) {
 								if (deleteIndexStart && deleteIndexEnd) {
-									editBuilder.delete(new vscode.Range(document.positionAt(deleteIndexStart), document.positionAt(deleteIndexEnd)));
+									editBuilder.delete(
+										new vscode.Range(
+											document.positionAt(deleteIndexStart),
+											document.positionAt(deleteIndexEnd)
+										)
+									);
 								}
 								if (insertIndexStart) {
 									editBuilder.insert(document.positionAt(insertIndexStart), defineStringToInsert);

@@ -1,11 +1,12 @@
-import * as vscode from "vscode";
-import { ERDiagramGenerator } from "./plantumlgenerator/ERDiagramGenerator";
 import * as fs from "fs";
 import * as path from "path";
+import * as vscode from "vscode";
+import ParserBearer from "../../ui5parser/ParserBearer";
+import { ERDiagramGenerator } from "./plantumlgenerator/ERDiagramGenerator";
 const fileSeparator = path.sep;
-export class GenerateERDiagramCommand {
-	static async generateERDiagram() {
-		const generator = new ERDiagramGenerator();
+export class GenerateERDiagramCommand extends ParserBearer {
+	async generateERDiagram() {
+		const generator = new ERDiagramGenerator(this._parser);
 		const diagram = await generator.generate();
 		const document = vscode.window.activeTextEditor?.document;
 		const workspace = document && vscode.workspace.getWorkspaceFolder(document.uri);
@@ -17,7 +18,7 @@ export class GenerateERDiagramCommand {
 			const uri = vscode.Uri.file(path);
 			const document = await vscode.workspace.openTextDocument(uri);
 			vscode.window.showTextDocument(document);
-			vscode.window.showInformationMessage("ER Diagram generated successfully")
+			vscode.window.showInformationMessage("ER Diagram generated successfully");
 		}
 	}
 }

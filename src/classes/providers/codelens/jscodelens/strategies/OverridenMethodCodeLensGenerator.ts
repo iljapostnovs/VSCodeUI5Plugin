@@ -1,19 +1,18 @@
-import { IUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { ICustomClassUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
+import { IUIMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
+import { ICustomClassJSMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../../../UI5Plugin";
 import { VSCodeTextDocumentTransformer } from "../../../../utils/VSCodeTextDocumentTransformer";
 import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 
 export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {
 	getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
 		let codeLens: vscode.CodeLens[] = [];
-		const UIClass = VSCodeTextDocumentTransformer.toCustomUIClass(document);
+		const UIClass = new VSCodeTextDocumentTransformer(this._parser).toCustomUIClass(document);
 		if (UIClass?.parentClassNameDotNotation) {
 			const rootMethods = UIClass.methods;
-			const overriddenMethods: ICustomClassUIMethod[] = [];
+			const overriddenMethods: ICustomClassJSMethod[] = [];
 			const parentMethods: IUIMethod[] = UIClass.parentClassNameDotNotation
-				? UI5Plugin.getInstance().parser.classFactory.getClassMethods(UIClass.parentClassNameDotNotation, true)
+				? this._parser.classFactory.getClassMethods(UIClass.parentClassNameDotNotation, true)
 				: [];
 
 			rootMethods.forEach(method => {
@@ -28,7 +27,7 @@ export class OverridenMethodCodeLensGenerator extends CodeLensGenerator {
 		return codeLens;
 	}
 
-	private _generateCodeLensesForMethods(document: vscode.TextDocument, methods: ICustomClassUIMethod[]) {
+	private _generateCodeLensesForMethods(document: vscode.TextDocument, methods: ICustomClassJSMethod[]) {
 		const codeLenses: vscode.CodeLens[] = [];
 
 		if (document) {

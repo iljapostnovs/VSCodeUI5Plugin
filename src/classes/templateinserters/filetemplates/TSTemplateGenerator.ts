@@ -1,11 +1,17 @@
+import { UI5TSParser } from "ui5plugin-parser";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../UI5Plugin";
+import { IParserBearer } from "../../ui5parser/ParserBearer";
 import { TemplateGenerator } from "./abstraction/TemplateGenerator";
 
-export class TSTemplateGenerator extends TemplateGenerator {
+export class TSTemplateGenerator extends TemplateGenerator implements IParserBearer<UI5TSParser> {
+	_parser: UI5TSParser;
+	constructor(parser: UI5TSParser) {
+		super();
+		this._parser = parser;
+	}
 	public generateTemplate(uri: vscode.Uri): string | undefined {
 		const isController = uri.fsPath.endsWith(".controller.ts");
-		const classNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(uri.fsPath);
+		const classNameDotNotation = this._parser.fileReader.getClassNameFromPath(uri.fsPath);
 		if (!classNameDotNotation) {
 			return;
 		}

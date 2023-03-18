@@ -1,38 +1,33 @@
-import { XMLParser } from "ui5plugin-parser";
-import {
-	AbstractCustomClass
-} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
-import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
-import { ITag } from "ui5plugin-parser/dist/classes/utils/XMLParser";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import { ITag } from "ui5plugin-parser/dist/classes/parsing/util/xml/XMLParser";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../../UI5Plugin";
 import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
-export class XMLDefinitionProvider {
-	public static provideDefinitionsFor(document: vscode.TextDocument, position: vscode.Position) {
+import ParserBearer from "../../../ui5parser/ParserBearer";
+export class XMLDefinitionProvider extends ParserBearer {
+	public provideDefinitionsFor(document: vscode.TextDocument, position: vscode.Position) {
 		let location: vscode.Location | vscode.LocationLink[] | undefined;
 		const offset = document.offsetAt(position);
 		const range = document.getWordRangeAtPosition(position);
 		const word = document.getText(range);
 
-		const XMLFile = TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
+		const XMLFile = this._parser.textDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
 		if (XMLFile) {
-			const tag = XMLParser.getTagInPosition(XMLFile, offset);
-			const attributes = XMLParser.getAttributesOfTheTag(tag);
+			const tag = this._parser.xmlParser.getTagInPosition(XMLFile, offset);
+			const attributes = this._parser.xmlParser.getAttributesOfTheTag(tag);
 
 			const attribute = attributes?.find(attribute => {
-				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
-				const eventHandlerName = XMLParser.getEventHandlerNameFromAttributeValue(attributeValue);
+				const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
+				const eventHandlerName = this._parser.xmlParser.getEventHandlerNameFromAttributeValue(attributeValue);
 
 				return eventHandlerName === word || `cmd:${eventHandlerName}` === word;
 			});
 			if (attribute) {
-				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
-				const eventHandlerName = XMLParser.getEventHandlerNameFromAttributeValue(attributeValue);
-				const responsibleClassName =
-					UI5Plugin.getInstance().parser.fileReader.getResponsibleClassForXMLDocument(
-						new TextDocumentAdapter(document)
-					);
+				const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
+				const eventHandlerName = this._parser.xmlParser.getEventHandlerNameFromAttributeValue(attributeValue);
+				const responsibleClassName = this._parser.fileReader.getResponsibleClassForXMLDocument(
+					new TextDocumentAdapter(document)
+				);
 				if (responsibleClassName) {
 					location = this._getLocationFor(responsibleClassName, eventHandlerName);
 				}
@@ -46,12 +41,12 @@ export class XMLDefinitionProvider {
 		return location;
 	}
 
-	private static _getLocationForFragmentOrViewPaths(tag: ITag, offset: number, document: vscode.TextDocument) {
+	private _getLocationForFragmentOrViewPaths(tag: ITag, offset: number, document: vscode.TextDocument) {
 		let location: vscode.LocationLink[] | undefined;
-		const attributes = XMLParser.getAttributesOfTheTag(tag);
+		const attributes = this._parser.xmlParser.getAttributesOfTheTag(tag);
 		if (attributes) {
 			const attribute = attributes?.find(attribute => {
-				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+				const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
 				const attributeValueOffsetBegin =
 					tag.positionBegin + tag.text.indexOf(attribute) + attribute.indexOf(attributeValue);
 				const attributeValueOffsetEnd = attributeValueOffsetBegin + attributeValue.length;
@@ -60,11 +55,11 @@ export class XMLDefinitionProvider {
 			});
 
 			if (attribute) {
-				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+				const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
 				const attributeValueOffsetBegin =
 					tag.positionBegin + tag.text.indexOf(attribute) + attribute.indexOf(attributeValue);
 				const attributeValueOffsetEnd = attributeValueOffsetBegin + attributeValue.length;
-				const XMLFile = UI5Plugin.getInstance().parser.fileReader.getXMLFile(attributeValue);
+				const XMLFile = this._parser.fileReader.getXMLFile(attributeValue);
 				if (XMLFile) {
 					const classUri = vscode.Uri.file(XMLFile.fsPath);
 					const vscodePosition = new vscode.Position(0, 0);
@@ -87,14 +82,13 @@ export class XMLDefinitionProvider {
 		return location;
 	}
 
-	private static _getLocationFor(jsUIClassName: string, eventHandlerName: string) {
+	private _getLocationFor(jsUIClassName: string, eventHandlerName: string) {
 		let location: vscode.Location | undefined;
 		const responsibleClassName = this._findClassNameOfEventHandler(jsUIClassName, eventHandlerName);
 		if (responsibleClassName) {
-			const controllerUIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(responsibleClassName);
+			const controllerUIClass = this._parser.classFactory.getUIClass(responsibleClassName);
 			if (controllerUIClass instanceof AbstractCustomClass) {
-				const classPath =
-					UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(responsibleClassName);
+				const classPath = this._parser.fileReader.getClassFSPathFromClassName(responsibleClassName);
 				const method = controllerUIClass.methods.find(method => method.name === eventHandlerName);
 				if (method?.position && classPath && method.loc) {
 					const classUri = vscode.Uri.file(classPath);
@@ -109,10 +103,8 @@ export class XMLDefinitionProvider {
 		return location;
 	}
 
-	private static _findClassNameOfEventHandler(className: string, methodName: string): string | undefined {
-		const UIClass = <AbstractCustomClass>(
-			UI5Plugin.getInstance().parser.classFactory.getUIClass(className)
-		);
+	private _findClassNameOfEventHandler(className: string, methodName: string): string | undefined {
+		const UIClass = <AbstractCustomClass>this._parser.classFactory.getUIClass(className);
 		const method = UIClass.methods.find(method => method.name === methodName);
 		if (method) {
 			return className;

@@ -1,25 +1,29 @@
+import { UI5JSParser } from "ui5plugin-parser";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../UI5Plugin";
+import { IParserBearer } from "../../ui5parser/ParserBearer";
 import { TemplateGenerator } from "./abstraction/TemplateGenerator";
 
-export class JSTemplateGenerator extends TemplateGenerator {
+export class JSTemplateGenerator extends TemplateGenerator implements IParserBearer<UI5JSParser> {
+	_parser: UI5JSParser;
+	constructor(parser: UI5JSParser) {
+		super();
+		this._parser = parser;
+	}
 	public generateTemplate(uri: vscode.Uri): string | undefined {
 		const isController = uri.fsPath.endsWith(".controller.js");
-		const classNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(uri.fsPath);
+		const classNameDotNotation = this._parser.fileReader.getClassNameFromPath(uri.fsPath);
 		if (!classNameDotNotation) {
 			return;
 		}
 
 		const sManagedObjectModuleName =
-			vscode.workspace.getConfiguration("ui5.plugin").get("insertManagedObjectModule") as string ??
+			(vscode.workspace.getConfiguration("ui5.plugin").get("insertManagedObjectModule") as string) ??
 			"sap/ui/base/ManagedObject";
 		const sControllerModuleName =
-			vscode.workspace.getConfiguration("ui5.plugin").get("insertControllerModule") as string ??
+			(vscode.workspace.getConfiguration("ui5.plugin").get("insertControllerModule") as string) ??
 			"sap/ui/core/mvc/Controller";
 
-		const standardUIDefineClassForExtension = isController
-			? sControllerModuleName
-			: sManagedObjectModuleName;
+		const standardUIDefineClassForExtension = isController ? sControllerModuleName : sManagedObjectModuleName;
 		const UIDefineClassNameParts = standardUIDefineClassForExtension.split("/");
 		const controlName = UIDefineClassNameParts[UIDefineClassNameParts.length - 1];
 

@@ -1,16 +1,16 @@
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../UI5Plugin";
 import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";
+import ParserBearer from "../../ui5parser/ParserBearer";
 
-export class SwitchToControllerCommand {
-	static async switchToController() {
+export class SwitchToControllerCommand extends ParserBearer {
+	async switchToController() {
 		try {
 			const document = vscode.window.activeTextEditor?.document;
 			if (document) {
-
-				const isViewOrFragment = document?.fileName.endsWith(".view.xml") || document?.fileName.endsWith(".fragment.xml");
+				const isViewOrFragment =
+					document?.fileName.endsWith(".view.xml") || document?.fileName.endsWith(".fragment.xml");
 				if (isViewOrFragment) {
-					const controllerNameOfCurrentlyOpenedView = SwitchToControllerCommand.getResponsibleClassForCurrentView();
+					const controllerNameOfCurrentlyOpenedView = this.getResponsibleClassForCurrentView();
 					if (controllerNameOfCurrentlyOpenedView) {
 						await this._switchToController(controllerNameOfCurrentlyOpenedView);
 					}
@@ -21,17 +21,18 @@ export class SwitchToControllerCommand {
 		}
 	}
 
-	private static async _switchToController(controllerName: string) {
-		const controlFSPath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(controllerName);
+	private async _switchToController(controllerName: string) {
+		const controlFSPath = this._parser.fileReader.getClassFSPathFromClassName(controllerName);
 		const editor = vscode.window.activeTextEditor;
 		if (editor && controlFSPath) {
 			await vscode.window.showTextDocument(vscode.Uri.file(controlFSPath));
 		}
 	}
 
-	public static getResponsibleClassForCurrentView() {
+	public getResponsibleClassForCurrentView() {
 		const document = vscode.window.activeTextEditor?.document;
-		const currentViewController = document && UI5Plugin.getInstance().parser.fileReader.getResponsibleClassForXMLDocument(new TextDocumentAdapter(document));
+		const currentViewController =
+			document && this._parser.fileReader.getResponsibleClassForXMLDocument(new TextDocumentAdapter(document));
 
 		return currentViewController;
 	}

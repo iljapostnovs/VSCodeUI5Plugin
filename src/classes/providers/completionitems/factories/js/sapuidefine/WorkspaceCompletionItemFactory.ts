@@ -1,12 +1,10 @@
-import * as vscode from "vscode";
-import * as fs from "fs";
 import * as path from "path";
-import glob = require("glob");
+import { ParserPool } from "ui5plugin-parser";
+import * as vscode from "vscode";
+import ParserBearer from "../../../../../ui5parser/ParserBearer";
 import { CustomCompletionItem } from "../../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../../abstraction/ICompletionItemFactory";
-import { UI5Plugin } from "../../../../../../UI5Plugin";
 const escapedFileSeparator = "\\" + path.sep;
-const workspace = vscode.workspace;
 
 interface IWorkspaceJSFileConstructor {
 	fsPath: string;
@@ -21,12 +19,12 @@ class UIDefineJSFile {
 		this.UIDefineString = UIDefineString;
 	}
 }
-export class WorkspaceCompletionItemFactory implements ICompletionItemFactory {
-	static async synchronizeCreate(completionItems: CustomCompletionItem[], textDocument: vscode.Uri) {
+export class WorkspaceCompletionItemFactory extends ParserBearer implements ICompletionItemFactory {
+	async synchronizeCreate(completionItems: CustomCompletionItem[], textDocument: vscode.Uri) {
 		const fileFsPath = textDocument.fsPath;
-		const defineString = (UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
+		const defineString = (this._parser.fileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
 		if (defineString) {
-			const newCompletionItem = WorkspaceCompletionItemFactory._generateCompletionItem(
+			const newCompletionItem = this._generateCompletionItem(
 				new UIDefineJSFile({
 					fsPath: fileFsPath,
 					UIDefineString: defineString
@@ -37,11 +35,15 @@ export class WorkspaceCompletionItemFactory implements ICompletionItemFactory {
 		}
 	}
 
-	static async synchronizeDelete(completionItems: CustomCompletionItem[], textDocument: vscode.Uri) {
+	async synchronizeDelete(completionItems: CustomCompletionItem[], textDocument: vscode.Uri) {
 		const fileFsPath = textDocument.fsPath;
-		const defineString = (UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
+		const defineString = (this._parser.fileReader.getClassNameFromPath(fileFsPath) || "").replace(/\./g, "/");
 		if (defineString) {
-			const deletedCompletionItem = completionItems.find(completionItem => (completionItem.label as string).substring(1, (completionItem.label as string).length - 1) === defineString);
+			const deletedCompletionItem = completionItems.find(
+				completionItem =>
+					(completionItem.label as string).substring(1, (completionItem.label as string).length - 1) ===
+					defineString
+			);
 			if (deletedCompletionItem) {
 				completionItems.splice(completionItems.indexOf(deletedCompletionItem), 1);
 			}
@@ -51,64 +53,44 @@ export class WorkspaceCompletionItemFactory implements ICompletionItemFactory {
 	async createCompletionItems() {
 		const completionItems: CustomCompletionItem[] = [];
 
-		const JSFilesOfAllWorkspaces = await this._getAllJSFilesOfAllWorkspaces();
+		const JSFilesOfAllWorkspaces = this._getAllJSFilesOfAllWorkspaces();
 
-		JSFilesOfAllWorkspaces.forEach((JSFile: UIDefineJSFile) => {
-			completionItems.push(WorkspaceCompletionItemFactory._generateCompletionItem(JSFile));
+		JSFilesOfAllWorkspaces.forEach(JSFile => {
+			completionItems.push(this._generateCompletionItem(JSFile));
 		});
 
 		return completionItems;
 	}
 
-	private async _getAllJSFilesOfAllWorkspaces() {
-		const workspaceJSFiles: UIDefineJSFile[] = [];
-		const wsFolders = workspace.workspaceFolders || [];
+	private _getAllJSFilesOfAllWorkspaces(): UIDefineJSFile[] {
 		const separator = path.sep;
-		for (const wsFolder of wsFolders) {
-			const manifests: any = UI5Plugin.getInstance().parser.fileReader.getManifestFSPathsInWorkspaceFolder({ fsPath: wsFolder.uri.fsPath });
 
-			for (const manifest of manifests) {
-				const manifestPath = path.normalize(manifest.fsPath);
-				const UI5Manifest: any = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-				const manifestFsPath: string = manifestPath.replace(`${separator}manifest.json`, "");
-				const UI5ComponentName: string = UI5Manifest["sap.app"]?.id || "";
-				const projectJSFiles = this._findJSFilesInWorkspaceFolder(wsFolder);
+		const customClasses = ParserPool.getAllCustomUIClasses();
 
-				projectJSFiles.forEach((projectJSFilePath) => {
-					if (projectJSFilePath.indexOf(manifestFsPath) > -1) {
-						const JSFileUIDefineString =
-							projectJSFilePath
-								.replace(".js", "")
-								.replace(manifestPath.replace(`${separator}manifest.json`, ""), UI5ComponentName)
-								.replace(/\./g, "/")
-								.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-						workspaceJSFiles.push(
-							new UIDefineJSFile({
-								fsPath: projectJSFilePath,
-								UIDefineString: JSFileUIDefineString
-							})
-						);
-					}
-				});
-			}
-		}
+		return customClasses
+			.map(customClass => {
+				const manifest = this._parser.fileReader.getManifestForClass(customClass.className);
+				if (manifest) {
+					const manifestPath = path.normalize(manifest.fsPath);
+					const UI5Manifest: any = manifest.content;
+					const UI5ComponentName: string = UI5Manifest["sap.app"]?.id || "";
 
-		return workspaceJSFiles;
+					const JSFileUIDefineString = customClass.fsPath
+						.replace(/\.(ts|js)$/, "")
+						.replace(manifestPath.replace(`${separator}manifest.json`, ""), UI5ComponentName)
+						.replace(/\./g, "/")
+						.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
+
+					return new UIDefineJSFile({
+						fsPath: customClass.fsPath,
+						UIDefineString: JSFileUIDefineString
+					});
+				}
+			})
+			.filter(UIDefineJSFile => !!UIDefineJSFile) as UIDefineJSFile[];
 	}
 
-	private _findJSFilesInWorkspaceFolder(wsFolder: vscode.WorkspaceFolder) {
-		const wsFolderFSPath = wsFolder.uri.fsPath.replace(new RegExp(`${escapedFileSeparator}`, "g"), "/");
-
-		const exclusions: string[] = vscode.workspace.getConfiguration("ui5.plugin").get("excludeFolderPattern") || [];
-		const exclusionPaths = exclusions.map(excludeString => {
-			return `${wsFolderFSPath}/${excludeString}`
-		});
-		return glob.sync(`${wsFolderFSPath}/**/*.js`, {
-			ignore: exclusionPaths
-		}).map(jsFilePath => path.normalize(jsFilePath));
-	}
-
-	private static _generateCompletionItem(workspaceJSFile: UIDefineJSFile) {
+	private _generateCompletionItem(workspaceJSFile: UIDefineJSFile) {
 		const insertionText = `"${workspaceJSFile.UIDefineString}"`;
 		const completionItem: CustomCompletionItem = new CustomCompletionItem(insertionText);
 		completionItem.kind = vscode.CompletionItemKind.Class;

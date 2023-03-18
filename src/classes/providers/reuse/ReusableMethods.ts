@@ -1,12 +1,13 @@
-import { CustomUIClass, ICustomClassUIMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
+import { CustomJSClass, ICustomClassJSMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import ParserPool from "ui5plugin-parser/dist/parser/pool/ParserPool";
 import * as vscode from "vscode";
 import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";
-export class ReusableMethods {
-	static getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
+import ParserBearer from "../../ui5parser/ParserBearer";
+export class ReusableMethods extends ParserBearer {
+	getPositionOfTheLastUIDefine(document: vscode.TextDocument) {
 		let position: vscode.Position | undefined;
-		const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
-		if (UIClass instanceof CustomUIClass) {
+		const UIClass = this._parser.textDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
+		if (UIClass instanceof CustomJSClass) {
 			const mainFunction = UIClass.fileContent?.body[0]?.expression;
 			const definePaths: any[] = mainFunction?.arguments[0]?.elements;
 
@@ -24,15 +25,25 @@ export class ReusableMethods {
 		return position;
 	}
 
-	static getIfPositionIsInTheLastOrAfterLastMember(UIClass: CustomUIClass, position: number) {
-		const currentMethod = UIClass.methods.find(method => method.node?.start < position && method.node?.end > position);
+	static getParserForCurrentActiveDocument() {
+		const activeDocument = vscode.window.activeTextEditor?.document;
+
+		return activeDocument && ParserPool.getParserForFile(activeDocument.fileName);
+	}
+
+	static getIfPositionIsInTheLastOrAfterLastMember(UIClass: CustomJSClass, position: number) {
+		const currentMethod = UIClass.methods.find(
+			method => method.node?.start < position && method.node?.end > position
+		);
 		const positionIsInMethod = !!currentMethod;
-		const positionIsAfterLastMethod = positionIsInMethod ? false : this._getIfPositionIsAfterLastMember(UIClass, position);
+		const positionIsAfterLastMethod = positionIsInMethod
+			? false
+			: this._getIfPositionIsAfterLastMember(UIClass, position);
 
 		return positionIsInMethod || positionIsAfterLastMethod;
 	}
 
-	private static _getIfPositionIsAfterLastMember(UIClass: CustomUIClass, position: number) {
+	private static _getIfPositionIsAfterLastMember(UIClass: CustomJSClass, position: number) {
 		let isPositionAfterLastMethod = false;
 		const properties = UIClass.acornClassBody?.properties || [];
 		const lastProperty = properties[properties.length - 1];
@@ -43,7 +54,7 @@ export class ReusableMethods {
 		return isPositionAfterLastMethod;
 	}
 
-	static getIfMethodIsLastOne(UIClass: CustomUIClass, method: ICustomClassUIMethod) {
+	static getIfMethodIsLastOne(UIClass: CustomJSClass, method: ICustomClassJSMethod) {
 		let currentMethodIsLastMethod = false;
 		const propertyValues = UIClass.acornClassBody?.properties?.map((node: any) => node.value);
 		if (propertyValues) {
@@ -56,7 +67,7 @@ export class ReusableMethods {
 		return currentMethodIsLastMethod;
 	}
 
-	static getIfPositionIsInPropertyName(UIClass: CustomUIClass, position: number) {
+	static getIfPositionIsInPropertyName(UIClass: CustomJSClass, position: number) {
 		let bPositionIsInPropertyName = true;
 		const positionIsBetweenProperties = !!UIClass.acornClassBody.properties?.find((node: any, index: number) => {
 			let correctNode = false;
@@ -71,7 +82,6 @@ export class ReusableMethods {
 		const positionIsInPropertyKey = !!UIClass.acornClassBody.properties?.find((node: any) => {
 			return node.key?.start <= position && node.key?.end >= position;
 		});
-
 
 		bPositionIsInPropertyName = positionIsBetweenProperties || positionIsInPropertyKey;
 

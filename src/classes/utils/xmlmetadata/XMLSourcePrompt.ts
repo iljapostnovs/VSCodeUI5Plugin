@@ -1,6 +1,5 @@
-
 import { AxiosRequestConfig } from "axios";
-import { HTTPHandler } from "ui5plugin-parser/dist/classes/utils/HTTPHandler";
+import { HTTPHandler } from "ui5plugin-parser/dist/classes/http/HTTPHandler";
 import * as vscode from "vscode";
 export class XMLSourcePrompt {
 	async getXMLMetadataText() {

@@ -1,13 +1,14 @@
-import * as vscode from "vscode";
-import { JSFileRenameHandler } from "./handlers/JSFileRenameHandler";
-import { XMLFileRenameHandler } from "./handlers/XMLFileRenameHandler";
-import { ControllerRenameHandler } from "./handlers/ControllerRenameHandler";
-import { IFileChanges } from "./handlers/abstraction/FileRenameHandler";
 import * as glob from "glob";
 import * as path from "path";
+import * as vscode from "vscode";
+import ParserBearer from "../ui5parser/ParserBearer";
+import { IFileChanges } from "./handlers/abstraction/FileRenameHandler";
+import { ControllerRenameHandler } from "./handlers/ControllerRenameHandler";
+import { JSFileRenameHandler } from "./handlers/JSFileRenameHandler";
+import { XMLFileRenameHandler } from "./handlers/XMLFileRenameHandler";
 const fileSeparator = path.sep;
-export class FileRenameMediator {
-	static handleFileRename(
+export class FileRenameMediator extends ParserBearer {
+	handleFileRename(
 		uri: {
 			oldUri: vscode.Uri;
 			newUri: vscode.Uri;
@@ -15,24 +16,24 @@ export class FileRenameMediator {
 		allFiles: IFileChanges[]
 	): IFileChanges[] {
 		if (uri.newUri.fsPath.endsWith(".js") || uri.newUri.fsPath.endsWith(".ts")) {
-			const jsFileRenameHandler = new JSFileRenameHandler();
+			const jsFileRenameHandler = new JSFileRenameHandler(this._parser);
 			jsFileRenameHandler.handleFileRename(uri.oldUri, uri.newUri, allFiles);
 		}
 
 		if (uri.newUri.fsPath.endsWith(".xml")) {
-			const xmlFileRenameHandler = new XMLFileRenameHandler();
+			const xmlFileRenameHandler = new XMLFileRenameHandler(this._parser);
 			xmlFileRenameHandler.handleFileRename(uri.oldUri, uri.newUri, allFiles);
 		}
 
 		if (uri.newUri.fsPath.endsWith(".controller.js") || uri.newUri.fsPath.endsWith(".controller.ts")) {
-			const controllerFileRenameHandler = new ControllerRenameHandler();
+			const controllerFileRenameHandler = new ControllerRenameHandler(this._parser);
 			controllerFileRenameHandler.handleFileRename(uri.oldUri, uri.newUri, allFiles);
 		}
 
 		return allFiles;
 	}
 
-	static handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri, fileChanges: IFileChanges[]): IFileChanges[] {
+	handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri, fileChanges: IFileChanges[]): IFileChanges[] {
 		const newFilePaths = glob.sync(newUri.fsPath.replace(/\\/g, "/") + "/**/*{.js,.ts,.xml}");
 		newFilePaths.forEach(filePath => {
 			const newFileUri = vscode.Uri.file(filePath);

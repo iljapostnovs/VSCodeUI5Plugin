@@ -828,9 +828,11 @@
 			]
 		},
 		{
-			"className": "com.statictest.StaticClass",
+			"className": "com.test.statictest.StaticClass",
 			"timeLimit": 100,
-			"errors": []
+			"errors": [{
+				"text": "No references found for \"com.test.statictest.StaticClass\" class"
+			}]
 		},
 		{
 			"className": "com.test.controller.LargeFile",
@@ -7922,7 +7924,7 @@
 			]
 		},
 		{
-			"className": "com.statictest.StaticTest",
+			"className": "com.test.statictest.StaticTest",
 			"timeLimit": 100,
 			"errors": []
 		},

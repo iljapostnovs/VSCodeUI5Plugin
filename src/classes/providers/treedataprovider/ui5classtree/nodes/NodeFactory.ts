@@ -1,22 +1,21 @@
-import { Node } from "./abstraction/Node";
 import * as vscode from "vscode";
-import { ClassNameNode } from "./nodetypes/rootnodes/js/ClassNameNode";
+import { TextDocumentAdapter } from "../../../../adapters/vscode/TextDocumentAdapter";
+import ParserBearer from "../../../../ui5parser/ParserBearer";
+import { Node } from "./abstraction/Node";
 import { RootNode } from "./abstraction/RootNode";
+import { XMLNode } from "./abstraction/XMLNode";
+import { ClassNameNode } from "./nodetypes/rootnodes/js/ClassNameNode";
 import { FieldsNode } from "./nodetypes/rootnodes/js/FieldsNode";
 import { MethodsNode } from "./nodetypes/rootnodes/js/MethodsNode";
+import { TagNode } from "./nodetypes/rootnodes/xml/TagNode";
 import { FieldNode } from "./nodetypes/subnodes/js/field/FieldNode";
 import { MethodLinesNode } from "./nodetypes/subnodes/js/method/MethodLinesNode";
 import { MethodNode } from "./nodetypes/subnodes/js/method/MethodNode";
 import { MethodReferencesNode } from "./nodetypes/subnodes/js/method/MethodReferencesNode";
 import { VisibilityNode } from "./nodetypes/subnodes/js/VisibilityNode";
-import { XMLNode } from "./abstraction/XMLNode";
-import { TagNode } from "./nodetypes/rootnodes/xml/TagNode";
-import { XMLParser } from "ui5plugin-parser";
-import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
-import { TextDocumentAdapter } from "../../../../adapters/vscode/TextDocumentAdapter";
 
-export class NodeFactory {
-	static getNodes(node?: Node) {
+export class NodeFactory extends ParserBearer {
+	getNodes(node?: Node) {
 		const nodes: Node[] = [];
 
 		if (!node) {
@@ -27,22 +26,27 @@ export class NodeFactory {
 
 		return nodes;
 	}
-	private static _getRootNodes() {
+	private _getRootNodes() {
 		const rootNodes: (RootNode | XMLNode)[] = [];
 
 		const currentDocument = vscode.window.activeTextEditor?.document;
 		if (currentDocument?.fileName.endsWith(".js") || currentDocument?.fileName.endsWith(".ts")) {
-			const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(currentDocument));
+			const UIClass = this._parser.textDocumentTransformer.toCustomUIClass(
+				new TextDocumentAdapter(currentDocument)
+			);
 			if (UIClass) {
-				rootNodes.push(new ClassNameNode(UIClass));
-				rootNodes.push(new MethodsNode(UIClass));
-				rootNodes.push(new FieldsNode(UIClass));
+				rootNodes.push(new ClassNameNode(UIClass, this._parser));
+				rootNodes.push(new MethodsNode(UIClass, this._parser));
+				rootNodes.push(new FieldsNode(UIClass, this._parser));
 			}
-		} else if (currentDocument?.fileName.endsWith(".fragment.xml") || currentDocument?.fileName.endsWith(".view.xml")) {
-			const XMLFile = TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(currentDocument));
+		} else if (
+			currentDocument?.fileName.endsWith(".fragment.xml") ||
+			currentDocument?.fileName.endsWith(".view.xml")
+		) {
+			const XMLFile = this._parser.textDocumentTransformer.toXMLFile(new TextDocumentAdapter(currentDocument));
 			if (XMLFile) {
-				const hierarchicalTags = XMLParser.getTagHierarchy(XMLFile);
-				const tagNodes = hierarchicalTags.map(tag => new TagNode(tag, XMLFile));
+				const hierarchicalTags = this._parser.xmlParser.getTagHierarchy(XMLFile);
+				const tagNodes = hierarchicalTags.map(tag => new TagNode(tag, XMLFile, this._parser));
 				rootNodes.push(...tagNodes);
 			}
 		}
@@ -50,27 +54,29 @@ export class NodeFactory {
 		return rootNodes;
 	}
 
-	private static _getSubNodes(node: Node) {
+	private _getSubNodes(node: Node) {
 		const nodes: Node[] = [];
 
 		if (node instanceof MethodsNode) {
 			nodes.push(...this._getMethodNodes(node));
 		} else if (node instanceof FieldsNode) {
-			nodes.push(...node.UIClass.fields.map(UIField => new FieldNode(UIField)).filter(node => node.UIField.name !== "prototype"));
+			nodes.push(
+				...node.UIClass.fields
+					.map(UIField => new FieldNode(UIField, this._parser))
+					.filter(node => node.UIField.name !== "prototype")
+			);
 		} else if (node instanceof MethodNode) {
 			const childNodes = [
-				new MethodLinesNode(node.UIMethod),
-				new MethodReferencesNode(node.UIMethod),
-				new VisibilityNode(node.UIMethod)
+				new MethodLinesNode(node.UIMethod, this._parser),
+				new MethodReferencesNode(node.UIMethod, this._parser),
+				new VisibilityNode(node.UIMethod, this._parser)
 			];
 			nodes.push(...childNodes);
 		} else if (node instanceof FieldNode) {
-			const childNodes = [
-				new VisibilityNode(node.UIField)
-			];
+			const childNodes = [new VisibilityNode(node.UIField, this._parser)];
 			nodes.push(...childNodes);
 		} else if (node instanceof TagNode) {
-			const childNodes = node.tag.tags.map(tag => new TagNode(tag, node.XMLFile));
+			const childNodes = node.tag.tags.map(tag => new TagNode(tag, node.XMLFile, this._parser));
 			nodes.push(...childNodes);
 		}
 
@@ -79,7 +85,9 @@ export class NodeFactory {
 		});
 		return nodes;
 	}
-	private static _getMethodNodes(node: MethodsNode) {
-		return node.UIClass.methods.filter(method => !!method.node).map(UIMethod => new MethodNode(UIMethod));
+	private _getMethodNodes(node: MethodsNode) {
+		return node.UIClass.methods
+			.filter(method => !!method.node)
+			.map(UIMethod => new MethodNode(UIMethod, this._parser));
 	}
 }

@@ -1,13 +1,12 @@
-import { XMLParser } from "ui5plugin-parser";
-import { IXMLFile } from "ui5plugin-parser/dist/classes/utils/FileReader";
-import { UI5Plugin } from "../../../../UI5Plugin";
+import { IXMLFile } from "ui5plugin-parser/dist/classes/parsing/util/filereader/IFileReader";
+import ParserBearer from "../../../ui5parser/ParserBearer";
 import { ITSInterfaceGenerator } from "../abstraction/ITSInterfaceGenerator";
 
-export class TSXMLInterfaceGenerator implements ITSInterfaceGenerator {
+export class TSXMLInterfaceGenerator extends ParserBearer implements ITSInterfaceGenerator {
 	async generate() {
-		const UI5FileReader = UI5Plugin.getInstance().parser.fileReader;
+		const fileReader = this._parser.fileReader;
 
-		const aXMLFiles: IXMLFile[] = UI5FileReader.getAllFragments().concat(UI5FileReader.getAllViews());
+		const aXMLFiles: IXMLFile[] = fileReader.getAllFragments().concat(fileReader.getAllViews());
 		const mInterfaceData = aXMLFiles.map(XMLFile => this._generateInterfaceDataForFile(XMLFile));
 		const aUniqueImports = [...new Set(mInterfaceData.flatMap(theInterface => theInterface.imports))].map(
 			toImport => {
@@ -17,15 +16,15 @@ export class TSXMLInterfaceGenerator implements ITSInterfaceGenerator {
 		);
 		const aInterfaces = mInterfaceData.map(interfaceData => {
 			const sExtends = [...new Set(interfaceData.extends)].join(" & ");
-			return `export type ${interfaceData.name} = {\n\t${
-				interfaceData.rows
-			}\n}${sExtends ? " & " + sExtends : ""};`;
+			return `export type ${interfaceData.name} = {\n\t${interfaceData.rows}\n}${
+				sExtends ? " & " + sExtends : ""
+			};`;
 		});
 
 		return aUniqueImports.join("\n") + "\n\n" + aInterfaces.join("\n\n");
 	}
 	private _generateInterfaceDataForFile(XMLFile: IXMLFile) {
-		const tags = XMLParser.getAllTags(XMLFile);
+		const tags = this._parser.xmlParser.getAllTags(XMLFile);
 		const mInterfaceData = tags.reduce(
 			(
 				accumulator: {
@@ -34,14 +33,14 @@ export class TSXMLInterfaceGenerator implements ITSInterfaceGenerator {
 				},
 				tag
 			) => {
-				const attributes = XMLParser.getAttributesOfTheTag(tag);
+				const attributes = this._parser.xmlParser.getAttributesOfTheTag(tag);
 				const attributeNamesAndValues = attributes?.map(attribute =>
-					XMLParser.getAttributeNameAndValue(attribute)
+					this._parser.xmlParser.getAttributeNameAndValue(attribute)
 				);
 				const idAttribute = attributeNamesAndValues?.find(nameValue => nameValue.attributeName === "id");
 				if (idAttribute) {
-					const className = XMLParser.getClassNameFromTag(tag.text);
-					const fullClassName = XMLParser.getFullClassNameFromTag(tag, XMLFile);
+					const className = this._parser.xmlParser.getClassNameFromTag(tag.text);
+					const fullClassName = this._parser.xmlParser.getFullClassNameFromTag(tag, XMLFile);
 
 					const idToClass = `${idAttribute.attributeValue}: ${className};`;
 

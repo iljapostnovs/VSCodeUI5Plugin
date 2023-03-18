@@ -17,7 +17,7 @@ export default class TestClassParsing extends ManagedObject {
 	static staticMethod() {
 		return 123;
 	}
-	private static privateSaticMethod() {
+	private static privateStaticMethod() {
 		return 123;
 	}
 	private _privateMethod() {}

@@ -1,22 +1,22 @@
+import { ICustomClassMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
+import { CustomTSObject } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSObject";
+import { IUI5Parser } from "ui5plugin-parser/dist/parser/abstraction/IUI5Parser";
 import * as vscode from "vscode";
-import { Util } from "./util/Util";
+import { VSCodeLocationAdapter } from "../../../../../../../../ui5linter/adapters/VSCodeLocationAdapter";
 import { ReferenceCodeLensGenerator } from "../../../../../../../codelens/jscodelens/strategies/ReferenceCodeLensGenerator";
 import { NavigatiableNode } from "../abstraction/NavigatiableNode";
-import { UI5Plugin } from "../../../../../../../../../UI5Plugin";
-import { ICustomClassMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { VSCodeLocationAdapter } from "../../../../../../../../ui5linter/adapters/VSCodeLocationAdapter";
-import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
-import { CustomTSObject } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSObject";
+import { Util } from "./util/Util";
 
 export class MethodNode extends NavigatiableNode {
 	readonly UIMethod: ICustomClassMethod;
 	private readonly lines: number;
 	private readonly references: number;
-	constructor(UIMethod: ICustomClassMethod) {
-		super();
+	constructor(UIMethod: ICustomClassMethod, parser: IUI5Parser) {
+		super(parser);
 		this.UIMethod = UIMethod;
-		this.lines = Util.getMethodLines(this.UIMethod) || 0;
+		this.lines = new Util(parser).getMethodLines(this.UIMethod) || 0;
 		this.references = this._getReferences();
 		this.label = this._generateLabel();
 		this.description = this._generateDescription();
@@ -34,7 +34,7 @@ export class MethodNode extends NavigatiableNode {
 		} else if (
 			this.lines > 50 ||
 			(this.references === 0 &&
-				!UI5Plugin.getInstance().parser.classFactory.isMethodOverriden(this.UIMethod.owner, this.UIMethod.name))
+				!this._parser.classFactory.isMethodOverriden(this.UIMethod.owner, this.UIMethod.name))
 		) {
 			iconName = "protected";
 		}
@@ -44,10 +44,10 @@ export class MethodNode extends NavigatiableNode {
 
 	private _getReferences() {
 		const locations: VSCodeLocationAdapter[] = [];
-		const referenceCodeLens = new ReferenceCodeLensGenerator();
+		const referenceCodeLens = new ReferenceCodeLensGenerator(this._parser);
 
-		const ownerClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(this.UIMethod.owner);
-		if (ownerClass instanceof CustomUIClass) {
+		const ownerClass = this._parser.classFactory.getUIClass(this.UIMethod.owner);
+		if (ownerClass instanceof CustomJSClass) {
 			locations.push(...referenceCodeLens.getReferenceLocations(this.UIMethod));
 		} else if (ownerClass instanceof CustomTSClass || ownerClass instanceof CustomTSObject) {
 			locations.push(...referenceCodeLens.getTSReferenceLocations(this.UIMethod));

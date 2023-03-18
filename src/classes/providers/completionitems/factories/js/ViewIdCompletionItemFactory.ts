@@ -1,26 +1,26 @@
-import { UI5Parser, XMLParser } from "ui5plugin-parser";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { InnerPropertiesStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/InnerPropertiesStrategy";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { IXMLDocumentIdData } from "ui5plugin-parser/dist/classes/utils/XMLParser";
-import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
+import { UI5JSParser } from "ui5plugin-parser";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { InnerPropertiesStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/InnerPropertiesStrategy";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { IXMLDocumentIdData } from "ui5plugin-parser/dist/classes/parsing/util/xml/XMLParser";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../../../UI5Plugin";
+import ParserBearer from "../../../../ui5parser/ParserBearer";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
-export class ViewIdCompletionItemFactory implements ICompletionItemFactory {
+export class ViewIdCompletionItemFactory extends ParserBearer<UI5JSParser> implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 
-		const strategy = new InnerPropertiesStrategy(AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser);
+		const strategy = new InnerPropertiesStrategy(this._parser.syntaxAnalyser, this._parser);
 		const offset = document.offsetAt(position);
-		const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+		const currentClassName = this._parser.fileReader.getClassNameFromPath(document.fileName);
 		if (currentClassName) {
 			const nodes = strategy.getStackOfNodesForInnerParamsForPosition(currentClassName, offset, true);
 			if (nodes.length === 1 && nodes[0].callee?.property?.name === "byId") {
 				const positionStrategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
-					AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
+					this._parser.syntaxAnalyser,
+					this._parser
 				);
 				const classNameAtById = positionStrategy.getClassNameOfTheVariableAtPosition(
 					currentClassName,
@@ -28,28 +28,18 @@ export class ViewIdCompletionItemFactory implements ICompletionItemFactory {
 				);
 				const isControl =
 					classNameAtById &&
-					UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(
-						classNameAtById,
-						"sap.ui.core.Control"
-					);
+					this._parser.classFactory.isClassAChildOfClassB(classNameAtById, "sap.ui.core.Control");
 				const isController =
 					classNameAtById &&
-					UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(
-						classNameAtById,
-						"sap.ui.core.mvc.Controller"
-					);
+					this._parser.classFactory.isClassAChildOfClassB(classNameAtById, "sap.ui.core.mvc.Controller");
 				if (isControl || isController) {
-					const UIClass = <CustomUIClass>(
-						UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName)
-					);
+					const UIClass = <CustomJSClass>this._parser.classFactory.getUIClass(currentClassName);
 					const viewsAndFragments =
-						UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(
-							UIClass
-						);
+						this._parser.classFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
 					const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
 					const viewIdResult: IXMLDocumentIdData[] = [];
 					XMLDocuments.forEach(XMLDocument => {
-						viewIdResult.push(...XMLParser.getAllIDsInCurrentView(XMLDocument));
+						viewIdResult.push(...this._parser.xmlParser.getAllIDsInCurrentView(XMLDocument));
 					});
 					completionItems = this._generateCompletionItemsFromUICompletionItems(
 						viewIdResult,

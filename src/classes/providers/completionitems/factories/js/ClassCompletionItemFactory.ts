@@ -1,14 +1,12 @@
-import { UI5Parser } from "ui5plugin-parser";
-import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
+import { ParserPool, UI5JSParser } from "ui5plugin-parser";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../../../UI5Plugin";
+import ParserBearer from "../../../../ui5parser/ParserBearer";
 import { ReusableMethods } from "../../../reuse/ReusableMethods";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
-export class ClassCompletionItemFactory implements ICompletionItemFactory {
+export class ClassCompletionItemFactory extends ParserBearer<UI5JSParser> implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
 
@@ -18,18 +16,15 @@ export class ClassCompletionItemFactory implements ICompletionItemFactory {
 		);
 
 		if (ifPositionIsNewExpressionOrExprStatement) {
-			const classes = UI5Plugin.getInstance().parser.classFactory.getAllExistentUIClasses();
-			const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+			const classes = ParserPool.getAllExistentUIClasses();
+			const currentClassName = this._parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassName) {
-				const currentUIClass = <CustomUIClass>(
-					UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName)
-				);
+				const currentUIClass = <CustomJSClass>this._parser.classFactory.getUIClass(currentClassName);
 				const classNames = Object.keys(classes);
 				const customUIClassNames = classNames.filter(
-					className =>
-						UI5Plugin.getInstance().parser.classFactory.getUIClass(className) instanceof CustomUIClass
+					className => this._parser.classFactory.getUIClass(className) instanceof CustomJSClass
 				);
-				const flatNodes = new SAPNodeDAO().getFlatNodes();
+				const flatNodes = this._parser.nodeDAO.getFlatNodes();
 				const standardUIClassNames = Object.keys(flatNodes).filter(className => {
 					const node = flatNodes[className];
 					return (
@@ -41,7 +36,7 @@ export class ClassCompletionItemFactory implements ICompletionItemFactory {
 				const filteredClassNames = allClassNames.filter(className => {
 					return !currentUIClass.UIDefine.find(UIDefine => className === UIDefine.classNameDotNotation);
 				});
-				const position = ReusableMethods.getPositionOfTheLastUIDefine(document);
+				const position = new ReusableMethods(this._parser).getPositionOfTheLastUIDefine(document);
 				completionItems = filteredClassNames.map(className => {
 					const classNameParts = className.split(".");
 					const shortClassName = classNameParts[classNameParts.length - 1];
@@ -77,19 +72,15 @@ export class ClassCompletionItemFactory implements ICompletionItemFactory {
 	) {
 		let currentPositionIsNewExpressionOrExpressionStatement = false;
 
-		const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+		const currentClassName = this._parser.fileReader.getClassNameFromPath(document.fileName);
 		if (currentClassName) {
 			const offset = document.offsetAt(position);
-			const currentUIClass = <CustomUIClass>(
-				UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName)
-			);
+			const currentUIClass = <CustomJSClass>this._parser.classFactory.getUIClass(currentClassName);
 			const currentMethod = currentUIClass.methods.find(method => {
 				return method.node?.start < offset && offset < method.node?.end;
 			});
 			if (currentMethod) {
-				const allContent = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.expandAllContent(
-					currentMethod.node
-				);
+				const allContent = this._parser.syntaxAnalyser.expandAllContent(currentMethod.node);
 				const newExpressionOrExpressionStatement = allContent.find((node: any) => {
 					const firstChar: undefined | string = node.name?.[0];
 					const firstCharCaps = firstChar?.toUpperCase();

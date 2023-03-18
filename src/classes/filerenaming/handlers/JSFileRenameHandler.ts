@@ -1,8 +1,7 @@
-import { FileRenameHandler, IFileChanges } from "./abstraction/FileRenameHandler";
-import * as vscode from "vscode";
-import { UI5Plugin } from "../../../UI5Plugin";
 import * as path from "path";
+import * as vscode from "vscode";
 import { DiagnosticsRegistrator } from "../../registrators/DiagnosticsRegistrator";
+import { FileRenameHandler, IFileChanges } from "./abstraction/FileRenameHandler";
 
 export class JSFileRenameHandler extends FileRenameHandler {
 	public handleFileRename(oldUri: vscode.Uri, newUri: vscode.Uri, allFiles: IFileChanges[]): IFileChanges[] {
@@ -13,7 +12,7 @@ export class JSFileRenameHandler extends FileRenameHandler {
 		const isTS = oldUri.fsPath.endsWith(".ts");
 		DiagnosticsRegistrator.removeDiagnosticForUri(oldUri, isTS ? "ts" : "js");
 
-		UI5Plugin.getInstance().parser.classFactory.setNewNameForClass(oldUri.fsPath, newUri.fsPath);
+		this._parser.classFactory.setNewNameForClass(oldUri.fsPath, newUri.fsPath);
 
 		return allFiles;
 	}
@@ -51,8 +50,8 @@ export class JSFileRenameHandler extends FileRenameHandler {
 		const oldOrNewFile = allFiles.find(
 			file => file.fileData.fsPath === oldUri.fsPath || file.fileData.fsPath === newUri.fsPath
 		);
-		const oldClassNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(oldUri.fsPath);
-		const newClassNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(newUri.fsPath);
+		const oldClassNameDotNotation = this._parser.fileReader.getClassNameFromPath(oldUri.fsPath);
+		const newClassNameDotNotation = this._parser.fileReader.getClassNameFromPath(newUri.fsPath);
 
 		if (!oldOrNewFile || !oldClassNameDotNotation || !newClassNameDotNotation) {
 			return allFiles;

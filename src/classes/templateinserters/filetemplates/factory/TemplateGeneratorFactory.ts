@@ -1,3 +1,5 @@
+import { UI5JSParser, UI5TSParser } from "ui5plugin-parser";
+import ParserPool from "ui5plugin-parser/dist/parser/pool/ParserPool";
 import { TemplateGenerator } from "../abstraction/TemplateGenerator";
 import { JSTemplateGenerator } from "../JSTemplateGenerator";
 import { TSTemplateGenerator } from "../TSTemplateGenerator";
@@ -7,12 +9,16 @@ export class TemplateGeneratorFactory {
 	static createInstance(filePath: string): TemplateGenerator | undefined {
 		let templateGenerator;
 
-		if (filePath.endsWith(".js")) {
-			templateGenerator = new JSTemplateGenerator();
+		const parser = ParserPool.getParserForFile(filePath);
+		if (!parser) {
+			return;
+		}
+		if (filePath.endsWith(".js") && parser instanceof UI5JSParser) {
+			templateGenerator = new JSTemplateGenerator(parser);
 		} else if (filePath.endsWith(".xml")) {
 			templateGenerator = new XMLTemplateGenerator();
-		} else if (filePath.endsWith(".ts")) {
-			templateGenerator = new TSTemplateGenerator();
+		} else if (filePath.endsWith(".ts") && parser instanceof UI5TSParser) {
+			templateGenerator = new TSTemplateGenerator(parser);
 		}
 
 		return templateGenerator;

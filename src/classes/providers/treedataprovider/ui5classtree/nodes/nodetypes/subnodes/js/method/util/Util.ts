@@ -1,12 +1,15 @@
-import { AbstractCustomClass, ICustomClassMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
-import { UI5Plugin } from "../../../../../../../../../../UI5Plugin";
+import {
+	AbstractCustomClass,
+	ICustomClassMethod
+} from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import ParserBearer from "../../../../../../../../../ui5parser/ParserBearer";
 
-export class Util {
-	static getMethodLines(UIMethod: ICustomClassMethod) {
-		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(UIMethod.owner);
+export class Util extends ParserBearer {
+	getMethodLines(UIMethod: ICustomClassMethod) {
+		const UIClass = this._parser.classFactory.getUIClass(UIMethod.owner);
 		if (UIClass instanceof AbstractCustomClass && UIMethod.loc) {
-			const lineEnd = UIMethod.node?.end?.line ?? UIMethod.node?.getEndLineNumber?.() ??  0;
-			const lineStart = UIMethod.loc?.start?.line ?? UIMethod.node?.getStartLineNumber?.() ?? 0;
+			const lineEnd = UIMethod.node?.loc?.end?.line ?? UIMethod.node?.getEndLineNumber?.() ?? 0;
+			const lineStart = UIMethod.node?.loc?.start?.line ?? UIMethod.node?.getStartLineNumber?.() ?? 0;
 
 			let lines = lineEnd - lineStart - 1;
 			if (lines === -1) {
