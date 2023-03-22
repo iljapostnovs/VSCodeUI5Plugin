@@ -1,6 +1,6 @@
 import { Node, StringLiteral } from "ts-morph";
 import * as ts from "typescript";
-import { UI5JSParser } from "ui5plugin-parser";
+import { ParserPool, UI5JSParser } from "ui5plugin-parser";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import {
 	AbstractCustomClass,
@@ -169,7 +169,7 @@ export class JSDefinitionProvider extends ParserBearer<UI5JSParser> {
 				UIClass.methods.find(method => method.name === memberName) ||
 				UIClass.fields.find(field => field.name === memberName);
 			if (methodOrField) {
-				const isThisClassFromAProject = !!this._parser.fileReader.getManifestForClass(className);
+				const isThisClassFromAProject = !!ParserPool.getManifestForClass(className);
 				if (!isThisClassFromAProject && openInBrowserIfStandardMethod) {
 					this._openClassMethodInTheBrowser(className, memberName);
 				} else {

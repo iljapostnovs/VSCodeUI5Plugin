@@ -7,7 +7,7 @@ import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapte
 import ParserBearer from "../../../ui5parser/ParserBearer";
 
 export class XMLHoverProvider extends ParserBearer {
-	getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
+	getHovers(document: vscode.TextDocument, position: vscode.Position) {
 		const range = document.getWordRangeAtPosition(position);
 		const wordWithPrefix = document.getText(range);
 		const wordWithPrefixParts = wordWithPrefix.split(":");

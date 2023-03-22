@@ -25,7 +25,7 @@ export class ViewIdCompletionItemFactory extends ParserBearer<UI5JSParser> imple
 				const classNameAtById = positionStrategy.getClassNameOfTheVariableAtPosition(
 					currentClassName,
 					nodes[0].callee?.property?.start
-				);
+				)?.split("|")[0].trim();
 				const isControl =
 					classNameAtById &&
 					this._parser.classFactory.isClassAChildOfClassB(classNameAtById, "sap.ui.core.Control");

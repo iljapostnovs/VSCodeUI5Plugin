@@ -1,4 +1,4 @@
-import ParserPool from "ui5plugin-parser/dist/parser/pool/ParserPool";
+import { ParserPool } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { XMLFormatter } from "../utils/XMLFormatter";

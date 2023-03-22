@@ -123,7 +123,7 @@ Before you start working with the plugin, it will be useful to set formatOnSave 
 As well it's recommended to install e.g. Prettier extension for JS files formatting.
 The reason for it is described in [Known limitations](#known-limitations)
 
-Make sure that you have `ui5.plugin.excludeFolderPattern` property set correctly. This property is critical if you have SAPUI5 libraries in your workspace.
+Make sure that you have `excludeFolderPattern` property set correctly for ```ui5parser```. This property is critical if you have SAPUI5 libraries in your workspace.
 
 ---
 

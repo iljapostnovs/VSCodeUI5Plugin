@@ -69,7 +69,7 @@ export class WorkspaceCompletionItemFactory extends ParserBearer implements ICom
 
 		return customClasses
 			.map(customClass => {
-				const manifest = this._parser.fileReader.getManifestForClass(customClass.className);
+				const manifest = ParserPool.getManifestForClass(customClass.className);
 				if (manifest) {
 					const manifestPath = path.normalize(manifest.fsPath);
 					const UI5Manifest: any = manifest.content;

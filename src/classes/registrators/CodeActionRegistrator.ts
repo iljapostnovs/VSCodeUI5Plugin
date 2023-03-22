@@ -1,5 +1,4 @@
-import { UI5JSParser } from "ui5plugin-parser";
-import ParserPool from "ui5plugin-parser/dist/parser/pool/ParserPool";
+import { ParserPool, UI5JSParser } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { JSCodeActionProvider } from "../providers/codeactions/js/JSCodeActionProvider";

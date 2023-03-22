@@ -1,5 +1,5 @@
+import { ParserPool } from "ui5plugin-parser";
 import { CustomJSClass, ICustomClassJSMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
-import ParserPool from "ui5plugin-parser/dist/parser/pool/ParserPool";
 import * as vscode from "vscode";
 import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";
 import ParserBearer from "../../ui5parser/ParserBearer";

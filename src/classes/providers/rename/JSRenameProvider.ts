@@ -51,12 +51,10 @@ export class JSRenameProvider extends ParserBearer<UI5JSParser> {
 						const classNameOfTheCurrentMethod = strategy.acornGetClassName(className, offset, true);
 						const isThisClassFromAProject =
 							classNameOfTheCurrentMethod &&
-							!!this._parser.fileReader.getManifestForClass(classNameOfTheCurrentMethod);
+							!!ParserPool.getManifestForClass(classNameOfTheCurrentMethod);
 						if (classNameOfTheCurrentMethod && isThisClassFromAProject) {
-							const UIClass = <CustomJSClass>(
-								this._parser.classFactory.getUIClass(classNameOfTheCurrentMethod)
-							);
-							if (UIClass.fsPath) {
+							const UIClass = this._parser.classFactory.getUIClass(classNameOfTheCurrentMethod);
+							if (UIClass instanceof CustomJSClass && UIClass.fsPath) {
 								const uri = vscode.Uri.file(UIClass.fsPath);
 								const document = await vscode.workspace.openTextDocument(uri);
 

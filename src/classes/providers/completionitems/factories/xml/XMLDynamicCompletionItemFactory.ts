@@ -1,6 +1,6 @@
+import { ParserPool } from "ui5plugin-parser";
 import {
 	AbstractJSClass,
-	ITypeValue,
 	IUIAggregation,
 	IUIEvent,
 	IUIProperty
@@ -16,6 +16,10 @@ import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 import { StandardXMLCompletionItemFactory } from "./StandardXMLCompletionItemFactory";
 
+interface ITypeValue {
+	text: string;
+	description: string | vscode.MarkdownString;
+}
 export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
 		let completionItems: CustomCompletionItem[] = [];
@@ -154,6 +158,21 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 						}));
 
 						completionItems = this._generateCompletionItemsFromTypeValues(mappedMethods);
+					} else if (className === "sap.ui.core.Fragment" && attributeName === "fragmentName") {
+						const fragments = ParserPool.getAllFragments();
+						const fragmentData: ITypeValue[] = fragments.map(fragment => {
+							const description = new vscode.MarkdownString()
+								.appendMarkdown(`Name: \`\`\`${fragment.name}\`\`\`<br/>`)
+								.appendMarkdown(`Path: \`\`\`${fragment.fsPath}\`\`\``)
+								.appendCodeblock(fragment.content, "xml");
+							description.supportHtml = true;
+							return {
+								text: fragment.name,
+								description: description
+							};
+						});
+
+						completionItems = this._generateCompletionItemsFromTypeValues(fragmentData);
 					}
 				}
 			}
@@ -186,7 +205,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 				} else if (libName) {
 					let tagPrefix = this._parser.xmlParser.getTagPrefix(currentTagText);
 					tagPrefix = tagPrefix ? `${tagPrefix}:` : "";
-					const isThisClassFromAProject = !!this._parser.fileReader.getManifestForClass(libName + ".");
+					const isThisClassFromAProject = !!ParserPool.getManifestForClass(libName + ".");
 					if (!isThisClassFromAProject) {
 						completionItems = this._getStandardCompletionItemsFilteredByLibraryName(libName);
 						completionItems = this._filterCompletionItemsByAggregationsType(
@@ -242,7 +261,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 			"StandardXMLCompletionItemFactory"
 		);
 		const wsFolders = vscode.workspace.workspaceFolders || [];
-		const classNames = wsFolders.reduce((accumulator: string[], wsFolder: vscode.WorkspaceFolder) => {
+		const classNames = wsFolders.reduce((accumulator: string[], wsFolder) => {
 			const classNames = this._parser.fileReader.getAllJSClassNamesFromProject({ fsPath: wsFolder.uri.fsPath });
 			accumulator = accumulator.concat(classNames);
 

@@ -1,4 +1,4 @@
-import { ParserPool, UI5JSParser } from "ui5plugin-parser";
+import { ParserPool, UI5JSParser, WorkspaceFolder } from "ui5plugin-parser";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
 import { IAbstract, IStatic } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
@@ -6,7 +6,6 @@ import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
 import { CustomTSObject } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSObject";
 import { IFragment, IView, IXMLFile } from "ui5plugin-parser/dist/classes/parsing/util/filereader/IFileReader";
-import { WorkspaceFolder } from "vscode";
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 
 export class ClassDiagramGenerator extends DiagramGenerator {
@@ -19,7 +18,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 			"@startuml ClassDiagram\nskinparam linetype ortho\nset namespaceSeparator none\nskinparam dpi 300\n";
 
 		const classNames = this._parser.fileReader
-			.getAllJSClassNamesFromProject({ fsPath: wsFolder.uri.fsPath })
+			.getAllJSClassNamesFromProject({ fsPath: wsFolder.fsPath })
 			.filter(className => !className.includes("-"));
 		const groupedClassNames = this._groupClassNamesToPackages([...classNames]);
 		Object.keys(groupedClassNames.packages).forEach(packageName => {
@@ -45,8 +44,8 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 			.filter(XMLFile => !groupedClassNames.viewsUsed.includes(XMLFile));
 		const fragments = this._parser.fileReader.getAllFragments();
 		const XMLFiles = [...views, ...fragments].filter((XMLFile: IXMLFile) => {
-			const manifest = this._parser.fileReader.getManifestForClass(XMLFile.name);
-			const dependencyIsFromSameProject = manifest && manifest.fsPath.startsWith(wsFolder.uri.fsPath);
+			const manifest = ParserPool.getManifestForClass(XMLFile.name);
+			const dependencyIsFromSameProject = manifest && manifest.fsPath.startsWith(wsFolder.fsPath);
 			return dependencyIsFromSameProject;
 		});
 
@@ -273,8 +272,8 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 		return dependencies;
 	}
 	private _getIfClassesAreWithinSameProject(className1: string, className2: string) {
-		const thisClassManifest = this._parser.fileReader.getManifestForClass(className1);
-		const parentClassManifest = this._parser.fileReader.getManifestForClass(className2);
+		const thisClassManifest = ParserPool.getManifestForClass(className1);
+		const parentClassManifest = ParserPool.getManifestForClass(className2);
 		return thisClassManifest?.fsPath === parentClassManifest?.fsPath;
 	}
 

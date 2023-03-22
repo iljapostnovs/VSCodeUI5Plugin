@@ -1,5 +1,4 @@
-import { UI5JSParser } from "ui5plugin-parser";
-import ParserPool from "ui5plugin-parser/dist/parser/pool/ParserPool";
+import { ParserPool, UI5JSParser } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { JSHoverProvider } from "../providers/hover/js/JSHoverProvider";
@@ -21,7 +20,7 @@ export class HoverRegistrator {
 			provideHover(document, position) {
 				const parser = ParserPool.getParserForFile(document.fileName);
 				if (parser) {
-					return new XMLHoverProvider(parser).getTextEdits(document, position);
+					return new XMLHoverProvider(parser).getHovers(document, position);
 				}
 			}
 		});

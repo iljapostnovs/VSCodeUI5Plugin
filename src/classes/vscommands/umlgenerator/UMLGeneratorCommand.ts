@@ -49,18 +49,15 @@ export class UMLGeneratorCommand extends ParserBearer {
 	}
 
 	async generateUMLForWholeProject() {
-		const wsFolders = vscode.workspace.workspaceFolders || [];
-		for (const wsFolder of wsFolders) {
-			const generator = UMLGeneratorFactory.createUMLGenerator(this._parser);
-			const diagram = await generator.generate(wsFolder);
-			const path = `${wsFolder.uri.fsPath}${fileSeparator}ProjectUML${generator.getFileExtension()}`;
-			fs.writeFileSync(path, diagram, {
-				encoding: "utf8"
-			});
-			const uri = vscode.Uri.file(path);
-			const document = await vscode.workspace.openTextDocument(uri);
-			vscode.window.showTextDocument(document);
-		}
+		const generator = UMLGeneratorFactory.createUMLGenerator(this._parser);
+		const diagram = await generator.generate(this._parser.workspaceFolder);
+		const path = `${this._parser.workspaceFolder.fsPath}${fileSeparator}ProjectUML${generator.getFileExtension()}`;
+		fs.writeFileSync(path, diagram, {
+			encoding: "utf8"
+		});
+		const uri = vscode.Uri.file(path);
+		const document = await vscode.workspace.openTextDocument(uri);
+		vscode.window.showTextDocument(document);
 
 		vscode.window.showInformationMessage("UML Diagram generated successfully");
 	}

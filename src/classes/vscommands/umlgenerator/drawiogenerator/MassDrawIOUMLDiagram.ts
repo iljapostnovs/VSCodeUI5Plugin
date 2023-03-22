@@ -1,4 +1,4 @@
-import { UI5JSParser } from "ui5plugin-parser";
+import { UI5JSParser, WorkspaceFolder } from "ui5plugin-parser";
 import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
@@ -28,7 +28,7 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 	getFileExtension() {
 		return ".drawio";
 	}
-	generate(wsFolder: vscode.WorkspaceFolder): Promise<string> {
+	generate(wsFolder: WorkspaceFolder): Promise<string> {
 		return new Promise(resolve => {
 			const header = new Header();
 			const footer = new Footer();
@@ -42,7 +42,7 @@ export class MassDrawIOUMLDiagram extends DiagramGenerator {
 				},
 				async progress => {
 					const classNames = this._parser.fileReader.getAllJSClassNamesFromProject({
-						fsPath: wsFolder.uri.fsPath
+						fsPath: wsFolder.fsPath
 					});
 					const classQuantity = classNames.length;
 

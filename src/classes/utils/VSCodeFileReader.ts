@@ -13,7 +13,7 @@ export class VSCodeFileReader extends ParserBearer {
 	getCurrentWorkspaceFoldersManifest() {
 		const currentClassName = this.getClassNameOfTheCurrentDocument();
 		if (currentClassName) {
-			return this._parser.fileReader.getManifestForClass(currentClassName);
+			return ParserPool.getManifestForClass(currentClassName);
 		}
 	}
 

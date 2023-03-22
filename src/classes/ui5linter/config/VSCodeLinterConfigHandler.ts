@@ -1,7 +1,7 @@
 import { ILinterConfigHandler, PackageLinterConfigHandler, Severity } from "ui5plugin-linter";
 import { JSLinterException } from "ui5plugin-linter/dist/classes/config/ILinterConfigHandler";
 import { JSLinters, PropertiesLinters, XMLLinters } from "ui5plugin-linter/dist/classes/Linter";
-import { TextDocument } from "ui5plugin-parser";
+import { ParserPool, TextDocument } from "ui5plugin-parser";
 import { IUI5Parser } from "ui5plugin-parser/dist/parser/abstraction/IUI5Parser";
 import * as vscode from "vscode";
 import ParserBearer from "../../ui5parser/ParserBearer";
@@ -14,7 +14,7 @@ export class VSCodeLinterConfigHandler extends ParserBearer implements ILinterCo
 		const currentDocumentFilePath = vscode.window.activeTextEditor?.document.fileName;
 		const className =
 			currentDocumentFilePath && this._parser.fileReader.getClassNameFromPath(currentDocumentFilePath);
-		const manifest = className && this._parser.fileReader.getManifestForClass(className);
+		const manifest = className && ParserPool.getManifestForClass(className);
 
 		let packagePath: string | undefined;
 		if (manifest) {

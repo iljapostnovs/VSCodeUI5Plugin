@@ -1,5 +1,4 @@
-import { UI5JSParser, UI5TSParser } from "ui5plugin-parser";
-import ParserPool from "ui5plugin-parser/dist/parser/pool/ParserPool";
+import { ParserPool, UI5JSParser, UI5TSParser } from "ui5plugin-parser";
 import { TemplateGenerator } from "../abstraction/TemplateGenerator";
 import { JSTemplateGenerator } from "../JSTemplateGenerator";
 import { TSTemplateGenerator } from "../TSTemplateGenerator";
