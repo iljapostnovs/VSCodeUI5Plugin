@@ -1,3 +1,9 @@
+## 1.0.0 (09-04-2023)
+* Update UI5 Parser to v1.0.0
+* Update UI5 Linter to v1.0.0
+* JSON schema for UI5 Parser and Linter entries in package.json added
+* UI5 Parser related preference entries removed
+
 ## 0.15.11 (04-01-2023)
 * Fix [#188](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/188)
 

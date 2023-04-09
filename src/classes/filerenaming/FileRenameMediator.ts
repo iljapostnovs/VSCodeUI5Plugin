@@ -3,10 +3,10 @@ import * as path from "path";
 import { toNative } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import ParserBearer from "../ui5parser/ParserBearer";
-import { IFileChanges } from "./handlers/abstraction/FileRenameHandler";
 import { ControllerRenameHandler } from "./handlers/ControllerRenameHandler";
-import { JSFileRenameHandler } from "./handlers/JSFileRenameHandler";
+import { JSTSFileRenameHandler } from "./handlers/JSTSFileRenameHandler";
 import { XMLFileRenameHandler } from "./handlers/XMLFileRenameHandler";
+import { IFileChanges } from "./handlers/abstraction/FileRenameHandler";
 const fileSeparator = path.sep;
 export class FileRenameMediator extends ParserBearer {
 	handleFileRename(
@@ -17,7 +17,7 @@ export class FileRenameMediator extends ParserBearer {
 		allFiles: IFileChanges[]
 	): IFileChanges[] {
 		if (uri.newUri.fsPath.endsWith(".js") || uri.newUri.fsPath.endsWith(".ts")) {
-			const jsFileRenameHandler = new JSFileRenameHandler(this._parser);
+			const jsFileRenameHandler = new JSTSFileRenameHandler(this._parser);
 			jsFileRenameHandler.handleFileRename(uri.oldUri, uri.newUri, allFiles);
 		}
 

@@ -242,7 +242,7 @@ export class FileWatcherMediator {
 	}
 
 	private async _applyFileChanges(fileChanges: IFileChanges[]) {
-		const edit = new vscode.WorkspaceEdit();
+		const textEdit = new vscode.WorkspaceEdit();
 		const changedTextDocuments: vscode.TextDocument[] = [];
 		const renames: IFileRenameData[] = fileChanges.flatMap(fileChange => {
 			return fileChange.renames;
@@ -255,7 +255,7 @@ export class FileWatcherMediator {
 			const positionBegin = document.positionAt(0);
 			const positionEnd = document.positionAt(document.getText().length);
 			const range = new vscode.Range(positionBegin, positionEnd);
-			edit.replace(document.uri, range, changedFile.fileData.content);
+			textEdit.replace(document.uri, range, changedFile.fileData.content);
 
 			const parser = ParserPool.getParserForFile(changedFile.fileData.fsPath);
 			if (parser) {
@@ -287,13 +287,17 @@ export class FileWatcherMediator {
 			}
 		});
 
-		renames.forEach(rename => {
-			const oldUri = vscode.Uri.file(rename.oldFSPath);
-			const newUri = vscode.Uri.file(rename.newFSPath);
-			edit.renameFile(oldUri, newUri);
-		});
+		await vscode.workspace.applyEdit(textEdit);
 
-		await vscode.workspace.applyEdit(edit);
+		if (renames.length > 0) {
+			const renameEdit = new vscode.WorkspaceEdit();
+			renames.forEach(rename => {
+				const oldUri = vscode.Uri.file(rename.oldFSPath);
+				const newUri = vscode.Uri.file(rename.newFSPath);
+				renameEdit.renameFile(oldUri, newUri);
+			});
+			await vscode.workspace.applyEdit(renameEdit);
+		}
 	}
 
 	private _handleFileRename(
