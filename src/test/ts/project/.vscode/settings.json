@@ -1,14 +1,11 @@
 {
-	"ui5.plugin.ui5version": "1.84.28",
 	"files.watcherExclude": {
 		"**/target": true
 	},
-	"ui5.plugin.tsInterfaceGenerationPath": "./src/interfaces/diagram.pu",
 	"ui5.plugin.umlGenerationPath": "../UMLDiagram.pu",
 	"ui5.plugin.XMLFileInterfacePath": "",
 	"ui5.plugin.TSODataInterfacesPath": "",
 	"ui5.plugin.ERDiagramPath": "",
 	"ui5.plugin.JSTypeDefDocPath": "",
-	"ui5.plugin.generateXMLFileInterfacePathOnSave": true,
 	"ui5.plugin.generateXMLFileInterfacesOnSave": false
 }
