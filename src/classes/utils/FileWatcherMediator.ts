@@ -190,6 +190,11 @@ export class FileWatcherMediator {
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 
+		disposable = workspace.onDidSaveTextDocument(document => {
+			this._executeGenerateTSXMLInterfacesCommand(document);
+		});
+		UI5Plugin.getInstance().addDisposable(disposable);
+
 		watcher.onDidDelete(uri => {
 			const parser = ParserPool.getParserForFile(uri.fsPath);
 			if (uri.fsPath.endsWith(".js")) {
@@ -239,6 +244,20 @@ export class FileWatcherMediator {
 			}
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
+	}
+
+	private _executeGenerateTSXMLInterfacesCommand(document: vscode.TextDocument) {
+		const textDocument = new TextDocumentAdapter(document);
+		if (textDocument.isXML()) {
+			const ui5PluginConfiguration = vscode.workspace.getConfiguration("ui5.plugin");
+			const isSavingRequired = ui5PluginConfiguration.get<boolean>("generateXMLFileInterfacesOnSave");
+			const isXMLFileInterfacePathSet = !!ui5PluginConfiguration.get<string>("XMLFileInterfacePath");
+			if (isSavingRequired && isXMLFileInterfacePathSet) {
+				return vscode.commands.executeCommand("ui5plugin.generateTSXMLFileInterfaces", {
+					shouldOpenDocument: false
+				});
+			}
+		}
 	}
 
 	private async _applyFileChanges(fileChanges: IFileChanges[]) {

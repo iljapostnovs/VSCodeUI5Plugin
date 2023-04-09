@@ -8,5 +8,7 @@
 	"ui5.plugin.XMLFileInterfacePath": "",
 	"ui5.plugin.TSODataInterfacesPath": "",
 	"ui5.plugin.ERDiagramPath": "",
-	"ui5.plugin.JSTypeDefDocPath": ""
+	"ui5.plugin.JSTypeDefDocPath": "",
+	"ui5.plugin.generateXMLFileInterfacePathOnSave": true,
+	"ui5.plugin.generateXMLFileInterfacesOnSave": false
 }

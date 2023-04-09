@@ -6,10 +6,10 @@ import { UI5Plugin } from "../../UI5Plugin";
 import { ReusableMethods } from "../providers/reuse/ReusableMethods";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
 import { FallbackCommand } from "../vscommands/FallbackCommand";
-import { GenerateTypeJSDocCommand } from "../vscommands/generatetypedoc/GenerateTypeJSDocCommand";
-import { ExportToI18NCommand } from "../vscommands/i18ncommand/ExportToI18NCommand";
 import { InsertCustomClassNameCommand } from "../vscommands/InsertCustomClassNameCommand";
 import { SAPUIDefineCommand } from "../vscommands/SAPUIDefineCommand";
+import { GenerateTypeJSDocCommand } from "../vscommands/generatetypedoc/GenerateTypeJSDocCommand";
+import { ExportToI18NCommand } from "../vscommands/i18ncommand/ExportToI18NCommand";
 import { ControllerModelViewSwitcher } from "../vscommands/switchers/ViewControllerSwitcher";
 import { TSODataInterfaceGenerator } from "../vscommands/tsinterfacegenerator/implementation/TSODataInterfaceGenerator";
 import { TSXMLInterfaceGenerator } from "../vscommands/tsinterfacegenerator/implementation/TSXMLInterfaceGenerator";
@@ -101,9 +101,12 @@ export class CommandRegistrator {
 			}
 		);
 
+		interface IGenerateTSXMLFileInterfacesArg {
+			shouldOpenDocument: boolean;
+		}
 		const generateTSXMLFileInterfacesCommand = vscode.commands.registerCommand(
 			"ui5plugin.generateTSXMLFileInterfaces",
-			async () => {
+			async (options: IGenerateTSXMLFileInterfacesArg = { shouldOpenDocument: true }) => {
 				const parser = ReusableMethods.getParserForCurrentActiveDocument();
 				if (parser) {
 					const oTSInterfaceGenerator = new TSXMLInterfaceGenerator(parser);
@@ -126,7 +129,9 @@ export class CommandRegistrator {
 							language: "typescript"
 						});
 					}
-					await vscode.window.showTextDocument(document);
+					if (options.shouldOpenDocument) {
+						await vscode.window.showTextDocument(document);
+					}
 				}
 			}
 		);
