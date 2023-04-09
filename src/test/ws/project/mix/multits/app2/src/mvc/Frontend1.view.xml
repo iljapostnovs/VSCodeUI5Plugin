@@ -1,0 +1,7 @@
+<mvc:View
+	controllerName="com.test.mix.multi.ts.app2.mvc.Frontend1"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+>
+	<Text text="Hi"/>
+</mvc:View>

@@ -1,0 +1,17 @@
+{
+	"classes": [
+		"com.test.mix.multi.js.app1.mvc.Frontend1",
+		"com.test.mix.multi.js.app2.mvc.Frontend1",
+		"com.test.mix.multi.js.app1.mvc.Frontend1Model",
+		"com.test.mix.multi.js.app2.mvc.Frontend1Model"
+	],
+	"views": [
+		"com.test.mix.multi.js.app1.mvc.Frontend1",
+		"com.test.mix.multi.js.app2.mvc.Frontend1"
+	],
+	"fragments": [
+		"com.test.mix.multi.js.app1.mvc.FrontendFragment1",
+		"com.test.mix.multi.js.app2.mvc.FrontendFragment1"
+	],
+	"parserQuantity": 2
+}

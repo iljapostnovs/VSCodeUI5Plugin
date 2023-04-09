@@ -1,6 +1,11 @@
-import { ReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts/util/ReferenceFinder";
-import { TSReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts/util/TSReferenceFinder";
-import { ICustomTSField, ICustomTSMethod, UI5JSParser, UI5TSParser } from "ui5plugin-parser";
+import {
+	ICustomTSField,
+	ICustomTSMethod,
+	ReferenceFinder,
+	TSReferenceFinder,
+	UI5JSParser,
+	UI5TSParser
+} from "ui5plugin-parser";
 import {
 	CustomJSClass,
 	ICustomClassJSField,

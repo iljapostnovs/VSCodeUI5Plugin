@@ -1,0 +1,6 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+>
+	<Text text="test"/>
+</c:FragmentDefinition>

@@ -1,4 +1,4 @@
-import { ParserFactory, ParserPool, UI5JSParser, WorkspaceFolder } from "ui5plugin-parser";
+import { ParserFactory, UI5JSParser, WorkspaceFolder } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { SAPUIDefineFactory } from "./classes/providers/completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
 import { WorkspaceCompletionItemFactory } from "./classes/providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
@@ -50,19 +50,11 @@ export class UI5Plugin {
 				CommandRegistrator.register(false);
 				const globalStoragePath = context.globalStorageUri.fsPath;
 				const parsers = await ParserFactory.createInstances(workspaceFolders, globalStoragePath);
-				parsers.forEach(parser => {
-					const manifests = parser.fileReader.getAllManifests();
-					if (manifests.length > 1) {
-						vscode.window.showInformationMessage(
-							`Project in workspace "${parser.workspaceFolder.fsPath}" has ${manifests.length} manifests. Nested manifest projects are not supported and might work inconsistently.`
-						);
-					} else if (manifests.length === 0) {
-						vscode.window.showInformationMessage(
-							`No manifests found for project in "${parser.workspaceFolder.fsPath}" workspace.`
-						);
-						ParserPool.deregister(parser);
-					}
-				});
+				const initializationMessages = ParserFactory.getInitializationMessages();
+				const messages = initializationMessages.map(message => message.message);
+				if (messages.length > 0) {
+					vscode.window.showWarningMessage(`Initialization warnings: \n${messages.join(",\n")}`);
+				}
 				if (parsers.length === 0) {
 					this.registerFallbackCommands();
 					return;

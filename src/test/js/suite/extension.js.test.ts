@@ -431,23 +431,6 @@ suite("Extension Test Suite", () => {
 		}
 	});
 
-	// test("Check config handler", () => {
-	// 	const testData = data.ConfigHandler;
-	// 	testData.forEach(config => {
-	// 		const parser = <UI5JSParser>ParserPool.getParserForCustomClass(config.className);
-	// 		const isException = new VSCodeLinterConfigHandler().checkIfMemberIsException(
-	// 			config.className,
-	// 			config.methodName
-	// 		);
-
-	// 		assert.strictEqual(
-	// 			isException,
-	// 			config.result,
-	// 			`"${config.className}" -> "${config.methodName}" should have exception value "${config.result}", but it has "${isException}"`
-	// 		);
-	// 	});
-	// });
-
 	test("View ID Completion items generated successfully", async () => {
 		const testData = CompletionItemsData.ViewId;
 

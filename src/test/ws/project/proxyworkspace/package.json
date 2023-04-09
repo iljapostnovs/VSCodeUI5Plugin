@@ -1,0 +1,10 @@
+{
+	"ui5": {
+		"ui5parser": {
+			"proxyWorkspaces": [
+				"./frontend1",
+				"./frontend2"
+			]
+		}
+	}
+}

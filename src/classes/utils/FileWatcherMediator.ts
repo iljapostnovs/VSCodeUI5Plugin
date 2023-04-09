@@ -1,9 +1,8 @@
-import * as ts from "typescript";
 import { PackageLinterConfigHandler } from "ui5plugin-linter";
-import { IReferenceCodeLensCacheable } from "ui5plugin-linter/dist/classes/js/parts/util/ReferenceFinderBase";
-import { PackageParserConfigHandler, ParserPool, UI5TSParser } from "ui5plugin-parser";
+import { PackageParserConfigHandler, ParserPool, toNative, UI5TSParser } from "ui5plugin-parser";
 import { ICacheable } from "ui5plugin-parser/dist/classes/parsing/abstraction/ICacheable";
 import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { IReferenceCodeLensCacheable } from "ui5plugin-parser/dist/classes/parsing/util/referencefinder/ReferenceFinderBase";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
@@ -21,10 +20,30 @@ export class FileWatcherMediator {
 		uri: vscode.Uri,
 		document?: vscode.TextDocument,
 		force = true,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		contentChanges?: Readonly<vscode.TextDocumentContentChangeEvent[]>
 	) {
 		if (!document) {
 			document = await vscode.workspace.openTextDocument(uri);
+		}
+
+		if (document.fileName.endsWith("package.json")) {
+			const nativePath = toNative(document.fileName);
+			delete PackageLinterConfigHandler.packageCache[nativePath];
+			delete PackageParserConfigHandler.packageCache[nativePath];
+			// if (contentChanges) {
+			// const contentChange = contentChanges[0];
+			// const changeOffset = contentChange.rangeOffset;
+			// const oldPackage = PackageParserConfigHandler.packageCache[nativePath];
+			// if in ui5parser, then reload
+			// }
+
+			const parsers = ParserPool.getAllParsers();
+			parsers.forEach(parser => {
+				if (parser.configHandler instanceof PackageParserConfigHandler) {
+					parser.configHandler.loadCache();
+				}
+			});
 		}
 		const parser = ParserPool.getParserForFile(document.fileName);
 		if (!parser) {
@@ -34,12 +53,12 @@ export class FileWatcherMediator {
 			const currentClassNameDotNotation = parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassNameDotNotation) {
 				if (document.fileName.endsWith(".ts") && parser instanceof UI5TSParser) {
-					const textChanges: ts.TextChange[] | undefined = contentChanges?.map(contentChange => {
-						return {
-							newText: contentChange.text,
-							span: { length: contentChange.rangeLength, start: contentChange.rangeOffset }
-						};
-					});
+					// const textChanges: ts.TextChange[] | undefined = contentChanges?.map(contentChange => {
+					// 	return {
+					// 		newText: contentChange.text,
+					// 		span: { length: contentChange.rangeLength, start: contentChange.rangeOffset }
+					// 	};
+					// });
 					parser.classFactory.setNewCodeForClass(
 						currentClassNameDotNotation,
 						document.getText(),
@@ -47,7 +66,8 @@ export class FileWatcherMediator {
 						undefined,
 						undefined,
 						true,
-						textChanges
+						undefined
+						// textChanges
 					);
 				} else {
 					parser.classFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText(), force);
@@ -55,16 +75,13 @@ export class FileWatcherMediator {
 			}
 		} else if (document.fileName.endsWith(".view.xml")) {
 			const viewContent = document.getText();
-			parser.fileReader.setNewViewContentToCache(viewContent, document.uri.fsPath, true);
+			parser.fileReader.setNewViewContentToCache(viewContent, toNative(document.uri.fsPath), true);
 		} else if (document.fileName.endsWith(".fragment.xml")) {
-			parser.fileReader.setNewFragmentContentToCache(document.getText(), document.fileName, true);
+			parser.fileReader.setNewFragmentContentToCache(document.getText(), toNative(document.fileName), true);
 		} else if (document.fileName.endsWith(".properties")) {
 			parser.resourceModelData.updateCache(new TextDocumentAdapter(document));
 		} else if (document.fileName.endsWith("manifest.json")) {
 			parser.fileReader.rereadAllManifests();
-		} else if (document.fileName.endsWith("package.json")) {
-			delete PackageLinterConfigHandler.packageCache[document.fileName];
-			delete PackageParserConfigHandler.packageCache[document.fileName];
 		}
 
 		this._updateDiagnosticsIfNecessary(document);
@@ -143,7 +160,7 @@ export class FileWatcherMediator {
 
 		disposable = vscode.workspace.onDidChangeTextDocument(event => {
 			if (event.contentChanges.length) {
-				this._onChange(event.document.uri, event.document, false);
+				this._onChange(event.document.uri, event.document, false, event.contentChanges);
 			}
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
@@ -245,13 +262,13 @@ export class FileWatcherMediator {
 				if (changedFile.fileData.fsPath.endsWith(".fragment.xml")) {
 					parser.fileReader.setNewFragmentContentToCache(
 						changedFile.fileData.content,
-						changedFile.fileData.fsPath,
+						toNative(changedFile.fileData.fsPath),
 						true
 					);
 				} else if (changedFile.fileData.fsPath.endsWith(".view.xml")) {
 					parser.fileReader.setNewViewContentToCache(
 						changedFile.fileData.content,
-						changedFile.fileData.fsPath,
+						toNative(changedFile.fileData.fsPath),
 						true
 					);
 				} else if (changedFile.fileData.fsPath.endsWith("manifest.json")) {
@@ -310,8 +327,8 @@ export class FileWatcherMediator {
 		if (uri.fsPath.endsWith(".js") || uri.fsPath.endsWith(".ts")) {
 			const parser = ParserPool.getParserForFile(uri.fsPath);
 			if (parser instanceof UI5TSParser) {
-				const project = parser.getProject(uri.fsPath);
-				project?.addSourceFileAtPath(document.fileName);
+				const project = parser.getProject(toNative(uri.fsPath));
+				project?.addSourceFileAtPath(toNative(document.fileName));
 			}
 			parser?.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document), false);
 		}
@@ -320,7 +337,8 @@ export class FileWatcherMediator {
 	private async _insertCodeTemplateOrSetNewContent(uri: vscode.Uri) {
 		const document = await vscode.workspace.openTextDocument(uri);
 		if (document.getText().length === 0) {
-			const templateInserter = TemplateGeneratorFactory.createInstance(uri.fsPath);
+			const fsPath = toNative(uri.fsPath);
+			const templateInserter = TemplateGeneratorFactory.createInstance(fsPath);
 			const textToInsert = templateInserter?.generateTemplate(uri);
 			if (textToInsert) {
 				const edit = new vscode.WorkspaceEdit();

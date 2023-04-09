@@ -1,0 +1,9 @@
+<mvc:View
+	controllerName="com.test.mix.multi.ts.app1.mvc.Frontend1"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:c="sap.ui.core"
+	xmlns="sap.m"
+>
+	<Text text="Hi"/>
+	<c:Fragment fragmentName="com.test.mix.multi.ts.app2.mvc.Frontend1Fragment"/>
+</mvc:View>

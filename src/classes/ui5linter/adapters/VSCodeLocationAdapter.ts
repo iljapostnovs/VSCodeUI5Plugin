@@ -1,4 +1,4 @@
-import { ILocation } from "ui5plugin-linter/dist/classes/js/parts/util/ReferenceFinderBase";
+import { ILocation } from "ui5plugin-parser/dist/classes/parsing/util/referencefinder/ReferenceFinderBase";
 import * as vscode from "vscode";
 import { RangeAdapter } from "../../adapters/vscode/RangeAdapter";
 export class VSCodeLocationAdapter extends vscode.Location {

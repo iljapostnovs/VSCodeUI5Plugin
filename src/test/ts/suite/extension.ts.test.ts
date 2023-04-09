@@ -1,8 +1,7 @@
 import assert = require("assert");
 import { after, test } from "mocha";
 import { UnusedMemberLinter } from "ui5plugin-linter/dist/classes/js/parts/UnusedMemberLinter";
-import { TSReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts/util/TSReferenceFinder";
-import { ParserPool, TextDocument, UI5TSParser } from "ui5plugin-parser";
+import { ParserPool, TextDocument, TSReferenceFinder, UI5TSParser } from "ui5plugin-parser";
 import {
 	ICustomClassField,
 	ICustomClassMethod

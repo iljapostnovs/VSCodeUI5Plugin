@@ -1,6 +1,6 @@
-import * as path from "path";
-import * as Mocha from "mocha";
 import * as glob from "glob";
+import * as Mocha from "mocha";
+import * as path from "path";
 export function run(): Promise<void> {
 	const mocha = new Mocha({
 		ui: "tdd",
@@ -10,28 +10,28 @@ export function run(): Promise<void> {
 
 	const testsRoot = path.resolve(__dirname, "../..");
 
-	return new Promise((c, e) => {
-		glob("**/**.ts.test.js", { cwd: testsRoot }, (err, files) => {
-			if (err) {
-				return e(err);
-			}
-
-			// Add files to the test suite
+	// eslint-disable-next-line no-async-promise-executor
+	return new Promise(async (resolve, reject) => {
+		try {
+			const files = await glob.glob("**/**.ts.test.js", { cwd: testsRoot });
 			files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
 
 			try {
 				// Run the mocha test
 				mocha.run(failures => {
 					if (failures > 0) {
-						e(new Error(`${failures} tests failed.`));
+						reject(new Error(`${failures} tests failed.`));
 					} else {
-						c();
+						resolve();
 					}
 				});
 			} catch (err) {
 				console.error(err);
-				e(err);
+				reject(err);
 			}
-		});
+		} catch (error) {
+			reject(error);
+		}
 	});
 }
+

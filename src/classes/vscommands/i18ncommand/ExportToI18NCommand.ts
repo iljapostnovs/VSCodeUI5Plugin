@@ -1,36 +1,50 @@
-import * as fs from "fs";
+import { appendFile } from "fs/promises";
 import * as path from "path";
 import * as vscode from "vscode";
 import ParserBearer from "../../ui5parser/ParserBearer";
-import { VSCodeFileReader } from "../../utils/VSCodeFileReader";
 import * as jsClassData from "./i18nIDs.json";
 import { CaseType, TextTransformationFactory } from "./TextTransformationFactory";
 
 export class ExportToI18NCommand extends ParserBearer {
 	public async export() {
 		const editor = vscode.window.activeTextEditor;
-
-		if (editor) {
-			const stringRange =
-				this._getStringRange() || new vscode.Range(editor.selection.start, editor.selection.start);
-			let stringForReplacing = editor.document.getText(stringRange);
-			stringForReplacing = stringForReplacing.substring(1, stringForReplacing.length - 1);
-			const I18nID = await this._askUserForI18nID(stringForReplacing);
-			if (I18nID) {
-				const textForInsertionIntoI18N = await this._generateStringForI18NInsert(stringForReplacing, I18nID);
-				const textForInsertionIntoCurrentFile = this._getStringForSavingIntoI18n(I18nID);
-
-				await this._insertIntoI18NFile(textForInsertionIntoI18N);
-
-				editor.edit(editBuilder => {
-					if (editor) {
-						editBuilder.replace(stringRange, textForInsertionIntoCurrentFile);
-
-						editor.selection = new vscode.Selection(stringRange.start, stringRange.start);
-					}
-				});
-			}
+		if (!editor) {
+			return;
 		}
+
+		const stringRange = this._getStringRange() || new vscode.Range(editor.selection.start, editor.selection.start);
+		let stringForReplacing = editor.document.getText(stringRange);
+		stringForReplacing = stringForReplacing.substring(1, stringForReplacing.length - 1);
+		const I18nID = await this._askUserForI18nID(stringForReplacing);
+		if (!I18nID) {
+			return;
+		}
+
+		const i18nIdIsDuplicated = this._getIfi18nIdIsDuplicated(I18nID);
+		if (!i18nIdIsDuplicated) {
+			const textForInsertionIntoI18N = await this._generateStringForI18NInsert(stringForReplacing, I18nID);
+			await this._insertIntoI18NFile(textForInsertionIntoI18N);
+		}
+
+		const textForInsertionIntoCurrentFile = this._getStringForSavingIntoI18n(I18nID);
+		editor.edit(editBuilder => {
+			if (editor) {
+				editBuilder.replace(stringRange, textForInsertionIntoCurrentFile);
+
+				editor.selection = new vscode.Selection(stringRange.start, stringRange.start);
+			}
+		});
+	}
+
+	private _getIfi18nIdIsDuplicated(I18nID: string) {
+		const [manifest] = this._parser.fileReader.getAllManifests();
+		if (!manifest) {
+			return false;
+		}
+		const componentName = manifest.componentName;
+		const resourceModelTexts = this._parser.resourceModelData.resourceModels[componentName];
+
+		return resourceModelTexts.some(text => text.id === I18nID);
 	}
 
 	private _getStringRange() {
@@ -204,13 +218,13 @@ export class ExportToI18NCommand extends ParserBearer {
 	}
 
 	private async _insertIntoI18NFile(stringToInsert: string) {
-		const manifest = new VSCodeFileReader(this._parser).getCurrentWorkspaceFoldersManifest();
+		const [manifest] = this._parser.fileReader.getAllManifests();
 		const manifestFsPath = manifest?.fsPath;
 		const i18nRelativePath = manifest?.content["sap.app"]?.i18n;
 		if (manifestFsPath && i18nRelativePath) {
 			const i18nFSPath = `${manifestFsPath}${path.sep}${i18nRelativePath.replace(/\//g, path.sep)}`;
 
-			fs.appendFileSync(i18nFSPath, stringToInsert, "utf8");
+			await appendFile(i18nFSPath, stringToInsert, "utf8");
 			this._parser.resourceModelData.readTexts();
 		}
 	}

@@ -1,3 +1,4 @@
+import { realpathSync } from "fs";
 import {
 	AbstractCustomClass,
 	ICustomClassMethod

@@ -1,6 +1,7 @@
 /out
 *.vsix
-/node_modules
+**/node_modules/**
 /dist
+/src/test/**/package-lock.json
 .vscode-test
 *.cpuprofile

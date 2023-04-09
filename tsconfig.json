@@ -15,6 +15,7 @@
 		"node_modules",
 		"src/test/ts/project",
 		"src/test/js/project",
+		"src/test/ws/project",
 		".vscode-test",
 		"dist"
 	]

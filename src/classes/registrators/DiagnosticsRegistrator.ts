@@ -1,4 +1,4 @@
-import { ParserPool, UI5JSParser, UI5TSParser } from "ui5plugin-parser";
+import { ParserPool, toNative, UI5JSParser, UI5TSParser } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { RangeAdapter } from "../adapters/vscode/RangeAdapter";
@@ -93,26 +93,26 @@ export class DiagnosticsRegistrator {
 	}
 
 	static updateDiagnosticCollection(document: vscode.TextDocument, bForce = false) {
-		const parser = ParserPool.getParserForFile(document.fileName);
+		const fileName = document.fileName;
+		const parser = ParserPool.getParserForFile(fileName);
 		if (!parser) {
 			return;
 		}
-		const fileName = document.fileName;
 		if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
-			if (document.fileName.endsWith(".fragment.xml")) {
-				parser.fileReader.setNewFragmentContentToCache(document.getText(), document.fileName);
-			} else if (document.fileName.endsWith(".view.xml")) {
-				parser.fileReader.setNewViewContentToCache(document.getText(), document.fileName);
+			if (fileName.endsWith(".fragment.xml")) {
+				parser.fileReader.setNewFragmentContentToCache(document.getText(), toNative(fileName));
+			} else if (fileName.endsWith(".view.xml")) {
+				parser.fileReader.setNewViewContentToCache(document.getText(), toNative(fileName));
 			}
 			this._updateXMLDiagnostics(document, xmlDiagnosticCollection);
 		} else if (fileName.endsWith(".js")) {
-			const className = parser.fileReader.getClassNameFromPath(document.fileName);
+			const className = parser.fileReader.getClassNameFromPath(fileName);
 			if (className) {
 				parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
 			}
 			this._updateJSDiagnostics(document, jsDiagnosticCollection);
 		} else if (fileName.endsWith(".ts")) {
-			const className = parser.fileReader.getClassNameFromPath(document.fileName);
+			const className = parser.fileReader.getClassNameFromPath(fileName);
 			if (className) {
 				parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
 			}

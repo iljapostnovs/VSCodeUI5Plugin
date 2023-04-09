@@ -1,5 +1,6 @@
 import * as glob from "glob";
 import * as path from "path";
+import { toNative } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import ParserBearer from "../ui5parser/ParserBearer";
 import { IFileChanges } from "./handlers/abstraction/FileRenameHandler";
@@ -34,13 +35,17 @@ export class FileRenameMediator extends ParserBearer {
 	}
 
 	handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri, fileChanges: IFileChanges[]): IFileChanges[] {
-		const newFilePaths = glob.sync(newUri.fsPath.replace(/\\/g, "/") + "/**/*{.js,.ts,.xml}");
+		const newUriFsPath = toNative(newUri.fsPath);
+		const oldUriFsPath = toNative(oldUri.fsPath);
+		const newFilePaths = glob
+			.sync(newUriFsPath.replace(/\\/g, "/") + "/**/*{.js,.ts,.xml}")
+			.map(fsPath => toNative(fsPath));
 		newFilePaths.forEach(filePath => {
 			const newFileUri = vscode.Uri.file(filePath);
 			const oldFileUri = vscode.Uri.file(
 				filePath
 					.replace(/\//g, fileSeparator)
-					.replace(newUri.fsPath.replace(/\//g, fileSeparator), oldUri.fsPath.replace(/\//g, fileSeparator))
+					.replace(newUriFsPath.replace(/\//g, fileSeparator), oldUriFsPath.replace(/\//g, fileSeparator))
 			);
 
 			this.handleFileRename(

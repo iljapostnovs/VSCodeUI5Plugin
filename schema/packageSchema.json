@@ -1,0 +1,336 @@
+{
+	"$schema": "https://json.schemastore.org/package",
+	"properties": {
+		"ui5": {
+			"description": "UI5 namespace",
+			"type": "object",
+			"properties": {
+				"ui5parser": {
+					"type": "object",
+					"description": "Namespace for UI5 Parser related properties",
+					"properties": {
+						"ui5version": {
+							"type": "string",
+							"description": "SAPUI5 Library version for lib metadata preload",
+							"pattern": "^1\\.[0-9]{2,3}\\.[0-9]{1,2}$"
+						},
+						"excludeFolderPatterns": {
+							"description": "Pattern which shows what should be excluded from file reading. Useful if you have local SAPUI5 libraries or node modules in your workspace. See glob npm package -> ignore option. 'dist', 'resources' and 'node_modules' folders are always excluded.",
+							"type": "array",
+							"items": {
+								"type": "string",
+								"title": "Exclude pattern",
+								"pattern": "^.+$"
+							}
+						},
+						"dataSource": {
+							"type": "string",
+							"description": "UI5 metadata source URL"
+						},
+						"rejectUnauthorized": {
+							"type": "boolean",
+							"description": "Data source related property. If true, the server certificate is verified against the list of supplied CAs. Verification happens at the connection level, before the HTTP request is sent."
+						},
+						"libsToLoad": {
+							"type": "array",
+							"items": {
+								"type": "string",
+								"pattern": "^sap\\..+"
+							},
+							"description": "List of UI5 standard libs to be additionally loaded. Example: 'sap.viz'"
+						},
+						"additionalWorkspaces": {
+							"description": "Additional workspaces to be loaded with the UI5 parser, relative to current working directory. Example: '../MyLibrary'",
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						"proxyWorkspaces": {
+							"description": "Option to tell explicitly where UI5 projects are relative to CWD, useful for CAP projects. Example: './MyUI5App'",
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						}
+					}
+				},
+				"ui5linter": {
+					"type": "object",
+					"description": "Namespace for UI5 Linter related properties",
+					"properties": {
+						"severity": {
+							"description": "Severity for linters",
+							"type": "object",
+							"properties": {
+								"AbstractClassLinter": {
+									"description": "Checks for abstract class member implementation",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"InterfaceLinter": {
+									"description": "Checks for interface member implementation",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"PublicMemberLinter": {
+									"description": "Checks if member should be public. If it has no references outside the class, warning will be triggered",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"UnusedMemberLinter": {
+									"description": "Checks for members with zero references",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"WrongClassNameLinter": {
+									"description": "Checks for correct class name in Class.extend(<here>, ...)",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"WrongFieldMethodLinter": {
+									"description": "Checks for correct usage of class members. (Does member exist? Is it deprecated? Are public/protected/private used accordingly?)",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"WrongFilePathLinter": {
+									"description": "Checks for class existence. All strings which starts with Component id are checked.",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"WrongImportLinter": {
+									"description": "Checks for class existence in sap.ui.define",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"WrongOverrideLinter": {
+									"description": "Checks if overriding is allowed",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"WrongParametersLinter": {
+									"description": "Checks for consistent method parameters usage: parameter quantity, parameter type.",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"UnusedClassLinter": {
+									"description": "Checks if class is imported anywhere, or used in views/fragments if it is Control or Element",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"WrongNamespaceLinter": {
+									"description": "Checks if namespace is correct in JSDoc for TS projects",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"TagAttributeLinter": {
+									"description": "Checks for correctness of the tag attributes in XML files. (Does attribute exist? Does it have correct value?)",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"TagLinter": {
+									"description": "Checks if tags are used properly: does the class or aggregation exist, is it deprecated, is the prefix correct, is correct type of children used for upper scope aggregation?",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"UnusedNamespaceLinter": {
+									"description": "Checks for unused namespaces in XML files",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"UnusedTranslationsLinter": {
+									"description": "Checks if translations in i18n are used",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								}
+							}
+						},
+						"usage": {
+							"description": "Which linters should be used",
+							"type": "object",
+							"properties": {
+								"AbstractClassLinter": {
+									"description": "Checks for abstract class member implementation",
+									"type": "boolean"
+								},
+								"InterfaceLinter": {
+									"description": "Checks for interface member implementation",
+									"type": "boolean"
+								},
+								"PublicMemberLinter": {
+									"description": "Checks if member should be public. If it has no references outside the class, warning will be triggered",
+									"type": "boolean"
+								},
+								"UnusedMemberLinter": {
+									"description": "Checks for members with zero references",
+									"type": "boolean"
+								},
+								"WrongClassNameLinter": {
+									"description": "Checks for correct class name in Class.extend(<here>, ...)",
+									"type": "boolean"
+								},
+								"WrongFieldMethodLinter": {
+									"description": "Checks for correct usage of class members. (Does member exist? Is it deprecated? Are public/protected/private used accordingly?)",
+									"type": "boolean"
+								},
+								"WrongFilePathLinter": {
+									"description": "Checks for class existence. All strings which starts with Component id are checked.",
+									"type": "boolean"
+								},
+								"WrongImportLinter": {
+									"description": "Checks for class existence in sap.ui.define",
+									"type": "boolean"
+								},
+								"WrongOverrideLinter": {
+									"description": "Checks if overriding is allowed",
+									"type": "boolean"
+								},
+								"WrongParametersLinter": {
+									"description": "Checks for consistent method parameters usage: parameter quantity, parameter type.",
+									"type": "boolean"
+								},
+								"UnusedClassLinter": {
+									"description": "Checks if class is imported anywhere, or used in views/fragments if it is Control or Element",
+									"type": "boolean"
+								},
+								"WrongNamespaceLinter": {
+									"description": "Checks if namespace is correct in JSDoc for TS projects",
+									"type": "boolean"
+								},
+								"TagAttributeLinter": {
+									"description": "Checks for correctness of the tag attributes in XML files. (Does attribute exist? Does it have correct value?)",
+									"type": "boolean"
+								},
+								"TagLinter": {
+									"description": "Checks if tags are used properly: does the class or aggregation exist, is it deprecated, is the prefix correct, is correct type of children used for upper scope aggregation?",
+									"type": "boolean"
+								},
+								"UnusedNamespaceLinter": {
+									"description": "Checks for unused namespaces",
+									"type": "boolean"
+								},
+								"UnusedTranslationsLinter": {
+									"description": "Checks if translations in i18n are used",
+									"type": "boolean"
+								}
+							}
+						},
+						"jsLinterExceptions": {
+							"type": "array",
+							"description": "Which members should be excluded from linting. Example: { \"className\": \"sap.ui.model.json.JSONModel\", \"memberName\": \"iSizeLimit\", \"applyToChildren\": true }",
+							"items": {
+								"type": "object",
+								"properties": {
+									"className": {
+										"type": "string",
+										"description": "Class name of the member to be excluded"
+									},
+									"memberName": {
+										"type": "string",
+										"description": "Member (field/method) name of the member to be excluded"
+									},
+									"applyToChildren": {
+										"description": "Should this rule work for children of the class as well",
+										"type": "boolean"
+									}
+								}
+							}
+						},
+						"jsClassExceptions": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "List of class names (e.g. com.test.control.MyControl) to be excluded from linting"
+						},
+						"xmlClassExceptions": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "List of view/fragment names (e.g. com.test.view.MyView) to be excluded from linting"
+						},
+						"componentsToInclude": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "List of component ids to be included in the linting. Makes sense if there are multiple projects needed for linting (e.g. app + library), but only one app needs to be linted"
+						},
+						"componentsToExclude": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "List of component ids to be excluded from the linting. Makes sense if there are multiple projects needed for linting (e.g. app1, app2, library), but only app1 and app2 needs to be linter, so library can be excluded"
+						}
+					}
+				}
+			}
+		}
+	}
+}
