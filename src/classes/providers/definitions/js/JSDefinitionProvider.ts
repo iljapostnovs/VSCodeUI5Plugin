@@ -337,7 +337,7 @@ export class JSDefinitionProvider extends ParserBearer<UI5JSParser> {
 				const classPath = this._parser.fileReader.getClassFSPathFromClassName(UIClass.className);
 				if (classPath) {
 					const classUri = vscode.Uri.file(classPath);
-					if (currentMember.node.start) {
+					if (currentMember.loc?.start) {
 						const position = PositionAdapter.acornPositionToVSCodePosition(currentMember.loc.start);
 						location = new vscode.Location(classUri, position);
 					}

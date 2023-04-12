@@ -186,7 +186,8 @@ export class CommandRegistrator {
 			"ui5plugin.generateUMLClassDiagramsForWholeProject",
 			"ui5plugin.generateERDiagramFromMetadata",
 			"ui5plugin.generateTSXMLFileInterfaces",
-			"ui5plugin.generateTSODataInterfaces"
+			"ui5plugin.generateTSODataInterfaces",
+			"ui5plugin.generateJSTypeDefDocFromMetadata"
 		];
 
 		commands.forEach(command => {

@@ -10,6 +10,127 @@ Any support is highly appreciated!<br/>
 
 # v1.0.0 update
 
+## UI5 Parser
+
+Main changes happened in whole parsing architecture. It was previously "one parser instance for everything", now there can be many. As a result, it is possible to have different project types in one folder/workspace, and every project might have its own configuration. For example, 
+
+### Removed preference entries
+
+All UI5 Parser related preference entries were removed from VSCode, now they should be defined in `package.json`. See [Config default values](https://github.com/iljapostnovs/ui5plugin-parser/blob/master/README.md#config-default-values) for reference.
+
+### Parser instantiation logic
+
+Let's introduce two terms which will be used here:
+
+-   **CWD** - current working directory, or the root folder of the project which is opened in the VSCode.
+-   **Workspace** - UI5 workspace, or the folder which has `manifest.json` in it.
+
+```
+--- CWD ---
+├── webapp
+--- Workspace 1 ---
+│   ├── Component.js
+│   └── manifest.json
+├── library
+--- Workspace 2 ---
+│   ├── library.js
+│   └── manifest.json
+└── package.json
+```
+
+The basic way for instantiating the parser looks as follows:
+
+-   Read `package.json` in `CWD` and use it as a configuration source
+-   Read all `Workspaces` and create UI5 Parser instance for it, using `package.json` as configuration source from previous step
+-   If `CWD` has `tsconfig.json` and any `.ts` files, it is considered to be TS project. Otherwise it's JS project.
+
+> **Important!** Take in mind that nested projects are not supported anymore, which means that there can be no folders with such structure:
+
+```
+├── webapp
+│   ├── library
+│   │   ├── library.js
+│   │   └── manifest.json
+│   ├── Component.js
+│   └── manifest.json
+```
+
+> The structure which will work as expected:
+
+```
+├── library
+│   ├── library.js
+│   └── manifest.json
+├── webapp
+│   ├── Component.js
+│   └── manifest.json
+```
+
+### Additional Workspaces
+
+If there is a e.g. library outside of the `CWD`, checkout `additionalWorkspaces` config for `ui5parser`.
+Example:
+
+```
+├── MyApp (CWD)
+│   │   ├── webapp
+│   │   │   ├── manifest.json
+│   │   │   └── Component.js
+│   └── package.json
+├── MyLibrary (Outside of CWD)
+│   │   ├── src
+│   │   │   ├── manifest.json
+│   │   │   └── library.js
+│   └── package.json
+└── tsconfig.json
+```
+
+To make this work, corresponding entry in `package.json` should be added
+
+```json
+"ui5": {
+   "ui5parser": {
+      "additionalWorkspaces" : ["../MyLibrary"]
+   }
+}
+```
+
+### Proxy Workspaces
+
+There are cases when project is mixed, meaning that one folder may contain many different projects inside, non-ui5 as well. Most frequent case would be CAP project with both backend and frontend in one folder.
+
+Example:
+
+```
+├── frontend
+│   ├── webapp
+│   │   └── manifest.json
+│   ├── package.json (<- this file will be used as configuration source after proxyWorkspaces is configured)
+│   └── tsconfig.json
+├── backend
+│   ├── Whatever.js
+│   └── package.json
+├── package.json (<- proxyWorkspaces should be configured here)
+└── tsconfig.json
+```
+
+To make the parser work only for `frontend` folder, corresponding entry in `package.json` should be added
+
+```json
+"ui5": {
+   "ui5parser": {
+      "proxyWorkspaces" : ["./frontend"]
+   }
+}
+```
+
+What happens is that `CWD` is replaced with the new path from `proxyWorkspaces`, so at instantiation stage `package.json` and `tsconfig.json` from `frontend` folder will be used instead of root folder.
+
+### Other changes
+
+-   If `ui5parser` related entries were changed in the `package.json`, VSCode should be reloaded manually
+-   Check out [Changelog](CHANGELOG.md) for the rest of the changes.
+
 ---
 
 # v0.15.0 update
@@ -367,7 +488,7 @@ Extension listens for `.js`/`.ts` file creation event (rename technically is fil
 
 Custom UI5 Explorer in VSCode panel is available<br/>
 
-1. For JS files tree view contains fields and methods<br/>
+1. For JS/TS files tree view contains fields and methods<br/>
    ![JSTreeView](/images/JSTreeView.png) > Coloring for methods is based on lines count and references count. > _ Red color appears if there are more than 100 lines in one method > _ Orange color appears if there are more than 50 lines in one method or there are 0 references (reference count is ignored if method is overriden) > \* Green color appears for the rest of the cases
 
 2. For XML files tree view contains class tag list<br/>
@@ -389,9 +510,9 @@ Custom UI5 Explorer in VSCode panel is available<br/>
 
 ### Assumptions
 
--   File starts with sap.ui.define
--   Your class body is in AnyUI5Class.extend("name", {_here_});<br/>
--   You have manifest.json with app/lib id
+-   File starts with sap.ui.define (JS)
+-   Your class body is in AnyUI5Class.extend("name", {_here_}); (JS)<br/>
+-   You have manifest.json with App ID
 -   App ID (Component name) and i18n paths are defined in manifest.json
 -   File is without syntax errors
 -   Name of the UI5Class is written accordingly to file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
@@ -399,7 +520,7 @@ Custom UI5 Explorer in VSCode panel is available<br/>
 
 ### Proxy
 
-If HTTP_PROXY or HTTPS_PROXY environment variables are set, ui5.sap.com will be requested using the proxy.
+If HTTP_PROXY or HTTPS_PROXY environment variables are set, https://ui5.sap.com will be requested using the proxy.
 
 # Known issues
 
@@ -434,6 +555,6 @@ Standard VSCode JS Formatter is not handling all formatting issues. `hookyqr.bea
 
 ## ui5.sap.com damaged JSON response
 
-For some reason ui5.sap.com sometimes might return damaged JSON when requesting standard library metadata. As a result, it is possible to get such error as:<br/>
+For some reason `ui5.sap.com` sometimes might return damaged JSON when requesting standard library metadata. As a result, it is possible to get such error as:<br/>
 ![UIFiveError](/images/UIFiveError.png)<br/>
 To solve it, please run `UI5: Clear cache` command and reload VSCode.

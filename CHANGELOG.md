@@ -1,12 +1,14 @@
-## 1.0.0 (09-04-2023)
+## 1.0.0 (12-04-2023)
 
--   UI5 Parser updated to v1.0.0
--   UI5 Linter updated to v1.0.0
--   JSON schema for UI5 Parser and Linter entries in package.json added
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.0.0
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.0.0
+-   JSON schema for UI5 Parser and Linter entries in `package.json` added
 -   UI5 Parser related VSCode preference entries removed, now they are controlled through package.json
 -   New VSCode preference entries added, now all code generators allows to adjust the path where the files will be saved relative to UI5 Project workspace: `ui5.plugin.umlGenerationPath`,`ui5.plugin.XMLFileInterfacePath`,`ui5.plugin.TSODataInterfacesPath`,`ui5.plugin.ERDiagramPath`,`ui5.plugin.JSTypeDefDocPath`
--   New VSCode preference entry added for listening XML file changes and generating XML control id to class TS interfaces automatically: `ui5.plugin.generateXMLFileInterfacesOnSave`.
+-   New VSCode preference entry added for listening XML file changes and generating XML control id to class mapping automatically: `ui5.plugin.generateXMLFileInterfacesOnSave`.
 -   New VSCode preference added for setting the data for `ui5plugin.generateTSXMLFileInterfaces` command. Entry: `ui5.plugin.TSODataInterfacesFetchingData`, which allows to define username, password and url for metadata loading.
+-   Typescript updated to v5.0.2
+-   `webapp` folder is not automatically excluded from reading for TS projects anymore
 
 ## 0.15.11 (04-01-2023)
 

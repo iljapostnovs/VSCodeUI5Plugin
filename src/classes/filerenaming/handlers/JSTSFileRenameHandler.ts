@@ -61,7 +61,7 @@ export class JSTSFileRenameHandler extends FileRenameHandler {
 
 	protected _replaceNamespace(oldUri: vscode.Uri, newUri: vscode.Uri, allFiles: IFileChanges[]): IFileChanges[] {
 		const oldOrNewFile = allFiles.find(
-			file => file.fileData.fsPath === oldUri.fsPath || file.fileData.fsPath === newUri.fsPath
+			file => file.fileData.fsPath === toNative(oldUri.fsPath) || file.fileData.fsPath === toNative(newUri.fsPath)
 		);
 		const oldClassNameDotNotation = this._parser.fileReader.getClassNameFromPath(oldUri.fsPath);
 		const newClassNameDotNotation = this._parser.fileReader.getClassNameFromPath(newUri.fsPath);
