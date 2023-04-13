@@ -1,3 +1,7 @@
+## 1.0.1 (13-04-2023)
+
+-   Error messages now shows if commands failed to execute
+
 ## 1.0.0 (13-04-2023)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.0.0
