@@ -12,7 +12,7 @@ Any support is highly appreciated!<br/>
 
 ## UI5 Parser
 
-Main changes happened in whole parsing architecture. It was previously "one parser instance for everything", now there can be many. As a result, it is possible to have different project types in one folder/workspace, and every project might have its own configuration. For example, 
+Main changes happened in whole parsing architecture. It was previously "one parser instance for everything", now there can be many. As a result, it is possible to have different project types in one folder/workspace, and every project might have its own configuration. For example, it is possible now to have such funny things as JS app with TS library.
 
 ### Removed preference entries
 
