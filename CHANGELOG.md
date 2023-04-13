@@ -9,6 +9,7 @@
 -   New VSCode preference added for setting the data for `ui5plugin.generateTSXMLFileInterfaces` command. Entry: `ui5.plugin.TSODataInterfacesFetchingData`, which allows to define username, password and url for metadata loading.
 -   Typescript updated to v5.0.2
 -   `webapp` folder is not automatically excluded from reading for TS projects anymore
+-   Export string to i18n doesn't add additional translation if it already exists in `i18n.properties`
 
 ## 0.15.11 (04-01-2023)
 
