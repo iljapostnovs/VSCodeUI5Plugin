@@ -23,6 +23,16 @@ jobs:
           npm install
           npm run test:ts
           &cmd.exe /c rd /s /q .vscode-test
+  test_ws:
+    name: Test Extension (Workspaces)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3.1.0
+      - name: Launch tests
+        run: |
+          npm install
+          npm run test:ws:multijs
+          npm run test:ws:multits
   build_artifact:
     name: Build Extension
     runs-on: ubuntu-latest

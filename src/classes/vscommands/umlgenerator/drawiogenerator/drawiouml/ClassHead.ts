@@ -2,7 +2,7 @@ import { IUMLGenerator } from "./interfaces/IUMLGenerator";
 import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 import { Header } from "./Header";
 import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
-import { AbstractUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
 
 export class ClassHead implements IUMLGenerator, ITextLengthGettable {
 	id: number;
@@ -11,8 +11,8 @@ export class ClassHead implements IUMLGenerator, ITextLengthGettable {
 	height = 26;
 	xAxis = 0;
 	yAxis = 0;
-	UIClass: AbstractUIClass;
-	constructor(UIClass: AbstractUIClass, parent: Header) {
+	UIClass: AbstractCustomClass;
+	constructor(UIClass: AbstractCustomClass, parent: Header) {
 		this.id = DrawIOUMLDiagram.getUniqueId();
 		this.UIClass = UIClass;
 		this.parent = parent;

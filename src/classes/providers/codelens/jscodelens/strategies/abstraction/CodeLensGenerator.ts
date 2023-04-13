@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
-export abstract class CodeLensGenerator {
+import ParserBearer from "../../../../../ui5parser/ParserBearer";
+export abstract class CodeLensGenerator extends ParserBearer {
 	abstract getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[];
 }

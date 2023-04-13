@@ -1,39 +1,43 @@
+import { IAggregationGenerator } from "./aggregation/interfaces/IAggregationGenerator";
+import { XMLAggregationGenerator } from "./aggregation/XMLAggregationGenerator";
+import { UIDefineCompletionItemGenerator } from "./define/UIDefineCompletionItemGenerator";
 import { IPropertyGenerator } from "./property/interfaces/IPropertyGenerator";
 import { XMLPropertyGenerator } from "./property/XMLPropertyGenerator";
-import { XMLAggregationGenerator } from "./aggregation/XMLAggregationGenerator";
-import { IAggregationGenerator } from "./aggregation/interfaces/IAggregationGenerator";
-import { UIDefineCompletionItemGenerator } from "./define/UIDefineCompletionItemGenerator";
 
 export class GeneratorFactory {
 	private static readonly _generatorMap = {
 		aggregation: {
-			"xml": XMLAggregationGenerator,
-			"js": XMLAggregationGenerator //TODO: add js aggregation generator
+			xml: XMLAggregationGenerator,
+			js: XMLAggregationGenerator //TODO: add js aggregation generator
 		},
 		property: {
-			"xml": XMLPropertyGenerator,
-			"js": XMLPropertyGenerator //TODO: add js property generator
+			xml: XMLPropertyGenerator,
+			js: XMLPropertyGenerator //TODO: add js property generator
 		},
 		define: {
-			"xml": undefined,
-			"js": UIDefineCompletionItemGenerator
+			xml: undefined,
+			js: UIDefineCompletionItemGenerator
 		}
 	};
 
 	static getPropertyGenerator(language: GeneratorFactory.language) {
-		const propertyGenerator: IPropertyGenerator = new GeneratorFactory._generatorMap[GeneratorFactory.type.property][language];
+		const propertyGenerator: IPropertyGenerator = new GeneratorFactory._generatorMap[
+			GeneratorFactory.type.property
+		][language]();
 
 		return propertyGenerator;
 	}
 
 	static getAggregationGenerator(language: GeneratorFactory.language) {
-		const aggregationGenerator: IAggregationGenerator = new GeneratorFactory._generatorMap[GeneratorFactory.type.aggregation][language];
+		const aggregationGenerator: IAggregationGenerator = new GeneratorFactory._generatorMap[
+			GeneratorFactory.type.aggregation
+		][language]();
 
 		return aggregationGenerator;
 	}
 
 	static getDefineGenerator() {
-		return new GeneratorFactory._generatorMap[GeneratorFactory.type.define][GeneratorFactory.language.js];
+		return GeneratorFactory._generatorMap[GeneratorFactory.type.define][GeneratorFactory.language.js];
 	}
 }
 

@@ -1,36 +1,26 @@
+import { UI5JSParser } from "ui5plugin-parser";
 import { SAPNode } from "ui5plugin-parser/dist/classes/librarydata/SAPNode";
-import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
-import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../../../../UI5Plugin";
 import { TextDocumentAdapter } from "../../../../../adapters/vscode/TextDocumentAdapter";
-import { FileWatcherMediator } from "../../../../../utils/FileWatcherMediator";
+import ParserBearer from "../../../../../ui5parser/ParserBearer";
 import { GeneratorFactory } from "../../../codegenerators/GeneratorFactory";
 import { CustomCompletionItem } from "../../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../../abstraction/ICompletionItemFactory";
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
-import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
-import { UI5Parser } from "ui5plugin-parser";
-import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-export class SAPUIDefineFactory implements ICompletionItemFactory {
+export class SAPUIDefineFactory extends ParserBearer<UI5JSParser> implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
-		let completionItems = SAPUIDefineFactory.JSDefineCompletionItems;
+		let completionItems = await this.generateUIDefineCompletionItems();
 
 		if (document && position) {
-			UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(
-				new TextDocumentAdapter(document)
-			);
+			this._parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
 			const offset = document.offsetAt(position);
-			const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
-			if (UIClass instanceof CustomUIClass && UIClass?.fileContent) {
+			const UIClass = this._parser.textDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
+			if (UIClass instanceof CustomJSClass && UIClass?.fileContent) {
 				const args = UIClass.fileContent?.body[0]?.expression?.arguments;
 				if (args && args.length === 2) {
 					const UIDefinePaths: string[] = args[0].elements || [];
-					const node = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findAcornNode(
-						UIDefinePaths,
-						offset
-					);
+					const node = this._parser.syntaxAnalyser.findAcornNode(UIDefinePaths, offset);
 					const isString = node?.type === "Literal";
 					if (isString) {
 						completionItems = completionItems.map(completionItem => {
@@ -53,32 +43,30 @@ export class SAPUIDefineFactory implements ICompletionItemFactory {
 
 		return completionItems;
 	}
-	public static JSDefineCompletionItems: CustomCompletionItem[] = [];
-	async preloadCompletionItems() {
-		SAPUIDefineFactory.JSDefineCompletionItems = await this.generateUIDefineCompletionItems();
-		FileWatcherMediator.synchronizeSAPUIDefineCompletionItems(SAPUIDefineFactory.JSDefineCompletionItems);
-	}
-	private static readonly _nodeDAO = new SAPNodeDAO();
 
 	public async generateUIDefineCompletionItems() {
-		const workspaceCompletionItemFactory = new WorkspaceCompletionItemFactory();
+		const workspaceCompletionItemFactory = this._parser.getCustomData<WorkspaceCompletionItemFactory>(
+			"WorkspaceCompletionItemFactory"
+		);
 		let completionItems: CustomCompletionItem[] = [];
 
-		const SAPNodes: SAPNode[] = await SAPUIDefineFactory._nodeDAO.getAllNodes();
+		const SAPNodes: SAPNode[] = await this._parser.nodeDAO.getAllNodes();
 
 		for (const node of SAPNodes) {
 			completionItems = completionItems.concat(this._recursiveUIDefineCompletionItemGeneration(node));
 		}
 
-		completionItems = completionItems.concat(await workspaceCompletionItemFactory.createCompletionItems());
+		const workspaceCompletionItems = (await workspaceCompletionItemFactory?.createCompletionItems()) ?? [];
+
+		completionItems = completionItems.concat(workspaceCompletionItems);
 		// copy(JSON.stringify(completionItems.map(item => item.insertText)))
 		return completionItems;
 	}
 
 	private _recursiveUIDefineCompletionItemGeneration(node: SAPNode) {
 		let completionItems: CustomCompletionItem[] = [];
-		const defineGenerator = GeneratorFactory.getDefineGenerator();
-		const insertText = defineGenerator.generateDefineString(node);
+		const DefineGenerator = GeneratorFactory.getDefineGenerator();
+		const insertText = new DefineGenerator(this._parser).generateDefineString(node);
 
 		if (insertText) {
 			const metadata = node.getMetadata();
@@ -91,7 +79,7 @@ export class SAPUIDefineFactory implements ICompletionItemFactory {
 
 			const mardownString = new vscode.MarkdownString();
 			mardownString.isTrusted = true;
-			mardownString.appendMarkdown(URLBuilder.getInstance().getMarkupUrlForClassApi(node));
+			mardownString.appendMarkdown(this._parser.urlBuilder.getMarkupUrlForClassApi(node));
 			mardownString.appendMarkdown(metadata.rawMetadata.description);
 			completionItem.documentation = mardownString;
 

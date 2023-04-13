@@ -1,27 +1,24 @@
-import { UI5Parser, XMLParser } from "ui5plugin-parser";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
+import { ParserPool, UI5JSParser } from "ui5plugin-parser";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../UI5Plugin";
 import { RangeAdapter } from "../../adapters/vscode/RangeAdapter";
 import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";
+import ParserBearer from "../../ui5parser/ParserBearer";
 
 interface IWorkspaceEdit {
 	uri: vscode.Uri;
 	range: vscode.Range;
 	newValue: string;
 }
-export class JSRenameProvider {
-	static async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string) {
+export class JSRenameProvider extends ParserBearer<UI5JSParser> {
+	async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string) {
 		let workspaceEdits: IWorkspaceEdit[] = [];
 
-		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+		const className = this._parser.fileReader.getClassNameFromPath(document.fileName);
 		if (className) {
-			UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(
-				new TextDocumentAdapter(document)
-			);
-			const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			this._parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
+			const UIClass = <CustomJSClass>this._parser.classFactory.getUIClass(className);
 			const offset = document.offsetAt(position);
 			const members = [...UIClass.methods, ...UIClass.fields];
 			const methodOrField = members.find(method => {
@@ -48,19 +45,16 @@ export class JSRenameProvider {
 					const oldMethodName = range && document.getText(range);
 					if (oldMethodName) {
 						const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
-							AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
+							this._parser.syntaxAnalyser,
+							this._parser
 						);
 						const classNameOfTheCurrentMethod = strategy.acornGetClassName(className, offset, true);
 						const isThisClassFromAProject =
 							classNameOfTheCurrentMethod &&
-							!!UI5Plugin.getInstance().parser.fileReader.getManifestForClass(
-								classNameOfTheCurrentMethod
-							);
+							!!ParserPool.getManifestForClass(classNameOfTheCurrentMethod);
 						if (classNameOfTheCurrentMethod && isThisClassFromAProject) {
-							const UIClass = <CustomUIClass>(
-								UI5Plugin.getInstance().parser.classFactory.getUIClass(classNameOfTheCurrentMethod)
-							);
-							if (UIClass.fsPath) {
+							const UIClass = this._parser.classFactory.getUIClass(classNameOfTheCurrentMethod);
+							if (UIClass instanceof CustomJSClass && UIClass.fsPath) {
 								const uri = vscode.Uri.file(UIClass.fsPath);
 								const document = await vscode.workspace.openTextDocument(uri);
 
@@ -92,7 +86,7 @@ export class JSRenameProvider {
 		return workspaceEdit;
 	}
 
-	private static _removeOverlapingEdits(workspaceEdits: IWorkspaceEdit[]) {
+	private _removeOverlapingEdits(workspaceEdits: IWorkspaceEdit[]) {
 		return workspaceEdits.reduce((accumulator: IWorkspaceEdit[], workspaceEdit) => {
 			const isOverlapingEdit = !!accumulator.find(workspaceEditInAccumulator => {
 				return (
@@ -109,14 +103,14 @@ export class JSRenameProvider {
 		}, []);
 	}
 
-	private static _addTextEditsForMembersInClassBodyRename(
+	private _addTextEditsForMembersInClassBodyRename(
 		className: string,
 		oldMemberName: string,
 		newMemberName: string,
 		workspaceEdits: IWorkspaceEdit[],
 		document: vscode.TextDocument
 	) {
-		const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+		const UIClass = <CustomJSClass>this._parser.classFactory.getUIClass(className);
 		const member =
 			UIClass.methods.find(method => method.name === oldMemberName) ||
 			UIClass.fields.find(field => field.name === oldMemberName);
@@ -133,23 +127,21 @@ export class JSRenameProvider {
 		}
 	}
 
-	private static _addTextEditsForMemberRename(
+	private _addTextEditsForMemberRename(
 		className: string,
 		oldMemberName: string,
 		newMemberName: string,
 		workspaceEdits: IWorkspaceEdit[]
 	) {
-		const UIClasses = UI5Plugin.getInstance().parser.classFactory.getAllExistentUIClasses();
-		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
-			AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
-		);
+		const UIClasses = ParserPool.getAllExistentUIClasses();
+		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(this._parser.syntaxAnalyser, this._parser);
 		Object.keys(UIClasses).forEach(key => {
 			const UIClass = UIClasses[key];
-			if (UIClass instanceof CustomUIClass) {
+			if (UIClass instanceof CustomJSClass) {
 				UIClass.methods.forEach(method => {
 					if (method.node) {
-						const memberExpressions = AbstractUI5Parser.getInstance(UI5Parser)
-							.syntaxAnalyser.expandAllContent(method.node)
+						const memberExpressions = this._parser.syntaxAnalyser
+							.expandAllContent(method.node)
 							.filter((node: any) => node.type === "MemberExpression");
 						const neededMemberExpressions = memberExpressions.filter(
 							(memberExpression: any) => memberExpression.property?.name === oldMemberName
@@ -176,28 +168,27 @@ export class JSRenameProvider {
 		});
 	}
 
-	private static _addTextEditsForEventHandlersInXMLDocs(
+	private _addTextEditsForEventHandlersInXMLDocs(
 		className: string,
 		oldMemberName: string,
 		newMemberName: string,
 		workspaceEdits: IWorkspaceEdit[]
 	) {
-		const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+		const UIClass = <CustomJSClass>this._parser.classFactory.getUIClass(className);
 		const methodOrField =
 			UIClass.methods.find(method => method.name === oldMemberName) ||
 			UIClass.fields.find(field => field.name === oldMemberName);
 		if (methodOrField?.mentionedInTheXMLDocument) {
-			const viewsAndFragments =
-				UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(
-					UIClass,
-					[],
-					true,
-					true,
-					true
-				);
+			const viewsAndFragments = this._parser.classFactory.getViewsAndFragmentsOfControlHierarchically(
+				UIClass,
+				[],
+				true,
+				true,
+				true
+			);
 			const viewAndFragmentArray = [...viewsAndFragments.fragments, ...viewsAndFragments.views];
 			viewAndFragmentArray.forEach(viewOrFragment => {
-				const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(
+				const tagsAndAttributes = this._parser.xmlParser.getXMLFunctionCallTagsAndAttributes(
 					viewOrFragment,
 					oldMemberName,
 					className
@@ -206,7 +197,7 @@ export class JSRenameProvider {
 				tagsAndAttributes.forEach(tagAndAttribute => {
 					const { tag, attributes } = tagAndAttribute;
 					attributes.forEach(attribute => {
-						const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+						const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
 						const positionOfAttribute = tag.positionBegin + tag.text.indexOf(attribute);
 						const positionOfValueBegin = positionOfAttribute + attribute.indexOf(attributeValue);
 						const positionOfEventHandlerInAttributeValueBegin =

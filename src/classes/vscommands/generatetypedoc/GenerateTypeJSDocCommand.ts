@@ -1,8 +1,11 @@
+import { writeFile } from "fs/promises";
+import { join } from "path";
+import * as vscode from "vscode";
+import { ReusableMethods } from "../../providers/reuse/ReusableMethods";
 import { JSTypeDocAdapter } from "../../utils/xmlmetadata/JSTypeDocAdapter";
 import { XMLMetadataParser } from "../../utils/xmlmetadata/XMLMetadataParser";
 import { XMLSourcePrompt } from "../../utils/xmlmetadata/XMLSourcePrompt";
 import { IVSCodeCommand } from "../IVSCodeCommand";
-import * as vscode from "vscode";
 
 export class GenerateTypeJSDocCommand implements IVSCodeCommand {
 	async execute() {
@@ -11,16 +14,27 @@ export class GenerateTypeJSDocCommand implements IVSCodeCommand {
 			const XMLData = await xmlSourcePrompt.getXMLMetadataText();
 			const metadata = new XMLMetadataParser(XMLData);
 			const typeDocAdapter = new JSTypeDocAdapter();
-			const typeDoc = typeDocAdapter.fromMetadata(metadata);
+			const content = typeDocAdapter.fromMetadata(metadata);
 
-			const document = await vscode.workspace.openTextDocument({
-				content: typeDoc,
-				language: "javascript"
-			});
+			const relativePath = vscode.workspace.getConfiguration("ui5.plugin").get<string>("JSTypeDefDocPath");
+			const parser = ReusableMethods.getParserForCurrentActiveDocument();
+			let document: vscode.TextDocument;
+			if (relativePath && parser) {
+				const absolutePath = join(parser.workspaceFolder.fsPath, relativePath);
+				await writeFile(absolutePath, content, {
+					encoding: "utf8"
+				});
+				const uri = vscode.Uri.file(absolutePath);
+				document = await vscode.workspace.openTextDocument(uri);
+			} else {
+				document = await vscode.workspace.openTextDocument({
+					content: content,
+					language: "javascript"
+				});
+			}
 			await vscode.window.showTextDocument(document);
 		} catch (error: any) {
 			vscode.window.showErrorMessage(`Couldn't parse XML: ${error.message}`);
 		}
 	}
-
 }

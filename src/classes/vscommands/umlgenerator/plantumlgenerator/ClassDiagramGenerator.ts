@@ -1,13 +1,11 @@
-import { UI5Parser } from "ui5plugin-parser";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
-import { IAbstract, IStatic } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
-import { CustomTSObject } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSObject";
-import { IXMLFile, IFragment, IView } from "ui5plugin-parser/dist/classes/utils/FileReader";
-import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
-import { WorkspaceFolder } from "vscode";
-import { UI5Plugin } from "../../../../UI5Plugin";
+import { ParserPool, UI5JSParser, WorkspaceFolder } from "ui5plugin-parser";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import { IAbstract, IStatic } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
+import { CustomTSObject } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSObject";
+import { IFragment, IView, IXMLFile } from "ui5plugin-parser/dist/classes/parsing/util/filereader/IFileReader";
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 
 export class ClassDiagramGenerator extends DiagramGenerator {
@@ -19,8 +17,8 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 		let diagram =
 			"@startuml ClassDiagram\nskinparam linetype ortho\nset namespaceSeparator none\nskinparam dpi 300\n";
 
-		const classNames = UI5Plugin.getInstance()
-			.parser.fileReader.getAllJSClassNamesFromProject({ fsPath: wsFolder.uri.fsPath })
+		const classNames = this._parser.fileReader
+			.getAllJSClassNamesFromProject({ fsPath: wsFolder.fsPath })
 			.filter(className => !className.includes("-"));
 		const groupedClassNames = this._groupClassNamesToPackages([...classNames]);
 		Object.keys(groupedClassNames.packages).forEach(packageName => {
@@ -35,19 +33,19 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 			diagram += "}\n";
 		});
 		groupedClassNames.unpackagedClasses.forEach(className => {
-			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			const UIClass = this._parser.classFactory.getUIClass(className);
 			if (UIClass instanceof AbstractCustomClass) {
 				diagram += this._generateClassDiagram(UIClass);
 			}
 		});
 
-		const views = UI5Plugin.getInstance()
-			.parser.fileReader.getAllViews()
+		const views = this._parser.fileReader
+			.getAllViews()
 			.filter(XMLFile => !groupedClassNames.viewsUsed.includes(XMLFile));
-		const fragments = UI5Plugin.getInstance().parser.fileReader.getAllFragments();
+		const fragments = this._parser.fileReader.getAllFragments();
 		const XMLFiles = [...views, ...fragments].filter((XMLFile: IXMLFile) => {
-			const manifest = UI5Plugin.getInstance().parser.fileReader.getManifestForClass(XMLFile.name);
-			const dependencyIsFromSameProject = manifest && manifest.fsPath.startsWith(wsFolder.uri.fsPath);
+			const manifest = ParserPool.getManifestForClass(XMLFile.name);
+			const dependencyIsFromSameProject = manifest && manifest.fsPath.startsWith(wsFolder.fsPath);
 			return dependencyIsFromSameProject;
 		});
 
@@ -63,7 +61,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 		});
 
 		const JSClassRelationships: string[] = classNames.flatMap(className => {
-			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			const UIClass = this._parser.classFactory.getUIClass(className);
 			if (UIClass instanceof AbstractCustomClass) {
 				return this._generateRelationships(UIClass);
 			} else {
@@ -101,14 +99,9 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 
 		let className = classNames.pop();
 		while (className) {
-			const UIClass = <AbstractCustomClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
-			if (
-				UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(
-					UIClass.className,
-					"sap.ui.core.mvc.Controller"
-				)
-			) {
-				const view = UI5Plugin.getInstance().parser.fileReader.getViewForController(className);
+			const UIClass = <AbstractCustomClass>this._parser.classFactory.getUIClass(className);
+			if (this._parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller")) {
+				const view = this._parser.fileReader.getViewForController(className);
 				if (view) {
 					const UIClasses = [UIClass];
 					data.viewsUsed.push(view);
@@ -116,11 +109,9 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 					const controllerName = UIClass.className;
 					const viewControllerClassNames = [viewName, controllerName];
 
-					const modelName = UI5Plugin.getInstance().parser.classFactory.getDefaultModelForClass(
-						UIClass.className
-					);
+					const modelName = this._parser.classFactory.getDefaultModelForClass(UIClass.className);
 					if (modelName) {
-						const model = UI5Plugin.getInstance().parser.classFactory.getUIClass(modelName);
+						const model = this._parser.classFactory.getUIClass(modelName);
 						if (model instanceof AbstractCustomClass) {
 							UIClasses.push(model);
 							if (classNames.includes(modelName)) {
@@ -194,7 +185,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 		const dependencies = [...new Set(this._gatherAllDependencies(UIClass))];
 		const parent =
 			UIClass.parentClassNameDotNotation &&
-			UI5Plugin.getInstance().parser.classFactory.getUIClass(UIClass.parentClassNameDotNotation);
+			this._parser.classFactory.getUIClass(UIClass.parentClassNameDotNotation);
 		if (parent instanceof AbstractCustomClass) {
 			const parentIsFromSameProject = this._getIfClassesAreWithinSameProject(
 				UIClass.className,
@@ -205,7 +196,7 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 			}
 		}
 		dependencies.forEach(dependency => {
-			const dependencyClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(dependency);
+			const dependencyClass = this._parser.classFactory.getUIClass(dependency);
 			if (dependency !== UIClass.parentClassNameDotNotation && dependencyClass instanceof AbstractCustomClass) {
 				const dependencyIsFromSameProject = this._getIfClassesAreWithinSameProject(
 					UIClass.className,
@@ -217,8 +208,8 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 			}
 		});
 
-		const fragments = UI5Plugin.getInstance().parser.fileReader.getFragmentsMentionedInClass(UIClass.className);
-		const view = UI5Plugin.getInstance().parser.fileReader.getViewForController(UIClass.className);
+		const fragments = this._parser.fileReader.getFragmentsMentionedInClass(UIClass.className);
+		const view = this._parser.fileReader.getViewForController(UIClass.className);
 		const XMLDocDependencies = [...fragments];
 		if (view) {
 			XMLDocDependencies.push(view);
@@ -239,9 +230,6 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 	}
 	private _gatherAllDependencies(UIClass: AbstractCustomClass) {
 		const dependencies: string[] = [];
-		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
-			AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
-		);
 
 		UIClass.UIDefine.forEach(UIDefine => {
 			if (
@@ -252,30 +240,40 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 			}
 		});
 
-		UIClass.methods.forEach(UIMethod => {
-			if ((<any>UIMethod).acornNode) {
-				const memberExpressions = AbstractUI5Parser.getInstance(UI5Parser)
-					.syntaxAnalyser.expandAllContent((<any>UIMethod).acornNode)
-					.filter((node: any) => node.type === "MemberExpression");
-				memberExpressions.forEach((memberExpression: any) => {
-					const className = strategy.acornGetClassName(UIClass.className, memberExpression.property.start);
-					if (
-						className &&
-						!className.includes("__map__") &&
-						className !== UIClass.className &&
-						!dependencies.includes(className)
-					) {
-						dependencies.push(className);
-					}
-				});
-			}
-		});
+		if (UIClass instanceof CustomJSClass && this._parser instanceof UI5JSParser) {
+			const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
+				this._parser.syntaxAnalyser,
+				this._parser
+			);
+			const syntaxAnalyzer = this._parser.syntaxAnalyser;
+			UIClass.methods.forEach(UIMethod => {
+				if ((<any>UIMethod).acornNode) {
+					const memberExpressions = syntaxAnalyzer
+						.expandAllContent((<any>UIMethod).acornNode)
+						.filter((node: any) => node.type === "MemberExpression");
+					memberExpressions.forEach((memberExpression: any) => {
+						const className = strategy.acornGetClassName(
+							UIClass.className,
+							memberExpression.property.start
+						);
+						if (
+							className &&
+							!className.includes("__map__") &&
+							className !== UIClass.className &&
+							!dependencies.includes(className)
+						) {
+							dependencies.push(className);
+						}
+					});
+				}
+			});
+		}
 
 		return dependencies;
 	}
 	private _getIfClassesAreWithinSameProject(className1: string, className2: string) {
-		const thisClassManifest = UI5Plugin.getInstance().parser.fileReader.getManifestForClass(className1);
-		const parentClassManifest = UI5Plugin.getInstance().parser.fileReader.getManifestForClass(className2);
+		const thisClassManifest = ParserPool.getManifestForClass(className1);
+		const parentClassManifest = ParserPool.getManifestForClass(className2);
 		return thisClassManifest?.fsPath === parentClassManifest?.fsPath;
 	}
 
@@ -312,20 +310,11 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 	private _getStereotype(UIClass: AbstractCustomClass) {
 		let stereotype = "";
 
-		if (
-			UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.model.Model")
-		) {
+		if (this._parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.model.Model")) {
 			stereotype = " <<Model>>";
-		} else if (
-			UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(
-				UIClass.className,
-				"sap.ui.core.mvc.Controller"
-			)
-		) {
+		} else if (this._parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.mvc.Controller")) {
 			stereotype = " <<Controller>>";
-		} else if (
-			UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.Control")
-		) {
+		} else if (this._parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.Control")) {
 			stereotype = " <<Control>>";
 		}
 
@@ -333,9 +322,9 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 	}
 	private _getClassOrInterfaceKeyword(UIClass: AbstractCustomClass) {
 		let keyword = "class";
-		const isInterface = !!UI5Plugin.getInstance()
-			.parser.classFactory.getAllCustomUIClasses()
-			.find(CustomUIClass => CustomUIClass.interfaces.includes(UIClass.className));
+		const isInterface = !!ParserPool.getAllCustomUIClasses().find(CustomJSClass =>
+			CustomJSClass.interfaces.includes(UIClass.className)
+		);
 		if (isInterface) {
 			keyword = "interface";
 		}
@@ -344,11 +333,8 @@ export class ClassDiagramGenerator extends DiagramGenerator {
 	}
 	private _getClassColor(UIClass: AbstractCustomClass) {
 		let color = "";
-		const isModel = UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(
-			UIClass.className,
-			"sap.ui.model.Model"
-		);
-		const isController = UI5Plugin.getInstance().parser.classFactory.isClassAChildOfClassB(
+		const isModel = this._parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.model.Model");
+		const isController = this._parser.classFactory.isClassAChildOfClassB(
 			UIClass.className,
 			"sap.ui.core.mvc.Controller"
 		);

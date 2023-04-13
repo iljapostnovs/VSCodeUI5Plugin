@@ -1,0 +1,16 @@
+{
+	"classes": [
+		"com.test.mix.multi.ts.app1.mvc.Frontend1",
+		"com.test.mix.multi.ts.app2.mvc.Frontend1",
+		"com.test.mix.multi.ts.app1.mvc.Frontend1Model",
+		"com.test.mix.multi.ts.app2.mvc.Frontend1Model"
+	],
+	"views": [
+		"com.test.mix.multi.ts.app1.mvc.Frontend1",
+		"com.test.mix.multi.ts.app2.mvc.Frontend1"
+	],
+	"fragments": [
+		"com.test.mix.multi.ts.app2.mvc.Frontend1Fragment"
+	],
+	"parserQuantity": 2
+}

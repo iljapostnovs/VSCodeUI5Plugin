@@ -1,50 +1,60 @@
-import * as vscode from "vscode";
-import * as fs from "fs";
+import { appendFile } from "fs/promises";
 import * as path from "path";
-import { TextTransformationFactory, CaseType } from "./TextTransformationFactory";
+import * as vscode from "vscode";
+import ParserBearer from "../../ui5parser/ParserBearer";
 import * as jsClassData from "./i18nIDs.json";
-import { ResourceModelData } from "ui5plugin-parser/dist/classes/UI5Classes/ResourceModelData";
-import { VSCodeFileReader } from "../../utils/VSCodeFileReader";
+import { CaseType, TextTransformationFactory } from "./TextTransformationFactory";
 
-export class ExportToI18NCommand {
-	public static async export() {
+export class ExportToI18NCommand extends ParserBearer {
+	public async export() {
 		const editor = vscode.window.activeTextEditor;
-
-		if (editor) {
-			const stringRange =
-				ExportToI18NCommand._getStringRange() ||
-				new vscode.Range(editor.selection.start, editor.selection.start);
-			let stringForReplacing = editor.document.getText(stringRange);
-			stringForReplacing = stringForReplacing.substring(1, stringForReplacing.length - 1);
-			const I18nID = await ExportToI18NCommand._askUserForI18nID(stringForReplacing);
-			if (I18nID) {
-				const textForInsertionIntoI18N = await ExportToI18NCommand._generateStringForI18NInsert(
-					stringForReplacing,
-					I18nID
-				);
-				const textForInsertionIntoCurrentFile = ExportToI18NCommand._getStringForSavingIntoI18n(I18nID);
-
-				await ExportToI18NCommand._insertIntoI18NFile(textForInsertionIntoI18N);
-
-				editor.edit(editBuilder => {
-					if (editor) {
-						editBuilder.replace(stringRange, textForInsertionIntoCurrentFile);
-
-						editor.selection = new vscode.Selection(stringRange.start, stringRange.start);
-					}
-				});
-			}
+		if (!editor) {
+			return;
 		}
+
+		const stringRange = this._getStringRange() || new vscode.Range(editor.selection.start, editor.selection.start);
+		let stringForReplacing = editor.document.getText(stringRange);
+		stringForReplacing = stringForReplacing.substring(1, stringForReplacing.length - 1);
+		const I18nID = await this._askUserForI18nID(stringForReplacing);
+		if (!I18nID) {
+			return;
+		}
+
+		const i18nIdIsDuplicated = this._getIfi18nIdIsDuplicated(I18nID);
+		if (!i18nIdIsDuplicated) {
+			const textForInsertionIntoI18N = await this._generateStringForI18NInsert(stringForReplacing, I18nID);
+			await this._insertIntoI18NFile(textForInsertionIntoI18N);
+		}
+
+		const textForInsertionIntoCurrentFile = this._getStringForSavingIntoI18n(I18nID);
+		editor.edit(editBuilder => {
+			if (editor) {
+				editBuilder.replace(stringRange, textForInsertionIntoCurrentFile);
+
+				editor.selection = new vscode.Selection(stringRange.start, stringRange.start);
+			}
+		});
 	}
 
-	private static _getStringRange() {
+	private _getIfi18nIdIsDuplicated(I18nID: string) {
+		const [manifest] = this._parser.fileReader.getAllManifests();
+		if (!manifest) {
+			return false;
+		}
+		const componentName = manifest.componentName;
+		const resourceModelTexts = this._parser.resourceModelData.resourceModels[componentName];
+
+		return resourceModelTexts.some(text => text.id === I18nID);
+	}
+
+	private _getStringRange() {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
 			// eslint-disable-next-line @typescript-eslint/quotes
-			const iDeltaStart = ExportToI18NCommand._getDeltaForFirstOccuraneOf('"', -1);
+			const iDeltaStart = this._getDeltaForFirstOccuraneOf('"', -1);
 			// eslint-disable-next-line @typescript-eslint/quotes
-			const iDeltaEnd = ExportToI18NCommand._getDeltaForFirstOccuraneOf('"', 1);
+			const iDeltaEnd = this._getDeltaForFirstOccuraneOf('"', 1);
 			const range = new vscode.Range(
 				editor.selection.start.translate(0, iDeltaStart),
 				editor.selection.start.translate(0, iDeltaEnd)
@@ -53,7 +63,7 @@ export class ExportToI18NCommand {
 		}
 	}
 
-	private static _getDeltaForFirstOccuraneOf(sChar: string, iDelta: number) {
+	private _getDeltaForFirstOccuraneOf(sChar: string, iDelta: number) {
 		const editor = vscode.window.activeTextEditor;
 		let deltaToReturn = iDelta;
 		if (editor) {
@@ -83,8 +93,8 @@ export class ExportToI18NCommand {
 		return deltaToReturn;
 	}
 
-	private static async _askUserForI18nID(text: string) {
-		const startingProposedValue = ExportToI18NCommand._generateProposedI18nID(text);
+	private async _askUserForI18nID(text: string) {
+		const startingProposedValue = this._generateProposedI18nID(text);
 		let i18nID = startingProposedValue;
 
 		const shouldUserConfirmI18nId = vscode.workspace.getConfiguration("ui5.plugin").get("askUserToConfirmI18nId");
@@ -100,12 +110,12 @@ export class ExportToI18NCommand {
 		return i18nID;
 	}
 
-	private static _generateProposedI18nID(text: string) {
+	private _generateProposedI18nID(text: string) {
 		text = text.trim();
 		let proposedI18NValue = "";
 
 		const editor = vscode.window.activeTextEditor;
-		const openedFileType = ExportToI18NCommand._getCurrentlyOpenedFileType();
+		const openedFileType = this._getCurrentlyOpenedFileType();
 
 		if (editor) {
 			const textTransformationStrategyType = vscode.workspace
@@ -117,9 +127,9 @@ export class ExportToI18NCommand {
 				const currentlyOpenedFileFSPath = editor.document.fileName;
 				const addition = (() => {
 					let returnString = "";
-					if (openedFileType === ExportToI18NCommand.fileType.controller) {
+					if (openedFileType === this.fileType.controller) {
 						returnString = "Controller";
-					} else if (openedFileType === ExportToI18NCommand.fileType.xml) {
+					} else if (openedFileType === this.fileType.xml) {
 						if (currentlyOpenedFileFSPath.endsWith(".fragment.xml")) {
 							returnString = "Fragment";
 						} else {
@@ -148,7 +158,7 @@ export class ExportToI18NCommand {
 		return proposedI18NValue;
 	}
 
-	private static async _generateStringForI18NInsert(selectedText: string, I18nID: string) {
+	private async _generateStringForI18NInsert(selectedText: string, I18nID: string) {
 		const shouldUserConfirmI18nId = vscode.workspace.getConfiguration("ui5.plugin").get("askUserToConfirmI18nId");
 		let item;
 		if (shouldUserConfirmI18nId) {
@@ -172,8 +182,8 @@ export class ExportToI18NCommand {
 		return textToInsert;
 	}
 
-	private static _getStringForSavingIntoI18n(I18nID: string) {
-		const openedFileType = ExportToI18NCommand._getCurrentlyOpenedFileType();
+	private _getStringForSavingIntoI18n(I18nID: string) {
+		const openedFileType = this._getCurrentlyOpenedFileType();
 		const typeMapping: any = {
 			xml: `"{i18n>${I18nID}}"`,
 			controller: `this.getBundle().getText("${I18nID}")`,
@@ -183,7 +193,7 @@ export class ExportToI18NCommand {
 		return typeMapping[openedFileType];
 	}
 
-	private static _getCurrentlyOpenedFileType() {
+	private _getCurrentlyOpenedFileType() {
 		let type = "";
 		const editor = vscode.window.activeTextEditor;
 		if (editor) {
@@ -196,30 +206,30 @@ export class ExportToI18NCommand {
 			const openedFileIsXMLFile = currentlyOpenedFileFSPath.endsWith(".xml");
 
 			if (openedFileIsController) {
-				type = ExportToI18NCommand.fileType.controller;
+				type = this.fileType.controller;
 			} else if (openedFileIsJSFile) {
-				type = ExportToI18NCommand.fileType.js;
+				type = this.fileType.js;
 			} else if (openedFileIsXMLFile) {
-				type = ExportToI18NCommand.fileType.xml;
+				type = this.fileType.xml;
 			}
 		}
 
 		return type;
 	}
 
-	private static async _insertIntoI18NFile(stringToInsert: string) {
-		const manifest = VSCodeFileReader.getCurrentWorkspaceFoldersManifest();
+	private async _insertIntoI18NFile(stringToInsert: string) {
+		const [manifest] = this._parser.fileReader.getAllManifests();
 		const manifestFsPath = manifest?.fsPath;
 		const i18nRelativePath = manifest?.content["sap.app"]?.i18n;
 		if (manifestFsPath && i18nRelativePath) {
 			const i18nFSPath = `${manifestFsPath}${path.sep}${i18nRelativePath.replace(/\//g, path.sep)}`;
 
-			fs.appendFileSync(i18nFSPath, stringToInsert, "utf8");
-			ResourceModelData.readTexts();
+			await appendFile(i18nFSPath, stringToInsert, "utf8");
+			this._parser.resourceModelData.readTexts();
 		}
 	}
 
-	static fileType = {
+	fileType = {
 		xml: "xml",
 		controller: "controller",
 		js: "js"

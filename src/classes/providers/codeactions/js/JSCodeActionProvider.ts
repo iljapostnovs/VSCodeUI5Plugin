@@ -1,23 +1,21 @@
+import { UI5JSParser } from "ui5plugin-parser";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
-import { CustomDiagnostics, CustomDiagnosticType } from "../../../registrators/DiagnosticsRegistrator";
-import { InsertType, MethodInserter } from "../util/MethodInserter";
-import { ReusableMethods } from "../../reuse/ReusableMethods";
-import { SAPUIDefineFactory } from "../../completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
-import { UI5Plugin } from "../../../../UI5Plugin";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
-import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
-import { UI5Parser } from "ui5plugin-parser";
+import { CustomDiagnostics, CustomDiagnosticType } from "../../../registrators/DiagnosticsRegistrator";
+import ParserBearer from "../../../ui5parser/ParserBearer";
+import { SAPUIDefineFactory } from "../../completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
+import { ReusableMethods } from "../../reuse/ReusableMethods";
+import { InsertType, MethodInserter } from "../util/MethodInserter";
 
-export class JSCodeActionProvider {
-	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
+export class JSCodeActionProvider extends ParserBearer<UI5JSParser> {
+	async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		let providerResult: vscode.CodeAction[] = this._getCreateMethodCodeActions(document, range);
 		providerResult = providerResult.concat(await this._getImportClassCodeActions(document, range));
 		return providerResult;
 	}
 
-	private static _getCreateMethodCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
+	private _getCreateMethodCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const selectedVariableName = this._getCurrentVariable(document, range);
 		const jsDiagnosticCollection = vscode.languages.getDiagnostics(document.uri);
 		const customDiagnostics = <CustomDiagnostics[]>(
@@ -28,7 +26,7 @@ export class JSCodeActionProvider {
 		);
 		const codeActions: vscode.CodeAction[] = nonExistendMethodDiagnostics.reduce(
 			(accumulator: vscode.CodeAction[], diagnostic: CustomDiagnostics) => {
-				const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+				const className = this._parser.fileReader.getClassNameFromPath(document.fileName);
 				if (
 					className &&
 					diagnostic.methodName &&
@@ -46,7 +44,7 @@ export class JSCodeActionProvider {
 							.join(", ");
 					}
 
-					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(
+					const insertCodeAction = new MethodInserter(this._parser).createInsertMethodCodeAction(
 						diagnostic.attribute,
 						diagnostic.methodName,
 						parameters,
@@ -66,8 +64,8 @@ export class JSCodeActionProvider {
 		return codeActions;
 	}
 
-	private static _getInsertTypeFromIdentifierName(name: string) {
-		const type = CustomUIClass.getTypeFromHungarianNotation(name)?.toLowerCase();
+	private _getInsertTypeFromIdentifierName(name: string) {
+		const type = CustomJSClass.getTypeFromHungarianNotation(name)?.toLowerCase();
 		if (type === "function" || !type) {
 			return InsertType.Method;
 		} else {
@@ -75,22 +73,17 @@ export class JSCodeActionProvider {
 		}
 	}
 
-	private static async _getImportClassCodeActions(
-		document: vscode.TextDocument,
-		range: vscode.Range | vscode.Selection
-	) {
+	private async _getImportClassCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const selectedVariableName = this._getCurrentVariable(document, range);
 		let providerResult: vscode.CodeAction[] = [];
 		const positionFits = this._getIfPositionIsNewExpressionOrExpressionStatement(document, range.start);
 
 		if (positionFits && selectedVariableName) {
-			const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+			const currentClassName = this._parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassName) {
-				UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(
-					new TextDocumentAdapter(document)
-				);
-				const UIClass = <CustomUIClass>UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName);
-				const UIDefine = await new SAPUIDefineFactory().generateUIDefineCompletionItems();
+				this._parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
+				const UIClass = <CustomJSClass>this._parser.classFactory.getUIClass(currentClassName);
+				const UIDefine = await this._parser.getCustomData<SAPUIDefineFactory>("SAPUIDefineFactory")?.generateUIDefineCompletionItems() ?? [];
 				const UIDefineCompletionItemsWhichContainsCurrentSelectionText = UIDefine.filter(
 					completionItem => (completionItem.label as string).indexOf(selectedVariableName) > -1
 				)
@@ -111,7 +104,7 @@ export class JSCodeActionProvider {
 						command: "ui5plugin.moveDefineToFunctionParameters",
 						title: "Add to UI Define"
 					};
-					const position = ReusableMethods.getPositionOfTheLastUIDefine(document);
+					const position = new ReusableMethods(this._parser).getPositionOfTheLastUIDefine(document);
 					if (position) {
 						const insertText =
 							UIClass.UIDefine.length === 0
@@ -135,25 +128,21 @@ export class JSCodeActionProvider {
 	}
 
 	//TODO: reuse with Class completion items
-	private static _getIfPositionIsNewExpressionOrExpressionStatement(
+	private _getIfPositionIsNewExpressionOrExpressionStatement(
 		document: vscode.TextDocument,
 		position: vscode.Position
 	) {
 		let currentPositionIsNewExpressionOrExpressionStatement = false;
 
-		const currentClassName = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+		const currentClassName = this._parser.fileReader.getClassNameFromPath(document.fileName);
 		if (currentClassName) {
 			const offset = document.offsetAt(position);
-			const currentUIClass = <CustomUIClass>(
-				UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassName)
-			);
+			const currentUIClass = <CustomJSClass>this._parser.classFactory.getUIClass(currentClassName);
 			const currentMethod = currentUIClass.methods.find(method => {
 				return method.node?.start < offset && offset < method.node?.end;
 			});
 			if (currentMethod) {
-				const allContent = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.expandAllContent(
-					currentMethod.node
-				);
+				const allContent = this._parser.syntaxAnalyser.expandAllContent(currentMethod.node);
 				const newExpressionOrExpressionStatement = allContent.find((node: any) => {
 					const firstChar: undefined | string = node.name?.[0];
 					const firstCharCaps = firstChar?.toUpperCase();
@@ -173,7 +162,7 @@ export class JSCodeActionProvider {
 		return currentPositionIsNewExpressionOrExpressionStatement;
 	}
 
-	private static _calculatePriority(codeAction: vscode.CodeAction) {
+	private _calculatePriority(codeAction: vscode.CodeAction) {
 		const priorities = ["sap/ui/model/", "sap/m/", "sap/ui/"];
 		let priority = 1;
 		priorities.find((priorityString, index) => {
@@ -189,25 +178,22 @@ export class JSCodeActionProvider {
 		return priority;
 	}
 
-	private static _getCurrentVariable(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
+	private _getCurrentVariable(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		let selectedVariableName = document.getText(range);
 
 		if (!selectedVariableName) {
-			const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
-			if (UIClass instanceof CustomUIClass) {
+			const UIClass = this._parser.textDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
+			if (UIClass instanceof CustomJSClass) {
 				const currentPositionOffset = document?.offsetAt(range.end);
-				const node = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findAcornNode(
+				const node = this._parser.syntaxAnalyser.findAcornNode(
 					UIClass.acornMethodsAndFields,
 					currentPositionOffset
 				);
 				if (node && node.value) {
-					const content = AbstractUI5Parser.getInstance(UI5Parser)
-						.syntaxAnalyser.expandAllContent(node.value)
+					const content = this._parser.syntaxAnalyser
+						.expandAllContent(node.value)
 						.filter(node => node.type === "Identifier");
-					const neededIdentifier = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findAcornNode(
-						content,
-						currentPositionOffset
-					);
+					const neededIdentifier = this._parser.syntaxAnalyser.findAcornNode(content, currentPositionOffset);
 					if (neededIdentifier) {
 						selectedVariableName = neededIdentifier.name;
 					}

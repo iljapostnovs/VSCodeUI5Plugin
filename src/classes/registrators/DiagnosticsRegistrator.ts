@@ -1,5 +1,6 @@
+import { ParserPool, toNative, UI5JSParser, UI5TSParser } from "ui5plugin-parser";
 import * as vscode from "vscode";
-import { ProjectType, UI5Plugin } from "../../UI5Plugin";
+import { UI5Plugin } from "../../UI5Plugin";
 import { RangeAdapter } from "../adapters/vscode/RangeAdapter";
 import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 import { VSCodeSeverityAdapter } from "../ui5linter/adapters/VSCodeSeverityAdapter";
@@ -25,15 +26,12 @@ export enum CustomDiagnosticType {
 	NonExistentField = 2
 }
 export class DiagnosticsRegistrator {
-	static register(project: ProjectType) {
+	static register() {
 		xmlDiagnosticCollection = vscode.languages.createDiagnosticCollection("XML");
 		propertiesDiagnosticCollection = vscode.languages.createDiagnosticCollection("properties");
 
-		if (project === ProjectType.js) {
-			jsDiagnosticCollection = vscode.languages.createDiagnosticCollection("javascript");
-		} else {
-			tsDiagnosticCollection = vscode.languages.createDiagnosticCollection("typescript");
-		}
+		jsDiagnosticCollection = vscode.languages.createDiagnosticCollection("javascript");
+		tsDiagnosticCollection = vscode.languages.createDiagnosticCollection("typescript");
 
 		if (vscode.window.activeTextEditor) {
 			this.updateDiagnosticCollection(vscode.window.activeTextEditor.document);
@@ -60,7 +58,11 @@ export class DiagnosticsRegistrator {
 		document: vscode.TextDocument,
 		propertiesDiagnosticCollection: vscode.DiagnosticCollection
 	) {
-		const errors = new PropertiesLinter().getLintingErrors(new TextDocumentAdapter(document));
+		const parser = ParserPool.getParserForFile(document.fileName);
+		if (!parser) {
+			return;
+		}
+		const errors = new PropertiesLinter(parser).getLintingErrors(new TextDocumentAdapter(document));
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
 			const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);
@@ -92,29 +94,27 @@ export class DiagnosticsRegistrator {
 
 	static updateDiagnosticCollection(document: vscode.TextDocument, bForce = false) {
 		const fileName = document.fileName;
+		const parser = ParserPool.getParserForFile(fileName);
+		if (!parser) {
+			return;
+		}
 		if (fileName.endsWith(".fragment.xml") || fileName.endsWith(".view.xml")) {
-			if (document.fileName.endsWith(".fragment.xml")) {
-				UI5Plugin.getInstance().parser.fileReader.setNewFragmentContentToCache(
-					document.getText(),
-					document.fileName
-				);
-			} else if (document.fileName.endsWith(".view.xml")) {
-				UI5Plugin.getInstance().parser.fileReader.setNewViewContentToCache(
-					document.getText(),
-					document.fileName
-				);
+			if (fileName.endsWith(".fragment.xml")) {
+				parser.fileReader.setNewFragmentContentToCache(document.getText(), toNative(fileName));
+			} else if (fileName.endsWith(".view.xml")) {
+				parser.fileReader.setNewViewContentToCache(document.getText(), toNative(fileName));
 			}
 			this._updateXMLDiagnostics(document, xmlDiagnosticCollection);
 		} else if (fileName.endsWith(".js")) {
-			const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+			const className = parser.fileReader.getClassNameFromPath(fileName);
 			if (className) {
-				UI5Plugin.getInstance().parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
+				parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
 			}
 			this._updateJSDiagnostics(document, jsDiagnosticCollection);
 		} else if (fileName.endsWith(".ts")) {
-			const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+			const className = parser.fileReader.getClassNameFromPath(fileName);
 			if (className) {
-				UI5Plugin.getInstance().parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
+				parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
 			}
 			this._updateTSDiagnostics(document, tsDiagnosticCollection);
 		} else if (fileName.endsWith(".properties")) {
@@ -124,9 +124,13 @@ export class DiagnosticsRegistrator {
 
 	private static _timeoutId: NodeJS.Timeout | null;
 	private static _updateXMLDiagnostics(document: vscode.TextDocument, collection: vscode.DiagnosticCollection) {
+		const parser = ParserPool.getParserForFile(document.fileName);
+		if (!parser) {
+			return;
+		}
 		if (!this._timeoutId) {
 			this._timeoutId = setTimeout(() => {
-				const errors = new XMLLinter().getLintingErrors(new TextDocumentAdapter(document));
+				const errors = new XMLLinter(parser).getLintingErrors(new TextDocumentAdapter(document));
 
 				const diagnostics: CustomDiagnostics[] = errors.map(error => {
 					const diagnostic = new CustomDiagnostics(
@@ -152,7 +156,11 @@ export class DiagnosticsRegistrator {
 	}
 
 	private static _updateJSDiagnostics(document: vscode.TextDocument, collection?: vscode.DiagnosticCollection) {
-		const errors = new JSLinter().getLintingErrors(new TextDocumentAdapter(document));
+		const parser = ParserPool.getParserForFile(document.fileName);
+		if (!parser || !(parser instanceof UI5JSParser)) {
+			return;
+		}
+		const errors = new JSLinter(parser).getLintingErrors(new TextDocumentAdapter(document));
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
 			const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);
@@ -175,7 +183,11 @@ export class DiagnosticsRegistrator {
 	}
 
 	private static _updateTSDiagnostics(document: vscode.TextDocument, collection?: vscode.DiagnosticCollection) {
-		const errors = new TSLinter().getLintingErrors(new TextDocumentAdapter(document));
+		const parser = ParserPool.getParserForFile(document.fileName);
+		if (!parser || !(parser instanceof UI5TSParser)) {
+			return;
+		}
+		const errors = new TSLinter(parser).getLintingErrors(new TextDocumentAdapter(document));
 
 		const diagnostics: CustomDiagnostics[] = errors.map(error => {
 			const diagnostic = new CustomDiagnostics(RangeAdapter.rangeToVSCodeRange(error.range), error.message);

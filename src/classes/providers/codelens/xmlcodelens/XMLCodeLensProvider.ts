@@ -1,19 +1,18 @@
-import { ResourceModelData } from "ui5plugin-parser/dist/classes/UI5Classes/ResourceModelData";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../../UI5Plugin";
+import ParserBearer from "../../../ui5parser/ParserBearer";
 import { VSCodeFileReader } from "../../../utils/VSCodeFileReader";
 
 function escapeRegExp(string: string) {
 	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-export class XMLCodeLensProvider {
-	static getCodeLenses(document: vscode.TextDocument) {
+export class XMLCodeLensProvider extends ParserBearer {
+	getCodeLenses(document: vscode.TextDocument) {
 		const codeLenses: vscode.CodeLens[] = [];
 
-		const componentName = VSCodeFileReader.getComponentNameOfAppInCurrentWorkspaceFolder();
+		const componentName = new VSCodeFileReader(this._parser).getComponentNameOfAppInCurrentWorkspaceFolder();
 		if (componentName) {
-			const currentResourceModelTexts = ResourceModelData.resourceModels[componentName];
+			const currentResourceModelTexts = this._parser.resourceModelData.resourceModels[componentName];
 			const XMLText = document.getText();
 
 			const rTranslatedTexts = /(\{|')i18n>.*?(\}|')/g;
@@ -45,23 +44,25 @@ export class XMLCodeLensProvider {
 		return codeLenses;
 	}
 
-	static goToResourceModel(textId: string) {
-		const manifest = VSCodeFileReader.getCurrentWorkspaceFoldersManifest();
+	goToResourceModel(textId: string) {
+		const manifest = new VSCodeFileReader(this._parser).getCurrentWorkspaceFoldersManifest();
 		if (manifest) {
-			const resourceModelText = UI5Plugin.getInstance().parser.fileReader.readResourceModelFile(manifest);
+			const resourceModelText = this._parser.fileReader.readResourceModelFile(manifest);
 			const rTextPosition = new RegExp(`(?<=${escapeRegExp(textId)}\\s?=).*`);
 			const result = rTextPosition.exec(resourceModelText);
 			if (result) {
-				const resourceModelFSPath = UI5Plugin.getInstance().parser.fileReader.getResourceModelUriForManifest(manifest);
+				const resourceModelFSPath = this._parser.fileReader.getResourceModelUriForManifest(manifest);
 
 				const uri = vscode.Uri.file(resourceModelFSPath);
-				vscode.window.showTextDocument(uri)
-					.then(textEditor => {
-						const positionBegin = textEditor.document.positionAt(result.index);
-						const positionEnd = textEditor.document.positionAt(result.index + result[0].length);
-						textEditor.selection = new vscode.Selection(positionBegin, positionEnd);
-						textEditor.revealRange(new vscode.Range(positionBegin, positionEnd), vscode.TextEditorRevealType.InCenter);
-					});
+				vscode.window.showTextDocument(uri).then(textEditor => {
+					const positionBegin = textEditor.document.positionAt(result.index);
+					const positionEnd = textEditor.document.positionAt(result.index + result[0].length);
+					textEditor.selection = new vscode.Selection(positionBegin, positionEnd);
+					textEditor.revealRange(
+						new vscode.Range(positionBegin, positionEnd),
+						vscode.TextEditorRevealType.InCenter
+					);
+				});
 			}
 		}
 	}

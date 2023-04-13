@@ -1,14 +1,13 @@
 import assert = require("assert");
 import { after, test } from "mocha";
 import { UnusedMemberLinter } from "ui5plugin-linter/dist/classes/js/parts/UnusedMemberLinter";
-import { TSReferenceFinder } from "ui5plugin-linter/dist/classes/js/parts/util/TSReferenceFinder";
-import { AbstractUI5Parser, TextDocument, UI5TSParser } from "ui5plugin-parser";
+import { ParserPool, TextDocument, TSReferenceFinder, UI5TSParser } from "ui5plugin-parser";
 import {
 	ICustomClassField,
 	ICustomClassMethod
-} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
-import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
-import { CustomTSObject } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSObject";
+} from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
+import { CustomTSObject } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSObject";
 import * as vscode from "vscode";
 import { VSCodeLinterConfigHandler } from "../../../classes/ui5linter/config/VSCodeLinterConfigHandler";
 import * as JSLinterData from "./data/linter/JSLinterData.json";
@@ -26,13 +25,13 @@ suite("Extension Test Suite", () => {
 		await extension?.activate();
 
 		assert.ok(extension?.isActive, "Extension activated");
-	});
+	}).timeout(30000);
 
 	test("Parser: class parsing", () => {
 		const testData = ClassParsing.classParsing;
 
 		testData.forEach(testData => {
-			const parser = AbstractUI5Parser.getInstance(UI5TSParser);
+			const parser = <UI5TSParser>ParserPool.getParserForCustomClass(testData.className);
 			const UIClass = parser.classFactory.getUIClass(testData.className);
 			const TSClass = testData.type === "TSClass" ? CustomTSClass : CustomTSObject;
 			assert.ok(UIClass instanceof TSClass, `Class "${testData.className}" is not recognized as Custom Class`);
@@ -61,16 +60,20 @@ suite("Extension Test Suite", () => {
 		const allTestData = JSLinterData.data;
 
 		for (const testData of allTestData) {
-			const parser = AbstractUI5Parser.getInstance(UI5TSParser);
+			const parser = <UI5TSParser>ParserPool.getParserForCustomClass(testData.className);
 			const UIClass = parser.classFactory.getUIClass(testData.className);
 			if (parser.classFactory.isCustomClass(UIClass)) {
 				const document = await vscode.workspace.openTextDocument(UIClass.fsPath);
 
-				const linter = new UnusedMemberLinter(parser, new VSCodeLinterConfigHandler());
+				const linter = new UnusedMemberLinter(parser, new VSCodeLinterConfigHandler(parser));
 				const errors = linter.getLintingErrors(new TextDocument(document.getText(), document.uri.fsPath));
 				const errorMessages = errors.map(error => error.message);
 				// copy(JSON.stringify(errorMessages))
-				assert.deepEqual(errorMessages, testData.UnusedMemberLinter, `Class "${UIClass.className}" has wrong error messages for UnusedMemberLinter`);
+				assert.deepEqual(
+					errorMessages,
+					testData.UnusedMemberLinter,
+					`Class "${UIClass.className}" has wrong error messages for UnusedMemberLinter`
+				);
 			}
 		}
 	});
@@ -79,7 +82,7 @@ suite("Extension Test Suite", () => {
 		const allTestData = References.data;
 
 		for (const testData of allTestData) {
-			const parser = AbstractUI5Parser.getInstance(UI5TSParser);
+			const parser = <UI5TSParser>ParserPool.getParserForCustomClass(testData.className);
 			const UIClass = parser.classFactory.getUIClass(testData.className);
 			if (parser.classFactory.isCustomClass(UIClass)) {
 				const members = [...UIClass.fields, ...UIClass.methods];
@@ -89,9 +92,16 @@ suite("Extension Test Suite", () => {
 					const member = members.find(member => member.name === referenceData.member);
 					if (member) {
 						const locations = referenceFinder.getReferenceLocations(member);
-						assert.equal(locations.length, referenceData.quantity, `Class "${UIClass.className}" member "${referenceData.member}" has wrong reference quantity`);
+						assert.equal(
+							locations.length,
+							referenceData.quantity,
+							`Class "${UIClass.className}" member "${referenceData.member}" has wrong reference quantity`
+						);
 					} else {
-						assert.ok(false, `Class "${UIClass.className}" doesn't have "${referenceData.member}" member. (Reference finder)`);
+						assert.ok(
+							false,
+							`Class "${UIClass.className}" doesn't have "${referenceData.member}" member. (Reference finder)`
+						);
 					}
 				});
 			}

@@ -1,25 +1,18 @@
 import { ILinterConfigHandler, PackageLinterConfigHandler, Severity } from "ui5plugin-linter";
-import { JSLinters, XMLLinters, PropertiesLinters } from "ui5plugin-linter/dist/classes/Linter";
-import { TextDocument, UI5Parser } from "ui5plugin-parser";
-import { UI5Plugin } from "../../../UI5Plugin";
-import * as vscode from "vscode";
-import path = require("path");
+import { JSLinters, PropertiesLinters, XMLLinters } from "ui5plugin-linter/dist/classes/Linter";
 import { JSLinterException } from "ui5plugin-linter/dist/classes/config/ILinterConfigHandler";
-import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
+import { TextDocument } from "ui5plugin-parser";
+import { IUI5Parser } from "ui5plugin-parser/dist/parser/abstraction/IUI5Parser";
+import ParserBearer from "../../ui5parser/ParserBearer";
 
-export class VSCodeLinterConfigHandler implements ILinterConfigHandler {
+export class VSCodeLinterConfigHandler extends ParserBearer implements ILinterConfigHandler {
 	private readonly _packageLinterConfigHandler: PackageLinterConfigHandler;
-	constructor() {
-		const currentDocumentFilePath = vscode.window.activeTextEditor?.document.fileName;
-		const className = currentDocumentFilePath && UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(currentDocumentFilePath);
-		const manifest = className && UI5Plugin.getInstance().parser.fileReader.getManifestForClass(className);
-
-		let packagePath: string | undefined;
-		if (manifest) {
-			const dirname = path.dirname(manifest.fsPath);
-			packagePath = path.join(dirname, "/package.json");
-		}
-		this._packageLinterConfigHandler = new PackageLinterConfigHandler(AbstractUI5Parser.getInstance(UI5Parser), packagePath);
+	constructor(parser: IUI5Parser) {
+		super(parser);
+		this._packageLinterConfigHandler = new PackageLinterConfigHandler(
+			this._parser,
+			parser.configHandler.packagePath
+		);
 	}
 
 	getJSLinterExceptions(): JSLinterException[] {
@@ -37,5 +30,4 @@ export class VSCodeLinterConfigHandler implements ILinterConfigHandler {
 	getIfLintingShouldBeSkipped(document: TextDocument): boolean {
 		return this._packageLinterConfigHandler.getIfLintingShouldBeSkipped(document);
 	}
-
 }

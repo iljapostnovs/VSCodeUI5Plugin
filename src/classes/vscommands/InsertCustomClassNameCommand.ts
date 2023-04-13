@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../UI5Plugin";
-export class InsertCustomClassNameCommand {
-	static insertCustomClassName() {
+import ParserBearer from "../ui5parser/ParserBearer";
+export class InsertCustomClassNameCommand extends ParserBearer {
+	insertCustomClassName() {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
 			const document = editor.document;
-			const classNameDotNotationToInsert = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.uri.fsPath);
+			const classNameDotNotationToInsert = this._parser.fileReader.getClassNameFromPath(document.uri.fsPath);
 			if (classNameDotNotationToInsert) {
 				editor.edit(editBuilder => {
 					if (editor) {

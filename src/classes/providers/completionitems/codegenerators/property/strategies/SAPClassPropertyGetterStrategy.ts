@@ -1,18 +1,20 @@
-import { AbstractUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { UI5Plugin } from "../../../../../../UI5Plugin";
+import { AbstractJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
+import { IUI5Parser } from "ui5plugin-parser/dist/parser/abstraction/IUI5Parser";
+import ParserBearer from "../../../../../ui5parser/ParserBearer";
 import { IPropertyGetterStrategy } from "../interfaces/IPropertyGetterStrategy";
 
-export class SAPClassPropertyGetterStrategy implements IPropertyGetterStrategy {
-	private readonly _UIClass: AbstractUIClass;
-	constructor(UIClass: AbstractUIClass) {
+export class SAPClassPropertyGetterStrategy extends ParserBearer implements IPropertyGetterStrategy {
+	private readonly _UIClass: AbstractJSClass;
+	constructor(parser: IUI5Parser, UIClass: AbstractJSClass) {
+		super(parser);
 		this._UIClass = UIClass;
 	}
 
 	getParent(): IPropertyGetterStrategy | undefined {
 		let theParent: SAPClassPropertyGetterStrategy | undefined;
 		if (this._UIClass.parentClassNameDotNotation) {
-			const parentClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(this._UIClass.parentClassNameDotNotation);
-			theParent = new SAPClassPropertyGetterStrategy(parentClass);
+			const parentClass = this._parser.classFactory.getUIClass(this._UIClass.parentClassNameDotNotation);
+			theParent = new SAPClassPropertyGetterStrategy(this._parser, parentClass);
 		}
 
 		return theParent;
@@ -22,7 +24,7 @@ export class SAPClassPropertyGetterStrategy implements IPropertyGetterStrategy {
 		return this._UIClass.properties;
 	}
 
-	getProperty(property: any): { name: string; defaultValue: any; } {
+	getProperty(property: any): { name: string; defaultValue: any } {
 		return {
 			name: property.name,
 			defaultValue: ""

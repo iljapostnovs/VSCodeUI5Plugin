@@ -1,23 +1,13 @@
-import { XMLParser } from "ui5plugin-parser";
-import { SAPNodeDAO } from "ui5plugin-parser/dist/classes/librarydata/SAPNodeDAO";
-import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
-import {
-	CustomTSClass,
-	ICustomClassTSMethod
-} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
-import {
-	CustomUIClass,
-	ICustomClassUIMethod
-} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { StandardUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/StandardUIClass";
-import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
-import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import { CustomJSClass, ICustomClassJSMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { StandardUIClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/StandardUIClass";
+import { CustomTSClass, ICustomClassTSMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../../UI5Plugin";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
+import ParserBearer from "../../../ui5parser/ParserBearer";
 
-export class XMLHoverProvider {
-	static getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
+export class XMLHoverProvider extends ParserBearer {
+	getHovers(document: vscode.TextDocument, position: vscode.Position) {
 		const range = document.getWordRangeAtPosition(position);
 		const wordWithPrefix = document.getText(range);
 		const wordWithPrefixParts = wordWithPrefix.split(":");
@@ -25,26 +15,26 @@ export class XMLHoverProvider {
 		const offset = document.offsetAt(position);
 		let hover: vscode.Hover | undefined;
 
-		const XMLFile = TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
+		const XMLFile = this._parser.textDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
 		if (XMLFile) {
-			const allTags = XMLParser.getAllTags(XMLFile);
+			const allTags = this._parser.xmlParser.getAllTags(XMLFile);
 			const tag = allTags.find(tag => tag.positionBegin < offset && tag.positionEnd >= offset);
 			if (tag) {
-				const tagName = XMLParser.getClassNameFromTag(tag.text);
-				const classOfTheTag = XMLParser.getClassNameInPosition(XMLFile, offset);
-				const attributes = XMLParser.getAttributesOfTheTag(tag);
+				const tagName = this._parser.xmlParser.getClassNameFromTag(tag.text);
+				const classOfTheTag = this._parser.xmlParser.getClassNameInPosition(XMLFile, offset);
+				const attributes = this._parser.xmlParser.getAttributesOfTheTag(tag);
 				const attribute = attributes?.find(attribute => {
-					const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
+					const { attributeName } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
 					return attributeName === word;
 				});
 				const attributeValue = attributes?.find(attribute => {
-					const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+					const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
 					return attributeValue === word;
 				});
 
 				if (attribute) {
 					//highlighted text is attribute
-					const { attributeName } = XMLParser.getAttributeNameAndValue(attribute);
+					const { attributeName } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
 					const text = this._getTextIfItIsFieldOrMethodOfClass(classOfTheTag, attributeName);
 
 					if (text) {
@@ -55,21 +45,19 @@ export class XMLHoverProvider {
 					}
 				} else if (attributeValue) {
 					const { attributeName, attributeValue: attributeVal } =
-						XMLParser.getAttributeNameAndValue(attributeValue);
-					const property = UI5Plugin.getInstance()
-						.parser.classFactory.getClassProperties(classOfTheTag)
+						this._parser.xmlParser.getAttributeNameAndValue(attributeValue);
+					const property = this._parser.classFactory
+						.getClassProperties(classOfTheTag)
 						.find(property => property.name === attributeName);
-					const responsibleClass =
-						UI5Plugin.getInstance().parser.fileReader.getResponsibleClassForXMLDocument(
-							new TextDocumentAdapter(document)
-						);
+					const responsibleClass = this._parser.fileReader.getResponsibleClassForXMLDocument(
+						new TextDocumentAdapter(document)
+					);
 					const method =
 						responsibleClass &&
-						UI5Plugin.getInstance()
-							.parser.classFactory.getClassMethods(responsibleClass)
+						this._parser.classFactory
+							.getClassMethods(responsibleClass)
 							.find(method => method.name === attributeVal);
-					const responsibleUIClass =
-						method && UI5Plugin.getInstance().parser.classFactory.getUIClass(method.owner);
+					const responsibleUIClass = method && this._parser.classFactory.getUIClass(method.owner);
 					const value = property?.typeValues.find(value => value.text === attributeVal);
 					if (property && value) {
 						const markdownString = new vscode.MarkdownString();
@@ -82,8 +70,8 @@ export class XMLHoverProvider {
 						responsibleUIClass.classText &&
 						method
 					) {
-						if (responsibleUIClass instanceof CustomUIClass) {
-							const customMethod = method as ICustomClassUIMethod;
+						if (responsibleUIClass instanceof CustomJSClass) {
+							const customMethod = method as ICustomClassJSMethod;
 							if (customMethod.node) {
 								const methodText = responsibleUIClass.classText.substring(
 									customMethod.node.start,
@@ -118,24 +106,33 @@ export class XMLHoverProvider {
 						//is class
 						const markdownString = new vscode.MarkdownString();
 						markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
-						const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(classOfTheTag);
-						const node = new SAPNodeDAO().findNode(UIClass.className);
+						const UIClass = this._parser.classFactory.getUIClass(classOfTheTag);
+						const node = this._parser.nodeDAO.findNode(UIClass.className);
 						let classDescription = node?.getMetadata()?.getRawMetadata()?.description || "";
 						classDescription = StandardUIClass.removeTags(classDescription);
 						const description = classDescription ? `  \n${classDescription}` : "";
-						const text = `${URLBuilder.getInstance().getMarkupUrlForClassApi(UIClass)}${description}`;
+						const text = `${this._parser.urlBuilder.getMarkupUrlForClassApi(UIClass)}${description}`;
 						markdownString.appendMarkdown(text);
 						hover = new vscode.Hover(markdownString);
 					} else {
 						//is aggregation
-						let parentTag = XMLParser.getParentTagAtPosition(XMLFile, offset);
-						const tagClass = XMLParser.getClassNameInPosition(XMLFile, parentTag.positionBegin);
+						let parentTag = this._parser.xmlParser.getParentTagAtPosition(XMLFile, offset);
+						const tagClass = this._parser.xmlParser.getClassNameInPosition(
+							XMLFile,
+							parentTag.positionBegin
+						);
 
 						if (!this._isThisAClass(tagClass)) {
-							parentTag = XMLParser.getParentTagAtPosition(XMLFile, parentTag.positionBegin - 1);
+							parentTag = this._parser.xmlParser.getParentTagAtPosition(
+								XMLFile,
+								parentTag.positionBegin - 1
+							);
 						}
 
-						const classOfTheTag = XMLParser.getClassNameInPosition(XMLFile, parentTag.positionBegin);
+						const classOfTheTag = this._parser.xmlParser.getClassNameInPosition(
+							XMLFile,
+							parentTag.positionBegin
+						);
 						const text = this._getTextIfItIsFieldOrMethodOfClass(classOfTheTag, word);
 
 						if (text) {
@@ -152,7 +149,7 @@ export class XMLHoverProvider {
 		return hover;
 	}
 
-	private static _isThisAClass(name: string) {
+	private _isThisAClass(name: string) {
 		const classNameParts = name.split(".");
 		const lastPart = classNameParts[classNameParts.length - 1];
 		const isClass = lastPart[0] === lastPart[0].toUpperCase();
@@ -160,20 +157,20 @@ export class XMLHoverProvider {
 		return isClass;
 	}
 
-	private static _getTextIfItIsFieldOrMethodOfClass(className: string, attributeName: string) {
+	private _getTextIfItIsFieldOrMethodOfClass(className: string, attributeName: string) {
 		let text = "";
-		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+		const UIClass = this._parser.classFactory.getUIClass(className);
 		const aggregation = UIClass.aggregations.find(aggregation => aggregation.name === attributeName);
 		const event = UIClass.events.find(event => event.name === attributeName);
 		const property = UIClass.properties.find(property => property.name === attributeName);
 		let api = "";
 		if (aggregation) {
 			text = `aggregation: **${aggregation.name}**  \ntype: **${aggregation.type}**  \nmultiple: ${aggregation.multiple}  \n\n${aggregation.description}`;
-			api = URLBuilder.getInstance().getMarkupUrlForAggregationApi(UIClass);
+			api = this._parser.urlBuilder.getMarkupUrlForAggregationApi(UIClass);
 		}
 		if (event) {
 			text = `event: **${event.name}**  \n\n${event.description}`;
-			api = URLBuilder.getInstance().getMarkupUrlForEventsApi(UIClass, event.name);
+			api = this._parser.urlBuilder.getMarkupUrlForEventsApi(UIClass, event.name);
 
 			if (event.params.length > 0) {
 				text += `  \n\nParameters:  \n${event.params
@@ -188,7 +185,7 @@ export class XMLHoverProvider {
 			if (typeValues.length > 0) {
 				text += `  \n\nValues:  \n${typeValues.join("  \n")}`;
 			}
-			api = URLBuilder.getInstance().getMarkupUrlForPropertiesApi(UIClass);
+			api = this._parser.urlBuilder.getMarkupUrlForPropertiesApi(UIClass);
 		}
 
 		if (api) {

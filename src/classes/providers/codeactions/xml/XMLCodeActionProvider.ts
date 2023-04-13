@@ -1,20 +1,18 @@
 import * as vscode from "vscode";
+import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
+import { CustomDiagnostics } from "../../../registrators/DiagnosticsRegistrator";
+import ParserBearer from "../../../ui5parser/ParserBearer";
 import { SwitchToControllerCommand } from "../../../vscommands/switchers/SwitchToControllerCommand";
 import { InsertType, MethodInserter } from "../util/MethodInserter";
-import { CustomDiagnostics } from "../../../registrators/DiagnosticsRegistrator";
-import { XMLParser } from "ui5plugin-parser";
-import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
-import { UI5Plugin } from "../../../../UI5Plugin";
-import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 
-export class XMLCodeActionProvider {
-	static async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
+export class XMLCodeActionProvider extends ParserBearer {
+	async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const providerResult: vscode.CodeAction[] = this._getEventAutofillCodeActions(document, range);
 
 		return providerResult;
 	}
 
-	private static _getEventAutofillCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
+	private _getEventAutofillCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const providerResult: vscode.CodeAction[] = [];
 		const diagnostics = vscode.languages.getDiagnostics(document.uri);
 		const diagnostic: CustomDiagnostics | undefined = diagnostics
@@ -22,22 +20,27 @@ export class XMLCodeActionProvider {
 			.find(diagnostic => {
 				return diagnostic.range.contains(range);
 			});
-		const XMLFile = diagnostic?.attribute && TextDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
+		const XMLFile =
+			diagnostic?.attribute && this._parser.textDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
 		if (diagnostic?.attribute && XMLFile) {
 			const currentPositionOffset = document?.offsetAt(range.end);
-			const attributeData = XMLParser.getAttributeNameAndValue(diagnostic.attribute);
-			attributeData.attributeValue = XMLParser.getEventHandlerNameFromAttributeValue(
+			const attributeData = this._parser.xmlParser.getAttributeNameAndValue(diagnostic.attribute);
+			attributeData.attributeValue = this._parser.xmlParser.getEventHandlerNameFromAttributeValue(
 				attributeData.attributeValue
 			);
-			const tagText = XMLParser.getTagInPosition(XMLFile, currentPositionOffset).text;
-			const tagPrefix = XMLParser.getTagPrefix(tagText);
-			const classNameOfTheTag = XMLParser.getClassNameFromTag(tagText);
-			const libraryPath = XMLParser.getLibraryPathFromTagPrefix(XMLFile, tagPrefix, currentPositionOffset);
+			const tagText = this._parser.xmlParser.getTagInPosition(XMLFile, currentPositionOffset).text;
+			const tagPrefix = this._parser.xmlParser.getTagPrefix(tagText);
+			const classNameOfTheTag = this._parser.xmlParser.getClassNameFromTag(tagText);
+			const libraryPath = this._parser.xmlParser.getLibraryPathFromTagPrefix(
+				XMLFile,
+				tagPrefix,
+				currentPositionOffset
+			);
 			const classOfTheTag = [libraryPath, classNameOfTheTag].join(".");
-			const events = UI5Plugin.getInstance().parser.classFactory.getClassEvents(classOfTheTag);
+			const events = this._parser.classFactory.getClassEvents(classOfTheTag);
 			const event = events.find(event => event.name === attributeData.attributeName);
 			if (event) {
-				const controllerName = SwitchToControllerCommand.getResponsibleClassForCurrentView();
+				const controllerName = new SwitchToControllerCommand(this._parser).getResponsibleClassForCurrentView();
 				if (controllerName) {
 					// TODO: this
 					const eventModule =
@@ -53,7 +56,7 @@ export class XMLCodeActionProvider {
 						.replace("{className}", classOfTheTag)
 						.replace("{eventName}", attributeData.attributeName);
 
-					const insertCodeAction = MethodInserter.createInsertMethodCodeAction(
+					const insertCodeAction = new MethodInserter(this._parser).createInsertMethodCodeAction(
 						controllerName,
 						attributeData.attributeValue,
 						"oEvent",

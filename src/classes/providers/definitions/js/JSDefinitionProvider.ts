@@ -1,24 +1,21 @@
-import { UI5Parser, XMLParser } from "ui5plugin-parser";
-import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/UI5Classes/JSParser/strategies/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { Node, StringLiteral } from "ts-morph";
+import * as ts from "typescript";
+import { ParserPool, UI5JSParser } from "ui5plugin-parser";
+import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import {
 	AbstractCustomClass,
 	ICustomClassField,
 	ICustomClassMethod
-} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
-import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { StandardUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/StandardUIClass";
-import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/utils/TextDocumentTransformer";
-import { URLBuilder } from "ui5plugin-parser/dist/classes/utils/URLBuilder";
-import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
+} from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { StandardUIClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/StandardUIClass";
+import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
+import { IXMLFile } from "ui5plugin-parser/dist/classes/parsing/util/filereader/IFileReader";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../../UI5Plugin";
 import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
-import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
-import * as ts from "typescript";
-import { Node, StringLiteral } from "ts-morph";
 import { RangeAdapter } from "../../../adapters/vscode/RangeAdapter";
-import { IXMLFile } from "ui5plugin-parser/dist/classes/utils/FileReader";
+import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
+import ParserBearer from "../../../ui5parser/ParserBearer";
 
 interface CurrentStringData {
 	value: string;
@@ -26,25 +23,26 @@ interface CurrentStringData {
 	end: number;
 }
 
-export class JSDefinitionProvider {
-	public static getPositionAndUriOfCurrentVariableDefinition(
+export class JSDefinitionProvider extends ParserBearer<UI5JSParser> {
+	public getPositionAndUriOfCurrentVariableDefinition(
 		document: vscode.TextDocument,
 		position: vscode.Position,
 		openInBrowserIfStandardMethod = false
 	) {
 		let location: vscode.Location | vscode.LocationLink[] | undefined;
 		const methodName = document.getText(document.getWordRangeAtPosition(position));
-		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+		const className = this._parser.fileReader.getClassNameFromPath(document.fileName);
 
 		if (!className) {
 			return location;
 		}
 
-		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+		const UIClass = this._parser.classFactory.getUIClass(className);
 
-		if (UIClass instanceof CustomUIClass) {
+		if (UIClass instanceof CustomJSClass) {
 			const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(
-				AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser
+				this._parser.syntaxAnalyser,
+				this._parser
 			);
 			const classNameAtCurrentPosition =
 				className && strategy.getClassNameOfTheVariableAtPosition(className, document.offsetAt(position));
@@ -74,14 +72,14 @@ export class JSDefinitionProvider {
 		return location;
 	}
 
-	private static _getParentMethodLocation(document: vscode.TextDocument, position: vscode.Position) {
+	private _getParentMethodLocation(document: vscode.TextDocument, position: vscode.Position) {
 		let location: vscode.Location | undefined;
-		const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
-		const parentUIClass = UIClass && UI5Plugin.getInstance().parser.classFactory.getParent(UIClass);
+		const UIClass = this._parser.textDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
+		const parentUIClass = UIClass && this._parser.classFactory.getParent(UIClass);
 		if (UIClass && parentUIClass && parentUIClass instanceof AbstractCustomClass) {
 			const offset = document.offsetAt(position);
 			let member: ICustomClassMethod<any> | ICustomClassField<any> | undefined;
-			if (UIClass instanceof CustomUIClass) {
+			if (UIClass instanceof CustomJSClass) {
 				const members = [...UIClass.methods, ...UIClass.fields];
 				member = members.find(member => {
 					if (member.loc) {
@@ -99,7 +97,7 @@ export class JSDefinitionProvider {
 			}
 			const parentMember = member && this._getParentMember(parentUIClass.className, member.name);
 			if (parentMember) {
-				const parentMemberClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(parentMember.owner);
+				const parentMemberClass = this._parser.classFactory.getUIClass(parentMember.owner);
 				const classUri =
 					parentMemberClass &&
 					parentMemberClass instanceof AbstractCustomClass &&
@@ -114,12 +112,12 @@ export class JSDefinitionProvider {
 		return location;
 	}
 
-	private static _getParentMember(
+	private _getParentMember(
 		className: string,
 		memberName: string
 	): ICustomClassMethod | ICustomClassField | undefined {
 		let parentMember: ICustomClassMethod | ICustomClassField | undefined;
-		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+		const UIClass = this._parser.classFactory.getUIClass(className);
 		if (UIClass instanceof AbstractCustomClass) {
 			const members = [...UIClass.methods, ...UIClass.fields];
 			parentMember = members.find(parentMember => parentMember.name === memberName);
@@ -132,19 +130,14 @@ export class JSDefinitionProvider {
 		return parentMember;
 	}
 
-	private static _getClassLocation(
-		document: vscode.TextDocument,
-		position: vscode.Position
-	): vscode.Location | undefined {
+	private _getClassLocation(document: vscode.TextDocument, position: vscode.Position): vscode.Location | undefined {
 		let location: vscode.Location | undefined;
-		const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
+		const UIClass = this._parser.textDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
 		const offset = document.offsetAt(position);
 		if (UIClass) {
 			const method = UIClass.methods.find(method => method.node?.start <= offset && method.node.end >= offset);
 			if (method && method.node) {
-				const allContent = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.expandAllContent(
-					method.node
-				);
+				const allContent = this._parser.syntaxAnalyser.expandAllContent(method.node);
 				const contentInPosition = allContent.filter(
 					(content: any) => content.start <= offset && content.end >= offset
 				);
@@ -152,10 +145,10 @@ export class JSDefinitionProvider {
 				if (identifier?.name) {
 					const importedClass = UIClass.UIDefine.find(UIDefine => UIDefine.className === identifier.name);
 					if (importedClass) {
-						const importedUIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(
+						const importedUIClass = this._parser.classFactory.getUIClass(
 							importedClass.classNameDotNotation
 						);
-						if (importedUIClass instanceof CustomUIClass && importedUIClass.fsPath) {
+						if (importedUIClass instanceof CustomJSClass && importedUIClass.fsPath) {
 							const classUri = vscode.Uri.file(importedUIClass.fsPath);
 							const vscodePosition = new vscode.Position(0, 0);
 							location = new vscode.Location(classUri, vscodePosition);
@@ -168,16 +161,15 @@ export class JSDefinitionProvider {
 		return location;
 	}
 
-	private static _getMemberLocation(className: string, memberName: string, openInBrowserIfStandardMethod: boolean) {
+	private _getMemberLocation(className: string, memberName: string, openInBrowserIfStandardMethod: boolean) {
 		let location: vscode.Location | undefined;
 		if (className) {
-			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			const UIClass = this._parser.classFactory.getUIClass(className);
 			const methodOrField =
 				UIClass.methods.find(method => method.name === memberName) ||
 				UIClass.fields.find(field => field.name === memberName);
 			if (methodOrField) {
-				const isThisClassFromAProject =
-					!!UI5Plugin.getInstance().parser.fileReader.getManifestForClass(className);
+				const isThisClassFromAProject = !!ParserPool.getManifestForClass(className);
 				if (!isThisClassFromAProject && openInBrowserIfStandardMethod) {
 					this._openClassMethodInTheBrowser(className, memberName);
 				} else {
@@ -197,16 +189,16 @@ export class JSDefinitionProvider {
 		return location;
 	}
 
-	private static _getXMLFileLocationOrXMLControlIdLocation(document: vscode.TextDocument, position: vscode.Position) {
+	private _getXMLFileLocationOrXMLControlIdLocation(document: vscode.TextDocument, position: vscode.Position) {
 		let location: vscode.LocationLink[] | undefined;
 
-		const UIClass = TextDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
-		if (UIClass) {
+		const UIClass = this._parser.textDocumentTransformer.toCustomUIClass(new TextDocumentAdapter(document));
+		if (UIClass && UIClass instanceof CustomJSClass) {
 			const currentStringData = this._getCurrentStringData(UIClass, document, position);
 			if (!currentStringData) {
 				return;
 			}
-			const XMLFile = UI5Plugin.getInstance().parser.fileReader.getXMLFile(currentStringData.value);
+			const XMLFile = this._parser.fileReader.getXMLFile(currentStringData.value);
 			if (XMLFile) {
 				location = this._getLocationOfXMLFile(XMLFile, document, currentStringData);
 			} else {
@@ -217,21 +209,21 @@ export class JSDefinitionProvider {
 		return location;
 	}
 
-	private static _getLocationOfXMLTag(
-		UIClass: AbstractCustomClass,
+	private _getLocationOfXMLTag(
+		UIClass: CustomJSClass,
 		currentStringData: CurrentStringData,
 		document: vscode.TextDocument
 	) {
 		let location: vscode.LocationLink[] | undefined;
-		const viewsAndFragments =
-			UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
+		const viewsAndFragments = this._parser.classFactory.getViewsAndFragmentsOfControlHierarchically(UIClass);
 		const XMLDocuments = [...viewsAndFragments.fragments, ...viewsAndFragments.views];
 		XMLDocuments.find(XMLDocument => {
-			const tags = XMLParser.getAllTags(XMLDocument);
+			const tags = this._parser.xmlParser.getAllTags(XMLDocument);
 			const idTag = tags.find(tag => {
-				const attributes = XMLParser.getAttributesOfTheTag(tag);
+				const attributes = this._parser.xmlParser.getAttributesOfTheTag(tag);
 				return !!attributes?.find(attribute => {
-					const { attributeName, attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+					const { attributeName, attributeValue } =
+						this._parser.xmlParser.getAttributeNameAndValue(attribute);
 
 					return currentStringData && attributeName === "id" && attributeValue === currentStringData.value;
 				});
@@ -262,7 +254,7 @@ export class JSDefinitionProvider {
 		return location;
 	}
 
-	private static _getLocationOfXMLFile(
+	private _getLocationOfXMLFile(
 		XMLFile: IXMLFile,
 		document: vscode.TextDocument,
 		currentStringData: CurrentStringData
@@ -281,19 +273,17 @@ export class JSDefinitionProvider {
 		return location;
 	}
 
-	private static _getCurrentStringData(
+	private _getCurrentStringData(
 		UIClass: AbstractCustomClass,
 		document: vscode.TextDocument,
 		position: vscode.Position
 	) {
 		let currentStringData: CurrentStringData | undefined;
-		if (UIClass instanceof CustomUIClass) {
+		if (UIClass instanceof CustomJSClass) {
 			const offset = document.offsetAt(position);
 			const method = UIClass.methods.find(method => method.node?.start <= offset && method.node?.end >= offset);
 			if (method?.node) {
-				const allContent = AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.expandAllContent(
-					method.node
-				);
+				const allContent = this._parser.syntaxAnalyser.expandAllContent(method.node);
 				const contentInPosition = allContent.filter(
 					(content: any) => content.start <= offset && content.end >= offset
 				);
@@ -326,7 +316,7 @@ export class JSDefinitionProvider {
 		return currentStringData;
 	}
 
-	private static _getStringLiteralAtPosRecursive(node: Node, offset: number): StringLiteral | undefined {
+	private _getStringLiteralAtPosRecursive(node: Node, offset: number): StringLiteral | undefined {
 		const child = node.getChildAtPos(offset);
 		if (child?.isKind(ts.SyntaxKind.StringLiteral)) {
 			return child;
@@ -335,21 +325,19 @@ export class JSDefinitionProvider {
 		}
 	}
 
-	private static _getVSCodeMemberLocation(classNameDotNotation: string, memberName: string) {
+	private _getVSCodeMemberLocation(classNameDotNotation: string, memberName: string) {
 		let location: vscode.Location | undefined;
-		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(classNameDotNotation);
+		const UIClass = this._parser.classFactory.getUIClass(classNameDotNotation);
 
 		if (UIClass instanceof AbstractCustomClass) {
 			const currentMember =
 				UIClass.methods.find(method => method.name === memberName) ||
 				UIClass.fields.find(field => field.name === memberName);
 			if (currentMember?.loc) {
-				const classPath = UI5Plugin.getInstance().parser.fileReader.getClassFSPathFromClassName(
-					UIClass.className
-				);
+				const classPath = this._parser.fileReader.getClassFSPathFromClassName(UIClass.className);
 				if (classPath) {
 					const classUri = vscode.Uri.file(classPath);
-					if (currentMember.node.start) {
+					if (currentMember.loc?.start) {
 						const position = PositionAdapter.acornPositionToVSCodePosition(currentMember.loc.start);
 						location = new vscode.Location(classUri, position);
 					}
@@ -360,16 +348,16 @@ export class JSDefinitionProvider {
 		}
 	}
 
-	private static _openClassMethodInTheBrowser(classNameDotNotation: string, methodName: string) {
-		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(classNameDotNotation);
+	private _openClassMethodInTheBrowser(classNameDotNotation: string, methodName: string) {
+		const UIClass = this._parser.classFactory.getUIClass(classNameDotNotation);
 		if (UIClass instanceof StandardUIClass) {
 			const methodFromClass = UIClass.methods.find(method => method.name === methodName);
 			if (methodFromClass) {
 				if (methodFromClass.isFromParent) {
 					this._openClassMethodInTheBrowser(UIClass.parentClassNameDotNotation, methodName);
 				} else {
-					const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(classNameDotNotation);
-					const linkToDocumentation = URLBuilder.getInstance().getUrlForMethodApi(UIClass, methodName);
+					const UIClass = this._parser.classFactory.getUIClass(classNameDotNotation);
+					const linkToDocumentation = this._parser.urlBuilder.getUrlForMethodApi(UIClass, methodName);
 					vscode.env.openExternal(vscode.Uri.parse(linkToDocumentation));
 				}
 			} else if (UIClass.parentClassNameDotNotation) {

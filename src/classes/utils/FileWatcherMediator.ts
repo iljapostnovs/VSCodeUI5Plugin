@@ -1,89 +1,93 @@
-import * as vscode from "vscode";
-import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
-import { ProjectType, UI5Plugin } from "../../UI5Plugin";
-import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
-import { CustomCompletionItem } from "../providers/completionitems/CustomCompletionItem";
-import { WorkspaceCompletionItemFactory } from "../providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
-import { IFileChanges, IFileRenameData } from "../filerenaming/handlers/abstraction/FileRenameHandler";
-import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/factory/TemplateGeneratorFactory";
-import { ResourceModelData } from "ui5plugin-parser/dist/classes/UI5Classes/ResourceModelData";
-import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
-import { VSCodeFileReader } from "./VSCodeFileReader";
-import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
 import { PackageLinterConfigHandler } from "ui5plugin-linter";
-import { AbstractUI5Parser, PackageParserConfigHandler, UI5TSParser } from "ui5plugin-parser";
-import { ICacheable } from "ui5plugin-parser/dist/classes/UI5Classes/abstraction/ICacheable";
-import * as ts from "typescript";
-import { IReferenceCodeLensCacheable } from "ui5plugin-linter/dist/classes/js/parts/util/ReferenceFinderBase";
+import { PackageParserConfigHandler, ParserPool, toNative, UI5TSParser } from "ui5plugin-parser";
+import { ICacheable } from "ui5plugin-parser/dist/classes/parsing/abstraction/ICacheable";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { IReferenceCodeLensCacheable } from "ui5plugin-parser/dist/classes/parsing/util/referencefinder/ReferenceFinderBase";
+import * as vscode from "vscode";
+import { UI5Plugin } from "../../UI5Plugin";
+import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
+import { FileRenameMediator } from "../filerenaming/FileRenameMediator";
+import { IFileChanges, IFileRenameData } from "../filerenaming/handlers/abstraction/FileRenameHandler";
+import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
+import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/factory/TemplateGeneratorFactory";
+import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
+import { VSCodeFileReader } from "./VSCodeFileReader";
 
 const workspace = vscode.workspace;
 
 export class FileWatcherMediator {
-	private static async _onChange(
+	private async _onChange(
 		uri: vscode.Uri,
 		document?: vscode.TextDocument,
 		force = true,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		contentChanges?: Readonly<vscode.TextDocumentContentChangeEvent[]>
 	) {
 		if (!document) {
 			document = await vscode.workspace.openTextDocument(uri);
 		}
+
+		if (document.fileName.endsWith("package.json")) {
+			const nativePath = toNative(document.fileName);
+			delete PackageLinterConfigHandler.packageCache[nativePath];
+			delete PackageParserConfigHandler.packageCache[nativePath];
+			// if (contentChanges) {
+			// const contentChange = contentChanges[0];
+			// const changeOffset = contentChange.rangeOffset;
+			// const oldPackage = PackageParserConfigHandler.packageCache[nativePath];
+			// if in ui5parser, then reload
+			// }
+
+			const parsers = ParserPool.getAllParsers();
+			parsers.forEach(parser => {
+				if (parser.configHandler instanceof PackageParserConfigHandler) {
+					parser.configHandler.loadCache();
+				}
+			});
+		}
+		const parser = ParserPool.getParserForFile(document.fileName);
+		if (!parser) {
+			return;
+		}
 		if (document.fileName.endsWith(".js") || document.fileName.endsWith(".ts")) {
-			const currentClassNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(
-				document.fileName
-			);
+			const currentClassNameDotNotation = parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassNameDotNotation) {
-				if (document.fileName.endsWith(".ts")) {
-					const textChanges: ts.TextChange[] | undefined = contentChanges?.map(contentChange => {
-						return {
-							newText: contentChange.text,
-							span: { length: contentChange.rangeLength, start: contentChange.rangeOffset }
-						};
-					});
-					AbstractUI5Parser.getInstance(UI5TSParser).classFactory.setNewCodeForClass(
+				if (document.fileName.endsWith(".ts") && parser instanceof UI5TSParser) {
+					// const textChanges: ts.TextChange[] | undefined = contentChanges?.map(contentChange => {
+					// 	return {
+					// 		newText: contentChange.text,
+					// 		span: { length: contentChange.rangeLength, start: contentChange.rangeOffset }
+					// 	};
+					// });
+					parser.classFactory.setNewCodeForClass(
 						currentClassNameDotNotation,
 						document.getText(),
 						force,
 						undefined,
 						undefined,
 						true,
-						textChanges
+						undefined
+						// textChanges
 					);
 				} else {
-					UI5Plugin.getInstance().parser.classFactory.setNewCodeForClass(
-						currentClassNameDotNotation,
-						document.getText(),
-						force
-					);
+					parser.classFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText(), force);
 				}
 			}
 		} else if (document.fileName.endsWith(".view.xml")) {
 			const viewContent = document.getText();
-			UI5Plugin.getInstance().parser.fileReader.setNewViewContentToCache(viewContent, document.uri.fsPath, true);
+			parser.fileReader.setNewViewContentToCache(viewContent, toNative(document.uri.fsPath), true);
 		} else if (document.fileName.endsWith(".fragment.xml")) {
-			UI5Plugin.getInstance().parser.fileReader.setNewFragmentContentToCache(
-				document.getText(),
-				document.fileName,
-				true
-			);
+			parser.fileReader.setNewFragmentContentToCache(document.getText(), toNative(document.fileName), true);
 		} else if (document.fileName.endsWith(".properties")) {
-			ResourceModelData.updateCache(new TextDocumentAdapter(document));
+			parser.resourceModelData.updateCache(new TextDocumentAdapter(document));
 		} else if (document.fileName.endsWith("manifest.json")) {
-			UI5Plugin.getInstance().parser.fileReader.rereadAllManifests(
-				vscode.workspace.workspaceFolders?.map(wsFolder => {
-					return { fsPath: wsFolder.uri.fsPath };
-				}) || []
-			);
-		} else if (document.fileName.endsWith("package.json")) {
-			delete PackageLinterConfigHandler.packageCache[document.fileName];
-			delete PackageParserConfigHandler.packageCache[document.fileName];
+			parser.fileReader.rereadAllManifests();
 		}
 
 		this._updateDiagnosticsIfNecessary(document);
 	}
 
-	private static _updateDiagnosticsIfNecessary(changedDocument: vscode.TextDocument) {
+	private _updateDiagnosticsIfNecessary(changedDocument: vscode.TextDocument) {
 		const activeDocument = vscode.window.activeTextEditor?.document;
 		if (activeDocument) {
 			const supportedExtensions = [".js", ".ts", ".view.xml", ".fragment.xml"];
@@ -96,11 +100,15 @@ export class FileWatcherMediator {
 		}
 	}
 
-	private static _checkIfDiagnosticIsDirty(changedDocument: vscode.TextDocument) {
+	private _checkIfDiagnosticIsDirty(changedDocument: vscode.TextDocument) {
 		let changedClassHasReferencesToActiveClass = false;
 		const activeDocument = vscode.window.activeTextEditor?.document;
+		const parser = ParserPool.getParserForFile(changedDocument.fileName);
+		if (!parser) {
+			return;
+		}
 		const activeDocumentClassName =
-			activeDocument && UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(activeDocument.fileName);
+			activeDocument && parser.fileReader.getClassNameFromPath(activeDocument.fileName);
 		if (
 			activeDocument &&
 			changedDocument.fileName !== activeDocument.fileName &&
@@ -117,35 +125,34 @@ export class FileWatcherMediator {
 
 		return changedClassHasReferencesToActiveClass;
 	}
-	private static _getCacheableInstance(document: vscode.TextDocument) {
+	private _getCacheableInstance(document: vscode.TextDocument) {
+		const parser = ParserPool.getParserForFile(document.fileName);
+		if (!parser) {
+			return;
+		}
 		let cacheable: ICacheable | undefined;
 		const activeDocument = vscode.window.activeTextEditor?.document;
 		const activeDocumentClassName =
-			activeDocument && UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(activeDocument.fileName);
-		const currentClassNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(
-			document.fileName
-		);
+			activeDocument && parser.fileReader.getClassNameFromPath(activeDocument.fileName);
+		const currentClassNameDotNotation = parser.fileReader.getClassNameFromPath(document.fileName);
 		if (activeDocumentClassName && currentClassNameDotNotation) {
 			if (document.fileName.endsWith(".js") || document.fileName.endsWith(".ts")) {
-				const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(currentClassNameDotNotation);
-				if (UIClass && UIClass instanceof CustomUIClass) {
+				const UIClass = parser.classFactory.getUIClass(currentClassNameDotNotation);
+				if (UIClass && UIClass instanceof CustomJSClass) {
 					cacheable = UIClass;
 				}
 			} else if (document.fileName.endsWith(".fragment.xml") || document.fileName.endsWith(".view.xml")) {
-				cacheable = UI5Plugin.getInstance().parser.fileReader.getXMLFile(activeDocumentClassName);
+				cacheable = parser.fileReader.getXMLFile(activeDocumentClassName);
 			}
 		}
 
 		return cacheable;
 	}
 
-	static register() {
-		let watcher: vscode.FileSystemWatcher;
-		if (UI5Plugin.getInstance().projectType === ProjectType.js) {
-			watcher = vscode.workspace.createFileSystemWatcher("**/*.{js,xml,json,properties}");
-		} else {
-			watcher = vscode.workspace.createFileSystemWatcher("**/*.{ts,xml,json,properties}");
-		}
+	register() {
+		const watcher: vscode.FileSystemWatcher = vscode.workspace.createFileSystemWatcher(
+			"**/*.{js,ts,xml,json,properties}"
+		);
 		let disposable = vscode.workspace.onDidChangeWorkspaceFolders(() => {
 			ClearCacheCommand.reloadWindow();
 		});
@@ -153,7 +160,7 @@ export class FileWatcherMediator {
 
 		disposable = vscode.workspace.onDidChangeTextDocument(event => {
 			if (event.contentChanges.length) {
-				this._onChange(event.document.uri, event.document, false);
+				this._onChange(event.document.uri, event.document, false, event.contentChanges);
 			}
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
@@ -183,13 +190,19 @@ export class FileWatcherMediator {
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 
+		disposable = workspace.onDidSaveTextDocument(document => {
+			this._executeGenerateTSXMLInterfacesCommand(document);
+		});
+		UI5Plugin.getInstance().addDisposable(disposable);
+
 		watcher.onDidDelete(uri => {
+			const parser = ParserPool.getParserForFile(uri.fsPath);
 			if (uri.fsPath.endsWith(".js")) {
 				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "js");
 			}
-			if (uri.fsPath.endsWith(".ts")) {
+			if (uri.fsPath.endsWith(".ts") && parser instanceof UI5TSParser) {
 				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "ts");
-				const project = UI5TSParser.getInstance(UI5TSParser).getProject(uri.fsPath);
+				const project = parser.getProject(uri.fsPath);
 				const sourceFile = project?.getSourceFile(uri.fsPath);
 				if (sourceFile) {
 					project?.removeSourceFile(sourceFile);
@@ -203,25 +216,28 @@ export class FileWatcherMediator {
 			}
 
 			if (uri.fsPath.endsWith(".js") || uri.fsPath.endsWith(".ts")) {
-				const currentClassNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(
-					uri.fsPath
-				);
+				const currentClassNameDotNotation = parser?.fileReader.getClassNameFromPath(uri.fsPath);
 				if (currentClassNameDotNotation) {
-					UI5Plugin.getInstance().parser.classFactory.removeClass(currentClassNameDotNotation);
+					parser?.classFactory.removeClass(currentClassNameDotNotation);
 				}
 			} else if (uri.fsPath.endsWith(".xml")) {
-				UI5Plugin.getInstance().parser.fileReader.removeFromCache(uri.fsPath);
+				parser?.fileReader.removeFromCache(uri.fsPath);
 			}
 		});
 		UI5Plugin.getInstance().addDisposable(disposable);
 
 		disposable = vscode.window.onDidChangeActiveTextEditor(textEditor => {
-			if (textEditor?.document.fileName.endsWith(".js") || textEditor?.document.fileName.endsWith(".ts")) {
-				const currentClassNameDotNotation = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(
+			const parser = textEditor && ParserPool.getParserForFile(textEditor?.document.fileName);
+			if (!textEditor || !parser) {
+				return;
+			}
+
+			if (textEditor.document.fileName.endsWith(".js") || textEditor.document.fileName.endsWith(".ts")) {
+				const currentClassNameDotNotation = parser.fileReader.getClassNameFromPath(
 					textEditor.document.fileName
 				);
 				if (currentClassNameDotNotation) {
-					UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(
+					parser.classFactory.setNewContentForClassUsingDocument(
 						new TextDocumentAdapter(textEditor.document)
 					);
 				}
@@ -230,8 +246,22 @@ export class FileWatcherMediator {
 		UI5Plugin.getInstance().addDisposable(disposable);
 	}
 
-	private static async _applyFileChanges(fileChanges: IFileChanges[]) {
-		const edit = new vscode.WorkspaceEdit();
+	private _executeGenerateTSXMLInterfacesCommand(document: vscode.TextDocument) {
+		const textDocument = new TextDocumentAdapter(document);
+		if (textDocument.isXML()) {
+			const ui5PluginConfiguration = vscode.workspace.getConfiguration("ui5.plugin");
+			const isSavingRequired = ui5PluginConfiguration.get<boolean>("generateXMLFileInterfacesOnSave");
+			const isXMLFileInterfacePathSet = !!ui5PluginConfiguration.get<string>("XMLFileInterfacePath");
+			if (isSavingRequired && isXMLFileInterfacePathSet) {
+				return vscode.commands.executeCommand("ui5plugin.generateTSXMLFileInterfaces", {
+					shouldOpenDocument: false
+				});
+			}
+		}
+	}
+
+	private async _applyFileChanges(fileChanges: IFileChanges[]) {
+		const textEdit = new vscode.WorkspaceEdit();
 		const changedTextDocuments: vscode.TextDocument[] = [];
 		const renames: IFileRenameData[] = fileChanges.flatMap(fileChange => {
 			return fileChange.renames;
@@ -244,63 +274,63 @@ export class FileWatcherMediator {
 			const positionBegin = document.positionAt(0);
 			const positionEnd = document.positionAt(document.getText().length);
 			const range = new vscode.Range(positionBegin, positionEnd);
-			edit.replace(document.uri, range, changedFile.fileData.content);
+			textEdit.replace(document.uri, range, changedFile.fileData.content);
 
-			if (changedFile.fileData.fsPath.endsWith(".fragment.xml")) {
-				UI5Plugin.getInstance().parser.fileReader.setNewFragmentContentToCache(
-					changedFile.fileData.content,
-					changedFile.fileData.fsPath,
-					true
-				);
-			} else if (changedFile.fileData.fsPath.endsWith(".view.xml")) {
-				UI5Plugin.getInstance().parser.fileReader.setNewViewContentToCache(
-					changedFile.fileData.content,
-					changedFile.fileData.fsPath,
-					true
-				);
-			} else if (changedFile.fileData.fsPath.endsWith("manifest.json")) {
-				UI5Plugin.getInstance().parser.fileReader.rereadAllManifests(
-					vscode.workspace.workspaceFolders?.map(wsFolder => {
-						return { fsPath: wsFolder.uri.fsPath };
-					}) || []
-				);
+			const parser = ParserPool.getParserForFile(changedFile.fileData.fsPath);
+			if (parser) {
+				if (changedFile.fileData.fsPath.endsWith(".fragment.xml")) {
+					parser.fileReader.setNewFragmentContentToCache(
+						changedFile.fileData.content,
+						toNative(changedFile.fileData.fsPath),
+						true
+					);
+				} else if (changedFile.fileData.fsPath.endsWith(".view.xml")) {
+					parser.fileReader.setNewViewContentToCache(
+						changedFile.fileData.content,
+						toNative(changedFile.fileData.fsPath),
+						true
+					);
+				} else if (changedFile.fileData.fsPath.endsWith("manifest.json")) {
+					parser.fileReader.rereadAllManifests();
+				}
 			}
 		}
 
 		changedFiles.forEach(changedFile => {
+			const parser = ParserPool.getParserForFile(changedFile.fileData.fsPath);
 			if (changedFile.fileData.fsPath.endsWith(".js") || changedFile.fileData.fsPath.endsWith(".ts")) {
-				const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(
-					changedFile.fileData.fsPath
-				);
+				const className = parser?.fileReader.getClassNameFromPath(changedFile.fileData.fsPath);
 				if (className) {
-					UI5Plugin.getInstance().parser.classFactory.setNewCodeForClass(
-						className,
-						changedFile.fileData.content
-					);
+					parser?.classFactory.setNewCodeForClass(className, changedFile.fileData.content);
 				}
 			}
 		});
 
-		renames.forEach(rename => {
-			const oldUri = vscode.Uri.file(rename.oldFSPath);
-			const newUri = vscode.Uri.file(rename.newFSPath);
-			edit.renameFile(oldUri, newUri);
-		});
+		await vscode.workspace.applyEdit(textEdit);
 
-		await vscode.workspace.applyEdit(edit);
+		if (renames.length > 0) {
+			const renameEdit = new vscode.WorkspaceEdit();
+			renames.forEach(rename => {
+				const oldUri = vscode.Uri.file(rename.oldFSPath);
+				const newUri = vscode.Uri.file(rename.newFSPath);
+				renameEdit.renameFile(oldUri, newUri);
+			});
+			await vscode.workspace.applyEdit(renameEdit);
+		}
 	}
 
-	private static _handleFileRename(
+	private _handleFileRename(
 		file: {
 			oldUri: vscode.Uri;
 			newUri: vscode.Uri;
 		},
 		fileChanges = this.getFileChangeData()
 	) {
-		return FileRenameMediator.handleFileRename(file, fileChanges);
+		const parser = ParserPool.getParserForFile(file.oldUri.fsPath);
+		return parser ? new FileRenameMediator(parser).handleFileRename(file, fileChanges) : fileChanges;
 	}
 
-	public static getFileChangeData(): IFileChanges[] {
+	public getFileChangeData(): IFileChanges[] {
 		return VSCodeFileReader.getAllFilesInAllWorkspaces().map(fileData => {
 			return {
 				fileData,
@@ -310,61 +340,28 @@ export class FileWatcherMediator {
 		});
 	}
 
-	//TODO: Move to js completion items
-	public static synchronizeSAPUIDefineCompletionItems(completionItems: CustomCompletionItem[]) {
-		let disposable = workspace.onDidCreateFiles(event => {
-			event.files.forEach(file => {
-				if (file.fsPath.endsWith(".js")) {
-					WorkspaceCompletionItemFactory.synchronizeCreate(completionItems, file);
-				}
-			});
-		});
-
-		UI5Plugin.getInstance().addDisposable(disposable);
-
-		disposable = workspace.onDidDeleteFiles(event => {
-			event.files.forEach(file => {
-				if (file.fsPath.endsWith(".js")) {
-					WorkspaceCompletionItemFactory.synchronizeDelete(completionItems, file);
-				}
-			});
-		});
-
-		UI5Plugin.getInstance().addDisposable(disposable);
-
-		disposable = workspace.onDidRenameFiles(event => {
-			event.files.forEach(file => {
-				if (file.newUri.fsPath.endsWith(".js")) {
-					WorkspaceCompletionItemFactory.synchronizeCreate(completionItems, file.newUri);
-					WorkspaceCompletionItemFactory.synchronizeDelete(completionItems, file.oldUri);
-				}
-			});
-		});
-
-		UI5Plugin.getInstance().addDisposable(disposable);
-	}
-
-	private static _handleFileCreate(uri: vscode.Uri) {
+	private _handleFileCreate(uri: vscode.Uri) {
 		this._insertCodeTemplateOrSetNewContent(uri);
 		this._syncWithProjectCache(uri);
 	}
 
-	private static async _syncWithProjectCache(uri: vscode.Uri) {
+	private async _syncWithProjectCache(uri: vscode.Uri) {
 		const document = await vscode.workspace.openTextDocument(uri);
 		if (uri.fsPath.endsWith(".js") || uri.fsPath.endsWith(".ts")) {
-			const project = UI5TSParser.getInstance(UI5TSParser).getProject(uri.fsPath);
-			project?.addSourceFileAtPath(document.fileName);
-			UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(
-				new TextDocumentAdapter(document),
-				false
-			);
+			const parser = ParserPool.getParserForFile(uri.fsPath);
+			if (parser instanceof UI5TSParser) {
+				const project = parser.getProject(toNative(uri.fsPath));
+				project?.addSourceFileAtPath(toNative(document.fileName));
+			}
+			parser?.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document), false);
 		}
 	}
 
-	private static async _insertCodeTemplateOrSetNewContent(uri: vscode.Uri) {
+	private async _insertCodeTemplateOrSetNewContent(uri: vscode.Uri) {
 		const document = await vscode.workspace.openTextDocument(uri);
 		if (document.getText().length === 0) {
-			const templateInserter = TemplateGeneratorFactory.createInstance(uri.fsPath);
+			const fsPath = toNative(uri.fsPath);
+			const templateInserter = TemplateGeneratorFactory.createInstance(fsPath);
 			const textToInsert = templateInserter?.generateTemplate(uri);
 			if (textToInsert) {
 				const edit = new vscode.WorkspaceEdit();
@@ -374,9 +371,11 @@ export class FileWatcherMediator {
 		}
 	}
 
-	private static _handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
+	private _handleFolderRename(oldUri: vscode.Uri, newUri: vscode.Uri) {
 		const fileChanges = this.getFileChangeData();
-		FileRenameMediator.handleFolderRename(oldUri, newUri, fileChanges);
+		const parser = ParserPool.getParserForFile(oldUri.fsPath);
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+		parser && new FileRenameMediator(parser).handleFolderRename(oldUri, newUri, fileChanges);
 
 		return fileChanges;
 	}

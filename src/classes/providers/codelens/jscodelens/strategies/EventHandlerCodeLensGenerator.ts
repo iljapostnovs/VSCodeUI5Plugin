@@ -1,15 +1,13 @@
-import * as vscode from "vscode";
-import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
-import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
-import { UI5Parser, XMLParser } from "ui5plugin-parser";
+import { UI5JSParser } from "ui5plugin-parser";
 import {
-	CustomUIClass
-} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { IXMLFile } from "ui5plugin-parser/dist/classes/utils/FileReader";
-import { UI5Plugin } from "../../../../../UI5Plugin";
-import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
-import { AbstractCustomClass, ICustomClassMethod } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractCustomClass";
-
+	AbstractCustomClass,
+	ICustomClassMethod
+} from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { IXMLFile } from "ui5plugin-parser/dist/classes/parsing/util/filereader/IFileReader";
+import * as vscode from "vscode";
+import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
+import { CodeLensGenerator } from "./abstraction/CodeLensGenerator";
 interface IEventHandlerData {
 	name: string;
 	className: string;
@@ -27,19 +25,18 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 	private _generateEventHandlerCodeLenses(document: vscode.TextDocument) {
 		const codeLenses: vscode.CodeLens[] = [];
 
-		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+		const className = this._parser.fileReader.getClassNameFromPath(document.fileName);
 		if (className) {
-			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			const UIClass = this._parser.classFactory.getUIClass(className);
 			if (UIClass instanceof AbstractCustomClass) {
 				const eventHandlers = UIClass.methods.filter(method => method.isEventHandler);
-				const viewsAndFragments =
-					UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(
-						UIClass,
-						[],
-						true,
-						true,
-						true
-					);
+				const viewsAndFragments = this._parser.classFactory.getViewsAndFragmentsOfControlHierarchically(
+					UIClass,
+					[],
+					true,
+					true,
+					true
+				);
 				const XMLDocuments = [...viewsAndFragments.views, ...viewsAndFragments.fragments];
 				XMLDocuments.forEach(XMLDocument => {
 					codeLenses.push(...this._getCodeLensesForEventsFromXMLText(XMLDocument, eventHandlers, document));
@@ -104,26 +101,28 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 		const regex = new RegExp(`".?${eventHandlerName}"`);
 		const eventHandlerPosition = regex.exec(XMLText.content)?.index;
 		if (eventHandlerPosition) {
-			const tag = XMLParser.getTagInPosition(XMLText, eventHandlerPosition);
-			const attributes = XMLParser.getAttributesOfTheTag(tag);
+			const tag = this._parser.xmlParser.getTagInPosition(XMLText, eventHandlerPosition);
+			const attributes = this._parser.xmlParser.getAttributesOfTheTag(tag);
 			const attribute = attributes?.find(attribute => {
-				const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
-				return XMLParser.getEventHandlerNameFromAttributeValue(attributeValue) === eventHandlerName;
+				const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
+				return (
+					this._parser.xmlParser.getEventHandlerNameFromAttributeValue(attributeValue) === eventHandlerName
+				);
 			});
 			const idAttribute = attributes?.find(attribute => {
-				return XMLParser.getAttributeNameAndValue(attribute).attributeName === "id";
+				return this._parser.xmlParser.getAttributeNameAndValue(attribute).attributeName === "id";
 			});
 
 			let controlId;
 			if (idAttribute) {
-				controlId = XMLParser.getAttributeNameAndValue(idAttribute).attributeValue;
+				controlId = this._parser.xmlParser.getAttributeNameAndValue(idAttribute).attributeValue;
 			}
 
 			if (attribute) {
 				const attributePositionStart = tag.positionBegin + tag.text.indexOf(attribute);
 				eventHandlerData = {
-					className: XMLParser.getClassNameInPosition(XMLText, eventHandlerPosition),
-					name: XMLParser.getAttributeNameAndValue(attribute).attributeName,
+					className: this._parser.xmlParser.getClassNameInPosition(XMLText, eventHandlerPosition),
+					name: this._parser.xmlParser.getAttributeNameAndValue(attribute).attributeName,
 					start: attributePositionStart,
 					end: attributePositionStart + attribute.length,
 					controlId: controlId
@@ -137,14 +136,15 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 	private _getCodeLensesForEventsFromJSClass(eventHandlers: ICustomClassMethod[], document: vscode.TextDocument) {
 		const solvedEventHandlers: ICustomClassMethod[] = [];
 		const codeLenses: vscode.CodeLens[] = [];
-		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+		const className = this._parser.fileReader.getClassNameFromPath(document.fileName);
 		if (className) {
-			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
-			if (UIClass instanceof CustomUIClass) {
+			const UIClass = this._parser.classFactory.getUIClass(className);
+			if (UIClass instanceof CustomJSClass) {
 				eventHandlers.forEach(eventHandler => {
-					const eventData = AbstractUI5Parser.getInstance(
-						UI5Parser
-					).syntaxAnalyser.getEventHandlerDataFromJSClass(className, eventHandler.name);
+					const eventData = (<UI5JSParser>this._parser).syntaxAnalyser.getEventHandlerDataFromJSClass(
+						className,
+						eventHandler.name
+					);
 					if (eventData && eventHandler.position) {
 						const positionBegin = document.positionAt(eventHandler.position);
 						const positionEnd = document.positionAt(eventHandler.position + eventHandler.name.length);

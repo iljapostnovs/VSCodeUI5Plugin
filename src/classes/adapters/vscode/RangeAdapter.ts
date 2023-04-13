@@ -1,6 +1,6 @@
 import LineColumn = require("line-column");
 import { SourceFile } from "ts-morph";
-import { IRange } from "ui5plugin-linter/dist/classes/Linter";
+import { IRange } from "ui5plugin-parser/dist/classes/parsing/util/range/adapters/RangeAdapter";
 import * as vscode from "vscode";
 import { IAcornPosition, PositionAdapter } from "./PositionAdapter";
 

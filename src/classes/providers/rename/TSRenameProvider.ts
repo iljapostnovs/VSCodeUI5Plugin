@@ -1,26 +1,24 @@
-import { AbstractUI5Parser, ICustomTSField, ICustomTSMethod, UI5TSParser, XMLParser } from "ui5plugin-parser";
-import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
-import { CustomTSObject } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSObject";
+import { ICustomTSField, ICustomTSMethod, UI5TSParser } from "ui5plugin-parser";
+import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
+import { CustomTSObject } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSObject";
 import * as vscode from "vscode";
-import { UI5Plugin } from "../../../UI5Plugin";
 import { RangeAdapter } from "../../adapters/vscode/RangeAdapter";
 import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";
+import ParserBearer from "../../ui5parser/ParserBearer";
 
 interface IWorkspaceEdit {
 	uri: vscode.Uri;
 	range: vscode.Range;
 	newValue: string;
 }
-export class TSRenameProvider {
-	static async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string) {
+export class TSRenameProvider extends ParserBearer<UI5TSParser> {
+	async provideRenameEdits(document: vscode.TextDocument, position: vscode.Position, newName: string) {
 		let workspaceEdits: IWorkspaceEdit[] = [];
 
-		const className = UI5Plugin.getInstance().parser.fileReader.getClassNameFromPath(document.fileName);
+		const className = this._parser.fileReader.getClassNameFromPath(document.fileName);
 		if (className) {
-			UI5Plugin.getInstance().parser.classFactory.setNewContentForClassUsingDocument(
-				new TextDocumentAdapter(document)
-			);
-			const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+			this._parser.classFactory.setNewContentForClassUsingDocument(new TextDocumentAdapter(document));
+			const UIClass = this._parser.classFactory.getUIClass(className);
 			if (UIClass instanceof CustomTSClass || UIClass instanceof CustomTSObject) {
 				const offset = document.offsetAt(position);
 				const members = [...UIClass.methods, ...UIClass.fields];
@@ -34,7 +32,7 @@ export class TSRenameProvider {
 
 				if (methodOrField?.node) {
 					const renameLocations =
-						AbstractUI5Parser.getInstance(UI5TSParser)
+						this._parser
 							.getProject(document.uri.fsPath)
 							?.getLanguageService()
 							.findRenameLocations(methodOrField.node) ?? [];
@@ -78,7 +76,7 @@ export class TSRenameProvider {
 		return workspaceEdit;
 	}
 
-	private static _removeOverlapingEdits(workspaceEdits: IWorkspaceEdit[]) {
+	private _removeOverlapingEdits(workspaceEdits: IWorkspaceEdit[]) {
 		return workspaceEdits.reduce((accumulator: IWorkspaceEdit[], workspaceEdit) => {
 			const isOverlapingEdit = !!accumulator.find(workspaceEditInAccumulator => {
 				return (
@@ -95,13 +93,13 @@ export class TSRenameProvider {
 		}, []);
 	}
 
-	private static _addTextEditsForEventHandlersInXMLDocs(
+	private _addTextEditsForEventHandlersInXMLDocs(
 		className: string,
 		oldMemberName: string,
 		newMemberName: string,
 		workspaceEdits: IWorkspaceEdit[]
 	) {
-		const UIClass = UI5Plugin.getInstance().parser.classFactory.getUIClass(className);
+		const UIClass = this._parser.classFactory.getUIClass(className);
 		if (UIClass instanceof CustomTSClass || UIClass instanceof CustomTSObject) {
 			const fields: ICustomTSField[] = UIClass.fields;
 			const methods: ICustomTSMethod[] = UIClass.methods;
@@ -110,17 +108,16 @@ export class TSRenameProvider {
 				fields.find(field => field.name === oldMemberName);
 
 			if (methodOrField?.mentionedInTheXMLDocument) {
-				const viewsAndFragments =
-					UI5Plugin.getInstance().parser.classFactory.getViewsAndFragmentsOfControlHierarchically(
-						UIClass,
-						[],
-						true,
-						true,
-						true
-					);
+				const viewsAndFragments = this._parser.classFactory.getViewsAndFragmentsOfControlHierarchically(
+					UIClass,
+					[],
+					true,
+					true,
+					true
+				);
 				const viewAndFragmentArray = [...viewsAndFragments.fragments, ...viewsAndFragments.views];
 				viewAndFragmentArray.forEach(viewOrFragment => {
-					const tagsAndAttributes = XMLParser.getXMLFunctionCallTagsAndAttributes(
+					const tagsAndAttributes = this._parser.xmlParser.getXMLFunctionCallTagsAndAttributes(
 						viewOrFragment,
 						oldMemberName,
 						className
@@ -129,7 +126,7 @@ export class TSRenameProvider {
 					tagsAndAttributes.forEach(tagAndAttribute => {
 						const { tag, attributes } = tagAndAttribute;
 						attributes.forEach(attribute => {
-							const { attributeValue } = XMLParser.getAttributeNameAndValue(attribute);
+							const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
 							const positionOfAttribute = tag.positionBegin + tag.text.indexOf(attribute);
 							const positionOfValueBegin = positionOfAttribute + attribute.indexOf(attributeValue);
 							const positionOfEventHandlerInAttributeValueBegin =

@@ -1,0 +1,10 @@
+{
+	"name": "ui5-typescript-helloworld",
+	"license": "Apache-2.0",
+	"devDependencies": {
+	  "@types/jquery": "3.5.14",
+	  "@types/openui5": "1.97.0",
+	  "@types/qunit": "2.11.3",
+	  "typescript": "^4.6.2"
+	}
+  }

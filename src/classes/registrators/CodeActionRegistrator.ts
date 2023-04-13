@@ -1,3 +1,4 @@
+import { ParserPool, UI5JSParser } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { JSCodeActionProvider } from "../providers/codeactions/js/JSCodeActionProvider";
@@ -9,7 +10,10 @@ export class CodeActionRegistrator {
 			{ language: "javascript", scheme: "file" },
 			{
 				provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
-					return JSCodeActionProvider.getCodeActions(document, range);
+					const parser = ParserPool.getParserForFile(document.fileName);
+					if (parser && parser instanceof UI5JSParser) {
+						return parser && new JSCodeActionProvider(parser).getCodeActions(document, range);
+					}
 				}
 			}
 		);
@@ -20,7 +24,8 @@ export class CodeActionRegistrator {
 			{ language: "xml", scheme: "file" },
 			{
 				provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
-					return XMLCodeActionProvider.getCodeActions(document, range);
+					const parser = ParserPool.getParserForFile(document.fileName);
+					return parser && new XMLCodeActionProvider(parser).getCodeActions(document, range);
 				}
 			}
 		);
@@ -33,7 +38,8 @@ export class CodeActionRegistrator {
 			{ language: "xml", scheme: "file" },
 			{
 				provideCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
-					return XMLCodeActionProvider.getCodeActions(document, range);
+					const parser = ParserPool.getParserForFile(document.fileName);
+					return parser && new XMLCodeActionProvider(parser).getCodeActions(document, range);
 				}
 			}
 		);

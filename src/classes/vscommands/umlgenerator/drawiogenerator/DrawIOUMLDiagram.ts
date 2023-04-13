@@ -1,24 +1,21 @@
-import { Property } from "./drawiouml/Property";
-import { Method } from "./drawiouml/Method";
-import { Field } from "./drawiouml/Field";
+import { UI5JSParser } from "ui5plugin-parser";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import { IUIField, IUIMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
+import { CustomTSObject } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSObject";
+import ParserBearer from "../../../ui5parser/ParserBearer";
 import { ClassHead } from "./drawiouml/ClassHead";
-import { Header } from "./drawiouml/Header";
+import { Field } from "./drawiouml/Field";
 import { Footer } from "./drawiouml/Footer";
-import { Separator } from "./drawiouml/Separator";
+import { Header } from "./drawiouml/Header";
 import { ITextLengthGettable } from "./drawiouml/interfaces/ITextLengthGettable";
-import {
-	AbstractUIClass,
-	IUIField,
-	IUIMethod
-} from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/AbstractUIClass";
-import { CustomUIClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomUIClass";
-import { UI5Parser } from "ui5plugin-parser";
-import { AbstractUI5Parser } from "ui5plugin-parser/dist/IUI5Parser";
-import { CustomTSClass } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSClass";
-import { CustomTSObject } from "ui5plugin-parser/dist/classes/UI5Classes/UI5Parser/UIClass/CustomTSObject";
+import { Method } from "./drawiouml/Method";
+import { Property } from "./drawiouml/Property";
+import { Separator } from "./drawiouml/Separator";
 
-export class DrawIOUMLDiagram {
-	readonly UIClass: AbstractUIClass;
+export class DrawIOUMLDiagram extends ParserBearer<UI5JSParser> {
+	readonly UIClass: AbstractCustomClass;
 	static id = 2;
 	private _xAxis = 70;
 	private _yAxis = 80;
@@ -26,36 +23,27 @@ export class DrawIOUMLDiagram {
 	private static readonly _pixelsPerChar = 6;
 	readonly classHead: ClassHead;
 	readonly header: Header;
-	constructor(UIClass: AbstractUIClass, header: Header = new Header()) {
+	constructor(UIClass: CustomJSClass, header: Header = new Header(), parser: UI5JSParser) {
+		super(parser);
 		this.UIClass = UIClass;
 
 		try {
 			this.UIClass.fields.forEach(field => {
 				if (!field.type) {
-					AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findFieldType(
-						field,
-						this.UIClass.className,
-						true,
-						true
-					);
+					this._parser.syntaxAnalyser.findFieldType(field, this.UIClass.className, true, true);
 				}
 			});
 
 			this.UIClass.methods.forEach(method => {
 				if (method.returnType === "void") {
-					AbstractUI5Parser.getInstance(UI5Parser).syntaxAnalyser.findMethodReturnType(
-						method,
-						this.UIClass.className,
-						true,
-						true
-					);
+					this._parser.syntaxAnalyser.findMethodReturnType(method, this.UIClass.className, true, true);
 				}
 			});
 		} catch (error) {
 			console.error(error);
 		}
 
-		if (this.UIClass instanceof CustomUIClass) {
+		if (this.UIClass instanceof CustomJSClass) {
 			this.UIClass.fillTypesFromHungarionNotation();
 		} else if (this.UIClass instanceof CustomTSClass || this.UIClass instanceof CustomTSObject) {
 			this.UIClass.loadTypes();

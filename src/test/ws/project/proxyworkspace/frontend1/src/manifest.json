@@ -1,0 +1,30 @@
+{
+	"_version": "1.1.0",
+	"sap.app": {
+		"_version": "1.1.0",
+		"id": "com.test.proxyworkspace.frontend1",
+		"type": "application",
+		"i18n": "i18n/i18n.properties"
+	},
+	"sap.ui5": {
+		"_version": "1.1.0",
+		"dependencies": {
+			"minUI5Version": "1.60.10",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {}
+			}
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "com.test.proxyworkspace.frontend1.i18n.i18n"
+				}
+			}
+		},
+		"config": {
+			"i18nBundle": "com.test.proxyworkspace.frontend1.i18n.i18n"
+		}
+	}
+}
