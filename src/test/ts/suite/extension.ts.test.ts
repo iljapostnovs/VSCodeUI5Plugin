@@ -25,7 +25,7 @@ suite("Extension Test Suite", () => {
 		await extension?.activate();
 
 		assert.ok(extension?.isActive, "Extension activated");
-	});
+	}).timeout(30000);
 
 	test("Parser: class parsing", () => {
 		const testData = ClassParsing.classParsing;

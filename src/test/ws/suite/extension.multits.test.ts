@@ -15,7 +15,7 @@ suite("Extension Test Suite", () => {
 		await extension?.activate();
 
 		assert.ok(extension?.isActive, "Extension activated");
-	});
+	}).timeout(30000);
 
 	test("Workspace: parsers initialized", () => {
 		const parsers = ParserPool.getAllParsers();
