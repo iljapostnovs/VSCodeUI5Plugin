@@ -113,7 +113,7 @@ export class CommandRegistrator {
 					}
 				} catch (error: any) {
 					await vscode.window.showErrorMessage(
-						`Error ocurred while generating TS Interfaces. Message: ${error.message}`
+						`Error ocurred while generating ER Diagram. Message: ${error.message}`
 					);
 				}
 			}
