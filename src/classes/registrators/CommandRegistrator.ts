@@ -48,13 +48,25 @@ export class CommandRegistrator {
 		const switcherCommand = vscode.commands.registerCommand("ui5plugin.switchBetweenVC", async () => {
 			const parser = ReusableMethods.getParserForCurrentActiveDocument();
 			if (parser) {
-				await new ControllerModelViewSwitcher(parser).switchBetweenControllerModelView();
+				try {
+					await new ControllerModelViewSwitcher(parser).switchBetweenControllerModelView();
+				} catch (error: any) {
+					await vscode.window.showErrorMessage(
+						`Error ocurred while switching between MVC. Message: ${error.message}`
+					);
+				}
 			}
 		});
 		const exportToI18NCommand = vscode.commands.registerCommand("ui5plugin.exportToi18n", async () => {
 			const parser = ReusableMethods.getParserForCurrentActiveDocument();
 			if (parser) {
-				await new ExportToI18NCommand(parser).export();
+				try {
+					await new ExportToI18NCommand(parser).export();
+				} catch (error: any) {
+					await vscode.window.showErrorMessage(
+						`Error ocurred while exporting to i18n. Message: ${error.message}`
+					);
+				}
 			}
 		});
 		const insertCustomClassNameCommand = vscode.commands.registerCommand("ui5plugin.insertCustomClassName", () => {
@@ -65,10 +77,16 @@ export class CommandRegistrator {
 		});
 		const generateUMLClassDiagramCommand = vscode.commands.registerCommand(
 			"ui5plugin.generateUMLClassDiagram",
-			() => {
+			async () => {
 				const parser = ReusableMethods.getParserForCurrentActiveDocument();
 				if (parser) {
-					new UMLGeneratorCommand(parser).generateUMLForCurrentClass();
+					try {
+						new UMLGeneratorCommand(parser).generateUMLForCurrentClass();
+					} catch (error: any) {
+						await vscode.window.showErrorMessage(
+							`Error ocurred while generating UML Diagram. Message: ${error.message}`
+						);
+					}
 				}
 			}
 		);
@@ -88,16 +106,28 @@ export class CommandRegistrator {
 		const generateERDiagram = vscode.commands.registerCommand(
 			"ui5plugin.generateERDiagramFromMetadata",
 			async () => {
-				const parser = ReusableMethods.getParserForCurrentActiveDocument();
-				if (parser) {
-					await new GenerateERDiagramCommand(parser).generateERDiagram();
+				try {
+					const parser = ReusableMethods.getParserForCurrentActiveDocument();
+					if (parser) {
+						await new GenerateERDiagramCommand(parser).generateERDiagram();
+					}
+				} catch (error: any) {
+					await vscode.window.showErrorMessage(
+						`Error ocurred while generating ER Diagram. Message: ${error.message}`
+					);
 				}
 			}
 		);
 		const generateTypeDefDoc = vscode.commands.registerCommand(
 			"ui5plugin.generateJSTypeDefDocFromMetadata",
 			async () => {
-				await new GenerateTypeJSDocCommand().execute();
+				try {
+					await new GenerateTypeJSDocCommand().execute();
+				} catch (error: any) {
+					await vscode.window.showErrorMessage(
+						`Error ocurred while generating JS TypeDefs. Message: ${error.message}`
+					);
+				}
 			}
 		);
 
@@ -107,16 +137,54 @@ export class CommandRegistrator {
 		const generateTSXMLFileInterfacesCommand = vscode.commands.registerCommand(
 			"ui5plugin.generateTSXMLFileInterfaces",
 			async (options: IGenerateTSXMLFileInterfacesArg = { shouldOpenDocument: true }) => {
-				const parser = ReusableMethods.getParserForCurrentActiveDocument();
-				if (parser) {
-					const oTSInterfaceGenerator = new TSXMLInterfaceGenerator(parser);
+				try {
+					const parser = ReusableMethods.getParserForCurrentActiveDocument();
+					if (parser) {
+						const oTSInterfaceGenerator = new TSXMLInterfaceGenerator(parser);
+						const content = await oTSInterfaceGenerator.generate();
+
+						const relativePath = vscode.workspace
+							.getConfiguration("ui5.plugin")
+							.get<string>("XMLFileInterfacePath");
+						let document: vscode.TextDocument;
+						if (relativePath) {
+							const absolutePath = join(parser.workspaceFolder.fsPath, relativePath);
+							await writeFile(absolutePath, content, {
+								encoding: "utf8"
+							});
+							const uri = vscode.Uri.file(absolutePath);
+							document = await vscode.workspace.openTextDocument(uri);
+						} else {
+							document = await vscode.workspace.openTextDocument({
+								content: content,
+								language: "typescript"
+							});
+						}
+						if (options.shouldOpenDocument) {
+							await vscode.window.showTextDocument(document);
+						}
+					}
+				} catch (error: any) {
+					await vscode.window.showErrorMessage(
+						`Error ocurred while generating TS Interfaces. Message: ${error.message}`
+					);
+				}
+			}
+		);
+
+		const generateODataInterfaceCommand = vscode.commands.registerCommand(
+			"ui5plugin.generateTSODataInterfaces",
+			async () => {
+				try {
+					const oTSInterfaceGenerator = new TSODataInterfaceGenerator();
 					const content = await oTSInterfaceGenerator.generate();
 
 					const relativePath = vscode.workspace
 						.getConfiguration("ui5.plugin")
-						.get<string>("XMLFileInterfacePath");
+						.get<string>("TSODataInterfacesPath");
+					const parser = ReusableMethods.getParserForCurrentActiveDocument();
 					let document: vscode.TextDocument;
-					if (relativePath) {
+					if (relativePath && parser) {
 						const absolutePath = join(parser.workspaceFolder.fsPath, relativePath);
 						await writeFile(absolutePath, content, {
 							encoding: "utf8"
@@ -129,38 +197,12 @@ export class CommandRegistrator {
 							language: "typescript"
 						});
 					}
-					if (options.shouldOpenDocument) {
-						await vscode.window.showTextDocument(document);
-					}
+					await vscode.window.showTextDocument(document);
+				} catch (error: any) {
+					await vscode.window.showErrorMessage(
+						`Error ocurred while generating TS Interfaces. Message: ${error.message}`
+					);
 				}
-			}
-		);
-
-		const generateODataInterfaceCommand = vscode.commands.registerCommand(
-			"ui5plugin.generateTSODataInterfaces",
-			async () => {
-				const oTSInterfaceGenerator = new TSODataInterfaceGenerator();
-				const content = await oTSInterfaceGenerator.generate();
-
-				const relativePath = vscode.workspace
-					.getConfiguration("ui5.plugin")
-					.get<string>("TSODataInterfacesPath");
-				const parser = ReusableMethods.getParserForCurrentActiveDocument();
-				let document: vscode.TextDocument;
-				if (relativePath && parser) {
-					const absolutePath = join(parser.workspaceFolder.fsPath, relativePath);
-					await writeFile(absolutePath, content, {
-						encoding: "utf8"
-					});
-					const uri = vscode.Uri.file(absolutePath);
-					document = await vscode.workspace.openTextDocument(uri);
-				} else {
-					document = await vscode.workspace.openTextDocument({
-						content: content,
-						language: "typescript"
-					});
-				}
-				await vscode.window.showTextDocument(document);
 			}
 		);
 
