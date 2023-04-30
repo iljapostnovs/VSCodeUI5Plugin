@@ -1,4 +1,5 @@
-import { ParserFactory, UI5JSParser, WorkspaceFolder } from "ui5plugin-parser";
+import { PackageLinterConfigHandler } from "ui5plugin-linter";
+import { PackageParserConfigHandler, ParserFactory, UI5JSParser, WorkspaceFolder } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { SAPUIDefineFactory } from "./classes/providers/completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
 import { WorkspaceCompletionItemFactory } from "./classes/providers/completionitems/factories/js/sapuidefine/WorkspaceCompletionItemFactory";
@@ -49,6 +50,14 @@ export class UI5Plugin {
 
 				CommandRegistrator.register(false);
 				const globalStoragePath = context.globalStorageUri.fsPath;
+				const globalConfigurationPath = vscode.workspace
+					.getConfiguration("ui5.plugin")
+					.get<string>("globalConfigurationPath");
+				if (globalConfigurationPath) {
+					PackageLinterConfigHandler.setGlobalConfigPath(globalConfigurationPath);
+					PackageParserConfigHandler.setGlobalConfigPath(globalConfigurationPath);
+				}
+
 				const parsers = await ParserFactory.createInstances(workspaceFolders, globalStoragePath);
 				const initializationMessages = ParserFactory.getInitializationMessages();
 				const messages = initializationMessages.map(message => message.message);

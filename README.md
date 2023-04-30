@@ -18,6 +18,8 @@ Main changes happened in whole parsing architecture. It was previously "one pars
 
 All UI5 Parser related preference entries were removed from VSCode, now they should be defined in `package.json`. See [Config default values](https://github.com/iljapostnovs/ui5plugin-parser/blob/master/README.md#config-default-values) for reference.
 
+> **Hint!** Path to global `<any_name>.json` can be defined using `ui5.plugin.globalConfigurationPath` preference entry.
+
 ### Parser instantiation logic
 
 Let's introduce two terms which will be used here:
