@@ -1,3 +1,8 @@
+## 1.1.0 (30-04-2023)
+
+-   New command added: `UI5: (TS) Generate interfaces for OData entities (Mass)`
+-   New preference entry added: `ui5.plugin.massTSODataInterfacesFetchingData`
+
 ## 1.0.1 (13-04-2023)
 
 -   Error messages now shows if commands failed to execute

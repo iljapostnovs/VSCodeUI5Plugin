@@ -1,13 +1,9 @@
 import { AxiosRequestConfig } from "axios";
 import { HTTPHandler } from "ui5plugin-parser/dist/classes/http/HTTPHandler";
 import * as vscode from "vscode";
+import { IXMLSourcePrompt, TSODataInterfacesFetchingData } from "./IXMLSourcePrompt";
 
-export interface TSODataInterfacesFetchingData {
-	username?: string;
-	password?: string;
-	url?: string;
-}
-export class XMLSourcePrompt {
+export class XMLSourcePrompt implements IXMLSourcePrompt {
 	async getXMLMetadataText() {
 		let XMLMetadata = "";
 		const activeDocument = vscode.window.activeTextEditor?.document;
@@ -48,6 +44,6 @@ export class XMLSourcePrompt {
 			}
 		}
 
-		return XMLMetadata;
+		return [XMLMetadata];
 	}
 }

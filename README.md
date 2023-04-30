@@ -468,6 +468,14 @@ There is a possibility to generate TS interfaces for OData entities
 
 ---
 
+### (TS) Generate interfaces for OData entities (Mass)
+
+Works the same as previous command, but can be used for multiple OData models at once. `ui5.plugin.massTSODataInterfacesFetchingData` preference entry should be configured for this command to work.
+
+> Related preference entries:<br/> _ui5.plugin.massTSODataInterfacesFetchingData_<br/>
+
+---
+
 ## Automatic template insertion
 
 Inserts initial text for `.js`, `.ts` and `.xml` files<br/>

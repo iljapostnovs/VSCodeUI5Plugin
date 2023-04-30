@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "1.0.1",
+	"version": "1.1.0",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -240,6 +240,31 @@
 					},
 					"markdownDescription": "URL, username and password for `UI5: (TS) Generate interfaces for OData entities` command."
 				},
+				"ui5.plugin.massTSODataInterfacesFetchingData": {
+					"type": "array",
+					"default": [],
+					"items": {
+						"type": "object",
+						"default": {},
+						"properties": {
+							"username": {
+								"type": "string"
+							},
+							"password": {
+								"type": "string"
+							},
+							"url": {
+								"type": "string",
+								"description": "URL to metadata"
+							},
+							"path": {
+								"type": "string",
+								"description": "Path for file where result will be put. Relative to project folder. Example: `./types/ODataTypes.d.ts`"
+							}
+						}
+					},
+					"markdownDescription": "Array of URL, username and password for `UI5: (TS) Generate interfaces for OData entities` command (Mass)."
+				},
 				"ui5.plugin.ERDiagramPath": {
 					"type": "string",
 					"default": "",
@@ -312,6 +337,10 @@
 			{
 				"command": "ui5plugin.generateTSODataInterfaces",
 				"title": "UI5: (TS) Generate interfaces for OData entities"
+			},
+			{
+				"command": "ui5plugin.generateMassTSODataInterfaces",
+				"title": "UI5: (TS) Generate interfaces for OData entities (Mass)"
 			}
 		]
 	},
@@ -360,8 +389,8 @@
 		"line-column": "^1.0.2",
 		"ts-morph": "^18.0.0",
 		"typescript": "^5.0.2",
-		"ui5plugin-linter": "^1.0.0",
-		"ui5plugin-parser": "^1.0.0"
+		"ui5plugin-linter": "^1.1.0",
+		"ui5plugin-parser": "^1.1.0"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",

@@ -11,7 +11,7 @@ export class GenerateTypeJSDocCommand implements IVSCodeCommand {
 	async execute() {
 		try {
 			const xmlSourcePrompt = new XMLSourcePrompt();
-			const XMLData = await xmlSourcePrompt.getXMLMetadataText();
+			const [XMLData] = await xmlSourcePrompt.getXMLMetadataText();
 			const metadata = new XMLMetadataParser(XMLData);
 			const typeDocAdapter = new JSTypeDocAdapter();
 			const content = typeDocAdapter.fromMetadata(metadata);

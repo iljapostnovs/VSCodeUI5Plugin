@@ -4,6 +4,7 @@ import { UI5JSParser } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { ReusableMethods } from "../providers/reuse/ReusableMethods";
+import { MassXMLSourcePrompt } from "../utils/xmlmetadata/MassXMLSourcePrompt";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
 import { FallbackCommand } from "../vscommands/FallbackCommand";
 import { InsertCustomClassNameCommand } from "../vscommands/InsertCustomClassNameCommand";
@@ -206,6 +207,47 @@ export class CommandRegistrator {
 			}
 		);
 
+		const generateMassODataInterfaceCommand = vscode.commands.registerCommand(
+			"ui5plugin.generateMassTSODataInterfaces",
+			async () => {
+				try {
+					const parser = ReusableMethods.getParserForCurrentActiveDocument();
+					if (!parser) {
+						throw new Error(
+							"Please select any file from the project where TS Interface generation is needed"
+						);
+					}
+
+					const XMLSourcePrompt = new MassXMLSourcePrompt();
+					const results = await XMLSourcePrompt.getXMLMetadataText();
+
+					const whenInterfacesAreGenerated = results.map(async result => {
+						const oTSInterfaceGenerator = new TSODataInterfaceGenerator();
+						const tsInterfaces = await oTSInterfaceGenerator.generate(result.metadataText);
+
+						return { path: result.path, content: tsInterfaces };
+					});
+
+					const interfaces = await Promise.all(whenInterfacesAreGenerated);
+
+					const whenFilesAreWritten = interfaces.map(theInterface => {
+						const absolutePath = join(parser.workspaceFolder.fsPath, theInterface.path);
+						return writeFile(absolutePath, theInterface.content, {
+							encoding: "utf8"
+						});
+					});
+
+					await Promise.all(whenFilesAreWritten);
+
+					vscode.window.showInformationMessage("TS Interfaces generated successfully");
+				} catch (error: any) {
+					await vscode.window.showErrorMessage(
+						`Error ocurred while generating TS Interfaces. Message: ${error.message}`
+					);
+				}
+			}
+		);
+
 		UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
 		UI5Plugin.getInstance().addDisposable(switcherCommand);
 		UI5Plugin.getInstance().addDisposable(exportToI18NCommand);
@@ -216,6 +258,7 @@ export class CommandRegistrator {
 		UI5Plugin.getInstance().addDisposable(generateTypeDefDoc);
 		UI5Plugin.getInstance().addDisposable(generateTSXMLFileInterfacesCommand);
 		UI5Plugin.getInstance().addDisposable(generateODataInterfaceCommand);
+		UI5Plugin.getInstance().addDisposable(generateMassODataInterfaceCommand);
 	}
 
 	static registerFallbackCommands() {
@@ -229,6 +272,7 @@ export class CommandRegistrator {
 			"ui5plugin.generateERDiagramFromMetadata",
 			"ui5plugin.generateTSXMLFileInterfaces",
 			"ui5plugin.generateTSODataInterfaces",
+			"ui5plugin.generateMassTSODataInterfaces",
 			"ui5plugin.generateJSTypeDefDocFromMetadata"
 		];
 
