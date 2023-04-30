@@ -3,7 +3,7 @@
 -   New command added: `UI5: (TS) Generate interfaces for OData entities (Mass)`
 -   New preference entry added: `ui5.plugin.massTSODataInterfacesFetchingData`
 -   `Duplicate Translation Linter` added to properties linters
--   Global config handler added
+-   Global config handler added: `ui5.plugin.globalConfigurationPath`
 
 ## 1.0.1 (13-04-2023)
 
