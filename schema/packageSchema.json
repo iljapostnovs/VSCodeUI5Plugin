@@ -206,6 +206,15 @@
 										"Information",
 										"Hint"
 									]
+								},
+								"DuplicateTranslationLinter": {
+									"description": "Checks if translations in i18n are duplicated",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
 								}
 							}
 						},
@@ -275,6 +284,10 @@
 								},
 								"UnusedTranslationsLinter": {
 									"description": "Checks if translations in i18n are used",
+									"type": "boolean"
+								},
+								"DuplicateTranslationLinter": {
+									"description": "Checks if translations in i18n are duplicated",
 									"type": "boolean"
 								}
 							}
