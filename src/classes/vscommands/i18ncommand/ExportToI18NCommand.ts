@@ -220,7 +220,14 @@ export class ExportToI18NCommand extends ParserBearer {
 	private async _insertIntoI18NFile(stringToInsert: string) {
 		const [manifest] = this._parser.fileReader.getAllManifests();
 		const manifestFsPath = manifest?.fsPath;
-		const i18nRelativePath = manifest?.content["sap.app"]?.i18n;
+		let i18nRelativePath = manifest?.content["sap.app"]?.i18n;
+		if(typeof i18nRelativePath === "object"){
+			i18nRelativePath = i18nRelativePath.bundleUrl
+		}
+		if(!i18nRelativePath){
+			throw new Error("Inavlid i18n bundle path valid formats are a string or an object with a property 'bundleUrl'")
+		}
+
 		if (manifestFsPath && i18nRelativePath) {
 			const i18nFSPath = `${manifestFsPath}${path.sep}${i18nRelativePath.replace(/\//g, path.sep)}`;
 
