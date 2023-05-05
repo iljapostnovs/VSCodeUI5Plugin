@@ -1,3 +1,7 @@
+## 1.1.1 (30-04-2023)
+
+-   I18n extraction allow setting i18n path in 'sap.app.i18n' and 'sap.app.i18n.bundleUrl'
+
 ## 1.1.0 (30-04-2023)
 
 -   New command added: `UI5: (TS) Generate interfaces for OData entities (Mass)`
