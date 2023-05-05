@@ -1,4 +1,4 @@
-## 1.1.1 (30-04-2023)
+## 1.1.1 (05-05-2023)
 
 -   I18n extraction allow setting i18n path in 'sap.app.i18n' and 'sap.app.i18n.bundleUrl'
 
