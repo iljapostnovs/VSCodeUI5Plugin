@@ -221,11 +221,13 @@ export class ExportToI18NCommand extends ParserBearer {
 		const [manifest] = this._parser.fileReader.getAllManifests();
 		const manifestFsPath = manifest?.fsPath;
 		let i18nRelativePath = manifest?.content["sap.app"]?.i18n;
-		if(typeof i18nRelativePath === "object"){
-			i18nRelativePath = i18nRelativePath.bundleUrl
+		if (typeof i18nRelativePath === "object") {
+			i18nRelativePath = i18nRelativePath.bundleUrl;
 		}
-		if(!i18nRelativePath){
-			throw new Error("Inavlid i18n bundle path valid formats are a string or an object with a property 'bundleUrl'")
+		if (!i18nRelativePath) {
+			throw new Error(
+				"Inavlid i18n bundle path in manifest.json. Please define path to i18n by setting 'sap.app.i18n' or 'sap.app.i18n.bundleUrl' field in manifest.json"
+			);
 		}
 
 		if (manifestFsPath && i18nRelativePath) {
