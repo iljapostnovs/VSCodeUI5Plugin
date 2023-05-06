@@ -1,6 +1,13 @@
+## 1.1.2 (06-05-2023)
+
+-   Improved logic for code generator commands, now the choice for which project command should be executed will be either for active selected document project, or for selected by user project
+-   `additionalWorkspaces` in `package.json` now supports absolute path
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.1.1
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.1.1
+
 ## 1.1.1 (05-05-2023)
 
--   I18n extraction allow setting i18n path in 'sap.app.i18n' and 'sap.app.i18n.bundleUrl'
+-   i18n extraction allows setting i18n path in 'sap.app.i18n' and 'sap.app.i18n.bundleUrl'
 
 ## 1.1.0 (30-04-2023)
 

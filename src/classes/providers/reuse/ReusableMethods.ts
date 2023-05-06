@@ -31,6 +31,26 @@ export class ReusableMethods extends ParserBearer {
 		return activeDocument && ParserPool.getParserForFile(activeDocument.fileName);
 	}
 
+	static async getOrPromptParser() {
+		let parser = this.getParserForCurrentActiveDocument();
+		if (!parser) {
+			const parsers = ParserPool.getAllParsers();
+			if (parsers.length === 1) {
+				[parser] = parsers;
+			} else {
+				const parserWsPaths = parsers.map(parser => parser.workspaceFolder.fsPath);
+				const userAnswer = await vscode.window.showQuickPick(parserWsPaths, {
+					title: "Please select what project the action will be applied to"
+				});
+				if (userAnswer) {
+					parser = parsers.find(parser => parser.workspaceFolder.fsPath === userAnswer);
+				}
+			}
+		}
+
+		return parser;
+	}
+
 	static getIfPositionIsInTheLastOrAfterLastMember(UIClass: CustomJSClass, position: number) {
 		const currentMethod = UIClass.methods.find(
 			method => method.node?.start < position && method.node?.end > position

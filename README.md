@@ -499,7 +499,12 @@ Extension listens for `.js`/`.ts` file creation event (rename technically is fil
 Custom UI5 Explorer in VSCode panel is available<br/>
 
 1. For JS/TS files tree view contains fields and methods<br/>
-   ![JSTreeView](/images/JSTreeView.png) > Coloring for methods is based on lines count and references count. > _ Red color appears if there are more than 100 lines in one method > _ Orange color appears if there are more than 50 lines in one method or there are 0 references (reference count is ignored if method is overriden) > \* Green color appears for the rest of the cases
+   ![JSTreeView](/images/JSTreeView.png)
+
+   > Coloring for methods is based on lines count and references count.<br/>
+   > **Red** color appears if there are more than 100 lines in one method<br/>
+   > **Orange** color appears if there are more than 50 lines in one method or there are 0 references (reference count is ignored if method is overriden)<br/>
+   > **Green** color appears for the rest of the cases
 
 2. For XML files tree view contains class tag list<br/>
    ![XMLTreeView](/images/XMLTreeView.png)
