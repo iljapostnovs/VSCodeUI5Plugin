@@ -190,18 +190,19 @@ export class JSDynamicCompletionItemsFactory extends ParserBearer<UI5JSParser> i
 				completionItem.insertText = new vscode.SnippetString(insertString);
 				completionItem.detail = `(${classMethod.visibility}) ${fieldsAndMethods.className}`;
 
-				const mardownString = new vscode.MarkdownString();
-				mardownString.isTrusted = true;
+				const markdownString = new vscode.MarkdownString();
+				markdownString.isTrusted = true;
+				markdownString.supportHtml = true;
 				if (classMethod.api) {
-					mardownString.appendMarkdown(classMethod.api);
+					markdownString.appendMarkdown(classMethod.api);
 				}
-				mardownString.appendCodeblock(
+				markdownString.appendCodeblock(
 					`${classMethod.name}(${classMethod.params.map(param => param.name).join(", ")}): ${
 						classMethod.returnType || "void"
 					}`
 				);
-				mardownString.appendMarkdown(classMethod.description);
-				completionItem.documentation = mardownString;
+				markdownString.appendMarkdown(classMethod.description);
+				completionItem.documentation = markdownString;
 
 				const currentRange = document.getWordRangeAtPosition(position);
 				if (currentRange) {

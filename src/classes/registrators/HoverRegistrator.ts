@@ -10,7 +10,7 @@ export class HoverRegistrator {
 			provideHover(document, position) {
 				const parser = ParserPool.getParserForFile(document.fileName);
 				if (parser && parser instanceof UI5JSParser) {
-					return new JSHoverProvider(parser).getTextEdits(document, position);
+					return new JSHoverProvider(parser).getHover(document, position);
 				}
 			}
 		});

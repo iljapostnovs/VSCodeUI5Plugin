@@ -77,11 +77,12 @@ export class SAPUIDefineFactory extends ParserBearer<UI5JSParser> implements ICo
 			completionItem.className = node.getName();
 			completionItem.detail = metadata.rawMetadata.title;
 
-			const mardownString = new vscode.MarkdownString();
-			mardownString.isTrusted = true;
-			mardownString.appendMarkdown(this._parser.urlBuilder.getMarkupUrlForClassApi(node));
-			mardownString.appendMarkdown(metadata.rawMetadata.description);
-			completionItem.documentation = mardownString;
+			const markdownString = new vscode.MarkdownString();
+			markdownString.isTrusted = true;
+			markdownString.supportHtml = true;
+			markdownString.appendMarkdown(this._parser.urlBuilder.getMarkupUrlForClassApi(node));
+			markdownString.appendMarkdown(metadata.rawMetadata.description);
+			completionItem.documentation = markdownString;
 
 			if (vscode.workspace.getConfiguration("ui5.plugin").get("moveDefineToFunctionParametersOnAutocomplete")) {
 				completionItem.command = {

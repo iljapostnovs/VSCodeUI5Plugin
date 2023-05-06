@@ -40,8 +40,8 @@ export class CommandRegistrator {
 	private static _init() {
 		const insertUIDefineCommand = vscode.commands.registerCommand(
 			"ui5plugin.moveDefineToFunctionParameters",
-			() => {
-				const parser = ReusableMethods.getOrPromptParser();
+			async () => {
+				const parser = await ReusableMethods.getOrPromptParser();
 				if (parser && parser instanceof UI5JSParser) {
 					new SAPUIDefineCommand(parser).insertUIDefine();
 				}

@@ -1,9 +1,11 @@
-## 1.1.2 (06-05-2023)
+## 1.2.0 (07-05-2023)
 
 -   Improved logic for code generator commands, now the choice for which project command should be executed will be either for active selected document project, or for selected by user project
 -   `additionalWorkspaces` in `package.json` now supports absolute path
--   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.1.1
--   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.1.1
+-   `@ui5model`, `@abstract` jsdoc support for classes added
+-   Hover providers now supports HTML format
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.2.0
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.2.0
 
 ## 1.1.1 (05-05-2023)
 
