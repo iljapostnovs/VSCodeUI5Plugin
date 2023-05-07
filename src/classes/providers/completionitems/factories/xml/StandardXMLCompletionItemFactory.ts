@@ -2,6 +2,7 @@ import { SAPNode } from "ui5plugin-parser/dist/classes/librarydata/SAPNode";
 import { AbstractJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
 import * as vscode from "vscode";
 import ParserBearer from "../../../../ui5parser/ParserBearer";
+import HTMLMarkdown from "../../../../utils/HTMLMarkdown";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { GeneratorFactory } from "../../codegenerators/GeneratorFactory";
 import { IAggregationGenerator } from "../../codegenerators/aggregation/interfaces/IAggregationGenerator";
@@ -67,9 +68,8 @@ export class StandardXMLCompletionItemFactory extends ParserBearer implements IC
 			classPrefix += ":";
 		}
 
-		const mardownString = new vscode.MarkdownString();
+		const mardownString = new HTMLMarkdown();
 		mardownString.isTrusted = true;
-		mardownString.supportHtml = true;
 		mardownString.appendMarkdown(this._parser.urlBuilder.getMarkupUrlForClassApi(node));
 		mardownString.appendMarkdown(metadata.description);
 
@@ -83,7 +83,7 @@ export class StandardXMLCompletionItemFactory extends ParserBearer implements IC
 
 	public generateXMLClassCompletionItemFromUIClass(UIClass: AbstractJSClass, classPrefix = "") {
 		return this._generateXMLClassCompletionItemUsing({
-			markdown: new vscode.MarkdownString("Custom class"),
+			markdown: new HTMLMarkdown("Custom class"),
 			insertText: this.generateClassInsertTextFromSAPClass(UIClass, classPrefix),
 			detail: UIClass.className,
 			className: UIClass.className
@@ -94,7 +94,7 @@ export class StandardXMLCompletionItemFactory extends ParserBearer implements IC
 		className: string;
 		insertText: string;
 		detail: string;
-		markdown: vscode.MarkdownString;
+		markdown: HTMLMarkdown;
 	}) {
 		const className = data.className.split(".")[data.className.split(".").length - 1];
 		const completionItem: CustomCompletionItem = new CustomCompletionItem(className);

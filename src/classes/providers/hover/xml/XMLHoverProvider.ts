@@ -5,6 +5,7 @@ import { CustomTSClass, ICustomClassTSMethod } from "ui5plugin-parser/dist/class
 import * as vscode from "vscode";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 import ParserBearer from "../../../ui5parser/ParserBearer";
+import HTMLMarkdown from "../../../utils/HTMLMarkdown";
 
 export class XMLHoverProvider extends ParserBearer {
 	getHovers(document: vscode.TextDocument, position: vscode.Position) {
@@ -38,8 +39,7 @@ export class XMLHoverProvider extends ParserBearer {
 					const text = this._getTextIfItIsFieldOrMethodOfClass(classOfTheTag, attributeName);
 
 					if (text) {
-						const markdownString = new vscode.MarkdownString();
-						markdownString.supportHtml = true;
+						const markdownString = new HTMLMarkdown();
 						markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
 						markdownString.appendMarkdown(text);
 						hover = new vscode.Hover(markdownString);
@@ -61,8 +61,7 @@ export class XMLHoverProvider extends ParserBearer {
 					const responsibleUIClass = method && this._parser.classFactory.getUIClass(method.owner);
 					const value = property?.typeValues.find(value => value.text === attributeVal);
 					if (property && value) {
-						const markdownString = new vscode.MarkdownString();
-						markdownString.supportHtml = true;
+						const markdownString = new HTMLMarkdown();
 						const text = `**${value.text}**: ${value.description}`;
 						markdownString.appendMarkdown(text);
 						hover = new vscode.Hover(markdownString);
@@ -79,8 +78,7 @@ export class XMLHoverProvider extends ParserBearer {
 									customMethod.node.start,
 									customMethod.node.end
 								);
-								const markdownString = new vscode.MarkdownString();
-								markdownString.supportHtml = true;
+								const markdownString = new HTMLMarkdown();
 								const text = "**Ctrl + Left Click** to navigate";
 								markdownString.appendMarkdown(text);
 								markdownString.appendCodeblock(methodText.replace(/\t/g, " "), "javascript");
@@ -94,8 +92,7 @@ export class XMLHoverProvider extends ParserBearer {
 									customTSMethod.node.getStart(),
 									customTSMethod.node.getEnd()
 								);
-								const markdownString = new vscode.MarkdownString();
-								markdownString.supportHtml = true;
+								const markdownString = new HTMLMarkdown();
 								const text = "**Ctrl + Left Click** to navigate";
 								markdownString.appendMarkdown(text);
 								markdownString.appendCodeblock(methodText.replace(/\t/g, " "), "typescript");
@@ -108,8 +105,7 @@ export class XMLHoverProvider extends ParserBearer {
 					const isClassName = word[0].toUpperCase() === word[0];
 					if (isClassName) {
 						//is class
-						const markdownString = new vscode.MarkdownString();
-						markdownString.supportHtml = true;
+						const markdownString = new HTMLMarkdown();
 						markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
 						const UIClass = this._parser.classFactory.getUIClass(classOfTheTag);
 						const classDescription = UIClass.description;
@@ -144,8 +140,7 @@ export class XMLHoverProvider extends ParserBearer {
 						const text = this._getTextIfItIsFieldOrMethodOfClass(classOfTheTag, word);
 
 						if (text) {
-							const markdownString = new vscode.MarkdownString();
-							markdownString.supportHtml = true;
+							const markdownString = new HTMLMarkdown();
 							markdownString.appendCodeblock(`class ${classOfTheTag}  \n`);
 							markdownString.appendMarkdown(text);
 							hover = new vscode.Hover(markdownString);

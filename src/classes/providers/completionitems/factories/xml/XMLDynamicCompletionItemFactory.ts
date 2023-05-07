@@ -11,6 +11,7 @@ import * as vscode from "vscode";
 import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
 import { TextDocumentAdapter } from "../../../../adapters/vscode/TextDocumentAdapter";
 import ParserBearer from "../../../../ui5parser/ParserBearer";
+import HTMLMarkdown from "../../../../utils/HTMLMarkdown";
 import { VSCodeFileReader } from "../../../../utils/VSCodeFileReader";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
@@ -18,7 +19,7 @@ import { StandardXMLCompletionItemFactory } from "./StandardXMLCompletionItemFac
 
 interface ITypeValue {
 	text: string;
-	description: string | vscode.MarkdownString;
+	description: string | HTMLMarkdown;
 }
 export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
@@ -35,9 +36,11 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 				if (positionType === PositionType.InNewAttribute) {
 					completionItems.forEach(item => {
 						if (item.insertText instanceof vscode.SnippetString) {
-							item.insertText.appendText("=\"");
+							// eslint-disable-next-line @typescript-eslint/quotes
+							item.insertText.appendText('="');
 							item.insertText.appendTabstop(0);
-							item.insertText.appendText("\"");
+							// eslint-disable-next-line @typescript-eslint/quotes
+							item.insertText.appendText('sc"');
 						}
 					});
 				}
@@ -128,7 +131,22 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 				const UIClass = this._parser.classFactory.getUIClass(className);
 				const attributeName = this._parser.xmlParser.getNearestAttribute(XMLFile.content, positionBeforeString);
 				const UIProperty = this._getUIPropertyRecursively(UIClass, attributeName);
-				if (UIProperty && UIProperty.typeValues.length > 0) {
+
+				if (className === "sap.ui.core.Fragment" && attributeName === "fragmentName") {
+					const fragments = ParserPool.getAllFragments();
+					const fragmentData: ITypeValue[] = fragments.map(fragment => {
+						const description = new HTMLMarkdown()
+							.appendMarkdown(`Name: \`\`\`${fragment.name}\`\`\`<br/>`)
+							.appendMarkdown(`Path: \`\`\`${fragment.fsPath}\`\`\``)
+							.appendCodeblock(fragment.content, "xml");
+						return {
+							text: fragment.name,
+							description: description
+						};
+					});
+
+					completionItems = this._generateCompletionItemsFromTypeValues(fragmentData);
+				} else if (UIProperty && UIProperty.typeValues.length > 0) {
 					completionItems = this._generateCompletionItemsFromTypeValues(UIProperty.typeValues);
 				} else if (UIProperty?.type === "string") {
 					const currentComponentName = new VSCodeFileReader(
@@ -158,21 +176,6 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 						}));
 
 						completionItems = this._generateCompletionItemsFromTypeValues(mappedMethods);
-					} else if (className === "sap.ui.core.Fragment" && attributeName === "fragmentName") {
-						const fragments = ParserPool.getAllFragments();
-						const fragmentData: ITypeValue[] = fragments.map(fragment => {
-							const description = new vscode.MarkdownString()
-								.appendMarkdown(`Name: \`\`\`${fragment.name}\`\`\`<br/>`)
-								.appendMarkdown(`Path: \`\`\`${fragment.fsPath}\`\`\``)
-								.appendCodeblock(fragment.content, "xml");
-							description.supportHtml = true;
-							return {
-								text: fragment.name,
-								description: description
-							};
-						});
-
-						completionItems = this._generateCompletionItemsFromTypeValues(fragmentData);
 					}
 				}
 			}
@@ -565,7 +568,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 			completionItem.insertText = new vscode.SnippetString(`${property.name}`);
 			completionItem.detail = `${property.name}: ${property.type}`;
 			const UI5ApiUri = this._parser.urlBuilder.getMarkupUrlForPropertiesApi(UIClass);
-			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${property.description}`);
+			completionItem.documentation = new HTMLMarkdown(`${UI5ApiUri}\n${property.description}`);
 			completionItem.sortText = "1";
 
 			return completionItem;
@@ -589,7 +592,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 			completionItem.insertText = new vscode.SnippetString(`${event.name}`);
 			completionItem.detail = event.name;
 			const UI5ApiUri = this._parser.urlBuilder.getMarkupUrlForEventsApi(UIClass, event.name);
-			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${event.description}`);
+			completionItem.documentation = new HTMLMarkdown(`${UI5ApiUri}\n${event.description}`);
 			completionItem.sortText = "2";
 
 			return completionItem;
@@ -612,7 +615,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 			completionItem.insertText = new vscode.SnippetString(`${aggregation.name}`);
 			completionItem.detail = aggregation.name;
 			const UI5ApiUri = this._parser.urlBuilder.getMarkupUrlForAggregationApi(UIClass);
-			completionItem.documentation = new vscode.MarkdownString(
+			completionItem.documentation = new HTMLMarkdown(
 				`${UI5ApiUri}\n${aggregation.description}\n${aggregation.type}`
 			);
 			completionItem.sortText = "3";
@@ -637,7 +640,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 			completionItem.insertText = new vscode.SnippetString(`${association.name}`);
 			completionItem.detail = association.name;
 			const UI5ApiUri = this._parser.urlBuilder.getMarkupUrlForAssociationApi(UIClass);
-			completionItem.documentation = new vscode.MarkdownString(`${UI5ApiUri}\n${association.description}`);
+			completionItem.documentation = new HTMLMarkdown(`${UI5ApiUri}\n${association.description}`);
 			completionItem.sortText = "4";
 
 			return completionItem;
