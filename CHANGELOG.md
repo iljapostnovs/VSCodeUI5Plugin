@@ -1,8 +1,17 @@
 ## 1.2.0 (07-05-2023)
 
--   Improved logic for code generator commands, now the choice for which project command should be executed will be either for active selected document project, or for selected by user project
+-   Improved logic for code generator commands (such as TS Interface generators, UML diagram generators, Typedef generators etc.), now the choice for which project command should be executed will be either project of active selected document, or selected by user. Now the logic looks as follows:
+
+>
+
+    1.  Get currently opened document
+    2.  Get parser instance for opened document
+    3.  If parser doesn't exist or no document are open, get all parser instances.
+    4.  If there is only one parser instance, it will be used automatically
+    5.  If there are more than 1 parser instance, user prompt will be triggered
+
 -   `additionalWorkspaces` in `package.json` now supports absolute path
--   `@ui5model`, `@abstract` jsdoc support for classes added
+-   `@ui5model`, `@abstract` jsdoc support for classes added. `@ui5model` can be used as class JSDoc, useful for TS projects to overcome performance issues for switching between MVC
 -   Hover providers now supports HTML format
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.2.0
 -   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.2.0
