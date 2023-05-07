@@ -1,13 +1,14 @@
 import { UI5JSParser } from "ui5plugin-parser";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/FieldsAndMethodForPositionBeforeCurrentStrategy";
-import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
 import { StandardUIClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/StandardUIClass";
+import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 import ParserBearer from "../../../ui5parser/ParserBearer";
 
 export class JSHoverProvider extends ParserBearer<UI5JSParser> {
-	getTextEdits(document: vscode.TextDocument, position: vscode.Position) {
+	getHover(document: vscode.TextDocument, position: vscode.Position) {
 		const strategy = new FieldsAndMethodForPositionBeforeCurrentStrategy(this._parser.syntaxAnalyser, this._parser);
 		const currentClassName = this._parser.fileReader.getClassNameFromPath(document.fileName);
 		const range = document.getWordRangeAtPosition(position);
@@ -38,7 +39,13 @@ export class JSHoverProvider extends ParserBearer<UI5JSParser> {
 						}
 					}
 					text += "  \n";
-					text += this._parser.urlBuilder.getMarkupUrlForClassApi(UIClass);
+					if (UIClass instanceof AbstractCustomClass) {
+						text += this._getNavigateableMarkupToClass(UIClass);
+					} else {
+						text += this._parser.urlBuilder.getMarkupUrlForClassApi(UIClass);
+					}
+					text += "  \n";
+					text += UIClass.description;
 					const markdownString = this._getMarkdownFromText(text);
 					hover = new vscode.Hover(markdownString);
 				}
@@ -47,8 +54,13 @@ export class JSHoverProvider extends ParserBearer<UI5JSParser> {
 		return hover;
 	}
 
+	private _getNavigateableMarkupToClass(UIClass: AbstractCustomClass) {
+		return `[Go to source](/${encodeURI(UIClass.fsPath.replaceAll("\\", "/"))})\n`;
+	}
+
 	private _getMarkdownFromText(text: string) {
 		const markdownString = new vscode.MarkdownString();
+		markdownString.supportHtml = true;
 		const textParts = text.split("\n");
 		markdownString.appendCodeblock(`${textParts[0]}`);
 		for (let i = 1; i < textParts.length; i++) {

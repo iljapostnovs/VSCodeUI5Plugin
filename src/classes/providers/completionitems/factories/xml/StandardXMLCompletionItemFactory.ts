@@ -1,16 +1,15 @@
 import { SAPNode } from "ui5plugin-parser/dist/classes/librarydata/SAPNode";
 import { AbstractJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
-import { StandardUIClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/StandardUIClass";
 import * as vscode from "vscode";
 import ParserBearer from "../../../../ui5parser/ParserBearer";
+import { CustomCompletionItem } from "../../CustomCompletionItem";
+import { GeneratorFactory } from "../../codegenerators/GeneratorFactory";
 import { IAggregationGenerator } from "../../codegenerators/aggregation/interfaces/IAggregationGenerator";
 import { SAPClassAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPClassAggregationGetterStrategy";
 import { SAPNodeAggregationGetterStrategy } from "../../codegenerators/aggregation/strategies/SAPNodeAggregationGetterStrategy";
-import { GeneratorFactory } from "../../codegenerators/GeneratorFactory";
 import { IPropertyGenerator } from "../../codegenerators/property/interfaces/IPropertyGenerator";
 import { SAPClassPropertyGetterStrategy } from "../../codegenerators/property/strategies/SAPClassPropertyGetterStrategy";
 import { SAPNodePropertyGenerationStrategy } from "../../codegenerators/property/strategies/SAPNodePropertyGetterStrategy";
-import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
 export class StandardXMLCompletionItemFactory extends ParserBearer implements ICompletionItemFactory {
@@ -70,8 +69,9 @@ export class StandardXMLCompletionItemFactory extends ParserBearer implements IC
 
 		const mardownString = new vscode.MarkdownString();
 		mardownString.isTrusted = true;
+		mardownString.supportHtml = true;
 		mardownString.appendMarkdown(this._parser.urlBuilder.getMarkupUrlForClassApi(node));
-		mardownString.appendMarkdown(StandardUIClass.removeTags(metadata.description));
+		mardownString.appendMarkdown(metadata.description);
 
 		return this._generateXMLClassCompletionItemUsing({
 			markdown: mardownString,

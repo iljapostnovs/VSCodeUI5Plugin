@@ -17,13 +17,14 @@ export class SwitchToModelCommand extends ParserBearer {
 				const document = vscode.window.activeTextEditor?.document;
 				if (document) {
 					const currentClassName = this._parser.fileReader.getClassNameFromPath(document.fileName);
-					if (currentClassName) {
+					const currentUIClass = currentClassName && this._parser.classFactory.getUIClass(currentClassName);
+					if (currentClassName && currentUIClass instanceof AbstractCustomClass) {
 						const isController = this._parser.classFactory.isClassAChildOfClassB(
 							currentClassName,
 							"sap.ui.core.mvc.Controller"
 						);
 						if (isController) {
-							const modelName = this._parser.classFactory.getDefaultModelForClass(currentClassName);
+							const modelName = currentUIClass.defaultModelClassName ?? this._parser.classFactory.getDefaultModelForClass(currentClassName);
 							if (modelName) {
 								const UIModelClass = this._parser.classFactory.getUIClass(modelName);
 								if (UIModelClass instanceof AbstractCustomClass) {

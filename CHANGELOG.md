@@ -1,6 +1,27 @@
+## 1.2.0 (07-05-2023)
+
+-   Improved logic for code generator commands (such as TS Interface generators, UML diagram generators, Typedef generators etc.), now the choice for which project command should be executed will be either project of active selected document, or selected by user. Now the logic looks as follows:
+
+>
+
+    1.  Get currently opened document
+    2.  Get parser instance for opened document
+    3.  If parser doesn't exist or no document are open, get all parser instances.
+    4.  If there is only one parser instance, it will be used automatically
+    5.  If there are more than 1 parser instance, user prompt will be triggered
+
+-   `additionalWorkspaces` in `package.json` now supports absolute path
+-   `@ui5model`, `@abstract` jsdoc support for classes added. `@ui5model` can be used as class JSDoc, useful for TS projects to overcome performance issues for switching between MVC
+-   Hover providers now supports HTML format
+-   Completion item generation for sap standard library related variables fixed (e.g. there were no completion items for `sap.ui.getCore()`)
+-   Support for additional ESTree nodes added for JS projects: `ChainExpression`, `ArrayPattern`, `ForOfStatement`, `AssignmentPattern`
+-   Fixed `byId` method exception support for JS projects with new UI5 library versions which returns `sap.ui.core.Element|undefined` instead of old `sap.ui.core.Element`
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.2.3
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.2.3
+
 ## 1.1.1 (05-05-2023)
 
--   I18n extraction allow setting i18n path in 'sap.app.i18n' and 'sap.app.i18n.bundleUrl'
+-   i18n extraction allows setting i18n path in 'sap.app.i18n' and 'sap.app.i18n.bundleUrl'
 
 ## 1.1.0 (30-04-2023)
 
