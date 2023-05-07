@@ -25,12 +25,18 @@ export class SwitchToViewCommand extends ParserBearer {
 						);
 						return bControllerHasThisModelInUIDefine;
 					});
+					const controllersWithThisDefaultModel = controllers.filter(controller => {
+						return controller.defaultModelClassName === currentClassName;
+					});
 					const controllerOfThisModel =
+						controllersWithThisDefaultModel.find(
+							controller => controller.defaultModelClassName === currentClassName
+						) ??
 						controllersWithThisModelInUIDefine.find(
 							controller =>
 								this._parser.classFactory.getDefaultModelForClass(controller.className) ===
 								currentClassName
-						) ||
+						) ??
 						controllers.find(
 							controller =>
 								this._parser.classFactory.getDefaultModelForClass(controller.className) ===

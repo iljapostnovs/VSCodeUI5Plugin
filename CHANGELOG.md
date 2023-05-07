@@ -1,3 +1,7 @@
+## 1.2.1 (07-05-2023)
+
+-   Fix switch between MVC commands `@ui5model` tag support
+
 ## 1.2.0 (07-05-2023)
 
 -   Improved logic for code generator commands (such as TS Interface generators, UML diagram generators, Typedef generators etc.), now the choice for which project command should be executed will be either project of active selected document, or selected by user. Now the logic looks as follows:
