@@ -13,8 +13,9 @@
 -   `additionalWorkspaces` in `package.json` now supports absolute path
 -   `@ui5model`, `@abstract` jsdoc support for classes added. `@ui5model` can be used as class JSDoc, useful for TS projects to overcome performance issues for switching between MVC
 -   Hover providers now supports HTML format
--   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.2.0
--   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.2.0
+-   Support for additional ESTree nodes added for JS projects: `ChainExpression`, `ArrayPattern`, `ForOfStatement`, `AssignmentPattern`
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.2.1
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.2.1
 
 ## 1.1.1 (05-05-2023)
 

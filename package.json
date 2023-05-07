@@ -393,8 +393,8 @@
 		"line-column": "^1.0.2",
 		"ts-morph": "^18.0.0",
 		"typescript": "^5.0.2",
-		"ui5plugin-linter": "^1.2.0",
-		"ui5plugin-parser": "^1.2.0"
+		"ui5plugin-linter": "^1.2.1",
+		"ui5plugin-parser": "^1.2.1"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",
