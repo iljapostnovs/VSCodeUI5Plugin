@@ -5,6 +5,7 @@ import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js
 import { IXMLDocumentIdData } from "ui5plugin-parser/dist/classes/parsing/util/xml/XMLParser";
 import * as vscode from "vscode";
 import ParserBearer from "../../../../ui5parser/ParserBearer";
+import HTMLMarkdown from "../../../../utils/HTMLMarkdown";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 
@@ -22,10 +23,10 @@ export class ViewIdCompletionItemFactory extends ParserBearer<UI5JSParser> imple
 					this._parser.syntaxAnalyser,
 					this._parser
 				);
-				const classNameAtById = positionStrategy.getClassNameOfTheVariableAtPosition(
-					currentClassName,
-					nodes[0].callee?.property?.start
-				)?.split("|")[0].trim();
+				const classNameAtById = positionStrategy
+					.getClassNameOfTheVariableAtPosition(currentClassName, nodes[0].callee?.property?.start)
+					?.split("|")[0]
+					.trim();
 				const isControl =
 					classNameAtById &&
 					this._parser.classFactory.isClassAChildOfClassB(classNameAtById, "sap.ui.core.Control");
@@ -65,7 +66,7 @@ export class ViewIdCompletionItemFactory extends ParserBearer<UI5JSParser> imple
 			completionItem.kind = vscode.CompletionItemKind.Keyword;
 			completionItem.insertText = viewIdData.id;
 			completionItem.detail = viewIdData.sourceClassName;
-			completionItem.documentation = new vscode.MarkdownString(
+			completionItem.documentation = new HTMLMarkdown(
 				`\`\`\`xml \n${viewIdData.tagText.substring(0, 200)}...\n\`\`\``
 			);
 			completionItem.sortText = "z";

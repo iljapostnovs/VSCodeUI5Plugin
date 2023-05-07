@@ -6,6 +6,7 @@ import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js
 import * as vscode from "vscode";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 import ParserBearer from "../../../ui5parser/ParserBearer";
+import HTMLMarkdown from "../../../utils/HTMLMarkdown";
 
 export class JSHoverProvider extends ParserBearer<UI5JSParser> {
 	getHover(document: vscode.TextDocument, position: vscode.Position) {
@@ -59,8 +60,7 @@ export class JSHoverProvider extends ParserBearer<UI5JSParser> {
 	}
 
 	private _getMarkdownFromText(text: string) {
-		const markdownString = new vscode.MarkdownString();
-		markdownString.supportHtml = true;
+		const markdownString = new HTMLMarkdown();
 		const textParts = text.split("\n");
 		markdownString.appendCodeblock(`${textParts[0]}`);
 		for (let i = 1; i < textParts.length; i++) {

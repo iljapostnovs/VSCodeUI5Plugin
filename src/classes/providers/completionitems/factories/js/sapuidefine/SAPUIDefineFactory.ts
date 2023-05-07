@@ -4,8 +4,9 @@ import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js
 import * as vscode from "vscode";
 import { TextDocumentAdapter } from "../../../../../adapters/vscode/TextDocumentAdapter";
 import ParserBearer from "../../../../../ui5parser/ParserBearer";
-import { GeneratorFactory } from "../../../codegenerators/GeneratorFactory";
+import HTMLMarkdown from "../../../../../utils/HTMLMarkdown";
 import { CustomCompletionItem } from "../../../CustomCompletionItem";
+import { GeneratorFactory } from "../../../codegenerators/GeneratorFactory";
 import { ICompletionItemFactory } from "../../abstraction/ICompletionItemFactory";
 import { WorkspaceCompletionItemFactory } from "./WorkspaceCompletionItemFactory";
 export class SAPUIDefineFactory extends ParserBearer<UI5JSParser> implements ICompletionItemFactory {
@@ -77,9 +78,8 @@ export class SAPUIDefineFactory extends ParserBearer<UI5JSParser> implements ICo
 			completionItem.className = node.getName();
 			completionItem.detail = metadata.rawMetadata.title;
 
-			const markdownString = new vscode.MarkdownString();
+			const markdownString = new HTMLMarkdown();
 			markdownString.isTrusted = true;
-			markdownString.supportHtml = true;
 			markdownString.appendMarkdown(this._parser.urlBuilder.getMarkupUrlForClassApi(node));
 			markdownString.appendMarkdown(metadata.rawMetadata.description);
 			completionItem.documentation = markdownString;

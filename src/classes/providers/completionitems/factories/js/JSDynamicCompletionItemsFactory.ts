@@ -12,6 +12,7 @@ import { ReusableMethods } from "../../../reuse/ReusableMethods";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 import { ClassCompletionItemFactory } from "./ClassCompletionItemFactory";
+import HTMLMarkdown from "../../../../utils/HTMLMarkdown";
 
 export class JSDynamicCompletionItemsFactory extends ParserBearer<UI5JSParser> implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
@@ -190,9 +191,8 @@ export class JSDynamicCompletionItemsFactory extends ParserBearer<UI5JSParser> i
 				completionItem.insertText = new vscode.SnippetString(insertString);
 				completionItem.detail = `(${classMethod.visibility}) ${fieldsAndMethods.className}`;
 
-				const markdownString = new vscode.MarkdownString();
+				const markdownString = new HTMLMarkdown();
 				markdownString.isTrusted = true;
-				markdownString.supportHtml = true;
 				if (classMethod.api) {
 					markdownString.appendMarkdown(classMethod.api);
 				}

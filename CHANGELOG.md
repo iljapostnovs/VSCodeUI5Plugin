@@ -1,3 +1,11 @@
+## 1.3.0 (07-05-2023)
+
+-   Fix HTML markdown support for hover and completion items
+-   Fix XML completion items for `fragmentName` of Fragments
+-   Add Special Setting support
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.3.0
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.3.0
+
 ## 1.2.1 (07-05-2023)
 
 -   Fix switch between MVC commands `@ui5model` tag support
