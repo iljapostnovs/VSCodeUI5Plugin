@@ -1,6 +1,6 @@
 import { UI5JSParser } from "ui5plugin-parser";
-import { ParentMethodStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/ParentMethodStrategy";
 import { InterfaceMemberStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/InterfaceMemberStrategy";
+import { ParentMethodStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/ParentMethodStrategy";
 import { IFieldsAndMethods } from "ui5plugin-parser/dist/classes/parsing/ui5class/factory/IClassFactory";
 import { IUIField, IUIMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
 import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
