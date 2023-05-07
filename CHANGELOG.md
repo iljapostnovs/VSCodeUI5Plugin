@@ -13,10 +13,11 @@
 -   `additionalWorkspaces` in `package.json` now supports absolute path
 -   `@ui5model`, `@abstract` jsdoc support for classes added. `@ui5model` can be used as class JSDoc, useful for TS projects to overcome performance issues for switching between MVC
 -   Hover providers now supports HTML format
+-   Completion item generation for sap standard library related variables fixed (e.g. there were no completion items for `sap.ui.getCore()`)
 -   Support for additional ESTree nodes added for JS projects: `ChainExpression`, `ArrayPattern`, `ForOfStatement`, `AssignmentPattern`
 -   Fixed `byId` method exception support for JS projects with new UI5 library versions which returns `sap.ui.core.Element|undefined` instead of old `sap.ui.core.Element`
--   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.2.2
--   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.2.2
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.2.3
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.2.3
 
 ## 1.1.1 (05-05-2023)
 
