@@ -1,3 +1,7 @@
+## 1.3.1 (08-05-2023)
+
+-   Fixed rename provider for TS
+
 ## 1.3.0 (07-05-2023)
 
 -   Fix HTML markdown support for hover and completion items
