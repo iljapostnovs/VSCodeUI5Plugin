@@ -2,10 +2,6 @@ import * as vscode from "vscode";
 import ParserBearer from "../../../ui5parser/ParserBearer";
 import { VSCodeFileReader } from "../../../utils/VSCodeFileReader";
 
-function escapeRegExp(string: string) {
-	return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 export class XMLCodeLensProvider extends ParserBearer {
 	getCodeLenses(document: vscode.TextDocument) {
 		const codeLenses: vscode.CodeLens[] = [];
@@ -44,26 +40,26 @@ export class XMLCodeLensProvider extends ParserBearer {
 		return codeLenses;
 	}
 
-	goToResourceModel(textId: string) {
+	goToResourceModel(translationId: string) {
 		const manifest = new VSCodeFileReader(this._parser).getCurrentWorkspaceFoldersManifest();
 		if (manifest) {
-			const resourceModelText = this._parser.fileReader.readResourceModelFile(manifest);
-			const rTextPosition = new RegExp(`(?<=${escapeRegExp(textId)}\\s?=).*`);
-			const result = rTextPosition.exec(resourceModelText);
-			if (result) {
-				const resourceModelFSPath = this._parser.fileReader.getResourceModelUriForManifest(manifest);
-
-				const uri = vscode.Uri.file(resourceModelFSPath);
-				vscode.window.showTextDocument(uri).then(textEditor => {
-					const positionBegin = textEditor.document.positionAt(result.index);
-					const positionEnd = textEditor.document.positionAt(result.index + result[0].length);
-					textEditor.selection = new vscode.Selection(positionBegin, positionEnd);
-					textEditor.revealRange(
-						new vscode.Range(positionBegin, positionEnd),
-						vscode.TextEditorRevealType.InCenter
-					);
-				});
+			const resourceModelFile = this._parser.resourceModelData.resourceModels[manifest.componentName];
+			const translation = resourceModelFile.find(translation => translation.id === translationId);
+			if (!translation) {
+				return;
 			}
+			const resourceModelFSPath = this._parser.fileReader.getResourceModelUriForManifest(manifest);
+
+			const uri = vscode.Uri.file(resourceModelFSPath);
+			vscode.window.showTextDocument(uri).then(textEditor => {
+				const positionBegin = textEditor.document.positionAt(translation.positionBegin);
+				const positionEnd = textEditor.document.positionAt(translation.positionEnd);
+				textEditor.selection = new vscode.Selection(positionBegin, positionEnd);
+				textEditor.revealRange(
+					new vscode.Range(positionBegin, positionEnd),
+					vscode.TextEditorRevealType.InCenter
+				);
+			});
 		}
 	}
 }

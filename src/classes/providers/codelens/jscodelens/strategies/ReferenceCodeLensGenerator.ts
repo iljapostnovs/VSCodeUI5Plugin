@@ -26,58 +26,57 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 	getCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
 		const codeLenses: vscode.CodeLens[] = [];
 
-		if (vscode.workspace.getConfiguration("ui5.plugin").get("jsReferenceCodeLens")) {
-			const UIClass = new VSCodeTextDocumentTransformer(this._parser).toUIClass(document);
-			if (UIClass) {
-				if (UIClass instanceof CustomJSClass) {
-					const methods = UIClass.methods;
+		if (!vscode.workspace.getConfiguration("ui5.plugin").get("jsReferenceCodeLens")) {
+			return codeLenses;
+		}
+		const UIClass = new VSCodeTextDocumentTransformer(this._parser).toUIClass(document);
+		if (UIClass instanceof CustomJSClass) {
+			const methods = UIClass.methods;
 
-					methods.forEach(method => {
-						if (method.loc) {
-							const locations = this.getReferenceLocations(method);
-							const range = RangeAdapter.acornLocationToVSCodeRange(method.loc);
-							const codeLens = new vscode.CodeLens(range);
-							codeLens.command = {
-								title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
-								command: locations.length ? "editor.action.showReferences" : "",
-								arguments: [document.uri, range.start, locations]
-							};
-							codeLenses.push(codeLens);
-						}
-					});
-				} else if (UIClass instanceof CustomTSClass || UIClass instanceof CustomTSObject) {
-					const methods = UIClass.methods;
-					const constructors = UIClass instanceof CustomTSClass ? UIClass.constructors : [];
-
-					[...methods, ...constructors].forEach(method => {
-						if (method.loc) {
-							const locations = this.getTSReferenceLocations(method);
-							const range = RangeAdapter.acornLocationToVSCodeRange(method.loc);
-							const codeLens = new vscode.CodeLens(range);
-							codeLens.command = {
-								title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
-								command: locations.length ? "editor.action.showReferences" : "",
-								arguments: [document.uri, range.start, locations]
-							};
-							codeLenses.push(codeLens);
-						}
-					});
-
-					UIClass.fields.forEach(field => {
-						if (field.loc) {
-							const locations = this.getTSReferenceLocations(field);
-							const range = RangeAdapter.acornLocationToVSCodeRange(field.loc);
-							const codeLens = new vscode.CodeLens(range);
-							codeLens.command = {
-								title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
-								command: locations.length ? "editor.action.showReferences" : "",
-								arguments: [document.uri, range.start, locations]
-							};
-							codeLenses.push(codeLens);
-						}
-					});
+			methods.forEach(method => {
+				if (method.loc) {
+					const locations = this.getReferenceLocations(method);
+					const range = RangeAdapter.acornLocationToVSCodeRange(method.loc);
+					const codeLens = new vscode.CodeLens(range);
+					codeLens.command = {
+						title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
+						command: locations.length ? "editor.action.showReferences" : "",
+						arguments: [document.uri, range.start, locations]
+					};
+					codeLenses.push(codeLens);
 				}
-			}
+			});
+		} else if (UIClass instanceof CustomTSClass || UIClass instanceof CustomTSObject) {
+			const methods = UIClass.methods;
+			const constructors = UIClass instanceof CustomTSClass ? UIClass.constructors : [];
+
+			[...methods, ...constructors].forEach(method => {
+				if (method.loc) {
+					const locations = this.getTSReferenceLocations(method);
+					const range = RangeAdapter.acornLocationToVSCodeRange(method.loc);
+					const codeLens = new vscode.CodeLens(range);
+					codeLens.command = {
+						title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
+						command: locations.length ? "editor.action.showReferences" : "",
+						arguments: [document.uri, range.start, locations]
+					};
+					codeLenses.push(codeLens);
+				}
+			});
+
+			UIClass.fields.forEach(field => {
+				if (field.loc) {
+					const locations = this.getTSReferenceLocations(field);
+					const range = RangeAdapter.acornLocationToVSCodeRange(field.loc);
+					const codeLens = new vscode.CodeLens(range);
+					codeLens.command = {
+						title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,
+						command: locations.length ? "editor.action.showReferences" : "",
+						arguments: [document.uri, range.start, locations]
+					};
+					codeLenses.push(codeLens);
+				}
+			});
 		}
 
 		return codeLenses;

@@ -299,7 +299,7 @@ Definitions for event handlers are provided.<br/>
 CodeLens for Internalization Texts, overriden methods, event handlers and references is provided
 ![DynamicCompletionItems](/images/XMLResourceModel.gif)
 
-> Related preference entries:<br/> _ui5.plugin.jsCodeLens_<br/> _ui5.plugin.jsReferenceCodeLens_<br/> _ui5.plugin.xmlCodeLens_<br/>
+> Related preference entries:<br/> _ui5.plugin.jsCodeLens_<br/> _ui5.plugin.jsReferenceCodeLens_<br/> _ui5.plugin.xmlCodeLens_<br/> _ui5.plugin.propertiesCodeLens_<br/>
 
 ---
 
@@ -394,7 +394,9 @@ Set your position to the string you want to export to i18n.properties file and e
 
 Goes to view from controller and to controller from view<br/>
 If somebody uses `MVC`, the command actually switches between `Model` (Default model, which is set as `this.getView().setModel(oModel)` in the controller) `View` and `Controller`<br/>
+
 > For TS projects it is possible to add `@ui5model` JSDoc to the class, which should have a class name of the model to which the command will switch to. It will improve the performance issue, because reading type of default model might take seconds. Example:
+
 ```javascript
 /**
  * My Controller JSDoc
@@ -508,10 +510,7 @@ Custom UI5 Explorer in VSCode panel is available<br/>
 1. For JS/TS files tree view contains fields and methods<br/>
    ![JSTreeView](/images/JSTreeView.png)
 
-   > Coloring for methods is based on lines count and references count.<br/>
-   > **Red** color appears if there are more than 100 lines in one method<br/>
-   > **Orange** color appears if there are more than 50 lines in one method or there are 0 references (reference count is ignored if method is overriden)<br/>
-   > **Green** color appears for the rest of the cases
+    > Coloring for methods is based on lines count and references count.<br/> > **Red** color appears if there are more than 100 lines in one method<br/> > **Orange** color appears if there are more than 50 lines in one method or there are 0 references (reference count is ignored if method is overriden)<br/> > **Green** color appears for the rest of the cases
 
 2. For XML files tree view contains class tag list<br/>
    ![XMLTreeView](/images/XMLTreeView.png)

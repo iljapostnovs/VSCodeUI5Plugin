@@ -19,7 +19,11 @@ export class ControllerModelViewSwitcher extends ParserBearer {
 				await switchToViewCommand.switchToView();
 			}
 		} else if (this._getIfJSClassIsOpened()) {
-			await switchToViewCommand.switchToView();
+			try {
+				await switchToModelCommand.switchToModel();
+			} catch (error) {
+				await switchToViewCommand.switchToView();
+			}
 		}
 	}
 
