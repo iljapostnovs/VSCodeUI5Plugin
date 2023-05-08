@@ -201,13 +201,13 @@ export class ExportToI18NCommand extends ParserBearer {
 			const openedFileIsController =
 				currentlyOpenedFileFSPath.endsWith(".controller.js") ||
 				currentlyOpenedFileFSPath.endsWith(".controller.ts");
-			const openedFileIsJSFile =
+			const openedFileIsJSTSFile =
 				currentlyOpenedFileFSPath.endsWith(".js") || currentlyOpenedFileFSPath.endsWith(".ts");
 			const openedFileIsXMLFile = currentlyOpenedFileFSPath.endsWith(".xml");
 
 			if (openedFileIsController) {
 				type = this.fileType.controller;
-			} else if (openedFileIsJSFile) {
+			} else if (openedFileIsJSTSFile) {
 				type = this.fileType.js;
 			} else if (openedFileIsXMLFile) {
 				type = this.fileType.xml;

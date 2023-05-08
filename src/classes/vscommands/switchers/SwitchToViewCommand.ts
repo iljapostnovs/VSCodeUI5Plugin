@@ -1,5 +1,5 @@
 import { ParserPool } from "ui5plugin-parser";
-import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
+import { IXMLFile } from "ui5plugin-parser/dist/classes/parsing/util/filereader/IFileReader";
 import * as vscode from "vscode";
 import ParserBearer from "../../ui5parser/ParserBearer";
 
@@ -10,43 +10,36 @@ export class SwitchToViewCommand extends ParserBearer {
 			if (currentClassName) {
 				const isModel = this._parser.classFactory.isClassAChildOfClassB(currentClassName, "sap.ui.model.Model");
 				if (isModel) {
-					const allUIClasses = ParserPool.getAllExistentUIClasses();
-					const controllers = Object.keys(allUIClasses)
-						.filter(key => allUIClasses[key] instanceof AbstractCustomClass)
-						.map(key => <AbstractCustomClass>allUIClasses[key])
-						.filter(UIClass => {
-							const filePath = this._parser.fileReader.getClassFSPathFromClassName(UIClass.className);
-							return filePath?.endsWith(".controller.js") || filePath?.endsWith(".controller.ts");
-						});
+					const customClasses = ParserPool.getAllCustomUIClasses();
 
-					const controllersWithThisModelInUIDefine = controllers.filter(controller => {
-						const bControllerHasThisModelInUIDefine = !!controller.UIDefine.find(
+					const customClassesWithThisModelInUIDefine = customClasses.filter(customClasses => {
+						const customClassesHasThisModelInUIDefine = !!customClasses.UIDefine.find(
 							UIDefine => UIDefine.classNameDotNotation === currentClassName
 						);
-						return bControllerHasThisModelInUIDefine;
+						return customClassesHasThisModelInUIDefine;
 					});
-					const controllersWithThisDefaultModel = controllers.filter(controller => {
-						return controller.defaultModelClassName === currentClassName;
+					const customClassesWithThisDefaultModel = customClasses.filter(customClasses => {
+						return customClasses.defaultModelClassName === currentClassName;
 					});
-					const controllerOfThisModel =
-						controllersWithThisDefaultModel.find(
-							controller => controller.defaultModelClassName === currentClassName
+					const customClassesOfThisModel =
+						customClassesWithThisDefaultModel.find(
+							customClasses => customClasses.defaultModelClassName === currentClassName
 						) ??
-						controllersWithThisModelInUIDefine.find(
-							controller =>
-								this._parser.classFactory.getDefaultModelForClass(controller.className) ===
+						customClassesWithThisModelInUIDefine.find(
+							customClasses =>
+								this._parser.classFactory.getDefaultModelForClass(customClasses.className) ===
 								currentClassName
 						) ??
-						controllers.find(
-							controller =>
-								this._parser.classFactory.getDefaultModelForClass(controller.className) ===
+						customClasses.find(
+							customClasses =>
+								this._parser.classFactory.getDefaultModelForClass(customClasses.className) ===
 								currentClassName
 						);
-					if (controllerOfThisModel) {
-						await this._switchToViewOrFragmentFromUIClass(controllerOfThisModel.className);
+					if (customClassesOfThisModel) {
+						await this._switchToXMLFileFromClass(customClassesOfThisModel.className);
 					}
 				} else {
-					await this._switchToViewOrFragmentFromUIClass(currentClassName);
+					await this._switchToXMLFileFromClass(currentClassName);
 				}
 			}
 		} catch (error) {
@@ -54,15 +47,13 @@ export class SwitchToViewCommand extends ParserBearer {
 		}
 	}
 
-	private async _switchToViewOrFragmentFromUIClass(currentClassName: string) {
-		const view = this._parser.fileReader.getViewForController(currentClassName);
-		if (!view) {
-			const fragment = this._parser.fileReader.getFirstFragmentForClass(currentClassName);
-			if (fragment) {
-				await vscode.window.showTextDocument(vscode.Uri.file(fragment.fsPath));
-			}
-		} else {
-			await vscode.window.showTextDocument(vscode.Uri.file(view.fsPath));
+	private async _switchToXMLFileFromClass(className: string) {
+		const XMLFile: IXMLFile | undefined =
+			this._parser.fileReader.getViewForController(className) ??
+			this._parser.fileReader.getFirstFragmentForClass(className);
+
+		if (XMLFile) {
+			await vscode.window.showTextDocument(vscode.Uri.file(XMLFile.fsPath));
 		}
 	}
 

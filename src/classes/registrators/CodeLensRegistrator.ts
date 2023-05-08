@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { JSCodeLensProvider } from "../providers/codelens/jscodelens/JSCodeLensProvider";
 import { TSCodeLensProvider } from "../providers/codelens/jscodelens/TSCodeLensProvider";
+import { PropertiesCodeLensProvider } from "../providers/codelens/propertiescodelens/PropertiesCodeLensProvider";
 import { XMLCodeLensProvider } from "../providers/codelens/xmlcodelens/XMLCodeLensProvider";
 import { ReusableMethods } from "../providers/reuse/ReusableMethods";
 
@@ -54,6 +55,19 @@ export class CodeLensRegistrator {
 				}
 			);
 			UI5Plugin.getInstance().addDisposable(TSCodeLens);
+		}
+
+		if (vscode.workspace.getConfiguration("ui5.plugin").get("propertiesCodeLens")) {
+			const propertiesCodeLens = vscode.languages.registerCodeLensProvider(
+				{ language: "properties", scheme: "file" },
+				{
+					provideCodeLenses(document: vscode.TextDocument) {
+						const parser = ParserPool.getParserForFile(document.fileName);
+						return parser && new PropertiesCodeLensProvider(parser).getCodeLenses(document);
+					}
+				}
+			);
+			UI5Plugin.getInstance().addDisposable(propertiesCodeLens);
 		}
 	}
 }

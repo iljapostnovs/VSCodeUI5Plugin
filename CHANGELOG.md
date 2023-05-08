@@ -1,3 +1,12 @@
+## 1.4.0 (09-05-2023)
+
+-   Fixed rename provider for TS
+-   Now `.properties` file has reference CodeLens
+-   New preference entry: `ui5.plugin.propertiesCodeLens`
+-   Parsing of `.properties` file migrated to [properties-file](https://github.com/Avansai/properties-file) package ([#322](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/322))
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.4.0
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.4.0
+
 ## 1.3.0 (07-05-2023)
 
 -   Fix HTML markdown support for hover and completion items

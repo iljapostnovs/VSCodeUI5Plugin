@@ -19,25 +19,19 @@ export class SwitchToModelCommand extends ParserBearer {
 					const currentClassName = this._parser.fileReader.getClassNameFromPath(document.fileName);
 					const currentUIClass = currentClassName && this._parser.classFactory.getUIClass(currentClassName);
 					if (currentClassName && currentUIClass instanceof AbstractCustomClass) {
-						const isController = this._parser.classFactory.isClassAChildOfClassB(
-							currentClassName,
-							"sap.ui.core.mvc.Controller"
-						);
-						if (isController) {
-							const modelName = currentUIClass.defaultModelClassName ?? this._parser.classFactory.getDefaultModelForClass(currentClassName);
-							if (modelName) {
-								const UIModelClass = this._parser.classFactory.getUIClass(modelName);
-								if (UIModelClass instanceof AbstractCustomClass) {
-									await this._switchToModel(UIModelClass.className);
-									resolve();
-								} else {
-									reject();
-								}
+						const modelName =
+							currentUIClass.defaultModelClassName ??
+							this._parser.classFactory.getDefaultModelForClass(currentClassName);
+						if (modelName) {
+							const UIModelClass = this._parser.classFactory.getUIClass(modelName);
+							if (UIModelClass instanceof AbstractCustomClass) {
+								await this._switchToModel(UIModelClass.className);
+								resolve();
 							} else {
-								reject(`Default model for "${currentClassName}" controller is not defined`);
+								reject();
 							}
 						} else {
-							reject(`"${currentClassName}" is not a model`);
+							reject(`Default model for "${currentClassName}" is not defined`);
 						}
 					}
 				}
