@@ -1,3 +1,7 @@
+## 1.4.1 (09-05-2023)
+
+-   JS Reference CodeLens now shows references for class fields as well
+
 ## 1.4.0 (09-05-2023)
 
 -   Fixed rename provider for TS
