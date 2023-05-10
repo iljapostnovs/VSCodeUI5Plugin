@@ -15,7 +15,7 @@ export class InternalizationTextCodeLenseGenerator extends CodeLensGenerator {
 			const currentResourceModelTexts = this._parser.resourceModelData.resourceModels[componentName];
 			const XMLText = document.getText();
 
-			const rTranslatedTexts = /(?<=\.getText\()".*"/g;
+			const rTranslatedTexts = /(?<=\.getText\()("|'|"`).*?("|'|"`)/g;
 			let results = rTranslatedTexts.exec(XMLText);
 			while (results) {
 				results = results || [];
