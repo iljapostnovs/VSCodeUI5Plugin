@@ -1,3 +1,8 @@
+## 1.5.0 (10-05-2023)
+
+-   JS Reference CodeLens now shows references for class fields as well
+-   Export to i18n command now export either full string if there is no selection, or only selected part of the string
+
 ## 1.4.0 (09-05-2023)
 
 -   Fixed rename provider for TS

@@ -2,38 +2,91 @@ import { appendFile } from "fs/promises";
 import * as path from "path";
 import * as vscode from "vscode";
 import ParserBearer from "../../ui5parser/ParserBearer";
-import * as jsClassData from "./i18nIDs.json";
 import { CaseType, TextTransformationFactory } from "./TextTransformationFactory";
+import * as jsClassData from "./i18nIDs.json";
 
 export class ExportToI18NCommand extends ParserBearer {
 	public async export() {
 		const editor = vscode.window.activeTextEditor;
-		if (!editor) {
+
+		let replaceStringRange = this._getReplaceStringRange();
+		let shouldCropQuotes = false;
+		const fullStringRange = this._getFullStringRange();
+		const stringForReplacing = replaceStringRange && editor?.document.getText(replaceStringRange);
+		const I18nID = stringForReplacing && (await this._askUserForI18nID(stringForReplacing));
+		let textForInsertionIntoCurrentFile = I18nID && this._getStringForSavingIntoCurrentFile(I18nID);
+		const isInStringTemplate = this._isCurrentPositionInStringTemplate();
+		if (!I18nID || !textForInsertionIntoCurrentFile || !editor || !replaceStringRange || !fullStringRange) {
 			return;
 		}
 
-		const stringRange = this._getStringRange() || new vscode.Range(editor.selection.start, editor.selection.start);
-		let stringForReplacing = editor.document.getText(stringRange);
-		stringForReplacing = stringForReplacing.substring(1, stringForReplacing.length - 1);
-		const I18nID = await this._askUserForI18nID(stringForReplacing);
-		if (!I18nID) {
-			return;
+		const replacingIsPartial = !replaceStringRange.isEqual(fullStringRange);
+		const thereIsNoSelection = editor.selection.start.isEqual(editor.selection.end);
+		if (isInStringTemplate && !replacingIsPartial && thereIsNoSelection) {
+			throw new Error("Please select range which you want to export");
 		}
 
+		if (replacingIsPartial) {
+			const openedFileType = this._getCurrentlyOpenedFileType();
+			const isJsTs = openedFileType === this.fileType.controller || openedFileType === this.fileType.jsts;
+			if (isJsTs && !isInStringTemplate) {
+				textForInsertionIntoCurrentFile = this._regenerateTextForInsertion(
+					editor,
+					fullStringRange,
+					replaceStringRange,
+					textForInsertionIntoCurrentFile
+				);
+				shouldCropQuotes = true;
+				replaceStringRange = fullStringRange;
+			} else if (isInStringTemplate) {
+				textForInsertionIntoCurrentFile = `\${${textForInsertionIntoCurrentFile}}`;
+			}
+		} else {
+			const openedFileType = this._getCurrentlyOpenedFileType();
+			const isJsTs = openedFileType === this.fileType.controller || openedFileType === this.fileType.jsts;
+			if (isJsTs) {
+				shouldCropQuotes = true;
+			}
+		}
 		const i18nIdIsDuplicated = this._getIfi18nIdIsDuplicated(I18nID);
 		if (!i18nIdIsDuplicated) {
 			const textForInsertionIntoI18N = await this._generateStringForI18NInsert(stringForReplacing, I18nID);
 			await this._insertIntoI18NFile(textForInsertionIntoI18N);
 		}
 
-		const textForInsertionIntoCurrentFile = this._getStringForSavingIntoI18n(I18nID);
-		editor.edit(editBuilder => {
-			if (editor) {
-				editBuilder.replace(stringRange, textForInsertionIntoCurrentFile);
-
-				editor.selection = new vscode.Selection(stringRange.start, stringRange.start);
+		await editor.edit(editBuilder => {
+			if (!replaceStringRange) {
+				return;
 			}
+			const rangeToReplace = new vscode.Range(
+				replaceStringRange.start.translate(0, shouldCropQuotes ? -1 : 0),
+				replaceStringRange.end.translate(0, shouldCropQuotes ? 1 : 0)
+			);
+			editBuilder.replace(rangeToReplace, textForInsertionIntoCurrentFile ?? "");
+
+			editor.selection = new vscode.Selection(rangeToReplace.start, rangeToReplace.end);
 		});
+	}
+
+	private _regenerateTextForInsertion(
+		editor: vscode.TextEditor,
+		fullStringRange: vscode.Range,
+		replaceStringRange: vscode.Range,
+		textForInsertionIntoCurrentFile: string | undefined
+	) {
+		const document = editor.document;
+		const fullString = document.getText(fullStringRange);
+
+		const replaceFrom = document.offsetAt(replaceStringRange.start) - document.offsetAt(fullStringRange.start);
+		const replaceTo = document.offsetAt(replaceStringRange.end) - document.offsetAt(fullStringRange.end);
+		textForInsertionIntoCurrentFile = `\`${fullString.substring(
+			0,
+			replaceFrom
+		)}\${${textForInsertionIntoCurrentFile}}${fullString.substring(
+			fullString.length + replaceTo,
+			fullString.length
+		)}\``;
+		return textForInsertionIntoCurrentFile;
 	}
 
 	private _getIfi18nIdIsDuplicated(I18nID: string) {
@@ -47,46 +100,101 @@ export class ExportToI18NCommand extends ParserBearer {
 		return resourceModelTexts.some(text => text.id === I18nID);
 	}
 
-	private _getStringRange() {
+	private _getFullStringRange() {
 		const editor = vscode.window.activeTextEditor;
 
 		if (editor) {
-			// eslint-disable-next-line @typescript-eslint/quotes
-			const iDeltaStart = this._getDeltaForFirstOccuraneOf('"', -1);
-			// eslint-disable-next-line @typescript-eslint/quotes
-			const iDeltaEnd = this._getDeltaForFirstOccuraneOf('"', 1);
+			const { iDeltaStart, iDeltaEnd } = this._getDeltaStartEnd();
+			if (iDeltaStart === undefined || iDeltaEnd === undefined) {
+				return;
+			}
 			const range = new vscode.Range(
-				editor.selection.start.translate(0, iDeltaStart),
-				editor.selection.start.translate(0, iDeltaEnd)
+				editor.selection.start.translate(0, iDeltaStart + 1),
+				editor.selection.start.translate(0, iDeltaEnd - 1)
 			);
 			return range;
 		}
 	}
 
+	private _getReplaceStringRange() {
+		const editor = vscode.window.activeTextEditor;
+
+		if (editor) {
+			if (editor.selection.start.isEqual(editor.selection.end)) {
+				const { iDeltaStart, iDeltaEnd } = this._getDeltaStartEnd();
+				if (iDeltaStart === undefined || iDeltaEnd === undefined) {
+					return;
+				}
+				const range = new vscode.Range(
+					editor.selection.start.translate(0, iDeltaStart + 1),
+					editor.selection.start.translate(0, iDeltaEnd - 1)
+				);
+				return range;
+			} else {
+				const range = new vscode.Range(editor.selection.start, editor.selection.end);
+				return range;
+			}
+		}
+	}
+
+	private _getDeltaStartEnd() {
+		let iDeltaStart: number | undefined;
+		let iDeltaEnd: number | undefined;
+		try {
+			// eslint-disable-next-line @typescript-eslint/quotes
+			iDeltaStart = this._getDeltaForFirstOccuraneOf('"', -1);
+			// eslint-disable-next-line @typescript-eslint/quotes
+			iDeltaEnd = this._getDeltaForFirstOccuraneOf('"', 1);
+		} catch (oError: any) {
+			try {
+				iDeltaStart = this._getDeltaForFirstOccuraneOf("'", -1);
+				iDeltaEnd = this._getDeltaForFirstOccuraneOf("'", 1);
+			} catch (oError) {
+				iDeltaStart = this._getDeltaForFirstOccuraneOf("`", -1);
+				iDeltaEnd = this._getDeltaForFirstOccuraneOf("`", 1);
+			}
+		}
+		return { iDeltaStart, iDeltaEnd };
+	}
+
+	private _isCurrentPositionInStringTemplate() {
+		try {
+			const iDeltaStart = this._getDeltaForFirstOccuraneOf("`", -1);
+			const iDeltaEnd = this._getDeltaForFirstOccuraneOf("`", 1);
+
+			return iDeltaStart !== undefined && iDeltaEnd !== undefined;
+		} catch (oError) {
+			return false;
+		}
+	}
+
 	private _getDeltaForFirstOccuraneOf(sChar: string, iDelta: number) {
 		const editor = vscode.window.activeTextEditor;
-		let deltaToReturn = iDelta;
-		if (editor) {
-			const startingPosition = editor.selection.start;
-			let selectedText = "";
+		if (!editor) {
+			return;
+		}
+		let deltaToReturn =
+			editor.document.offsetAt(editor.selection.end) - editor.document.offsetAt(editor.selection.start);
+		const startingPosition = editor.selection.start;
 
-			while (selectedText[iDelta > 0 ? selectedText.length - 1 : 0] !== sChar) {
-				try {
-					const range = new vscode.Range(
-						startingPosition.translate(0, deltaToReturn < 0 ? deltaToReturn : 0),
-						startingPosition.translate(0, deltaToReturn > 0 ? deltaToReturn : 0)
-					);
-					selectedText = editor.document.getText(range);
-					if (selectedText[iDelta > 0 ? selectedText.length - 1 : 0] !== sChar) {
-						deltaToReturn += iDelta;
-					}
-				} catch (error) {
-					throw new Error("No string for export to i18n found");
-				}
+		let selectedText = "";
 
-				if (Math.abs(deltaToReturn) > editor.document.getText().length) {
-					throw new Error("No string for export to i18n found");
+		while (selectedText[iDelta > 0 ? selectedText.length - 1 : 0] !== sChar) {
+			try {
+				const range = new vscode.Range(
+					startingPosition.translate(0, deltaToReturn < 0 ? deltaToReturn : 0),
+					startingPosition.translate(0, deltaToReturn > 0 ? deltaToReturn : 0)
+				);
+				selectedText = editor.document.getText(range);
+				if (selectedText[iDelta > 0 ? selectedText.length - 1 : 0] !== sChar) {
+					deltaToReturn += iDelta;
 				}
+			} catch (error) {
+				throw new Error("No string for export to i18n found");
+			}
+
+			if (Math.abs(deltaToReturn) > editor.document.getText().length) {
+				throw new Error("No string for export to i18n found");
 			}
 		}
 
@@ -182,12 +290,12 @@ export class ExportToI18NCommand extends ParserBearer {
 		return textToInsert;
 	}
 
-	private _getStringForSavingIntoI18n(I18nID: string) {
+	private _getStringForSavingIntoCurrentFile(I18nID: string): string | undefined {
 		const openedFileType = this._getCurrentlyOpenedFileType();
 		const typeMapping: any = {
-			xml: `"{i18n>${I18nID}}"`,
+			xml: `{i18n>${I18nID}}`,
 			controller: `this.getBundle().getText("${I18nID}")`,
-			js: `this.getModel("i18n").getResourceBundle().getText("${I18nID}")`
+			jsts: `this.getModel("i18n").getResourceBundle().getText("${I18nID}")`
 		};
 
 		return typeMapping[openedFileType];
@@ -208,7 +316,7 @@ export class ExportToI18NCommand extends ParserBearer {
 			if (openedFileIsController) {
 				type = this.fileType.controller;
 			} else if (openedFileIsJSTSFile) {
-				type = this.fileType.js;
+				type = this.fileType.jsts;
 			} else if (openedFileIsXMLFile) {
 				type = this.fileType.xml;
 			}
@@ -226,7 +334,7 @@ export class ExportToI18NCommand extends ParserBearer {
 		}
 		if (!i18nRelativePath) {
 			throw new Error(
-				"Inavlid i18n bundle path in manifest.json. Please define path to i18n by setting 'sap.app.i18n' or 'sap.app.i18n.bundleUrl' field in manifest.json"
+				"Invalid i18n bundle path in manifest.json. Please define path to i18n by setting 'sap.app.i18n' or 'sap.app.i18n.bundleUrl' field in manifest.json"
 			);
 		}
 
@@ -241,6 +349,6 @@ export class ExportToI18NCommand extends ParserBearer {
 	fileType = {
 		xml: "xml",
 		controller: "controller",
-		js: "js"
+		jsts: "jsts"
 	};
 }

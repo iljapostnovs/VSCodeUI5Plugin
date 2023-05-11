@@ -32,11 +32,13 @@ export class ReferenceCodeLensGenerator extends CodeLensGenerator {
 		const UIClass = new VSCodeTextDocumentTransformer(this._parser).toUIClass(document);
 		if (UIClass instanceof CustomJSClass) {
 			const methods = UIClass.methods;
+			const fields = UIClass.fields;
+			const members = [...fields, ...methods];
 
-			methods.forEach(method => {
-				if (method.loc) {
-					const locations = this.getReferenceLocations(method);
-					const range = RangeAdapter.acornLocationToVSCodeRange(method.loc);
+			members.forEach(member => {
+				if (member.loc) {
+					const locations = this.getReferenceLocations(member);
+					const range = RangeAdapter.acornLocationToVSCodeRange(member.loc);
 					const codeLens = new vscode.CodeLens(range);
 					codeLens.command = {
 						title: `${locations.length} reference${locations.length === 1 ? "" : "s"}`,

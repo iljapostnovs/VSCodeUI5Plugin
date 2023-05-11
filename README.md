@@ -382,6 +382,8 @@ The provider renames all references to the class for `JS` projects, and all refe
 
 Set your position to the string you want to export to i18n.properties file and execute command. Works both in XML and JS files.
 
+> **Info!** If there is no selection, whole string will be exported. If there is a selection, only the selected part of the string will be exported.
+
 > `this.getBundle()` method which returns ResourceBundle should be defined in Controller/BaseController
 
 > Related preference entries:<br/> _ui5.plugin.askUserToConfirmI18nId_<br/> _ui5.plugin.addI18nTextLengthLimitation_<br/> _ui5.plugin.textTransformationStrategy_<br/>
