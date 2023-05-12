@@ -40,7 +40,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 							item.insertText.appendText('="');
 							item.insertText.appendTabstop(0);
 							// eslint-disable-next-line @typescript-eslint/quotes
-							item.insertText.appendText('sc"');
+							item.insertText.appendText('"');
 						}
 					});
 				}

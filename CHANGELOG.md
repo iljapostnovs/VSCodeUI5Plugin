@@ -1,3 +1,7 @@
+## 1.5.1 (12-05-2023)
+
+-   Fix XML completion items prefilled with "sc" ([#326](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/326))
+
 ## 1.5.0 (10-05-2023)
 
 -   JS Reference CodeLens now shows references for class fields as well
