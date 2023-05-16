@@ -9,6 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3.1.0
       - name: Launch tests
+        shell: powershell
         run: |
           npm install
           npm run test:js
