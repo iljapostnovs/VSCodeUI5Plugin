@@ -14,6 +14,9 @@ export class VSCodeLinterConfigHandler extends ParserBearer implements ILinterCo
 			parser.configHandler.packagePath
 		);
 	}
+	getPropertiesLinterExceptions(): string[] {
+		return this._packageLinterConfigHandler.getPropertiesLinterExceptions();
+	}
 
 	getJSLinterExceptions(): JSLinterException[] {
 		return this._packageLinterConfigHandler.getJSLinterExceptions();
