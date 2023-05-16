@@ -17,7 +17,7 @@ async function main() {
 		await runTests({ extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace, "--disable-extensions"] });
 	} catch (err) {
 		console.error("Failed to run tests");
-		process.exitCode = 1;
+		process.exit(1);
 	}
 }
 
