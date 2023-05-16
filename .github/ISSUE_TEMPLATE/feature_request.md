@@ -3,7 +3,7 @@ name: Feature request
 about: Create a feature request for new functionality
 title: "Feature request: "
 labels: enhancement
-assignees: "@iljapostnovs"
+assignees: iljapostnovs
 ---
 
 **Describe the feature**
