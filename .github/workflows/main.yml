@@ -13,6 +13,7 @@ jobs:
         run: |
           npm install
           npm run test:js -ErrorAction Stop
+          &cmd.exe /c rd /s /q .vscode-test
   test_ts:
     name: Test Extension (TS)
     runs-on: self-hosted
@@ -21,7 +22,7 @@ jobs:
       - name: Launch tests
         run: |
           npm install
-          npm run test:ts
+          npm run test:ts -ErrorAction Stop
           &cmd.exe /c rd /s /q .vscode-test
   test_ws:
     name: Test Extension (Workspaces)

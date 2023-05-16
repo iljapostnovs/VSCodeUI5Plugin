@@ -71,6 +71,7 @@
 			"className": "com.test.controller.BaseController",
 			"result": [
 				"override",
+				"1 reference",
 				"0 references",
 				"3 references"
 			]
