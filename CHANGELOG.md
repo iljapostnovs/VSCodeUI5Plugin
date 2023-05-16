@@ -1,3 +1,11 @@
+## 1.6.0 (16-05-2023)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.4.3
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.5.2
+-   Bugfix for linter not taking into account `jsClassesToExclude` for TS projects
+-   `propertiesLinterExceptions` added to `ui5linter` configuration
+-   `@ui5ignore` is now supported in `i18n.properties`
+
 ## 1.5.1 (12-05-2023)
 
 -   Fix XML completion items prefilled with "sc" ([#326](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/326))

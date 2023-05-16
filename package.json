@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "1.5.1",
+	"version": "1.5.2",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -398,8 +398,8 @@
 		"line-column": "^1.0.2",
 		"ts-morph": "^18.0.0",
 		"typescript": "^5.0.2",
-		"ui5plugin-linter": "^1.4.1",
-		"ui5plugin-parser": "^1.4.1"
+		"ui5plugin-linter": "^1.5.2",
+		"ui5plugin-parser": "^1.4.3"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",

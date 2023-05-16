@@ -320,6 +320,13 @@
 							},
 							"description": "List of class names (e.g. com.test.control.MyControl) to be excluded from linting"
 						},
+						"propertiesLinterExceptions": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "List of i18n ids to be excluded from linting by UnusedTranslationLinter"
+						},
 						"xmlClassExceptions": {
 							"type": "array",
 							"items": {
