@@ -28,7 +28,7 @@
 				)"
 				alternateRowColors="wrong value"
 				wrongProperty=""
-				selectionChange="nonExistantEventHandler"
+				selectionChange="onTableNonExistantEventHandlerSelectionChange"
 				delete="onTableDelete"
 				paste=".onTablePaste"
 				itemPress="onTableItemPress(${$parameters>/value})"

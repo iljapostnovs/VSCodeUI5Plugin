@@ -8,7 +8,7 @@
 		press="wrongEventHandler"
 	>
 		<customData>
-			<Text validationError="wrongEventHandler"/>
+			<Text validationError="onTextWrongEventHandlerValidationError"/>
 		</customData>
 	</Button>
 	<!-- @ui5ignore press -->

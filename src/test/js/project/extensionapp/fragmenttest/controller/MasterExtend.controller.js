@@ -19,7 +19,7 @@ sap.ui.define([
 			const oSource = oEvent.getSource();
 			this.eventHandler10(oEvent);
 		},
-		eventHandler11() {},
+		onButton11ParseError() {},
 		async unusedEventHandlerExtended() {},
 		eventHandler14(oEvent) {
 			const source = oEvent.getSource();

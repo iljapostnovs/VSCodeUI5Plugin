@@ -6,7 +6,7 @@
 		<List
 			id="idListFromThirdFragment"
 			selectionChange="onThirdFragmentSelectionChange"
-			delete="onNonExistentDelete"
+			delete="onListNonExistantDelete"
 			backgroundDesign="Solid"
 		>
 		</List>

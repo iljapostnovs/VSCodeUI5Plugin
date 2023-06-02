@@ -7,7 +7,7 @@
 		text="{
 			formatter: '.formatter.formatValueFragmentController2'
 		}"
-		press="eventHandler11"
+		press="onButton11Press"
 	/>
 	<Text
 		id="idTextFragmentController2"

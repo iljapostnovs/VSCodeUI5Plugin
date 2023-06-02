@@ -7897,7 +7897,7 @@
 					"text": "Invalid attribute name (wrongProperty)"
 				},
 				{
-					"text": "Event handler \"nonExistantEventHandler\" not found in \"com.test.controller.LinterTest\"."
+					"text": "Event handler \"onTableNonExistantEventHandlerSelectionChange\" not found in \"com.test.controller.LinterTest\"."
 				},
 				{
 					"text": "Value \"false\" is unnecessary, it is the sames as default value of \"busy\" property"
@@ -7941,18 +7941,14 @@
 					"text": "\"eventHandler1\" should match pattern: \"/^onButton.*?Press$/\""
 				},
 				{
-					"text": "Event handler \"eventHandler11\" not found in \"com.test.fragmenttest.controller.Master\"."
+					"text": "Event handler \"onButton11ParseError\" not found in \"com.test.fragmenttest.controller.Master\"."
 				}
 			]
 		},
 		{
 			"className": "com.test.xmlrequiretest.XMLRequire",
 			"timeLimit": 100,
-			"errors": [
-				{
-					"text": "\"method1\" should match pattern: \"/^onFlexibleColumnLayout.*?StateChange$/\""
-				}
-			]
+			"errors": []
 		}
 	],
 	"FragmentLinter": [
@@ -7961,7 +7957,7 @@
 			"timeLimit": 100,
 			"errors": [
 				{
-					"text": "Event handler \"wrongEventHandler\" not found in \"com.test.xmllintertest.UI5IgnoreTest\"."
+					"text": "Event handler \"onTextWrongEventHandlerValidationError\" not found in \"com.test.xmllintertest.UI5IgnoreTest\"."
 				},
 				{
 					"text": "\"idButton2\" should match pattern: \"/^id.*?Button$/\""
@@ -7978,10 +7974,10 @@
 					"text": "\"onFragmentButtonPress\" should match pattern: \"/^onButton.*?Press$/\""
 				},
 				{
-					"text": "Event handler \"onWrongEventHandler\" not found in \"com.test.controller.LinterTest\"."
+					"text": "Event handler \"onButtonWrongEventHandlerParseError\" not found in \"com.test.controller.LinterTest\"."
 				},
 				{
-					"text": "Event handler \"nonExistantHandler\" not found in \"com.test.controller.LinterTest\"."
+					"text": "Event handler \"onButtonNonExistantHandlerValidationError\" not found in \"com.test.controller.LinterTest\"."
 				},
 				{
 					"text": "Invalid attribute value (wrong value)"
@@ -8001,7 +7997,7 @@
 					"text": "\"onSecondFragmentSelectionChange\" should match pattern: \"/^onList.*?SelectionChange$/\""
 				},
 				{
-					"text": "Event handler \"onNonExistentDelete\" not found in \"com.test.controller.LinterTest\"."
+					"text": "Event handler \"onListNonExistantDelete\" not found in \"com.test.controller.LinterTest\"."
 				},
 				{
 					"text": "Value \"Solid\" is unnecessary, it is the sames as default value of \"backgroundDesign\" property"
@@ -8018,7 +8014,7 @@
 					"text": "\"onThirdFragmentSelectionChange\" should match pattern: \"/^onList.*?SelectionChange$/\""
 				},
 				{
-					"text": "Event handler \"onNonExistentDelete\" not found in \"com.test.controller.LinterTest\"."
+					"text": "Event handler \"onListNonExistantDelete\" not found in \"com.test.controller.LinterTest\"."
 				},
 				{
 					"text": "Value \"Solid\" is unnecessary, it is the sames as default value of \"backgroundDesign\" property"
@@ -8043,7 +8039,7 @@
 			"className": "com.extend.fragmenttest.controller.MasterExtend",
 			"eventHandlers": [
 				"eventHandler10",
-				"eventHandler11",
+				"onButton11ParseError",
 				"eventHandler14"
 			]
 		},

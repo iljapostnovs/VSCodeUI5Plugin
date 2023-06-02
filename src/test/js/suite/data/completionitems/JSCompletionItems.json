@@ -2804,7 +2804,7 @@
 			"textToFind": "this.",
 			"items": [
 				".eventHandler10",
-				".eventHandler11",
+				".onButton11ParseError",
 				".unusedEventHandlerExtended",
 				".eventHandler14",
 				".eventHandler1",
