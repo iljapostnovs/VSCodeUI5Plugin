@@ -39,7 +39,7 @@
 				{
 					"fileData": {
 						"fsPath": "com.test.renametest.view.Master",
-						"content": "<mvc:View\n\tcontrollerName=\"com.test.renametests.controller.Master\"\n\txmlns:mvc=\"sap.ui.core.mvc\"\n\txmlns=\"sap.m\"\n\txmlns:c=\"sap.ui.core\"\n\tdisplayBlock=\"true\"\n\theight=\"100%\"\n\tbusyIndicatorDelay=\"0\"\n>\n\t<Button\n\t\tid=\"idButtonMasterView\"\n\t\ttext=\"{\n\t\t\tformatter: '.formatter.formatValueViewMaster'\n\t\t}\"\n\t\tpress=\"eventHandler1\"\n\t\tbusy=\"true\"\n\t\tparseError=\"eventHandler11\"\n\t/>\n\t<Bar>\n\t\t<contentLeft>\n\n\t\t</contentLeft>\n\t</Bar>\n\t<c:Fragment\n\t\tfragmentName=\"com.test.renametests.view.fragments.FragmentView1\"\n\t\ttype=\"XML\"\n\t/>\n\t<c:Fragment\n\t\tfragmentName=\"com.test.renametests.view.fragments.FragmentView2\"\n\t\ttype=\"XML\"\n\t/>\n</mvc:View>"
+						"content": "<mvc:View\n\tcontrollerName=\"com.test.renametests.controller.Master\"\n\txmlns:mvc=\"sap.ui.core.mvc\"\n\txmlns=\"sap.m\"\n\txmlns:c=\"sap.ui.core\"\n\tdisplayBlock=\"true\"\n\theight=\"100%\"\n\tbusyIndicatorDelay=\"0\"\n>\n\t<Button\n\t\tid=\"idButtonMasterView\"\n\t\ttext=\"{\n\t\t\tformatter: '.formatter.formatValueViewMaster'\n\t\t}\"\n\t\tpress=\"eventHandler1\"\n\t\tbusy=\"true\"\n\t\tparseError=\"onButton11ParseError\"\n\t/>\n\t<Bar>\n\t\t<contentLeft>\n\n\t\t</contentLeft>\n\t</Bar>\n\t<c:Fragment\n\t\tfragmentName=\"com.test.renametests.view.fragments.FragmentView1\"\n\t\ttype=\"XML\"\n\t/>\n\t<c:Fragment\n\t\tfragmentName=\"com.test.renametests.view.fragments.FragmentView2\"\n\t\ttype=\"XML\"\n\t/>\n</mvc:View>"
 					},
 					"changed": true,
 					"renames": []

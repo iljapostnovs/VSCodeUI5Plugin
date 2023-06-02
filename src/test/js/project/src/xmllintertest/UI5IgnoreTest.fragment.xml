@@ -8,9 +8,10 @@
 		press="wrongEventHandler"
 	>
 		<customData>
-			<Text validationError="wrongEventHandler"/>
+			<Text validationError="onTextWrongEventHandlerValidationError"/>
 		</customData>
 	</Button>
+	<!-- @ui5ignore press -->
 	<Button
 		id="idButton2"
 		press="notWrongEventHandler"

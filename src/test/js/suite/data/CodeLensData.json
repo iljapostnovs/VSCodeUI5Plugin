@@ -38,8 +38,8 @@
 			"className": "com.test.controller.LinterTest",
 			"result": [
 				"override",
-				"Event handler of \"sap.m.Table (idTableFromView)~delete\"",
-				"Event handler of \"sap.m.Table (idTableFromView)~paste\"",
+				"Event handler of \"sap.m.Table (idViewTable)~delete\"",
+				"Event handler of \"sap.m.Table (idViewTable)~paste\"",
 				"Event handler of \"sap.m.List (idListFromThirdFragment)~selectionChange\"",
 				"Event handler of \"sap.m.List (idListFromSecondFragment)~selectionChange\"",
 				"Event handler of \"sap.m.Button (idButtonFromFragment)~press\"",
@@ -64,7 +64,8 @@
 				"1 reference",
 				"1 reference",
 				"1 reference",
-				"2 references"
+				"1 reference",
+				"1 reference"
 			]
 		},
 		{

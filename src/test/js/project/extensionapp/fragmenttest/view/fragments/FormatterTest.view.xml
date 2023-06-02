@@ -20,7 +20,7 @@
 				path: 123
 			}]
 		}"
-		press="eventHandler11"
+		press="onButton11Press"
 	/>
 	<Button text="{= ${/SupportModel}}"/>
 	<Button text="{Test}"/>

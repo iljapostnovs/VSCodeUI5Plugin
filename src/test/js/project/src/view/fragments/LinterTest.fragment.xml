@@ -5,8 +5,8 @@
 	<Button
 		id="idButtonFromFragment"
 		press="onFragmentButtonPress"
-		parseError="onWrongEventHandler"
-		validationError="nonExistantHandler"
+		parseError="onButtonWrongEventHandlerParseError"
+		validationError="onButtonNonExistantHandlerValidationError"
 		width="100%"
 		busy="wrong value"
 		wrongAttribute=""

@@ -132,6 +132,7 @@ export class DiagnosticsRegistrator {
 			this._timeoutId = setTimeout(() => {
 				const errors = new XMLLinter(parser).getLintingErrors(new TextDocumentAdapter(document));
 
+				// copy(JSON.stringify(errors.map(error => ({text: error.message}))))
 				const diagnostics: CustomDiagnostics[] = errors.map(error => {
 					const diagnostic = new CustomDiagnostics(
 						RangeAdapter.rangeToVSCodeRange(error.range),

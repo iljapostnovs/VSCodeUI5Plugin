@@ -14,6 +14,15 @@ export class VSCodeLinterConfigHandler extends ParserBearer implements ILinterCo
 			parser.configHandler.packagePath
 		);
 	}
+	getAttributesToCheck(): string[] {
+		return this._packageLinterConfigHandler.getAttributesToCheck();
+	}
+	getIdNamingPattern(): string {
+		return this._packageLinterConfigHandler.getIdNamingPattern();
+	}
+	getEventNamingPattern(): string {
+		return this._packageLinterConfigHandler.getEventNamingPattern();
+	}
 	getPropertiesLinterExceptions(): string[] {
 		return this._packageLinterConfigHandler.getPropertiesLinterExceptions();
 	}

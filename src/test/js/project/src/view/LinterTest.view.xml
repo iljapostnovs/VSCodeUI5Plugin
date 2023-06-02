@@ -20,18 +20,18 @@
 		</nonExistantAggregation>
 		<content>
 			<Table
-				id="idTableFromView"
-				popinChanged="_onItemPress(
+				id="idViewTable"
+				popinChanged="onTablePopinChanged(
 					$event,
 					$controller,
 					formatMessage($test>test})
 				)"
 				alternateRowColors="wrong value"
 				wrongProperty=""
-				selectionChange="nonExistantEventHandler"
-				delete="_onDelete"
-				paste=".onPaste"
-				itemPress="_onItemPress(${$parameters>/value})"
+				selectionChange="onTableNonExistantEventHandlerSelectionChange"
+				delete="onTableDelete"
+				paste=".onTablePaste"
+				itemPress="onTableItemPress(${$parameters>/value})"
 				validateFieldGroup="cmd:Save"
 				busy="false"
 			/>

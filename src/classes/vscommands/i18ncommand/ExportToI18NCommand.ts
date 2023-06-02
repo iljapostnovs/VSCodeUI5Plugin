@@ -295,7 +295,7 @@ export class ExportToI18NCommand extends ParserBearer {
 		const typeMapping: any = {
 			xml: `{i18n>${I18nID}}`,
 			controller: `this.getBundle().getText("${I18nID}")`,
-			jsts: `this.getModel("i18n").getResourceBundle().getText("${I18nID}")`
+			jsts: `this.getModel("i18n")?.getResourceBundle().getText("${I18nID}")`
 		};
 
 		return typeMapping[openedFileType];
