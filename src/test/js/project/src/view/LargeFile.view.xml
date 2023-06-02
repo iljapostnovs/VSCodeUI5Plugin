@@ -15,8 +15,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -28,8 +27,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -69,8 +67,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -82,8 +79,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -123,8 +119,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -136,8 +131,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -177,8 +171,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -190,8 +183,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -231,8 +223,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -244,8 +235,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -285,8 +275,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -298,8 +287,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -339,8 +327,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -352,8 +339,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -393,8 +379,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -406,8 +391,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -447,8 +431,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -460,8 +443,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -501,8 +483,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -514,8 +495,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -555,8 +535,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -568,8 +547,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -609,8 +587,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -622,8 +599,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -663,8 +639,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -676,8 +651,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -717,8 +691,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -730,8 +703,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -771,8 +743,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -784,8 +755,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -825,8 +795,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -838,8 +807,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -879,8 +847,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -892,8 +859,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -933,8 +899,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -946,8 +911,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -987,8 +951,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1000,8 +963,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1041,8 +1003,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1054,8 +1015,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1095,8 +1055,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1108,8 +1067,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1149,8 +1107,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1162,8 +1119,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1203,8 +1159,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1216,8 +1171,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1257,8 +1211,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1270,8 +1223,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1311,8 +1263,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1324,8 +1275,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1365,8 +1315,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1378,8 +1327,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1419,8 +1367,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1432,8 +1379,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1473,8 +1419,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1486,8 +1431,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1527,8 +1471,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1540,8 +1483,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1581,8 +1523,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1594,8 +1535,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1635,8 +1575,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1648,8 +1587,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1689,8 +1627,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1702,8 +1639,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1743,8 +1679,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1756,8 +1691,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1797,8 +1731,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1810,8 +1743,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1851,8 +1783,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1864,8 +1795,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1905,8 +1835,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1918,8 +1847,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -1959,8 +1887,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -1972,8 +1899,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2013,8 +1939,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2026,8 +1951,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2067,8 +1991,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2080,8 +2003,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2121,8 +2043,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2134,8 +2055,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2175,8 +2095,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2188,8 +2107,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2229,8 +2147,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2242,8 +2159,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2283,8 +2199,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2296,8 +2211,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2337,8 +2251,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2350,8 +2263,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2391,8 +2303,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2404,8 +2315,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2445,8 +2355,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2458,8 +2367,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2499,8 +2407,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2512,8 +2419,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2553,8 +2459,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2566,8 +2471,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2607,8 +2511,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2620,8 +2523,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2661,8 +2563,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2674,8 +2575,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2715,8 +2615,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2728,8 +2627,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2769,8 +2667,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2782,8 +2679,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2823,8 +2719,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2836,8 +2731,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2877,8 +2771,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2890,8 +2783,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2931,8 +2823,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2944,8 +2835,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -2985,8 +2875,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -2998,8 +2887,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3039,8 +2927,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3052,8 +2939,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3093,8 +2979,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3106,8 +2991,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3147,8 +3031,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3160,8 +3043,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3201,8 +3083,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3214,8 +3095,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3255,8 +3135,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3268,8 +3147,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3309,8 +3187,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3322,8 +3199,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3363,8 +3239,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3376,8 +3251,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3417,8 +3291,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3430,8 +3303,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3471,8 +3343,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3484,8 +3355,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3525,8 +3395,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3538,8 +3407,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3579,8 +3447,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3592,8 +3459,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3633,8 +3499,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3646,8 +3511,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3687,8 +3551,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3700,8 +3563,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3741,8 +3603,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3754,8 +3615,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3795,8 +3655,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3808,8 +3667,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3849,8 +3707,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3862,8 +3719,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3903,8 +3759,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3916,8 +3771,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -3957,8 +3811,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -3970,8 +3823,8 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
+		<!-- @ui5ignore delete -->
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -4012,8 +3865,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -4025,8 +3877,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -4066,8 +3917,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			design="Standard"
 			displayOnly="false"
@@ -4079,8 +3929,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			alternateRowColors="false"
 			backgroundDesign="Translucent"
@@ -4113,7 +3962,7 @@
 			</columns>
 		</Table>
 		<Text
-			id="idTestText"
+			id="idEmptyStringText"
 			renderWhitespace="false"
 			text="empty string"
 			textAlign="Begin"
@@ -4121,8 +3970,7 @@
 			width=""
 			wrapping="true"
 			wrappingType="Normal"
-		>
-		</Text>
+		/>
 		<Label
 			id="idTestLabel"
 			design="Standard"
@@ -4135,8 +3983,7 @@
 			width="empty string"
 			wrapping="false"
 			wrappingType="Normal"
-		>
-		</Label>
+		/>
 		<Table
 			id="idTestTable"
 			alternateRowColors="false"

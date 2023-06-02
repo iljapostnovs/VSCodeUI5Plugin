@@ -48,7 +48,7 @@ sap.ui.define([
 
 		},
 
-		onpaste: function() {
+		onTablePaste: function() {
 
 		},
 

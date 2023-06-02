@@ -8,217 +8,7 @@ Any support is highly appreciated!<br/>
 
 ---
 
-# v1.0.0 update
-
-## UI5 Parser
-
-Main changes happened in whole parsing architecture. It was previously "one parser instance for everything", now there can be many. As a result, it is possible to have different project types in one folder/workspace, and every project might have its own configuration. For example, it is possible now to have such funny things as JS app with TS library.
-
-### Removed preference entries
-
-All UI5 Parser related preference entries were removed from VSCode, now they should be defined in `package.json`. See [Config default values](https://github.com/iljapostnovs/ui5plugin-parser/blob/master/README.md#config-default-values) for reference.
-
-> **Hint!** Path to global `<any_name>.json` can be defined using `ui5.plugin.globalConfigurationPath` preference entry.
-
-### Parser instantiation logic
-
-Let's introduce two terms which will be used here:
-
--   **CWD** - current working directory, or the root folder of the project which is opened in the VSCode.
--   **Workspace** - UI5 workspace, or the folder which has `manifest.json` in it.
-
-```
---- CWD ---
-├── webapp
---- Workspace 1 ---
-│   ├── Component.js
-│   └── manifest.json
-├── library
---- Workspace 2 ---
-│   ├── library.js
-│   └── manifest.json
-└── package.json
-```
-
-The basic way for instantiating the parser looks as follows:
-
--   Read `package.json` in `CWD` and use it as a configuration source
--   Read all `Workspaces` and create UI5 Parser instance for it, using `package.json` as configuration source from previous step
--   If `CWD` has `tsconfig.json` and any `.ts` files, it is considered to be TS project. Otherwise it's JS project.
-
-> **Important!** Take in mind that nested projects are not supported anymore, which means that there can be no folders with such structure:
-
-```
-├── webapp
-│   ├── library
-│   │   ├── library.js
-│   │   └── manifest.json
-│   ├── Component.js
-│   └── manifest.json
-```
-
-> The structure which will work as expected:
-
-```
-├── library
-│   ├── library.js
-│   └── manifest.json
-├── webapp
-│   ├── Component.js
-│   └── manifest.json
-```
-
-### Additional Workspaces
-
-If there is a e.g. library outside of the `CWD`, checkout `additionalWorkspaces` config for `ui5parser`.
-Example:
-
-```
-├── MyApp (CWD)
-│   │   ├── webapp
-│   │   │   ├── manifest.json
-│   │   │   └── Component.js
-│   └── package.json
-├── MyLibrary (Outside of CWD)
-│   │   ├── src
-│   │   │   ├── manifest.json
-│   │   │   └── library.js
-│   └── package.json
-└── tsconfig.json
-```
-
-To make this work, corresponding entry in `package.json` should be added
-
-```json
-"ui5": {
-   "ui5parser": {
-      "additionalWorkspaces" : ["../MyLibrary"]
-   }
-}
-```
-
-### Proxy Workspaces
-
-There are cases when project is mixed, meaning that one folder may contain many different projects inside, non-ui5 as well. Most frequent case would be CAP project with both backend and frontend in one folder.
-
-Example:
-
-```
-├── frontend
-│   ├── webapp
-│   │   └── manifest.json
-│   ├── package.json (<- this file will be used as configuration source after proxyWorkspaces is configured)
-│   └── tsconfig.json
-├── backend
-│   ├── Whatever.js
-│   └── package.json
-├── package.json (<- proxyWorkspaces should be configured here)
-└── tsconfig.json
-```
-
-To make the parser work only for `frontend` folder, corresponding entry in `package.json` should be added
-
-```json
-"ui5": {
-   "ui5parser": {
-      "proxyWorkspaces" : ["./frontend"]
-   }
-}
-```
-
-What happens is that `CWD` is replaced with the new path from `proxyWorkspaces`, so at instantiation stage `package.json` and `tsconfig.json` from `frontend` folder will be used instead of root folder.
-
-### Other changes
-
--   If `ui5parser` related entries were changed in the `package.json`, VSCode should be reloaded manually
--   Check out [Changelog](CHANGELOG.md) for the rest of the changes.
-
----
-
-# v0.15.0 update
-
-## Typescript support introduced!
-
 [Check the blog to get some ideas for developing with TS!](https://blogs.sap.com/2022/10/28/visual-studio-code-sapui5-extension-now-supports-typescript)
-
-Most of the functionality works now in typescript as well.
-Things to know:
-
-1. `tsconfig.json` should be located in the root folder of workspace
-2. If any `.ts` files are found and `tsconfig.json` is found, project is considered to be TS project
-3. `src-gen` folder is automatically excluded by extension if it's TS project. If build folder has different name, it should be added to folder exclusions in VSCode extension preferences.
-4. Folder with builded resources should be added to exclusions of `ui5parser`. Check `excludeFolderPatterns` in package.json.
-5. Not all linters work for TS, because TS has a lot out of the box features. E.g. Wrong field/method linter works only for JS, because TS has it's own syntax analysis for that.
-6. `ts-morph` is used as TS parser and it has some drawbacks. When using typechecker to get type e.g. of the field or return type of the method, `ts-morph` might hang up for about ~10s, which is not great. However, types are crucial for Reference CodeLens/Linters, specifically for fields in order to be able to distinguish them in views/fragments. As a workaround for performance issues, typechecker is not used to get field types. Because of that only simple structure is allowed.
-
-Examples which should work as expected:
-
-```typescript
-export default class Random {
-  formatterInstance = new Formatter(),
-  formatterObject = Formatter
-}
-```
-
-At the same time type detection will work if the type is specifically written, e.g.
-
-```typescript
-formatter: Formatter = ...
-```
-
-6. Disabling TS standard reference code lens should be considered. This extension contains its own reference code lens, which includes references to views and fragments.
-
-# Feature support
-
-| Feature                                                | JS  | TS  | Comment                                  |
-| :----------------------------------------------------- | :-: | :-: | :--------------------------------------- |
-| Insert new method from XML for event handlers          | ✅  | ✅  |                                          |
-| Insert new method from JS                              | ✅  | ❌  | TS has this out of the box               |
-| i18n CodeLens                                          | ✅  | ✅  |                                          |
-| Reference CodeLens                                     | ✅  | ✅  |                                          |
-| Override CodeLens                                      | ✅  | ✅  |                                          |
-| Event Handler CodeLens                                 | ✅  | ✅  |                                          |
-| XML Completion Items                                   | ✅  | ✅  |                                          |
-| JS Completion Items                                    | ✅  | ❌  | TS has this out of the box               |
-| Ctrl+clickable control ids in js/ts                    | ✅  | ✅  |                                          |
-| Ctrl+clickable fragment/view names                     | ✅  | ✅  |                                          |
-| Ctrl+clickable event handlers in XML                   | ✅  | ✅  |                                          |
-| sap.ui.define import                                   | ✅  | ❌  | TS has this out of the box               |
-| JS Definition Provider                                 | ✅  | ❌  | TS has this out of the box               |
-| Insert method/field from JS                            | ✅  | ❌  | TS has this out of the box               |
-| Insert method from XML                                 | ✅  | ✅  |                                          |
-| Automatic file template inserting                      | ✅  | ✅  |                                          |
-| Hover information in JS                                | ✅  | ❌  | TS has this out of the box               |
-| Hover information in XML                               | ✅  | ✅  |                                          |
-| Signature Help                                         | ✅  | ❌  | TS has this out of the box               |
-| UI5 Explorer                                           | ✅  | ✅  |                                          |
-| XML Formatter                                          | ✅  | ✅  |                                          |
-| Rename provider                                        | ✅  | ✅  | TS still needs to rename handlers in XML |
-| Generate typedef JSDoc command                         | ✅  | ✅  |                                          |
-| Export text to i18n command                            | ✅  | ✅  |                                          |
-| Generate typedef JSDoc command                         | ✅  | ✅  |                                          |
-| Controller/View/Model switch command                   | ✅  | ✅  |                                          |
-| TS Interface generation for id-> class mapping command | ✅  | ✅  |                                          |
-| TS Interface generation for OData entities command     | ✅  | ✅  |                                          |
-| UML Class diagram generation command                   | ✅  | ✅  |                                          |
-| Insert custom class name command                       | ✅  | ✅  |                                          |
-| Regenerate sap.ui.define variables command             | ✅  | ❌  | Not needed for TS                        |
-| WrongParametersLinter                                  | ✅  | ❌  | TS has this out of the box               |
-| WrongOverrideLinter                                    | ✅  | ❌  | TS has this out of the box               |
-| WrongImportLinter                                      | ✅  | ❌  | TS has this out of the box               |
-| WrongFilePathLinter                                    | ✅  | ✅  |                                          |
-| WrongFieldMethodLinter                                 | ✅  | ❌  | TS has this out of the box               |
-| WrongClassNameLinter                                   | ✅  | ✅  |                                          |
-| UnusedTranslationsLinter                               | ✅  | ✅  |                                          |
-| UnusedNamespaceLinter                                  | ✅  | ✅  |                                          |
-| UnusedMemberLinter                                     | ✅  | ✅  |                                          |
-| WrongNamespaceLinter                                   | ❌  | ✅  | Necessary namespace for UI5 babel        |
-| TagLinter                                              | ✅  | ✅  |                                          |
-| TagAttributeLinter                                     | ✅  | ✅  |                                          |
-| PublicMemberLinter                                     | ✅  | ✅  |                                          |
-| InterfaceLinter                                        | ✅  | ❌  | TS has this out of the box               |
-| AbstractClassLinter                                    | ✅  | ❌  | TS has this out of the box               |
-| UnusedClassLinter                                      | ✅  | ✅  |                                          |
 
 ---
 
@@ -231,9 +21,93 @@ Before you start working with the plugin, it will be useful to set formatOnSave 
 ```
 
 As well it's recommended to install e.g. Prettier extension for JS/TS files formatting.
-The reason for it is described in [Known limitations](#known-limitations)
+The reason for it is described in [Known issues](#known-issues)
 
-Make sure that you have `excludeFolderPattern` property set correctly for `ui5parser`. This property is critical if you have SAPUI5 libraries in your workspace.
+Make sure that you have `excludeFolderPattern` property set correctly for `ui5parser`. This property is critical if you have SAPUI5 libraries or any other sources which should not be parsed in your workspace.
+
+---
+
+# v1.7.0 update
+
+Got new XML errors with ids and event handlers? Check out [UI5 Linter Readme](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#id-and-event-handler-patterns-in-views-and-fragments).
+
+# Summary
+
+-   [Configuration](#configuration)
+-   [Completion Items](#completion-items)
+-   [Manifest.json schema](#manifestjson)
+-   [Method Definitions](#method-definitions)
+-   [XML Event Handler Definitions](#xml-event-handler-definitions)
+-   [CodeLens](#codelens)
+-   [XML Diagnostics](#xml-diagnostics)
+-   [JS/TS Diagnostics](#jsts-diagnostics)
+-   [Properties (i18n) Diagnostics](#properties-i18n-diagnostics)
+-   [Code Action Provider](#code-action-provider)
+-   [JS and XML Hover Provider](#js-and-xml-hover-provider)
+-   [XML Formatter](#xml-formatter)
+-   [JS/TS Rename Provider](#jsts-rename-provider)
+-   [Commands](#commands)
+    -   [Move sap.ui.define to parameters](#move-sapuidefine-to-parameters)
+    -   [Export to i18n](#export-to-i18n)
+    -   [Switch View/Controller](#switch-viewcontroller)
+    -   [Insert Custom Class name](#insert-custom-class-name)
+    -   [Clear Cache](#clear-cache)
+    -   [UML Class Diagram generation](#uml-class-diagram-generation)
+    -   [JSDoc typedef generation from metadata](#jsdoc-typedef-generation-from-metadata)
+    -   [(TS) Generate interfaces for XML files (id to class mapping)](#ts-generate-interfaces-for-xml-files-id-to-class-mapping)
+    -   [(TS) Generate interfaces for OData entities](#ts-generate-interfaces-for-odata-entities)
+    -   [(TS) Generate interfaces for OData entities (Mass)](#ts-generate-interfaces-for-odata-entities-mass)
+-   [Automatic template insertion](#automatic-template-insertion)
+-   [Automatic class name and class path renaming](#automatic-class-name-and-class-path-renaming)
+-   [UI5 Explorer](#ui5-explorer)
+-   [Hotkeys](#hotkeys)
+-   [Proxy](#proxy)
+-   [Known issues](#known-issues)
+-   [Things to consider using TS](#things-to-consider-using-ts)
+-   [Parser instantiation logic](https://github.com/iljapostnovs/ui5plugin-parser/blob/master/README.md#parser-instantiation-logic)
+    -   [Additional Workspaces](https://github.com/iljapostnovs/ui5plugin-parser/blob/master/README.md#additional-workspaces)
+    -   [Proxy Workspaces](https://github.com/iljapostnovs/ui5plugin-parser/blob/master/README.md#proxy-workspaces)
+
+---
+
+## Configuration
+
+VSCode extension is using [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) and [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) packages, because of that configuration is splitted into three parts:
+
+1. [UI5 Parser configuration](https://github.com/iljapostnovs/ui5plugin-parser/blob/master/README.md#config-default-values). Contains parser related configuration, e.g. UI5 Version, URL for standard library metadata preload, exclude folder patterns etc. Configuration can be done in `package.json`.
+2. [UI5 Linter configuration](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#configuration-example). Contains linting related configuration, e.g. linter exceptions, severity, usage etc. Configuration can be done in `package.json`.
+3. VSCode preference entries. Contains VSCode specific configuration.
+
+| VSCode Preference                                       | Description                                                                                                                                                                                                                |
+| :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ui5.plugin.jsCodeLens                                   | Should javascript CodeLens be enabled                                                                                                                                                                                      |
+| ui5.plugin.jsReferenceCodeLens                          | Should javascript Reference CodeLens be enabled                                                                                                                                                                            |
+| ui5.plugin.xmlCodeLens                                  | Should xml CodeLens be enabled                                                                                                                                                                                             |
+| ui5.plugin.propertiesCodeLens                           | Should properties CodeLens be enabled                                                                                                                                                                                      |
+| ui5.plugin.signatureHelp                                | Should UI5 Signature Help be enabled                                                                                                                                                                                       |
+| ui5.plugin.moveDefineToFunctionParametersOnAutocomplete | Should sap.ui.define class names be moved to function parameters on sap.ui.define autocomplition                                                                                                                           |
+| ui5.plugin.codeGeneratorStrategy                        | Strategy which should be used for code generation. E.g. you will get 'var' with ES5 strategy and 'let' with ES6 strategy when using override completion items.                                                             |
+| ui5.plugin.UMLDiagramGenerationStrategy                 | Which format should be used for UML diagram generation                                                                                                                                                                     |
+| ui5.plugin.addI18nTextLengthLimitation                  | Should text length be added to i18n text id (e.g. #YMSG,14)                                                                                                                                                                |
+| ui5.plugin.textTransformationStrategy                   | Case type which should be used for i18n text id proposal                                                                                                                                                                   |
+| ui5.plugin.askUserToConfirmI18nId                       | Should user confirm proposed i18n id                                                                                                                                                                                       |
+| ui5.plugin.addInheritedPropertiesAndAggregations        | Should inherited properties/aggregations be added in XML completion items                                                                                                                                                  |
+| ui5.plugin.addTagAttributes                             | Should tag attributes be added in XML completion items                                                                                                                                                                     |
+| ui5.plugin.addTagAggregations                           | Should tag aggregations be added in XML completion items                                                                                                                                                                   |
+| ui5.plugin.tsEventModule                                | Event module for Typescript, which will be used when creating event handler from XML                                                                                                                                       |
+| ui5.plugin.tsEventType                                  | Event type for Typescript, which will be used when creating event handler from XML. (e.g. type of oEvent: 'Event').                                                                                                        |
+| ui5.plugin.insertManagedObjectModule                    | Module which will be used for automatic insertion on custom class creation                                                                                                                                                 |
+| ui5.plugin.insertControllerModule                       | Module which will be used for automatic insertion on custom controller creation                                                                                                                                            |
+| ui5.plugin.xmlFormatterTagEndingNewline                 | Should XML Formatter put tag ending (">", "/>") in newline                                                                                                                                                                 |
+| ui5.plugin.umlGenerationPath                            | Path for file generated by `UI5: Generate UML Class diagram for whole project` command. Relative to project folder. Example: `../diagram/ClassDiagram.pu`                                                                  |
+| ui5.plugin.XMLFileInterfacePath                         | Path for file generated by `UI5: (TS) Generate types for XML files (id to class mapping)` command. Relative to project folder. Example: `./types/ViewFragmentIds.d.ts`                                                     |
+| ui5.plugin.generateXMLFileInterfacesOnSave              | Should `UI5: (TS) Generate types for XML files (id to class mapping)` command be executed on XML file save or not. Works only if `ui5.plugin.XMLFileInterfacePath` is set. Works only for TS projects.                     |
+| ui5.plugin.TSODataInterfacesPath                        | Path for file generated by `UI5: (TS) Generate interfaces for OData entities` command. Relative to project folder. Example: `./types/ODataTypes.d.ts`                                                                      |
+| ui5.plugin.TSODataInterfacesFetchingData                | URL, username and password for `UI5: (TS) Generate interfaces for OData entities` command.                                                                                                                                 |
+| ui5.plugin.massTSODataInterfacesFetchingData            | Array of URL, username and password for `UI5: (TS) Generate interfaces for OData entities` command (Mass).                                                                                                                 |
+| ui5.plugin.ERDiagramPath                                | Path for file generated by `UI5: Generate ER diagram from metadata.xml` command. Relative to project folder. Example: `../diagram/ERDiagram.pu`                                                                            |
+| ui5.plugin.JSTypeDefDocPath                             | Path for file generated by `UI5: Generate JS typedef JSDoc from metadata` command. Relative to project folder. Example: `./model/ModelTypedef.js`                                                                          |
+| ui5.plugin.globalConfigurationPath                      | Absolute path to global `any_file.json` configuration file, which is used by `UI5 Parser` and `UI5 Linter`. Priority of ui5 config determination: local `package.json` -> global `any_file.json` -> default value. Example: `C:\\Users\\MyUser\\Documents\\ui5config.json` |
 
 ---
 
@@ -296,7 +170,7 @@ Definitions for event handlers are provided.<br/>
 
 ## CodeLens
 
-CodeLens for Internalization Texts, overriden methods, event handlers and references is provided
+CodeLens for Internalization Texts (translations), overriden methods, event handlers and member references is provided
 ![DynamicCompletionItems](/images/XMLResourceModel.gif)
 
 > Related preference entries:<br/> _ui5.plugin.jsCodeLens_<br/> _ui5.plugin.jsReferenceCodeLens_<br/> _ui5.plugin.xmlCodeLens_<br/> _ui5.plugin.propertiesCodeLens_<br/>
@@ -307,7 +181,8 @@ CodeLens for Internalization Texts, overriden methods, event handlers and refere
 
 See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<br/>
 
-> To make XML Linter ignore attribute errors of next tag, you can use `<-- @ui5ignore -->` comment right above the tag<br/>
+> To make XML Linter ignore tag and attribute errors of next tag, you can use `<-- @ui5ignore -->` comment right above the tag<br/>
+> To make XML Linter ignore specific attribute errors of next tag, you can use `<-- @ui5ignore myAttribute1, myAttribute2 -->` comment right above the tag<br/>
 
 ![DynamicCompletionItems](/images/XMLDiagnostics.gif)
 
@@ -317,7 +192,7 @@ See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<b
 
 See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<br/>
 
-> To make Unused method, public member, wrong parameter usage and wrong field/method linters ignore some methods or fields, you can use @ui5ignore JSDoc param<br/> ![UI5IgnoreExample](/images/UI5IgnoreExample.png)
+> To make Unused method, public member, wrong parameter usage and wrong field/method linters ignore some methods or fields, you can use @ui5ignore JSDoc param, or add exceptions in `package.json`<br/> ![UI5IgnoreExample](/images/UI5IgnoreExample.png)
 
 ![DynamicCompletionItems](/images/JSDiagnostics.gif)
 
@@ -326,6 +201,8 @@ See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<b
 ## Properties (i18n) Diagnostics
 
 See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<br/>
+
+> To make Properties Linter ignore translation errors, you can use `# @ui5ignore` comment right above the translation<br/>
 
 ---
 
@@ -370,6 +247,8 @@ The provider renames all references to the class for `JS` projects, and all refe
 
 ## Commands
 
+---
+
 ### Move sap.ui.define to parameters
 
 > Hotkey: F5<br/>
@@ -377,6 +256,8 @@ The provider renames all references to the class for `JS` projects, and all refe
 > Related preference entries: _ui5.plugin.moveDefineToFunctionParametersOnAutocomplete_<br/>
 
 ![UIDefine](/images/UIDefine.gif)
+
+---
 
 ### Export to i18n
 
@@ -391,6 +272,8 @@ Set your position to the string you want to export to i18n.properties file and e
 > Hotkey: F4<br/>
 
 ![ExportToI18n](/images/ExportToI18n.gif)
+
+---
 
 ### Switch View/Controller
 
@@ -410,6 +293,8 @@ If somebody uses `MVC`, the command actually switches between `Model` (Default m
 
 ![SwitchViewController](/images/SwitchViewController.gif)
 
+---
+
 ### Insert Custom Class name
 
 Inserts the class name into current position<br/>
@@ -418,24 +303,31 @@ Inserts the class name into current position<br/>
 
 ![InsertCustomClassNameCommand](/images/InsertCustomClassNameCommand.gif)
 
+---
+
 ### Clear Cache
 
 Clears cache with SAPUI5 lib metadata
 
+---
+
 ### UML Class Diagram generation
 
 UML Class diagram generates for the project of the currently opened file.<br/>
+
+> Command name: `UI5: Generate UML Class diagram for whole project`
+
 Also it is possible to generate ER diagram for opened metadata.xml file.<br/>
 
 > There are two ways to generate ER diagram:<br/>
 >
-> -   Open metadata.xml file, execute command "UI5: Generate ER diagram from metadata.xml"<br/>
-> -   Execute command "UI5: Generate ER diagram from metadata.xml" and enter url to metadata.xml<br/>
+> -   Open metadata.xml file, execute command `UI5: Generate ER diagram from metadata.xml`<br/>
+> -   Execute command `UI5: Generate ER diagram from metadata.xml` and enter url to metadata.xml<br/>
 
 It is possible to select in preferences which type of diagram to generate: DrawIO or PlantUML.<br/>
 However, DrawIO is not supported anymore.<br/>
 
-> Recommended VSCode extensions:<br/>
+> **Recommended VSCode extensions**:<br/>
 > DrawIO: _hediet.vscode-drawio-insiders-build_<br/>
 > PlantUML: _jebbs.plantuml_<br/>
 
@@ -450,6 +342,8 @@ However, DrawIO is not supported anymore.<br/>
 ### JSDoc typedef generation from metadata
 
 There is a possibility to generate typedef JSDocs from metadata
+
+> Command name: `UI5: Generate JS typedef JSDoc from metadata`
 
 > Works only with V2 OData Service <br/>
 
@@ -541,9 +435,13 @@ Custom UI5 Explorer in VSCode panel is available<br/>
 -   Name of the UI5Class is written accordingly to file path. (E.g. "/src/control/Text.js" => "anycomponentname.control.Text")
 -   You have an access to https://ui5.sap.com for standard lib metadata preload
 
+---
+
 ### Proxy
 
 If HTTP_PROXY or HTTPS_PROXY environment variables are set, https://ui5.sap.com will be requested using the proxy.
+
+---
 
 # Known issues
 
@@ -576,8 +474,41 @@ Standard VSCode JS Formatter is not handling all formatting issues. `hookyqr.bea
 }
 ```
 
+---
+
 ## ui5.sap.com damaged JSON response
 
 For some reason `ui5.sap.com` sometimes might return damaged JSON when requesting standard library metadata. As a result, it is possible to get such error as:<br/>
 ![UIFiveError](/images/UIFiveError.png)<br/>
 To solve it, please run `UI5: Clear cache` command and reload VSCode.
+
+---
+
+## Things to consider using TS
+
+1. If any `.ts` files are found and `tsconfig.json` is found, project is considered to be TS project
+2. `src-gen` folder is automatically excluded by extension if it's TS project. If build folder has different name, it should be added to folder exclusions in [UI5 Parser configuration](#configuration).
+3. Folder with builded resources should be added to exclusions of `ui5parser`. Check `excludeFolderPatterns` in package.json.
+4. Not all linters work for TS, because TS has a lot out of the box features. E.g. Wrong field/method linter works only for JS, because TS has it's own syntax analysis for that.
+5. `ts-morph` is used as TS parser and it has some drawbacks. When using typechecker to get type e.g. of the field or return type of the method, `ts-morph` might hang up for about ~10s, which is not great. However, types are crucial for Reference CodeLens/Linters, specifically for fields in order to be able to distinguish them in views/fragments. As a workaround for performance issues, typechecker is not used to get field types. Because of that only simple structure is allowed.
+
+Examples which should work as expected:
+
+```typescript
+export default class Random {
+  formatterInstance = new Formatter(),
+  formatterObject = Formatter
+}
+```
+
+At the same time type detection will work if the type is specifically written, e.g.
+
+```typescript
+formatter: Formatter = ...
+```
+
+6. Disabling TS standard reference code lens should be considered. This extension contains its own reference code lens, which includes references to views and fragments.
+
+---
+
+> Info! If `ui5parser` related entries were changed in the `package.json`, VSCode should be reloaded manually

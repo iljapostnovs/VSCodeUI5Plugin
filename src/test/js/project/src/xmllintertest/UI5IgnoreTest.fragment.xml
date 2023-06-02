@@ -11,6 +11,7 @@
 			<Text validationError="wrongEventHandler"/>
 		</customData>
 	</Button>
+	<!-- @ui5ignore press -->
 	<Button
 		id="idButton2"
 		press="notWrongEventHandler"

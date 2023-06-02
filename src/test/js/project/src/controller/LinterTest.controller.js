@@ -18,7 +18,7 @@ sap.ui.define([
 	return Controller.extend("com.test.controller.LinterTest", {
 		formatter: Formatter,
 
-		_onDelete: function(oEvent) {
+		onTableDelete: function(oEvent) {
 
 		},
 
@@ -144,10 +144,12 @@ sap.ui.define([
 			}));
 		},
 
-		onPaste: function() {},
+		onTablePaste: function() {},
 
-		_onItemPress: function() {
+		onTableItemPress: function() {
 
-		}
+		},
+
+		onTablePopinChanged() {}
 	});
 });

@@ -6,7 +6,18 @@ export class TSXMLInterfaceGenerator extends ParserBearer implements ITSInterfac
 	async generate() {
 		const fileReader = this._parser.fileReader;
 
-		const aXMLFiles: IXMLFile[] = fileReader.getAllFragments().concat(fileReader.getAllViews());
+		const aXMLFiles: IXMLFile[] = fileReader
+			.getAllFragments()
+			.concat(fileReader.getAllViews())
+			.sort((xmlFile1, xmlFile2) => {
+				if (xmlFile1.fsPath < xmlFile2.fsPath) {
+					return -1;
+				} else if (xmlFile1.fsPath > xmlFile2.fsPath) {
+					return 1;
+				} else {
+					return 0;
+				}
+			});
 		const mInterfaceData = aXMLFiles.map(XMLFile => this._generateInterfaceDataForFile(XMLFile));
 		const aUniqueImports = [...new Set(mInterfaceData.flatMap(theInterface => theInterface.imports))].map(
 			toImport => {

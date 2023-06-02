@@ -830,9 +830,11 @@
 		{
 			"className": "com.test.statictest.StaticClass",
 			"timeLimit": 100,
-			"errors": [{
-				"text": "No references found for \"com.test.statictest.StaticClass\" class"
-			}]
+			"errors": [
+				{
+					"text": "No references found for \"com.test.statictest.StaticClass\" class"
+				}
+			]
 		},
 		{
 			"className": "com.test.controller.LargeFile",
@@ -7933,6 +7935,12 @@
 			"timeLimit": 100,
 			"errors": [
 				{
+					"text": "\"idButtonMasterView\" should match pattern: \"/^id.*?Button$/\""
+				},
+				{
+					"text": "\"eventHandler1\" should match pattern: \"/^onButton.*?Press$/\""
+				},
+				{
 					"text": "Event handler \"eventHandler11\" not found in \"com.test.fragmenttest.controller.Master\"."
 				}
 			]
@@ -7940,7 +7948,11 @@
 		{
 			"className": "com.test.xmlrequiretest.XMLRequire",
 			"timeLimit": 100,
-			"errors": []
+			"errors": [
+				{
+					"text": "\"method1\" should match pattern: \"/^onFlexibleColumnLayout.*?StateChange$/\""
+				}
+			]
 		}
 	],
 	"FragmentLinter": [
@@ -7950,12 +7962,21 @@
 			"errors": [
 				{
 					"text": "Event handler \"wrongEventHandler\" not found in \"com.test.xmllintertest.UI5IgnoreTest\"."
+				},
+				{
+					"text": "\"idButton2\" should match pattern: \"/^id.*?Button$/\""
 				}
 			]
 		},
 		{
 			"className": "com.test.view.fragments.LinterTest",
 			"errors": [
+				{
+					"text": "\"idButtonFromFragment\" should match pattern: \"/^id.*?Button$/\""
+				},
+				{
+					"text": "\"onFragmentButtonPress\" should match pattern: \"/^onButton.*?Press$/\""
+				},
 				{
 					"text": "Event handler \"onWrongEventHandler\" not found in \"com.test.controller.LinterTest\"."
 				},
@@ -7974,6 +7995,12 @@
 			"className": "com.test.view.fragments.SecondFragment",
 			"errors": [
 				{
+					"text": "\"idListFromSecondFragment\" should match pattern: \"/^id.*?List$/\""
+				},
+				{
+					"text": "\"onSecondFragmentSelectionChange\" should match pattern: \"/^onList.*?SelectionChange$/\""
+				},
+				{
 					"text": "Event handler \"onNonExistentDelete\" not found in \"com.test.controller.LinterTest\"."
 				},
 				{
@@ -7984,6 +8011,12 @@
 		{
 			"className": "com.test.view.fragments.ThirdFragment",
 			"errors": [
+				{
+					"text": "\"idListFromThirdFragment\" should match pattern: \"/^id.*?List$/\""
+				},
+				{
+					"text": "\"onThirdFragmentSelectionChange\" should match pattern: \"/^onList.*?SelectionChange$/\""
+				},
 				{
 					"text": "Event handler \"onNonExistentDelete\" not found in \"com.test.controller.LinterTest\"."
 				},
@@ -8000,7 +8033,7 @@
 				"_onRouteMatched",
 				"_onRouteMatched2",
 				"_onRouteMatched3",
-				"_onDelete",
+				"onTableDelete",
 				"onFragmentButtonPress",
 				"onSecondFragmentSelectionChange",
 				"onThirdFragmentSelectionChange"

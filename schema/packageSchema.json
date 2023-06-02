@@ -347,6 +347,24 @@
 								"type": "string"
 							},
 							"description": "List of component ids to be excluded from the linting. Makes sense if there are multiple projects needed for linting (e.g. app1, app2, library), but only app1 and app2 needs to be linter, so library can be excluded"
+						},
+						"idNamingPattern": {
+							"type": "array",
+							"description": "Dynamic RegExp pattern for naming ids in views and fragments. Default value: '^id{BindingPath}.*{ControlName}$'. Variables: 'BindingPath', 'bindingPath', 'ControlName', 'controlName'. Leave empty to skip this check."
+						},
+						"eventNamingPattern": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "Dynamic RegExp pattern for naming event handlers in views and fragments. Default value: '^on{BindingPath}{ControlName}.*?{EventName}$'. Variables: 'BindingPath', 'bindingPath', 'ControlName', 'controlName', 'EventName', 'eventName'. Leave empty to skip this check."
+						},
+						"attributesToCheck": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "List of attributes to guess the 'BindingPath' variable value from. Used for 'idNamingPattern' and 'eventNamingPattern'. Default value: '[\"content\", \"items\", \"value\", \"text\", \"number\"]'"
 						}
 					}
 				}
