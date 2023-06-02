@@ -3,6 +3,7 @@
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.4.6
 -   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.6.2
 -   XML attribute linter enhanced with `id` and `event handler` naming style check
+-   `ui5ignore-patterns` in XML files added for ignoring naming style errors
 -   `ui5ignore` in XML files now supports specific attribute ignoring
 
 ## 1.6.1 (25-05-2023)
