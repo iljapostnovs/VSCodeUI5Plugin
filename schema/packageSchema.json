@@ -349,14 +349,13 @@
 							"description": "List of component ids to be excluded from the linting. Makes sense if there are multiple projects needed for linting (e.g. app1, app2, library), but only app1 and app2 needs to be linter, so library can be excluded"
 						},
 						"idNamingPattern": {
-							"type": "array",
+							"type": "string",
+							"default": "^id{MeaningAssumption}.*?{ControlName}$",
 							"description": "Dynamic RegExp pattern for naming ids in views and fragments. Default value: '^id{MeaningAssumption}.*{ControlName}$'. Variables: 'MeaningAssumption', 'meaningAssumption', 'ControlName', 'controlName'. Leave empty to skip this check."
 						},
 						"eventNamingPattern": {
-							"type": "array",
-							"items": {
-								"type": "string"
-							},
+							"type": "string",
+							"default": "^on{MeaningAssumption}{ControlName}.*?{EventName}$",
 							"description": "Dynamic RegExp pattern for naming event handlers in views and fragments. Default value: '^on{MeaningAssumption}{ControlName}.*?{EventName}$'. Variables: 'MeaningAssumption', 'meaningAssumption', 'ControlName', 'controlName', 'EventName', 'eventName'. Leave empty to skip this check."
 						},
 						"attributesToCheck": {
