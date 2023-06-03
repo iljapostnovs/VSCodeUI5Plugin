@@ -1,3 +1,7 @@
+## 1.7.1 (02-06-2023)
+
+-   Fix package JSON schema
+
 ## 1.7.0 (02-06-2023)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.4.6
