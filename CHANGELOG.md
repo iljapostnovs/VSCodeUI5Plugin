@@ -1,3 +1,8 @@
+## 1.7.2 (06-06-2023)
+
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.6.4
+-   Bugfix for empty id pattern
+
 ## 1.7.1 (02-06-2023)
 
 -   Fix package JSON schema
