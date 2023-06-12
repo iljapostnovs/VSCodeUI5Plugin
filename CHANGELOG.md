@@ -1,3 +1,9 @@
+## 1.8.0 (12-06-2023)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.5.0
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.7.0
+-   Add `rc` file support
+
 ## 1.7.2 (06-06-2023)
 
 -   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.6.4
