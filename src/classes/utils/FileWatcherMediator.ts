@@ -12,6 +12,7 @@ import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/factory/TemplateGeneratorFactory";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
 import { VSCodeFileReader } from "./VSCodeFileReader";
+import path = require("path");
 
 const workspace = vscode.workspace;
 
@@ -27,8 +28,17 @@ export class FileWatcherMediator {
 			document = await vscode.workspace.openTextDocument(uri);
 		}
 
-		if (document.fileName.endsWith("package.json")) {
-			const nativePath = toNative(document.fileName);
+		const configFiles = [
+			".ui5pluginrc",
+			".ui5pluginrc.json",
+			".ui5pluginrc.yaml",
+			".ui5pluginrc.yml",
+			".ui5pluginrc.js",
+			"package.json"
+		];
+		if (configFiles.some(file => document?.fileName.endsWith(file))) {
+			const dirName = path.dirname(document.fileName);
+			const nativePath = toNative(dirName + "/package.json");
 			delete PackageLinterConfigHandler.packageCache[nativePath];
 			delete PackageParserConfigHandler.packageCache[nativePath];
 			// if (contentChanges) {
