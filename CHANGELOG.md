@@ -1,3 +1,7 @@
+## 1.8.1 (13-06-2023)
+
+-   Migrate `rc` file handler to `cosmiconfig`
+
 ## 1.8.0 (12-06-2023)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.5.1
