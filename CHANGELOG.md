@@ -1,3 +1,7 @@
+## 1.8.2 (14-06-2023)
+
+-   Migrate `rc` file handler back to `rc-config-loader` to webpack compatible version
+
 ## 1.8.1 (13-06-2023)
 
 -   Migrate `rc` file handler to `cosmiconfig`
