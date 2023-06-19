@@ -62,7 +62,7 @@ export class XMLCodeActionProvider extends ParserBearer {
 
 		if (
 			UIClass instanceof CustomTSClass &&
-			!this._getIfNamedImportExists(UIClass.node.getProject(), ownerModule, eventName)
+			!this._getIfNamedImportExists(UIClass.node.getProject(), ownerModule, variables.tsEventParameters)
 		) {
 			variables.tsEventParameters = "object";
 		}
