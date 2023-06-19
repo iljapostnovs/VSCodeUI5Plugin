@@ -84,35 +84,35 @@ VSCode extension is using [UI5 Parser](https://github.com/iljapostnovs/ui5plugin
 2. [UI5 Linter configuration](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#configuration-example). Contains linting related configuration, e.g. linter exceptions, severity, usage etc. Configuration can be done in `package.json` or any of `rc` file types, e.g. `.ui5pluginrc`.
 3. VSCode preference entries. Contains VSCode specific configuration.
 
-| VSCode Preference                                       | Description                                                                                                                                                                                                                |
-| :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ui5.plugin.jsCodeLens                                   | Should javascript CodeLens be enabled                                                                                                                                                                                      |
-| ui5.plugin.jsReferenceCodeLens                          | Should javascript Reference CodeLens be enabled                                                                                                                                                                            |
-| ui5.plugin.xmlCodeLens                                  | Should xml CodeLens be enabled                                                                                                                                                                                             |
-| ui5.plugin.propertiesCodeLens                           | Should properties CodeLens be enabled                                                                                                                                                                                      |
-| ui5.plugin.signatureHelp                                | Should UI5 Signature Help be enabled                                                                                                                                                                                       |
-| ui5.plugin.moveDefineToFunctionParametersOnAutocomplete | Should sap.ui.define class names be moved to function parameters on sap.ui.define autocomplition                                                                                                                           |
-| ui5.plugin.codeGeneratorStrategy                        | Strategy which should be used for code generation. E.g. you will get 'var' with ES5 strategy and 'let' with ES6 strategy when using override completion items.                                                             |
-| ui5.plugin.UMLDiagramGenerationStrategy                 | Which format should be used for UML diagram generation                                                                                                                                                                     |
-| ui5.plugin.addI18nTextLengthLimitation                  | Should text length be added to i18n text id (e.g. #YMSG,14)                                                                                                                                                                |
-| ui5.plugin.textTransformationStrategy                   | Case type which should be used for i18n text id proposal                                                                                                                                                                   |
-| ui5.plugin.askUserToConfirmI18nId                       | Should user confirm proposed i18n id                                                                                                                                                                                       |
-| ui5.plugin.addInheritedPropertiesAndAggregations        | Should inherited properties/aggregations be added in XML completion items                                                                                                                                                  |
-| ui5.plugin.addTagAttributes                             | Should tag attributes be added in XML completion items                                                                                                                                                                     |
-| ui5.plugin.addTagAggregations                           | Should tag aggregations be added in XML completion items                                                                                                                                                                   |
-| ui5.plugin.tsEventModule                                | Event module for Typescript, which will be used when creating event handler from XML                                                                                                                                       |
-| ui5.plugin.tsEventType                                  | Event type for Typescript, which will be used when creating event handler from XML. (e.g. type of oEvent: 'Event').                                                                                                        |
-| ui5.plugin.insertManagedObjectModule                    | Module which will be used for automatic insertion on custom class creation                                                                                                                                                 |
-| ui5.plugin.insertControllerModule                       | Module which will be used for automatic insertion on custom controller creation                                                                                                                                            |
-| ui5.plugin.xmlFormatterTagEndingNewline                 | Should XML Formatter put tag ending (">", "/>") in newline                                                                                                                                                                 |
-| ui5.plugin.umlGenerationPath                            | Path for file generated by `UI5: Generate UML Class diagram for whole project` command. Relative to project folder. Example: `../diagram/ClassDiagram.pu`                                                                  |
-| ui5.plugin.XMLFileInterfacePath                         | Path for file generated by `UI5: (TS) Generate types for XML files (id to class mapping)` command. Relative to project folder. Example: `./types/ViewFragmentIds.d.ts`                                                     |
-| ui5.plugin.generateXMLFileInterfacesOnSave              | Should `UI5: (TS) Generate types for XML files (id to class mapping)` command be executed on XML file save or not. Works only if `ui5.plugin.XMLFileInterfacePath` is set. Works only for TS projects.                     |
-| ui5.plugin.TSODataInterfacesPath                        | Path for file generated by `UI5: (TS) Generate interfaces for OData entities` command. Relative to project folder. Example: `./types/ODataTypes.d.ts`                                                                      |
-| ui5.plugin.TSODataInterfacesFetchingData                | URL, username and password for `UI5: (TS) Generate interfaces for OData entities` command.                                                                                                                                 |
-| ui5.plugin.massTSODataInterfacesFetchingData            | Array of URL, username and password for `UI5: (TS) Generate interfaces for OData entities` command (Mass).                                                                                                                 |
-| ui5.plugin.ERDiagramPath                                | Path for file generated by `UI5: Generate ER diagram from metadata.xml` command. Relative to project folder. Example: `../diagram/ERDiagram.pu`                                                                            |
-| ui5.plugin.JSTypeDefDocPath                             | Path for file generated by `UI5: Generate JS typedef JSDoc from metadata` command. Relative to project folder. Example: `./model/ModelTypedef.js`                                                                          |
+| VSCode Preference                                       | Description                                                                                                                                                                                                                                                                |
+| :------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ui5.plugin.jsCodeLens                                   | Should javascript CodeLens be enabled                                                                                                                                                                                                                                      |
+| ui5.plugin.jsReferenceCodeLens                          | Should javascript Reference CodeLens be enabled                                                                                                                                                                                                                            |
+| ui5.plugin.xmlCodeLens                                  | Should xml CodeLens be enabled                                                                                                                                                                                                                                             |
+| ui5.plugin.propertiesCodeLens                           | Should properties CodeLens be enabled                                                                                                                                                                                                                                      |
+| ui5.plugin.signatureHelp                                | Should UI5 Signature Help be enabled                                                                                                                                                                                                                                       |
+| ui5.plugin.moveDefineToFunctionParametersOnAutocomplete | Should sap.ui.define class names be moved to function parameters on sap.ui.define autocomplition                                                                                                                                                                           |
+| ui5.plugin.codeGeneratorStrategy                        | Strategy which should be used for code generation. E.g. you will get 'var' with ES5 strategy and 'let' with ES6 strategy when using override completion items.                                                                                                             |
+| ui5.plugin.UMLDiagramGenerationStrategy                 | Which format should be used for UML diagram generation                                                                                                                                                                                                                     |
+| ui5.plugin.addI18nTextLengthLimitation                  | Should text length be added to i18n text id (e.g. #YMSG,14)                                                                                                                                                                                                                |
+| ui5.plugin.textTransformationStrategy                   | Case type which should be used for i18n text id proposal                                                                                                                                                                                                                   |
+| ui5.plugin.askUserToConfirmI18nId                       | Should user confirm proposed i18n id                                                                                                                                                                                                                                       |
+| ui5.plugin.addInheritedPropertiesAndAggregations        | Should inherited properties/aggregations be added in XML completion items                                                                                                                                                                                                  |
+| ui5.plugin.addTagAttributes                             | Should tag attributes be added in XML completion items                                                                                                                                                                                                                     |
+| ui5.plugin.addTagAggregations                           | Should tag aggregations be added in XML completion items                                                                                                                                                                                                                   |
+| ui5.plugin.tsEventModule                                | Event module for Typescript, which will be used when creating event handler from XML                                                                                                                                                                                       |
+| ui5.plugin.tsEventType                                  | Event type for Typescript, which will be used when creating event handler from XML. (e.g. type of oEvent: 'Event').                                                                                                                                                        |
+| ui5.plugin.insertManagedObjectModule                    | Module which will be used for automatic insertion on custom class creation                                                                                                                                                                                                 |
+| ui5.plugin.insertControllerModule                       | Module which will be used for automatic insertion on custom controller creation                                                                                                                                                                                            |
+| ui5.plugin.xmlFormatterTagEndingNewline                 | Should XML Formatter put tag ending (">", "/>") in newline                                                                                                                                                                                                                 |
+| ui5.plugin.umlGenerationPath                            | Path for file generated by `UI5: Generate UML Class diagram for whole project` command. Relative to project folder. Example: `../diagram/ClassDiagram.pu`                                                                                                                  |
+| ui5.plugin.XMLFileInterfacePath                         | Path for file generated by `UI5: (TS) Generate types for XML files (id to class mapping)` command. Relative to project folder. Example: `./types/ViewFragmentIds.d.ts`                                                                                                     |
+| ui5.plugin.generateXMLFileInterfacesOnSave              | Should `UI5: (TS) Generate types for XML files (id to class mapping)` command be executed on XML file save or not. Works only if `ui5.plugin.XMLFileInterfacePath` is set. Works only for TS projects.                                                                     |
+| ui5.plugin.TSODataInterfacesPath                        | Path for file generated by `UI5: (TS) Generate interfaces for OData entities` command. Relative to project folder. Example: `./types/ODataTypes.d.ts`                                                                                                                      |
+| ui5.plugin.TSODataInterfacesFetchingData                | URL, username and password for `UI5: (TS) Generate interfaces for OData entities` command.                                                                                                                                                                                 |
+| ui5.plugin.massTSODataInterfacesFetchingData            | Array of URL, username and password for `UI5: (TS) Generate interfaces for OData entities` command (Mass).                                                                                                                                                                 |
+| ui5.plugin.ERDiagramPath                                | Path for file generated by `UI5: Generate ER diagram from metadata.xml` command. Relative to project folder. Example: `../diagram/ERDiagram.pu`                                                                                                                            |
+| ui5.plugin.JSTypeDefDocPath                             | Path for file generated by `UI5: Generate JS typedef JSDoc from metadata` command. Relative to project folder. Example: `./model/ModelTypedef.js`                                                                                                                          |
 | ui5.plugin.globalConfigurationPath                      | Absolute path to global `any_file.json` configuration file, which is used by `UI5 Parser` and `UI5 Linter`. Priority of ui5 config determination: local `package.json` -> global `any_file.json` -> default value. Example: `C:\\Users\\MyUser\\Documents\\ui5config.json` |
 
 ---
@@ -221,6 +221,13 @@ Code Actions for creating event handlers in controllers from xml views are provi
 
 ![CodeActionsProvider](/images/CodeActionsProvider.gif)
 ![CreateMethodCodeActionsProvider](/images/CreateMethodCodeActionsProvider.gif)
+
+> Check out `ui5.plugin.tsEventType` preference entry. Handy if UI5 Version `1.115.0`+ is used, because the preference entry can be changed to `Event<{tsEventParameters}>`, and then the necessary generic for event parameters will be added automatically.
+> Example: `Event<$ListBaseSelectionChangeEventParameters>` will be generated, if `Create method` action will be selected on non existant event handler in XML view `sap.m.List` -> `selectionChange` event
+> ![Image](images/CreateMethodFromView.png)
+> ![Image](images/CreatedMethodFromView.png)
+
+> Related preference entries: <br/>_ui5.plugin.tsEventModule_<br/>_ui5.plugin.tsEventType_<br/>
 
 ---
 
@@ -394,6 +401,8 @@ Works the same as previous command, but can be used for multiple OData models at
 Inserts initial text for `.js`, `.ts` and `.xml` files<br/>
 Extends `"sap/ui/core/mvc/Controller"` if file name ends with `.controller.js`/`.controller.ts` and `"sap/ui/base/ManagedObject"` if file name ends with `.js`/`.ts`<br/>
 
+> **Hint!** `sap/ui/core/mvc/Controller` can be changed to e.g. `com/my/app/BaseController` using `ui5.plugin.insertManagedObjectModule` preference entry
+
 > Related preference entries:<br/> _ui5.plugin.insertControllerModule_<br/> _ui5.plugin.insertManagedObjectModule_<br/> > ![AutomaticTemplates](/images/AutomaticTemplates.gif)
 
 ---
@@ -518,14 +527,16 @@ formatter: Formatter = ...
 ---
 
 # Extension recommendations
-- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for additional linting
-- [Live Share](https://marketplace.visualstudio.com/items?itemName=MS-vsliveshare.vsliveshare) for live code sharing with colleagues
-- [PlantUML](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml) for viewing diagrams generated by SAPUI5 Extension
-- [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for pretty code
-- [TODO Highlight](https://marketplace.visualstudio.com/items?itemName=wayou.vscode-todo-highlight) to not forget about your TODOs
-- [Template String Converter](https://marketplace.visualstudio.com/items?itemName=meganrogge.template-string-converter) to be even more lazy
-- [Version Lens](https://marketplace.visualstudio.com/items?itemName=pflannery.vscode-versionlens) for updating your tooling
-- [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) to get autocomplete for `ui5.yaml` and `.ui5pluginrc.yaml` with this preference entry:
+
+-   [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for additional linting
+-   [Live Share](https://marketplace.visualstudio.com/items?itemName=MS-vsliveshare.vsliveshare) for live code sharing with colleagues
+-   [PlantUML](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml) for viewing diagrams generated by SAPUI5 Extension
+-   [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for pretty code
+-   [TODO Highlight](https://marketplace.visualstudio.com/items?itemName=wayou.vscode-todo-highlight) to not forget about your TODOs
+-   [Template String Converter](https://marketplace.visualstudio.com/items?itemName=meganrogge.template-string-converter) to be even more lazy
+-   [Version Lens](https://marketplace.visualstudio.com/items?itemName=pflannery.vscode-versionlens) for updating your tooling
+-   [YAML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml) to get autocomplete for `ui5.yaml` and `.ui5pluginrc.yaml` with this preference entry:
+
 ```json
 "yaml.schemas": {
     "https://raw.githubusercontent.com/iljapostnovs/VSCodeUI5Plugin/master/schema/packageSchema.json": [
@@ -534,4 +545,5 @@ formatter: Formatter = ...
     ]
 }
 ```
-- [XML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-xml) to get simple syntax linting
+
+-   [XML](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-xml) to get simple syntax linting

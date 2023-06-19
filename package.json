@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "1.8.2",
+	"version": "1.9.0",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -22,7 +22,7 @@
 	"icon": "images/ui5.png",
 	"homepage": "https://github.com/iljapostnovs/VSCodeUI5Plugin/blob/master/README.md",
 	"engines": {
-		"vscode": "^1.76.0"
+		"vscode": "^1.79.0"
 	},
 	"categories": [
 		"Extension Packs"
@@ -191,7 +191,10 @@
 				},
 				"ui5.plugin.tsEventType": {
 					"type": "string",
-					"description": "Event type for Typescript, which will be used when creating event handler from XML. (e.g. type of oEvent: 'Event'). There are three possible optional variables used for replacing: classModule, className, eventName. Example: if the value for this property is Event<\"{classModule}\", \"{eventName}\">, and you are inserting change event from sap.m.Table, the result will be 'oEvent: Event<\"sap/m/Table\", \"change\">'",
+					"markdownDescription": "Event type for Typescript, which will be used when creating event handler from XML. (e.g. type of `sap/ui/base/Event` is `Event`). There are four possible optional variables used for replacing: `{classModule}`, `{className}`, `{eventName}`, `{tsEventParameters}`. Example: if the value for this property is `Event<\"{classModule}\", \"{eventName}\">`, and you are inserting `change` event from `sap.m.Table`, the result will be `oEvent: Event<\"sap/m/Table\", \"change\">`. \n\n> **Hint!** It is recommended to use `Event<{tsEventParameters}>` after UI5 Version `1.115.0`+, because generics for Events were introduced.",
+					"examples": [
+						"Event<{tsEventParameters}>"
+					],
 					"default": "Event"
 				},
 				"ui5.plugin.insertManagedObjectModule": {
@@ -378,30 +381,30 @@
 		"@types/glob": "^8.1.0",
 		"@types/line-column": "^1.0.0",
 		"@types/mocha": "^10.0.1",
-		"@types/node": "^18.15.11",
-		"@types/vscode": "^1.76.0",
+		"@types/node": "^18.16.18",
+		"@types/vscode": "^1.79.1",
 		"@types/webpack": "^5.28.1",
-		"@typescript-eslint/eslint-plugin": "^5.57.0",
-		"@typescript-eslint/parser": "^5.57.0",
-		"@vscode/test-electron": "^2.3.0",
+		"@typescript-eslint/eslint-plugin": "^5.60.0",
+		"@typescript-eslint/parser": "^5.60.0",
+		"@vscode/test-electron": "^2.3.3",
 		"axios": "^1.3.4",
 		"clean-webpack-plugin": "^4.0.0",
-		"eslint": "^8.36.0",
+		"eslint": "^8.43.0",
 		"mocha": "^10.2.0",
-		"ts-loader": "^9.4.2",
-		"webpack": "^5.76.3",
-		"webpack-cli": "^5.0.1"
+		"ts-loader": "^9.4.3",
+		"webpack": "^5.87.0",
+		"webpack-cli": "^5.1.4"
 	},
 	"dependencies": {
 		"acorn-loose": "^8.3.0",
 		"comment-parser": "^1.3.1",
-		"fast-xml-parser": "^4.1.3",
+		"fast-xml-parser": "^4.2.4",
 		"glob": "^9.3.2",
 		"line-column": "^1.0.2",
-		"ts-morph": "^18.0.0",
-		"typescript": "5.0.2",
-		"ui5plugin-linter": "^1.7.3",
-		"ui5plugin-parser": "^1.5.3"
+		"ts-morph": "^19.0.0",
+		"typescript": "5.1.3",
+		"ui5plugin-linter": "^1.7.4",
+		"ui5plugin-parser": "^1.5.4"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",
