@@ -56,9 +56,8 @@ export class MethodInserter extends ParserBearer {
 					importDeclaration => importDeclaration.getModuleSpecifier().getLiteralText() === eventModule
 				);
 				if (!baseEventImportDeclaration) {
-					// eslint-disable-next-line @typescript-eslint/quotes
 					insertImport = `\nimport ${eventName} from "${eventModule}";`;
-					insertImportOffset = importDeclarations[importDeclarations.length - 1].getEnd() ?? 0;
+					insertImportOffset = importDeclarations.at(-1)?.getEnd() ?? 0;
 				}
 			}
 		} else {
