@@ -57,7 +57,8 @@ export class XMLCodeActionProvider extends ParserBearer {
 			classModule: tagClassModule,
 			className: tagClassName,
 			eventName: eventName,
-			tsEventParameters: this._generateEventParameters(eventData)
+			tsEventParameters: this._generateEventParameters(eventData),
+			tsEvent: this._generateEvent(eventData)
 		};
 
 		if (
@@ -66,13 +67,20 @@ export class XMLCodeActionProvider extends ParserBearer {
 		) {
 			variables.tsEventParameters = "object";
 		}
+		if (
+			UIClass instanceof CustomTSClass &&
+			!this._getIfNamedImportExists(UIClass.node.getProject(), ownerModule, variables.tsEvent)
+		) {
+			variables.tsEvent = "Event<object>";
+		}
 
 		const eventType = vscode.workspace.getConfiguration("ui5.plugin").get<string>("tsEventType") ?? "Event";
 		const eventTypeWithReplacedVars = eventType
 			.replace("{classModule}", variables.classModule)
 			.replace("{className}", variables.className)
 			.replace("{eventName}", variables.eventName)
-			.replace("{tsEventParameters}", variables.tsEventParameters);
+			.replace("{tsEventParameters}", variables.tsEventParameters)
+			.replace("{tsEvent}", variables.tsEvent);
 
 		const insertCodeAction = new MethodInserter(this._parser).createInsertMethodCodeAction(
 			responsibleController,
@@ -97,6 +105,12 @@ export class XMLCodeActionProvider extends ParserBearer {
 				this._getIfNamedImportExists(project, ownerModule, variables.tsEventParameters)
 			) {
 				await this._addTSImports(eventData, UIClass, variables.tsEventParameters, insertCodeAction);
+			}
+			if (
+				eventType.includes("{tsEvent}") &&
+				this._getIfNamedImportExists(project, ownerModule, variables.tsEvent)
+			) {
+				await this._addTSImports(eventData, UIClass, variables.tsEvent, insertCodeAction);
 			}
 		}
 
@@ -144,7 +158,16 @@ export class XMLCodeActionProvider extends ParserBearer {
 		const ownerName = eventData.owner.split(".").pop() ?? "";
 		const eventNameUpper =
 			eventData.event.name[0].toUpperCase() + eventData.event.name.substring(1, eventData.event.name.length);
-		const tsEventParameters = `$${ownerName}${eventNameUpper}EventParameters`;
+		const tsEventParameters = `${ownerName}$${eventNameUpper}EventParameters`;
+
+		return tsEventParameters;
+	}
+
+	private _generateEvent(eventData: { event: IUIEvent; owner: string }) {
+		const ownerName = eventData.owner.split(".").pop() ?? "";
+		const eventNameUpper =
+			eventData.event.name[0].toUpperCase() + eventData.event.name.substring(1, eventData.event.name.length);
+		const tsEventParameters = `${ownerName}$${eventNameUpper}Event`;
 
 		return tsEventParameters;
 	}
@@ -158,7 +181,7 @@ export class XMLCodeActionProvider extends ParserBearer {
 	private async _addTSImports(
 		event: { event: IUIEvent; owner: string },
 		UIClass: CustomTSClass,
-		tsEventParameters: string,
+		tsEventOrEventParams: string,
 		codeAction: vscode.CodeAction
 	) {
 		const ownerModule = event.owner.replace(/\./g, "/");
@@ -168,7 +191,7 @@ export class XMLCodeActionProvider extends ParserBearer {
 
 		const namedImportExists = existingImportDeclaration
 			?.getNamedImports()
-			.some(namedImport => namedImport.getName() === tsEventParameters);
+			.some(namedImport => namedImport.getName() === tsEventOrEventParams);
 
 		const dummySourceFile = UIClass.node
 			.getSourceFile()
@@ -184,7 +207,7 @@ export class XMLCodeActionProvider extends ParserBearer {
 			fakeImportDeclaration = dummySourceFile.addImportDeclaration(existingImportDeclaration.getStructure());
 		}
 		if (!namedImportExists && fakeImportDeclaration) {
-			fakeImportDeclaration.addNamedImport(tsEventParameters);
+			fakeImportDeclaration.addNamedImport(tsEventOrEventParams);
 
 			await this._addImportsToCodeAction(codeAction, UIClass, fakeImportDeclaration, existingImportDeclaration);
 		}
