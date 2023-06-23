@@ -224,7 +224,9 @@ Code Actions for creating event handlers in controllers from xml views are provi
 
 > Check out `ui5.plugin.tsEventType` preference entry. Handy if UI5 Version `1.115.0`+ is used, because the preference entry can be changed to `Event<{tsEventParameters}>`, and then the necessary generic for event parameters will be added automatically.
 > Example: `Event<$ListBaseSelectionChangeEventParameters>` will be generated, if `Create method` action will be selected on non existant event handler in XML view `sap.m.List` -> `selectionChange` event
+
 > ![Image](images/CreateMethodFromView.png)
+
 > ![Image](images/CreatedMethodFromView.png)
 
 > Related preference entries: <br/>_ui5.plugin.tsEventModule_<br/>_ui5.plugin.tsEventType_<br/>

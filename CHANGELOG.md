@@ -1,9 +1,13 @@
+## 1.9.1 (23-06-2023)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.5.5
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.7.5
+
 ## 1.9.0 (19-06-2023)
 
 -   `tsEventParameters` variable added to `ui5.plugin.tsEventType` preference entry. Handy if UI5 Version `1.115.0`+ is used, because the preference entry can be changed to `Event<{tsEventParameters}>`, and then the necessary generic for event parameters will be added automatically.
     > Example: `Event<$ListBaseSelectionChangeEventParameters>` will be generated, if `Create method` action will be selected on non existant event handler in XML view `sap.m.List` -> `selectionChange` event
-    > ![Image](images/CreateMethodFromView.png)
-    > ![Image](images/CreatedMethodFromView.png)
+    > ![Image](images/CreateMethodFromView.png) > ![Image](images/CreatedMethodFromView.png)
 -   Typescript version updated to 5.1.3
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.5.4
 -   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.7.4
