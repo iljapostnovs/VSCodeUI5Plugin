@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "1.9.2",
+	"version": "1.10.0",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -44,6 +44,10 @@
 				{
 					"id": "ui5Explorer",
 					"name": "UI5 Explorer"
+				},
+				{
+					"id": "ui5projectdata",
+					"name": "UI5 Project Data"
 				}
 			]
 		},
@@ -52,6 +56,11 @@
 				{
 					"command": "ui5plugin.refreshClassTree",
 					"when": "view == ui5Explorer",
+					"group": "navigation"
+				},
+				{
+					"command": "ui5plugin.refreshUI5ProjectDataTree",
+					"when": "view == ui5projectdata",
 					"group": "navigation"
 				},
 				{
@@ -302,6 +311,18 @@
 				}
 			},
 			{
+				"command": "ui5plugin.refreshUI5ProjectDataTree",
+				"title": "UI5: Refresh project data tree",
+				"icon": {
+					"light": "icons/light/refresh.svg",
+					"dark": "icons/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "ui5plugin.openNewDocument",
+				"title": "UI5: Open new document"
+			},
+			{
 				"command": "ui5plugin.expandClassTree",
 				"title": "UI5: Expand class tree",
 				"icon": {
@@ -404,8 +425,8 @@
 		"line-column": "^1.0.2",
 		"ts-morph": "^19.0.0",
 		"typescript": "5.1.3",
-		"ui5plugin-linter": "^1.7.5",
-		"ui5plugin-parser": "^1.5.5"
+		"ui5plugin-linter": "^1.7.6",
+		"ui5plugin-parser": "^1.5.6"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",

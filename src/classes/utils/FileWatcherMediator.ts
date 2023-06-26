@@ -39,12 +39,12 @@ export class FileWatcherMediator {
 		if (configFiles.some(file => document?.fileName.endsWith(file))) {
 			const dirName = path.dirname(document.fileName);
 			const nativePath = toNative(dirName + "/package.json");
-			delete PackageLinterConfigHandler.packageCache[nativePath];
-			delete PackageParserConfigHandler.packageCache[nativePath];
+			delete PackageLinterConfigHandler.configCache[nativePath];
+			delete PackageParserConfigHandler.configCache[nativePath];
 			// if (contentChanges) {
 			// const contentChange = contentChanges[0];
 			// const changeOffset = contentChange.rangeOffset;
-			// const oldPackage = PackageParserConfigHandler.packageCache[nativePath];
+			// const oldPackage = PackageParserConfigHandler.configCache[nativePath];
 			// if in ui5parser, then reload
 			// }
 
