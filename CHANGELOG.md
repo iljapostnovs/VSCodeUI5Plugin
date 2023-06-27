@@ -1,3 +1,10 @@
+## 1.10.0 (27-06-2023)
+
+-   `tsEvent` variable added to `ui5.plugin.tsEventType` preference entry. Handy if UI5 Version `1.115.1`+ is used, because the preference entry can be changed to `{tsEventParameters}`, and then the necessary event will be added automatically. Comes as a replacement for `tsEventParameters` variable. (Check [UI5 Type Definitions release notes](https://sap.github.io/ui5-typescript/releasenotes.html))
+-   [UI5 Project Data](README.md#ui5-project-data) view added
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.5.6
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.7.6
+
 ## 1.9.1 (23-06-2023)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.5.5

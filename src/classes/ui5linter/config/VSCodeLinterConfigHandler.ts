@@ -7,12 +7,17 @@ import ParserBearer from "../../ui5parser/ParserBearer";
 
 export class VSCodeLinterConfigHandler extends ParserBearer implements ILinterConfigHandler {
 	private readonly _packageLinterConfigHandler: PackageLinterConfigHandler;
+	packagePath: string;
+	configPath?: string;
 	constructor(parser: IUI5Parser) {
 		super(parser);
 		this._packageLinterConfigHandler = new PackageLinterConfigHandler(
 			this._parser,
 			parser.configHandler.packagePath
 		);
+
+		this.packagePath = this._packageLinterConfigHandler.packagePath;
+		this.configPath = this._packageLinterConfigHandler.configPath;
 	}
 	getAttributesToCheck(): string[] {
 		return this._packageLinterConfigHandler.getAttributesToCheck();

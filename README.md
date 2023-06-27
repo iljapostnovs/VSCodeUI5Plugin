@@ -62,6 +62,7 @@ Have any ideas on how to improve [MeaningAssumption](https://github.com/iljapost
 -   [Automatic template insertion](#automatic-template-insertion)
 -   [Automatic class name and class path renaming](#automatic-class-name-and-class-path-renaming)
 -   [UI5 Explorer](#ui5-explorer)
+-   [UI5 Project Data](#ui5-project-data)
 -   [Hotkeys](#hotkeys)
 -   [Proxy](#proxy)
 -   [Known issues](#known-issues)
@@ -101,7 +102,7 @@ VSCode extension is using [UI5 Parser](https://github.com/iljapostnovs/ui5plugin
 | ui5.plugin.addTagAttributes                             | Should tag attributes be added in XML completion items                                                                                                                                                                                                                     |
 | ui5.plugin.addTagAggregations                           | Should tag aggregations be added in XML completion items                                                                                                                                                                                                                   |
 | ui5.plugin.tsEventModule                                | Event module for Typescript, which will be used when creating event handler from XML                                                                                                                                                                                       |
-| ui5.plugin.tsEventType                                  | Event type for Typescript, which will be used when creating event handler from XML. (e.g. type of oEvent: 'Event').                                                                                                                                                        |
+| ui5.plugin.tsEventType                                  | Event type for Typescript, which will be used when creating event handler from XML. (e.g. type of `sap/ui/base/Event` is `Event`).                                                                                                                                         |
 | ui5.plugin.insertManagedObjectModule                    | Module which will be used for automatic insertion on custom class creation                                                                                                                                                                                                 |
 | ui5.plugin.insertControllerModule                       | Module which will be used for automatic insertion on custom controller creation                                                                                                                                                                                            |
 | ui5.plugin.xmlFormatterTagEndingNewline                 | Should XML Formatter put tag ending (">", "/>") in newline                                                                                                                                                                                                                 |
@@ -222,8 +223,8 @@ Code Actions for creating event handlers in controllers from xml views are provi
 ![CodeActionsProvider](/images/CodeActionsProvider.gif)
 ![CreateMethodCodeActionsProvider](/images/CreateMethodCodeActionsProvider.gif)
 
-> Check out `ui5.plugin.tsEventType` preference entry. Handy if UI5 Version `1.115.0`+ is used, because the preference entry can be changed to `Event<{tsEventParameters}>`, and then the necessary generic for event parameters will be added automatically.
-> Example: `Event<$ListBaseSelectionChangeEventParameters>` will be generated, if `Create method` action will be selected on non existant event handler in XML view `sap.m.List` -> `selectionChange` event
+> **Helpful for TS!** Check out `ui5.plugin.tsEventType` preference entry. Handy if UI5 Version `1.115.1`+ is used, because the preference entry can be changed to `{tsEvent}`, in such case the correct event will be added automatically.
+> Example: `ListBase$SelectionChangeEvent` will be generated, if `Create method` action will be selected on non existant event handler in XML view `sap.m.List` -> `selectionChange` event
 
 > ![Image](images/CreateMethodFromView.png)
 
@@ -418,7 +419,7 @@ Extension listens for `.js`/`.ts` file creation event (rename technically is fil
 
 ## UI5 Explorer
 
-Custom UI5 Explorer in VSCode panel is available<br/>
+Custom `UI5 Explorer` view in VSCode panel is available<br/>
 
 1. For JS/TS files tree view contains fields and methods<br/>
    ![JSTreeView](/images/JSTreeView.png)
@@ -427,6 +428,18 @@ Custom UI5 Explorer in VSCode panel is available<br/>
 
 2. For XML files tree view contains class tag list<br/>
    ![XMLTreeView](/images/XMLTreeView.png)
+
+---
+
+## UI5 Project Data
+
+Custom `UI5 Project Data` view in VSCode panel is available
+
+It represents the data about the project, like UI5 Version, config path etc. It makes easier to troubleshoot the config related issues.
+
+View is not updated automatically, in order to do that, refresh button on the top right corner should be pressed.
+
+![UI5ProjectData](/images/UI5ProjectData.png)
 
 ---
 

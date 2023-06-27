@@ -47,6 +47,16 @@ export class CommandRegistrator {
 				}
 			}
 		);
+		const openNewDocumentCommand = vscode.commands.registerCommand(
+			"ui5plugin.openNewDocument",
+			async (content: string, language: string) => {
+				const document = await vscode.workspace.openTextDocument({
+					content: content,
+					language: language
+				});
+				await vscode.window.showTextDocument(document);
+			}
+		);
 		const switcherCommand = vscode.commands.registerCommand("ui5plugin.switchBetweenVC", async () => {
 			const parser = ReusableMethods.getParserForCurrentActiveDocument();
 			if (!parser) {
@@ -255,6 +265,7 @@ export class CommandRegistrator {
 		);
 
 		UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
+		UI5Plugin.getInstance().addDisposable(openNewDocumentCommand);
 		UI5Plugin.getInstance().addDisposable(switcherCommand);
 		UI5Plugin.getInstance().addDisposable(exportToI18NCommand);
 		UI5Plugin.getInstance().addDisposable(insertCustomClassNameCommand);
