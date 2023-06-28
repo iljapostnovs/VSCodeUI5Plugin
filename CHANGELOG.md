@@ -1,3 +1,7 @@
+## 1.10.1 (28-06-2023)
+
+-   `sap/ui/base/Event` is not automatically imported anymore if `tsEvent` variable is added to `ui5.plugin.tsEventType` preference entry
+
 ## 1.10.0 (27-06-2023)
 
 -   `tsEvent` variable added to `ui5.plugin.tsEventType` preference entry. Handy if UI5 Version `1.115.1`+ is used, because the preference entry can be changed to `{tsEventParameters}`, and then the necessary event will be added automatically. Comes as a replacement for `tsEventParameters` variable. (Check [UI5 Type Definitions release notes](https://sap.github.io/ui5-typescript/releasenotes.html))
