@@ -51,13 +51,16 @@ export class MethodInserter extends ParserBearer {
 					"\t"
 				);
 
-				const importDeclarations = UIClass.node.getSourceFile().getImportDeclarations();
-				const baseEventImportDeclaration = importDeclarations.find(
-					importDeclaration => importDeclaration.getModuleSpecifier().getLiteralText() === eventModule
-				);
-				if (!baseEventImportDeclaration) {
-					insertImport = `\nimport ${eventName} from "${eventModule}";`;
-					insertImportOffset = importDeclarations.at(-1)?.getEnd() ?? 0;
+				const tsEventType = vscode.workspace.getConfiguration("ui5.plugin").get<string>("tsEventType");
+				if (!tsEventType?.includes("{tsEvent}")) {
+					const importDeclarations = UIClass.node.getSourceFile().getImportDeclarations();
+					const baseEventImportDeclaration = importDeclarations.find(
+						importDeclaration => importDeclaration.getModuleSpecifier().getLiteralText() === eventModule
+					);
+					if (!baseEventImportDeclaration) {
+						insertImport = `\nimport ${eventName} from "${eventModule}";`;
+						insertImportOffset = importDeclarations.at(-1)?.getEnd() ?? 0;
+					}
 				}
 			}
 		} else {
