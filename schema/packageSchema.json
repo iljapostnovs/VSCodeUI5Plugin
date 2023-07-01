@@ -171,8 +171,26 @@
 										"Hint"
 									]
 								},
+								"EventTypeLinter": {
+									"description": "Checks if Event Type is used correctly. Works only for TS.",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
 								"TagAttributeLinter": {
 									"description": "Checks for correctness of the tag attributes in XML files. (Does attribute exist? Does it have correct value?)",
+									"enum": [
+										"Warning",
+										"Error",
+										"Information",
+										"Hint"
+									]
+								},
+								"TagAttributeDefaultValueLinter": {
+									"description": "Checks if attribute value in XML is not the same as default value of the property",
 									"enum": [
 										"Warning",
 										"Error",
@@ -270,8 +288,16 @@
 									"description": "Checks if namespace is correct in JSDoc for TS projects",
 									"type": "boolean"
 								},
+								"EventTypeLinter": {
+									"description": "Checks if Event Type is used correctly. Works only for TS, default value is true if UI5 Version is at least 1.115.1.",
+									"type": "boolean"
+								},
 								"TagAttributeLinter": {
 									"description": "Checks for correctness of the tag attributes in XML files. (Does attribute exist? Does it have correct value?)",
+									"type": "boolean"
+								},
+								"TagAttributeDefaultValueLinter": {
+									"description": "Checks if attribute value in XML is not the same as default value of the property",
 									"type": "boolean"
 								},
 								"TagLinter": {

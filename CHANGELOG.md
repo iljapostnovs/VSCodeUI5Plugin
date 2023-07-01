@@ -1,3 +1,9 @@
+## 1.11.0 (02-07-2023)
+
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.8.0
+-   `TagAttributeDefaultValueLinter` configuration entry added. [Readme](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#tagattributedefaultvaluelinter)
+-   `EventTypeLinter` added. [Readme](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#eventtypelinter-ts-only-11151)
+
 ## 1.10.1 (28-06-2023)
 
 -   `sap/ui/base/Event` is not automatically imported anymore if `tsEvent` variable is added to `ui5.plugin.tsEventType` preference entry
