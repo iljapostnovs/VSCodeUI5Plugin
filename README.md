@@ -3,6 +3,8 @@
 ![TestAndBuildBadge](https://github.com/iljapostnovs/VSCodeUI5Plugin/workflows/Test%20and%20build/badge.svg?branch=development)
 
 Any support is highly appreciated!<br/>
+
+[<img src="images/paypal-donate-button.png" height="30"/>](https://www.paypal.com/donate/?hosted_button_id=HPZ5FA8C3KJ6W)
 [<img src="https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=%23fe8e86" height="30"/>](https://github.com/sponsors/iljapostnovs)
 [<img src="./images/donate.png" height="30"/>](https://donate.cafe/iljapostnovs)
 
