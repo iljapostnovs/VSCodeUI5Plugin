@@ -33,7 +33,7 @@ Make sure that you have `excludeFolderPattern` property set correctly for `ui5pa
 
 Got new XML errors with ids and event handlers? Check out [UI5 Linter Readme](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#id-and-event-handler-patterns-in-views-and-fragments).
 
-Have any ideas on how to improve [MeaningAssumption](https://github.com/iljapostnovs/ui5plugin-linter/blob/04bc0fb8697087a569b5adc67a2b2492a7c97b34/src/classes/xml/linters/pattern/APatternValidator.ts#L20) variable determination? Create [Feature request](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/new/choose)
+Have any ideas on how to improve [MeaningAssumption](https://github.com/iljapostnovs/ui5plugin-linter/blob/750fe1b40a78151293f64daf0cefe449a56dcba8/src/classes/xml/linters/pattern/AMeaningAssumptionGenerator.ts#L34) variable determination? Create [Feature request](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/new/choose)
 
 # Summary
 
