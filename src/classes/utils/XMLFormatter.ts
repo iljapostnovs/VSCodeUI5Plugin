@@ -264,7 +264,7 @@ export class XMLFormatter extends ParserBearer {
 		} else if (typeof value === "object") {
 			formattedAttribute += `${this._formatAttributeObject(value, indentation + "\t")}`;
 		} else if (typeof value === "string") {
-			formattedAttribute += `'${value}'`;
+			formattedAttribute += `'${value.replace(/\\/g, "\\\\")}'`;
 		} else if (typeof value === "function") {
 			throw new Error("Parsing error");
 		} else {
@@ -390,7 +390,8 @@ export class XMLFormatter extends ParserBearer {
 
 		let i = 0;
 		while (i < document.length) {
-			if (document[i] === "\"") {
+			// eslint-disable-next-line @typescript-eslint/quotes
+			if (document[i] === '"') {
 				quotionMarkCount++;
 			}
 			if (document[i] === "'") {

@@ -3,6 +3,7 @@ import { join } from "path";
 import { UI5JSParser } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
+import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
 import { ReusableMethods } from "../providers/reuse/ReusableMethods";
 import Progress from "../utils/Progress";
 import { MassXMLSourcePrompt } from "../utils/xmlmetadata/MassXMLSourcePrompt";
@@ -10,6 +11,7 @@ import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
 import { FallbackCommand } from "../vscommands/FallbackCommand";
 import { InsertCustomClassNameCommand } from "../vscommands/InsertCustomClassNameCommand";
 import { SAPUIDefineCommand } from "../vscommands/SAPUIDefineCommand";
+import GenerateIDCommand from "../vscommands/generateids/GenerateIDCommand";
 import { GenerateTypeJSDocCommand } from "../vscommands/generatetypedoc/GenerateTypeJSDocCommand";
 import { ExportToI18NCommand } from "../vscommands/i18ncommand/ExportToI18NCommand";
 import { ControllerModelViewSwitcher } from "../vscommands/switchers/ViewControllerSwitcher";
@@ -263,6 +265,20 @@ export class CommandRegistrator {
 				}, "Fetching metadata...");
 			}
 		);
+		const generateIds = vscode.commands.registerCommand("ui5plugin.generateIds", async () => {
+			const parser = ReusableMethods.getParserForCurrentActiveDocument();
+			const activeDocument = vscode.window.activeTextEditor?.document;
+			if (!parser || !activeDocument) {
+				return;
+			}
+
+			try {
+				await new GenerateIDCommand(new TextDocumentAdapter(activeDocument), parser).execute();
+				await vscode.window.showInformationMessage("IDs generated successfully");
+			} catch (error: any) {
+				await vscode.window.showErrorMessage(`Error ocurred while generating ids. Message: ${error.message}`);
+			}
+		});
 
 		UI5Plugin.getInstance().addDisposable(insertUIDefineCommand);
 		UI5Plugin.getInstance().addDisposable(openNewDocumentCommand);
@@ -276,6 +292,7 @@ export class CommandRegistrator {
 		UI5Plugin.getInstance().addDisposable(generateTSXMLFileInterfacesCommand);
 		UI5Plugin.getInstance().addDisposable(generateODataInterfaceCommand);
 		UI5Plugin.getInstance().addDisposable(generateMassODataInterfaceCommand);
+		UI5Plugin.getInstance().addDisposable(generateIds);
 	}
 
 	static registerFallbackCommands() {
@@ -290,7 +307,8 @@ export class CommandRegistrator {
 			"ui5plugin.generateTSXMLFileInterfaces",
 			"ui5plugin.generateTSODataInterfaces",
 			"ui5plugin.generateMassTSODataInterfaces",
-			"ui5plugin.generateJSTypeDefDocFromMetadata"
+			"ui5plugin.generateJSTypeDefDocFromMetadata",
+			"ui5plugin.generateIds"
 		];
 
 		commands.forEach(command => {

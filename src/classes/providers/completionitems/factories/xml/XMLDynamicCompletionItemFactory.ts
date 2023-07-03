@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/quotes */
 import { ParserPool } from "ui5plugin-parser";
 import {
 	AbstractJSClass,
@@ -6,13 +7,15 @@ import {
 	IUIProperty
 } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
 import { IXMLFile } from "ui5plugin-parser/dist/classes/parsing/util/filereader/IFileReader";
-import { PositionType } from "ui5plugin-parser/dist/classes/parsing/util/xml/XMLParser";
+import { ITag, PositionType } from "ui5plugin-parser/dist/classes/parsing/util/xml/XMLParser";
 import * as vscode from "vscode";
 import { RangeAdapter } from "../../../../adapters/vscode/RangeAdapter";
 import { TextDocumentAdapter } from "../../../../adapters/vscode/TextDocumentAdapter";
 import ParserBearer from "../../../../ui5parser/ParserBearer";
 import HTMLMarkdown from "../../../../utils/HTMLMarkdown";
 import { VSCodeFileReader } from "../../../../utils/VSCodeFileReader";
+import { VSCodeTextDocumentTransformer } from "../../../../utils/VSCodeTextDocumentTransformer";
+import GenerateIDCommand from "../../../../vscommands/generateids/GenerateIDCommand";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 import { StandardXMLCompletionItemFactory } from "./StandardXMLCompletionItemFactory";
@@ -35,11 +38,9 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 
 				if (positionType === PositionType.InNewAttribute) {
 					completionItems.forEach(item => {
-						if (item.insertText instanceof vscode.SnippetString) {
-							// eslint-disable-next-line @typescript-eslint/quotes
+						if (item.insertText instanceof vscode.SnippetString && item.label !== "id") {
 							item.insertText.appendText('="');
 							item.insertText.appendTabstop(0);
-							// eslint-disable-next-line @typescript-eslint/quotes
 							item.insertText.appendText('"');
 						}
 					});
@@ -487,8 +488,10 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 						new VSCodeFileReader(this._parser).getControllerNameOfTheCurrentDocument() || ""
 					)
 					.map(method => method.name);
+				const tag = this._parser.xmlParser.getTagInPosition(XMLFile, document.offsetAt(position));
 				controllerMethods = [...new Set(controllerMethods)];
 				completionItems = this._getPropertyCompletionItemsFromClass(UIClass);
+				this._insertIdCompletionItem(completionItems, UIClass, document, tag);
 				completionItems = completionItems.concat(
 					this._getEventCompletionItemsFromClass(UIClass, controllerMethods)
 				);
@@ -580,6 +583,46 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		}
 
 		return completionItems;
+	}
+
+	private _insertIdCompletionItem(
+		allCompletionItems: CustomCompletionItem[],
+		UIClass: AbstractJSClass,
+		document: vscode.TextDocument,
+		tag: ITag
+	) {
+		const properties = this._parser.classFactory.getClassProperties(UIClass.className);
+		const idProperty = properties.find(property => property.name === "id");
+		if (!idProperty) {
+			return;
+		}
+
+		const idCompletionItem: CustomCompletionItem = new CustomCompletionItem("id");
+		idCompletionItem.kind = vscode.CompletionItemKind.Property;
+		idCompletionItem.insertText = new vscode.SnippetString(`id="${this._generateControlId(document, tag)}"$0`);
+
+		idCompletionItem.detail = "id: string";
+		const UI5ApiUri = this._parser.urlBuilder.getMarkupUrlForPropertiesApi(UIClass);
+		idCompletionItem.documentation = new HTMLMarkdown(`${UI5ApiUri}\n${idProperty.description}`);
+		idCompletionItem.sortText = "1";
+
+		const index = allCompletionItems.findIndex(completionItem => completionItem.label === "id");
+		if (index > -1) {
+			allCompletionItems.splice(index, 1, idCompletionItem);
+		}
+	}
+
+	private _generateControlId(document: vscode.TextDocument, tag: ITag): string {
+		const generator = new GenerateIDCommand(new TextDocumentAdapter(document), this._parser);
+
+		const transformer = new VSCodeTextDocumentTransformer(this._parser);
+		const XMLFile = transformer.toXMLFile(document);
+		if (!XMLFile) {
+			return "";
+		}
+
+		const allIds = this._parser.xmlParser.getAllIDsInCurrentView(XMLFile).map(id => id.id);
+		return generator.generateId(tag, allIds, false).replace(/\{TabStop\}/g, "$1");
 	}
 
 	private _getEventCompletionItemsFromClass(UIClass: AbstractJSClass, eventValues: string[] = []) {

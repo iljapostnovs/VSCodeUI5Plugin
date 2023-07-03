@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/indent */
 import assert = require("assert");
 import { after, test } from "mocha";
 import { JSLinterErrorFactory, PropertiesLinterErrorFactory, XMLLinterErrorFactory } from "ui5plugin-linter";
@@ -9,18 +10,20 @@ import { TextDocumentAdapter } from "../../../classes/adapters/vscode/TextDocume
 import { FileRenameMediator } from "../../../classes/filerenaming/FileRenameMediator";
 import { JSCodeLensProvider } from "../../../classes/providers/codelens/jscodelens/JSCodeLensProvider";
 import { JSDynamicCompletionItemsFactory } from "../../../classes/providers/completionitems/factories/js/JSDynamicCompletionItemsFactory";
-import { SAPUIDefineFactory } from "../../../classes/providers/completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
 import { ViewIdCompletionItemFactory } from "../../../classes/providers/completionitems/factories/js/ViewIdCompletionItemFactory";
+import { SAPUIDefineFactory } from "../../../classes/providers/completionitems/factories/js/sapuidefine/SAPUIDefineFactory";
 import { XMLDynamicCompletionItemFactory } from "../../../classes/providers/completionitems/factories/xml/XMLDynamicCompletionItemFactory";
 import { JSRenameProvider } from "../../../classes/providers/rename/JSRenameProvider";
 import { FileWatcherMediator } from "../../../classes/utils/FileWatcherMediator";
 import { XMLFormatter } from "../../../classes/utils/XMLFormatter";
+import GenerateIDCommand from "../../../classes/vscommands/generateids/GenerateIDCommand";
 import * as CodeLensData from "./data/CodeLensData.json";
-import * as CompletionItemsData from "./data/completionitems/JSCompletionItems.json";
-import * as XMLCompletionItemData from "./data/completionitems/XMLCompletionItems.json";
+import * as IDGenerationData from "./data/IDGenerationData.json";
 import * as renameData from "./data/RenameData.json";
 import * as data from "./data/TestData.json";
 import * as XMLFormatterData from "./data/XMLFormatterData.json";
+import * as CompletionItemsData from "./data/completionitems/JSCompletionItems.json";
+import * as XMLCompletionItemData from "./data/completionitems/XMLCompletionItems.json";
 // import * as os from "os";
 
 suite("Extension Test Suite", () => {
@@ -385,8 +388,8 @@ suite("Extension Test Suite", () => {
 								const viewOrFragment =
 									XMLDocEdit.type === "fragment"
 										? parser.fileReader
-											.getAllFragments()
-											.find(fragment => fragment.fsPath === filePath)
+												.getAllFragments()
+												.find(fragment => fragment.fsPath === filePath)
 										: parser.fileReader.getAllViews().find(view => view.fsPath === filePath);
 								if (viewOrFragment) {
 									const tagsAndAttributes = xmlParser.getXMLFunctionCallTagsAndAttributes(
@@ -660,6 +663,29 @@ suite("Extension Test Suite", () => {
 			}
 		}
 	});
+
+	test("ID Generation works as expected", async () => {
+		const testData = IDGenerationData.data;
+
+		for (const data of testData) {
+			const parser = ParserPool.getParserForCustomClass(data.className);
+			const fsPath = parser?.fileReader.convertClassNameToFSPath(data.className, false, false, true);
+			if (fsPath && parser) {
+				const uri = vscode.Uri.file(fsPath);
+				const document = await vscode.workspace.openTextDocument(uri);
+				await vscode.window.showTextDocument(document);
+				await new GenerateIDCommand(new TextDocumentAdapter(document), parser).execute();
+				// copy(document.getText())
+				assert.strictEqual(
+					document.getText().replaceAll("\r", ""),
+					data.result.replaceAll("\r", ""),
+					`ID Generation for "${data.className}" should have content "${
+						data.result
+					}", but it was "${document.getText()}"`
+				);
+			}
+		}
+	});
 });
 
 function compareStringArrays(actualArray: string[], expectedArray: string[], assertText: string) {
@@ -730,8 +756,8 @@ function compareArrays(
 			typeof insertText === "string"
 				? insertText
 				: insertText instanceof vscode.SnippetString
-					? insertText.value
-					: undefined;
+				? insertText.value
+				: undefined;
 		const item = items.find(item => item === stringToInsert);
 		assert.ok(
 			!!item,

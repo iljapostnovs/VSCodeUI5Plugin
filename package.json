@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "1.10.1",
+	"version": "1.11.0",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -298,6 +298,35 @@
 					"type": "string",
 					"default": "",
 					"markdownDescription": "Absolute path to global `any_file.json` configuration file, which is used by `UI5 Parser` and `UI5 Linter`. Priority of ui5 config determination: local `package.json` -> global `any_file.json` -> default value. Example: `C:\\Users\\MyUser\\Documents\\ui5config.json`"
+				},
+				"ui5.plugin.idGenerationFormula": {
+					"type": "string",
+					"default": "id{MeaningAssumption}{TabStop}{Counter}{ControlName}",
+					"markdownDescription": "Formula for id generation. There are four variables available: `{MeaningAssumption}`, `{Counter}`, `{TabStop}` and `{ControlName}`. \n\n`{MeaningAssumption}` generation is taken from [ui5plugin-linter](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#meaningassumption-variable). \n\n`{MeaningAssumption}` and `{ControlName}` can be presented in camelCase: `{meaningAssumption}` and `{controlName}`. \n\n`{Counter}` is a number, which will be added in case if same ids will be generated.\n\n`{TabStop}` is used for XML Completion Items, it indicates where the selection will be at after applying completion item. \n\nThis preference entry is used by `ui5plugin.generateIds` command and XML Completion items."
+				},
+				"ui5.plugin.generateIdsCommandData": {
+					"type": "object",
+					"default": {
+						"excludeClasses": [
+							"sap.ui.core.mvc.View",
+							"sap.ui.core.FragmentDefinition"
+						],
+						"generateIdsForElements": true
+					},
+					"properties": {
+						"excludeClasses": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"markdownDescription": "Array of classes to be excluded from ID generation. E.g. `[\"sap.ui.core.mvc.View\"]`"
+						},
+						"generateIdsForElements": {
+							"type": "boolean",
+							"markdownDescription": "If ids should be generated for Elements as well, or for Controls only"
+						}
+					},
+					"markdownDescription": "Data for `ui5plugin.generateIds` command. Contains array of classes to be excluded from ID generation and a flag if IDs should be generated for Elements as well, or for Controls only"
 				}
 			}
 		},
@@ -377,6 +406,10 @@
 			{
 				"command": "ui5plugin.generateMassTSODataInterfaces",
 				"title": "UI5: (TS) Generate interfaces for OData entities (Mass)"
+			},
+			{
+				"command": "ui5plugin.generateIds",
+				"title": "UI5: Generate ids for all elements in view or fragment"
 			}
 		]
 	},
@@ -425,7 +458,7 @@
 		"line-column": "^1.0.2",
 		"ts-morph": "^19.0.0",
 		"typescript": "5.1.3",
-		"ui5plugin-linter": "^1.7.6",
+		"ui5plugin-linter": "^1.8.1",
 		"ui5plugin-parser": "^1.5.6"
 	},
 	"__metadata": {

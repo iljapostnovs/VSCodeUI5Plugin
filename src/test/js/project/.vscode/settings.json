@@ -2,5 +2,6 @@
 	"ui5.plugin.ui5version": "1.84.28",
 	"files.watcherExclude": {
 		"**/target": true
-	}
+	},
+	"files.autoSave": "off"
 }
