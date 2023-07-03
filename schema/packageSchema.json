@@ -389,6 +389,7 @@
 							"items": {
 								"type": "string"
 							},
+							"default": ["content", "items", "value", "text", "number"],
 							"description": "List of attributes to guess the 'MeaningAssumption' variable value from. Used for 'idNamingPattern' and 'eventNamingPattern'. Default value: '[\"content\", \"items\", \"value\", \"text\", \"number\"]'"
 						}
 					}

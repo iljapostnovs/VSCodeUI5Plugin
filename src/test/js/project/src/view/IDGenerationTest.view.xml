@@ -1,0 +1,24 @@
+<mvc:View
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	displayBlock="true"
+	height="100%"
+	xmlns:c="sap.ui.core"
+	busyIndicatorDelay="0"
+>
+	<Page>
+		<customHeader>
+			<Toolbar>
+				<Button text="Add Order"/>
+			</Toolbar>
+		</customHeader>
+		<Table items="{ODataModel>/Orders}"/>
+		<Select items="{/Vendors}">
+			<items>
+				<c:Item/>
+			</items>
+		</Select>
+		<Button/>
+		<Button/>
+	</Page>
+</mvc:View>

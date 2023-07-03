@@ -3,6 +3,8 @@
 -   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.8.0
 -   `TagAttributeDefaultValueLinter` configuration entry added. [Readme](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#tagattributedefaultvaluelinter)
 -   `EventTypeLinter` added. [Readme](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#eventtypelinter-ts-only-11151)
+-   New command introduced: [ui5plugin.generateIds](README.md#generate-ids-for-all-elements-in-view-or-fragment).
+-   New preference entries introduced: `ui5.plugin.idGenerationFormula`, `ui5.plugin.generateIdsCommandData` ([Configuration Readme](README.md#configuration))
 
 ## 1.10.1 (28-06-2023)
 
