@@ -1,4 +1,4 @@
-## 1.11.0 (02-07-2023)
+## 1.11.0 (03-07-2023)
 
 -   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.8.1
 -   `TagAttributeDefaultValueLinter` configuration entry added. [Readme](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#tagattributedefaultvaluelinter)
