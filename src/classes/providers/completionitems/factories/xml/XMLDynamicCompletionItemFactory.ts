@@ -497,6 +497,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 				);
 				completionItems = completionItems.concat(this._getAggregationCompletionItemsFromClass(UIClass));
 				completionItems = completionItems.concat(this._getAssociationCompletionItemsFromClass(UIClass));
+				completionItems = this._filterOutAlreadyUsedAttributes(completionItems, tag);
 			}
 		}
 
@@ -695,6 +696,19 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		}
 
 		return completionItems;
+	}
+
+	private _filterOutAlreadyUsedAttributes(
+		completionItems: CustomCompletionItem[],
+		tag: ITag
+	): CustomCompletionItem[] {
+		return completionItems.filter(completionItem => {
+			const attributes = this._parser.xmlParser.getAttributesOfTheTag(tag) ?? [];
+			return !attributes.some(
+				attribute =>
+					this._parser.xmlParser.getAttributeNameAndValue(attribute).attributeName === completionItem.label
+			);
+		});
 	}
 
 	private _removeDuplicateCompletionItems(completionItems: CustomCompletionItem[]) {
