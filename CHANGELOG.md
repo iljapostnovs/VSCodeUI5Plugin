@@ -1,3 +1,8 @@
+## 1.12.0 (09-07-2023)
+
+-   New command added: `ui5plugin.bulkExportToi18n` [Readme](README.md#export-to-i18n-bulk)
+-   New preference entry added: `ui5.plugin.bulkExportToi18nCommandData`
+
 ## 1.11.1 (05-07-2023)
 
 -   XML attribute completion items now are filtered by usage. If attribute already exists, no completion item will be shown for it.

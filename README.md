@@ -53,6 +53,7 @@ Have any ideas on how to improve [MeaningAssumption](https://github.com/iljapost
 -   [Commands](#commands)
     -   [Move sap.ui.define to parameters](#move-sapuidefine-to-parameters)
     -   [Export to i18n](#export-to-i18n)
+    -   [Export to i18n (bulk)](#export-to-i18n-bulk)
     -   [Switch View/Controller](#switch-viewcontroller)
     -   [Insert Custom Class name](#insert-custom-class-name)
     -   [Clear Cache](#clear-cache)
@@ -293,6 +294,18 @@ Set your position to the string you want to export to i18n.properties file and e
 > Hotkey: F4<br/>
 
 ![ExportToI18n](/images/ExportToI18n.gif)
+
+---
+
+### Export to i18n (bulk)
+
+Open view or fragment and execute command. Works for XML files only.
+
+> **Important!** There is no info provided by SAP regarding which property should be exportable to i18n, that is why it is not possible to fully automate this process. This command exports only properties, which are configured to be exported. If there are some properties which are not exported, but should be, it is possible to adjust `ui5.plugin.bulkExportToi18nCommandData` VSCode preference entry. If you find yourself **editing the preference entry**, please [open a ticket](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/new?assignees=iljapostnovs&labels=enhancement&projects=&template=feature_request.md&title=Feature+request%3A+) in github and share what was added, so it could be included into default value and work for everyone.
+
+> Related preference entries:<br/> _ui5.plugin.bulkExportToi18nCommandData_<br/>
+
+![BulkExportToI18NCommand](/images/BulkExportToI18NCommand.gif)
 
 ---
 
