@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/indent */
 import assert = require("assert");
+import { readFile, writeFile } from "fs/promises";
 import { after, test } from "mocha";
 import { JSLinterErrorFactory, PropertiesLinterErrorFactory, XMLLinterErrorFactory } from "ui5plugin-linter";
 import { ParserPool, UI5JSParser, XMLParser } from "ui5plugin-parser";
@@ -695,6 +696,10 @@ suite("Extension Test Suite", () => {
 		const parser = ParserPool.getParserForCustomClass(viewName);
 		const fsPath = parser?.fileReader.convertClassNameToFSPath(viewName, false, false, true);
 		if (fsPath && parser) {
+			const manifest = parser.fileReader.getManifestForClass(viewName);
+			const i18nFsPath = manifest && parser.fileReader.getResourceModelUriForManifest(manifest);
+			const oldI18nContent = i18nFsPath && (await readFile(i18nFsPath, { encoding: "utf-8" }));
+
 			const uri = vscode.Uri.file(fsPath);
 			const document = await vscode.workspace.openTextDocument(uri);
 			await vscode.window.showTextDocument(document);
@@ -720,6 +725,10 @@ suite("Extension Test Suite", () => {
 					testData.i18n
 				)}"`
 			);
+
+			if (i18nFsPath && oldI18nContent) {
+				await writeFile(i18nFsPath, oldI18nContent);
+			}
 		}
 	});
 });
