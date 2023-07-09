@@ -19,6 +19,7 @@ import { TSODataInterfaceGenerator } from "../vscommands/tsinterfacegenerator/im
 import { TSXMLInterfaceGenerator } from "../vscommands/tsinterfacegenerator/implementation/TSXMLInterfaceGenerator";
 import { GenerateERDiagramCommand } from "../vscommands/umlgenerator/GenerateERDiagramCommand";
 import { UMLGeneratorCommand } from "../vscommands/umlgenerator/UMLGeneratorCommand";
+import BulkExportToI18NCommand from "../vscommands/i18ncommand/BulkExportToI18NCommand";
 
 export class CommandRegistrator {
 	static register(metadataLoaded: boolean) {
@@ -81,6 +82,21 @@ export class CommandRegistrator {
 
 			try {
 				await new ExportToI18NCommand(parser).export();
+			} catch (error: any) {
+				await vscode.window.showErrorMessage(
+					`Error ocurred while exporting to i18n. Message: ${error.message}`
+				);
+			}
+		});
+		const bulkExportToI18NCommand = vscode.commands.registerCommand("ui5plugin.bulkExportToi18n", async () => {
+			const parser = ReusableMethods.getParserForCurrentActiveDocument();
+			const document = vscode.window.activeTextEditor?.document;
+			if (!parser || !document) {
+				return;
+			}
+
+			try {
+				await new BulkExportToI18NCommand(parser).export(document);
 			} catch (error: any) {
 				await vscode.window.showErrorMessage(
 					`Error ocurred while exporting to i18n. Message: ${error.message}`
@@ -284,6 +300,7 @@ export class CommandRegistrator {
 		UI5Plugin.getInstance().addDisposable(openNewDocumentCommand);
 		UI5Plugin.getInstance().addDisposable(switcherCommand);
 		UI5Plugin.getInstance().addDisposable(exportToI18NCommand);
+		UI5Plugin.getInstance().addDisposable(bulkExportToI18NCommand);
 		UI5Plugin.getInstance().addDisposable(insertCustomClassNameCommand);
 		UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramCommand);
 		UI5Plugin.getInstance().addDisposable(generateUMLClassDiagramForWholeProject);
@@ -300,6 +317,7 @@ export class CommandRegistrator {
 			"ui5plugin.moveDefineToFunctionParameters",
 			"ui5plugin.switchBetweenVC",
 			"ui5plugin.exportToi18n",
+			"ui5plugin.bulkExportToi18n",
 			"ui5plugin.insertCustomClassName",
 			"ui5plugin.generateUMLClassDiagram",
 			"ui5plugin.generateUMLClassDiagramsForWholeProject",

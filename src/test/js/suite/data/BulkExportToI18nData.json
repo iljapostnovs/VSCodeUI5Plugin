@@ -1,0 +1,25 @@
+{
+	"xml": "<mvc:View\r\n\txmlns:mvc=\"sap.ui.core.mvc\"\r\n\txmlns=\"sap.m\"\r\n\tdisplayBlock=\"true\"\r\n\theight=\"100%\"\r\n\tbusyIndicatorDelay=\"0\"\r\n>\r\n\t<Text text=\"{i18n>BulkI18nExportTestView.Hello}\"/>\r\n\t<Text text=\"{i18n>BulkI18nExportTestView.Hello}\"/>\r\n\t<Text text=\"{AlreadyBinded}\"/>\r\n\t<Text text=\"Complex {Binded}\"/>\r\n\t<Button text=\"{i18n>BulkI18nExportTestView.MyButton}\"/>\r\n\t<Input placeholder=\"{i18n>BulkI18nExportTestView.MyPlaceholder}\"/>\r\n\t<Title text=\"{i18n>BulkI18nExportTestView.MyTitle}\"/>\r\n\t<InputListItem\r\n\t\thighlight=\"Information\"\r\n\t\thighlightText=\"{i18n>BulkI18nExportTestView.HiThere}\"\r\n\t/>\r\n</mvc:View>",
+	"i18n": [
+		{
+			"id": "BulkI18nExportTestView.Hello",
+			"description": "Hello"
+		},
+		{
+			"id": "BulkI18nExportTestView.MyButton",
+			"description": "My Button"
+		},
+		{
+			"id": "BulkI18nExportTestView.MyPlaceholder",
+			"description": "My placeholder"
+		},
+		{
+			"id": "BulkI18nExportTestView.MyTitle",
+			"description": "My title"
+		},
+		{
+			"id": "BulkI18nExportTestView.HiThere",
+			"description": "Hi there"
+		}
+	]
+}

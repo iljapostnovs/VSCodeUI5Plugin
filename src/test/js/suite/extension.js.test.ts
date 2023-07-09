@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/indent */
 import assert = require("assert");
+import { readFile, writeFile } from "fs/promises";
 import { after, test } from "mocha";
 import { JSLinterErrorFactory, PropertiesLinterErrorFactory, XMLLinterErrorFactory } from "ui5plugin-linter";
 import { ParserPool, UI5JSParser, XMLParser } from "ui5plugin-parser";
@@ -17,6 +18,8 @@ import { JSRenameProvider } from "../../../classes/providers/rename/JSRenameProv
 import { FileWatcherMediator } from "../../../classes/utils/FileWatcherMediator";
 import { XMLFormatter } from "../../../classes/utils/XMLFormatter";
 import GenerateIDCommand from "../../../classes/vscommands/generateids/GenerateIDCommand";
+import BulkExportToI18NCommand from "../../../classes/vscommands/i18ncommand/BulkExportToI18NCommand";
+import * as BulkExportToi18nData from "./data/BulkExportToI18nData.json";
 import * as CodeLensData from "./data/CodeLensData.json";
 import * as IDGenerationData from "./data/IDGenerationData.json";
 import * as renameData from "./data/RenameData.json";
@@ -683,6 +686,48 @@ suite("Extension Test Suite", () => {
 						data.result
 					}", but it was "${document.getText()}"`
 				);
+			}
+		}
+	});
+
+	test("Export to i18n works as expected", async () => {
+		const testData = BulkExportToi18nData;
+		const viewName = "com.test.view.BulkI18nExportTest";
+		const parser = ParserPool.getParserForCustomClass(viewName);
+		const fsPath = parser?.fileReader.convertClassNameToFSPath(viewName, false, false, true);
+		if (fsPath && parser) {
+			const manifest = parser.fileReader.getManifestForClass(viewName);
+			const i18nFsPath = manifest && parser.fileReader.getResourceModelUriForManifest(manifest);
+			const oldI18nContent = i18nFsPath && (await readFile(i18nFsPath, { encoding: "utf-8" }));
+
+			const uri = vscode.Uri.file(fsPath);
+			const document = await vscode.workspace.openTextDocument(uri);
+			await vscode.window.showTextDocument(document);
+			await new BulkExportToI18NCommand(parser).export(document);
+			assert.strictEqual(
+				document.getText().replaceAll("\r", ""),
+				testData.xml.replaceAll("\r", ""),
+				`i18n generation for "${viewName}" should have content in view "${
+					testData.xml
+				}", but it was "${document.getText()}"`
+			);
+
+			const i18nData = parser.resourceModelData.resourceModels["com.test"];
+			const lastFive = i18nData
+				.slice(i18nData.length - 5, i18nData.length)
+				.map(({ id, description }) => ({ id, description }));
+			const jsonData = JSON.stringify(lastFive);
+
+			assert.strictEqual(
+				jsonData.replaceAll("\r", ""),
+				JSON.stringify(testData.i18n).replaceAll("\r", ""),
+				`i18n generation for "${viewName}" should have content in i18n "${jsonData}", but it was "${JSON.stringify(
+					testData.i18n
+				)}"`
+			);
+
+			if (i18nFsPath && oldI18nContent) {
+				await writeFile(i18nFsPath, oldI18nContent);
 			}
 		}
 	});

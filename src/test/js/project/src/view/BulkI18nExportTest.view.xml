@@ -1,0 +1,19 @@
+<mvc:View
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	displayBlock="true"
+	height="100%"
+	busyIndicatorDelay="0"
+>
+	<Text text="Hello"/>
+	<Text text="Hello"/>
+	<Text text="{AlreadyBinded}"/>
+	<Text text="Complex {Binded}"/>
+	<Button text="My Button"/>
+	<Input placeholder="My placeholder"/>
+	<Title text="My title"/>
+	<InputListItem
+		highlight="Information"
+		highlightText="Hi there"
+	/>
+</mvc:View>

@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "1.11.1",
+	"version": "1.12.0",
 	"publisher": "iljapostnovs",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
 	"license": "Apache-2.0",
@@ -327,6 +327,72 @@
 						}
 					},
 					"markdownDescription": "Data for `ui5plugin.generateIds` command. Contains array of classes to be excluded from ID generation and a flag if IDs should be generated for Elements as well, or for Controls only"
+				},
+				"ui5.plugin.bulkExportToi18nCommandData": {
+					"type": "array",
+					"default": [
+						{
+							"className": "*",
+							"properties": [
+								"text",
+								"title",
+								"info",
+								"placeholder",
+								"tooltip",
+								"iconTooltip",
+								"intro"
+							]
+						},
+						{
+							"className": "sap.m.ListItemBase",
+							"applyToChildren": true,
+							"properties": [
+								"highlightText"
+							]
+						},
+						{
+							"className": "sap.m.ListBase",
+							"applyToChildren": true,
+							"properties": [
+								"footerText",
+								"growingTriggerText",
+								"headerText",
+								"noDataText"
+							]
+						}
+					],
+					"items": {
+						"type": "object",
+						"default": {
+							"className": "",
+							"applyToChildren": true,
+							"properties": [
+								""
+							]
+						},
+						"required": [
+							"className",
+							"properties"
+						],
+						"properties": {
+							"className": {
+								"type": "string",
+								"markdownDescription": "Class name for which rule will be applied. Example: `sap.m.Button`, `*`"
+							},
+							"applyToChildren": {
+								"type": "boolean",
+								"markdownDescription": "If current rule should be applied for children classes"
+							},
+							"properties": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								},
+								"markdownDescription": "List of properties which should be exported. Example: `[\"text\"]`"
+							}
+						}
+					},
+					"markdownDescription": "Data for `ui5plugin.bulkExportToi18n` command. Contains data about which proprties should be exported to i18n."
 				}
 			}
 		},
@@ -410,6 +476,10 @@
 			{
 				"command": "ui5plugin.generateIds",
 				"title": "UI5: Generate ids for all elements in view or fragment"
+			},
+			{
+				"command": "ui5plugin.bulkExportToi18n",
+				"title": "UI5: Export to i18n (bulk)"
 			}
 		]
 	},
