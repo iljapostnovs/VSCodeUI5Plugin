@@ -1,3 +1,7 @@
+## 1.12.1 (10-07-2023)
+
+-   `README.md` updated
+
 ## 1.12.0 (09-07-2023)
 
 -   New command added: `ui5plugin.bulkExportToi18n` [Readme](README.md#export-to-i18n-bulk)

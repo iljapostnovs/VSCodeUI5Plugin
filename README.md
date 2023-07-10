@@ -121,6 +121,7 @@ VSCode extension is using [UI5 Parser](https://github.com/iljapostnovs/ui5plugin
 | ui5.plugin.globalConfigurationPath                      | Absolute path to global `any_file.json` configuration file, which is used by `UI5 Parser` and `UI5 Linter`. Priority of ui5 config determination: local `package.json` -> global `any_file.json` -> default value. Example: `C:\\Users\\MyUser\\Documents\\ui5config.json` |
 | ui5.plugin.idGenerationFormula                          | Formula for id generation.                                                                                                                                                                                                                                                 |
 | ui5.plugin.generateIdsCommandData                       | Data for `ui5plugin.generateIds` command. Contains array of classes to be excluded from ID generation and a flag if IDs should be generated for Elements as well, or for Controls only                                                                                     |
+| ui5.plugin.bulkExportToi18nCommandData                  | Data for `ui5plugin.bulkExportToi18n` command. Contains data about which proprties should be exported to i18n.only                                                                                                                                                         |
 
 ---
 
@@ -155,7 +156,7 @@ Completion items which are generated dynamically depending on current variable t
 
 ### Manifest.json
 
-Schema for manifest.json properties is added.<br/>
+Schema for manifest.json properties is provided.<br/>
 
 ![ManifestCompletionItems](/images/ManifestCompletionItems.gif)
 
@@ -192,10 +193,7 @@ CodeLens for Internalization Texts (translations), overriden methods, event hand
 
 ## XML Diagnostics
 
-See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<br/>
-
-> To make XML Linter ignore tag and attribute errors of next tag, you can use `<-- @ui5ignore -->` comment right above the tag<br/>
-> To make XML Linter ignore specific attribute errors of next tag, you can use `<-- @ui5ignore myAttribute1, myAttribute2 -->` comment right above the tag<br/>
+See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter#xml-linters) for reference<br/>
 
 ![DynamicCompletionItems](/images/XMLDiagnostics.gif)
 
@@ -203,9 +201,7 @@ See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<b
 
 ## JS/TS Diagnostics
 
-See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<br/>
-
-> To make Unused method, public member, wrong parameter usage and wrong field/method linters ignore some methods or fields, you can use @ui5ignore JSDoc param, or add exceptions in `package.json`<br/> ![UI5IgnoreExample](/images/UI5IgnoreExample.png)
+See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter#jsts-linters) for reference<br/>
 
 ![DynamicCompletionItems](/images/JSDiagnostics.gif)
 
@@ -213,9 +209,7 @@ See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<b
 
 ## Properties (i18n) Diagnostics
 
-See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter) for reference<br/>
-
-> To make Properties Linter ignore translation errors, you can use `# @ui5ignore` comment right above the translation<br/>
+See [UI5 Linter](https://www.npmjs.com/package/ui5plugin-linter#properties-linters) for reference<br/>
 
 ---
 
@@ -283,11 +277,11 @@ The provider renames all references to the class for `JS` projects, and all refe
 
 ### Export to i18n
 
-Set your position to the string you want to export to i18n.properties file and execute command. Works both in XML and JS files.
+Set your position to the string you want to export to `i18n.properties` file and execute command. Works both in XML and JS files.
 
 > **Info!** If there is no selection, whole string will be exported. If there is a selection, only the selected part of the string will be exported.
 
-> `this.getBundle()` method which returns ResourceBundle should be defined in Controller/BaseController
+> `this.getBundle()` method which returns `ResourceBundle` should be defined in Controller/BaseController
 
 > Related preference entries:<br/> _ui5.plugin.askUserToConfirmI18nId_<br/> _ui5.plugin.addI18nTextLengthLimitation_<br/> _ui5.plugin.textTransformationStrategy_<br/>
 
@@ -555,7 +549,7 @@ To solve it, please run `UI5: Clear cache` command and reload VSCode.
 ## Things to consider using TS
 
 1. If any `.ts` files are found and `tsconfig.json` is found, project is considered to be TS project
-2. `src-gen` folder is automatically excluded by extension if it's TS project. If build folder has different name, it should be added to folder exclusions in [UI5 Parser configuration](#configuration).
+2. `src-gen` folder is automatically excluded by extension if it's TS project. If build folder has different name, it should be added to folder exclusions in [UI5 Parser configuration](https://github.com/iljapostnovs/ui5plugin-parser/blob/master/README.md#config-default-values).
 3. Folder with builded resources should be added to exclusions of `ui5parser`. Check `excludeFolderPatterns` in package.json.
 4. Not all linters work for TS, because TS has a lot out of the box features. E.g. Wrong field/method linter works only for JS, because TS has it's own syntax analysis for that.
 5. `ts-morph` is used as TS parser and it has some drawbacks. When using typechecker to get type e.g. of the field or return type of the method, `ts-morph` might hang up for about ~10s, which is not great. However, types are crucial for Reference CodeLens/Linters, specifically for fields in order to be able to distinguish them in views/fragments. As a workaround for performance issues, typechecker is not used to get field types. Because of that only simple structure is allowed.
