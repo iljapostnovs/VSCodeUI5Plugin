@@ -1,4 +1,4 @@
-import { IUIMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
+import { IUIMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractBaseClass";
 import { ICustomClassJSMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
 import { VSCodeTextDocumentTransformer } from "../../../../utils/VSCodeTextDocumentTransformer";

@@ -52,6 +52,13 @@
 							"items": {
 								"type": "string"
 							}
+						},
+						"nodeProjects": {
+							"description": "Configuration entry for UI5 Projects which are installed via npm. Example: 'my-custom-lib'",
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
 						}
 					}
 				},

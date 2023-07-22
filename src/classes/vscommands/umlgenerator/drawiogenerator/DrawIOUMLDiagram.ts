@@ -1,6 +1,6 @@
 import { UI5JSParser } from "ui5plugin-parser";
+import { IUIField, IUIMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractBaseClass";
 import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
-import { IUIField, IUIMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
 import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
 import { CustomTSObject } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSObject";
@@ -9,10 +9,10 @@ import { ClassHead } from "./drawiouml/ClassHead";
 import { Field } from "./drawiouml/Field";
 import { Footer } from "./drawiouml/Footer";
 import { Header } from "./drawiouml/Header";
-import { ITextLengthGettable } from "./drawiouml/interfaces/ITextLengthGettable";
 import { Method } from "./drawiouml/Method";
 import { Property } from "./drawiouml/Property";
 import { Separator } from "./drawiouml/Separator";
+import { ITextLengthGettable } from "./drawiouml/interfaces/ITextLengthGettable";
 
 export class DrawIOUMLDiagram extends ParserBearer<UI5JSParser> {
 	readonly UIClass: AbstractCustomClass;

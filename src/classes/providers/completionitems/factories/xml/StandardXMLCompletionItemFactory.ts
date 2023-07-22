@@ -1,5 +1,5 @@
 import { SAPNode } from "ui5plugin-parser/dist/classes/librarydata/SAPNode";
-import { AbstractJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
+import { AbstractBaseClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractBaseClass";
 import * as vscode from "vscode";
 import ParserBearer from "../../../../ui5parser/ParserBearer";
 import HTMLMarkdown from "../../../../utils/HTMLMarkdown";
@@ -81,10 +81,10 @@ export class StandardXMLCompletionItemFactory extends ParserBearer implements IC
 		});
 	}
 
-	public generateXMLClassCompletionItemFromUIClass(UIClass: AbstractJSClass, classPrefix = "") {
+	public generateXMLClassCompletionItemFromUIClass(UIClass: AbstractBaseClass, classPrefix = "", addPrefixBeforeClassName = false) {
 		return this._generateXMLClassCompletionItemUsing({
-			markdown: new HTMLMarkdown("Custom class"),
-			insertText: this.generateClassInsertTextFromSAPClass(UIClass, classPrefix),
+			markdown: new HTMLMarkdown(UIClass.description || "Custom Class"),
+			insertText: this.generateClassInsertTextFromSAPClass(UIClass, classPrefix, addPrefixBeforeClassName),
 			detail: UIClass.className,
 			className: UIClass.className
 		});
@@ -133,7 +133,7 @@ export class StandardXMLCompletionItemFactory extends ParserBearer implements IC
 		);
 	}
 
-	public generateClassInsertTextFromSAPClass(UIClass: AbstractJSClass, classPrefix: string) {
+	public generateClassInsertTextFromSAPClass(UIClass: AbstractBaseClass, classPrefix: string, addPrefixBeforeClassName = false) {
 		const propertyGenerator: IPropertyGenerator = GeneratorFactory.getPropertyGenerator(
 			GeneratorFactory.language.xml
 		);
@@ -153,7 +153,7 @@ export class StandardXMLCompletionItemFactory extends ParserBearer implements IC
 		const classNameParts = className.split(".");
 		className = classNameParts[classNameParts.length - 1];
 
-		return this._generateInsertStringFrom(className, properties, aggregations, classPrefix);
+		return this._generateInsertStringFrom(className, properties, aggregations, classPrefix, addPrefixBeforeClassName ? classPrefix : undefined);
 	}
 
 	private _generateInsertStringFrom(
