@@ -39,7 +39,8 @@
 		"vscode": "^1.79.0"
 	},
 	"categories": [
-		"Extension Packs"
+		"Linters",
+		"Programming Languages"
 	],
 	"activationEvents": [
 		"onStartupFinished"
