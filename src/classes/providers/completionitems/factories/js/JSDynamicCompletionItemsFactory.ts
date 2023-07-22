@@ -1,18 +1,18 @@
 import { UI5JSParser } from "ui5plugin-parser";
 import { InterfaceMemberStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/InterfaceMemberStrategy";
 import { ParentMethodStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/ParentMethodStrategy";
+import { IUIField, IUIMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractBaseClass";
 import { IFieldsAndMethods } from "ui5plugin-parser/dist/classes/parsing/ui5class/factory/IClassFactory";
-import { IUIField, IUIMethod } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
 import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import * as vscode from "vscode";
 import { TextDocumentAdapter } from "../../../../adapters/vscode/TextDocumentAdapter";
 import { CodeGeneratorFactory } from "../../../../templateinserters/codegenerationstrategies/CodeGeneratorFactory";
 import ParserBearer from "../../../../ui5parser/ParserBearer";
+import HTMLMarkdown from "../../../../utils/HTMLMarkdown";
 import { ReusableMethods } from "../../../reuse/ReusableMethods";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
 import { ClassCompletionItemFactory } from "./ClassCompletionItemFactory";
-import HTMLMarkdown from "../../../../utils/HTMLMarkdown";
 
 export class JSDynamicCompletionItemsFactory extends ParserBearer<UI5JSParser> implements ICompletionItemFactory {
 	async createCompletionItems(document: vscode.TextDocument, position: vscode.Position) {

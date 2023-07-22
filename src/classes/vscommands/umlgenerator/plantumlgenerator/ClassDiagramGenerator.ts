@@ -1,7 +1,7 @@
 import { ParserPool, UI5JSParser, WorkspaceFolder } from "ui5plugin-parser";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/FieldsAndMethodForPositionBeforeCurrentStrategy";
+import { IAbstract, IStatic } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractBaseClass";
 import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
-import { IAbstract, IStatic } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
 import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
 import { CustomTSObject } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSObject";

@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/quotes */
 import { ParserPool } from "ui5plugin-parser";
 import {
-	AbstractJSClass,
+	AbstractBaseClass,
 	IUIAggregation,
 	IUIEvent,
 	IUIProperty
-} from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
+} from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractBaseClass";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
 import { IXMLFile } from "ui5plugin-parser/dist/classes/parsing/util/filereader/IFileReader";
 import { ITag, PositionType } from "ui5plugin-parser/dist/classes/parsing/util/xml/XMLParser";
 import * as vscode from "vscode";
@@ -105,9 +106,30 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		if (textEditor) {
 			const document = textEditor.document;
 			const XMLText = document.getText();
-			completionItems = this._convertToFileSpecificCompletionItems(
+			const standardCompletionItems =
 				this._parser.getCustomData<StandardXMLCompletionItemFactory>("StandardXMLCompletionItemFactory")
-					?.XMLStandardLibCompletionItems ?? [],
+					?.XMLStandardLibCompletionItems ?? [];
+
+			const customClassLibs = ParserPool.getAllCustomUIClasses()
+				.filter(UIClass =>
+					this._parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.Element")
+				)
+				.reduce((libNames: string[], UIClass) => {
+					const classNameParts = UIClass.className.split(".");
+					classNameParts.pop();
+					const libName = classNameParts.join(".");
+					if (!libNames.includes(libName)) {
+						libNames.push(libName);
+					}
+
+					return libNames;
+				}, []);
+			const customCompletionItems = customClassLibs.flatMap(customLib => {
+				const prefix = this._parser.xmlParser.getPrefixForLibraryName(customLib, XMLText);
+				return prefix ? this._getCompletionItemsForCustomClasses(customLib, prefix) : [];
+			});
+			completionItems = this._convertToFileSpecificCompletionItems(
+				standardCompletionItems.concat(customCompletionItems),
 				XMLText,
 				addPrefix
 			);
@@ -238,6 +260,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 	) {
 		const nodeDAO = this._parser.nodeDAO;
 		return completionItems.reduce((accumulator: CustomCompletionItem[], completionItem: CustomCompletionItem) => {
+			const UIClass = this._parser.classFactory.getUIClass(completionItem.className);
 			const node = nodeDAO.findNode(completionItem.className);
 			if (node) {
 				const libName = node.getName().replace(`.${node.getDisplayName()}`, "");
@@ -252,6 +275,19 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 						accumulator.push(completionItem);
 					}
 				}
+			} else if (UIClass instanceof AbstractCustomClass) {
+				const libName = UIClass.className.replace(`.${UIClass.className.split(".").pop()}`, "");
+				const tagPrefix = this._parser.xmlParser.getPrefixForLibraryName(libName, XMLText);
+				if (tagPrefix !== undefined) {
+					let classPrefix = "";
+					if (addPrefix) {
+						classPrefix = tagPrefix.length > 0 ? `${tagPrefix}:` : tagPrefix;
+					}
+					const completionItem = this._getCustomCompletionItemWithPrefix(UIClass, classPrefix, libName);
+					if (completionItem) {
+						accumulator.push(completionItem);
+					}
+				}
 			} else {
 				//this happens when you have aggregation completion items
 				accumulator.push(completionItem);
@@ -260,28 +296,27 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		}, []);
 	}
 
-	private _getCompletionItemsForCustomClasses(libName: string, tagPrefix: string) {
+	private _getCompletionItemsForCustomClasses(libName: string, tagPrefix: string, addPrefixBeforeClassName = false) {
 		const xmlClassFactory = this._parser.getCustomData<StandardXMLCompletionItemFactory>(
 			"StandardXMLCompletionItemFactory"
 		);
-		const wsFolders = vscode.workspace.workspaceFolders || [];
-		const classNames = wsFolders.reduce((accumulator: string[], wsFolder) => {
-			const classNames = this._parser.fileReader.getAllJSClassNamesFromProject({ fsPath: wsFolder.uri.fsPath });
-			accumulator = accumulator.concat(classNames);
+		const classNames = ParserPool.getAllCustomUIClasses().map(UIClass => UIClass.className);
 
-			return accumulator;
-		}, []);
-
-		const classNamesForLibName = classNames.filter(className => className.startsWith(libName));
+		const classNamesForLibName = classNames.filter(className => {
+			const classNameParts = className.split(".");
+			classNameParts.pop();
+			const libOfTheClass = classNameParts.join(".");
+			return libOfTheClass === libName;
+		});
 		const UIClassesForLibName = classNamesForLibName.map(className =>
 			this._parser.classFactory.getUIClass(className)
 		);
 		const UIClassesThatExtendsUIControl = UIClassesForLibName.filter(UIClass =>
-			this._parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.Control")
+			this._parser.classFactory.isClassAChildOfClassB(UIClass.className, "sap.ui.core.Element")
 		);
 		const completionItems: CustomCompletionItem[] = UIClassesThatExtendsUIControl.map(UIClass =>
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-			xmlClassFactory!.generateXMLClassCompletionItemFromUIClass(UIClass, tagPrefix)
+			xmlClassFactory!.generateXMLClassCompletionItemFromUIClass(UIClass, tagPrefix, addPrefixBeforeClassName)
 		);
 
 		return completionItems;
@@ -309,19 +344,23 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		return completionItem;
 	}
 
+	private _getCustomCompletionItemWithPrefix(
+		UIClass: AbstractCustomClass,
+		tagPrefix: string,
+		libName = ""
+	): CustomCompletionItem | undefined {
+		return this._getCompletionItemsForCustomClasses(libName, tagPrefix, true).find(
+			completionItem => completionItem.className === UIClass.className
+		);
+	}
+
 	private _filterCompletionItemsByAggregationsType(
 		document: vscode.TextDocument,
 		position: vscode.Position,
 		completionItems: CustomCompletionItem[]
 	) {
-		const XMLFile =
-			vscode.window.activeTextEditor?.document &&
-			this._parser.textDocumentTransformer.toXMLFile(
-				new TextDocumentAdapter(vscode.window.activeTextEditor.document)
-			);
-		const currentPositionOffset = vscode.window.activeTextEditor?.document.offsetAt(
-			vscode.window.activeTextEditor?.selection.start
-		);
+		const XMLFile = this._parser.textDocumentTransformer.toXMLFile(new TextDocumentAdapter(document));
+		const currentPositionOffset = document.offsetAt(position);
 
 		if (XMLFile && currentPositionOffset) {
 			const { positionBegin: currentTagPositionBegin } = this._parser.xmlParser.getTagBeginEndPosition(
@@ -373,10 +412,12 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 				if (defaultAggregation) {
 					const aggregationType = defaultAggregation.type;
 					if (aggregationType) {
-						const nodeDAO = this._parser.nodeDAO;
 						completionItems = aggregationCompletionItems.concat(
 							completionItems.filter(completionItem => {
-								return nodeDAO.isInstanceOf(aggregationType, completionItem.className);
+								return this._parser.classFactory.isClassAChildOfClassB(
+									completionItem.className,
+									aggregationType
+								);
 							})
 						);
 					}
@@ -386,7 +427,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 				) {
 					const nodeDAO = this._parser.nodeDAO;
 					completionItems = completionItems.filter(completionItem => {
-						return nodeDAO.isInstanceOf("sap.ui.core.Control", completionItem.className);
+						return nodeDAO.isInstanceOf("sap.ui.core.Element", completionItem.className);
 					});
 				} else {
 					completionItems = aggregationCompletionItems;
@@ -410,9 +451,11 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 				const UIAggregation = this._getUIAggregationRecursively(UIClass, aggregationName);
 				if (UIAggregation?.type) {
 					const aggregationType = UIAggregation.type;
-					const nodeDAO = this._parser.nodeDAO;
 					completionItems = completionItems.filter(completionItem => {
-						return nodeDAO.isInstanceOf(aggregationType, completionItem.className);
+						return this._parser.classFactory.isClassAChildOfClassB(
+							completionItem.className,
+							aggregationType
+						);
 					});
 				}
 			}
@@ -505,7 +548,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 	}
 
 	private _getUIAggregationRecursively(
-		UIClass: AbstractJSClass,
+		UIClass: AbstractBaseClass,
 		aggregationName: string
 	): IUIAggregation | undefined {
 		let aggregation: IUIAggregation | undefined;
@@ -518,7 +561,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		return aggregation;
 	}
 
-	private _getAllAggregationsRecursively(UIClass: AbstractJSClass): IUIAggregation[] {
+	private _getAllAggregationsRecursively(UIClass: AbstractBaseClass): IUIAggregation[] {
 		let aggregations = UIClass.aggregations;
 		if (UIClass.parentClassNameDotNotation) {
 			const parentClass = this._parser.classFactory.getUIClass(UIClass.parentClassNameDotNotation);
@@ -528,7 +571,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		return aggregations;
 	}
 
-	private _getUIPropertyRecursively(UIClass: AbstractJSClass, propertyName: string): IUIProperty | undefined {
+	private _getUIPropertyRecursively(UIClass: AbstractBaseClass, propertyName: string): IUIProperty | undefined {
 		let property: IUIProperty | undefined;
 		property = UIClass.properties.find(property => property.name === propertyName);
 		if (!property && UIClass.parentClassNameDotNotation) {
@@ -539,7 +582,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		return property;
 	}
 
-	private _getUIEventRecursively(UIClass: AbstractJSClass, eventName: string): IUIEvent | undefined {
+	private _getUIEventRecursively(UIClass: AbstractBaseClass, eventName: string): IUIEvent | undefined {
 		let event: IUIEvent | undefined;
 		event = UIClass.events.find(event => event.name === eventName);
 		if (!event && UIClass.parentClassNameDotNotation) {
@@ -561,7 +604,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		);
 	}
 
-	private _getPropertyCompletionItemsFromClass(UIClass: AbstractJSClass) {
+	private _getPropertyCompletionItemsFromClass(UIClass: AbstractBaseClass) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = UIClass.properties.map(property => {
@@ -588,7 +631,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 
 	private _insertIdCompletionItem(
 		allCompletionItems: CustomCompletionItem[],
-		UIClass: AbstractJSClass,
+		UIClass: AbstractBaseClass,
 		document: vscode.TextDocument,
 		tag: ITag
 	) {
@@ -626,7 +669,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		return generator.generateId(tag, allIds, false).replace(/\{TabStop\}/g, "$1");
 	}
 
-	private _getEventCompletionItemsFromClass(UIClass: AbstractJSClass, eventValues: string[] = []) {
+	private _getEventCompletionItemsFromClass(UIClass: AbstractBaseClass, eventValues: string[] = []) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = UIClass.events.map(event => {
@@ -650,7 +693,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		return completionItems;
 	}
 
-	private _getAggregationCompletionItemsFromClass(UIClass: AbstractJSClass) {
+	private _getAggregationCompletionItemsFromClass(UIClass: AbstractBaseClass) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = UIClass.aggregations.map(aggregation => {
@@ -675,7 +718,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		return completionItems;
 	}
 
-	private _getAssociationCompletionItemsFromClass(UIClass: AbstractJSClass) {
+	private _getAssociationCompletionItemsFromClass(UIClass: AbstractBaseClass) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = UIClass.associations.map(association => {
@@ -714,9 +757,17 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 	private _removeDuplicateCompletionItems(completionItems: CustomCompletionItem[]) {
 		completionItems = completionItems.reduce(
 			(accumulator: CustomCompletionItem[], completionItem: CustomCompletionItem) => {
-				const methodInAccumulator = accumulator.find(
-					accumulatedCompletionItem => accumulatedCompletionItem.label === completionItem.label
-				);
+				const methodInAccumulator = accumulator.find(accumulatedCompletionItem => {
+					const accumulatorInsertText =
+						accumulatedCompletionItem.insertText instanceof vscode.SnippetString
+							? accumulatedCompletionItem.insertText.value
+							: accumulatedCompletionItem.insertText;
+					const insertText =
+						completionItem.insertText instanceof vscode.SnippetString
+							? completionItem.insertText.value
+							: completionItem.insertText;
+					return accumulatorInsertText === insertText;
+				});
 				if (!methodInAccumulator) {
 					accumulator.push(completionItem);
 				}

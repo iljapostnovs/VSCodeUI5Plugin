@@ -1,3 +1,10 @@
+## 1.13.0 (22-07-2023)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.6.0
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.8.2
+-   `nodeProjects` configuration option added. [Readme](https://github.com/iljapostnovs/ui5plugin-parser/blob/master/README.md#node-projects)
+-   Minor bugfixes for XML Completion items for custom controls
+
 ## 1.12.1 (10-07-2023)
 
 -   `README.md` updated

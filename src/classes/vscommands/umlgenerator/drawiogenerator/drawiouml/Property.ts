@@ -1,8 +1,8 @@
-import { IUMLGenerator } from "./interfaces/IUMLGenerator";
+import { IUIProperty } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractBaseClass";
 import { DrawIOUMLDiagram } from "../DrawIOUMLDiagram";
 import { ClassHead } from "./ClassHead";
 import { ITextLengthGettable } from "./interfaces/ITextLengthGettable";
-import { IUIProperty } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
+import { IUMLGenerator } from "./interfaces/IUMLGenerator";
 
 export class Property implements IUMLGenerator, ITextLengthGettable {
 	id: number;
@@ -35,9 +35,12 @@ export class Property implements IUMLGenerator, ITextLengthGettable {
 	}
 	generateXML(): string {
 		return `
-				<mxCell id="${this.id}" value="${this.getValue()}" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="${this.parent.id}">
+				<mxCell id="${
+					this.id
+				}" value="${this.getValue()}" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="${
+			this.parent.id
+		}">
 					<mxGeometry y="${26 + 26 * this.index}" width="${this.parent.width}" height="26" as="geometry" />
 				</mxCell>`;
 	}
-
 }

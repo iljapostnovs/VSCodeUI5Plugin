@@ -1,47 +1,82 @@
 {
 	"root": true,
-	"overrides": [{
-		"files": ["*.ts", "*.tsx"],
-		"parserOptions": {
-			"project": ["./tsconfig.json"]
+	"overrides": [
+		{
+			"files": [
+				"*.ts",
+				"*.tsx"
+			],
+			"extends": [
+				"plugin:@typescript-eslint/eslint-recommended",
+				"plugin:@typescript-eslint/recommended"
+			],
+			"parserOptions": {
+				"project": [
+					"./tsconfig.json"
+				]
+			},
+			"rules": {
+				"@typescript-eslint/explicit-module-boundary-types": "off",
+				"@typescript-eslint/no-explicit-any": "off",
+				"@typescript-eslint/no-namespace": "off",
+				"@typescript-eslint/prefer-readonly": "error",
+				"@typescript-eslint/type-annotation-spacing": "error",
+				"comma-spacing": "off",
+				"@typescript-eslint/comma-spacing": [
+					"error"
+				],
+				"comma-dangle": "off",
+				"@typescript-eslint/comma-dangle": [
+					"error"
+				],
+				"dot-notation": "off",
+				"@typescript-eslint/dot-notation": [
+					"error"
+				],
+				"func-call-spacing": "off",
+				"@typescript-eslint/func-call-spacing": [
+					"error"
+				],
+				"indent": "off",
+				"@typescript-eslint/indent": "off",
+				"no-empty-function": "off",
+				"@typescript-eslint/no-empty-function": [
+					"error"
+				],
+				"no-extra-semi": "off",
+				"@typescript-eslint/no-extra-semi": [
+					"error"
+				],
+				"no-unused-expressions": "off",
+				"@typescript-eslint/no-unused-expressions": [
+					"error"
+				],
+				"no-unused-vars": "off",
+				"@typescript-eslint/no-unused-vars": [
+					"error"
+				],
+				"object-curly-spacing": "off",
+				"@typescript-eslint/object-curly-spacing": [
+					"error",
+					"always"
+				],
+				"quotes": "off",
+				"@typescript-eslint/quotes": [
+					"error",
+					"double"
+				]
+			}
 		}
-	}],
+	],
 	"parser": "@typescript-eslint/parser",
 	"plugins": [
 		"@typescript-eslint"
 	],
 	"extends": [
-		"eslint:recommended",
 		"plugin:@typescript-eslint/eslint-recommended",
 		"plugin:@typescript-eslint/recommended"
 	],
-	"rules": {
-		"@typescript-eslint/explicit-module-boundary-types": "off",
-		"@typescript-eslint/no-explicit-any": "off",
-		"@typescript-eslint/no-namespace": "off",
-		"@typescript-eslint/prefer-readonly": "error",
-		"@typescript-eslint/type-annotation-spacing": "error",
-		"comma-spacing": "off",
-		"@typescript-eslint/comma-spacing": ["error"],
-		"comma-dangle": "off",
-		"@typescript-eslint/comma-dangle": ["error"],
-		"dot-notation": "off",
-		"@typescript-eslint/dot-notation": ["error"],
-		"func-call-spacing": "off",
-		"@typescript-eslint/func-call-spacing": ["error"],
-		"indent": "off",
-		"@typescript-eslint/indent": ["error", "tab"],
-		"no-empty-function": "off",
-		"@typescript-eslint/no-empty-function": ["error"],
-		"no-extra-semi": "off",
-		"@typescript-eslint/no-extra-semi": ["error"],
-		"no-unused-expressions": "off",
-		"@typescript-eslint/no-unused-expressions": ["error"],
-		"no-unused-vars": "off",
-		"@typescript-eslint/no-unused-vars": ["error"],
-		"object-curly-spacing": "off",
-		"@typescript-eslint/object-curly-spacing": ["error", "always"],
-		"quotes": "off",
-		"@typescript-eslint/quotes": ["error", "double"]
-	}
+	"ignorePatterns": [
+		"**/test/**"
+	]
 }

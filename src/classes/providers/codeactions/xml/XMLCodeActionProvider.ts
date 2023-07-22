@@ -1,5 +1,5 @@
 import { ImportDeclaration, Project } from "ts-morph";
-import { AbstractJSClass, IUIEvent } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/AbstractJSClass";
+import { AbstractBaseClass, IUIEvent } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractBaseClass";
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
 import * as vscode from "vscode";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
@@ -239,8 +239,8 @@ export class XMLCodeActionProvider extends ParserBearer {
 		}
 	}
 
-	private _getClassAndParents(className: string): AbstractJSClass[] {
-		const UIClasses: AbstractJSClass[] = [];
+	private _getClassAndParents(className: string): AbstractBaseClass[] {
+		const UIClasses: AbstractBaseClass[] = [];
 		const UIClass = this._parser.classFactory.getUIClass(className);
 		if (UIClass) {
 			UIClasses.push(UIClass);
