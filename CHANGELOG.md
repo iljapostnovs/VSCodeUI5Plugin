@@ -1,3 +1,9 @@
+## 1.13.1 (13-08-2023)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.6.1
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.8.3
+-   Missing autocompletions in XML issue fixed ([#366](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/366))
+
 ## 1.13.0 (22-07-2023)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.6.0

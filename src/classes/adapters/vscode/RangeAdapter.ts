@@ -1,8 +1,8 @@
-import LineColumn = require("line-column");
-import { SourceFile } from "ts-morph";
+import { lineColumn as LineColumn } from "ui5plugin-parser";
 import { IRange } from "ui5plugin-parser/dist/classes/parsing/util/range/adapters/RangeAdapter";
 import * as vscode from "vscode";
 import { IAcornPosition, PositionAdapter } from "./PositionAdapter";
+import { SourceFile } from "ui5plugin-parser/dist/tsmorph";
 
 export interface IAcornLocation {
 	start: IAcornPosition;

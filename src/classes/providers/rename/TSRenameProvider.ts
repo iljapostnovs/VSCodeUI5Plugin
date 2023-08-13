@@ -1,4 +1,3 @@
-import { MethodDeclaration, Node, ts } from "ts-morph";
 import { ICustomTSField, ICustomTSMethod, UI5TSParser } from "ui5plugin-parser";
 import {
 	CustomTSClass,
@@ -11,6 +10,7 @@ import {
 	ICustomClassTSObjectMethod
 } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSObject";
 import { IXMLFile } from "ui5plugin-parser/dist/classes/parsing/util/filereader/IFileReader";
+import { MethodDeclaration, Node, ts } from "ui5plugin-parser/dist/tsmorph";
 import * as vscode from "vscode";
 import { RangeAdapter } from "../../adapters/vscode/RangeAdapter";
 import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";

@@ -1,6 +1,6 @@
-import * as glob from "glob";
 import * as path from "path";
 import { toNative } from "ui5plugin-parser";
+import { glob } from "ui5plugin-parser/dist/glob";
 import * as vscode from "vscode";
 import ParserBearer from "../ui5parser/ParserBearer";
 import { ControllerRenameHandler } from "./handlers/ControllerRenameHandler";

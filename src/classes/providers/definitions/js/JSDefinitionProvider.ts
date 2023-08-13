@@ -1,5 +1,3 @@
-import { Node, StringLiteral } from "ts-morph";
-import * as ts from "typescript";
 import { ParserPool, UI5JSParser } from "ui5plugin-parser";
 import { FieldsAndMethodForPositionBeforeCurrentStrategy } from "ui5plugin-parser/dist/classes/parsing/jsparser/typesearch/FieldsAndMethodForPositionBeforeCurrentStrategy";
 import {
@@ -16,6 +14,7 @@ import { PositionAdapter } from "../../../adapters/vscode/PositionAdapter";
 import { RangeAdapter } from "../../../adapters/vscode/RangeAdapter";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 import ParserBearer from "../../../ui5parser/ParserBearer";
+import { Node, StringLiteral, ts } from "ui5plugin-parser/dist/tsmorph";
 
 interface CurrentStringData {
 	value: string;
