@@ -1,4 +1,3 @@
-import { ImportDeclaration, Project } from "ts-morph";
 import { AbstractBaseClass, IUIEvent } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractBaseClass";
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
 import * as vscode from "vscode";
@@ -6,6 +5,7 @@ import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapte
 import { CustomDiagnostics } from "../../../registrators/DiagnosticsRegistrator";
 import ParserBearer from "../../../ui5parser/ParserBearer";
 import { InsertType, MethodInserter } from "../util/MethodInserter";
+import { ImportDeclaration, Project } from "ui5plugin-parser/dist/tsmorph";
 
 export class XMLCodeActionProvider extends ParserBearer {
 	async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {

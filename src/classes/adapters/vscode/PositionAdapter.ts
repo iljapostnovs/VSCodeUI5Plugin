@@ -1,5 +1,5 @@
-import LineColumn = require("line-column");
 import * as vscode from "vscode";
+import { lineColumn as LineColumn } from "ui5plugin-parser";
 export interface IAcornPosition {
 	line: number,
 	column: number

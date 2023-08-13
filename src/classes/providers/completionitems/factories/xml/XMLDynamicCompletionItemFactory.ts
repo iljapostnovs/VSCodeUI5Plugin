@@ -598,7 +598,10 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 			typeValues.map(typeValue => {
 				const completionItem = new CustomCompletionItem(typeValue.text, vscode.CompletionItemKind.Keyword);
 				completionItem.detail = typeValue.text;
-				completionItem.documentation = typeValue.description;
+				completionItem.documentation =
+					typeValue.description instanceof HTMLMarkdown
+						? typeValue.description
+						: new HTMLMarkdown(typeValue.description);
 				return completionItem;
 			})
 		);
@@ -761,11 +764,15 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 					const accumulatorInsertText =
 						accumulatedCompletionItem.insertText instanceof vscode.SnippetString
 							? accumulatedCompletionItem.insertText.value
-							: accumulatedCompletionItem.insertText;
+							: accumulatedCompletionItem.insertText
+							? accumulatedCompletionItem.insertText
+							: accumulatedCompletionItem.label;
 					const insertText =
 						completionItem.insertText instanceof vscode.SnippetString
 							? completionItem.insertText.value
-							: completionItem.insertText;
+							: completionItem.insertText
+							? completionItem.insertText
+							: completionItem.label;
 					return accumulatorInsertText === insertText;
 				});
 				if (!methodInAccumulator) {
