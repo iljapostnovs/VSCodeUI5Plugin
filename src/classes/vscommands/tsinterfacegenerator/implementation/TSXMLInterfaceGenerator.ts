@@ -24,7 +24,7 @@ export class TSXMLInterfaceGenerator extends ParserBearer implements ITSInterfac
 				const className = toImport.split("/").pop();
 				return `import ${className} from "${toImport}";`;
 			}
-		);
+		).sort();
 		const aInterfaces = mInterfaceData.map(interfaceData => {
 			const sExtends = [...new Set(interfaceData.extends)].join(" & ");
 			return `export type ${interfaceData.name} = {\n\t${interfaceData.rows}\n}${
@@ -35,7 +35,7 @@ export class TSXMLInterfaceGenerator extends ParserBearer implements ITSInterfac
 		return aUniqueImports.join("\n") + "\n\n" + aInterfaces.join("\n\n");
 	}
 	private _generateInterfaceDataForFile(XMLFile: IXMLFile) {
-		const tags = this._parser.xmlParser.getAllTags(XMLFile);
+		const tags = this._parser.xmlParser.getAllTags(XMLFile).filter(tag => !tag.text.startsWith("<!--"));
 		const mInterfaceData = tags.reduce(
 			(
 				accumulator: {
@@ -69,8 +69,8 @@ export class TSXMLInterfaceGenerator extends ParserBearer implements ITSInterfac
 
 		const isView = XMLFile.fsPath.endsWith(".view.xml");
 		const interfaceName = XMLFile.name.split(".").pop() + (isView ? "View" : "Fragment");
-		const uniqueImports = [...new Set(mInterfaceData.import)];
-		const interfaceRows = mInterfaceData.interfaces.join("\n\t");
+		const uniqueImports = [...new Set(mInterfaceData.import)].sort();
+		const interfaceRows = mInterfaceData.interfaces.sort().join("\n\t");
 		const aExtends = XMLFile.fragments.map(fragment => {
 			const isView = fragment.fsPath.endsWith(".view.xml");
 			const interfaceName = fragment.name.split(".").pop() + (isView ? "View" : "Fragment");
