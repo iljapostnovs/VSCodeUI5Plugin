@@ -2,6 +2,7 @@
 	xmlns="sap.m"
 	xmlns:c="sap.ui.core"
 >
+	<Text text="\{type: 'sap.ui.model.type.Date', formatOptions: \{UTC: true\}, constraints: \{\} \}"></Text>
 	<Button
 		id="idButtonFragmentController2"
 		text="{

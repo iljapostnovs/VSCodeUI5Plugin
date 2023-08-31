@@ -1,3 +1,8 @@
+## 1.13.2 (31-08-2023)
+
+-   XML Formatter doesn't replace `"` with `'` in attribute value anymore for such cases as `\{type: 'sap.ui.model.type.Date', formatOptions: \{UTC: true\}, constraints: \{\} \}`
+-   TS id to control generator command now ignores commented tags. Output is sorted now.
+
 ## 1.13.1 (13-08-2023)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.6.1
