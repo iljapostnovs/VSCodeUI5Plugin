@@ -183,7 +183,11 @@ export class XMLFormatter extends ParserBearer {
 			}
 			formattedValue = `"${formattedValue}"`;
 		} else {
-			formattedValue = `'${attributeValue}'`;
+			if (attributeValue.includes("'")) {
+				formattedValue = `"${attributeValue}"`;
+			} else {
+				formattedValue = `'${attributeValue}'`;
+			}
 		}
 
 		return formattedValue;
