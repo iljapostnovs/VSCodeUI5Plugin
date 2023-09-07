@@ -1,3 +1,7 @@
+## 1.13.3 (07-09-2023)
+
+-   Fix imported module name collision for `(TS) Generate interfaces for XML files (id to class mapping)` command
+
 ## 1.13.2 (31-08-2023)
 
 -   XML Formatter doesn't replace `"` with `'` in attribute value anymore for such cases as `\{type: 'sap.ui.model.type.Date', formatOptions: \{UTC: true\}, constraints: \{\} \}`
