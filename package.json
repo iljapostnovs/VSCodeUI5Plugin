@@ -237,6 +237,11 @@
 					"default": true,
 					"description": "Should XML Formatter put tag ending (\">\", \"/>\") in newline"
 				},
+				"ui5.plugin.xmlFormatterSpaceAfterSelfTagEnd": {
+					"type": "boolean",
+					"default": true,
+					"description": "Should XML Formatter leave a space between the last attribute and the self tag end (\"/>\")"
+				},
 				"ui5.plugin.umlGenerationPath": {
 					"type": "string",
 					"default": "",

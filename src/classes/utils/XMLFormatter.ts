@@ -116,10 +116,17 @@ export class XMLFormatter extends ParserBearer {
 		const bShouldTagEndingBeOnNewline = vscode.workspace
 			.getConfiguration("ui5.plugin")
 			.get("xmlFormatterTagEndingNewline") as boolean;
+		const bShouldSelfTagEndingHaveSpaceBeforeIt = vscode.workspace
+			.getConfiguration("ui5.plugin")
+			.get("xmlFormatterSpaceAfterSelfTagEnd") as boolean;
 
 		if (tagAttributes.length <= 1 || !bShouldTagEndingBeOnNewline) {
 			formattedTag = formattedTag.trimEnd();
 			indentation = "";
+
+			if (tagEnd === "/>" && bShouldSelfTagEndingHaveSpaceBeforeIt) {
+				indentation += " ";
+			}
 		}
 
 		formattedTag += `${indentation}${tagEnd}`;
