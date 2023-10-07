@@ -13,6 +13,16 @@
 			</Toolbar>
 		</customHeader>
 		<Table items="{ODataModel>/Orders}"/>
+		<Table items="{
+			path: 'ODataModel>/Orders'
+		}"/>
+		<Table items="{
+			path: 'ODataModel>/Orders',
+			sorter: {
+				path: 'OrderID',
+				descending: false
+			}
+		}"/>
 		<Select items="{/Vendors}">
 			<items>
 				<c:Item/>

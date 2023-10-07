@@ -2,10 +2,10 @@ import { PackageLinterConfigHandler } from "ui5plugin-linter";
 import AMeaningAssumptionGenerator from "ui5plugin-linter/dist/classes/xml/linters/pattern/AMeaningAssumptionGenerator";
 import { ITag } from "ui5plugin-parser/dist/classes/parsing/util/xml/XMLParser";
 import { IUI5Parser } from "ui5plugin-parser/dist/parser/abstraction/IUI5Parser";
-import { WorkspaceEdit, window, workspace } from "vscode";
+import { Range, TextEdit, WorkspaceEdit, window, workspace } from "vscode";
 import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";
 import { VSCodeTextDocumentTransformer } from "../../utils/VSCodeTextDocumentTransformer";
-import { XMLFormatter } from "../../utils/XMLFormatter";
+import { XMLFormatter } from "ui5plugin-linter/dist/classes/formatter/xml/XMLFormatter";
 
 export interface GenerateIDCommandConfig {
 	excludeClasses?: string[];
@@ -58,9 +58,27 @@ export default class GenerateIDCommand extends AMeaningAssumptionGenerator {
 
 		if (workspaceEdit.size > 0) {
 			await workspace.applyEdit(workspaceEdit);
-			const textEdits = new XMLFormatter(this._parser).formatDocument(this._document.vsCodeDocument);
+
+			const bShouldTagEndingBeOnNewline = workspace
+				.getConfiguration("ui5.plugin")
+				.get<boolean>("xmlFormatterTagEndingNewline");
+			const sFormattedText = new XMLFormatter(this._parser, bShouldTagEndingBeOnNewline).formatDocument(
+				this._document
+			);
+			if (!sFormattedText) {
+				return;
+			}
+
+			const positionBegin = this._document.vsCodeDocument.positionAt(0);
+			const positionEnd = this._document.vsCodeDocument.positionAt(
+				this._document.vsCodeDocument.getText().length
+			);
+			const range = new Range(positionBegin, positionEnd);
+			const textEdit = new TextEdit(range, sFormattedText);
+
 			const formatEdit = new WorkspaceEdit();
-			formatEdit.set(this._document.vsCodeDocument.uri, textEdits);
+			formatEdit.set(this._document.vsCodeDocument.uri, [textEdit]);
+
 			await workspace.applyEdit(formatEdit);
 		}
 	}

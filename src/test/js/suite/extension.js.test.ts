@@ -16,7 +16,7 @@ import { SAPUIDefineFactory } from "../../../classes/providers/completionitems/f
 import { XMLDynamicCompletionItemFactory } from "../../../classes/providers/completionitems/factories/xml/XMLDynamicCompletionItemFactory";
 import { JSRenameProvider } from "../../../classes/providers/rename/JSRenameProvider";
 import { FileWatcherMediator } from "../../../classes/utils/FileWatcherMediator";
-import { XMLFormatter } from "../../../classes/utils/XMLFormatter";
+import { XMLFormatter } from "ui5plugin-linter/dist/classes/formatter/xml/XMLFormatter";
 import GenerateIDCommand from "../../../classes/vscommands/generateids/GenerateIDCommand";
 import BulkExportToI18NCommand from "../../../classes/vscommands/i18ncommand/BulkExportToI18NCommand";
 import * as BulkExportToi18nData from "./data/BulkExportToI18nData.json";
@@ -641,11 +641,11 @@ suite("Extension Test Suite", () => {
 			if (fsPath) {
 				const uri = vscode.Uri.file(fsPath);
 				const document = await vscode.workspace.openTextDocument(uri);
-				const textEdits = new XMLFormatter(parser).formatDocument(document);
+				const formattedText = new XMLFormatter(parser).formatDocument(new TextDocumentAdapter(document));
 				assert.strictEqual(
-					textEdits[0].newText.replaceAll("\r", ""),
+					formattedText?.replaceAll("\r", ""),
 					data.formattedText.replaceAll("\r", ""),
-					`XML Formatter for "${data.className}" should have formatted to "${data.formattedText}", but result was "${textEdits[0].newText}"`
+					`XML Formatter for "${data.className}" should have formatted to "${data.formattedText}", but result was "${formattedText}"`
 				);
 			}
 		}
