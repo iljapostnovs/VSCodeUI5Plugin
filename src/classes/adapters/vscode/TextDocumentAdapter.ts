@@ -7,4 +7,8 @@ export class TextDocumentAdapter extends TextDocument {
 		super(document.getText(), document.fileName);
 		this.vsCodeDocument = document;
 	}
+
+	getText(): string {
+		return this.vsCodeDocument.getText();
+	}
 }

@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "1.13.3",
+	"version": "1.13.4",
 	"publisher": "iljapostnovs",
 	"license": "Apache-2.0",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
@@ -235,7 +235,7 @@
 				"ui5.plugin.xmlFormatterTagEndingNewline": {
 					"type": "boolean",
 					"default": true,
-					"description": "Should XML Formatter put tag ending (\">\", \"/>\") in newline"
+					"description": "Should XML Formatter put tag ending (\">\", \"/>\") on newline"
 				},
 				"ui5.plugin.umlGenerationPath": {
 					"type": "string",
@@ -535,8 +535,8 @@
 		"webpack-cli": "^5.1.4"
 	},
 	"dependencies": {
-		"ui5plugin-linter": "^1.8.3",
-		"ui5plugin-parser": "^1.6.1"
+		"ui5plugin-linter": "^1.9.1",
+		"ui5plugin-parser": "^1.6.3"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",

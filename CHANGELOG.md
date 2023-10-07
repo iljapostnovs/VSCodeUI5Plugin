@@ -1,3 +1,8 @@
+## 1.13.4 (07-10-2023)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.6.3
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.9.1
+
 ## 1.13.3 (07-09-2023)
 
 -   Fix imported module name collision for `(TS) Generate interfaces for XML files (id to class mapping)` command
