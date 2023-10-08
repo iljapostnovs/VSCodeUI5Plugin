@@ -1,3 +1,8 @@
+## 1.14.0 (08-10-2023)
+
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.10.0
+-   `xmlFormatterSpaceAfterSelfTagEnd` preference entry for XML formatter added. [Readme](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#add-space-before-a-self-closing-tag)
+
 ## 1.13.4 (07-10-2023)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.6.3

@@ -1,8 +1,8 @@
+import { XMLFormatter } from "ui5plugin-linter/dist/classes/formatter/xml/XMLFormatter";
 import { ParserPool } from "ui5plugin-parser";
 import * as vscode from "vscode";
 import { UI5Plugin } from "../../UI5Plugin";
 import { TextDocumentAdapter } from "../adapters/vscode/TextDocumentAdapter";
-import { XMLFormatter } from "ui5plugin-linter/dist/classes/formatter/xml/XMLFormatter";
 export class XMLFormatterRegistrator {
 	static register() {
 		const disposable = vscode.languages.registerDocumentFormattingEditProvider(
@@ -17,9 +17,14 @@ export class XMLFormatterRegistrator {
 						const bShouldTagEndingBeOnNewline = vscode.workspace
 							.getConfiguration("ui5.plugin")
 							.get<boolean>("xmlFormatterTagEndingNewline");
-						const sFormattedText = new XMLFormatter(parser, bShouldTagEndingBeOnNewline).formatDocument(
-							new TextDocumentAdapter(document)
-						);
+						const bShouldSelfTagEndingHaveSpaceBeforeIt = vscode.workspace
+							.getConfiguration("ui5.plugin")
+							.get<boolean>("xmlFormatterSpaceAfterSelfTagEnd");
+						const sFormattedText = new XMLFormatter(
+							parser,
+							bShouldTagEndingBeOnNewline,
+							bShouldSelfTagEndingHaveSpaceBeforeIt
+						).formatDocument(new TextDocumentAdapter(document));
 						if (!sFormattedText) {
 							return;
 						}
