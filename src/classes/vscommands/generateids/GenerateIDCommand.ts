@@ -1,11 +1,11 @@
 import { PackageLinterConfigHandler } from "ui5plugin-linter";
+import { XMLFormatter } from "ui5plugin-linter/dist/classes/formatter/xml/XMLFormatter";
 import AMeaningAssumptionGenerator from "ui5plugin-linter/dist/classes/xml/linters/pattern/AMeaningAssumptionGenerator";
 import { ITag } from "ui5plugin-parser/dist/classes/parsing/util/xml/XMLParser";
 import { IUI5Parser } from "ui5plugin-parser/dist/parser/abstraction/IUI5Parser";
 import { Range, TextEdit, WorkspaceEdit, window, workspace } from "vscode";
 import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";
 import { VSCodeTextDocumentTransformer } from "../../utils/VSCodeTextDocumentTransformer";
-import { XMLFormatter } from "ui5plugin-linter/dist/classes/formatter/xml/XMLFormatter";
 
 export interface GenerateIDCommandConfig {
 	excludeClasses?: string[];
@@ -62,9 +62,14 @@ export default class GenerateIDCommand extends AMeaningAssumptionGenerator {
 			const bShouldTagEndingBeOnNewline = workspace
 				.getConfiguration("ui5.plugin")
 				.get<boolean>("xmlFormatterTagEndingNewline");
-			const sFormattedText = new XMLFormatter(this._parser, bShouldTagEndingBeOnNewline).formatDocument(
-				this._document
-			);
+			const bShouldSelfTagEndingHaveSpaceBeforeIt = workspace
+				.getConfiguration("ui5.plugin")
+				.get<boolean>("xmlFormatterSpaceAfterSelfTagEnd");
+			const sFormattedText = new XMLFormatter(
+				this._parser,
+				bShouldTagEndingBeOnNewline,
+				bShouldSelfTagEndingHaveSpaceBeforeIt
+			).formatDocument(this._document);
 			if (!sFormattedText) {
 				return;
 			}

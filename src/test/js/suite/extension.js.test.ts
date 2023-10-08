@@ -641,7 +641,7 @@ suite("Extension Test Suite", () => {
 			if (fsPath) {
 				const uri = vscode.Uri.file(fsPath);
 				const document = await vscode.workspace.openTextDocument(uri);
-				const formattedText = new XMLFormatter(parser).formatDocument(new TextDocumentAdapter(document));
+				const formattedText = new XMLFormatter(parser, true, false).formatDocument(new TextDocumentAdapter(document));
 				assert.strictEqual(
 					formattedText?.replaceAll("\r", ""),
 					data.formattedText.replaceAll("\r", ""),
