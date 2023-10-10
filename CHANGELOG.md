@@ -1,3 +1,8 @@
+## 1.15.0 (09-10-2023)
+
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.11.0
+-   Make XML Formatter preserve newlines. (Thanks to @netux)
+
 ## 1.14.0 (08-10-2023)
 
 -   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.10.0
