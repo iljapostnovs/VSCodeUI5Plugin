@@ -37,7 +37,8 @@ export class TSXMLInterfaceGenerator extends ParserBearer implements ITSInterfac
 			const sExtends = [...new Set(interfaceData.extends)].join(" & ");
 			const interfaceRows = interfaceData.rows.map(interfaceData => {
 				const moduleName = aUniqueImportData.find(importData => importData.modulePath === interfaceData.module)?.moduleName ?? "";
-				return `${interfaceData.id}: ${moduleName};`;
+				const controlId = /[^a-zA-Z]/.test(interfaceData.id) ? `"${interfaceData.id}"`: interfaceData.id;
+				return `${controlId}: ${moduleName};`;
 			}).sort().join("\n\t");
 			return `export type ${interfaceData.name} = {\n\t${interfaceRows}\n}${sExtends ? " & " + sExtends : ""};`;
 		});
