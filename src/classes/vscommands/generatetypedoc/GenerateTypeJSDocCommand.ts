@@ -3,7 +3,7 @@ import { join } from "path";
 import * as vscode from "vscode";
 import { ReusableMethods } from "../../providers/reuse/ReusableMethods";
 import { JSTypeDocAdapter } from "../../utils/xmlmetadata/JSTypeDocAdapter";
-import { XMLMetadataParser } from "../../utils/xmlmetadata/XMLMetadataParser";
+import MetadataParserFactory from "../../utils/xmlmetadata/MetadataParserFactory";
 import { XMLSourcePrompt } from "../../utils/xmlmetadata/XMLSourcePrompt";
 import { IVSCodeCommand } from "../IVSCodeCommand";
 
@@ -12,7 +12,7 @@ export class GenerateTypeJSDocCommand implements IVSCodeCommand {
 		try {
 			const xmlSourcePrompt = new XMLSourcePrompt();
 			const [XMLData] = await xmlSourcePrompt.getXMLMetadataText();
-			const metadata = new XMLMetadataParser(XMLData);
+			const metadata = MetadataParserFactory.getInstance(XMLData);
 			const typeDocAdapter = new JSTypeDocAdapter();
 			const content = typeDocAdapter.fromMetadata(metadata);
 

@@ -1,5 +1,11 @@
 import * as vscode from "vscode";
-import { IAssociation, IEntityType, IProperty, XMLMetadataParser } from "../../../utils/xmlmetadata/XMLMetadataParser";
+import {
+	AXMLMetadataParser,
+	IEntityType,
+	IProperty,
+	TCoordinality
+} from "../../../utils/xmlmetadata/AXMLMetadataParser";
+import MetadataParserFactory from "../../../utils/xmlmetadata/MetadataParserFactory";
 import { XMLSourcePrompt } from "../../../utils/xmlmetadata/XMLSourcePrompt";
 import { DiagramGenerator } from "../abstraction/DiagramGenerator";
 
@@ -14,7 +20,7 @@ export class ERDiagramGenerator extends DiagramGenerator {
 		try {
 			const xmlSourcePrompt = new XMLSourcePrompt();
 			const [XMLData] = await xmlSourcePrompt.getXMLMetadataText();
-			const metadata = new XMLMetadataParser(XMLData);
+			const metadata = MetadataParserFactory.getInstance(XMLData);
 			diagram = this._buildPlantUMLDiagram(metadata);
 		} catch (error) {
 			vscode.window.showErrorMessage(
@@ -25,12 +31,12 @@ export class ERDiagramGenerator extends DiagramGenerator {
 		return diagram;
 	}
 
-	private _buildPlantUMLDiagram(XMLData: XMLMetadataParser) {
+	private _buildPlantUMLDiagram(XMLData: AXMLMetadataParser) {
 		let diagram = "@startuml ERDiagram \nskinparam dpi 600\n";
 
 		diagram += this._buildDiagramForEntityTypes(XMLData.entityTypes);
 		diagram += this._buildDiagramForEntityTypes(XMLData.complexTypes, "<<Complex Type>> ");
-		diagram += this._buildDiagramForAssociations(XMLData.associations, XMLData.entityTypes);
+		diagram += this._buildDiagramForAssociations(XMLData.entityTypes);
 		diagram += this._buildAssociationsBetweenPropertiesAndComplexTypes(
 			XMLData.complexTypes,
 			XMLData.entityTypes.concat(XMLData.complexTypes)
@@ -67,44 +73,37 @@ export class ERDiagramGenerator extends DiagramGenerator {
 		);
 	}
 
-	private _buildDiagramForAssociations(associations: IAssociation[], entityTypes: IEntityType[]) {
+	private _buildDiagramForAssociations(entityTypes: IEntityType[]) {
 		return (
 			entityTypes
 				.flatMap(entityType => {
 					return entityType.navigations.map(navigation => {
-						const association = associations.find(
-							association => association.name === navigation.relationship
-						);
-						const fromRole =
-							association?.from.role === navigation.from ? association?.from : association?.to;
-						const toRole = association?.to.role === navigation.to ? association?.to : association?.from;
+						const multiplicityTo = this._getMultiplicity(navigation.coordinality ?? "1..1");
 
-						const multiplicityTo = this._getMultiplicity(toRole?.multiplicity ?? "1", false);
-
-						return `${fromRole?.type} --${multiplicityTo} ${toRole?.type}: ${navigation.name}`;
+						return `${entityType.name} --${multiplicityTo} ${navigation.type}: ${navigation.name}`;
 					});
 				})
 				.join("\n") + "\n"
 		);
 	}
 
-	private _getMultiplicity(multiplicity: string, isFrom: boolean) {
+	private _getMultiplicity(multiplicity: TCoordinality) {
 		let multiplicitySymbolic = "";
 
-		if (multiplicity === "1") {
+		if (multiplicity === "1..1") {
 			multiplicitySymbolic = "||";
-		} else if (multiplicity === "*") {
-			if (isFrom) {
-				multiplicitySymbolic = "}|";
-			} else {
-				multiplicitySymbolic = "|{";
-			}
+		} else if (multiplicity === "1..n") {
+			// if (isFrom) {
+			// 	multiplicitySymbolic = "}|";
+			// } else {
+			multiplicitySymbolic = "|{";
+			// }
 		} else if (multiplicity === "0..1") {
-			if (isFrom) {
-				multiplicitySymbolic = "|o";
-			} else {
-				multiplicitySymbolic = "o|";
-			}
+			// if (isFrom) {
+			// 	multiplicitySymbolic = "|o";
+			// } else {
+			multiplicitySymbolic = "o|";
+			// }
 		}
 
 		return multiplicitySymbolic;

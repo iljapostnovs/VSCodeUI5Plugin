@@ -1,22 +1,27 @@
-import { IEntityType, XMLMetadataParser } from "./XMLMetadataParser";
+import { AXMLMetadataParser, IEntityType } from "./AXMLMetadataParser";
 
 export class JSTypeDocAdapter {
-	fromMetadata(metadata: XMLMetadataParser) {
+	fromMetadata(metadata: AXMLMetadataParser) {
 		return this._buildTypeDef(metadata.entityTypes) + "\n\n" + this._buildTypeDef(metadata.complexTypes);
 	}
 
 	private _buildTypeDef(entityTypes: IEntityType[]) {
-		return entityTypes.map(entityType => {
-			const sTypeDefStart = "/**\n";
-			const sTypeDefEnd = "\n */";
-			const sTypeDefName = ` * @typedef ${entityType.name}\n`;
-			const sRow = entityType.properties.map(property => {
-				return ` * @property {${this._mapType(property.type)}} ${property.name}${property.label ? ` - ${property.label}` : ""}`;
+		return entityTypes
+			.map(entityType => {
+				const sTypeDefStart = "/**\n";
+				const sTypeDefEnd = "\n */";
+				const sTypeDefName = ` * @typedef ${entityType.name}\n`;
+				const sRow = entityType.properties
+					.map(property => {
+						return ` * @property {${this._mapType(property.type)}} ${property.name}${
+							property.label ? ` - ${property.label}` : ""
+						}`;
+					})
+					.join("\n");
 
-			}).join("\n");
-
-			return sTypeDefStart + sTypeDefName + sRow + sTypeDefEnd;
-		}).join("\n\n");
+				return sTypeDefStart + sTypeDefName + sRow + sTypeDefEnd;
+			})
+			.join("\n\n");
 	}
 
 	private _mapType(type: string) {
@@ -43,5 +48,5 @@ export class JSTypeDocAdapter {
 		"Edm.Single": "string",
 		"Edm.String": "string",
 		"Edm.Time": "string"
-	}
+	};
 }
