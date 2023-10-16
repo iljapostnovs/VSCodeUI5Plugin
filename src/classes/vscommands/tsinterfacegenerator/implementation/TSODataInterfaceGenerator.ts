@@ -1,48 +1,54 @@
 import {
-	IAssociation,
+	AXMLMetadataParser,
 	IEntityType,
 	INavigation,
-	XMLMetadataParser
-} from "../../../utils/xmlmetadata/XMLMetadataParser";
+	TCoordinality
+} from "../../../utils/xmlmetadata/AXMLMetadataParser";
+import { EdmTypes } from "../../../utils/xmlmetadata/EdmTypes";
+import MetadataParserFactory from "../../../utils/xmlmetadata/MetadataParserFactory";
+import { XMLMetadataParserV4 } from "../../../utils/xmlmetadata/XMLMetadataParserV4";
 import { XMLSourcePrompt } from "../../../utils/xmlmetadata/XMLSourcePrompt";
 import { ITSInterfaceGenerator } from "../abstraction/ITSInterfaceGenerator";
 
 export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
+	metadata?: AXMLMetadataParser;
 	async generate(XMLData?: string) {
 		if (!XMLData) {
 			const xmlSourcePrompt = new XMLSourcePrompt();
 			[XMLData] = await xmlSourcePrompt.getXMLMetadataText();
 		}
-		const metadata = new XMLMetadataParser(XMLData);
-		const aEntityTypeKeyInterfaces = metadata.entityTypes.map(entityType =>
+		this.metadata = MetadataParserFactory.getInstance(XMLData);
+		const aEntityTypeKeyInterfaces = this.metadata.entityTypes.map(entityType =>
 			this._buildInterfaceForEntityKeys(entityType)
 		);
-		const aComplexTypeKeyInterfaces = metadata.complexTypes.map(complexType =>
+		const aComplexTypeKeyInterfaces = this.metadata.complexTypes.map(complexType =>
 			this._buildInterfaceForEntityKeys(complexType)
 		);
-		const aEntityTypeInterfaces = metadata.entityTypes.map(entityType =>
-			this._buildInterfaceForEntity(entityType, metadata.associations)
+		const aEntityTypeInterfaces = this.metadata.entityTypes.map(entityType =>
+			this._buildInterfaceForEntity(entityType)
 		);
-		const aComplexTypeInterfaces = metadata.complexTypes.map(complexType =>
-			this._buildInterfaceForEntity(complexType, metadata.associations)
+		const aComplexTypeInterfaces = this.metadata.complexTypes.map(complexType =>
+			this._buildInterfaceForEntity(complexType)
 		);
-		const aEntityDataInterfaces = this._buildInterfacesForEntitySets(metadata);
+		const aEntityDataInterfaces = this._buildInterfacesForEntitySets(this.metadata);
+		const aFunctionImportInterfaces = this._buildInterfacesForFunctionImports(this.metadata);
 
 		const aInterfaces = [
 			aEntityTypeKeyInterfaces,
 			aEntityTypeInterfaces,
 			aComplexTypeKeyInterfaces,
 			aComplexTypeInterfaces,
-			aEntityDataInterfaces
+			aEntityDataInterfaces,
+			aFunctionImportInterfaces
 		].flat();
 
 		return aInterfaces.join("\n\n");
 	}
 
-	private _buildInterfacesForEntitySets(metadata: XMLMetadataParser) {
+	private _buildInterfacesForEntitySets(metadata: AXMLMetadataParser) {
 		const aInterfaceData = metadata.entityTypes.map(entityType => {
 			const entityTypeName = entityType.name;
-			const navigations = this._generateNavigations(entityType, metadata);
+			const navigations = this._generateNavigations(entityType);
 
 			return `"${entityType.entitySetName}": {\n\t\tkeys: ${entityTypeName}Keys;\n\t\ttype: ${entityTypeName};\n\t\ttypeName: "${entityTypeName}";\n\t\tnavigations: ${navigations};\n\t};`;
 		});
@@ -50,17 +56,30 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 		return [`export type EntitySets = {\n\t${aInterfaceData.join("\n\t")}\n};`];
 	}
 
-	private _generateNavigations(entityType: IEntityType, metadata: XMLMetadataParser) {
+	private _buildInterfacesForFunctionImports(metadata: AXMLMetadataParser) {
+		const aInterfaceData = metadata.functionImports.map(functionImport => {
+			const params = functionImport.parameters.map(param => {
+				const typeFromTypeMap = this._mapType(param.type);
+				return `{\n\t\t\tname: "${param.name}",\n\t\t\tlabel: "${
+					param.label ?? ""
+				}",\n\t\t\ttype: ${typeFromTypeMap}\n\t\t}`;
+			});
+
+			return `"${functionImport.name}": {\n\t\treturnType: ${
+				functionImport.returnType ?? "void"
+			};\n\t\tmethod: "${functionImport.method}";\n\t\tparameters: [${params}];\n\t};`;
+		});
+
+		return [`export type FunctionImports = {\n\t${aInterfaceData.join("\n\t")}\n};`];
+	}
+
+	private _generateNavigations(entityType: IEntityType) {
 		const navigationProperties = entityType.navigations
 			.map(navigation => {
-				const association = metadata.associations.find(
-					association => association.name === navigation.relationship
-				);
-				const toRole = association?.to.role === navigation.to ? association?.to : association?.from;
+				const isMultiple = this._getIsMultiple(navigation.coordinality);
 
-				const isMultiple = this._getIsMultiple(toRole?.multiplicity ?? "1");
-
-				const entityTypeName = isMultiple && toRole?.type ? `${toRole?.type}[]` : toRole?.type ?? "any";
+				const entityTypeName =
+					isMultiple && navigation.type ? `${navigation.type}[]` : navigation.type ?? "any";
 				const navigationName = navigation.name;
 
 				return `\t\t\t"${navigationName}": {\n\t\t\t\ttype: ${entityTypeName}\n\t\t\t};`;
@@ -70,12 +89,12 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 		return navigations;
 	}
 
-	private _getIsMultiple(multiplicity: string) {
-		if (multiplicity === "1") {
-			return false;
-		} else if (multiplicity === "*") {
+	private _getIsMultiple(multiplicity: TCoordinality) {
+		if (multiplicity === "1..n") {
 			return true;
 		} else if (multiplicity === "0..1") {
+			return false;
+		} else if (multiplicity === "1..1") {
 			return false;
 		} else {
 			return false;
@@ -92,9 +111,9 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 				if (description) {
 					description = `/** @description ${description} */\n\t`;
 				}
-				return `${description}${keyProperty.name}${keyProperty.nullable ? "?" : ""}: ${this._mapType(
+				return `${description}${keyProperty.name}: ${this._mapType(
 					keyProperty.type
-				)};`;
+				)}${keyProperty.nullable ? " | null" : ""};`;
 			})
 			.join("\n\t");
 
@@ -103,7 +122,7 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 		return theInterface;
 	}
 
-	private _buildInterfaceForEntity(entity: IEntityType, associations: IAssociation[]) {
+	private _buildInterfaceForEntity(entity: IEntityType) {
 		let theInterface = `export interface ${entity.name} extends ${entity.name}Keys {\n\t`;
 
 		theInterface += entity.properties
@@ -113,16 +132,16 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 				if (description) {
 					description = `/** @description ${description} */\n\t`;
 				}
-				return `${description}${property.name}${property.nullable ? "?" : ""}: ${this._mapType(
+				return `${description}${property.name}: ${this._mapType(
 					property.type
-				)};`;
+				)}${property.nullable ? " | null" : ""};`;
 			})
 			.join("\n\t");
 		theInterface +=
 			"\n\t" +
 			entity.navigations
 				.map(navigation => {
-					return `${navigation.name}?: ${this._getNavigationType(navigation, associations)};`;
+					return `${navigation.name}?: ${this._getNavigationType(navigation)};`;
 				})
 				.join("\n\t");
 
@@ -131,37 +150,23 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 		return theInterface;
 	}
 
-	private _getNavigationType(navigation: INavigation, associations: IAssociation[]) {
-		const association = associations.find(assoc => assoc.name === navigation.relationship);
-		const role = navigation.to === association?.to.role ? association?.to : association?.from;
-		const isMultiple = role?.multiplicity === "*";
-
-		return role ? (isMultiple ? `{ results: ${role?.type}[] }` : role.type) : "unknown";
+	private _getNavigationType(navigation: INavigation) {
+		const isMultiple = this._getIsMultiple(navigation.coordinality);
+		if (this.metadata instanceof XMLMetadataParserV4) {
+			return navigation ? (isMultiple ? `${navigation?.type}[]` : navigation.type) : "unknown";
+		} else {
+			return navigation ? (isMultiple ? `{ results: ${navigation?.type}[] }` : navigation.type) : "unknown";
+		}
 	}
 
 	private _mapType(type: string) {
-		const typeFromTypeMap = this._typeMap[type] || type;
+		const typeFromTypeMap =
+			(this.metadata instanceof XMLMetadataParserV4 ? this._typeMapV4[type] : this._typeMapV2[type]) ?? "string";
 		const returnType = typeFromTypeMap.startsWith("Edm.") ? typeFromTypeMap.replace("Edm.", "") : typeFromTypeMap;
 		return returnType;
 	}
 
-	private readonly _typeMap: { [key: string]: string } = {
-		"Edm.Decimal": "string",
-		"Edm.Boolean": "boolean",
-		"Edm.Double": "string",
-		"Edm.Float": "float",
-		"Edm.Int16": "int",
-		"Edm.Int32": "int",
-		"Edm.Int64": "string",
-		"Edm.Guid": "string",
-		"Edm.Binary": "string",
-		"Edm.DateTime": "Date",
-		"Edm.Date": "Date",
-		"Edm.DateTimeOffset": "string",
-		"Edm.Byte": "string",
-		"Edm.SByte": "string",
-		"Edm.Single": "string",
-		"Edm.String": "string",
-		"Edm.Time": "string"
-	};
+	private readonly _typeMapV2: { [key: string]: string } = EdmTypes.typeMapV2;
+
+	private readonly _typeMapV4: { [key: string]: string } = EdmTypes.typeMapV4;
 }

@@ -363,7 +363,6 @@ However, DrawIO is not supported anymore.<br/>
 > UML Diagram example:<br/> ![UML.png](/images/UML.png)
 
 > ER Diagram example:<br/> ![ERDiagram.png](/images/ERDiagram.png)
-> Works only with V2 OData Service <br/>
 > Related preference entries:<br/> _ui5.plugin.umlGenerationPath_<br/>
 
 ---
@@ -376,8 +375,6 @@ There are two ways to generate typedefs:<br/>
 
 -   Open `metadata.xml`file, execute command `UI5: JSDoc typedef generation from metadata`<br/>
 -   Execute command `UI5: JSDoc typedef generation from metadata` and enter url to `metadata.xml`<br/>
-
-> Works only with V2 OData Service <br/>
 
 > Related preference entries:<br/> _ui5.plugin.JSTypeDefDocPath_<br/>
 
@@ -404,8 +401,6 @@ There are two ways to generate interfaces:<br/>
 -   Open `metadata.xml` file, execute command `UI5: (TS) Generate interfaces for OData entities`<br/>
 -   Execute command `UI5: (TS) Generate interfaces for OData entities` and enter url to `metadata.xml`<br/>
 
-> Works only with V2 OData Service
-
 > Related preference entries:<br/> _ui5.plugin.TSODataInterfacesPath_<br/> _ui5.plugin.TSODataInterfacesFetchingData_<br/>
 
 ![GenerateXMLToIdInterfaces.png](/images/GenerateXMLToIdInterfaces.png)
@@ -415,8 +410,6 @@ There are two ways to generate interfaces:<br/>
 ### (TS) Generate interfaces for OData entities (Mass)
 
 Works the same as previous command, but can be used for multiple OData models at once. `ui5.plugin.massTSODataInterfacesFetchingData` preference entry should be configured for this command to work.
-
-> Works only with V2 OData Service
 
 > Related preference entries:<br/> _ui5.plugin.massTSODataInterfacesFetchingData_<br/>
 

@@ -1,56 +1,30 @@
-
 import { fastXmlParser } from "ui5plugin-parser";
-
-export interface IProperty {
-	name: string,
-	type: string,
-	label?: string;
-	length?: string,
-	precision?: string,
-	scale?: string,
-	nullable: boolean
-}
-
-export interface IEntityType {
-	name: string,
-	properties: IProperty[],
-	keys: string[],
-	navigations: INavigation[],
-	entitySetName?: string
-}
+import { AXMLMetadataParser, IEntityType, IFunctionImport, INavigation, IProperty } from "./AXMLMetadataParser";
 
 export interface IAssociation {
 	name: string;
-	from: {
-		type: string,
-		multiplicity: string,
-		role: string
-	},
-	to: {
-		type: string,
-		multiplicity: string,
-		role: string
-	}
+	end: {
+		type: string;
+		multiplicity: Multiplicity;
+		role: string;
+	}[];
 }
 
-export interface INavigation {
-	name: string,
-	relationship: string,
-	from: string,
-	to: string
-}
+export type Multiplicity = "1" | "*" | "0..1";
 
-export class XMLMetadataParser {
-	readonly associations: IAssociation[] = [];
+export class XMLMetadataParser extends AXMLMetadataParser {
+	namespace: string = "";
 	readonly entityTypes: IEntityType[] = [];
 	readonly complexTypes: IEntityType[] = [];
+	readonly functionImports: IFunctionImport[] = [];
 
 	constructor(XMLText: string) {
+		super();
 		const data = this._parseMetadataXML(XMLText);
 
-		this.associations = data.associations;
 		this.entityTypes = data.entityTypes;
 		this.complexTypes = data.complexTypes;
+		this.functionImports = data.functionImports;
 	}
 
 	private _parseMetadataXML(xmlText: string) {
@@ -65,41 +39,65 @@ export class XMLMetadataParser {
 		const parsedEntityTypes: IEntityType[] = [];
 		const parsedComplexTypes: IEntityType[] = [];
 		const parsedAssociations: IAssociation[] = [];
+		const parsedFunctionImports: IFunctionImport[] = [];
 		schemas.forEach((schema: any) => {
-			const namespace = schema["@_Namespace"];
+			this.namespace = schema["@_Namespace"];
 			const entityTypes = this._getArray(schema.EntityType);
 			const complexTypes = this._getArray(schema.ComplexType);
 			const associations = this._getArray(schema.Association);
+			const functionImports =
+				schema.EntityContainer?.FunctionImport && this._getArray(schema.EntityContainer.FunctionImport);
 			const entitySets = schema.EntityContainer?.EntitySet && this._getArray(schema.EntityContainer.EntitySet);
 
-			parsedEntityTypes.push(...this._parseEntityTypes(entityTypes, namespace, entitySets));
-			parsedComplexTypes.push(...this._parseEntityTypes(complexTypes, namespace, entitySets));
-			parsedAssociations.push(...this._parseAssociations(associations, namespace));
+			parsedAssociations.push(...this._parseAssociations(associations));
+			parsedEntityTypes.push(...this._parseEntityTypes(entityTypes, entitySets, parsedAssociations));
+			parsedComplexTypes.push(...this._parseEntityTypes(complexTypes, entitySets, parsedAssociations));
+			parsedFunctionImports.push(...this._parseFunctionImports(functionImports));
 		});
 
 		return {
 			entityTypes: parsedEntityTypes,
 			complexTypes: parsedComplexTypes,
-			associations: parsedAssociations
+			functionImports: parsedFunctionImports
 		};
 	}
 
-	private _parseEntityTypes(entityTypes: any[], namespace: string, entitySets: any[]): IEntityType[] {
+	private _parseFunctionImports(functionImports: any[]): IFunctionImport[] {
+		return functionImports.map((functionImport: any) => {
+			return {
+				name: functionImport["@_Name"],
+				returnType: functionImport["@_ReturnType"]?.replace(`${this.namespace}.`, "") ?? "void",
+				method: functionImport["@_m:HttpMethod"] ?? "GET",
+				parameters: this._getArray(functionImport.Parameter).map(param => {
+					return {
+						name: param["@_Name"],
+						type: param["@_Type"],
+						label: param["@_sap:label"]
+					};
+				})
+			};
+		});
+	}
+
+	private _parseEntityTypes(entityTypes: any[], entitySets: any[], associations: IAssociation[]): IEntityType[] {
 		return entityTypes.map((entityType: any) => {
 			const name: string = entityType["@_Name"];
-			const keys: string[] = entityType.Key?.PropertyRef["@_Name"] ? [entityType.Key.PropertyRef["@_Name"]] : (entityType.Key?.PropertyRef.map((propertyRef: any) => propertyRef["@_Name"]) || []);
+			const keys: string[] = entityType.Key?.PropertyRef["@_Name"]
+				? [entityType.Key.PropertyRef["@_Name"]]
+				: entityType.Key?.PropertyRef.map((propertyRef: any) => propertyRef["@_Name"]) || [];
 			const XMLProperties = this._getArray(entityType.Property);
-			let properties: IProperty[] = XMLProperties.map((property: any) => {
-				return {
-					name: property["@_Name"],
-					type: property["@_Type"].replace(`${namespace}.`, ""),
-					length: property["@_MaxLength"],
-					precision: property["@_Precision"],
-					scale: property["@_Scale"],
-					label: property["@_sap:label"],
-					nullable: property["@_Nullable"] === "true"
-				}
-			}) || [];
+			let properties: IProperty[] =
+				XMLProperties.map((property: any) => {
+					return {
+						name: property["@_Name"],
+						type: property["@_Type"].replace(`${this.namespace}.`, ""),
+						length: property["@_MaxLength"],
+						precision: property["@_Precision"],
+						scale: property["@_Scale"],
+						label: property["@_sap:label"],
+						nullable: property["@_Nullable"] === "true"
+					};
+				}) || [];
 			properties = properties.sort((a, b) => {
 				const aValue: 1 | 0 = keys.includes(a.name) ? 1 : 0;
 				const bValue: 1 | 0 = keys.includes(b.name) ? 1 : 0;
@@ -108,15 +106,20 @@ export class XMLMetadataParser {
 
 			const navigationData = this._getArray(entityType.NavigationProperty);
 			const navigations: INavigation[] = navigationData.map((data: any): INavigation => {
+				const relationship = data["@_Relationship"].replace(`${this.namespace}.`, "");
+				const association = associations.find(association => association.name === relationship);
+				const to = association?.end.find(end => end.role === data["@_ToRole"]);
+				const toType = to?.type.replace(`${this.namespace}.`, "") ?? "";
+				const coordinalityFrom = "1";
+				const coordinalityTo = to?.multiplicity === "*" ? "n" : "1";
 				return {
 					name: data["@_Name"],
-					relationship: data["@_Relationship"].replace(`${namespace}.`, ""),
-					from: data["@_FromRole"],
-					to: data["@_ToRole"]
-				}
+					type: toType,
+					coordinality: `${coordinalityFrom}..${coordinalityTo}`
+				};
 			});
 
-			const entitySetName = this._getEntitySetName(name, entitySets, namespace);
+			const entitySetName = this._getEntitySetName(name, entitySets);
 
 			return { name, properties, keys, navigations, entitySetName };
 		});
@@ -136,27 +139,25 @@ export class XMLMetadataParser {
 		return myArray;
 	}
 
-	private _getEntitySetName(name: any, entitySets: any[], namespace: string): string | undefined {
+	private _getEntitySetName(name: any, entitySets: any[]): string | undefined {
 		const entitySet = entitySets.find((entitySet: any) => {
-			return entitySet["@_EntityType"].replace(`${namespace}.`, "") === name
+			return entitySet["@_EntityType"].replace(`${this.namespace}.`, "") === name;
 		});
 
 		return entitySet && entitySet["@_Name"];
 	}
-	private _parseAssociations(associations: any[], namespace: string): IAssociation[] {
+	private _parseAssociations(associations: any[]): IAssociation[] {
 		return associations.map((association: any) => {
+			const ends = this._getArray(association.End);
 			const name = association["@_Name"];
-			const from = {
-				type: association.End[0]["@_Type"].replace(`${namespace}.`, ""),
-				multiplicity: association.End[0]["@_Multiplicity"],
-				role: association.End[0]["@_Role"]
-			};
-			const to = {
-				type: association.End[1]["@_Type"].replace(`${namespace}.`, ""),
-				multiplicity: association.End[1]["@_Multiplicity"],
-				role: association.End[1]["@_Role"]
-			};
-			return { name, from, to };
+			const parsedEnds = ends.map(end => {
+				return {
+					type: end["@_Type"].replace(`${this.namespace}.`, ""),
+					multiplicity: end["@_Multiplicity"],
+					role: end["@_Role"]
+				};
+			});
+			return { name, end: parsedEnds };
 		});
 	}
 }
