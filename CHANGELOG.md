@@ -1,4 +1,4 @@
-## 1.16.0 (15-10-2023)
+## 1.16.0 (16-10-2023)
 
 -   Commands which worked with V2 OData model only now works with V4 as well
 

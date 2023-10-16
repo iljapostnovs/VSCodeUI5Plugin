@@ -4,6 +4,7 @@ import {
 	INavigation,
 	TCoordinality
 } from "../../../utils/xmlmetadata/AXMLMetadataParser";
+import { EdmTypes } from "../../../utils/xmlmetadata/EdmTypes";
 import MetadataParserFactory from "../../../utils/xmlmetadata/MetadataParserFactory";
 import { XMLMetadataParserV4 } from "../../../utils/xmlmetadata/XMLMetadataParserV4";
 import { XMLSourcePrompt } from "../../../utils/xmlmetadata/XMLSourcePrompt";
@@ -110,9 +111,9 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 				if (description) {
 					description = `/** @description ${description} */\n\t`;
 				}
-				return `${description}${keyProperty.name}${keyProperty.nullable ? "?" : ""}: ${this._mapType(
+				return `${description}${keyProperty.name}: ${this._mapType(
 					keyProperty.type
-				)};`;
+				)}${keyProperty.nullable ? " | null" : ""};`;
 			})
 			.join("\n\t");
 
@@ -131,9 +132,9 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 				if (description) {
 					description = `/** @description ${description} */\n\t`;
 				}
-				return `${description}${property.name}${property.nullable ? "?" : ""}: ${this._mapType(
+				return `${description}${property.name}: ${this._mapType(
 					property.type
-				)};`;
+				)}${property.nullable ? " | null" : ""};`;
 			})
 			.join("\n\t");
 		theInterface +=
@@ -159,30 +160,13 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 	}
 
 	private _mapType(type: string) {
-		const typeFromTypeMap = this._typeMap[type] ?? "string";
+		const typeFromTypeMap =
+			(this.metadata instanceof XMLMetadataParserV4 ? this._typeMapV4[type] : this._typeMapV2[type]) ?? "string";
 		const returnType = typeFromTypeMap.startsWith("Edm.") ? typeFromTypeMap.replace("Edm.", "") : typeFromTypeMap;
 		return returnType;
 	}
 
-	private readonly _typeMap: { [key: string]: string } = {
-		"Edm.Decimal": "string",
-		"Edm.Boolean": "boolean",
-		"Edm.Double": "string",
-		"Edm.Float": "float",
-		"Edm.Int": "int",
-		"Edm.Int16": "int",
-		"Edm.Int32": "int",
-		"Edm.Int64": "string",
-		"Edm.Guid": "string",
-		"Edm.Binary": "string",
-		"Edm.DateTime": "Date",
-		"Edm.Date": "Date",
-		"Edm.DateTimeOffset": "string",
-		"Edm.Byte": "string",
-		"Edm.SByte": "string",
-		"Edm.Single": "string",
-		"Edm.String": "string",
-		String: "string",
-		"Edm.Time": "string"
-	};
+	private readonly _typeMapV2: { [key: string]: string } = EdmTypes.typeMapV2;
+
+	private readonly _typeMapV4: { [key: string]: string } = EdmTypes.typeMapV4;
 }

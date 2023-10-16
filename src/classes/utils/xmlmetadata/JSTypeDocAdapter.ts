@@ -1,7 +1,11 @@
 import { AXMLMetadataParser, IEntityType } from "./AXMLMetadataParser";
+import { EdmTypes } from "./EdmTypes";
+import { XMLMetadataParserV4 } from "./XMLMetadataParserV4";
 
 export class JSTypeDocAdapter {
+	metadata?: AXMLMetadataParser;
 	fromMetadata(metadata: AXMLMetadataParser) {
+		this.metadata = metadata;
 		return this._buildTypeDef(metadata.entityTypes) + "\n\n" + this._buildTypeDef(metadata.complexTypes);
 	}
 
@@ -25,28 +29,13 @@ export class JSTypeDocAdapter {
 	}
 
 	private _mapType(type: string) {
-		const typeFromTypeMap = this._typeMap[type] || type;
+		const typeFromTypeMap =
+			(this.metadata instanceof XMLMetadataParserV4 ? this._typeMapV4[type] : this._typeMapV2[type]) ?? "string";
 		const returnType = typeFromTypeMap.startsWith("Edm.") ? typeFromTypeMap.replace("Edm.", "") : typeFromTypeMap;
 		return returnType;
 	}
 
-	private readonly _typeMap: { [key: string]: string } = {
-		"Edm.Decimal": "string",
-		"Edm.Boolean": "boolean",
-		"Edm.Double": "string",
-		"Edm.Float": "float",
-		"Edm.Int16": "int",
-		"Edm.Int32": "int",
-		"Edm.Int64": "string",
-		"Edm.Guid": "string",
-		"Edm.Binary": "string",
-		"Edm.DateTime": "Date",
-		"Edm.Date": "Date",
-		"Edm.DateTimeOffset": "string",
-		"Edm.Byte": "string",
-		"Edm.SByte": "string",
-		"Edm.Single": "string",
-		"Edm.String": "string",
-		"Edm.Time": "string"
-	};
+	private readonly _typeMapV2: { [key: string]: string } = EdmTypes.typeMapV2;
+
+	private readonly _typeMapV4: { [key: string]: string } = EdmTypes.typeMapV4;
 }
