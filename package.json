@@ -540,8 +540,8 @@
 		"webpack-cli": "^5.1.4"
 	},
 	"dependencies": {
-		"ui5plugin-linter": "^1.11.0",
-		"ui5plugin-parser": "^1.6.3"
+		"ui5plugin-linter": "^1.11.1",
+		"ui5plugin-parser": "^1.6.4"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",
