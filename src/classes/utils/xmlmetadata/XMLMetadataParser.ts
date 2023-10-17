@@ -45,9 +45,8 @@ export class XMLMetadataParser extends AXMLMetadataParser {
 			const entityTypes = this._getArray(schema.EntityType);
 			const complexTypes = this._getArray(schema.ComplexType);
 			const associations = this._getArray(schema.Association);
-			const functionImports =
-				schema.EntityContainer?.FunctionImport && this._getArray(schema.EntityContainer.FunctionImport);
-			const entitySets = schema.EntityContainer?.EntitySet && this._getArray(schema.EntityContainer.EntitySet);
+			const functionImports = this._getArray(schema.EntityContainer?.FunctionImport);
+			const entitySets = this._getArray(schema.EntityContainer?.EntitySet);
 
 			parsedAssociations.push(...this._parseAssociations(associations));
 			parsedEntityTypes.push(...this._parseEntityTypes(entityTypes, entitySets, parsedAssociations));
