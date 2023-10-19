@@ -1,3 +1,7 @@
+## 1.16.2 (19-10-2023)
+
+-   Fix OData Edm types mapping to TS types
+
 ## 1.16.1 (17-10-2023)
 
 -   Bugfix for OData parser
