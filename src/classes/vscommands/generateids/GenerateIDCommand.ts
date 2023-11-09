@@ -3,6 +3,7 @@ import { XMLFormatter } from "ui5plugin-linter/dist/classes/formatter/xml/XMLFor
 import AMeaningAssumptionGenerator from "ui5plugin-linter/dist/classes/xml/linters/pattern/AMeaningAssumptionGenerator";
 import { ITag } from "ui5plugin-parser/dist/classes/parsing/util/xml/XMLParser";
 import { IUI5Parser } from "ui5plugin-parser/dist/parser/abstraction/IUI5Parser";
+import * as vscode from "vscode";
 import { Range, TextEdit, WorkspaceEdit, window, workspace } from "vscode";
 import { TextDocumentAdapter } from "../../adapters/vscode/TextDocumentAdapter";
 import { VSCodeTextDocumentTransformer } from "../../utils/VSCodeTextDocumentTransformer";
@@ -59,17 +60,25 @@ export default class GenerateIDCommand extends AMeaningAssumptionGenerator {
 		if (workspaceEdit.size > 0) {
 			await workspace.applyEdit(workspaceEdit);
 
-			const bShouldTagEndingBeOnNewline = workspace
+			const shouldXmlFormatterTagEndByNewline = workspace
 				.getConfiguration("ui5.plugin")
 				.get<boolean>("xmlFormatterTagEndingNewline");
-			const bShouldSelfTagEndingHaveSpaceBeforeIt = workspace
+			const shouldXmlFormatterTagSpaceBeforeSelfClose = workspace
 				.getConfiguration("ui5.plugin")
 				.get<boolean>("xmlFormatterSpaceAfterSelfTagEnd");
-			const sFormattedText = new XMLFormatter(
-				this._parser,
-				bShouldTagEndingBeOnNewline,
-				bShouldSelfTagEndingHaveSpaceBeforeIt
-			).formatDocument(this._document);
+
+			let indentation = "\t";
+			if (vscode.window.activeTextEditor?.options.insertSpaces) {
+				const tabSize = vscode.window.activeTextEditor?.options.tabSize;
+				if (typeof tabSize === "number") {
+					indentation = " ".repeat(tabSize);
+				}
+			}
+			const sFormattedText = new XMLFormatter(this._parser, {
+				shouldXmlFormatterTagEndByNewline,
+				shouldXmlFormatterTagSpaceBeforeSelfClose,
+				indentation
+			}).formatDocument(this._document);
 			if (!sFormattedText) {
 				return;
 			}

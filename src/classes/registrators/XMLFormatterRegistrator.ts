@@ -14,17 +14,25 @@ export class XMLFormatterRegistrator {
 						return;
 					}
 					if (document.uri.fsPath.endsWith(".view.xml") || document.uri.fsPath.endsWith(".fragment.xml")) {
-						const bShouldTagEndingBeOnNewline = vscode.workspace
+						const shouldXmlFormatterTagEndByNewline = vscode.workspace
 							.getConfiguration("ui5.plugin")
 							.get<boolean>("xmlFormatterTagEndingNewline");
-						const bShouldSelfTagEndingHaveSpaceBeforeIt = vscode.workspace
+						const shouldXmlFormatterTagSpaceBeforeSelfClose = vscode.workspace
 							.getConfiguration("ui5.plugin")
 							.get<boolean>("xmlFormatterSpaceAfterSelfTagEnd");
-						const sFormattedText = new XMLFormatter(
-							parser,
-							bShouldTagEndingBeOnNewline,
-							bShouldSelfTagEndingHaveSpaceBeforeIt
-						).formatDocument(new TextDocumentAdapter(document));
+
+						let indentation = "\t";
+						if (vscode.window.activeTextEditor?.options.insertSpaces) {
+							const tabSize = vscode.window.activeTextEditor?.options.tabSize;
+							if (typeof tabSize === "number") {
+								indentation = " ".repeat(tabSize);
+							}
+						}
+						const sFormattedText = new XMLFormatter(parser, {
+							shouldXmlFormatterTagEndByNewline,
+							shouldXmlFormatterTagSpaceBeforeSelfClose,
+							indentation
+						}).formatDocument(new TextDocumentAdapter(document));
 						if (!sFormattedText) {
 							return;
 						}
