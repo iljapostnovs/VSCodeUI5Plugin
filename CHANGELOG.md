@@ -1,3 +1,7 @@
+## 1.16.3 (09-11-2023)
+
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.12.0
+
 ## 1.16.2 (19-10-2023)
 
 -   Fix OData Edm types mapping to TS types
