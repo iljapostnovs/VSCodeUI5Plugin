@@ -13,6 +13,7 @@ sap.ui.define([
 		unusedFormatValue() {},
 		formatGlobal() {
 			this.formatGlobal();
-		}
+		},
+		declarationAboveClass() {}
 	});
 });
