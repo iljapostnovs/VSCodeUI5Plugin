@@ -14,7 +14,7 @@ async function main() {
 		const testWorkspace = path.resolve(__dirname, "../../../src/test/js/project");
 
 		// Download VS Code, unzip it and run the integration test
-		await runTests({ extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace, "--disable-extensions"] });
+		await runTests({ version: "1.84.2", extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace, "--disable-extensions"] });
 	} catch (err) {
 		console.error("Failed to run tests");
 		process.exit(1);
