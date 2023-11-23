@@ -2654,7 +2654,8 @@
 				"\"com/test/util/ui5ignoretest/UI5IgnoreTestClass\"",
 				"\"com/test/xmllintertest/UI5IgnoreTest\"",
 				"\"com/test/xmlrequiretest/XMLRequire/controller\"",
-				"\"com/test/xmlrequiretest/XMLRequireUtil\""
+				"\"com/test/xmlrequiretest/XMLRequireUtil\"",
+				"\"com/test/util/AllBodyTest\""
 			]
 		}
 	],

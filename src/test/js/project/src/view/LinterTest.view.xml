@@ -5,16 +5,20 @@
 	xmlns:f="sap.f"
 	xmlns:c="sap.ui.core"
 	xmlns:l="sap.ui.layout"
+	xmlns:html="http://www.w3.org/1999/xhtml"
 	displayBlock="true"
 	height="100%"
 	busyIndicatorDelay="0"
 >
-	<Input value="Numéro d'article"/>
+	<Input value="Numéro d'article" />
 	<Page>
 		<!DOCTYPE variables [
 			<!ENTITY checkBoxGridDataSpan "test test >stest">
 			<!ENTITY checkBoxGridDataSpan "test test test">
 		]>
+		<html:div style="max-width: 40rem;">
+			<Input />
+		</html:div>
 		<nonExistantAggregation>
 			<!-- Don't shrink below minimum size. Fills space if available. -->
 		</nonExistantAggregation>
@@ -35,8 +39,8 @@
 				validateFieldGroup="cmd:Save"
 				busy="false"
 			/>
-			<s:WrongNamespace/>
-			<NonExistantClass/>
+			<s:WrongNamespace />
+			<NonExistantClass />
 			<c:Fragment
 				fragmentName="com.test.view.fragments.LinterTest"
 				type="XML"

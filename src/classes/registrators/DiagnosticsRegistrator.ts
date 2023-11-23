@@ -117,7 +117,7 @@ export class DiagnosticsRegistrator {
 				parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
 			}
 			this._updateTSDiagnostics(document, tsDiagnosticCollection);
-		} else if (fileName.endsWith(".properties")) {
+		} else if (fileName.endsWith("i18n.properties")) {
 			this._updatePropertiesDiagnostics(document, propertiesDiagnosticCollection);
 		}
 	}

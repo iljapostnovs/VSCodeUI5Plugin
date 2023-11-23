@@ -1,9 +1,15 @@
 {
 	"jsCodeLenses": [
 		{
+			"className": "com.test.util.AllBodyTest",
+			"result": [
+				"1 reference",
+				"3 references"
+			]
+		},
+		{
 			"className": "com.test.xmlrequiretest.XMLRequireUtil",
 			"result": [
-				"Event handler of \"sap.f.FlexibleColumnLayout~stateChange\"",
 				"1 reference",
 				"1 reference"
 			]

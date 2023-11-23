@@ -88,7 +88,7 @@ export class FileWatcherMediator {
 			parser.fileReader.setNewViewContentToCache(viewContent, toNative(document.uri.fsPath), true);
 		} else if (document.fileName.endsWith(".fragment.xml")) {
 			parser.fileReader.setNewFragmentContentToCache(document.getText(), toNative(document.fileName), true);
-		} else if (document.fileName.endsWith(".properties")) {
+		} else if (document.fileName.endsWith("18n.properties")) {
 			parser.resourceModelData.updateCache(new TextDocumentAdapter(document));
 		} else if (document.fileName.endsWith("manifest.json")) {
 			parser.fileReader.rereadAllManifests();
@@ -221,7 +221,7 @@ export class FileWatcherMediator {
 			if (uri.fsPath.endsWith(".xml")) {
 				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "xml");
 			}
-			if (uri.fsPath.endsWith(".properties")) {
+			if (uri.fsPath.endsWith("i18n.properties")) {
 				DiagnosticsRegistrator.removeDiagnosticForUri(uri, "properties");
 			}
 

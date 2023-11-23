@@ -1,13 +1,15 @@
 sap.ui.define([
-	"sap/ui/model/json/JSONModel"
+	"sap/ui/model/json/JSONModel",
+	"com/test/util/AllBodyTest"
 ], function(
-	JSONModel
+	JSONModel,
+	AllBodyTest
 ) {
 	"use strict";
 
 	return JSONModel.extend("com.test.util.AnotherModel", {
 		anotherMethod: function() {
-
+			AllBodyTest.staticTest();
 		}
 	});
 });
