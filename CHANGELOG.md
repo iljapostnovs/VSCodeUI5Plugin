@@ -1,7 +1,16 @@
+## 1.16.5 (25-01-2024)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.7.6
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.14.4
+-   Fix [#396](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/396)
+-   Fix [#393](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/393)
+
 ## 1.16.5 (23-11-2023)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.7.4
 -   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.14.3
+-   Fix [#386](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/386)
+-   Fix [#387](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/387)
 
 ## 1.16.4 (09-11-2023)
 
