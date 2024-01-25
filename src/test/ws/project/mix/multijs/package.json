@@ -1,0 +1,9 @@
+{
+	"name": "ui5-typescript-helloworld",
+	"license": "Apache-2.0",
+	"ui5": {
+		"ui5parser": {
+			"ui5version": "1.84.41"
+		}
+	}
+}
