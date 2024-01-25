@@ -7,7 +7,7 @@ jobs:
     name: Test Extension (JS)
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v4.1.1
       - name: Launch tests
         shell: powershell
         run: |
@@ -18,7 +18,7 @@ jobs:
     name: Test Extension (TS)
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v4.1.1
       - name: Launch tests
         run: |
           npm install
@@ -28,7 +28,7 @@ jobs:
     name: Test Extension (Workspaces)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v4.1.1
       - name: Launch tests
         run: |
           npm install
@@ -38,7 +38,7 @@ jobs:
     name: Build Extension
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v4.1.1
       - name: npm install and build
         env:
           NPM_CONFIG_PREFIX: "~/.npm-global"
