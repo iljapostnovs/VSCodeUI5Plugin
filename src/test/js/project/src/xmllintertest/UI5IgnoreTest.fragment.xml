@@ -8,12 +8,13 @@
 		press="wrongEventHandler"
 	>
 		<customData>
-			<Text validationError="onTextWrongEventHandlerValidationError"/>
+			<Text validationError="onTextWrongEventHandlerValidationError" />
 		</customData>
 	</Button>
-	<!-- @ui5ignore press -->
+	<!-- @ui5ignore press,randomAttribute-->
 	<Button
 		id="idButton2"
+		randomAttribute="123"
 		press="notWrongEventHandler"
 	/>
 </c:FragmentDefinition>
