@@ -1,6 +1,11 @@
 {
 	"name": "ui5-typescript-helloworld",
 	"license": "Apache-2.0",
+	"ui5": {
+		"ui5parser": {
+			"ui5version": "1.84.41"
+		}
+	},
 	"devDependencies": {
 	  "@types/jquery": "3.5.14",
 	  "@types/openui5": "1.97.0",
