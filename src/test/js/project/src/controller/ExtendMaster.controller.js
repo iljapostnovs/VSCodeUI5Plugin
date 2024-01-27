@@ -8,6 +8,8 @@ sap.ui.define([
 	return MasterController.extend("com.test.controller.ExtendMaster", {
 		onInit: function() {
 
-		}
+		},
+
+		deprecatedTest() {}
 	});
 });

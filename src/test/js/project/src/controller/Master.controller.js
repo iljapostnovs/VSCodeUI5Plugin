@@ -28,6 +28,13 @@ sap.ui.define([
 			this._vRegexTest = /asd/;
 		},
 
+		/**
+		 * @deprecated
+		 */
+		deprecatedTest() {
+
+		},
+
 		_testMyModel: function() {
 			this.getView().getModel("MyModel").testMethod();
 		},
