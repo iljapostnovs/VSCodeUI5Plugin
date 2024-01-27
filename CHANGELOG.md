@@ -1,3 +1,9 @@
+## 1.17.0 (27-01-2024)
+
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.15.0
+-   `WrongOverrideLinter` now checks if member is deprecated ([#398](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/398))
+-   Fix: `UnusedClassLinter` doesn't show error if any member is used outside the class ([#387](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/387))
+
 ## 1.16.6 (25-01-2024)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.7.7

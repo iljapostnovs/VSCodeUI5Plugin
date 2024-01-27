@@ -819,6 +819,18 @@
 			]
 		},
 		{
+			"className": "com.test.controller.ExtendMaster",
+			"timeLimit": 100,
+			"errors": [
+				{
+					"text": "Member \"deprecatedTest\" is deprecated"
+				},
+				{
+					"text": "No references found for \"com.test.controller.ExtendMaster\" class"
+				}
+			]
+		},
+		{
 			"className": "com.test.util.TypeDefTest",
 			"timeLimit": 100,
 			"errors": [
@@ -830,11 +842,7 @@
 		{
 			"className": "com.test.statictest.StaticClass",
 			"timeLimit": 100,
-			"errors": [
-				{
-					"text": "No references found for \"com.test.statictest.StaticClass\" class"
-				}
-			]
+			"errors": []
 		},
 		{
 			"className": "com.test.controller.LargeFile",

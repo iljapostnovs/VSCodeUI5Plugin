@@ -31,6 +31,8 @@
 			"className": "com.extend.fragmenttest.controller.MasterExtend",
 			"textToFind": "\"com/extend/",
 			"items": [
+				"\"sap/ui/core/date/CalendarUtils\"",
+				"\"sap/ui/core/date/CalendarWeekNumbering\"",
 				"\"sap\"",
 				"\"sap/apf\"",
 				"\"sap/apf/abap\"",

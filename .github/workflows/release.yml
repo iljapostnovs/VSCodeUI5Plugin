@@ -13,7 +13,7 @@ jobs:
         run: node -p -e '`PACKAGE_VERSION=${require("./package.json").version}`' >> $GITHUB_ENV
       - name: Create Release
         id: create_release
-        uses: ncipollo/release-action@v1.12.0
+        uses: ncipollo/release-action@v1.13.0
         with:
           tag: v${{ env.PACKAGE_VERSION }}
           name: v${{ env.PACKAGE_VERSION }}
