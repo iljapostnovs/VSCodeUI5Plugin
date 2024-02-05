@@ -1,3 +1,8 @@
+## 1.18.0 (06-02-2024)
+
+-   New preference entry introduced: `eventHandlerGenerationFormula`
+-   New Code Action provided: event handlers renaming according to `eventHandlerGenerationFormula`
+
 ## 1.17.0 (27-01-2024)
 
 -   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.15.0

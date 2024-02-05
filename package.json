@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "1.17.0",
+	"version": "1.18.0",
 	"publisher": "iljapostnovs",
 	"license": "Apache-2.0",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
@@ -323,6 +323,11 @@
 					"type": "string",
 					"default": "id{MeaningAssumption}{TabStop}{Counter}{ControlName}",
 					"markdownDescription": "Formula for id generation. There are four variables available: `{MeaningAssumption}`, `{Counter}`, `{TabStop}` and `{ControlName}`. \n\n`{MeaningAssumption}` generation is taken from [ui5plugin-linter](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#meaningassumption-variable). \n\n`{MeaningAssumption}` and `{ControlName}` can be presented in camelCase: `{meaningAssumption}` and `{controlName}`. \n\n`{Counter}` is a number, which will be added in case if same ids will be generated.\n\n`{TabStop}` is used for XML Completion Items, it indicates where the selection will be at after applying completion item. \n\nThis preference entry is used by `ui5plugin.generateIds` command and XML Completion items."
+				},
+				"ui5.plugin.eventHandlerGenerationFormula": {
+					"type": "string",
+					"default": "on{MeaningAssumption}{TabStop}{ControlName}{EventName}",
+					"markdownDescription": "Formula for event handler name generation. There are four variables available: `{MeaningAssumption}`, `{EventName}`, `{TabStop}` and `{ControlName}`. \n\n`{MeaningAssumption}` generation is taken from [ui5plugin-linter](https://github.com/iljapostnovs/ui5plugin-linter/blob/master/README.md#meaningassumption-variable). \n\n`{MeaningAssumption}`, `{EventName}` and `{ControlName}` can be presented in camelCase: `{meaningAssumption}`, `{eventName}` and `{controlName}`.\n\n`{TabStop}` is used for XML Completion Items, it indicates where the selection will be at after applying completion item."
 				},
 				"ui5.plugin.generateIdsCommandData": {
 					"type": "object",
