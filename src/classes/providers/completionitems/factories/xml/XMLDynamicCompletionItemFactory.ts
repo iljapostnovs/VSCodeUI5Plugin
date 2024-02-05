@@ -16,6 +16,7 @@ import ParserBearer from "../../../../ui5parser/ParserBearer";
 import HTMLMarkdown from "../../../../utils/HTMLMarkdown";
 import { VSCodeFileReader } from "../../../../utils/VSCodeFileReader";
 import { VSCodeTextDocumentTransformer } from "../../../../utils/VSCodeTextDocumentTransformer";
+import GenerateEventCommand from "../../../../vscommands/generateevent/GenerateEventCommand";
 import GenerateIDCommand from "../../../../vscommands/generateids/GenerateIDCommand";
 import { CustomCompletionItem } from "../../CustomCompletionItem";
 import { ICompletionItemFactory } from "../abstraction/ICompletionItemFactory";
@@ -39,7 +40,11 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 
 				if (positionType === PositionType.InNewAttribute) {
 					completionItems.forEach(item => {
-						if (item.insertText instanceof vscode.SnippetString && item.label !== "id") {
+						if (
+							item.insertText instanceof vscode.SnippetString &&
+							item.label !== "id" &&
+							!item.insertText.value.includes('="')
+						) {
 							item.insertText.appendText('="');
 							item.insertText.appendTabstop(0);
 							item.insertText.appendText('"');
@@ -536,7 +541,7 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 				completionItems = this._getPropertyCompletionItemsFromClass(UIClass);
 				this._insertIdCompletionItem(completionItems, UIClass, document, tag);
 				completionItems = completionItems.concat(
-					this._getEventCompletionItemsFromClass(UIClass, controllerMethods)
+					this._getEventCompletionItemsFromClass(UIClass, controllerMethods, tag, document)
 				);
 				completionItems = completionItems.concat(this._getAggregationCompletionItemsFromClass(UIClass));
 				completionItems = completionItems.concat(this._getAssociationCompletionItemsFromClass(UIClass));
@@ -672,14 +677,26 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 		return generator.generateId(tag, allIds, false).replace(/\{TabStop\}/g, "$1");
 	}
 
-	private _getEventCompletionItemsFromClass(UIClass: AbstractBaseClass, eventValues: string[] = []) {
+	private _getEventCompletionItemsFromClass(
+		UIClass: AbstractBaseClass,
+		eventValues: string[] = [],
+		tag: ITag,
+		document: vscode.TextDocument
+	) {
 		let completionItems: CustomCompletionItem[] = [];
 
 		completionItems = UIClass.events.map(event => {
 			const completionItem: CustomCompletionItem = new CustomCompletionItem(event.name);
 			completionItem.kind = vscode.CompletionItemKind.Event;
 			// const insertTextValues = eventValues.length > 0 ? `|${eventValues.join(",")}|` : "";
-			completionItem.insertText = new vscode.SnippetString(`${event.name}`);
+			const eventHandlerName = new GenerateEventCommand(
+				new TextDocumentAdapter(document),
+				this._parser
+			).generateEvent(tag, event.name, false);
+
+			completionItem.insertText = new vscode.SnippetString(
+				`${event.name}="${eventHandlerName.replace(/\{TabStop\}/g, "$1")}"`
+			);
 			completionItem.detail = event.name;
 			const UI5ApiUri = this._parser.urlBuilder.getMarkupUrlForEventsApi(UIClass, event.name);
 			completionItem.documentation = new HTMLMarkdown(`${UI5ApiUri}\n${event.description}`);
@@ -690,7 +707,9 @@ export class XMLDynamicCompletionItemFactory extends ParserBearer implements ICo
 
 		if (UIClass.parentClassNameDotNotation) {
 			const parentClass = this._parser.classFactory.getUIClass(UIClass.parentClassNameDotNotation);
-			completionItems = completionItems.concat(this._getEventCompletionItemsFromClass(parentClass, eventValues));
+			completionItems = completionItems.concat(
+				this._getEventCompletionItemsFromClass(parentClass, eventValues, tag, document)
+			);
 		}
 
 		return completionItems;

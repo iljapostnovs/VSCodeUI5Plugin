@@ -1,17 +1,92 @@
 import { AbstractBaseClass, IUIEvent } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractBaseClass";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
 import { CustomTSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/ts/CustomTSClass";
+import { TextDocumentTransformer } from "ui5plugin-parser/dist/classes/parsing/util/textdocument/TextDocumentTransformer";
+import { ImportDeclaration, Project } from "ui5plugin-parser/dist/tsmorph";
 import * as vscode from "vscode";
 import { TextDocumentAdapter } from "../../../adapters/vscode/TextDocumentAdapter";
 import { CustomDiagnostics } from "../../../registrators/DiagnosticsRegistrator";
 import ParserBearer from "../../../ui5parser/ParserBearer";
+import GenerateEventCommand from "../../../vscommands/generateevent/GenerateEventCommand";
 import { InsertType, MethodInserter } from "../util/MethodInserter";
-import { ImportDeclaration, Project } from "ui5plugin-parser/dist/tsmorph";
+import { RangeAdapter } from "../../../adapters/vscode/RangeAdapter";
 
 export class XMLCodeActionProvider extends ParserBearer {
 	async getCodeActions(document: vscode.TextDocument, range: vscode.Range | vscode.Selection) {
 		const providerResult: vscode.CodeAction[] = await this._getEventAutofillCodeActions(document, range);
+		const eventRenameProviderResult: vscode.CodeAction[] = this._getEventRenameCodeActions(document, range);
+		return providerResult.concat(eventRenameProviderResult);
+	}
+	private _getEventRenameCodeActions(
+		document: vscode.TextDocument,
+		range: vscode.Range | vscode.Selection
+	): vscode.CodeAction[] {
+		const diagnostics = vscode.languages.getDiagnostics(document.uri);
+		const diagnostic: CustomDiagnostics | undefined = diagnostics
+			.filter(diagnostic => diagnostic instanceof CustomDiagnostics)
+			.find(diagnostic => {
+				return diagnostic.range.contains(range);
+			});
+		const XMLFile = new TextDocumentTransformer(this._parser).toXMLFile(new TextDocumentAdapter(document));
 
-		return providerResult;
+		if (!diagnostic?.attribute || !XMLFile) {
+			return [];
+		}
+
+		const tag = this._parser.xmlParser.getTagInPosition(XMLFile, document.offsetAt(range.end));
+		const {
+			attributeValue: eventHandlerName,
+			attributeName: eventName,
+			classOfTheTag: tagClassName
+		} = this._getAttributeData(document, diagnostic.attribute, range) ?? {};
+
+		if (!eventHandlerName || !eventName || !tagClassName) {
+			return [];
+		}
+
+		const eventData = this._getEventData(tagClassName, eventName);
+		const responsibleController = this._parser.fileReader.getResponsibleClassForXMLDocument(
+			new TextDocumentAdapter(document)
+		);
+		if (!eventData || !responsibleController) {
+			return [];
+		}
+
+		const responsibleUIClass = this._parser.classFactory.getUIClass(responsibleController) as AbstractCustomClass;
+		const eventHandlerMethod = responsibleUIClass.methods.find(method => method.name === eventHandlerName);
+		if (!eventHandlerMethod || !eventHandlerMethod.loc) {
+			return [];
+		}
+
+		const newEventHandlerName = new GenerateEventCommand(
+			new TextDocumentAdapter(document),
+			this._parser
+		).generateEvent(tag, eventName);
+
+		const replaceEventHandlerNameCodeAction = new vscode.CodeAction(
+			`Rename "${eventHandlerName}" to "${newEventHandlerName}"`,
+			vscode.CodeActionKind.QuickFix
+		);
+		replaceEventHandlerNameCodeAction.isPreferred = true;
+		replaceEventHandlerNameCodeAction.edit = new vscode.WorkspaceEdit();
+
+		const attributeIndex = tag.text?.indexOf(diagnostic.attribute) ?? 0;
+		const oldEventHandlerIndex = diagnostic.attribute.indexOf(eventHandlerName);
+		const positionBegin = tag.positionBegin + attributeIndex + oldEventHandlerIndex;
+		const positionEnd = positionBegin + eventHandlerName.length;
+		replaceEventHandlerNameCodeAction.edit.replace(
+			document.uri,
+			new vscode.Range(document.positionAt(positionBegin), document.positionAt(positionEnd)),
+			newEventHandlerName
+		);
+
+		replaceEventHandlerNameCodeAction.edit.replace(
+			vscode.Uri.file(responsibleUIClass.fsPath),
+			RangeAdapter.acornLocationToVSCodeRange(eventHandlerMethod.loc),
+			newEventHandlerName
+		);
+
+		return [replaceEventHandlerNameCodeAction];
 	}
 
 	private async _getEventAutofillCodeActions(
