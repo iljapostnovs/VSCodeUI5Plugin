@@ -133,7 +133,7 @@ VSCode extension is using [UI5 Parser](https://github.com/iljapostnovs/ui5plugin
 
 XML Completion Items for UI5 Controls.<br/>
 
-> Related preference entries:<br/>_ui5.plugin.addInheritedPropertiesAndAggregations_ <br/>_ui5.plugin.addTagAttributes_ <br/>_ui5.plugin.addTagAggregations_ <br/>_ui5.plugin.idGenerationFormula_ <br/>\_ui5.plugin.eventHandlerGenerationFormula <br/>
+> Related preference entries:<br/>_ui5.plugin.addInheritedPropertiesAndAggregations_ <br/>_ui5.plugin.addTagAttributes_ <br/>_ui5.plugin.addTagAggregations_ <br/>_ui5.plugin.idGenerationFormula_ <br/>_ui5.plugin.eventHandlerGenerationFormula <br/>
 
 ![XMLCompletionItems](/images/XMLCompletionItems.gif)<br/>
 XML Completion Items for properties, aggregations, associations and events<br/>
