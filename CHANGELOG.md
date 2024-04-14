@@ -1,3 +1,8 @@
+## 1.18.1 (15-04-2024)
+
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.15.1
+-   Fixed XML formatter issue ([#407](https://github.com/iljapostnovs/VSCodeUI5Plugin/issues/407))
+
 ## 1.18.0 (06-02-2024)
 
 -   New preference entry introduced: `eventHandlerGenerationFormula`
