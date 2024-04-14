@@ -108,4 +108,13 @@
 	>
 
 	</Button>
+	<DatePicker value="{
+	type: 'sap.ui.model.type.Date',
+	formatOptions: {
+		style: 'medium',
+		source: {
+			pattern: 'yyyy-MM-dd\'T\'hh:mm:ssXXX'
+		}
+	}
+	}" />
 </c:FragmentDefinition>
