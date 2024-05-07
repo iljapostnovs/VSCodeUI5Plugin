@@ -72,6 +72,9 @@ export class FileWatcherMediator {
 				}
 
 				FileWatcherMediator._parsingTimeout[document.fileName] = setTimeout(() => {
+					if (!document) {
+						return;
+					}
 					if (document.fileName.endsWith(".ts") && parser instanceof UI5TSParser) {
 						// const textChanges: ts.TextChange[] | undefined = contentChanges?.map(contentChange => {
 						// 	return {
