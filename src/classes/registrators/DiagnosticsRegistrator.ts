@@ -8,6 +8,7 @@ import { JSLinter } from "../ui5linter/js/JSLinter";
 import { PropertiesLinter } from "../ui5linter/properties/PropertiesLinter";
 import { TSLinter } from "../ui5linter/ts/TSLinter";
 import { XMLLinter } from "../ui5linter/xml/XMLLinter";
+import EventBus from "../utils/EventBus";
 
 let xmlDiagnosticCollection: vscode.DiagnosticCollection;
 let jsDiagnosticCollection: vscode.DiagnosticCollection;
@@ -40,18 +41,21 @@ export class DiagnosticsRegistrator {
 		const changeActiveTextEditor = vscode.window.onDidChangeActiveTextEditor(editor => {
 			const fileName = editor?.document.fileName;
 			if (editor && fileName) {
-				this.updateDiagnosticCollection(editor.document, true);
+				this.updateDiagnosticCollection(editor.document);
 			}
 		});
 
-		const textDocumentChange = vscode.workspace.onDidChangeTextDocument(event => {
-			if (event.contentChanges.length > 0) {
-				DiagnosticsRegistrator.updateDiagnosticCollection(event.document);
-			}
+		// const textDocumentChange = vscode.workspace.onDidChangeTextDocument(event => {
+		// 	if (event.contentChanges.length > 0) {
+		// 		DiagnosticsRegistrator.updateDiagnosticCollection(event.document);
+		// 	}
+		// });
+		EventBus.subscribeCodeUpdated((document: vscode.TextDocument) => {
+			DiagnosticsRegistrator.updateDiagnosticCollection(document);
 		});
 
 		UI5Plugin.getInstance().addDisposable(changeActiveTextEditor);
-		UI5Plugin.getInstance().addDisposable(textDocumentChange);
+		// UI5Plugin.getInstance().addDisposable(textDocumentChange);
 	}
 
 	private static async _updatePropertiesDiagnostics(
@@ -92,7 +96,7 @@ export class DiagnosticsRegistrator {
 		}
 	}
 
-	static updateDiagnosticCollection(document: vscode.TextDocument, bForce = false) {
+	static updateDiagnosticCollection(document: vscode.TextDocument) {
 		const fileName = document.fileName;
 		const parser = ParserPool.getParserForFile(fileName);
 		if (!parser) {
@@ -106,16 +110,16 @@ export class DiagnosticsRegistrator {
 			}
 			this._updateXMLDiagnostics(document, xmlDiagnosticCollection);
 		} else if (fileName.endsWith(".js")) {
-			const className = parser.fileReader.getClassNameFromPath(fileName);
-			if (className) {
-				parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
-			}
+			// const className = parser.fileReader.getClassNameFromPath(fileName);
+			// if (className) {
+			// 	parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
+			// }
 			this._updateJSDiagnostics(document, jsDiagnosticCollection);
 		} else if (fileName.endsWith(".ts")) {
-			const className = parser.fileReader.getClassNameFromPath(fileName);
-			if (className) {
-				parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
-			}
+			// const className = parser.fileReader.getClassNameFromPath(fileName);
+			// if (className) {
+			// 	parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
+			// }
 			this._updateTSDiagnostics(document, tsDiagnosticCollection);
 		} else if (fileName.endsWith(".properties")) {
 			this._updatePropertiesDiagnostics(document, propertiesDiagnosticCollection);

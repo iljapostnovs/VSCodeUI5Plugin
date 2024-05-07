@@ -1,6 +1,7 @@
 import { PackageLinterConfigHandler } from "ui5plugin-linter";
 import { PackageParserConfigHandler, ParserPool, toNative, UI5TSParser } from "ui5plugin-parser";
 import { ICacheable } from "ui5plugin-parser/dist/classes/parsing/abstraction/ICacheable";
+import { AbstractCustomClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/AbstractCustomClass";
 import { CustomJSClass } from "ui5plugin-parser/dist/classes/parsing/ui5class/js/CustomJSClass";
 import { IReferenceCodeLensCacheable } from "ui5plugin-parser/dist/classes/parsing/util/referencefinder/ReferenceFinderBase";
 import * as vscode from "vscode";
@@ -11,12 +12,14 @@ import { IFileChanges, IFileRenameData } from "../filerenaming/handlers/abstract
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/factory/TemplateGeneratorFactory";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
+import EventBus from "./EventBus";
 import { VSCodeFileReader } from "./VSCodeFileReader";
 import path = require("path");
 
 const workspace = vscode.workspace;
 
 export class FileWatcherMediator {
+	private static readonly _parsingTimeout: Record<string, NodeJS.Timeout> = {};
 	private async _onChange(
 		uri: vscode.Uri,
 		document?: vscode.TextDocument,
@@ -62,26 +65,40 @@ export class FileWatcherMediator {
 		if (document.fileName.endsWith(".js") || document.fileName.endsWith(".ts")) {
 			const currentClassNameDotNotation = parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassNameDotNotation) {
-				if (document.fileName.endsWith(".ts") && parser instanceof UI5TSParser) {
-					// const textChanges: ts.TextChange[] | undefined = contentChanges?.map(contentChange => {
-					// 	return {
-					// 		newText: contentChange.text,
-					// 		span: { length: contentChange.rangeLength, start: contentChange.rangeOffset }
-					// 	};
-					// });
-					parser.classFactory.setNewCodeForClass(
-						currentClassNameDotNotation,
-						document.getText(),
-						force,
-						undefined,
-						undefined,
-						true,
-						undefined
-						// textChanges
-					);
-				} else {
-					parser.classFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText(), force);
+				const UIClass = parser.classFactory.getUIClass(currentClassNameDotNotation) as AbstractCustomClass;
+				const textChanged = force || UIClass.classText !== document.getText();
+				if (FileWatcherMediator._parsingTimeout[document.fileName]) {
+					clearTimeout(FileWatcherMediator._parsingTimeout[document.fileName]);
 				}
+
+				FileWatcherMediator._parsingTimeout[document.fileName] = setTimeout(() => {
+					if (document.fileName.endsWith(".ts") && parser instanceof UI5TSParser) {
+						// const textChanges: ts.TextChange[] | undefined = contentChanges?.map(contentChange => {
+						// 	return {
+						// 		newText: contentChange.text,
+						// 		span: { length: contentChange.rangeLength, start: contentChange.rangeOffset }
+						// 	};
+						// });
+						parser.classFactory.setNewCodeForClass(
+							currentClassNameDotNotation,
+							document.getText(),
+							force,
+							undefined,
+							undefined,
+							true,
+							undefined
+							// textChanges
+						);
+					} else {
+						parser.classFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText(), force);
+					}
+
+					if (textChanged || force) {
+						EventBus.fireCodeUpdated(document);
+					}
+
+					delete FileWatcherMediator._parsingTimeout[document.fileName];
+				}, 1000);
 			}
 		} else if (document.fileName.endsWith(".view.xml")) {
 			const viewContent = document.getText();

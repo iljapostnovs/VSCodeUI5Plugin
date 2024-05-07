@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "1.18.1",
+	"version": "1.18.2",
 	"publisher": "iljapostnovs",
 	"license": "Apache-2.0",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
@@ -419,6 +419,11 @@
 					},
 					"markdownDescription": "Data for `ui5plugin.bulkExportToi18n` command. Contains data about which proprties should be exported to i18n."
 				}
+			},
+			"ui5.plugin.parsingDelay": {
+				"type": "number",
+				"default": 1000,
+				"markdownDescription": "Delay for parsing the files. Increase it for heavy projects."
 			}
 		},
 		"commands": [
