@@ -41,7 +41,7 @@ export class DiagnosticsRegistrator {
 		const changeActiveTextEditor = vscode.window.onDidChangeActiveTextEditor(editor => {
 			const fileName = editor?.document.fileName;
 			if (editor && fileName) {
-				this.updateDiagnosticCollection(editor.document);
+				this.updateDiagnosticCollection(editor.document, true);
 			}
 		});
 
@@ -96,7 +96,7 @@ export class DiagnosticsRegistrator {
 		}
 	}
 
-	static updateDiagnosticCollection(document: vscode.TextDocument) {
+	static updateDiagnosticCollection(document: vscode.TextDocument, refreshCode = false) {
 		const fileName = document.fileName;
 		const parser = ParserPool.getParserForFile(fileName);
 		if (!parser) {
@@ -110,16 +110,16 @@ export class DiagnosticsRegistrator {
 			}
 			this._updateXMLDiagnostics(document, xmlDiagnosticCollection);
 		} else if (fileName.endsWith(".js")) {
-			// const className = parser.fileReader.getClassNameFromPath(fileName);
-			// if (className) {
-			// 	parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
-			// }
+			const className = parser.fileReader.getClassNameFromPath(fileName);
+			if (className && refreshCode) {
+				parser.classFactory.setNewCodeForClass(className, document.getText(), true);
+			}
 			this._updateJSDiagnostics(document, jsDiagnosticCollection);
 		} else if (fileName.endsWith(".ts")) {
-			// const className = parser.fileReader.getClassNameFromPath(fileName);
-			// if (className) {
-			// 	parser.classFactory.setNewCodeForClass(className, document.getText(), bForce);
-			// }
+			const className = parser.fileReader.getClassNameFromPath(fileName);
+			if (className && refreshCode) {
+				parser.classFactory.setNewCodeForClass(className, document.getText(), true);
+			}
 			this._updateTSDiagnostics(document, tsDiagnosticCollection);
 		} else if (fileName.endsWith(".properties")) {
 			this._updatePropertiesDiagnostics(document, propertiesDiagnosticCollection);

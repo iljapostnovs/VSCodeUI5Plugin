@@ -66,7 +66,10 @@ export class FileWatcherMediator {
 			const currentClassNameDotNotation = parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassNameDotNotation) {
 				const UIClass = parser.classFactory.getUIClass(currentClassNameDotNotation) as AbstractCustomClass;
-				const textChanged = force || UIClass.classText !== document.getText();
+				const textChanged =
+					force ||
+					UIClass.classText.length !== document.getText().length ||
+					UIClass.classText !== document.getText();
 				if (FileWatcherMediator._parsingTimeout[document.fileName]) {
 					clearTimeout(FileWatcherMediator._parsingTimeout[document.fileName]);
 				}
@@ -106,12 +109,20 @@ export class FileWatcherMediator {
 		} else if (document.fileName.endsWith(".view.xml")) {
 			const viewContent = document.getText();
 			parser.fileReader.setNewViewContentToCache(viewContent, toNative(document.uri.fsPath), true);
+
+			EventBus.fireCodeUpdated(document);
 		} else if (document.fileName.endsWith(".fragment.xml")) {
 			parser.fileReader.setNewFragmentContentToCache(document.getText(), toNative(document.fileName), true);
+
+			EventBus.fireCodeUpdated(document);
 		} else if (document.fileName.endsWith("18n.properties")) {
 			parser.resourceModelData.updateCache(new TextDocumentAdapter(document));
+
+			EventBus.fireCodeUpdated(document);
 		} else if (document.fileName.endsWith("manifest.json")) {
 			parser.fileReader.rereadAllManifests();
+
+			EventBus.fireCodeUpdated(document);
 		}
 
 		this._updateDiagnosticsIfNecessary(document);
