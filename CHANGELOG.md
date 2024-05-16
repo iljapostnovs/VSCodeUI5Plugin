@@ -1,3 +1,7 @@
+## 1.19.0 (16-05-2024)
+
+-   New preference entry added: `ui5.plugin.parsingDelay`
+
 ## 1.18.1 (15-04-2024)
 
 -   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.15.1

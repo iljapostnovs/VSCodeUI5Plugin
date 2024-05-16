@@ -104,7 +104,7 @@ export class FileWatcherMediator {
 					}
 
 					delete FileWatcherMediator._parsingTimeout[document.fileName];
-				}, 1000);
+				}, vscode.workspace.getConfiguration("ui5.plugin").get<number>("parsingDelay"));
 			}
 		} else if (document.fileName.endsWith(".view.xml")) {
 			const viewContent = document.getText();
