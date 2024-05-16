@@ -418,12 +418,12 @@
 						}
 					},
 					"markdownDescription": "Data for `ui5plugin.bulkExportToi18n` command. Contains data about which proprties should be exported to i18n."
+				},
+				"ui5.plugin.parsingDelay": {
+					"type": "number",
+					"default": 500,
+					"markdownDescription": "Delay for parsing JS/TS files. Increase it for complex projects."
 				}
-			},
-			"ui5.plugin.parsingDelay": {
-				"type": "number",
-				"default": 500,
-				"markdownDescription": "Delay for parsing JS/TS files. Increase it for complex projects."
 			}
 		},
 		"commands": [
