@@ -11,12 +11,14 @@ import { IFileChanges, IFileRenameData } from "../filerenaming/handlers/abstract
 import { DiagnosticsRegistrator } from "../registrators/DiagnosticsRegistrator";
 import { TemplateGeneratorFactory } from "../templateinserters/filetemplates/factory/TemplateGeneratorFactory";
 import { ClearCacheCommand } from "../vscommands/ClearCacheCommand";
+import EventBus from "./EventBus";
 import { VSCodeFileReader } from "./VSCodeFileReader";
 import path = require("path");
 
 const workspace = vscode.workspace;
 
 export class FileWatcherMediator {
+	private static readonly _parsingTimeout: Record<string, NodeJS.Timeout> = {};
 	private async _onChange(
 		uri: vscode.Uri,
 		document?: vscode.TextDocument,
@@ -62,36 +64,57 @@ export class FileWatcherMediator {
 		if (document.fileName.endsWith(".js") || document.fileName.endsWith(".ts")) {
 			const currentClassNameDotNotation = parser.fileReader.getClassNameFromPath(document.fileName);
 			if (currentClassNameDotNotation) {
-				if (document.fileName.endsWith(".ts") && parser instanceof UI5TSParser) {
-					// const textChanges: ts.TextChange[] | undefined = contentChanges?.map(contentChange => {
-					// 	return {
-					// 		newText: contentChange.text,
-					// 		span: { length: contentChange.rangeLength, start: contentChange.rangeOffset }
-					// 	};
-					// });
-					parser.classFactory.setNewCodeForClass(
-						currentClassNameDotNotation,
-						document.getText(),
-						force,
-						undefined,
-						undefined,
-						true,
-						undefined
-						// textChanges
-					);
-				} else {
-					parser.classFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText(), force);
+				if (FileWatcherMediator._parsingTimeout[document.fileName]) {
+					clearTimeout(FileWatcherMediator._parsingTimeout[document.fileName]);
 				}
+
+				FileWatcherMediator._parsingTimeout[document.fileName] = setTimeout(() => {
+					if (!document) {
+						return;
+					}
+					if (document.fileName.endsWith(".ts") && parser instanceof UI5TSParser) {
+						// const textChanges: ts.TextChange[] | undefined = contentChanges?.map(contentChange => {
+						// 	return {
+						// 		newText: contentChange.text,
+						// 		span: { length: contentChange.rangeLength, start: contentChange.rangeOffset }
+						// 	};
+						// });
+						parser.classFactory.setNewCodeForClass(
+							currentClassNameDotNotation,
+							document.getText(),
+							force,
+							undefined,
+							undefined,
+							true,
+							undefined
+							// textChanges
+						);
+					} else {
+						parser.classFactory.setNewCodeForClass(currentClassNameDotNotation, document.getText(), force);
+					}
+
+					EventBus.fireCodeUpdated(document);
+
+					delete FileWatcherMediator._parsingTimeout[document.fileName];
+				}, vscode.workspace.getConfiguration("ui5.plugin").get<number>("parsingDelay"));
 			}
 		} else if (document.fileName.endsWith(".view.xml")) {
 			const viewContent = document.getText();
 			parser.fileReader.setNewViewContentToCache(viewContent, toNative(document.uri.fsPath), true);
+
+			EventBus.fireCodeUpdated(document);
 		} else if (document.fileName.endsWith(".fragment.xml")) {
 			parser.fileReader.setNewFragmentContentToCache(document.getText(), toNative(document.fileName), true);
+
+			EventBus.fireCodeUpdated(document);
 		} else if (document.fileName.endsWith("18n.properties")) {
 			parser.resourceModelData.updateCache(new TextDocumentAdapter(document));
+
+			EventBus.fireCodeUpdated(document);
 		} else if (document.fileName.endsWith("manifest.json")) {
 			parser.fileReader.rereadAllManifests();
+
+			EventBus.fireCodeUpdated(document);
 		}
 
 		this._updateDiagnosticsIfNecessary(document);
