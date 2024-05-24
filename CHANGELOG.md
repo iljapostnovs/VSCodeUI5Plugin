@@ -1,6 +1,6 @@
 ## 1.19.0 (24-05-2024)
 
--   New preference entry added: `ui5.plugin.parsingDelay`
+-   New preference entry added: `ui5.plugin.parsingDelay`. It serves as a delay for parsing, which can be handy for large projects in order to gain better performance.
 
 ## 1.18.1 (15-04-2024)
 
