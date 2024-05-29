@@ -1,3 +1,7 @@
+## 1.19.1 (29-05-2024)
+
+-   Change Edm.Byte to int for OData to TS type generation
+
 ## 1.19.0 (24-05-2024)
 
 -   New preference entry added: `ui5.plugin.parsingDelay`. It serves as a delay for parsing, which can be handy for large projects in order to gain better performance.
