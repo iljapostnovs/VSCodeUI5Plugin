@@ -1,3 +1,8 @@
+## 1.19.2 (13-03-2025)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.7.8
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.15.2
+
 ## 1.19.1 (29-05-2024)
 
 -   Change Edm.Byte to int for OData to TS type generation
