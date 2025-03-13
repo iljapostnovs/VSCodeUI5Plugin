@@ -1,3 +1,8 @@
+## 1.19.1 (13-03-2025)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.7.8
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.15.2
+
 ## 1.19.0 (24-05-2024)
 
 -   New preference entry added: `ui5.plugin.parsingDelay`. It serves as a delay for parsing, which can be handy for large projects in order to gain better performance.
