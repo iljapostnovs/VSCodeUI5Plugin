@@ -53,6 +53,46 @@
 		"linter",
 		"sap"
 	],
+	"main": "./dist/extension.js",
+	"scripts": {
+		"vscode:prepublish": "npx webpack --mode production",
+		"webpack": "npx webpack --mode development",
+		"webpack-dev": "npx webpack --mode development --watch",
+		"compile": "npx webpack --mode none",
+		"compilets": "npx tsc",
+		"lint": "eslint src",
+		"test:js": "node ./dist/test/js/TestRunner.js",
+		"test:ts": "node ./dist/test/ts/TestRunner.js",
+		"test:ws:multijs": "node ./dist/test/ws/TestRunnerMultiJS.js",
+		"test:ws:multits": "node ./dist/test/ws/TestRunnerMultiTS.js",
+		"pretest:js": "npm run compilets",
+		"pretest:ts": "npm run compilets && cd ./src/test/ts/project && npm install",
+		"pretest:ws:multijs": "npm run compilets",
+		"pretest:ws:multits": "npm run compilets && cd ./src/test/ws/project/mix/multits/app1 && npm install && cd ../app2 && npm install",
+		"watch": "npm run compilets",
+		"install_ext": "vsce package && PowerShell -Command \"code --install-extension $(node -p -e '`ui5plugin-` + require(`./package.json`).version + `.vsix`')\""
+	},
+	"devDependencies": {
+		"@types/mocha": "^10.0.10",
+		"@types/node": "^20.17.30",
+		"@types/vscode": "^1.99.1",
+		"@types/webpack": "^5.28.5",
+		"@typescript-eslint/eslint-plugin": "^6.19.1",
+		"@typescript-eslint/parser": "^6.19.1",
+		"@vscode/test-electron": "^2.5.2",
+		"axios": "^1.8.4",
+		"clean-webpack-plugin": "^4.0.0",
+		"eslint": "^8.56.0",
+		"mocha": "^11.1.0",
+		"ts-loader": "^9.5.2",
+		"webpack": "^5.99.5",
+		"typescript": "5.8.3",
+		"webpack-cli": "^6.0.1"
+	},
+	"dependencies": {
+		"ui5plugin-linter": "^1.16.1",
+		"ui5plugin-parser": "^1.8.2"
+	},
 	"contributes": {
 		"views": {
 			"explorer": [
@@ -65,46 +105,6 @@
 					"name": "UI5 Project Data"
 				}
 			]
-		},
-		"main": "./dist/extension.js",
-		"scripts": {
-			"vscode:prepublish": "npx webpack --mode production",
-			"webpack": "npx webpack --mode development",
-			"webpack-dev": "npx webpack --mode development --watch",
-			"compile": "npx webpack --mode none",
-			"compilets": "npx tsc",
-			"lint": "eslint src",
-			"test:js": "node ./dist/test/js/TestRunner.js",
-			"test:ts": "node ./dist/test/ts/TestRunner.js",
-			"test:ws:multijs": "node ./dist/test/ws/TestRunnerMultiJS.js",
-			"test:ws:multits": "node ./dist/test/ws/TestRunnerMultiTS.js",
-			"pretest:js": "npm run compilets",
-			"pretest:ts": "npm run compilets && cd ./src/test/ts/project && npm install",
-			"pretest:ws:multijs": "npm run compilets",
-			"pretest:ws:multits": "npm run compilets && cd ./src/test/ws/project/mix/multits/app1 && npm install && cd ../app2 && npm install",
-			"watch": "npm run compilets",
-			"install_ext": "vsce package && PowerShell -Command \"code --install-extension $(node -p -e '`ui5plugin-` + require(`./package.json`).version + `.vsix`')\""
-		},
-		"devDependencies": {
-			"@types/mocha": "^10.0.10",
-			"@types/node": "^20.17.30",
-			"@types/vscode": "^1.99.1",
-			"@types/webpack": "^5.28.5",
-			"@typescript-eslint/eslint-plugin": "^6.19.1",
-			"@typescript-eslint/parser": "^6.19.1",
-			"@vscode/test-electron": "^2.5.2",
-			"axios": "^1.8.4",
-			"clean-webpack-plugin": "^4.0.0",
-			"eslint": "^8.56.0",
-			"mocha": "^11.1.0",
-			"ts-loader": "^9.5.2",
-			"webpack": "^5.99.5",
-			"typescript": "5.8.3",
-			"webpack-cli": "^6.0.1"
-		},
-		"dependencies": {
-			"ui5plugin-linter": "^1.16.1",
-			"ui5plugin-parser": "^1.8.2"
 		},
 		"menus": {
 			"view/title": [
