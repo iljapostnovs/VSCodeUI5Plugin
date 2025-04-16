@@ -1,4 +1,3 @@
-import { AxiosRequestConfig } from "axios";
 import { HTTPHandler } from "ui5plugin-parser/dist/classes/http/HTTPHandler";
 import * as vscode from "vscode";
 import { IXMLSourcePrompt, TSODataInterfacesFetchingData } from "./IXMLSourcePrompt";
@@ -36,7 +35,7 @@ export class XMLSourcePrompt implements IXMLSourcePrompt {
 			}
 
 			if (url) {
-				const config: AxiosRequestConfig = {};
+				const config: any = {};
 				if (username && password) {
 					config.auth = { username, password };
 				}

@@ -7,6 +7,7 @@ sap.ui.define([
 
 	return ManagedObject.extend("com.test.xmlrequiretest.XMLRequireUtil", {
 		method1() {},
-		method2() {}
+		method2() {},
+		method3() {}
 	});
 });

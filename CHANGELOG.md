@@ -1,3 +1,8 @@
+## 1.20.0 (16-04-2025)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.8.2
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.16.1
+
 ## 1.19.2 (13-03-2025)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.7.8

@@ -105,8 +105,10 @@ export class EventHandlerCodeLensGenerator extends CodeLensGenerator {
 			const attributes = this._parser.xmlParser.getAttributesOfTheTag(tag);
 			const attribute = attributes?.find(attribute => {
 				const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
+				const currentEventHandlerName = this._parser.xmlParser.getEventHandlerNameFromAttributeValue(attributeValue);
+				const currentEventHandlerNameNoDot = currentEventHandlerName.startsWith(".") ? currentEventHandlerName.replace(".", "") : currentEventHandlerName;
 				return (
-					this._parser.xmlParser.getEventHandlerNameFromAttributeValue(attributeValue) === eventHandlerName
+					currentEventHandlerNameNoDot === eventHandlerName
 				);
 			});
 			const idAttribute = attributes?.find(attribute => {
