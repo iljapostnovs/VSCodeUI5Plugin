@@ -18,8 +18,10 @@ sap.ui.define([
 	return Controller.extend("com.test.controller.LinterTest", {
 		formatter: Formatter,
 
-		onTableDelete: function(oEvent) {
+		_isThisUsed: "123",
 
+		onTableDelete: function(oEvent) {
+			`s${this._isThisUsed}s`;
 		},
 
 		onFragmentButtonPress: function(oEvent) {

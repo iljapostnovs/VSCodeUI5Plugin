@@ -19,17 +19,19 @@ export class XMLDefinitionProvider extends ParserBearer {
 			const attribute = attributes?.find(attribute => {
 				const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
 				const eventHandlerName = this._parser.xmlParser.getEventHandlerNameFromAttributeValue(attributeValue);
+				const eventHandlerNameNoDot = eventHandlerName.startsWith(".") ? eventHandlerName.replace(".", "") : eventHandlerName;
 
-				return eventHandlerName === word || `cmd:${eventHandlerName}` === word;
+				return eventHandlerNameNoDot === word || `cmd:${eventHandlerName}` === word;
 			});
 			if (attribute) {
 				const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
 				const eventHandlerName = this._parser.xmlParser.getEventHandlerNameFromAttributeValue(attributeValue);
+				const eventHandlerNameNoDot = eventHandlerName.startsWith(".") ? eventHandlerName.replace(".", "") : eventHandlerName;
 				const responsibleClassName = this._parser.fileReader.getResponsibleClassForXMLDocument(
 					new TextDocumentAdapter(document)
 				);
 				if (responsibleClassName) {
-					location = this._getLocationFor(responsibleClassName, eventHandlerName);
+					location = this._getLocationFor(responsibleClassName, eventHandlerNameNoDot);
 				}
 			}
 

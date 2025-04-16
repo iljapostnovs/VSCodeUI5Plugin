@@ -1,7 +1,9 @@
 sap.ui.define([
-	"sap/ui/core/mvc/Controller"
+	"sap/ui/core/mvc/Controller",
+	"./XMLRequireUtil"
 ], function(
-	Controller
+	Controller,
+	XMLRequireUtil
 ) {
 	"use strict";
 
@@ -9,6 +11,7 @@ sap.ui.define([
 		/**
 		 * @param {sap.m.Button} oButton
 		 */
-		method1(oButton) {return oButton;}
+		method1(oButton) {return oButton;},
+		requireUtil: new XMLRequireUtil()
 	});
 });

@@ -12,7 +12,7 @@ export class XMLHoverProvider extends ParserBearer {
 		const range = document.getWordRangeAtPosition(position);
 		const wordWithPrefix = document.getText(range);
 		const wordWithPrefixParts = wordWithPrefix.split(":");
-		const word = wordWithPrefixParts.pop();
+		const word = wordWithPrefixParts.pop(); //TODO: think about words that has "." in it
 		const offset = document.offsetAt(position);
 		let hover: vscode.Hover | undefined;
 
@@ -30,7 +30,9 @@ export class XMLHoverProvider extends ParserBearer {
 				});
 				const attributeValue = attributes?.find(attribute => {
 					const { attributeValue } = this._parser.xmlParser.getAttributeNameAndValue(attribute);
-					return attributeValue === word;
+					const attributeValuePositionBegin = tag.positionBegin + tag.text.indexOf(attributeValue);
+					const attributeValuePositionEnd = attributeValuePositionBegin + attributeValue.length;
+					return attributeValuePositionBegin <= offset && attributeValuePositionEnd >= offset;
 				});
 
 				if (attribute) {
@@ -53,11 +55,13 @@ export class XMLHoverProvider extends ParserBearer {
 					const responsibleClass = this._parser.fileReader.getResponsibleClassForXMLDocument(
 						new TextDocumentAdapter(document)
 					);
+					const eventName = this._parser.xmlParser.getEventHandlerNameFromAttributeValue(attributeVal);
+					const eventNameNoDot = eventName.startsWith(".") ? eventName.replace(".", "") : eventName;
 					const method =
 						responsibleClass &&
 						this._parser.classFactory
 							.getClassMethods(responsibleClass)
-							.find(method => method.name === attributeVal);
+							.find(method => method.name === eventNameNoDot);
 					const responsibleUIClass = method && this._parser.classFactory.getUIClass(method.owner);
 					const value = property?.typeValues.find(value => value.text === attributeVal);
 					if (property && value) {

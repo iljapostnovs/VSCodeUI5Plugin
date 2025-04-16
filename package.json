@@ -2,7 +2,7 @@
 	"name": "ui5plugin",
 	"displayName": "SAPUI5 Extension",
 	"description": "Extension for working with UI5 projects",
-	"version": "1.19.2",
+	"version": "1.20.0",
 	"publisher": "iljapostnovs",
 	"license": "Apache-2.0",
 	"author": "Ilja Postnovs <ilja.postnovs@gmail.com>",
@@ -533,25 +533,25 @@
 		"install_ext": "vsce package && PowerShell -Command \"code --install-extension $(node -p -e '`ui5plugin-` + require(`./package.json`).version + `.vsix`')\""
 	},
 	"devDependencies": {
-		"@types/mocha": "^10.0.6",
-		"@types/node": "^20.11.6",
-		"@types/vscode": "^1.85.0",
+		"@types/mocha": "^10.0.10",
+		"@types/node": "^20.17.30",
+		"@types/vscode": "^1.99.1",
 		"@types/webpack": "^5.28.5",
 		"@typescript-eslint/eslint-plugin": "^6.19.1",
 		"@typescript-eslint/parser": "^6.19.1",
-		"@vscode/test-electron": "^2.3.9",
-		"axios": "^1.6.6",
+		"@vscode/test-electron": "^2.5.2",
+		"axios": "^1.8.4",
 		"clean-webpack-plugin": "^4.0.0",
 		"eslint": "^8.56.0",
-		"mocha": "^10.2.0",
-		"ts-loader": "^9.5.1",
-		"webpack": "^5.90.0",
-		"typescript": "5.3.3",
-		"webpack-cli": "^5.1.4"
+		"mocha": "^11.1.0",
+		"ts-loader": "^9.5.2",
+		"webpack": "^5.99.5",
+		"typescript": "5.8.3",
+		"webpack-cli": "^6.0.1"
 	},
 	"dependencies": {
-		"ui5plugin-linter": "^1.15.2",
-		"ui5plugin-parser": "^1.7.8"
+		"ui5plugin-linter": "^1.16.1",
+		"ui5plugin-parser": "^1.8.2"
 	},
 	"__metadata": {
 		"id": "7a9177b5-9a33-478d-bff3-879dc393cb43",

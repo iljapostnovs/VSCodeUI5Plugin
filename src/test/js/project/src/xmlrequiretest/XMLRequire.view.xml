@@ -15,6 +15,7 @@
 	<f:FlexibleColumnLayout
 		afterEndColumnNavigate="com.test.xmlrequiretest.XMLRequireUtil.method2"
 		afterBeginColumnNavigate="XMLRequireUtil.method1($controller)"
+		endColumnNavigate=".requireUtil.method3"
 		stateChange="method1"
 	/>
 </mvc:View>
