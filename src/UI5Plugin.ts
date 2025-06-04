@@ -43,10 +43,15 @@ export class UI5Plugin {
 	public initialize(context: vscode.ExtensionContext) {
 		return Progress.show(async () => {
 			try {
+				const workspacefilter =
+					vscode.workspace.getConfiguration("ui5.plugin").get<string>("globalConfigurationPath") ??
+					"file:///.*";
 				const workspaceFolders =
-					vscode.workspace.workspaceFolders?.map(wsFolder => {
-						return new WorkspaceFolder(wsFolder.uri.fsPath);
-					}) ?? [];
+					vscode.workspace.workspaceFolders
+						?.filter(wsFolder => wsFolder.uri.toString().match(workspacefilter))
+						?.map(wsFolder => {
+							return new WorkspaceFolder(wsFolder.uri.fsPath);
+						}) ?? [];
 
 				CommandRegistrator.register(false);
 				const globalStoragePath = context.globalStorageUri.fsPath;
