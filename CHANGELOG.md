@@ -1,3 +1,9 @@
+## 1.21.0 (27-06-2025)
+
+-   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.10.1
+-   [UI5 Linter](https://github.com/iljapostnovs/ui5plugin-linter) updated to v1.17.1
+-   Decrease min. VSCode engine version
+
 ## 1.20.0 (16-04-2025)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.8.2
