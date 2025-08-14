@@ -463,6 +463,11 @@
 					"type": "number",
 					"default": 500,
 					"markdownDescription": "Delay for parsing JS/TS files. Increase it for large projects to gain in performance."
+				},
+				"ui5.plugin.workspaceFilter": {
+					"type": "string",
+					"default": "file:///.*",
+					"markdownDescription": "Regular expression for filtering workspace root folders"
 				}
 			}
 		},
