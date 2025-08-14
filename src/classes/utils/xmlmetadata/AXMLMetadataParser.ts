@@ -12,6 +12,7 @@ export interface IParameter {
 	name: string;
 	type: string;
 	label?: string;
+	nullable?: boolean
 }
 export interface IFunctionImport {
 	name: string;

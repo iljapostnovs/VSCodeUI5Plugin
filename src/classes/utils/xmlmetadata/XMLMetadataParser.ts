@@ -63,15 +63,25 @@ export class XMLMetadataParser extends AXMLMetadataParser {
 
 	private _parseFunctionImports(functionImports: any[]): IFunctionImport[] {
 		return functionImports.map((functionImport: any) => {
+			let type = "void";
+			const returnTypeAttr = functionImport["@_ReturnType"];
+
+			if (returnTypeAttr) {
+				const rawType = functionImport["@_ReturnType"].replace(`${this.namespace}.`, "");
+				const isCollection = /Collection(.*?)/.test(rawType);
+				type = isCollection ? (/(?<=Collection\().*?(?=\))/.exec(rawType)?.[0] ?? rawType) + "[]" : rawType;
+			}
+
 			return {
 				name: functionImport["@_Name"],
-				returnType: functionImport["@_ReturnType"]?.replace(`${this.namespace}.`, "") ?? "void",
+				returnType: type,
 				method: functionImport["@_m:HttpMethod"] ?? "GET",
 				parameters: this._getArray(functionImport.Parameter).map(param => {
 					return {
 						name: param["@_Name"],
 						type: param["@_Type"],
-						label: param["@_sap:label"]
+						label: param["@_sap:label"],
+						...(param["@_Nullable"] === "true" ? { nullable: true } : {})
 					};
 				})
 			};

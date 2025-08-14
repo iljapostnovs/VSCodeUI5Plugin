@@ -62,7 +62,7 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 				const typeFromTypeMap = this._mapType(param.type);
 				return `{\n\t\t\tname: "${param.name}",\n\t\t\tlabel: "${
 					param.label ?? ""
-				}",\n\t\t\ttype: ${typeFromTypeMap}\n\t\t}`;
+				}",\n\t\t\ttype: ${typeFromTypeMap}${param.nullable ? ",\n\t\t\tnullable: true" : ""}\n\t\t}`;
 			});
 
 			return `"${functionImport.name}": {\n\t\treturnType: ${
@@ -111,9 +111,9 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 				if (description) {
 					description = `/** @description ${description} */\n\t`;
 				}
-				return `${description}${keyProperty.name}: ${this._mapType(
-					keyProperty.type
-				)}${keyProperty.nullable ? " | null" : ""};`;
+				return `${description}${keyProperty.name}: ${this._mapType(keyProperty.type)}${
+					keyProperty.nullable ? " | null" : ""
+				};`;
 			})
 			.join("\n\t");
 
@@ -132,9 +132,9 @@ export class TSODataInterfaceGenerator implements ITSInterfaceGenerator {
 				if (description) {
 					description = `/** @description ${description} */\n\t`;
 				}
-				return `${description}${property.name}: ${this._mapType(
-					property.type
-				)}${property.nullable ? " | null" : ""};`;
+				return `${description}${property.name}: ${this._mapType(property.type)}${
+					property.nullable ? " | null" : ""
+				};`;
 			})
 			.join("\n\t");
 		theInterface +=

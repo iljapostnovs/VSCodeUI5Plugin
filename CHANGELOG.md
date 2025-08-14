@@ -1,3 +1,8 @@
+## 1.21.1 (14-08-2025)
+
+-   Fix: OData to TS type generation to correctly convert Collections into Arrays
+-   Fix: OData to TS type generation to correctly parse the Nullable property of FunctionImport parameters
+
 ## 1.21.0 (27-06-2025)
 
 -   [UI5 Parser](https://github.com/iljapostnovs/ui5plugin-parser) updated to v1.10.1
